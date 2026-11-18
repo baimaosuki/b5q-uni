@@ -3,7 +3,7 @@
   "repository": "baimaosuki/b5q-uni",
   "workflow": ".github/workflows/b5q-stage123.yml",
   "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
-  "status": "workflow-published-push-trigger-prepared",
+  "status": "first-ci-run-failed-at-kernel-build",
   "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
   "credential_in_files": false,
   "local_linux_toolchain": "Blocked: official installer requires root; host check also found missing libclang headers, being resolved locally.",
@@ -13,5 +13,23 @@
     "http_status": 403,
     "message": "Must have admin rights to Repository."
   },
-  "trigger": "Normal repository push event using the existing authorized SSH transport; no token persisted."
+  "trigger": "Normal repository push event using the existing authorized SSH transport; no token persisted.",
+  "runs": [
+    {
+      "id": 44390948642,
+      "commit": "919302cd8faab199e5cd5ba51fa1d4914f7b20c1",
+      "result": "failure",
+      "environment": "macos-26 / Xcode 26.6 tools verified",
+      "passed": [
+        "checkout",
+        "porting-record/template check",
+        "host tools",
+        "Xcode/SDK tool verification",
+        "full target resolution"
+      ],
+      "failed_step": "Build full-component XNU",
+      "actual_error_text": "not yet retrieved; API log archive access returned HTTP 403"
+    }
+  ],
+  "diagnostics_change": "Capture build console and emit sanitized first-failure text as check annotations, in addition to text artifacts."
 }

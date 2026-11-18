@@ -102,14 +102,17 @@ jobs:
           ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
           ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
       - name: Build full-component XNU
+        id: kernel
         working-directory: UniXNU
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          ./unixnu build kernel --device ../UniXNU-b5q --os "$OS_PROFILE"
+          ./unixnu build kernel --device ../UniXNU-b5q --os "$OS_PROFILE" 2>&1 | tee "$RUNNER_TEMP/b5q-kernel-console.log"
       - name: Collect text diagnostics
         if: always()
+        env:
+          KERNEL_OUTCOME: ${{ steps.kernel.outcome }}
         run: |
           python3 - <<'PY'
           import os, re, shutil
@@ -129,6 +132,15 @@ jobs:
               out.parent.mkdir(parents=True, exist_ok=True)
               out.write_text(text)
               count += 1
+          console = Path(os.environ['RUNNER_TEMP']) / 'b5q-kernel-console.log'
+          if console.is_file():
+              text = console.read_text(errors='replace')
+              text = re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)', '***', text)
+              (dest / 'kernel-console.log').write_text(text)
+              if os.environ.get('KERNEL_OUTCOME') == 'failure':
+                  tail = '\n'.join(text.splitlines()[-60:])[-12000:]
+                  escaped = tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                  print('::error title=b5q kernel first-failure diagnostics::' + escaped)
           (dest / 'scope.txt').write_text('Pinned full-component b5q kernel attempt. No phone flash or hardware qualification. Apple-derived binaries are not published by this diagnostic workflow.\n')
           print(f'{count} text logs collected')
           PY
