@@ -1,0 +1,69 @@
+name: b5q RAM and verified-root host checks
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/b5q-storage-tests.yml'
+      - 'UniXNU-b5q/scripts/test-ramblock-host.py'
+      - 'UniXNU-b5q/storage/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ramblock:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/RamBlock
+          ref: 00a6e5dd6bb1709e817e13daec7986308cfb6d0f
+          path: RamBlock
+          persist-credentials: false
+      - name: Exercise actual parser and overlay algorithms
+        run: |
+          python3 UniXNU-b5q/scripts/test-ramblock-host.py --source RamBlock --output "$RUNNER_TEMP/ramblock" --cxx g++
+      - name: Summarize host-only result
+        if: always()
+        run: |
+          test ! -f "$RUNNER_TEMP/ramblock/report.json" || cat "$RUNNER_TEMP/ramblock/report.json"
+          echo "Host checks do not authorize phone UFS initialization or persistence." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: b5q-ramblock-host
+          path: |
+            ${{ runner.temp }}/ramblock/*.json
+            ${{ runner.temp }}/ramblock/*.log
+          retention-days: 7
+  verified-root:
+    runs-on: macos-26
+    timeout-minutes: 30
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/VerifiedRoot
+          ref: 974f043d0c71ba2e60331483a41c6c6d35274ee3
+          path: VerifiedRoot
+          persist-credentials: false
+      - name: Test real RSA and C block verification
+        run: |
+          set -euo pipefail
+          brew install openssl@3
+          export PATH="$(brew --prefix openssl@3)/bin:$PATH"
+          python3 VerifiedRoot/tests/check.py --output "$RUNNER_TEMP/verified-root" --openssl-prefix "$(brew --prefix openssl@3)"
+          cat "$RUNNER_TEMP/verified-root/checks.json"
+      - name: Publish host-only checks, not keys or signed inputs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-verified-root-host
+          path: ${{ runner.temp }}/verified-root/checks.json
+          if-no-files-found: warn
+          retention-days: 7

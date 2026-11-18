@@ -1,0 +1,33 @@
+{
+  "revision": "2b6638be3e5630969e316dd1755065542fcee505",
+  "repository": "UniXNU/ShengUfs",
+  "scope": "Read-only source audit, not a b5q driver or transport qualification",
+  "prohibited_unreviewed_reuse": [
+    "LUN0 userdata automatic selection and implicit first-block reads",
+    "GCC/SMmu/DPU MMIO and all DMA mappings inherited from sheng",
+    "stream 0x1401 and hard-coded sheng memory access assumptions",
+    "persistent Data overlay and panic writeback paths"
+  ],
+  "generic_interfaces_reviewed": [
+    "RootWindowRead.h: bound, verify and copy the same snapshot while locked",
+    "RootPublication.h: prepare all windows, publish SystemOS before OS",
+    "VerifiedTableCache.h: authenticated table page cache"
+  ],
+  "required_target_evidence": [
+    "Samsung runtime controller/link/request-list and outstanding-command ownership",
+    "b5q SMMU streams, context bank, DMA address constraints",
+    "completed RamBlock hardware gate",
+    "explicit deployment extent and OS/SystemOS/App signed manifests"
+  ],
+  "b5q_runtime_driver_implemented": false,
+  "ufs_enabled": false,
+  "device_tested": false,
+  "source_sha256": {
+    "NativeUfs.cpp": "35213b6da13b16c2fd6fdd905bb0919657820dad2a5cce7ae2783ad53521e1e6",
+    "RootLayout.h": "a188e7886917d5b8e02f6e7dbab648f5b6ca798584557f1216f5abfcdde67ea9",
+    "RootWindowRead.h": "e8d98556290cf540204227f863b043eb09996bb87d38e1d6894b83b351c8d112",
+    "RootPublication.h": "3c289b44f4d7c082b3f214eda2d4225f53860dd007f4a89402bdc910f268aeda",
+    "RootTransportLayout.h": "5f52df07f7db0c47feccd9234ddc2cfad0057c3ce54cc4e2746a01fb05f44d5c",
+    "VerifiedTableCache.h": "32a81773eb0a2d20d290e7c9abb8042b41784f9aa8044f3b748d0e339c39c0d8"
+  }
+}

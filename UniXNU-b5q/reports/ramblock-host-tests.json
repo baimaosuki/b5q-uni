@@ -1,0 +1,76 @@
+{
+  "scope": "host algorithm tests only",
+  "phone_ufs_enabled": false,
+  "ramblock_hardware_gate_passed": false,
+  "tests": [
+    {
+      "name": "sparse",
+      "command": [
+        "compiler command in local artifact log; ephemeral source copy"
+      ],
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "persist",
+      "command": [
+        "compiler command in local artifact log; ephemeral source copy"
+      ],
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "direct",
+      "command": [
+        "compiler command in local artifact log; ephemeral source copy"
+      ],
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "writeback",
+      "command": [
+        "compiler command in local artifact log; ephemeral source copy"
+      ],
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "concurrent",
+      "command": [
+        "compiler command in local artifact log; ephemeral source copy"
+      ],
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    }
+  ],
+  "source_sha256": {
+    "DirectDisk.h": "c6c8b18abc2c9db7a247da8178f7d43d4c21e6333cdcb40086734f2419273ff2",
+    "NativeRamBlock.cpp": "772d47a069c50c9bf92f6c9292668340e005a61d996651033d9af2b6474b897c",
+    "PersistOverlay.h": "090b8e97cfc056619ab8621d8f4b5e7e20025753d29f958a42a4cdaf0b832b2d",
+    "SeedDisk.h": "d8a654529b5d56703bcf491c3834b407590995eebcb7a26004448990c200e4a0",
+    "SparseDisk.h": "5ab6516488b7daaef88e788fffef17195e7d2f74746da2206c6d9ed3a63c8c74",
+    "Test/concurrent.cpp": "4879d96e0ac8efe2df69b42f0a8609745488b295dbeb1bf18c461e85d47902ae",
+    "Test/direct.cpp": "e9984f189e1ec6110e87d29c419e8a0aa989e33f8846e20b364df683559333c8",
+    "Test/packed-hash.cpp": "fd1c690c985a874ed3fa966f3e411dfab0a8c1f9bd00002eb8c0bf2a4f846b00",
+    "Test/persist.cpp": "460e3ef6e6bdc2834adbb5c2c38d4e4576f78e4f4d133efbf0dfb936c8a557a3",
+    "Test/seed-identity.cpp": "9adb7e8c5a2245eaa487c56067bcbec55795ff7e4f12c0b0779b3d8f43037802",
+    "Test/seeddisk.cpp": "fdb0d795df7977ef0373e313b41c74ec63291ea2721112785a86d63405dd8020",
+    "Test/sparse.cpp": "715f5579020260b40905229b5c245ec42c27c2312962496909bea73bc06226ff",
+    "Test/writeback.cpp": "40e9e63f7c67238bd4abdc95b3c20dea13e9cf7c2db5ed85a3779ba028e50a7e"
+  },
+  "test_correction": {
+    "file": "Test/sparse.cpp",
+    "reason": "stale 2GiB limit; parser maximum is 1TiB",
+    "original_sha256": "715f5579020260b40905229b5c245ec42c27c2312962496909bea73bc06226ff",
+    "corrected_sha256": "631adf9c1b4d77e8e9e212640657c8ca26e53a01927f3ae958c07d64f48ee861",
+    "parser_modified": false,
+    "upstream_original_result": "assertion failure at line 30"
+  },
+  "passed": true
+}
