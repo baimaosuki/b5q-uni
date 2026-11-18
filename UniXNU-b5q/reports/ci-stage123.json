@@ -60,5 +60,23 @@
     "board_patch_series": "soc:patches/xnu-12377/series",
     "validation": "All 130 ordered patches successfully applied to a disposable clone of ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
     "report": "reports/xnu-patch-application.json"
-  }
+  },
+  "requested_scope": "User extended execution scope to milestones 1-4 on 2026-11-19; root/UFS work follows the existing RamBlock gate.",
+  "uefi_runs": [
+    {
+      "run": 44400103817,
+      "job": 135140488759,
+      "result": "failure",
+      "state": "UEFI compiler started; initial diagnostics matched -Werror command flags rather than the source error.",
+      "next": "A separate firmware workflow now emits only actual error patterns and console tail, avoiding repeated full-kernel attempts for diagnostic changes."
+    },
+    {
+      "run": 44400581788,
+      "job": 135143119461,
+      "result": "failure",
+      "state": "Same pre-repair firmware configuration; actual first error not yet captured."
+    }
+  ],
+  "active_kernel_run": 44400581788,
+  "firmware_workflow": ".github/workflows/b5q-firmware.yml"
 }
