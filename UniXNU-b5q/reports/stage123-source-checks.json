@@ -14,7 +14,7 @@
   "gpu_power_and_firmware_wiring": "not claimed implemented by the DTS",
   "uefi_source_patch": {
     "path": "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch",
-    "sha256": "8324f1e1105b9418b8fbfe3a33c7074ab78e033b098be0e095490cd55eea4a72",
+    "sha256": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
     "base_revision": "b303410c8e401fc9419ae65a024356ed09a438ef",
     "changes": [
       "Required UniXNU/DarwinBoot/RAM payload DSC and FDF wiring",
@@ -31,5 +31,18 @@
     "patch_apply_check": "PASS against archived exact firmware baseline",
     "source_preflight": "PASS; reports/uefi-source-preflight.json",
     "ci": "Separate ubuntu-24.04 firmware job added; firmware preflight now checks its actual source wiring, not payload seed/GPU availability."
+  },
+  "handoff_module_host_build": {
+    "result": "PASS",
+    "scope": "B5qHandoffDxe single module only, not the full FD or any hardware execution",
+    "clang": "17.0.6",
+    "local_edk2_revision": "64f478939955e45faa632c160ae2a75a5ff7ef7f",
+    "source_error_fixed": "Use EDK II FdtLib Fdt* wrappers rather than raw libfdt function names.",
+    "efi_path": "/home/baimao/zflip5/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/B5qHandoffDxe.efi",
+    "efi_bytes": 24576,
+    "efi_sha256": "58f2b20de2fc3c76cf55dfd91d6e6fe0299372b6bc643716a6d41c73cff96944",
+    "first_failure_log": "logs/b5q-port/uefi-handoff-module.log",
+    "successful_retry_log": "logs/b5q-port/uefi-handoff-module-retry.log",
+    "qualification": "Local host source check uses an independently recorded EDK II revision; pinned full CI firmware remains authoritative."
   }
 }

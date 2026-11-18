@@ -233,10 +233,10 @@ jobs:
               text=re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)','***',text)
               (dest/f'{index:02d}-{p.name}').write_text(text)
               for line in text.splitlines():
-                  if re.search(r'(?:error|fatal|not found|missing|failed)',line,re.I):errors.append(p.name+': '+line[:800])
+                  if re.search(r'(?:error:|fatal error|error [0-9a-f]+:|not found|missing|failed)',line,re.I) and '-Werror' not in line:errors.append(p.name+': '+line[:800])
           if os.environ.get('FIRMWARE_OUTCOME')=='failure':
               messages=errors[:8]
-              if not messages and console.is_file():messages=console.read_text(errors='replace').splitlines()[-6:]
+              if console.is_file():messages += ['console tail: '+line[:700] for line in console.read_text(errors='replace').splitlines()[-8:]]
               for index,line in enumerate(messages):
                   line=line.replace('%','%25').replace('\r','%0D').replace('\n','%0A')
                   print(f'::error title=b5q firmware diagnostic {index+1}::'+line)
