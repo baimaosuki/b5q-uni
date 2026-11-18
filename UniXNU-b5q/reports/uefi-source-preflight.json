@@ -1,0 +1,11 @@
+{
+  "scope": "Static b5q DSC/FDF wiring check, not binary vendor-I/O or runtime validation",
+  "result": "PASS",
+  "files": {
+    "b5q.dsc": "ae7f35e03accc44f56738e03a322fd2ba57fa5f051eedd5569b69da4db9a70aa",
+    "b5q.fdf": "2a1b320a2839020fa889e0e365bb7b73ff476f68c59ff405f0dcf5826cf9a2de",
+    "Include/DXE.inc": "d3ca6b9331508c8dd4a0e329c3c08af68dffd3476a72ebedaeb82cb7755d19a4",
+    "Include/APRIORI.inc": "2ebe6188f6c0acfec87202f66acce14665e3868f4915e9248c9eed8e56dde848"
+  },
+  "errors": []
+}

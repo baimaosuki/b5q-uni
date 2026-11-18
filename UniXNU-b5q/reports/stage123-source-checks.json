@@ -11,5 +11,25 @@
   "runtime_framebuffer": "unknown; no fabricated simple-framebuffer node",
   "ufs": "disabled",
   "panic_screen": "Official payload.patch-xnu-entry-probe integration selected; not tested without a prelinked kernel",
-  "gpu_power_and_firmware_wiring": "not claimed implemented by the DTS"
+  "gpu_power_and_firmware_wiring": "not claimed implemented by the DTS",
+  "uefi_source_patch": {
+    "path": "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch",
+    "sha256": "8324f1e1105b9418b8fbfe3a33c7074ab78e033b098be0e095490cd55eea4a72",
+    "base_revision": "b303410c8e401fc9419ae65a024356ed09a438ef",
+    "changes": [
+      "Required UniXNU/DarwinBoot/RAM payload DSC and FDF wiring",
+      "Remove explicit UFS/Sdcc/mass-storage/PIL modules from b5q APRIORI/FDF includes",
+      "Disable automatic RamManagerDxe expansion",
+      "Add read-only ReadyToBoot FDT/EFI map/GOP diagnostics, excluding chosen/identity fields"
+    ],
+    "status": "source-added-not-compiled-or-hardware-tested",
+    "remaining": [
+      "Samsung SEC/UH/RKP audit and validated memory map/window strategy",
+      "Gunyah watchdog ownership verification",
+      "Opaque vendor dependencies still require audit; module omission is not proof they perform no internal UFS operations"
+    ],
+    "patch_apply_check": "PASS against archived exact firmware baseline",
+    "source_preflight": "PASS; reports/uefi-source-preflight.json",
+    "ci": "Separate ubuntu-24.04 firmware job added; firmware preflight now checks its actual source wiring, not payload seed/GPU availability."
+  }
 }
