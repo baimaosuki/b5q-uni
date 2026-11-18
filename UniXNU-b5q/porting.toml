@@ -243,7 +243,7 @@ result = "Five PASS results from real pinned production algorithms with ASan/UBS
 
 [[area.evidence]]
 kind = "source"
-reference = ".github/workflows/b5q-storage-tests.yml"
+reference = "reports/storage-host-ci.json"
 result = "Reproducible independent jobs. VerifiedRoot uploads checks.json only, never generated private keys."
 
 [[area.evidence]]
