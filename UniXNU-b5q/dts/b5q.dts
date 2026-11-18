@@ -1,0 +1,50 @@
+// SPDX-License-Identifier: BSD-3-Clause
+// XNU hardware description, not a bootloader FDT replacement.
+// Evidence: reports/official-firmware-hardware.json (F7310ZCS7EYF3).
+/dts-v1/;
+/include/ "sm8550.dtsi"
+
+/ {
+    model = "Samsung Galaxy Z Flip5";
+    compatible = "samsung,b5q", "qcom,sm8550";
+
+    // Runtime banks and scanout geometry are supplied by firmware handoff.
+    // Do not turn the stock /memory/reg=<0 0> placeholder into invented RAM,
+    // or infer framebuffer stride/base from the splash reservation.
+    reserved-memory {
+        #address-cells = <2>;
+        #size-cells = <2>;
+        ranges;
+        hyp@80000000 {
+            reg = <0 0x80000000 0 0x00a00000>;
+            no-map;
+        };
+        tz-stat@82700000 {
+            reg = <0 0x82700000 0 0x00100000>;
+            no-map;
+        };
+        gpu-microcode@9b09a000 {
+            reg = <0 0x9b09a000 0 0x00002000>;
+            no-map;
+        };
+        splash@b8000000 {
+            reg = <0 0xb8000000 0 0x02b00000>;
+            // This is a reservation, not an active framebuffer node.
+            // Stock splash is mappable; preserve its lack of no-map.
+        };
+        qtee@d8300000 {
+            reg = <0 0xd8300000 0 0x00500000>;
+            no-map;
+        };
+    };
+};
+
+// The rest of the live reservation set (including UH/RKP) must be enforced
+// by b5q firmware from its incoming FDT/EFI map. This subset never defines
+// the extent of allocatable RAM.
+&gpu { unixnu,adt-name = "gpu"; status = "okay"; };
+&gmu { unixnu,adt-name = "gmu"; status = "okay"; };
+&gpu_smmu { unixnu,adt-name = "gpu-smmu"; status = "okay"; };
+// RamBlock qualification precedes all UFS controller activity.
+&ufs { status = "disabled"; };
+&ufsphy { status = "disabled"; };

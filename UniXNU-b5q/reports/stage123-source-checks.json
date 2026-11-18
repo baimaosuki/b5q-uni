@@ -1,0 +1,15 @@
+{
+  "date": "2026-11-19",
+  "scope": "Board DTS compile and source configuration only; not firmware runtime or XNU hardware qualification",
+  "hardware_dtb": {
+    "path": "artifacts/b5q-stage123/hardware.dtb",
+    "bytes": 2920,
+    "sha256": "d8c7cbfa384ba6b0ffdc48efad44b25a0e12477913022678b7f568f7c059ccae"
+  },
+  "input_dts_sha256": "7bf16c75e6e0d0fa478fc1caf91a9442387174f4c1331282704d844e16eb8714",
+  "runtime_memory_banks": "unknown; deliberately absent",
+  "runtime_framebuffer": "unknown; no fabricated simple-framebuffer node",
+  "ufs": "disabled",
+  "panic_screen": "Official payload.patch-xnu-entry-probe integration selected; not tested without a prelinked kernel",
+  "gpu_power_and_firmware_wiring": "not claimed implemented by the DTS"
+}

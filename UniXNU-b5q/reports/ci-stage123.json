@@ -3,7 +3,7 @@
   "repository": "baimaosuki/b5q-uni",
   "workflow": ".github/workflows/b5q-stage123.yml",
   "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
-  "status": "soc-patch-series-corrected-ready-for-rebuild",
+  "status": "bootstrap-compilation-entered-next-diagnostics-run",
   "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
   "credential_in_files": false,
   "local_linux_toolchain": "Blocked: official installer requires root; host check also found missing libclang headers, being resolved locally.",
@@ -37,6 +37,13 @@
       "failed_step": "Build full-component XNU",
       "first_error": "native-smp-secondary.patch: pexpert/pexpert/arm64/board_config.h:134 patch does not apply",
       "evidence": "Public check-run first-failure annotation 135111507883"
+    },
+    {
+      "id": 44392851424,
+      "commit": "eac080d9c5147b660d9c0058e8f687b27f645ebb",
+      "result": "failure",
+      "passed": "130 patches applied and public headers restored; compiler bootstrap entered libdispatch/libfirehose_kernel",
+      "first_error": "Nested bootstrap diagnostics need shorter annotations; initial annotation was truncated by GitHub."
     }
   ],
   "diagnostics_change": "Capture build console and emit sanitized first-failure text as check annotations, in addition to text artifacts.",

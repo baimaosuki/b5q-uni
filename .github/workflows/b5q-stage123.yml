@@ -132,13 +132,22 @@ jobs:
               out.parent.mkdir(parents=True, exist_ok=True)
               out.write_text(text)
               count += 1
+          if os.environ.get('KERNEL_OUTCOME') == 'failure':
+              diagnostics = []
+              for p in sorted(root.rglob('*.log')) if root.exists() else []:
+                  for line in p.read_text(errors='replace').splitlines():
+                      if re.search(r'(?:fatal error:|error:|\*\* BUILD FAILED|make(?:\[\d+\])?: \*\*\*)', line, re.I):
+                          diagnostics.append((p.name, line[:900]))
+              for index, (name, line) in enumerate(diagnostics[:8]):
+                  msg = (name + ': ' + line).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                  print(f'::error title=b5q source diagnostic {index+1}::' + msg)
           console = Path(os.environ['RUNNER_TEMP']) / 'b5q-kernel-console.log'
           if console.is_file():
               text = console.read_text(errors='replace')
               text = re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)', '***', text)
               (dest / 'kernel-console.log').write_text(text)
               if os.environ.get('KERNEL_OUTCOME') == 'failure':
-                  tail = '\n'.join(text.splitlines()[-60:])[-12000:]
+                  tail = '\n'.join(line[:240] for line in text.splitlines()[-18:])[-3000:]
                   escaped = tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
                   print('::error title=b5q kernel first-failure diagnostics::' + escaped)
           (dest / 'scope.txt').write_text('Pinned full-component b5q kernel attempt. No phone flash or hardware qualification. Apple-derived binaries are not published by this diagnostic workflow.\n')
