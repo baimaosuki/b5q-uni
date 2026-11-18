@@ -1,0 +1,24 @@
+{
+  "upstream_revision": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+  "scope": "macOS OS ABI binding and display lifecycle only; no b5q peripheral bring-up",
+  "included": [
+    "ABI fixture/header generation and authenticated vtable verification",
+    "Original family branch stubs and absolute data bindings",
+    "IOSurface allocator with real size/format verification",
+    "GOP and keystore lifecycle",
+    "SoftwareAES original-family ABI binding and real NIST-tested start"
+  ],
+  "excluded": [
+    "build-sheng-source-drivers.py and every downstream peripheral aggregation section",
+    "ShengPreflight, firmware binaries, GPIO, DRAM/reservations, Novatek",
+    "CPU/GPU power, DPU, touch, wifi, audio, battery, ADSP, Bluetooth and sleep probes"
+  ],
+  "source_files": {
+    "sources/reference-sheng/scripts/build-gop-legacy-display-27.py": "0681663cf1a7c5ffc784aa83d4ccff7972054e0572626f7a5a04f617850914de",
+    "sources/reference-sheng/package/LegacyDisplayProbe.cpp": "ace25719d26936ea829fa99806c86506b264f186d357faa034c1e32ba0e060a8",
+    "sources/reference-sheng/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+    "sources/reference-sheng/package/SoftwareAesProbe.cpp": "532bc9a90160cfbbd51e45597946b4e0e2f9df7654abb0cb4970504e361c7d06"
+  },
+  "build_status": "pending-real-macOS-CI",
+  "hardware_tested": false
+}

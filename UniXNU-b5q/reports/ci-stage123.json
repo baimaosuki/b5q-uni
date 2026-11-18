@@ -3,10 +3,10 @@
   "repository": "baimaosuki/b5q-uni",
   "workflow": ".github/workflows/b5q-stage123.yml",
   "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
-  "status": "ramblock-aes-config-corrected-next-ci-run",
+  "status": "uefi-full-fd-ci-success-gop-archive-repair-in-progress",
   "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
   "credential_in_files": false,
-  "local_linux_toolchain": "Blocked: official installer requires root; host check also found missing libclang headers, being resolved locally.",
+  "local_linux_toolchain": "Not the CI blocker: macOS CI tools and Ubuntu matched firmware toolchain verified.",
   "outputs_claimed": false,
   "first_source_commit": "2ae6320faf10534ce17203b7efd7a21febfd32fa",
   "api_dispatch": {
@@ -53,6 +53,24 @@
       "first_error": "NativeRamBlock requires the qualified original storage/AES prelink closure",
       "repair": "Remove the board override of the macOS profile prelinked crypto bootstrap; enable the already-selected SoftwareAES personality. No component or upstream validation was disabled.",
       "remaining": "macOS-specific AES ABI and root/storage runtime qualification remain pending."
+    },
+    {
+      "id": 44402720955,
+      "commit": "076f3121a34e2e60b44ab736367dc536018b6c4b",
+      "result": "failure",
+      "kernel_job": 135149746000,
+      "actual_error_text": "Missing build/native-legacy-display/libNativeLegacyDisplay.late.a",
+      "passed": [
+        "130-patch sequence",
+        "libfirehose bootstrap",
+        "ArmDTPlatform",
+        "ArmCpu",
+        "libpthread",
+        "RamBlock",
+        "SoftwareAES",
+        "AppleKeyStoreState",
+        "Adreno740"
+      ]
     }
   ],
   "diagnostics_change": "Capture build console and emit sanitized first-failure text as check annotations, in addition to text artifacts.",
@@ -78,5 +96,14 @@
     }
   ],
   "active_kernel_run": 44400581788,
-  "firmware_workflow": ".github/workflows/b5q-firmware.yml"
+  "firmware_workflow": ".github/workflows/b5q-firmware.yml",
+  "firmware_runs": [
+    {
+      "id": 44402720981,
+      "job": 135149745872,
+      "commit": "076f3121a34e2e60b44ab736367dc536018b6c4b",
+      "result": "success",
+      "scope": "Full pinned FD build with upstream FD size check; not hardware verification"
+    }
+  ]
 }

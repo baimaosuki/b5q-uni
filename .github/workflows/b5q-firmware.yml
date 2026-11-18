@@ -64,6 +64,23 @@ jobs:
           ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
           ./unixnu build firmware --device ../UniXNU-b5q --os "$OS_PROFILE" \
             --uefi ../uefi-b5q --clang-bin /usr/lib/llvm-18/bin 2>&1 | tee "$RUNNER_TEMP/b5q-firmware-console.log"
+      - name: Record successful FD identity
+        if: success()
+        run: |
+          set -euo pipefail
+          test -f uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd
+          sha256sum uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd | tee "$RUNNER_TEMP/b5q-firmware.sha256"
+          echo "::notice title=b5q FD SHA256::$(cat "$RUNNER_TEMP/b5q-firmware.sha256")"
+      - name: Upload compiled b5q FD
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-uefi-fd-${{ github.sha }}
+          path: |
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd
+            ${{ runner.temp }}/b5q-firmware.sha256
+          if-no-files-found: error
+          retention-days: 14
       - name: Publish firmware first-error diagnostics
         if: always()
         env:

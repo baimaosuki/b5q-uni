@@ -22,7 +22,7 @@
       "Disable automatic RamManagerDxe expansion",
       "Add read-only ReadyToBoot FDT/EFI map/GOP diagnostics, excluding chosen/identity fields"
     ],
-    "status": "source-added-not-compiled-or-hardware-tested",
+    "status": "full-pinned-CI-FD-build-success-hardware-pending",
     "remaining": [
       "Samsung SEC/UH/RKP audit and validated memory map/window strategy",
       "Gunyah watchdog ownership verification",
@@ -30,7 +30,7 @@
     ],
     "patch_apply_check": "PASS against archived exact firmware baseline",
     "source_preflight": "PASS; reports/uefi-source-preflight.json",
-    "ci": "Separate ubuntu-24.04 firmware job added; firmware preflight now checks its actual source wiring, not payload seed/GPU availability."
+    "ci": "44402720981 / 135149745872 completed success"
   },
   "handoff_module_host_build": {
     "result": "PASS",
