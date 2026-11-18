@@ -3,7 +3,7 @@
   "repository": "baimaosuki/b5q-uni",
   "workflow": ".github/workflows/b5q-stage123.yml",
   "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
-  "status": "first-ci-run-failed-at-kernel-build",
+  "status": "soc-patch-series-corrected-ready-for-rebuild",
   "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
   "credential_in_files": false,
   "local_linux_toolchain": "Blocked: official installer requires root; host check also found missing libclang headers, being resolved locally.",
@@ -29,7 +29,20 @@
       ],
       "failed_step": "Build full-component XNU",
       "actual_error_text": "not yet retrieved; API log archive access returned HTTP 403"
+    },
+    {
+      "id": 44391906629,
+      "commit": "ce8ceb7c3efb3b3f381c5936e9dfe61fbc4ecd66",
+      "result": "failure",
+      "failed_step": "Build full-component XNU",
+      "first_error": "native-smp-secondary.patch: pexpert/pexpert/arm64/board_config.h:134 patch does not apply",
+      "evidence": "Public check-run first-failure annotation 135111507883"
     }
   ],
-  "diagnostics_change": "Capture build console and emit sanitized first-failure text as check annotations, in addition to text artifacts."
+  "diagnostics_change": "Capture build console and emit sanitized first-failure text as check annotations, in addition to text artifacts.",
+  "repair": {
+    "board_patch_series": "soc:patches/xnu-12377/series",
+    "validation": "All 130 ordered patches successfully applied to a disposable clone of ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "report": "reports/xnu-patch-application.json"
+  }
 }
