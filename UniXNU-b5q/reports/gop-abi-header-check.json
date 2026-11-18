@@ -1,0 +1,10 @@
+{
+  "scope": "ABI fixture/header generation only; no target compiler invoked",
+  "passed": true,
+  "generated_abi_sha256": "4913f84ff12b9797d5f6f461ebd1795c7cdc20371cb6c9b1f31bdc37d4d3fa57",
+  "kernelcache_sha256": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9",
+  "original_vtable_slots": 483,
+  "qualified_named_slots": 211,
+  "recipe_sha256": "ad0cd4f623c4d4110bd1a12cbfd28c189bea397db3d617d0a639e577814343e1",
+  "peripheral_aggregation": false
+}

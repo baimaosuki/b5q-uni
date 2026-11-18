@@ -1,0 +1,44 @@
+{
+  "scope": "Pinned generic algorithms with host fakes only, not the UFS hardware driver",
+  "revision": "2b6638be3e5630969e316dd1755065542fcee505",
+  "tests": [
+    {
+      "name": "RootWindowRead",
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "RootPublication",
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "RootDiagnostics",
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "TransferPoll",
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    },
+    {
+      "name": "CompletionWait",
+      "compile_returncode": 0,
+      "test_returncode": 0,
+      "passed": true
+    }
+  ],
+  "passed": true,
+  "test_portability_fix": {
+    "path": "tests/RootWindowRead.cpp",
+    "change": "0ULL -> uint64_t(0) for LP64 Linux initializer list",
+    "production_source_modified": false
+  },
+  "mmio_access": false,
+  "device_qualified": false
+}

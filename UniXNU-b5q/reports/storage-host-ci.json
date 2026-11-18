@@ -3,6 +3,20 @@
   "sha256": "c040bd74acfb5c4ce8b22952cd7d272c1f1c4ea5ebdfc1da2a58b68c4bbcc267",
   "scope": "Host-only RAM and signed-root tests; no transport or phone qualification",
   "first_run": 44409204189,
-  "run_status": "in-progress-or-queued",
-  "private_keys_uploaded": false
+  "run_status": "completed",
+  "private_keys_uploaded": false,
+  "conclusion": "success",
+  "jobs": [
+    {
+      "name": "ramblock",
+      "id": 135172500689,
+      "result": "success"
+    },
+    {
+      "name": "verified-root",
+      "id": 135172501315,
+      "result": "success"
+    }
+  ],
+  "ufs_initialization_authorized": false
 }

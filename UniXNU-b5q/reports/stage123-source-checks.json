@@ -22,7 +22,7 @@
       "Disable automatic RamManagerDxe expansion",
       "Add read-only ReadyToBoot FDT/EFI map/GOP diagnostics, excluding chosen/identity fields"
     ],
-    "status": "full-pinned-CI-FD-build-success-hardware-pending",
+    "status": "full-fd-ci-and-local-build-success-hardware-pending",
     "remaining": [
       "Samsung SEC/UH/RKP audit and validated memory map/window strategy",
       "Gunyah watchdog ownership verification",
@@ -44,5 +44,16 @@
     "first_failure_log": "logs/b5q-port/uefi-handoff-module.log",
     "successful_retry_log": "logs/b5q-port/uefi-handoff-module-retry.log",
     "qualification": "Local host source check uses an independently recorded EDK II revision; pinned full CI firmware remains authoritative."
+  },
+  "full_fd_local_build": {
+    "result": "PASS",
+    "path": "/home/baimao/zflip5/artifacts/b5q-stage123/firmware/SILICIUM_UEFI.fd",
+    "bytes": 3145728,
+    "sha256": "f1fa4e0e4e4f42ce5f6acb03488735abfcddadc4ecb89c76a88fe704c0f598e0",
+    "edk2_revision": "cfb93724a06ff86ff5ba971413368a7809ee42a5",
+    "clang": "17.0.6",
+    "log": "logs/b5q-port/uefi-full-local.log",
+    "compiler_log": "UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/logs/firmware.log",
+    "scope": "Full FD build with exact pinned EDK II and local Clang17, versus CI Clang18. Not a boot image or hardware execution."
   }
 }

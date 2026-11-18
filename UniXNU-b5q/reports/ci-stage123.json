@@ -3,7 +3,7 @@
   "repository": "baimaosuki/b5q-uni",
   "workflow": ".github/workflows/b5q-stage123.yml",
   "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
-  "status": "uefi-full-fd-ci-success-gop-archive-repair-in-progress",
+  "status": "uefi-full-fd-success-xnu-final-link-failure",
   "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
   "credential_in_files": false,
   "local_linux_toolchain": "Not the CI blocker: macOS CI tools and Ubuntu matched firmware toolchain verified.",
@@ -71,6 +71,17 @@
         "AppleKeyStoreState",
         "Adreno740"
       ]
+    },
+    {
+      "id": 44408313251,
+      "commit": "56a51dda982422bbd8c30343053356e647575f2e",
+      "kernel_job": 135169370887,
+      "result": "failure",
+      "passed": [
+        "b5q GOP and AES ABI archive recipes",
+        "all configured archive recipe commands"
+      ],
+      "actual_error_text": "Final arm64e kernel link unresolved symbols, including source_corecrypto14_original/source_corecrypto14_start_once; complete set being read from existing-run artifact."
     }
   ],
   "diagnostics_change": "Capture build console and emit sanitized first-failure text as check annotations, in addition to text artifacts.",
