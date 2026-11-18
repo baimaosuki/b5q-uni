@@ -22,7 +22,7 @@ jobs:
           TARGET_RUN: ${{ inputs.run_id || '44408313251' }}
         run: |
           python3 - <<'PY'
-          import io,json,os,re,sys,traceback,urllib.request,zipfile
+          import io,json,os,re,sys,traceback,urllib.request,urllib.error,urllib.parse,zipfile
           def exception(kind,error,tb):
               message=''.join(traceback.format_exception(kind,error,tb))
               message=re.sub(r'https?://[^\s]+', '[redacted URL]', message)
@@ -34,7 +34,19 @@ jobs:
           if not run.isdigit():raise SystemExit('Invalid run ID')
           def get(path):
               req=urllib.request.Request(base+path,headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','User-Agent':'b5q-first-error'})
-              with urllib.request.urlopen(req,timeout=90) as response:return response.read(128*1024*1024)
+              class NoRedirect(urllib.request.HTTPRedirectHandler):
+                  def redirect_request(self,*args,**kwargs):return None
+              try:
+                  response=urllib.request.build_opener(NoRedirect).open(req,timeout=90)
+              except urllib.error.HTTPError as error:
+                  if error.code!=302:raise
+                  target=error.headers['Location']
+                  parsed=urllib.parse.urlsplit(target)
+                  if parsed.scheme!='https' or not any((parsed.hostname or '').endswith(suffix) for suffix in ('.blob.core.windows.net','.actions.githubusercontent.com','.githubusercontent.com','.amazonaws.com')):
+                      raise RuntimeError('Unexpected artifact redirect host')
+                  # Never forward GitHub Authorization to signed object storage.
+                  response=urllib.request.urlopen(urllib.request.Request(target,headers={'User-Agent':'b5q-first-error'}),timeout=90)
+              with response:return response.read(128*1024*1024)
           artifacts=json.loads(get('/actions/runs/'+run+'/artifacts'))['artifacts']
           wanted=[a for a in artifacts if a['name'].startswith('b5q-kernel-logs-')]
           if not wanted:raise RuntimeError('No kernel text artifact; names='+str([a['name'] for a in artifacts]))
