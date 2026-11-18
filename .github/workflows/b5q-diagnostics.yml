@@ -53,10 +53,14 @@ jobs:
           payload=get('/actions/artifacts/'+str(wanted[0]['id'])+'/zip')
           symbols=[]
           with zipfile.ZipFile(io.BytesIO(payload)) as z:
-              for name in z.namelist():
-                  if name.split('/')[-1] not in ('kernel.log','kernel-console.log'):continue
+              paths=[name for name in z.namelist() if name.split('/')[-1]=='kernel.log']
+              if not paths:raise RuntimeError('Actual final kernel.log missing')
+              for name in paths:
                   text=z.read(name).decode(errors='replace')
-                  for line in text.splitlines():
+                  start=text.rfind('Undefined symbols for architecture')
+                  if start<0:continue
+                  block=text[start:].split('ld: symbol(s) not found',1)[0]
+                  for line in block.splitlines():
                       if re.match(r'^\s+"[^"\n]+", referenced from:',line):
                           symbol=line.strip().split('"')[1]
                           if symbol not in symbols:symbols.append(symbol)
