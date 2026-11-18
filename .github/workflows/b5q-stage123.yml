@@ -2,6 +2,16 @@ name: b5q macOS Stage 1-3
 run-name: b5q ${{ inputs.os_profile || 'macos-27.3-26C5035r' }} kernel / ${{ github.sha }}
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/b5q-stage123.yml'
+      - 'UniXNU-b5q/board.toml'
+      - 'UniXNU-b5q/configs/**'
+      - 'UniXNU-b5q/dts/**'
+      - 'UniXNU-b5q/scripts/**'
+      - 'UniXNU-b5q/patches/**'
+      - 'patches/uefi-b5q/**'
   workflow_dispatch:
     inputs:
       os_profile:
@@ -31,9 +41,9 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 360
     env:
-      DEVELOPER_DIR: /Applications/Xcode_${{ inputs.xcode }}.app/Contents/Developer
+      DEVELOPER_DIR: /Applications/Xcode_${{ inputs.xcode || '26.6' }}.app/Contents/Developer
       UNIXNU_DEVICE: ${{ github.workspace }}/UniXNU-b5q
-      OS_PROFILE: ${{ inputs.os_profile }}
+      OS_PROFILE: ${{ inputs.os_profile || 'macos-27.3-26C5035r' }}
     defaults:
       run:
         shell: bash

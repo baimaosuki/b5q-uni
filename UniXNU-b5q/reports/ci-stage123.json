@@ -3,9 +3,15 @@
   "repository": "baimaosuki/b5q-uni",
   "workflow": ".github/workflows/b5q-stage123.yml",
   "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
-  "status": "prepared-not-dispatched",
+  "status": "workflow-published-push-trigger-prepared",
   "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
   "credential_in_files": false,
   "local_linux_toolchain": "Blocked: official installer requires root; host check also found missing libclang headers, being resolved locally.",
-  "outputs_claimed": false
+  "outputs_claimed": false,
+  "first_source_commit": "2ae6320faf10534ce17203b7efd7a21febfd32fa",
+  "api_dispatch": {
+    "http_status": 403,
+    "message": "Must have admin rights to Repository."
+  },
+  "trigger": "Normal repository push event using the existing authorized SSH transport; no token persisted."
 }
