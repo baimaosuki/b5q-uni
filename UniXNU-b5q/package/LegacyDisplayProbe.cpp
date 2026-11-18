@@ -521,6 +521,7 @@ void native_legacy_display_probe(void) {
 void native_legacy_display_late_probe(void);
 extern void native_keystore_probe(void);
 extern "C" void b5q_software_aes_probe(void);
+extern "C" void b5q_ram_storage_start(void);
 // IOKit's busy services while the registry is not quiet: the network configuration names interfaces only once IOKit is quiet (or after its
 // 240 s limit), and the TimeSync clock manager waits for quiet too, so a service whose matching never ends holds up the network, TimeSync
 // and everything waiting on them (macOS run28: en0 named after 240 s, WindowServer waiting on clocksyncd). Every 10 s for 10 minutes, while
@@ -598,6 +599,7 @@ void native_legacy_display_late_probe(void) {
     {thread_t thread = nullptr; if (kernel_thread_start(busyReport, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);}
     // NativeAES first: AppleImage4 waits for the real IOAESAccelerator service.
     b5q_software_aes_probe();
+    b5q_ram_storage_start();
     native_keystore_probe();
     // Board peripherals are not emulated by this OS-only display lifecycle.
     IOService *display=pendingLegacyDisplay;if(!display){native_legacy_display_checkpoint();return;}pendingLegacyDisplay=nullptr;

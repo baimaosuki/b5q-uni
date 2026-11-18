@@ -11,6 +11,13 @@
     // Runtime banks and scanout geometry are supplied by firmware handoff.
     // Do not turn the stock /memory/reg=<0 0> placeholder into invented RAM,
     // or infer framebuffer stride/base from the splash reservation.
+    // Offline compilation placeholder, matching the original Samsung DT.
+    // DarwinBoot obtains the allocated physical window from the EFI map;
+    // neither address nor RAM capacity is inferred from this property.
+    memory {
+        device_type = "memory";
+        reg = <0 0 0 0>;
+    };
     reserved-memory {
         #address-cells = <2>;
         #size-cells = <2>;

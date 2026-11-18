@@ -21,9 +21,11 @@ defconfig = "b5q_macos_defconfig"
 config_fragments = ["arch:configs/common.config", "soc:configs/sm8550.config", "os:configs/macos.config"]
 patch_series = ["arch:patches/xnu/series", "soc:patches/xnu-12377/series", "os:patches/xnu/series", "device:patches/xnu/series"]
 # b5q OS ABI binder excludes all sheng peripheral aggregation.
-archives = ["build-corecrypto-14.py", "build-corecrypto-14.py --namespace", "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py", "component:RamBlock", "build-b5q-gop-27.py", "component:Adreno740"]
+archives = ["build-corecrypto-14.py", "build-corecrypto-14.py --namespace", "component:ArmDTPlatform", "component:ArmCpu", "build-libpthread-kernel.py", "build-b5q-storage.py", "build-b5q-gop-27.py", "build-b5q-adreno.py"]
 
 [kernel.embedded_components]
+RamBlock = "build-b5q-storage.py"
+Adreno740 = "build-b5q-adreno.py"
 SoftwareAES = "build-b5q-gop-27.py"
 AppleKeyStoreState = "build-b5q-gop-27.py"
 
@@ -63,6 +65,7 @@ kernel_args = ["-v", "debug=0x14e", "vc-text=1"]
 [payload.adt]
 chip_id = "6050"
 unique_chip_id = "required"
+packed_data_ramdisk = true
 
 [package]
 unixnu = "../UniXNU"

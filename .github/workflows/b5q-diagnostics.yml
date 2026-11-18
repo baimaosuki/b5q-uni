@@ -7,19 +7,23 @@ on:
     inputs:
       run_id:
         required: true
-        default: '44408313251'
+        default: '44412976670'
 permissions:
   contents: read
   actions: read
+  checks: write
 jobs:
   inspect:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
       - name: Read actual failed-run logs with scoped Actions identity
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_RUN: ${{ inputs.run_id || '44408313251' }}
+          TARGET_RUN: ${{ inputs.run_id || '44412976670' }}
         run: |
           python3 - <<'PY'
           import io,json,os,re,sys,traceback,urllib.request,urllib.error,urllib.parse,zipfile
@@ -51,12 +55,16 @@ jobs:
           wanted=[a for a in artifacts if a['name'].startswith('b5q-kernel-logs-')]
           if not wanted:raise RuntimeError('No kernel text artifact; names='+str([a['name'] for a in artifacts]))
           payload=get('/actions/artifacts/'+str(wanted[0]['id'])+'/zip')
+          import pathlib
+          output=pathlib.Path(os.environ['RUNNER_TEMP'])/'b5q-prior-run'
+          (output/'logs').mkdir(parents=True,exist_ok=True)
           symbols=[]
           with zipfile.ZipFile(io.BytesIO(payload)) as z:
               paths=[name for name in z.namelist() if name.split('/')[-1]=='kernel.log']
               if not paths:raise RuntimeError('Actual final kernel.log missing')
               for name in paths:
                   text=z.read(name).decode(errors='replace')
+                  (output/'logs'/('final-'+name.split('/')[-1])).write_text(text)
                   start=text.rfind('Undefined symbols for architecture')
                   if start<0:continue
                   block=text[start:].split('ld: symbol(s) not found',1)[0]
@@ -70,3 +78,9 @@ jobs:
               message=' | '.join(symbols[start:start+8]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
               print(f'::warning title=b5q unresolved symbols {start+1}-{min(start+8,len(symbols))}::'+message)
           PY
+      - name: Relay complete actual final linker log
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 UniXNU-b5q/scripts/ci-transfer.py send --root "$RUNNER_TEMP/b5q-prior-run" --public UniXNU-b5q/scripts/ci-recipient-public.pem --out "$RUNNER_TEMP/b5q-prior-transfer" --publish

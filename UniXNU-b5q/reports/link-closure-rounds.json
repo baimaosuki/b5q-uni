@@ -1,0 +1,21 @@
+{
+  "target": "macos-27.3-26C5035r",
+  "baseline_run": 44412976670,
+  "baseline_conclusion": "failure",
+  "rounds": [
+    {
+      "round": 1,
+      "status": "local-preflight-complete-not-yet-CI-compiled",
+      "batch": [
+        "actual macOS source storage ABI and deferred RAM adapter",
+        "complete shared Adreno and support kits",
+        "typed absent board/persistence hooks",
+        "official FAT payload and package manifest",
+        "encrypted full-log/artifact return"
+      ]
+    }
+  ],
+  "success": false,
+  "device_required_for_build": false,
+  "ufs_controller": false
+}
