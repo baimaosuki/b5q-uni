@@ -136,7 +136,7 @@ jobs:
               diagnostics = []
               for p in sorted(root.rglob('*.log')) if root.exists() else []:
                   for line in p.read_text(errors='replace').splitlines():
-                      if re.search(r'(?:fatal error:|error:|\*\* BUILD FAILED|make(?:\[\d+\])?: \*\*\*)', line, re.I):
+                      if re.search(r'(?:fatal error:|error:| requires |\*\* BUILD FAILED|make(?:\[\d+\])?: \*\*\*)', line, re.I):
                           diagnostics.append((p.name, line[:900]))
               for index, (name, line) in enumerate(diagnostics[:8]):
                   msg = (name + ': ' + line).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')

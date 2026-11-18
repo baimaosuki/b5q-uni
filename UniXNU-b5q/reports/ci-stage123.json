@@ -3,7 +3,7 @@
   "repository": "baimaosuki/b5q-uni",
   "workflow": ".github/workflows/b5q-stage123.yml",
   "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
-  "status": "bootstrap-compilation-entered-next-diagnostics-run",
+  "status": "ramblock-aes-config-corrected-next-ci-run",
   "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
   "credential_in_files": false,
   "local_linux_toolchain": "Blocked: official installer requires root; host check also found missing libclang headers, being resolved locally.",
@@ -44,6 +44,15 @@
       "result": "failure",
       "passed": "130 patches applied and public headers restored; compiler bootstrap entered libdispatch/libfirehose_kernel",
       "first_error": "Nested bootstrap diagnostics need shorter annotations; initial annotation was truncated by GitHub."
+    },
+    {
+      "id": 44398657089,
+      "commit": "3856bd94c206152f1f6de63890457f5a80dbb25c",
+      "result": "failure",
+      "passed": "130 patches, public headers, libdispatch libfirehose_kernel install",
+      "first_error": "NativeRamBlock requires the qualified original storage/AES prelink closure",
+      "repair": "Remove the board override of the macOS profile prelinked crypto bootstrap; enable the already-selected SoftwareAES personality. No component or upstream validation was disabled.",
+      "remaining": "macOS-specific AES ABI and root/storage runtime qualification remain pending."
     }
   ],
   "diagnostics_change": "Capture build console and emit sanitized first-failure text as check annotations, in addition to text artifacts.",

@@ -1,6 +1,7 @@
 # Core build selection. No inherited sheng storage archive, UUID or power policy.
 CONFIG_XNU_BUILD_ARCHIVES=y
-CONFIG_XNU_CRYPTO_BOOTSTRAP="source"
+# Use the selected macOS profile crypto bootstrap; do not override it here.
+CONFIG_XNU_NATIVE_AES=y
 CONFIG_XNU_DT_PANIC_REGION=y
 CONFIG_XNU_ARMVIRT_PLATFORM=n
 CONFIG_XNU_KERNEL_CHAINED_FIXUPS=y
