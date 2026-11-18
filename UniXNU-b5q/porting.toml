@@ -1,0 +1,459 @@
+schema_version = 1
+
+[device]
+name = "b5q"
+soc = "SM8550-AC"
+os_profile = "macos-27.3-26C5035r"
+summary = "Samsung Galaxy Z Flip5 SM-F7310; original F7310ZCS7EYF3 GPU and static DT inputs extracted; runtime memory/GOP, toolchain and board implementations remain pending."
+
+[[area]]
+id = "configuration"
+status = "implemented"
+components = ["ArmDTPlatform", "ArmCpu", "DarwinBoot", "XnuPrelink", "SoftwareAES", "AppleKeyStoreState", "GopFramebuffer", "Adreno740", "AdrenoMetal", "QcomDwc3", "QcomGeniSpi", "RamBlock", "VerifiedRoot"]
+paths = ["board.toml", "feeds.toml", "configs/**", "scripts/package.sh", "README.md", "local.toml.example"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["The board uses Format 2 and selects the 13 requested catalog components for macos-27.3-26C5035r. Official package --check passed with 130 listed patches; listing does not apply them or run firmware preflight.", "scripts/package.sh is the unmodified upstream template. Bare --os 27 selects iPadOS, so the full macOS profile is used.", "The user replaced the Stage 1 confirmation gate with continuous implementation authorization; unavailable external inputs must be reported.", "2026-11-19: The supplied SM-F7310 CHC Android 15 package F7310ZCS7EYF3 was inventoried; the continuous porting plan separates input availability, host builds and device acceptance without changing component selection.", "The original firmware directory and RAR archives are ignored to avoid accidental binary publication; ignored local.toml now points at the extracted Samsung GPU directory.", "2026-11-19: User authorized direct GitHub Actions execution. The new root workflow uses the pinned official macos-26/Xcode flow for the full selected b5q kernel; it does not require the local Linux root installer. Workflow/run outcomes are recorded in reports/ci-stage123.json; dispatch is not itself a build success."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Follow the dated plan: finish environment and b5q board integration using the inventoried Samsung inputs."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/source-alignment.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "board.toml"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "scripts/package.sh"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/build-attempt.json"
+result = "Records the official check success, both real build failures, resolved host dependency and absent macOS outputs; no device success is claimed."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/samsung-gpu-inputs.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/ci-stage123.json"
+result = "Direct CI configuration and observed execution state; no token is stored in source, configuration or logs."
+[[area]]
+id = "firmware"
+status = "planned"
+components = []
+paths = ["proprietary-files.txt", "scripts/check-b5q-inputs.py", "reports/input-preflight.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["An independent uefi-b5q checkout was created at b303410c8e401fc9419ae65a024356ed09a438ef; source-alignment.json records it separately. No b5q SEC/guard/watchdog merge is claimed.", "Historical 2026-11-18 filename search found no Samsung firmware at that time (reports/build-attempt.json). Superseded by the user-provided F7310ZCS7EYF3 directory and the 2026-11-19 extraction evidence below; no Xiaomi firmware was substituted.", "The inherited Samsung platform selects vendor hardware drivers; its UFS dispatch needs an explicit RamBlock-only policy before a new firmware build.", "2026-11-19: Extracted only boot, vendor_boot, recovery, dtbo, super and NON-HLOS from the supplied package; no protected bootloader members were extracted and no phone partitions were accessed. The allowlist extractor records member offsets and compressed/uncompressed SHA256.", "Original vendor_boot/recovery DTB bundles match; recovery_dtbo equals the effective AP DTBO table prefix. Samsung GPU files are in super/vendor EROFS /firmware, not NON-HLOS.", "Extracted inputs resolve the prior firmware-directory gap; Samsung SEC/UH/RKP, watchdog, GOP and continuous-memory integration are not implemented.", "2026-11-19: User authorized direct GitHub Actions execution. The new root workflow uses the pinned official macos-26/Xcode flow for the full selected b5q kernel; it does not require the local Linux root installer. Workflow/run outcomes are recorded in reports/ci-stage123.json; dispatch is not itself a build success."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Implement b5q UEFI runtime FDT/GOP inventory, Samsung handoff and RAM-payload integration; keep vendor UFS dispatch off until RamBlock passes."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/source-alignment.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/input-preflight.json"
+result = "2026-11-19 external-input check finds Samsung ZAP files and reports only the missing platform seed; its scoped presence check does not claim full dependency checks, board implementation or signature verification."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/samsung-gpu-inputs.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/ci-stage123.json"
+result = "Direct CI configuration and observed execution state; no token is stored in source, configuration or logs."
+[[area]]
+id = "cpu"
+status = "planned"
+components = ["ArmCpu"]
+paths = ["configs/**", "reports/hardware-baseline.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["The b5q platform sets SOC_TYPE=1, the upstream SM8550-AC selection.", "The downstream DT describes GICD 0x17100000/0x10000 and GICR 0x17180000/0x200000.", "High-frequency CPU OPP votes have not been derived from a live b5q clock LUT; no sheng clock table was copied.", "2026-11-19: Original-package DT candidates confirm GICD 0x17100000+0x10000, GICR 0x17180000+0x200000 and a 19.2 MHz timer property. Runtime counter frequency, CPU LUT/bin and selected base/overlay remain unverified."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Verify CPU affinities, timer frequency and SM8550-AC votes against the runtime selected board/base before wiring the DTS."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/hardware-baseline.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+[[area]]
+id = "memory"
+status = "planned"
+components = []
+paths = ["dts/**", "reports/hardware-baseline.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["The reference b5q FDT has eight /memory/reg tuples; they are OS-visible fragments, not one contiguous allocatable range.", "UH guest 0xb1000000+0x3000000 and UH heap 0xb0200000+0x40000 occur in the Samsung FDT; Gunyah HYP is 0x80000000+0xa00000.", "QTEE is 0xd8300000+0x500000. No separately named RKP interval was found, and none was invented.", "The eventual XNU DTS and DarwinBoot window must be constructed from b5q evidence, not the sheng memory window.", "2026-11-19: All five inspected base0+overlay candidates have /memory/reg=<0 0> and no simple-framebuffer node; the eight memory tuples in the older reference inventory are not runtime banks extracted from this phone.", "The original-package candidates show HYP 0x80000000+0xa00000, TZ-stat 0x82700000+0x100000 and QTEE 0xd8300000+0x500000. No directly adoptable separately named UH/RKP interval was established; old reference UH values must not be promoted to runtime evidence.", "Four SoC bases and five B5Q revisions 04/05/07/09/11 were preserved. Only base0 x five overlays were merged successfully; this is neither hardware selection nor a verified 20-way matrix. Cached merges now require recorded base, overlay and merged SHA256 matches."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Capture bootloader-patched incoming FDT, EFI memory map and actual board revision; construct b5q reservations and DarwinBoot contiguous windows from these."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/hardware-baseline.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+[[area]]
+id = "storage"
+status = "planned"
+components = ["RamBlock", "VerifiedRoot"]
+paths = ["package/**", "reports/input-preflight.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["The board component list selects RamBlock and VerifiedRoot; no ShengUfs root or persistent-data arguments are enabled.", "B5qUfs is not implemented or published as a submodule. A name blacklist alone cannot prevent raw-LBA writes to protected partitions.", "efs/sec_efs/cpefs/param/xbl/abl and slot aliases remain excluded from any proposed write path.", "An existing NABU macOS 27.3 runtime/data.dbr was passed as an external candidate to the build attempt; compilation stopped before seed binding or b5q validation. Its OS, UUID and platform bindings are not claimed verified.", "2026-11-19: Static DT confirms UFS 0x1d84000+0x3000 and ICE 0x1d88000+0x8000; no controller was initialized or accessed.", "Upstream RamBlock provides writable RAM Data, not automatically OS/SystemOS/App root windows. Package.sh omits userdata assembly; root policies and userdata require their separate build step.", "After RAM I/O validation only, implement a bounded b5q UFS root-read path; distinguish controller MMIO command writes from persistent block writes. Default persistent writes stay off, protected endpoints stay inaccessible, and no deployment area or LBA is privately chosen."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Validate RamBlock with all UFS paths disabled; then implement bounded root reads and three verified-root windows, keeping Data in RAM initially."]
+
+[[area.evidence]]
+kind = "source"
+reference = "board.toml"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/input-preflight.json"
+result = "2026-11-19 external-input check finds Samsung ZAP files and reports only the missing platform seed; its scoped presence check does not claim full dependency checks, board implementation or signature verification."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/build-attempt.json"
+result = "Records the official check success, both real build failures, resolved host dependency and absent macOS outputs; no device success is claimed."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+[[area]]
+id = "display"
+status = "planned"
+components = ["GopFramebuffer"]
+paths = ["package/**", "reports/hardware-baseline.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["Mu b5q DSC specifies 1080x2640, 32 bpp, and USE_CUSTOM_DISPLAY_DRIVER=1.", "The splash reservation starts at 0xb8000000 and has size 0x2b00000; this does not establish the active scanout pointer.", "No simple-framebuffer node or measured stride was found. Packed width*4=4320 bytes is a candidate, not a verified stride.", "2026-11-19: Original-package candidates contain inner 1080x2640 and cover 720x748 panel timings, but no live framebuffer node. Splash 0xb8000000+0x2b00000 is only a reservation, not proof of framebuffer address/stride.", "Use runtime GOP base, size, format and pixels-per-scanline, and verify main/cover behavior separately from the TWRP DRM work."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Capture and validate main-screen GOP handoff and displayUUID pairing; do not hard-code width*4 or treat splash reservation as active scanout."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/hardware-baseline.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+[[area]]
+id = "input"
+status = "planned"
+components = ["QcomGeniSpi"]
+paths = ["package/**", "dts/**"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["QcomGeniSpi is selected as requested; no Samsung touch or GPIO wiring has been implemented.", "ShengNovatekTouch, Xiaomi GPIO values and touch firmware are not selected.", "2026-11-19: Original merged DTs describe I2C Synaptics/Goodix and SPI Synaptics candidates; vendor includes s3916a_b5.bin, s3908_b5.bin and s3908_b5_old.bin. Runtime board selection and sensor role remain unknown.", "QcomGeniSpi selection is not a complete touch implementation. No ShengNovatekTouch, Xiaomi GPIO or touch firmware is reused."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Resolve active sensor/bus from selected revision and runtime evidence, then implement b5q touch protocol and coordinate/displayUUID binding."]
+
+[[area.evidence]]
+kind = "source"
+reference = "board.toml"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+[[area]]
+id = "gpu"
+status = "planned"
+components = ["Adreno740", "AdrenoMetal", "AdrenoFirmware", "AdrenoPM4", "ArmSmmu4K", "Sm8550Platform"]
+paths = ["scripts/**", "package/**", "reports/hardware-baseline.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["The component dependency closure also includes AdrenoFirmware, AdrenoPM4, ArmSmmu4K and Sm8550Platform. The downstream b5q FDT contains a 719000000 Hz top GPU OPP in bin 0 and a 680000000 Hz top OPP in bin 1. Bin selection and power votes are not interchangeable.", "Historical input gap is resolved by the 2026-11-19 Samsung GPU inventory below; b5q-specific firmware-loading, SMMU and power recipes are still pending. No Xiaomi signed image is used.", "Banners-Turnip patches/8g2_oneui.py is identified in the upstream input lock; application to a real Mesa source tree has not yet occurred.", "2026-11-19: All eight original Samsung GPU inputs found in vendor/firmware: a740_zap.mbn/elf/mdt/b00/b01/b02, gmu_gen70200.bin, a740_sqe.fw. MBN SHA256=824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e; SQE SHA256=96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473.", "GMU 66844 bytes matches the pinned upstream input; Samsung SQE 76724 bytes differs from the upstream 75380-byte input, and ZAP differs. Firmware loading and input pins require a Samsung-specific recipe, not blind upstream replacement.", "ZAP split segments match MBN segments byte-for-byte and MDT matches headers plus hash segment. Signature-chain verification and GPU execution were not performed; ELF and full MBN are not interchangeable.", "GPU and SMMU bases are 0x3d00000+0x40000 and 0x3da0000+0x40000 in inspected original-package DT. OneUI Turnip patch application, power/bin votes, firmware startup, submission and Metal present remain unimplemented."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Implement Samsung ZAP/GMU/SQE loading and verified GPU/SMMU power bindings; apply the pinned OneUI Turnip patch in the real graphics build and validate each GPU-to-present step."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/hardware-baseline.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "board.toml"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/samsung-gpu-inputs.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+[[area]]
+id = "network"
+status = "planned"
+components = []
+paths = ["package/**"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["No network hardware or Wi-Fi/Bluetooth implementation is part of the current board configuration.", "2026-11-19: Samsung GPU/DT input inventory is complete; it does not establish Wi-Fi/Bluetooth support. The desktop plan separately tracks en0/TimeSync identity and board networking."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Determine b5q network buses/firmware and interrupts; validate desktop network identity dependencies separately from actual Wi-Fi/Bluetooth functionality."]
+
+[[area.evidence]]
+kind = "source"
+reference = "board.toml"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "The dated plan distinguishes remaining subsystem implementation from the completed Samsung input inventory."
+[[area]]
+id = "audio"
+status = "planned"
+components = []
+paths = ["package/**"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["No audio controller, codec, HAL or DSP firmware was copied from sheng.", "2026-11-19: The original-package inventory and dated plan do not claim audio bring-up; shared SM8550 selection is not proof of Samsung codec/DSP routing."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Derive b5q codec/DSP, power and routing from Samsung evidence and implement audio as its own acceptance path after core boot."]
+
+[[area.evidence]]
+kind = "source"
+reference = "board.toml"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "The dated plan distinguishes remaining subsystem implementation from the completed Samsung input inventory."
+[[area]]
+id = "power"
+status = "planned"
+components = []
+paths = ["package/**", "reports/hardware-baseline.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["Samsung CPU/GPU votes and Gunyah watchdog handoff require b5q evidence; no Xiaomi-specific SMC policy is assumed verified.", "2026-11-19: The dated plan keeps Samsung shutdown/reset, watchdog handoff, suspend and fold transitions as distinct pending tests; neither GPU input availability nor desktop startup proves these transitions."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Audit Samsung watchdog/PSCI and shutdown/reset ownership during UEFI bring-up; validate suspend/fold and power transitions separately."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/hardware-baseline.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "The dated plan distinguishes remaining subsystem implementation from the completed Samsung input inventory."
+[[area]]
+id = "packaging"
+status = "planned"
+components = ["DarwinBoot", "XnuPrelink"]
+paths = ["scripts/package.sh", "board.toml", "reports/build-attempt.json"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["The official package script and macOS profile are selected. The first full build failed on unifdef; Ubuntu dependency extraction repaired that error. The retry reached kernel preflight for 17 selected components and then failed because /opt/unixnu-linux/llvm/bin/clang is absent. The official Linux installer requires root and passwordless sudo is unavailable; no CI run has been dispatched. Host privilege evidence is recorded in reports/build-attempt.json.", "The prior artifacts/unixnu-b5q/boot.img is a menu-only build and is not a macOS package output.", "A final package manifest must only be written by the official pipeline after kernel, payload and boot image creation.", "2026-11-19: Official package --check rerun with Samsung inputs available: 130 patches listed, none applied or compiled by that check. The prior full build remains blocked by missing /opt/unixnu-linux/llvm/bin/clang; no new full build ran for this input-inventory request.", "Existing UniversalMac_27.3_26C5035r_Restore.ipsw is present in nabu_macos/out/downloads. macOS-specific SDK/Data seed/Metal addon steps follow the official Mac+Xcode workflow; Linux XNU tools alone do not satisfy them.", "The final deliverable must include separate userdata root-window assembly and policy/layout evidence in addition to kernel, payload, boot and package.manifest.json. Platform seed, runtime board evidence and deployment geometry remain unresolved; no b5q macOS artifacts are claimed.", "2026-11-19: User authorized direct GitHub Actions execution. The new root workflow uses the pinned official macos-26/Xcode flow for the full selected b5q kernel; it does not require the local Linux root installer. Workflow/run outcomes are recorded in reports/ci-stage123.json; dispatch is not itself a build success."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Complete toolchains/Mac runner, local seed and board recipes, then build roots/userdata separately and run the official package pipeline; only report verified existing outputs."]
+
+[[area.evidence]]
+kind = "source"
+reference = "scripts/package.sh"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "board.toml"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/build-attempt.json"
+result = "Records the official check success, both real build failures, resolved host dependency and absent macOS outputs; no device success is claimed."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/input-preflight.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/ci-stage123.json"
+result = "Direct CI configuration and observed execution state; no token is stored in source, configuration or logs."
+[[area]]
+id = "diagnostics"
+status = "implemented"
+components = []
+paths = ["scripts/inventory-hardware.py", "reports/**"]
+inputs = ["Pinned UniXNU/macOS profiles and b5q source evidence listed below."]
+configuration = ["board.toml and reports/hardware-baseline.json carry effective selection and observed facts."]
+procedure = ["Use the official package.sh entry point and record the first real failure without marking subsequent steps complete."]
+findings = ["The inventory script parses local FDT properties without accessing the phone or UFS partitions and does not export /chosen/bootargs. The full hardware comparison and real first-failure/retry report are preserved alongside it. Parsed memory tuples and UH guest reg were cross-checked against fdtget successfully.", "The inspected TWRP prebuilt contains four SoC DTBs; these are not a local phone extraction or an independently verified b5q board overlay.", "xnu-panic-screen.c is in UniXNU/scripts; entry probe and macOS display recipes require later board wiring and are not claimed present in this port.", "2026-11-19: Firmware, DT and GPU inventory scripts preserve member provenance and hashes, suppress full chosen/identity fields and never execute phone I/O. DT merge scope is explicitly five base0 candidates and caches are bound to recorded input/output hashes.", "The dated plan records current input/build status and the RamBlock-versus-root distinction. Main-screen entry/panic integration remains pending and is not validated by the TWRP display tests.", "2026-11-19 validation: three inventory scripts pass py_compile; all eight GPU hashes and ZAP segment checks pass; four bases/five overlays/five hash-bound cached merges and DT cross-checks pass. Porting record validates 14 areas. Input preflight remains expected-blocked solely on missing local platform seed.", "2026-11-19: User authorized direct GitHub Actions execution. The new root workflow uses the pinned official macos-26/Xcode flow for the full selected b5q kernel; it does not require the local Linux root installer. Workflow/run outcomes are recorded in reports/ci-stage123.json; dispatch is not itself a build success."]
+completion = ["The subsystem implementation and required host checks pass; device claims require a separate recorded device result."]
+limits = ["No Flip5 macOS hardware qualification or full kernel/payload/boot build is recorded."]
+next_action = ["Keep provenance/script checks and porting-record validation passing; wire b5q main-screen XNU entry/panic and runtime handoff logs next."]
+
+[[area.evidence]]
+kind = "source"
+reference = "scripts/inventory-hardware.py"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/hardware-baseline.json"
+result = "Current implementation/input evidence; inspect findings for the exact scope and unresolved inputs."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/build-attempt.json"
+result = "Records the official check success, both real build failures, resolved host dependency and absent macOS outputs; no device success is claimed."
+
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/official-firmware-hardware.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/samsung-gpu-inputs.json"
+result = "2026-11-19 input inventory and dependency-ordered implementation plan; scope and remaining gaps are recorded in findings, not a hardware success claim."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/firmware-plan-evidence.json"
+result = "2026-11-19 workspace index records exact paths and SHA256 for extraction scripts, original member manifest, plan, upstream guides and host check log. No hardware success is claimed."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/ci-stage123.json"
+result = "Direct CI configuration and observed execution state; no token is stored in source, configuration or logs."
+[[area]]
+id = "recovery-display"
+status = "implemented"
+components = []
+paths = ["reports/twrp-cover-off.json"]
+inputs = ["Pinned b5q TWRP device tree, Samsung SM8550 common tree and minuitwrp DRM backend; b5q main display is 1080x2640."]
+configuration = ["The b5q-only v4 policy enables atomic capabilities before querying ownership, verifies main atomic CRTC_ID/ACTIVE, filters main/cover planes by mask/format/ownership, and tests compatible cover candidates before real commits. No pre-test off/DPMS or observer sysfs writes remain. The main brightness path is fixed to a real positive-max node, with explicit power-unblank for positive brightness requests."]
+procedure = ["Build recoveryimage with the cover-off patches, then inspect the final ramdisk and compare kernel/DTB/DTBO to the previous build."]
+findings = ["The original non-main CRTC teardown submitted a secondary ACTIVE property against main_monitor_crtc and ran before atomic capabilities were enabled.", "The new policy resolves object-local properties, tears down only the assigned cover CRTC and planes, avoids shared/main CRTCs and has DPMS fallback.", "Samsung's legacy panel1 backlight alias can have NULL ops; the service targets the Qualcomm panel1-backlight path only and retries late registration.", "The latest user authorized a TWRP cover-display build; this work does not complete the macOS display port or change the bootloader warning stage.", "The recoveryimage build and final-image inspection passed; 14 DRM mock scenarios with ASan/UBSan and five shell-helper tests passed. Incremental relink staging stamps are refreshed to prevent a stale library in the ramdisk.", "Delivered v1 recovery.img SHA256: a05be4db7e1d5fdd340b4f1f25d29c3c80a081ee3826c27cfe3a0d44c654774d; kernel/DTB/DTBO unchanged from the baseline.", "2026-11-19: user reports v1 did not darken the physical cover display; mock/image PASS was not hardware success. Reworking inherited-splash takeover, power requests and persistent diagnostics as v2. The inspected sde_connector.c caches brightness while allow_bl_update is false; its panel number is a registration counter, not a proven physical display identity.", "2026-11-19: v2 recoveryimage built successfully; 14 off-policy + 32 takeover + 7 helper tests passed (53 total); final ramdisk includes takeover, fallback and diagnostic service. SHA256 482eb45f19a16a92cf440000efee01f3254a0a9de48e0bc4868f8597c61fed76. Kernel/DTB/DTBO unchanged. No physical v2 success is claimed.", "2026-11-19 user-supplied excerpts verify v2 is installed and its black TEST_ONLY failed with -22/EINVAL; snapshots later show all CRTCs disconnected and both real backlights in powerdown. Exact pre-off CRTC ownership and cause of SDE_0 shutdown are not established from the excerpts alone. Removing all pre-test cover-off/DPMS calls, guarding main ownership using atomic CRTC_ID, and testing alternative compatible resources as v3. Full logs are referenced on a separate Windows host and have not been read locally.", "v3 built and final-image checks passed, including absence of the legacy pre-test teardown string, presence of read-only observer and compiled real-node brightness guards. 49 v3 + 7 observer + 14 historical tests passed (70 total). IMG SHA256 b1076392b3db80863a937a99fb6a3f3ac84d86ae6a80d7cb26c61af44b1b6c5b. Kernel/DTB/DTBO unchanged; hardware not tested.", "User reports v3 remains on the inner Samsung logo. Local ADB has no device; no v3 runtime log is available. Code audit found atomic connector ownership queried before drmSetClientCap(ATOMIC), so an invisible CRTC_ID can make main initialization fail. v4 moves capability setup before all main ownership queries and covers bootloader scanout handoff in host regressions.", "v4 recoveryimage and final image verification passed. 53 native + 8 observer/source-order + 14 historical host cases passed (75 total). IMG SHA256 ac5e72f99b97cb1098ed5b5fad227cca02c043ff54d3e18e74c4e0c7f48da854. The original kernel/DTB/DTBO are unchanged; actual v4 boot/display remains unverified."]
+completion = ["The recoveryimage build and host policy tests pass, and the final ramdisk contains the board init service and compiled DRM policy. Actual cover power-off requires a separate device observation."]
+limits = ["No connected ADB device was present; runtime panel state is not yet verified."]
+next_action = ["Deliver v4 standalone IMG; first verify recovery is reachable and the inner UI replaces the logo. On the connected computer, adb get-state and ro.twrp.version distinguish userspace availability; inspect B5Q-COVER4 early caps/main/graphics logs before further changes."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/twrp-cover-off.json"
+result = "Records earlier hardware symptoms including v3 logo persistence, v4 ordering fix, successful build, final IMG/source/patch hashes, 75 host checks and replay; v4 hardware_tested=false."

@@ -1,0 +1,3 @@
+# Copy to ignored local.toml. Paths are machine-specific; never commit seeds.
+[b5q_inputs]
+samsung_firmware_dir = "/path/to/your/b5q/samsung-firmware"

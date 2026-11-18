@@ -1,0 +1,83 @@
+{
+  "date": "2026-11-18",
+  "device": "b5q",
+  "os_profile": "macos-27.3-26C5035r",
+  "state": "blocked-before-kernel-compilation",
+  "official_package_template_unchanged": true,
+  "check": {
+    "result": "PASS",
+    "patches_listed": 130,
+    "patches_applied": false,
+    "firmware_preflight_run_by_upstream_check": false,
+    "log": "logs/b5q-port/package-check.log"
+  },
+  "porting_record": {
+    "result": "PASS",
+    "areas": 13,
+    "selected_component_closure": 17
+  },
+  "build_attempts": [
+    {
+      "result": "FAIL",
+      "first_error": "unifdef not found on PATH",
+      "log": "logs/b5q-port/package-build.log",
+      "repair": "Downloaded Ubuntu unifdef and tcsh packages and extracted to artifacts/tools/linux-deps/root; no system install"
+    },
+    {
+      "result": "FAIL",
+      "first_error": "/opt/unixnu-linux/llvm/bin/clang missing",
+      "log": "logs/b5q-port/package-build-retry.log",
+      "required_upstream_action": "Install the official Linux XNU toolchain with root privileges, or use the official macOS CI runner path"
+    }
+  ],
+  "external_inputs": {
+    "ipsw_located": true,
+    "ipsw_path": "/home/baimao/nabu_macos/out/downloads/UniversalMac_27.3_26C5035r_Restore.ipsw",
+    "candidate_data_seed": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/runtime/data.dbr",
+    "candidate_data_seed_bound_or_validated_for_b5q": false,
+    "samsung_firmware_directory_provided": false,
+    "platform_seed_provided": false,
+    "samsung_firmware_search": {
+      "result": "no candidates found",
+      "scope": "home filesystem traversal excluding Git/object stores, node_modules and machine caches",
+      "filename_patterns": [
+        "*a740*zap*",
+        "AP_F731*",
+        "BL_F731*",
+        "SM-F731*"
+      ],
+      "log": "logs/b5q-port/samsung-firmware-search.log"
+    }
+  },
+  "outputs": {
+    "kernel/kernel.macho": {
+      "exists": false
+    },
+    "payload/payload.img": {
+      "exists": false
+    },
+    "boot/boot.img": {
+      "exists": false
+    },
+    "package.manifest.json": {
+      "exists": false
+    }
+  },
+  "remaining_implementation": [
+    "b5q XNU DTS and power/firmware recipes",
+    "Samsung UEFI SEC/watchdog/continuous-memory merge",
+    "Samsung OneUI Turnip patch application",
+    "b5q display/panic entry integration",
+    "RamBlock root/system-image integration",
+    "optional B5qUfs guarded write implementation"
+  ],
+  "ci_dispatched": false,
+  "phone_flash_performed": false,
+  "credential_written_to_files": false,
+  "host": {
+    "os": "Linux",
+    "passwordless_root_available": false,
+    "official_linux_xnu_toolchain_installed": false,
+    "llvm17_for_uefi_available": true
+  }
+}

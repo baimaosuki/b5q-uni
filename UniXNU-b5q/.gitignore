@@ -1,0 +1,8 @@
+/local.toml
+/out/
+/build/
+/inputs/
+__pycache__/
+*.py[cod]
+/.cache/
+/unixnu.local.toml

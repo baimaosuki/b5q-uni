@@ -1,0 +1,132 @@
+name: b5q macOS Stage 1-3
+run-name: b5q ${{ inputs.os_profile || 'macos-27.3-26C5035r' }} kernel / ${{ github.sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      os_profile:
+        description: Pinned UniXNU OS profile
+        required: true
+        default: macos-27.3-26C5035r
+      xcode:
+        description: Xcode version used by the pinned upstream macOS workflow
+        required: true
+        default: '26.6'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: b5q-stage123-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
+  HOMEBREW_NO_ENV_HINTS: 1
+
+jobs:
+  kernel:
+    name: macOS XNU full-component build
+    runs-on: macos-26
+    timeout-minutes: 360
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ inputs.xcode }}.app/Contents/Developer
+      UNIXNU_DEVICE: ${{ github.workspace }}/UniXNU-b5q
+      OS_PROFILE: ${{ inputs.os_profile }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out b5q source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check out pinned UniXNU
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/UniXNU
+          ref: 563595abedfdfa413ad583b66b6176d82007e633
+          path: UniXNU
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - name: Check device record and upstream template
+        run: |
+          set -euo pipefail
+          test "$OS_PROFILE" = macos-27.3-26C5035r
+          cmp UniXNU/templates/package.sh UniXNU-b5q/scripts/package.sh
+          python3 UniXNU/scripts/porting-record.py check --device UniXNU-b5q
+      - name: Install upstream macOS host tools
+        run: |
+          set -euo pipefail
+          brew install llvm lld mtools dtc
+          if ! command -v unifdef >/dev/null; then
+            brew install unifdef
+            echo "$(brew --prefix unifdef)/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Report and verify runner tools
+        run: |
+          set -euo pipefail
+          sw_vers
+          uname -m
+          test -d "$DEVELOPER_DIR"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          xcrun --sdk macosx --show-sdk-version
+          xcrun --sdk iphoneos --find mig
+          clang --version | head -n 1
+          "$(brew --prefix llvm)/bin/clang" --version | head -n 1
+          python3 --version
+          for tool in git make clang cmake ninja unifdef ld.lld mformat mcopy dtc xcodebuild; do
+            command -v "$tool"
+          done
+          df -h "$GITHUB_WORKSPACE"
+      - name: Resolve full b5q target
+        working-directory: UniXNU
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
+          ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
+      - name: Build full-component XNU
+        working-directory: UniXNU
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ./unixnu build kernel --device ../UniXNU-b5q --os "$OS_PROFILE"
+      - name: Collect text diagnostics
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os, re, shutil
+          from pathlib import Path
+          root = Path(os.environ['GITHUB_WORKSPACE']) / 'UniXNU/out/b5q'
+          dest = Path(os.environ['RUNNER_TEMP']) / 'b5q-text-logs'
+          dest.mkdir(parents=True, exist_ok=True)
+          count = 0
+          for p in sorted(root.rglob('*.log')) if root.exists() else []:
+              raw = p.read_bytes()
+              if b'\0' in raw:
+                  continue
+              text = raw.decode('utf-8', 'replace')
+              text = re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)', '***', text)
+              text = re.sub(r'https?://[^\s"\']*[?&](?:token|sig|signature|key|X-Amz-Signature)=[^\s"\']*', '***', text, flags=re.I)
+              out = dest / p.relative_to(root)
+              out.parent.mkdir(parents=True, exist_ok=True)
+              out.write_text(text)
+              count += 1
+          (dest / 'scope.txt').write_text('Pinned full-component b5q kernel attempt. No phone flash or hardware qualification. Apple-derived binaries are not published by this diagnostic workflow.\n')
+          print(f'{count} text logs collected')
+          PY
+      - name: Upload text diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-kernel-logs-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/b5q-text-logs/
+          if-no-files-found: warn
+          retention-days: 7

@@ -1,0 +1,104 @@
+{
+  "result": "PASS",
+  "variant": "b5q-cover-off-4",
+  "hardware_tested": false,
+  "previous_image_sha256": "79dda2f543d22924c407fdd7eebd435e75b5d1d528d943fb9f1e5c53288c94fe",
+  "image_sha256": "ac5e72f99b97cb1098ed5b5fad227cca02c043ff54d3e18e74c4e0c7f48da854",
+  "image_bytes": 109576192,
+  "unchanged_input_sha256": {
+    "kernel": "cc0036af53f6ceecc57835439da69fc66a6aed7aa129112404716312df8efd53",
+    "dtb": "871fee3fa8948e3da00e441720c250904f1fb84241e1e2db6816a285c7b497ca",
+    "dtbo": "7a6239f8b78a37120b58306eecb090bb5cf1e07fce80eaa8124a8e4d2b6e7583"
+  },
+  "policy_files": {
+    "init.recovery.b5q-cover.rc": {
+      "sha256": "5c2d83dc96eac68f6687a536a9cc3ecbcfc815c1b8ca0b81969dbb3d124af3cc",
+      "mode": "0o100750"
+    },
+    "system/bin/b5q-cover-off.sh": {
+      "sha256": "10ec2fe8e648da229ea6aca57fdecb7d3bb0ee9c0aba701b0c5a131df2eb46ba",
+      "mode": "0o100755"
+    },
+    "init.recovery.qcom.rc": {
+      "sha256": "c17a644970075045e4dd3ca13246a51ee1c4a87f6ada8cc260426f92e9be88ef",
+      "mode": "0o100750"
+    }
+  },
+  "policy_libraries": {
+    "system/lib64/libminuitwrp.so": "559c6624557b02e55e6244039150241eb10ef84b7955b56f25f4db6b239500a0"
+  },
+  "checks": [
+    "kernel/DTB/DTBO unchanged",
+    "board init override installed",
+    "service script byte equality",
+    "DRM policy and black-frame takeover compiled into ramdisk libraries",
+    "non-DRM backend fallback compiled",
+    "legacy pre-test teardown absent",
+    "read-only sysfs observer",
+    "hardware-init import chain present",
+    "shell/sleep/cat available",
+    "b5q-only Soong flag enabled"
+  ],
+  "scope": "Recovery userspace only; no bootloader warning/logo/param/AVB change",
+  "date": "2026-11-19",
+  "timezone": "Asia/Shanghai",
+  "build_status": "success",
+  "artifact": "/home/baimao/zflip5/artifacts/twrp-b5q-cover-off-v4/recovery.img",
+  "user_evidence": {
+    "earlier": {
+      "source": "user-pasted log excerpts, not complete Windows files",
+      "v2": {
+        "installed_version": "3.7.1_12-b5q-cover-off-2",
+        "black_test_rc": -22,
+        "real_black_commit_executed": false,
+        "later_snapshot": "all CRTCs disabled; both real backlights powerdown",
+        "full_logs_read_locally": false
+      },
+      "v1": {
+        "variant": "b5q-cover-off-1",
+        "result": "cover remained illuminated",
+        "date": "2026-11-19",
+        "image_sha256": "a05be4db7e1d5fdd340b4f1f25d29c3c80a081ee3826c27cfe3a0d44c654774d"
+      }
+    },
+    "v3": {
+      "symptom": "inner display remains at Samsung boot logo",
+      "adb_connected_locally": false,
+      "runtime_logs_read": false
+    }
+  },
+  "host_tests": {
+    "historical_off_policy": 14,
+    "native_transaction_ownership_and_handoff": 53,
+    "read_only_observer_and_init_order": 8,
+    "total": 75,
+    "result": "PASS",
+    "sanitizers": [
+      "address",
+      "undefined"
+    ],
+    "physical_device_accessed": false
+  },
+  "build_log": "logs/twrp-cover-off-v4-build.log",
+  "image_check_log": "logs/twrp-cover-off-v4-image-check.log",
+  "regression": "Mock atomic properties are hidden before client capability setup: selection fails before enable and succeeds after. Production init order is separately asserted.",
+  "patch_replay": "PASS pristine -> v3 -> reverse v3 -> v4 -> reverse-check in temporary trees",
+  "patches": {
+    "patches/twrp-cover-off/0001-recovery-b5q-display-policy.patch": "e4d1d90169707d0afcf9f7ceb6c390227583aa247dac1dcd53db895e0712eabc",
+    "patches/twrp-cover-off/0002-device-b5q-cover-off.patch": "cae7076784d7dd833eed3fcd1267a818c6a027fa3310d4a9c1ba212fc012e5ce"
+  },
+  "source_revisions": {
+    "bootable/recovery": "5c3d206a5eeb3d446bcda8248a405a4b278bab5c",
+    "device/samsung/b5q": "99d7229242df7885857c2f4c9b95a04f254545ba",
+    "device/samsung/sm8550-common": "19a9b7047cb52f03c7adb97c8ed40cdb965235e7"
+  },
+  "implementation_sources": {
+    "sources/twrp/bootable/recovery/minuitwrp/b5q_cover_takeover.h": "779577e8f37609707d11effafe7db819dd5b199ae395ac7d2b2e97e2eb302d04",
+    "sources/twrp/bootable/recovery/minuitwrp/graphics_drm.cpp": "518e5fac79f317b076009f6680d7e8903ada1c9e5d82d5fdf6a474888e887d0a"
+  },
+  "limits": [
+    "v3 symptom was reported by photo; no v3 phone runtime log was read.",
+    "The ordering defect is established in code, not proven to be the sole cause on the phone.",
+    "No local ADB device or v4 hardware acceptance test."
+  ]
+}

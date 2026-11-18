@@ -1,0 +1,113 @@
+{
+  "model": "SM-F7310",
+  "build": "F7310ZCS7EYF3",
+  "source_chain": [
+    "AP tar member super.img.lz4",
+    "Android sparse decode",
+    "super logical vendor",
+    "EROFS /firmware"
+  ],
+  "source_extraction_manifest": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/extraction-manifest.json",
+  "firmware_directory": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu",
+  "firmware_executed": false,
+  "signature_verification": "not performed; original bytes preserved",
+  "files": {
+    "a740_zap.mbn": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_zap.mbn",
+      "bytes": 12088,
+      "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e",
+      "matches_upstream_inputs": []
+    },
+    "a740_zap.elf": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_zap.elf",
+      "bytes": 5168,
+      "sha256": "3cbdf8d0ca6744c368170e8d248c409c3b93963e56fa1ef0d3951eae0ef5148b",
+      "matches_upstream_inputs": []
+    },
+    "a740_zap.mdt": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_zap.mdt",
+      "bytes": 4044,
+      "sha256": "43bb897d06ae605c0175d9193ea34ebbe699e497a6b802782dbac79e7e0808f2",
+      "matches_upstream_inputs": []
+    },
+    "a740_zap.b00": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_zap.b00",
+      "bytes": 148,
+      "sha256": "2fb7b6afa4387a8ba81e1faf0c35ac1c6fd6294118426d5b45946d75f4e3e339",
+      "matches_upstream_inputs": []
+    },
+    "a740_zap.b01": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_zap.b01",
+      "bytes": 1072,
+      "sha256": "21c0afb7418fe901d688327bbc7423898cc3d6ca93d77adff8294c6fca30fbcd",
+      "matches_upstream_inputs": []
+    },
+    "a740_zap.b02": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_zap.b02",
+      "bytes": 3896,
+      "sha256": "33f9f488249a51239cc448f48d34160d2eec550ca35d89ccd0b25efa78e61b31",
+      "matches_upstream_inputs": []
+    },
+    "gmu_gen70200.bin": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/gmu_gen70200.bin",
+      "bytes": 66844,
+      "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98",
+      "matches_upstream_inputs": [
+        "qcom/gmu_gen70200.bin"
+      ]
+    },
+    "a740_sqe.fw": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_sqe.fw",
+      "bytes": 76724,
+      "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473",
+      "matches_upstream_inputs": []
+    }
+  },
+  "source_members": [
+    {
+      "archive": "AP_F7310ZCS7EYF3_F7310ZCS7EYF3_MQB97237818_REV00_user_low_ship_MULTI_CERT_meta_OS15.tar.md5",
+      "archive_bytes": 14847447162,
+      "member": "super.img.lz4",
+      "member_data_offset": 30200832,
+      "compressed_bytes": 8767465936,
+      "compressed_sha256": "7ee085a877b5490c1d0a671620884a898a9d58faa4fb1188cacf7027e166e72f",
+      "output": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/images/super.img",
+      "bytes": 9789872052,
+      "sha256": "a892dc3457cba562251f01aacf1c6f96e8fff52eab103622e15fa3c3e3ccde4b"
+    }
+  ],
+  "zap_segments": [
+    {
+      "index": 0,
+      "offset_in_mbn": 0,
+      "filesz": 148,
+      "flags": "0x7000000",
+      "split_equals_mbn_segment": true
+    },
+    {
+      "index": 1,
+      "offset_in_mbn": 4096,
+      "filesz": 1072,
+      "flags": "0x8000007",
+      "split_equals_mbn_segment": true
+    },
+    {
+      "index": 2,
+      "offset_in_mbn": 8192,
+      "filesz": 3896,
+      "flags": "0x2000000",
+      "split_equals_mbn_segment": true
+    }
+  ],
+  "mdt_equals_headers_plus_hash_segments": true,
+  "container_sha256": {
+    "images/super.img": "a892dc3457cba562251f01aacf1c6f96e8fff52eab103622e15fa3c3e3ccde4b",
+    "images/super.raw.img": "7fd33b5d37342a765e10bfde2f41a585bb0584056109d3dc55644dcedcaf99d5",
+    "logical/vendor.img": "2263807d0c7aec5c841527a023c5d58370ff369b287b3feb54c930109981e156"
+  },
+  "tool_sha256": {
+    "simg2img": "2b53dc582f82d69f7adc6665f9260f3544723a35ec97e36de3b1c9ff54082971",
+    "lpunpack": "8e9d47bbc2bb426168b4ccbae49ddefdac2d467c4c2ca2ff3ed98da04e7be5a8"
+  },
+  "erofs_tool_sha256": "9df25cc289bbd04f1995383aa6a5a235757ef895a6085b26d0b63eb45718a448"
+}

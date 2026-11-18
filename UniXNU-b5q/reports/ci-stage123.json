@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-19",
+  "repository": "baimaosuki/b5q-uni",
+  "workflow": ".github/workflows/b5q-stage123.yml",
+  "upstream_revision": "563595abedfdfa413ad583b66b6176d82007e633",
+  "status": "prepared-not-dispatched",
+  "scope": "Official macOS runner and full-component kernel build, preserving real first failure; UEFI source integration remains separate work.",
+  "credential_in_files": false,
+  "local_linux_toolchain": "Blocked: official installer requires root; host check also found missing libclang headers, being resolved locally.",
+  "outputs_claimed": false
+}

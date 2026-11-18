@@ -1,0 +1,4 @@
+# Required Samsung b5q inputs; acquisition path and SHA256 pending user directory.
+# a740_zap signed image (ELF/MBN or MDT + split segments)
+# GMU/SQE firmware and board-specific signed power inputs selected by the b5q recipes
+# No Xiaomi firmware or ShengPreflight download is allowed.

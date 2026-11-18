@@ -1,0 +1,97 @@
+{
+  "date": "2026-11-19",
+  "scope": "Workspace evidence index for original Samsung input inventory and porting plan; no driver implementation or phone operation",
+  "files": [
+    {
+      "workspace_path": "/home/baimao/zflip5/.gitignore",
+      "bytes": 240,
+      "sha256": "28b759fea7139adb6644128efc8ca6caa7a3537f28cf1b87ac834667c545d27b"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/UniXNU/docs/porting/macos.md",
+      "bytes": 16590,
+      "sha256": "704e31904c9b0f4276460cdceb837e598d9feec2010e207029c6c9ecec18f666"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/UniXNU/drivers/RamBlock/README.md",
+      "bytes": 1523,
+      "sha256": "145a34316b27041ca903a5cc0f667b75ea9d98e68290cbdf0cbe24a100b91dc7"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/extraction-manifest.json",
+      "bytes": 6137,
+      "sha256": "76d7f494d8cd1d0811a86a79999a449d96567f5206d14f02da169e63278c3326"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/docs/b5q-macos-porting-plan-2026-11-19.md",
+      "bytes": 17674,
+      "sha256": "93e5b130e469592c3cfe56197ba56d9ebccf068ced778b18782f92815cd40b63"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/logs/b5q-port/package-check-with-samsung-firmware.log",
+      "bytes": 14319,
+      "sha256": "3e02e61f24f3f65a789f04c4c9221420513aedae972ba9ff05cd481034baec00"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/scripts/extract-b5q-samsung-inputs.py",
+      "bytes": 4352,
+      "sha256": "54dfea071cc5a3cc5ebaa454d0a946964e2e7a4297b1be84a8f193e9f4aa3a12"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/scripts/inventory-b5q-gpu-inputs.py",
+      "bytes": 3833,
+      "sha256": "ddb71d356ba068b5adefd841ddc97fecf865f93a5d26d9c0552850fb9e8d3dd3"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/scripts/inventory-b5q-official-dt.py",
+      "bytes": 6259,
+      "sha256": "7323b7a7c829cbc00be39b5a03024dd31523dd64f31ce570d844d3624f538380"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/logs/b5q-official-dt-inventory.log",
+      "bytes": 364,
+      "sha256": "de072455dabd7a5c2be6956249133443b281725f5052da4e8d84af1e2292d1ab"
+    },
+    {
+      "workspace_path": "/home/baimao/zflip5/logs/b5q-samsung-gpu-inventory.log",
+      "bytes": 557,
+      "sha256": "e4f93564a0f47c8cb70572c3e4217cb4f4e417b92d74cf00ae94b7ba5aac6904"
+    }
+  ],
+  "checks": {
+    "python_syntax": {
+      "command": "python3 -m py_compile scripts/extract-b5q-samsung-inputs.py scripts/inventory-b5q-official-dt.py scripts/inventory-b5q-gpu-inputs.py",
+      "exit_code": 0
+    },
+    "official_dt_inventory": {
+      "command": "python3 scripts/inventory-b5q-official-dt.py artifacts/firmware-b5q/F7310ZCS7EYF3",
+      "exit_code": 0,
+      "bases": 4,
+      "overlays": 5,
+      "merged": 5,
+      "cached_merge_input_output_hashes_verified": true,
+      "all_cross_checks": true,
+      "log": "/home/baimao/zflip5/logs/b5q-official-dt-inventory.log"
+    },
+    "gpu_inventory": {
+      "command": "python3 scripts/inventory-b5q-gpu-inputs.py artifacts/firmware-b5q/F7310ZCS7EYF3",
+      "exit_code": 0,
+      "files": 8,
+      "split_segments_match_mbn": true,
+      "mdt_matches_headers_and_hash_segment": true,
+      "log": "/home/baimao/zflip5/logs/b5q-samsung-gpu-inventory.log"
+    },
+    "input_presence": {
+      "command": "python3 UniXNU-b5q/scripts/check-b5q-inputs.py",
+      "exit_code": 2,
+      "expected_result": "blocked",
+      "only_missing_input": "UNIXNU_UNIQUE_CHIP_ID",
+      "scope": "ZAP presence and local platform seed only, not full build readiness"
+    },
+    "porting_record": {
+      "command": "python3 UniXNU/scripts/porting-record.py check --device UniXNU-b5q",
+      "exit_code": 0,
+      "structured_areas": 14
+    }
+  }
+}

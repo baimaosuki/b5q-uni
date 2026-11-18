@@ -1,0 +1,25 @@
+{
+  "board": "b5q",
+  "result": "blocked",
+  "inputs": {
+    "a740_zap.mdt": {
+      "bytes": 4044,
+      "sha256": "43bb897d06ae605c0175d9193ea34ebbe699e497a6b802782dbac79e7e0808f2"
+    },
+    "a740_zap.elf": {
+      "bytes": 5168,
+      "sha256": "3cbdf8d0ca6744c368170e8d248c409c3b93963e56fa1ef0d3951eae0ef5148b"
+    },
+    "a740_zap.mbn": {
+      "bytes": 12088,
+      "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+    }
+  },
+  "missing": [
+    "UNIXNU_UNIQUE_CHIP_ID: the official payload requires the target platform seed; no seed is generated or copied from another device"
+  ],
+  "hardware_tested": false,
+  "firmware_provenance_note": "Model/version and signed-ZAP provenance must be recorded by the extraction recipe; finding a filename alone does not verify a signature",
+  "platform_seed_present": false,
+  "scope": "External input presence only; firmware extraction, board implementation and hardware qualification are separate porting records"
+}

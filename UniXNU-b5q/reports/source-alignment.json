@@ -1,0 +1,33 @@
+{
+  "date": "2026-11-18",
+  "sources": {
+    "UniXNU": {
+      "revision": "563595abedfdfa413ad583b66b6176d82007e633",
+      "dirty": false
+    },
+    "sources/reference-sheng": {
+      "revision": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+      "dirty": false
+    },
+    "sources/reference-uefi-sheng": {
+      "revision": "b303410c8e401fc9419ae65a024356ed09a438ef",
+      "dirty": false
+    },
+    "sources/Mu-Silicium": {
+      "revision": "50a0ef121fe633fed786ff14e293f9d6e2da229d",
+      "dirty": true
+    },
+    "sources/UniXNU-sm8550-common": {
+      "revision": "2dc650ca76ae38715cd0712e60a44b14fe251745",
+      "dirty": false
+    },
+    "uefi-b5q": {
+      "revision": "b303410c8e401fc9419ae65a024356ed09a438ef",
+      "role": "independent unmerged firmware workspace; README.b5q.md is an untracked local note"
+    }
+  },
+  "notes": [
+    "Core and reference repositories were aligned to the revisions in the supplied research report.",
+    "The original Mu-Silicium local menu-integration edits were retained; no destructive reset was used."
+  ]
+}
