@@ -652,6 +652,11 @@
       "name": "macos-addon-applications.patch",
       "sha256": "0724f6849d7522118b0bcb2b32d0b54d6cb60421e84ea6bc1f1cf01ba180dc2d",
       "result": "PASS"
+    },
+    {
+      "name": "prelinked-corecrypto-hooks.patch",
+      "sha256": "14b51f6bdc5037d89f8a2664c1b5ed2c96b383dca6f9cea28f88b3a6f12b9800",
+      "result": "PASS"
     }
   ],
   "result": "PASS"

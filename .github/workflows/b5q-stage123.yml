@@ -138,6 +138,19 @@ jobs:
                   for line in p.read_text(errors='replace').splitlines():
                       if re.search(r'(?:fatal error:|error:| requires |\*\* BUILD FAILED|make(?:\[\d+\])?: \*\*\*)', line, re.I):
                           diagnostics.append((p.name, line[:900]))
+              symbols=[]
+              for p in sorted(root.rglob('kernel.log')) if root.exists() else []:
+                  text=p.read_text(errors='replace')
+                  start=text.rfind('Undefined symbols for architecture')
+                  if start<0:continue
+                  block=text[start:].split('ld: symbol(s) not found',1)[0]
+                  for line in block.splitlines():
+                      if re.match(r'^\s+"[^"\n]+", referenced from:',line):
+                          symbol=line.strip().split('"')[1]
+                          if symbol not in symbols:symbols.append(symbol)
+              for start in range(0,len(symbols),6):
+                  msg=' | '.join(symbols[start:start+6]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
+                  print(f'::warning title=b5q final unresolved symbols {start+1}::'+msg)
               for index, (name, line) in enumerate(diagnostics[:8]):
                   msg = (name + ': ' + line).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
                   print(f'::error title=b5q source diagnostic {index+1}::' + msg)

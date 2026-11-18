@@ -116,5 +116,18 @@
       "result": "success",
       "scope": "Full pinned FD build with upstream FD size check; not hardware verification"
     }
-  ]
+  ],
+  "unresolved_symbols_report": "reports/xnu-unresolved-symbols.json",
+  "crypto_hook_repair": {
+    "patch": "patches/xnu/prelinked-corecrypto-hooks.patch",
+    "scope": "Source-only provider guard matches existing prelinked bootstrap, without skipping original POST",
+    "ordered_patch_test": "131/131 PASS",
+    "target_build": "pending retry"
+  },
+  "stage4_host_ci": {
+    "run": 44409204189,
+    "conclusion": "success",
+    "hardware_gate": false
+  },
+  "latest_full_kernel_status": "Final link failure in 44408313251; b5q GOP/AES binder compiled and its checks passed. IOStorageFamily/Adreno/optional hook/source-bootstrap integration remain."
 }

@@ -1,1 +1,2 @@
-# Stage 1: no board kernel patches selected.
+# OS-only compatibility: match the selected original/prelinked crypto bootstrap.
+prelinked-corecrypto-hooks.patch

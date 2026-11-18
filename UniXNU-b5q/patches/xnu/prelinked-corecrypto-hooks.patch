@@ -1,0 +1,20 @@
+--- a/libkern/c++/OSKext.cpp
++++ b/libkern/c++/OSKext.cpp
+@@ -82,7 +82,7 @@
+ #if CONFIG_MACF
+ extern "C" int mac_late;
+ #endif
+-#if defined(XNU_SOURCE_CORECRYPTO14)
++#if defined(XNU_SOURCE_CORECRYPTO14) && !defined(XNU_PRELINKED_CORECRYPTO)
+ extern "C" kmod_info_t *source_corecrypto14_original(void);
+ extern "C" kern_return_t source_corecrypto14_start_once(kmod_info_t *module, void *data);
+ #endif
+@@ -8485,7 +8485,7 @@
+ 	OSKextLogKextInfo(this, kmod_info->address, kmod_info->size, firehose_tracepoint_code_load);
+ 	result = OSRuntimeInitializeCPP(this);
+ 	if (result == KERN_SUCCESS) {
+-#if defined(XNU_SOURCE_CORECRYPTO14)
++#if defined(XNU_SOURCE_CORECRYPTO14) && !defined(XNU_PRELINKED_CORECRYPTO)
+ 		if (kmod_info == source_corecrypto14_original()) {
+ 			/* The kernel already started the original corecrypto; share that one result. */
+ 			result = source_corecrypto14_start_once(kmod_info, kmodStartData);

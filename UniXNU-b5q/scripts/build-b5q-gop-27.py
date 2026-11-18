@@ -11,6 +11,7 @@ import os
 from pathlib import Path
 import struct
 import subprocess
+import tomllib
 import sys
 from kernel_target import ARCH, IOS_VERSION, TRIPLE
 # The OS profile's build selects the class fixtures: the reviewed iPadOS 27 ones, or the macOS 27.3 ones that
@@ -25,6 +26,10 @@ OUT.mkdir(parents=True, exist_ok=True)
 sys.path.insert(0, str(ROOT / 'kits/XnuPrelink'))
 ABI_PATH = Path(__file__).resolve().with_name(f'legacy-display-{BUILD}.json')
 abi = json.loads(ABI_PATH.read_text())
+profile = tomllib.loads(Path(os.environ['UNIXNU_OS_PROFILE']).read_text())
+if profile['kernel']['prelink']['kernelcache_sha256'] != abi['kernelcache_sha256']:
+    raise SystemExit('GOP fixture is not the selected OS profile kernelcache')
+
 # IOService's vtable length in this kernel and the pure-virtual target of the collection: fixed for iPadOS 27, recorded
 # in the fixture for macOS.
 BASE = abi.get('base_slots', 168)
@@ -465,7 +470,10 @@ report = dict(device='b5q', os_profile='macos-27.3-26C5035r',
               archive_sha256=sha(archive), aes_archive_sha256=sha(aes_archive),
               kernelcache_sha256=abi['kernelcache_sha256'],
               abi_slots_checked=len(slots), aes_slots_checked=len(aes_slots),
-              original_bindings=len(bindings),
+              original_bindings=len(bindings), compiled_object_sha256=sha(obj),
+              late_object_sha256=sha(late), virtual_entries=len(slots),
+              owned_entries=owned, inherited_native_entries=native,
+              original_instructions_modified=False,
               peripheral_aggregation=False, hardware_tested=False)
 (OUT/'build-report.json').write_text(json.dumps(report,indent=2)+'\n')
 print(f'PASS: b5q macOS ABI archives {archive} and {aes_archive}; hardware untested')
