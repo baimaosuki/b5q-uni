@@ -1,0 +1,22 @@
+# Firmware/menu bring-up configuration, not a completed XNU board port.
+[firmware]
+config = "b5q"
+dsc = "Platforms/Samsung/b5qPkg/b5q.dsc"
+fd = "Build/b5qPkg/{target}_CLANGPDB/FV/SILICIUM_UEFI.fd"
+packages = [
+  "{uefi}", "{uefi}/Platforms/Samsung", "{edk2}",
+  "{tree}/package", "{tree}/drivers/DarwinBoot",
+  "{uefi}/Common/Mu", "{uefi}/Common/Mu_OEM_Sample",
+  "{uefi}/Silicon/Qualcomm", "{uefi}/Silicon/Samsung", "{uefi}/Silicon/Silicium",
+  "{uefi}/Silicium-ACPI", "{uefi}/Silicium-ACPI/Platforms/Samsung",
+  "{uefi}/Silicium-ACPI/Silicon/Qualcomm",
+]
+[firmware.defines]
+ENABLE_SECUREBOOT = "0"
+DEVICE_MODEL = "b5q"
+MEMORY_PROTECTION = "TRUE"
+SHIP_MODE = "FALSE"
+BUILDID_STRING = "b5q-unixnu-menu"
+
+[bootimg.image]
+ramdisk_compression = "none"

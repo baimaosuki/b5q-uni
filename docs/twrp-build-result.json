@@ -1,0 +1,30 @@
+{
+  "device": "b5q",
+  "product_model": "SM-F731B",
+  "image_bytes": 109576192,
+  "partition_limit_bytes": 109576192,
+  "boot_header_version": 2,
+  "page_size": 4096,
+  "kernel_bytes": 20814995,
+  "ramdisk_bytes": 41731655,
+  "ramdisk_offset": 20819968,
+  "recovery_dtbo_bytes": 5054464,
+  "recovery_dtbo_offset": 62554112,
+  "dtb_bytes": 1785699,
+  "dtb_offset": 67608576,
+  "dtb_load_address": 32505856,
+  "avb_footer_present": true,
+  "hardware_boot_test": "not performed",
+  "note": "Upstream Samsung digest patch modifies AVB metadata; this check does not verify the AVB signature.",
+  "sha256": {
+    "recovery.img": "79dda2f543d22924c407fdd7eebd435e75b5d1d528d943fb9f1e5c53288c94fe",
+    "twrp-b5q-odin.tar": "0e7dc8b5085780136bcae7e1894ebdec099eb1a09cfe0983eeb0c6e8da86c126"
+  },
+  "source_inputs_sha256": {
+    "kernel": "cc0036af53f6ceecc57835439da69fc66a6aed7aa129112404716312df8efd53",
+    "dtb": "871fee3fa8948e3da00e441720c250904f1fb84241e1e2db6816a285c7b497ca",
+    "recovery_dtbo": "7a6239f8b78a37120b58306eecb090bb5cf1e07fce80eaa8124a8e4d2b6e7583"
+  },
+  "ramdisk_verification": "passed; see ramdisk-report.json",
+  "build_result": "success"
+}

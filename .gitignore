@@ -1,0 +1,7 @@
+/sources/
+/logs/
+/artifacts/
+/cache/
+/.venv/
+__pycache__/
+*.py[cod]

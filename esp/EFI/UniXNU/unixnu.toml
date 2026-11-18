@@ -1,0 +1,44 @@
+version = 1
+
+[boot]
+timeout = -1
+default = "hello"
+rotate = 0
+fallback_timeout = 600
+
+[ui]
+title = "UniXNU - Galaxy Z Flip5"
+
+[kits]
+autoload = true
+
+[[entry]]
+id = "hello"
+title = "UEFI payload test (returns to menu)"
+type = "efi"
+path = "Payloads/HelloPayload.efi"
+args = "plain pause"
+
+[[entry]]
+id = "tools"
+title = "Tools"
+type = "action"
+action = "tools"
+
+[[entry]]
+id = "exit"
+title = "Return to firmware"
+type = "action"
+action = "exit"
+
+[[entry]]
+id = "reset"
+title = "Restart"
+type = "action"
+action = "reset"
+
+[[entry]]
+id = "shutdown"
+title = "Power off"
+type = "action"
+action = "shutdown"

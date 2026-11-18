@@ -1,0 +1,18 @@
+{
+  "target": "twrp_b5q-eng",
+  "build_target": "recoveryimage",
+  "sources": {
+    "manifest": "6dc117d9cbd08430daa16db2013560e1c4017fa8",
+    "repo-tool": "97dc5c1bd9527c2abe2183b16a4b7ef037dc34a7",
+    "b5q": "99d7229242df7885857c2f4c9b95a04f254545ba",
+    "sm8550-common": "19a9b7047cb52f03c7adb97c8ed40cdb965235e7",
+    "twrp": "5c3d206a5eeb3d446bcda8248a405a4b278bab5c",
+    "soong": "c6c059ab28c8c67921c0838a994bb70d53594aa7"
+  },
+  "patches": [
+    {
+      "path": "patches/twrp-soong/0001-handle-missing-robolectric-runtime.patch",
+      "sha256": "dbfabebd9ffc6655e5630120a097687980cb43b5bad00727247b9a26e3baa451"
+    }
+  ]
+}

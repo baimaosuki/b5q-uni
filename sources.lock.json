@@ -1,0 +1,61 @@
+{
+  "format": 1,
+  "date": "2026-11-18",
+  "sources": [
+    {
+      "name": "UniXNU",
+      "url": "https://github.com/UniXNU/UniXNU.git",
+      "commit": "bba3b57879e94e5ec1632daafb74cbcab8af49a5",
+      "sparse": []
+    },
+    {
+      "name": "UniXNU-sm8550-common",
+      "url": "https://github.com/UniXNU/UniXNU-sm8550-common.git",
+      "commit": "2dc650ca76ae38715cd0712e60a44b14fe251745",
+      "sparse": []
+    },
+    {
+      "name": "UniXNU-sheng",
+      "url": "https://github.com/UniXNU/UniXNU-sheng.git",
+      "commit": "6c42e1055ffb3b335fda991190ad221edaa7af3c",
+      "sparse": []
+    },
+    {
+      "name": "Mu-Silicium",
+      "url": "https://github.com/Project-Silicium/Mu-Silicium.git",
+      "commit": "50a0ef121fe633fed786ff14e293f9d6e2da229d",
+      "sparse": []
+    },
+    {
+      "name": "Device-Binaries",
+      "url": "https://github.com/Project-Silicium/Device-Binaries.git",
+      "commit": "9f4dbfd7d61acdae69fd5bb48720ce7e53711e25",
+      "sparse": [
+        "b5q"
+      ]
+    },
+    {
+      "name": "lzfse",
+      "url": "https://github.com/lzfse/lzfse.git",
+      "commit": "e634ca58b4821d9f3d560cdc6df5dec02ffc93fd",
+      "sparse": []
+    }
+  ],
+  "mu_submodules": [
+    "Common/Mu",
+    "Common/Mu_OEM_Sample",
+    "Mu_Basecore",
+    "Silicium-ACPI",
+    "Silicon/Silicium/OpensslPkg/Library/OpensslLib/openssl"
+  ],
+  "reference_device": "UniXNU-sheng",
+  "reference_defconfig": "sheng_macos_defconfig",
+  "os_profile": "macos-27.3-26C5035r",
+  "mu_basecore_submodules": [
+    "BaseTools/Source/C/BrotliCompress/brotli",
+    "MdeModulePkg/Library/BrotliCustomDecompressLib/brotli",
+    "MdePkg/Library/BaseFdtLib/libfdt",
+    "MdePkg/Library/MipiSysTLib/mipisyst",
+    "SecurityPkg/DeviceSecurity/SpdmLib/libspdm"
+  ]
+}

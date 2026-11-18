@@ -1,0 +1,19 @@
+diff --git a/java/robolectric.go b/java/robolectric.go
+index 9fe1f0e..9bfa874 100644
+--- a/java/robolectric.go
++++ b/java/robolectric.go
+@@ -188,6 +188,14 @@ func (r *robolectricTest) GenerateAndroidBuildActions(ctx android.ModuleContext)
+ 	r.data = append(r.data, r.manifest, r.resourceApk)
+ 
+ 	runtimes := ctx.GetDirectDepWithTag("robolectric-android-all-prebuilts", roboRuntimesTag)
++	if runtimes == nil {
++		if ctx.Config().AllowMissingDependencies() {
++			ctx.AddMissingDependencies([]string{"robolectric-android-all-prebuilts"})
++		} else {
++			ctx.ModuleErrorf("missing robolectric-android-all-prebuilts runtime")
++		}
++		return
++	}
+ 
+ 	installPath := android.PathForModuleInstall(ctx, r.BaseModuleName())
+ 

@@ -1,0 +1,274 @@
+{
+  "date": "2026-11-18",
+  "source_lock": "sources.lock.json",
+  "os_profile": "macos-27.3-26C5035r",
+  "verification": {
+    "kernelcache_profile_sha256": "passed",
+    "reference_dts_compilation": "passed with upstream warnings; see logs/b5q-dtc.log",
+    "b5q_build": "not performed",
+    "device_boot": "not performed",
+    "workspace_fetch_with_ipsw_inputs": "passed; logs/workspace-fetch-verify.log"
+  },
+  "input_files": [
+    {
+      "path": "sources/Mu-Silicium/Resources/DTBs/b5q.dts",
+      "bytes": 1758336,
+      "sha256": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f"
+    },
+    {
+      "path": "sources/Mu-Silicium/Resources/DTBs/b5q.dtb",
+      "bytes": 1145090,
+      "sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be"
+    },
+    {
+      "path": "sources/Mu-Silicium/Resources/Configs/b5q.toml",
+      "bytes": 314,
+      "sha256": "f96c6e166eceea767ff0c7c2a9105b647f1f540364f70894a97eef26de752035"
+    },
+    {
+      "path": "sources/Mu-Silicium/Platforms/Samsung/b5qPkg/b5q.dsc",
+      "bytes": 2341,
+      "sha256": "699dce57228a939fd9fdd55c21c35786eb19bbe3fee8c70f95ef25180c240b2d"
+    },
+    {
+      "path": "sources/Mu-Silicium/Platforms/Samsung/b5qPkg/b5q.fdf",
+      "bytes": 4519,
+      "sha256": "c49811d33a7e43d441898c8c582ca19aa17bf12ea0bd3a8191bbbe58723fed6c"
+    },
+    {
+      "path": "sources/UniXNU-sm8550-common/dts/sm8550.dtsi",
+      "bytes": 3095,
+      "sha256": "3e6d53ad38c5d9d00c09c9bf76d8a4764af5efc45f67533a4aea1aeb8e4fb84f"
+    },
+    {
+      "path": "sources/UniXNU-sheng/unixnu.lock",
+      "bytes": 841,
+      "sha256": "092cea1cd90680a4f40931c1b3f7b998844a109f70712aed8fe09495716b8df1"
+    },
+    {
+      "path": "sources/UniXNU/out/ipsw/26C5035r/141-22106-021.dmg.trustcache",
+      "bytes": 2135,
+      "sha256": "ec5028bf90a6341a267f37356573a007fdbb9b5a2574eb9eae019715b589523c"
+    },
+    {
+      "path": "sources/UniXNU/out/ipsw/26C5035r/141-22145-021.dmg.aea.trustcache",
+      "bytes": 3503,
+      "sha256": "613d7972025f35c9b22993032fb4643fc7d9df9253778d6cd0734af9a19dff99"
+    },
+    {
+      "path": "sources/UniXNU/out/ipsw/26C5035r/141-22233-021.dmg.aea.trustcache",
+      "bytes": 445681,
+      "sha256": "6bc49e0dffade1c61401fd3e087636627f1ae7eca26df9b8890b1cb78ffb2963"
+    },
+    {
+      "path": "sources/UniXNU/out/ipsw/26C5035r/DeviceTree.k114cap.im4p",
+      "bytes": 106603,
+      "sha256": "7810505c5da4894725aed79b21ba673d651fc9fddaf04aafce58ab6f8cd65797"
+    },
+    {
+      "path": "sources/UniXNU/out/ipsw/26C5035r/kernelcache.decompressed",
+      "bytes": 124518400,
+      "sha256": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9"
+    }
+  ],
+  "submodules": {
+    "UniXNU": [
+      {
+        "path": "drivers/Adreno740",
+        "commit": "1c9029bc3216a39d9e514ba41dee12e95e8f3598",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/AdrenoMetal",
+        "commit": "8c7f9502de593c04a1003690f4a9441fe88551e8",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/AppleKeyStoreState",
+        "commit": "6ff4f11d8fdf853351f8d98e1bbe1373fb8da2e6",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/ArmCpu",
+        "commit": "5f3702697ed80fd2e98594de1af7e32b4b77b08b",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/ArmDTPlatform",
+        "commit": "e8bd8d5de395c6cbc00d762c1bef57dbd15a448d",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/ArmVirtPlatform",
+        "commit": "d1423a8bceac4be0478a93d9173587111c040084",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/DarwinBoot",
+        "commit": "5243c68ec332a227fe3680cd5da6d5a0e127035c",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/GopFramebuffer",
+        "commit": "b0d812d578efa2acb005b66f73168891719af09a",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/QcomBaseband",
+        "commit": "dd0199cf3300764ed52b23f4a47761f91fab21a2",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/QcomGeniSpi",
+        "commit": "eac47baefe6a5d2368a70351e6ad1b6361bedbe2",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/RamBlock",
+        "commit": "00a6e5dd6bb1709e817e13daec7986308cfb6d0f",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/SoftwareAES",
+        "commit": "da07dd5c7d62bbe960f5bd4fe7789574d3a49d8c",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/VirtioMmioBlock",
+        "commit": "4e1013eb8c45077b57f8d38d61b389fe899ea1c3",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/VirtioMmioConsole",
+        "commit": "70253216890b2afcaa6333948726f896f84fc757",
+        "matches_gitlink": true
+      },
+      {
+        "path": "kits/AdrenoFirmware",
+        "commit": "20ad3d7aca14bd46aecab6335c780f5413fa054b",
+        "matches_gitlink": true
+      },
+      {
+        "path": "kits/AdrenoPM4",
+        "commit": "282606b528b2595bc4274ea7490b62b323f35a5f",
+        "matches_gitlink": true
+      },
+      {
+        "path": "kits/AirNir",
+        "commit": "b356371a74cd158c2902f4886f373ebb0f833a36",
+        "matches_gitlink": true
+      },
+      {
+        "path": "kits/ArmSmmu4K",
+        "commit": "83969cd874503e65997ff7639f7dcf3d0a92cd17",
+        "matches_gitlink": true
+      },
+      {
+        "path": "kits/VerifiedRoot",
+        "commit": "974f043d0c71ba2e60331483a41c6c6d35274ee3",
+        "matches_gitlink": true
+      },
+      {
+        "path": "kits/XnuPrelink",
+        "commit": "440589b0c31625f17edf363e24b3c82c51c70bb9",
+        "matches_gitlink": true
+      }
+    ],
+    "UniXNU-sheng": [
+      {
+        "path": "drivers/Ath12kWifi",
+        "commit": "f087c7ddac07e945f20d199dbaf6c95c6db3346a",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/QcaBluetooth",
+        "commit": "effe4ec5c57cd400a5f818b21c9903fef237edbc",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/QcomDwc3",
+        "commit": "d4e96f322ed9cbf32845d08db6da24e09bb77ca8",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/ShengHidInput",
+        "commit": "114061452959a547aaa08f9ca5aa54033394ca2f",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/ShengNovatekTouch",
+        "commit": "69fdd6223ed2572aa8bd8351e77c53a238276130",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/ShengPreflight",
+        "commit": "9cfc8d2c8d77f2008ba228fa6eff83d2c7ab7fd2",
+        "matches_gitlink": true
+      },
+      {
+        "path": "drivers/ShengUfs",
+        "commit": "9d527ae1a8d36a7ff210f9f4c9b429549c34c991",
+        "matches_gitlink": true
+      }
+    ],
+    "Mu-Silicium": [
+      {
+        "path": "Binaries",
+        "commit": "9f4dbfd7d61acdae69fd5bb48720ce7e53711e25",
+        "matches_gitlink": true
+      },
+      {
+        "path": "Common/Mu",
+        "commit": "b39b64999b34e436a4cd04da7de7db5362b158fe",
+        "matches_gitlink": true
+      },
+      {
+        "path": "Common/Mu_OEM_Sample",
+        "commit": "0e90379695747c58ec5ab1366078da891e9ae41c",
+        "matches_gitlink": true
+      },
+      {
+        "path": "Mu_Basecore",
+        "commit": "64f478939955e45faa632c160ae2a75a5ff7ef7f",
+        "matches_gitlink": true
+      },
+      {
+        "path": "Silicium-ACPI",
+        "commit": "8c4cdc43abf23cffdeb588621126253bb2c559da",
+        "matches_gitlink": true
+      },
+      {
+        "path": "Silicon/Silicium/OpensslPkg/Library/OpensslLib/openssl",
+        "commit": "67b5686b4419b4cb8caa502711c41815f5279751",
+        "matches_gitlink": true
+      }
+    ],
+    "Mu-Silicium/Mu_Basecore": [
+      {
+        "path": "BaseTools/Source/C/BrotliCompress/brotli",
+        "commit": "e230f474b87134e8c6c85b630084c612057f253e",
+        "matches_gitlink": true
+      },
+      {
+        "path": "MdeModulePkg/Library/BrotliCustomDecompressLib/brotli",
+        "commit": "e230f474b87134e8c6c85b630084c612057f253e",
+        "matches_gitlink": true
+      },
+      {
+        "path": "MdePkg/Library/BaseFdtLib/libfdt",
+        "commit": "cfff805481bdea27f900c32698171286542b8d3c",
+        "matches_gitlink": true
+      },
+      {
+        "path": "MdePkg/Library/MipiSysTLib/mipisyst",
+        "commit": "370b5944c046bab043dd8b133727b2135af7747a",
+        "matches_gitlink": true
+      },
+      {
+        "path": "SecurityPkg/DeviceSecurity/SpdmLib/libspdm",
+        "commit": "f55cf6d48ec69b4ac60a63903e9c6a2cb0fd155d",
+        "matches_gitlink": true
+      }
+    ]
+  }
+}

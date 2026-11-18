@@ -1,0 +1,37 @@
+diff --git a/Platforms/Samsung/b5qPkg/Include/DXE.inc b/Platforms/Samsung/b5qPkg/Include/DXE.inc
+index 99618fa..488478d 100644
+--- a/Platforms/Samsung/b5qPkg/Include/DXE.inc
++++ b/Platforms/Samsung/b5qPkg/Include/DXE.inc
+@@ -104,3 +104,9 @@
+   INF Binaries/b5q/QcomPkg/Drivers/PILDxe/PILDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/PILProxyDxe/PILProxyDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/SPSSDxe/SPSSDxe.inf
++
++  # UniXNU boot interface and Darwin loader
++  INF UniXNUPkg/Application/UniXNU/UniXNU.inf
++  INF UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
++  INF UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
++  INF DarwinBootPkg/Driver/DarwinBoot.inf
+diff --git a/Platforms/Samsung/b5qPkg/b5q.dsc b/Platforms/Samsung/b5qPkg/b5q.dsc
+index 3eb9ea3..a3d4fde 100644
+--- a/Platforms/Samsung/b5qPkg/b5q.dsc
++++ b/Platforms/Samsung/b5qPkg/b5q.dsc
+@@ -67,6 +67,7 @@
+   gQcomPkgTokenSpaceGuid.PcdPlatformType|"WP"
+ 
+ [LibraryClasses]
++  UniXNULib|UniXNUPkg/Library/UniXNULib/UniXNULib.inf
+   #
+   # Memory Libraries
+   #
+@@ -82,3 +83,10 @@
+   # ACPI Tables
+   #
+   b5q/AcpiTables.inf
++
++  # UniXNU boot interface and Darwin loader
++  UniXNUPkg/Application/UniXNU/UniXNU.inf
++  UniXNUPkg/Driver/UniXNUDxe/UniXNUDxe.inf
++  UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
++  DarwinBootPkg/Driver/DarwinBoot.inf
++  UniXNUPkg/Test/HelloPayload/HelloPayload.inf

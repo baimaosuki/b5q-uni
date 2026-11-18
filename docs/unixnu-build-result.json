@@ -1,0 +1,143 @@
+{
+  "board": "b5q",
+  "target": "DEBUG",
+  "hardware_tested": false,
+  "scope": "UEFI menu and DarwinBoot loader; no XNU kernel/macOS payload",
+  "config_sha256": "f39e7bd81658a8b3812adb4a5b739d27e4b3648bf2e5c4453bbc8590720b75be",
+  "sources": {
+    "UniXNU": "bba3b57879e94e5ec1632daafb74cbcab8af49a5",
+    "Mu-Silicium": "50a0ef121fe633fed786ff14e293f9d6e2da229d",
+    "Mu_Basecore": "64f478939955e45faa632c160ae2a75a5ff7ef7f",
+    "Binaries": "9f4dbfd7d61acdae69fd5bb48720ce7e53711e25",
+    "DarwinBoot": "5243c68ec332a227fe3680cd5da6d5a0e127035c"
+  },
+  "modules": {
+    "UniXNU": {
+      "sha256": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b",
+      "bytes": 104448
+    },
+    "UniXNUDxe": {
+      "sha256": "6d113a926a61b09c1ae72289f52f52926b0e37395473943ba32a49aec2d50141",
+      "bytes": 22528
+    },
+    "UniXNURamDiskDxe": {
+      "sha256": "a1ecbdcfb73118e34bc476ef565e42bbcf05c0c658c4712cc1511505a14e6eea",
+      "bytes": 25088
+    },
+    "DarwinBoot": {
+      "sha256": "95578b1fba1f7d18bc7cb95b77ec839707b2282804be886dbbafbafde60ace76",
+      "bytes": 43520
+    },
+    "HelloPayload": {
+      "sha256": "ec0e30ded9a83eb40df13940baa80b3c31206c259b82ed929add363df0a7d1e4",
+      "bytes": 27648
+    }
+  },
+  "files": {
+    "SILICIUM_UEFI.fd": {
+      "sha256": "bfdb2d3a3bff5246d094e7118c25c984877c7d927b61e5ec7a5192d68513733c",
+      "bytes": 3145728
+    },
+    "boot.img": {
+      "sha256": "3b216aab477e8ca486aa36f9a0e1937db0308689babed153f133d84239ccc8b4",
+      "bytes": 19279872
+    },
+    "menu-payload.fat": {
+      "sha256": "a78480496d973bffe82e8963755bde0f5995c0f6c06e3205bbc35dc7250c62d8",
+      "bytes": 16777216
+    },
+    "b5q.dtb": {
+      "sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+      "bytes": 1145090
+    },
+    "unixnu-b5q-odin.tar": {
+      "sha256": "67a102f2bc7cccd569ab085dcfec7b29986c6743127b19352dd5f3e2eda920b5",
+      "bytes": 19281920
+    },
+    "unixnu-b5q-esp.tar": {
+      "sha256": "3c42f17522e34906d8689862b15836d4f7b68bdc8f5682325e65a73ddec98a69",
+      "bytes": 184320
+    }
+  },
+  "patches": {
+    "0001-b5q-unixnu-interface.patch": "eadf4ae4250e5b1f9ec30c7892a50031e9befbf2a7948f2ff26e49de5847eded",
+    "0002-bootshim-describe-full-image-size.patch": "2e03cd096eb82a2112fd6d192d51ab4141b60b672876a99e027a28abec084ce2"
+  },
+  "toolchain": "Ubuntu clang version 17.0.6 (9ubuntu1)",
+  "verification": {
+    "result": "PASS",
+    "hardware_tested": false,
+    "firmware_bytes": 3145728,
+    "decompressed_fv_bytes": 7974912,
+    "embedded_modules": {
+      "UniXNU": {
+        "guid": "9b665204-a133-47a2-9396-9e2b370a4e25",
+        "machine": "AArch64",
+        "embedded_matches_efi": true
+      },
+      "UniXNUDxe": {
+        "guid": "29b950cf-586d-49ea-9d71-f88645ccdaf6",
+        "machine": "AArch64",
+        "embedded_matches_efi": true
+      },
+      "UniXNURamDiskDxe": {
+        "guid": "75ca63ad-fbae-4a06-92a0-f937c671251d",
+        "machine": "AArch64",
+        "embedded_matches_efi": true
+      },
+      "DarwinBoot": {
+        "guid": "1b64af87-8415-4b57-9b16-680d70913b9f",
+        "machine": "AArch64",
+        "embedded_matches_efi": true
+      }
+    },
+    "fat_files": {
+      "EFI/BOOT/BOOTAA64.EFI": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b",
+      "EFI/UniXNU/Drivers/DarwinBoot.efi": "95578b1fba1f7d18bc7cb95b77ec839707b2282804be886dbbafbafde60ace76",
+      "EFI/UniXNU/Payloads/HelloPayload.efi": "ec0e30ded9a83eb40df13940baa80b3c31206c259b82ed929add363df0a7d1e4",
+      "EFI/UniXNU/unixnu.toml": "15b688af9ebfc0be53479cf4b702c472dce3164cf3aac756ef565a8306049ba7"
+    },
+    "boot_header_version": 4,
+    "boot_bytes": 19279872,
+    "shim_bytes": 112,
+    "checks": [
+      "LZMA FV extraction",
+      "embedded PE equality and AArch64",
+      "DiskIo and FAT drivers",
+      "boot shim geometry",
+      "gzip firmware and appended DTB",
+      "FAT ramdisk equality",
+      "FAT file readback",
+      "Odin and ESP tar readback"
+    ]
+  },
+  "qemu": {
+    "result": "PASS",
+    "environment": "QEMU virt / AAVMF, exact delivered EFI binaries",
+    "hardware_tested": false,
+    "checks": {
+      "menu": {
+        "result": "PASS",
+        "expected": [
+          "UNIXNU: config: loaded",
+          "UNIXNU: ui: graphics 1080x2640, scale 4, portrait layout",
+          "UNIXNU: menu: shown 5 entries"
+        ],
+        "log_sha256": "eca7aad7e5db5af63f018b3d54bd2ae837f5258e7ca4f28e9edb36cadfde0bf6"
+      },
+      "payload": {
+        "result": "PASS",
+        "expected": [
+          "UNIXNU-HELLO: Hello from the UniXNU test payload",
+          "UNIXNU-HELLO: RESULT PASS 0 passed 0 failed",
+          "UNIXNU: menu: entry 0 returned Success"
+        ],
+        "log_sha256": "eb8404c3fcaf073731598e8dfa9c4d27fed8613476ab0345ae436a4a5c568f7d"
+      }
+    },
+    "efi_sha256": {
+      "UniXNU": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b",
+      "HelloPayload": "ec0e30ded9a83eb40df13940baa80b3c31206c259b82ed929add363df0a7d1e4"
+    }
+  }
+}

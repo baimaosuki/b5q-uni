@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest>
+  <remote name="b5q-github" fetch="https://github.com/" />
+  <project name="dmXq-twrp-development/android_device_samsung_b5q"
+           path="device/samsung/b5q" remote="b5q-github"
+           revision="99d7229242df7885857c2f4c9b95a04f254545ba" clone-depth="1" />
+  <project name="dmXq-twrp-development/android_device_samsung_sm8550-common"
+           path="device/samsung/sm8550-common" remote="b5q-github"
+           revision="19a9b7047cb52f03c7adb97c8ed40cdb965235e7" clone-depth="1" />
+</manifest>
