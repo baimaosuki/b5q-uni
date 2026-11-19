@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause-Patent
-// Actual public IOStorageFamily base and RamBlock, with no UFS adapter.
+// Public IOStorageFamily base, volatile RamBlock Data and authenticated b5q UFS roots.
 #include <IOKit/IOService.h>
 #include <IOKit/IOLib.h>
 #include <IOKit/IODeviceTreeSupport.h>

@@ -4,7 +4,8 @@ from pathlib import Path
 import json,hashlib,tomllib
 root=Path(__file__).resolve().parents[2];device=root/'UniXNU-b5q';source=(device/'package/B5qUfs/B5qUfs.cpp').read_text();fmt=(device/'package/B5qUfs/B5qRootFormat.h').read_text();board=tomllib.loads((device/'board.toml').read_text());config=(device/'configs/b5q_macos_defconfig').read_text();recipe=(device/'scripts/build-b5q-storage.py').read_text()
 assert '0x01d84000,0x3000' in source and '0x15000000,0x100000' in source
-assert '0x80000060U' in source and '0x1401' not in source
+smmu=(device/'package/B5qUfs/B5qSmmu.h').read_text()
+assert '0x80000060U' in smmu and '0x1401' not in source+smmu
 assert 'if(!normalUnit(lun))continue' in source and 'unit[4]==0' in source and 'last<lastLba' in source
 assert '0x9e&&cdb[1]==0x10' in source and 'cdb[0]!=0x88' in source
 assert 'host.selected||lba<1||lba>264||count>265-lba' in source

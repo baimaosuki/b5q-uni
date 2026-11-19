@@ -17,6 +17,7 @@
 #include <mach/mach_vm.h>
 #include "verified_root.h"
 #include "B5qRootFormat.h"
+#include "B5qSmmu.h"
 #include "B5qRootPolicies.h"
 using namespace B5qFormat;
 extern "C" const struct vr_crypto vr_xnu_crypto;
@@ -42,22 +43,7 @@ static void fail(const char *why) { panic("B5qUfs: %s (HCE=%x HCS=%x IS=%x DB=%x
 // Find an unused bypass bank, preserving all streams except exact Samsung UFS SID.
 // The UFS queue is already stopped and has no pending DMA before this executes.
 static bool mapUfsStream() {
- uintptr_t s=host.smmu;uint32_t idr0=read32(s,0x20),idr1=read32(s,0x24),idr2=read32(s,0x28);
- unsigned groups=idr0&255,banks=idr1&255,pages=1U<<(((idr1>>28)&7)+1);
- if(!(idr0&(1U<<30))||!(idr2&(1U<<12))||(idr1>>31)||!groups||groups>128||banks<2||banks>128||pages>128||(pages+banks)*4096>0x100000)return false;
- const unsigned bits[]={32,36,40,42,44,48};for(unsigned shift=0;shift<=8;shift+=4){unsigned code=(idr2>>shift)&15;if(code>=6||host.physical>=(1ULL<<bits[code])||dmaBytes>(1ULL<<bits[code])-host.physical)return false;}
- int slot=-1,freeSlot=-1;unsigned matches=0;
- for(unsigned i=0;i<groups;++i){uint32_t smr=read32(s,0x800+4*i);if(!(smr>>31)){freeSlot=int(i);continue;}
-  uint32_t mask=(smr>>16)&0x7fff;if(((smr^0x60U)&0x7fff&~mask)==0){if(mask||++matches>1)return false;slot=int(i);}}
- if(slot<0)slot=freeSlot;if(slot<0)return false;
- int bank=-1;
- for(unsigned b=banks;b-->1;){bool used=false;for(unsigned i=0;i<groups;++i){uint32_t smr=read32(s,0x800+4*i),s2=read32(s,0xc00+4*i);if((smr>>31)&&((s2>>16)&3)==0&&(s2&255)==b)used=true;}if(!used&&read32(s,(pages+b)*4096)==0){bank=int(b);break;}}
- if(bank<0)return false;
- write32(s,0x1000+4*unsigned(bank),0x10000);write32(s,0x1800+4*unsigned(bank),1);
- if(read32(s,0x1000+4*unsigned(bank))!=0x10000||read32(s,0x1800+4*unsigned(bank))!=1)return false;
- // Invalidate the exact UFS mapping before atomically publishing its new bank.
- write32(s,0x800+4*unsigned(slot),0);write32(s,0xc00+4*unsigned(slot),unsigned(bank));write32(s,0x800+4*unsigned(slot),0x80000060U);
- return read32(s,0x800+4*unsigned(slot))==0x80000060U&&read32(s,0xc00+4*unsigned(slot))==unsigned(bank);
+ return b5qConfigureUfsStream(host.physical,dmaBytes,[](unsigned off){return read32(host.smmu,off);},[](unsigned off,uint32_t v){write32(host.smmu,off,v);});
 }
 static bool startTransport() {
  IOMemoryMap *gcc=nullptr;uintptr_t g=map(0x00177000,0x1000,&gcc);host.gccMap=gcc;

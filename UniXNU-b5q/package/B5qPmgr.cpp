@@ -2,6 +2,7 @@
 // Retained original PMGR's unsupported base semantics and original nub.
 // No virtual-machine declaration, forged latch state, PMGR MMIO or CPU-power backend.
 #include <IOKit/IOService.h>
+#include <IOKit/IOPlatformExpert.h>
 #include <IOKit/IOLib.h>
 #include <libkern/OSKextLib.h>
 #include <libkern/c++/OSSymbol.h>
