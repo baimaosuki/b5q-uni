@@ -24,11 +24,11 @@ def sha(path):
   for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
  return h.hexdigest()
 
-def pack(root,public,out):
+def pack(root,public,out,extra=()):
  out.mkdir(parents=True,exist_ok=True)
  archive=out/'results.tar.gz'
  files=[]
- for relative in ['kernel/kernel.macho','kernel/kernel.map.json','kernel/kernel.json','kernel/kernel.failed.json','payload/payload.img','payload/payload.json','package.manifest.json','payload/.complete.json']:
+ for relative in ['kernel/kernel.macho','kernel/kernel.map.json','kernel/kernel.json','kernel/kernel.failed.json','payload/payload.img','payload/payload.json','package.manifest.json','payload/.complete.json',*extra]:
   p=root/relative
   if p.is_file():files.append((p,relative))
  native=root/'tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf'
@@ -116,12 +116,12 @@ def receive(repo,run,private,out):
 
 def main():
  p=argparse.ArgumentParser(description=__doc__);sub=p.add_subparsers(dest='command',required=True)
- send=sub.add_parser('send');send.add_argument('--root',type=Path,required=True);send.add_argument('--public',type=Path,required=True);send.add_argument('--out',type=Path,required=True);send.add_argument('--publish',action='store_true')
+ send=sub.add_parser('send');send.add_argument('--root',type=Path,required=True);send.add_argument('--public',type=Path,required=True);send.add_argument('--out',type=Path,required=True);send.add_argument('--publish',action='store_true');send.add_argument('--extra',action='append',default=[],choices=['runtime/data.dbr','runtime/data-seed.json'])
  recv=sub.add_parser('receive');recv.add_argument('--repo',required=True);recv.add_argument('--run',required=True);recv.add_argument('--private',type=Path,required=True);recv.add_argument('--out',type=Path,required=True)
  test=sub.add_parser('unpack');test.add_argument('--header',type=Path,required=True);test.add_argument('--cipher',type=Path,required=True);test.add_argument('--private',type=Path,required=True);test.add_argument('--out',type=Path,required=True)
  a=p.parse_args()
  if a.command=='send':
-  header,cipher=pack(a.root,a.public,a.out)
+  header,cipher=pack(a.root,a.public,a.out,a.extra)
   if a.publish:publish(header,cipher,os.environ['GITHUB_REPOSITORY'],os.environ['GITHUB_SHA'],os.environ['GITHUB_RUN_ID'],os.environ['GH_TOKEN'])
  elif a.command=='receive':receive(a.repo,a.run,a.private,a.out)
  else:unpack(json.loads(a.header.read_text()),a.cipher,a.private,a.out)

@@ -1,0 +1,405 @@
+{
+  "source": "user supplied GPT and newly built exact-profile SHNGROOT v2 image",
+  "lba_bytes": 4096,
+  "sector_size_basis": "one-sector fsc=4KiB; boot=96MiB, esp=800MiB and macosroot=48GiB match this size",
+  "disk_lun": "unknown; partition labels do not establish UFS LUN identity",
+  "hardware_partition_read_performed": false,
+  "gpt_write_performed": false,
+  "partitions": [
+    {
+      "number": 1,
+      "first_lba": 265,
+      "last_lba": 1032,
+      "size_bytes": 3145728,
+      "byte_offset": 1085440,
+      "type_code": "FFFF",
+      "name": "modemst1"
+    },
+    {
+      "number": 2,
+      "first_lba": 1033,
+      "last_lba": 1800,
+      "size_bytes": 3145728,
+      "byte_offset": 4231168,
+      "type_code": "FFFF",
+      "name": "modemst2"
+    },
+    {
+      "number": 3,
+      "first_lba": 1801,
+      "last_lba": 1801,
+      "size_bytes": 4096,
+      "byte_offset": 7376896,
+      "type_code": "FFFF",
+      "name": "fsc"
+    },
+    {
+      "number": 4,
+      "first_lba": 1802,
+      "last_lba": 1803,
+      "size_bytes": 8192,
+      "byte_offset": 7380992,
+      "type_code": "FFFF",
+      "name": "ssd"
+    },
+    {
+      "number": 5,
+      "first_lba": 1804,
+      "last_lba": 9995,
+      "size_bytes": 33554432,
+      "byte_offset": 7389184,
+      "type_code": "FFFF",
+      "name": "persist"
+    },
+    {
+      "number": 6,
+      "first_lba": 9996,
+      "last_lba": 15115,
+      "size_bytes": 20971520,
+      "byte_offset": 40943616,
+      "type_code": "8300",
+      "name": "efs"
+    },
+    {
+      "number": 7,
+      "first_lba": 15116,
+      "last_lba": 17675,
+      "size_bytes": 10485760,
+      "byte_offset": 61915136,
+      "type_code": "FFFF",
+      "name": "param"
+    },
+    {
+      "number": 8,
+      "first_lba": 17676,
+      "last_lba": 20235,
+      "size_bytes": 10485760,
+      "byte_offset": 72400896,
+      "type_code": "FFFF",
+      "name": "debug"
+    },
+    {
+      "number": 9,
+      "first_lba": 20236,
+      "last_lba": 25355,
+      "size_bytes": 20971520,
+      "byte_offset": 82886656,
+      "type_code": "8300",
+      "name": "sec_efs"
+    },
+    {
+      "number": 10,
+      "first_lba": 25356,
+      "last_lba": 25611,
+      "size_bytes": 1048576,
+      "byte_offset": 103858176,
+      "type_code": "FFFF",
+      "name": "misc"
+    },
+    {
+      "number": 11,
+      "first_lba": 25612,
+      "last_lba": 25739,
+      "size_bytes": 524288,
+      "byte_offset": 104906752,
+      "type_code": "FFFF",
+      "name": "frp"
+    },
+    {
+      "number": 12,
+      "first_lba": 25740,
+      "last_lba": 29835,
+      "size_bytes": 16777216,
+      "byte_offset": 105431040,
+      "type_code": "FFFF",
+      "name": "rawdump"
+    },
+    {
+      "number": 13,
+      "first_lba": 29836,
+      "last_lba": 40175,
+      "size_bytes": 42352640,
+      "byte_offset": 122208256,
+      "type_code": "8300",
+      "name": "bota"
+    },
+    {
+      "number": 14,
+      "first_lba": 40176,
+      "last_lba": 40303,
+      "size_bytes": 524288,
+      "byte_offset": 164560896,
+      "type_code": "FFFF",
+      "name": "persistent"
+    },
+    {
+      "number": 15,
+      "first_lba": 40304,
+      "last_lba": 41327,
+      "size_bytes": 4194304,
+      "byte_offset": 165085184,
+      "type_code": "FFFF",
+      "name": "steady"
+    },
+    {
+      "number": 16,
+      "first_lba": 41328,
+      "last_lba": 57711,
+      "size_bytes": 67108864,
+      "byte_offset": 169279488,
+      "type_code": "FFFF",
+      "name": "dsp"
+    },
+    {
+      "number": 17,
+      "first_lba": 57712,
+      "last_lba": 96111,
+      "size_bytes": 157286400,
+      "byte_offset": 236388352,
+      "type_code": "FFFF",
+      "name": "apnhlos"
+    },
+    {
+      "number": 18,
+      "first_lba": 96112,
+      "last_lba": 96127,
+      "size_bytes": 65536,
+      "byte_offset": 393674752,
+      "type_code": "FFFF",
+      "name": "vbmeta_system"
+    },
+    {
+      "number": 19,
+      "first_lba": 96128,
+      "last_lba": 104319,
+      "size_bytes": 33554432,
+      "byte_offset": 393740288,
+      "type_code": "FFFF",
+      "name": "metadata"
+    },
+    {
+      "number": 20,
+      "first_lba": 104320,
+      "last_lba": 152447,
+      "size_bytes": 197132288,
+      "byte_offset": 427294720,
+      "type_code": "0700",
+      "name": "modem"
+    },
+    {
+      "number": 21,
+      "first_lba": 152448,
+      "last_lba": 177023,
+      "size_bytes": 100663296,
+      "byte_offset": 624427008,
+      "type_code": "FFFF",
+      "name": "boot"
+    },
+    {
+      "number": 22,
+      "first_lba": 177024,
+      "last_lba": 179071,
+      "size_bytes": 8388608,
+      "byte_offset": 725090304,
+      "type_code": "8300",
+      "name": "init_boot"
+    },
+    {
+      "number": 23,
+      "first_lba": 179072,
+      "last_lba": 205823,
+      "size_bytes": 109576192,
+      "byte_offset": 733478912,
+      "type_code": "FFFF",
+      "name": "recovery"
+    },
+    {
+      "number": 24,
+      "first_lba": 205824,
+      "last_lba": 230399,
+      "size_bytes": 100663296,
+      "byte_offset": 843055104,
+      "type_code": "FFFF",
+      "name": "vendor_boot"
+    },
+    {
+      "number": 25,
+      "first_lba": 230400,
+      "last_lba": 316159,
+      "size_bytes": 351272960,
+      "byte_offset": 943718400,
+      "type_code": "FFFF",
+      "name": "vm-bootsys"
+    },
+    {
+      "number": 26,
+      "first_lba": 316160,
+      "last_lba": 3055359,
+      "size_bytes": 11219763200,
+      "byte_offset": 1294991360,
+      "type_code": "FFFF",
+      "name": "super"
+    },
+    {
+      "number": 27,
+      "first_lba": 3055360,
+      "last_lba": 3157759,
+      "size_bytes": 419430400,
+      "byte_offset": 12514754560,
+      "type_code": "8300",
+      "name": "prism"
+    },
+    {
+      "number": 28,
+      "first_lba": 3157760,
+      "last_lba": 3162879,
+      "size_bytes": 20971520,
+      "byte_offset": 12934184960,
+      "type_code": "8300",
+      "name": "optics"
+    },
+    {
+      "number": 29,
+      "first_lba": 3162880,
+      "last_lba": 3367679,
+      "size_bytes": 838860800,
+      "byte_offset": 12955156480,
+      "type_code": "EF00",
+      "name": "esp"
+    },
+    {
+      "number": 30,
+      "first_lba": 3367680,
+      "last_lba": 3379199,
+      "size_bytes": 47185920,
+      "byte_offset": 13794017280,
+      "type_code": "8300",
+      "name": "carrier"
+    },
+    {
+      "number": 31,
+      "first_lba": 3379200,
+      "last_lba": 3384319,
+      "size_bytes": 20971520,
+      "byte_offset": 13841203200,
+      "type_code": "8300",
+      "name": "omr"
+    },
+    {
+      "number": 32,
+      "first_lba": 3384320,
+      "last_lba": 3388415,
+      "size_bytes": 16777216,
+      "byte_offset": 13862174720,
+      "type_code": "FFFF",
+      "name": "dtbo"
+    },
+    {
+      "number": 33,
+      "first_lba": 3388416,
+      "last_lba": 3389439,
+      "size_bytes": 4194304,
+      "byte_offset": 13878951936,
+      "type_code": "FFFF",
+      "name": "testparti"
+    },
+    {
+      "number": 34,
+      "first_lba": 3389440,
+      "last_lba": 3405823,
+      "size_bytes": 67108864,
+      "byte_offset": 13883146240,
+      "type_code": "FFFF",
+      "name": "core_nhlos_a"
+    },
+    {
+      "number": 35,
+      "first_lba": 3405824,
+      "last_lba": 3406335,
+      "size_bytes": 2097152,
+      "byte_offset": 13950255104,
+      "type_code": "FFFF",
+      "name": "catefv"
+    },
+    {
+      "number": 36,
+      "first_lba": 3406336,
+      "last_lba": 47595510,
+      "size_bytes": 180998860800,
+      "byte_offset": 13952352256,
+      "type_code": "A03A",
+      "name": "userdata"
+    },
+    {
+      "number": 37,
+      "first_lba": 49692663,
+      "last_lba": 62275574,
+      "size_bytes": 51539607552,
+      "byte_offset": 203541147648,
+      "type_code": "AF0A",
+      "name": "macosroot"
+    }
+  ],
+  "selected": {
+    "boot": {
+      "number": 21,
+      "first_lba": 152448,
+      "last_lba": 177023,
+      "size_bytes": 100663296,
+      "byte_offset": 624427008,
+      "type_code": "FFFF",
+      "name": "boot"
+    },
+    "esp": {
+      "number": 29,
+      "first_lba": 3162880,
+      "last_lba": 3367679,
+      "size_bytes": 838860800,
+      "byte_offset": 12955156480,
+      "type_code": "EF00",
+      "name": "esp"
+    },
+    "userdata": {
+      "number": 36,
+      "first_lba": 3406336,
+      "last_lba": 47595510,
+      "size_bytes": 180998860800,
+      "byte_offset": 13952352256,
+      "type_code": "A03A",
+      "name": "userdata"
+    },
+    "macosroot": {
+      "number": 37,
+      "first_lba": 49692663,
+      "last_lba": 62275574,
+      "size_bytes": 51539607552,
+      "byte_offset": 203541147648,
+      "type_code": "AF0A",
+      "name": "macosroot"
+    }
+  },
+  "gaps": [
+    {
+      "first_lba": 47595511,
+      "last_lba": 49692662,
+      "size_bytes": 8589934592
+    }
+  ],
+  "integration_blockers": [
+    "Current kernel has no root-window block provider: native_ufs_store_open/read refuse; owner-root acceptance remains false/NODEV.",
+    "The existing build does not bind new owner root policies or a template-derived Data seed.",
+    "GPT geometry does not supply a Samsung UFS/SMMU/DMA transport implementation."
+  ],
+  "authorized_target_name": "macosroot",
+  "never_write_targets": [
+    "userdata",
+    "super",
+    "efs",
+    "sec_efs",
+    "cpefs",
+    "param",
+    "xbl",
+    "abl"
+  ],
+  "root_image_bytes": 17603493888
+}

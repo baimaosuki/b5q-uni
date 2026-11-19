@@ -1,0 +1,250 @@
+{
+  "source": "user GPT listing and fresh original IPSW extraction",
+  "working_directory": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r",
+  "lba_bytes": 4096,
+  "selected": {
+    "boot": {
+      "number": 21,
+      "first_lba": 152448,
+      "last_lba": 177023,
+      "size_bytes": 100663296,
+      "byte_offset": 624427008,
+      "type_code": "FFFF",
+      "name": "boot"
+    },
+    "esp": {
+      "number": 29,
+      "first_lba": 3162880,
+      "last_lba": 3367679,
+      "size_bytes": 838860800,
+      "byte_offset": 12955156480,
+      "type_code": "EF00",
+      "name": "esp"
+    },
+    "userdata": {
+      "number": 36,
+      "first_lba": 3406336,
+      "last_lba": 47595510,
+      "size_bytes": 180998860800,
+      "byte_offset": 13952352256,
+      "type_code": "A03A",
+      "name": "userdata"
+    },
+    "macosroot": {
+      "number": 37,
+      "first_lba": 49692663,
+      "last_lba": 62275574,
+      "size_bytes": 51539607552,
+      "byte_offset": 203541147648,
+      "type_code": "AF0A",
+      "name": "macosroot"
+    }
+  },
+  "gaps": [
+    {
+      "first_lba": 47595511,
+      "last_lba": 49692662,
+      "size_bytes": 8589934592
+    }
+  ],
+  "disk_lun": "unknown",
+  "integration_blockers": [
+    "Current kernel has no root-window block provider: native_ufs_store_open/read refuse; owner-root acceptance remains false/NODEV.",
+    "The existing build does not bind new owner root policies or a template-derived Data seed.",
+    "GPT geometry does not supply a Samsung UFS/SMMU/DMA transport implementation."
+  ],
+  "partition_access_performed": false,
+  "reused_other_board_assets": false,
+  "complete_boot_package": false,
+  "extraction": {
+    "source_ipsw": "/home/baimao/nabu_macos/out/downloads/UniversalMac_27.3_26C5035r_Restore.ipsw",
+    "source_bytes": 27206093542,
+    "source_sha256": "1f372fa17c2a6c7e10fd135213b928028e9fbe73d54b949deb6c04bea57c93fa",
+    "profile": "macos-27.3-26C5035r",
+    "upstream_commit": "563595abedfdfa413ad583b66b6176d82007e633",
+    "product": "Mac17,11",
+    "device_class": "k114cap",
+    "version": "27.3",
+    "build": "26C5035r",
+    "independent_extraction": true,
+    "reused_other_board_assets": false,
+    "components": {
+      "KernelCache": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/kernelcache.release.mac17j",
+        "component": "KernelCache",
+        "member": "kernelcache.release.mac17j",
+        "size": 32709948,
+        "sha256": "66bbe2fa3edfae6fe7b479ce78a7e3935ea29ae2f155e0f4ef45cd5b03594720",
+        "source": "local"
+      },
+      "DeviceTree": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/DeviceTree.k114cap.im4p",
+        "component": "DeviceTree",
+        "member": "Firmware/all_flash/DeviceTree.k114cap.im4p",
+        "size": 106603,
+        "sha256": "7810505c5da4894725aed79b21ba673d651fc9fddaf04aafce58ab6f8cd65797",
+        "source": "local"
+      },
+      "StaticTrustCache": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22233-021.dmg.aea.trustcache",
+        "component": "StaticTrustCache",
+        "member": "Firmware/141-22233-021.dmg.aea.trustcache",
+        "size": 445681,
+        "sha256": "6bc49e0dffade1c61401fd3e087636627f1ae7eca26df9b8890b1cb78ffb2963",
+        "source": "local"
+      },
+      "Cryptex1,SystemTrustCache": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22145-021.dmg.aea.trustcache",
+        "component": "Cryptex1,SystemTrustCache",
+        "member": "Firmware/141-22145-021.dmg.aea.trustcache",
+        "size": 3503,
+        "sha256": "613d7972025f35c9b22993032fb4643fc7d9df9253778d6cd0734af9a19dff99",
+        "source": "local"
+      },
+      "Cryptex1,AppTrustCache": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22106-021.dmg.trustcache",
+        "component": "Cryptex1,AppTrustCache",
+        "member": "Firmware/141-22106-021.dmg.trustcache",
+        "size": 2135,
+        "sha256": "ec5028bf90a6341a267f37356573a007fdbb9b5a2574eb9eae019715b589523c",
+        "source": "local"
+      },
+      "OS": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22233-021.dmg.aea",
+        "component": "OS",
+        "member": "141-22233-021.dmg.aea",
+        "size": 11408506880,
+        "sha256": "b7dbb5c6c3ee18ba43fcccb2e865aee008e4388f634bcfbd611b93bf9907d434",
+        "source": "local"
+      },
+      "Cryptex1,SystemOS": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22145-021.dmg.aea",
+        "component": "Cryptex1,SystemOS",
+        "member": "141-22145-021.dmg.aea",
+        "size": 2483027968,
+        "sha256": "00f80636bede8b709d0f6342ebefef3ec25ac43b3db03e544f4ccf692ada736d",
+        "source": "local"
+      },
+      "Cryptex1,AppOS": {
+        "path": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22106-021.dmg",
+        "component": "Cryptex1,AppOS",
+        "member": "141-22106-021.dmg",
+        "size": 54525952,
+        "sha256": "797bb1e07e354e80e75d3be2658d8f586b343dbdc05cb93cb880e772ab0d23d1",
+        "source": "local"
+      }
+    }
+  },
+  "root_images": {
+    "OS": {
+      "component": "OS",
+      "member": "141-22233-021.dmg.aea",
+      "plain_dmg": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22233-021.dmg",
+      "plain_dmg_bytes": 14493417472,
+      "plain_dmg_sha256": "40d8282eb8650da9b4d7437a981764c48d47ee4bdc5b8b362248f25ecbce0e70",
+      "raw": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/raw/OS.raw.dmg",
+      "raw_bytes": 14493417472,
+      "raw_sha256": "40d8282eb8650da9b4d7437a981764c48d47ee4bdc5b8b362248f25ecbce0e70",
+      "profile_pin": "40d8282eb8650da9b4d7437a981764c48d47ee4bdc5b8b362248f25ecbce0e70",
+      "pin_match": true,
+      "volume_uuid": "84581E99-85BE-4957-AC53-2947E887B3E4",
+      "local_storage": "hardlink of identical freshly decrypted raw APFS within this dedicated directory"
+    },
+    "SystemOS": {
+      "component": "Cryptex1,SystemOS",
+      "member": "141-22145-021.dmg.aea",
+      "plain_dmg": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22145-021.dmg",
+      "plain_dmg_bytes": 2917138432,
+      "plain_dmg_sha256": "14330ed990fe7022114b10718f4defe3049d49b6e5d52fd3ac71a487541cd1f3",
+      "raw": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/raw/SystemOS.raw.dmg",
+      "raw_bytes": 2917138432,
+      "raw_sha256": "14330ed990fe7022114b10718f4defe3049d49b6e5d52fd3ac71a487541cd1f3",
+      "profile_pin": "14330ed990fe7022114b10718f4defe3049d49b6e5d52fd3ac71a487541cd1f3",
+      "pin_match": true,
+      "volume_uuid": "6678E466-2F88-4C56-9408-DC7361BAA0BA",
+      "local_storage": "hardlink of identical freshly decrypted raw APFS within this dedicated directory"
+    },
+    "App": {
+      "component": "Cryptex1,AppOS",
+      "member": "141-22106-021.dmg",
+      "plain_dmg": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/official/ipsw/26C5035r/141-22106-021.dmg",
+      "plain_dmg_bytes": 54525952,
+      "plain_dmg_sha256": "797bb1e07e354e80e75d3be2658d8f586b343dbdc05cb93cb880e772ab0d23d1",
+      "raw": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/raw/App.raw.dmg",
+      "raw_bytes": 54525952,
+      "raw_sha256": "797bb1e07e354e80e75d3be2658d8f586b343dbdc05cb93cb880e772ab0d23d1",
+      "profile_pin": "797bb1e07e354e80e75d3be2658d8f586b343dbdc05cb93cb880e772ab0d23d1",
+      "pin_match": true,
+      "volume_uuid": "F2AEA010-C8EB-4AF8-92A9-4B90781CD668",
+      "local_storage": "hardlink of identical freshly decrypted raw APFS within this dedicated directory"
+    }
+  },
+  "root_image": {
+    "image_bytes": 17603493888,
+    "image_sha256": "35b1c581c7074c626b4b3750af93901a988425e42671f1aaeafd7fd6e13de199",
+    "manifest_sha256": "d93a00b589d64b7e0757aa40288aaa927a5364382ec5a0dd08faa3629d9a7d8b",
+    "windows": [
+      {
+        "name": "OS",
+        "offset": 1048576,
+        "size": 14493417472,
+        "sha256": "40d8282eb8650da9b4d7437a981764c48d47ee4bdc5b8b362248f25ecbce0e70"
+      },
+      {
+        "name": "SystemOS",
+        "offset": 14494466048,
+        "size": 2917138432,
+        "sha256": "14330ed990fe7022114b10718f4defe3049d49b6e5d52fd3ac71a487541cd1f3"
+      },
+      {
+        "name": "App",
+        "offset": 17411604480,
+        "size": 54525952,
+        "sha256": "797bb1e07e354e80e75d3be2658d8f586b343dbdc05cb93cb880e772ab0d23d1"
+      }
+    ],
+    "objects": [
+      {
+        "name": "OS.vroot",
+        "offset": 17466130432,
+        "size": 113229824,
+        "sha256": "f10b77a0b2f0475c296a66c69ec3c1d26598dbca3e6b09751a0b1cc31af533b0"
+      },
+      {
+        "name": "SystemOS.vroot",
+        "offset": 17579376640,
+        "size": 22790144,
+        "sha256": "48402d8eccea26cd5e226830f97a08fe3c1d8d2265bdd38977c39b761a79d608"
+      },
+      {
+        "name": "App.vroot",
+        "offset": 17602445312,
+        "size": 425984,
+        "sha256": "8e0bfe4d34f4bda99b8f04fb2dc7af157ebf587631ed093b344023c4a092ec62"
+      }
+    ],
+    "flash_command": null,
+    "source": "local",
+    "hardware_tested": false,
+    "image": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/delivery/macosroot.img",
+    "target_partition": "macosroot",
+    "target_first_lba": 49692663,
+    "target_last_lba": 62275574,
+    "target_partition_bytes": 51539607552,
+    "lba_bytes": 4096,
+    "gpt_source": "user-provided text",
+    "image_format": "UniXNU SHNGROOT v2, three pinned raw images and three verified-root hash-table objects",
+    "complete_boot_package": false,
+    "deployable": false,
+    "host_layout_verification": true,
+    "root_policies_kernel_bound": false,
+    "data_seed_template_derived": false,
+    "existing_kernel_root_provider": false,
+    "root_image_fits": true,
+    "tail_bytes": 33936113664,
+    "max_data_gib_without_other_tail_reservations": 31
+  },
+  "root_policy_hosts_verified": true,
+  "kernel_policy_anchor_bound": false,
+  "data_seed_status": "pending actual official macOS CI build; no reused empty RAM seed"
+}

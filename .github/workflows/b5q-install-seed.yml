@@ -1,0 +1,48 @@
+name: b5q fresh macOS installation Data seed
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/b5q-install-seed.yml', 'scripts/b5q-install/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+  checks: write
+jobs:
+  seed:
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/UniXNU
+          ref: 563595abedfdfa413ad583b66b6176d82007e633
+          path: pinned-UniXNU
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/DarwinBoot
+          ref: 5243c68ec332a227fe3680cd5da6d5a0e127035c
+          path: pinned-UniXNU/drivers/DarwinBoot
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - name: Install official AEA key retrieval tool
+        run: brew install blacktop/tap/ipsw
+      - name: Make Data from a newly extracted IPSW OS template
+        env:
+          UNIXNU_IPSW_JOBS: '16'
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/b5q-install/logs"
+          python3 scripts/b5q-install/build-data-seed.py --unixnu pinned-UniXNU --out "$RUNNER_TEMP/b5q-install" --gpt scripts/b5q-install/gpt-input.json 2>&1 | tee "$RUNNER_TEMP/b5q-install/logs/data-seed.log"
+      - name: Encrypt and return actual Data seed or failure logs
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/ci-transfer.py send --root "$RUNNER_TEMP/b5q-install" --public UniXNU-b5q/scripts/ci-recipient-public.pem --out "$RUNNER_TEMP/seed-transfer" --extra runtime/data.dbr --extra runtime/data-seed.json --publish
