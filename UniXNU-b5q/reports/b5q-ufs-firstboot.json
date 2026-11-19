@@ -159,14 +159,14 @@
   "compiled": false,
   "hardware_tested": false,
   "latest_ci_attempt": {
-    "run": 44491129022,
-    "commit": "f8cc392e22a7a8f5889c915e94054fe5e477379e",
+    "run": 44494359247,
+    "commit": "5b19c2aab0127326f2b95aa5a3cd803de26a6312",
     "status": "completed",
-    "conclusion": "failure",
-    "final_unresolved": [
-      "IOStorage::complete(IOStorageCompletion*, int, unsigned long long)"
-    ],
-    "repair": "Exact public callback action used, matching original IOStorage.cpp and actual NativeRamBlock",
+    "conclusion": "success",
+    "final_unresolved": [],
+    "mapping_complete": true,
+    "allow_missing": false,
+    "source_POST_and_actual_pmgr_branches": "PASS locally",
     "runtime_observed": false
   },
   "host_validation": {
@@ -174,5 +174,6 @@
     "root_format": "ASan/UBSan actual root manifest and GPT negative cases PASS",
     "installer": "mock ADB actual installer: exact geometry/hash checks before writes; readback failure stops boot write PASS",
     "pmgr": "pinned original entrypoint byte guards PASS"
-  }
+  },
+  "final_build_report": "reports/b5q-firstboot-build.json"
 }

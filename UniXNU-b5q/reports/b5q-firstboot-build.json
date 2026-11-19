@@ -1,0 +1,122 @@
+{
+  "profile": "macos-27.3-26C5035r",
+  "build_status": {
+    "boot_capacity": 100663296,
+    "ci_run": "44494359247",
+    "data_volatile": true,
+    "esp_capacity": 838860800,
+    "flash_candidate_ready": true,
+    "hardware_boot_verified": false,
+    "host_build_complete": true,
+    "limitations": [
+      "Controller/link must remain powered at firmware handoff; no cold-reset or QMP-PHY init is attempted.",
+      "Actual Samsung SMMU stream and free-bank ownership checked at boot, refusal is displayed on panic screen.",
+      "No Adreno power/Metal desktop or input hardware success is claimed.",
+      "Data modifications disappear on reboot.",
+      "No local phone flashing was performed."
+    ],
+    "macos_desktop_verified": false,
+    "macosroot_capacity": 51539607552,
+    "macosroot_first_lba": 49692663,
+    "macosroot_last_lba": 62275574,
+    "new_data_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+    "new_kernel_symbols_missing": {},
+    "new_v4_boot_signature_bytes": 0,
+    "old_transport_signature_reused": false,
+    "original_loader_files": {
+      "EFI/BOOT/BOOTAA64.EFI": {
+        "bytes": 104448,
+        "sha256": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b"
+      },
+      "EFI/UniXNU/Drivers/DarwinBoot.efi": {
+        "bytes": 43520,
+        "sha256": "95578b1fba1f7d18bc7cb95b77ec839707b2282804be886dbbafbafde60ace76"
+      }
+    },
+    "payload_chunk_roundtrip_verified": true,
+    "protected_partition_access_in_driver": false,
+    "root_policies_bound": "three local signed headers and anchor compiled in B5qRootPolicies.h; table digests verified on actual reads",
+    "root_read_only": true,
+    "scope": "first hardware boot candidate, not a proven macOS desktop",
+    "source_commit": "5b19c2aab0127326f2b95aa5a3cd803de26a6312",
+    "transport_kernel_preserved": true,
+    "transport_kernel_sha256": "a39551a8154e1aa6a87610c86a26ffa9285dc3921f52c5b1d2046448f4beeb52",
+    "transport_template_sha256": "3b216aab477e8ca486aa36f9a0e1937db0308689babed153f133d84239ccc8b4"
+  },
+  "source_commit": "5b19c2aab0127326f2b95aa5a3cd803de26a6312",
+  "ci_run": "44494359247",
+  "outputs": {
+    "boot-b5q-firstboot.tar": {
+      "bytes": 56043520,
+      "sha256": "b7def1b3f5305acc334dcea8cbe31c0d3128c90f6545b5a80dfb7834a852a39d"
+    },
+    "boot.img": {
+      "bytes": 56041472,
+      "sha256": "329339d426ea5e6573e482001e241878a85ba0a02503a9fe5558daa97373295f"
+    },
+    "kernel.macho": {
+      "bytes": 142983168,
+      "sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df"
+    },
+    "macosroot.img": {
+      "bytes": 17603493888,
+      "sha256": "35b1c581c7074c626b4b3750af93901a988425e42671f1aaeafd7fd6e13de199"
+    },
+    "payload.img": {
+      "bytes": 268435456,
+      "sha256": "821366a9a768e8afa2c13089c01e15b20f4dc52ccb33e7d9b771c5207f6ebf13"
+    }
+  },
+  "local_directory": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-firstboot-v1",
+  "local_checks": {
+    "verification": "PASS",
+    "mapping_complete": true,
+    "missing": {},
+    "stubbed": [],
+    "actual_original_pmgr_branches": {
+      "_b5q_original_pmgr_construct": {
+        "symbol": "_b5q_original_pmgr_construct",
+        "source": "0xfffffff00c29c7d4",
+        "target": "0xfffffff009897c48",
+        "owner": "com.apple.driver.ApplePMGR"
+      },
+      "_b5q_original_pmgr_factory": {
+        "symbol": "_b5q_original_pmgr_factory",
+        "source": "0xfffffff00c29c7dc",
+        "target": "0xfffffff0098ebac8",
+        "owner": "com.apple.driver.ApplePMGR"
+      },
+      "_b5q_original_pmgr_read": {
+        "symbol": "_b5q_original_pmgr_read",
+        "source": "0xfffffff00c29c7e4",
+        "target": "0xfffffff0098ef408",
+        "owner": "com.apple.driver.ApplePMGR"
+      },
+      "_b5q_original_pmgr_write": {
+        "symbol": "_b5q_original_pmgr_write",
+        "source": "0xfffffff00c29c7ec",
+        "target": "0xfffffff0098ece48",
+        "owner": "com.apple.driver.ApplePMGR"
+      }
+    },
+    "deployment_source_POST_already_correct": true,
+    "hardware_boot_verified": false,
+    "scope": "real built outputs; no runtime or desktop assertion"
+  },
+  "flash_scope": [
+    "macosroot",
+    "boot"
+  ],
+  "hardware_tested": false,
+  "integrity_checks": "Local before submission and after actual output return; no new CI gates",
+  "local_pre_ci_report": "artifacts/b5q-firstboot/local-pre-ci/report.json",
+  "archive": {
+    "archive": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-firstboot-v1.tar.zst",
+    "bytes": 13796848064,
+    "sha256": "2f38dd69de0ecda756264be774fc2ac4094d302cd87b0153e5f6b0a1dc9f9c81",
+    "compressed_stream_check": "PASS",
+    "archive_member_hashes": "PASS",
+    "files": 33,
+    "hardware_boot_verified": false
+  }
+}

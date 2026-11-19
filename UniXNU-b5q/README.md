@@ -50,3 +50,17 @@ source-contract checks and installer error paths. Hardware macOS boot, desktop,
 Metal and input are not established by host compilation. The first UFS version
 requires a powered/idle firmware handoff and a private available SMMU context;
 it does not implement cold PHY/reset initialization. Data is volatile.
+
+## Completed firstboot build
+
+CI `44494359247` completed successfully for source
+`5b19c2aab0127326f2b95aa5a3cd803de26a6312`. The actual kernel and payload
+were returned, assembled with the existing boot transport, and checked locally.
+`reports/b5q-firstboot-build.json` records output paths, byte counts, SHA256 and
+exact verification scope. Kernel mapping is complete, without missing/stubbed
+references; desktop and hardware boot remain unverified.
+
+The latest user instruction moves added integrity checks out of CI. Run
+`python3 scripts/b5q-install/pre-ci.py` from the workspace before submitting a
+build. New kernel/payload output checks execute locally after return, and existing
+completed build results are retained.

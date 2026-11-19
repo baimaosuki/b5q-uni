@@ -21,5 +21,10 @@
   ],
   "build_44493823201": "completed success; actual 24 returned CI files verified by encrypted transport receiver",
   "future_ci_scope": "Dependencies, original compilation/package, diagnostic collection, real artifact return; no newly added mid-run integrity gates",
-  "phone_access_performed": false
+  "phone_access_performed": false,
+  "local_preflight_result": {
+    "checks": 14,
+    "result": "PASS",
+    "report": "artifacts/b5q-firstboot/local-pre-ci/report.json"
+  }
 }
