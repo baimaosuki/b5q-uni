@@ -1,56 +1,52 @@
 # UniXNU b5q
 
-Samsung Galaxy Z Flip5, SM8550-AC, target `macos-27.3-26C5035r`.
+Samsung Galaxy Z Flip5 / b5q / SM8550-AC; target `macos-27.3-26C5035r`, XNU `12377.121.6`.
 
-The Format 2 board selects the requested 13 core components and pins SM8550 support.
-The unchanged `scripts/package.sh` is copied from the selected UniXNU checkout.
-`porting.toml` records implementation and evidence independently for each subsystem.
+This Format 2 device package selects the pinned UniXNU SM8550 common layer and
+thirteen shared components. `scripts/package.sh` is the unchanged upstream
+template. `porting.toml` records each subsystem's findings and evidence.
+
+The user explicitly lifted the UFS development suspension on 2026-11-19.
+`package/B5qUfs/` implements a Samsung stock-DT-backed, polling, read-only root
+transport. It warm-adopts the powered UFS link, isolates only SID `0x60`, finds
+one CRC-valid GPT `macosroot` matching the user-supplied bounds, authenticates
+three signed root windows and verifies every returned block. Unit descriptors
+exclude boot-LUN units before block reads. No SCSI writes or persistent Data
+provider are enabled. Data uses the actual official template-derived RAM seed.
+
+`package/B5qRootBinding.cpp` supplies the real owner-root media ancestry audit;
+`package/B5qPmgr.cpp` binds the retained original PMGR base/nub without claiming
+Samsung power-management support. OS-facing GOP/AES bindings are derived from
+the exact pinned macOS collection. Xiaomi panel density, GPIO, DRAM, power votes,
+Novatek touch, firmware and fastboot preflight policies are not selected.
+
+The active build is `.github/workflows/b5q-stage123.yml`: make exact-UUID Data,
+compile/link full XNU, emit the collection, apply guarded screen diagnostics,
+seal source crypto and build FAT payload. Actual results and first failure logs
+are returned encrypted to the local workspace. See
+`reports/b5q-ufs-firstboot.json` and `porting.toml` for observed CI checkpoints.
 
 ```sh
 scripts/package.sh --os macos-27.3-26C5035r --uefi ../uefi-b5q --check
-scripts/package.sh --os macos-27.3-26C5035r --uefi ../uefi-b5q --data-ramdisk /path/to/data.dbr
 ```
 
-A bare `--os 27` selects **iPadOS**, not macOS. Always use the full target here.
-The commands above are the intended upstream entry points, not a successful build claim.
+Use the full profile name: `--os 27` selects iPadOS. Complete root-enabled host
+builds are assembled locally with `../scripts/b5q-install/assemble-firstboot.py`.
+The installer and Chinese firstboot/input guide are in
+`../scripts/b5q-install/`; they write only explicitly selected `macosroot`/`boot`
+and validate supplied partition byte offsets, capacities and readback digests.
+The source package does not connect to a phone while compiling or assembling.
 
-Hardware evidence is in `reports/hardware-baseline.json`. Regenerate it read-only with
-`python3 scripts/inventory-hardware.py`. It distinguishes Mu reference DTB, TWRP prebuilt
-DTBs and the earlier local menu boot image; none is labelled as an extraction from this phone.
+Samsung firmware inputs were independently extracted from F7310ZCS7EYF3. Four
+original base DTBs agree on the UFS controller, apps SMMU and UFS stream ID.
+See `reports/official-firmware-hardware.json`, `reports/samsung-gpu-inputs.json`
+and `reports/b5q-ufs-firstboot.json`. Static `/memory/reg` is zero; actual RAM
+window and scanout must come from EFI allocation/GOP rather than inferred board
+constants.
 
-External firmware is selected by `B5Q_FIRMWARE_DIR` or ignored `local.toml`, following
-`local.toml.example`. `scripts/check-b5q-inputs.py` currently records unresolved inputs.
-The Samsung GPU inputs have been extracted from the supplied SM-F7310 F7310ZCS7EYF3
-package. See `reports/samsung-gpu-inputs.json` for eight original files, hashes and
-MBN/split checks, and `reports/official-firmware-hardware.json` for the four DT bases
-and five board overlays. Five base0+overlay candidates were inspected offline; they
-do not select the actual phone revision. Static `/memory/reg` is a zero placeholder
-and there is no live framebuffer node; runtime FDT/GOP evidence is still needed.
-The local input preflight now finds ZAP and only reports the missing platform seed.
-The b5q DTS is compiled and the OS-only GOP/AES ABI recipe is integrated.
-Samsung firmware-loading, GPU power/Metal runtime and optional B5qUfs remain
-unqualified; selecting a component does not implement its wiring.
-
-The implementation plan is `../docs/b5q-macos-porting-plan-2026-11-19.md`. RamBlock
-provides RAM-backed Data, not the OS/SystemOS/App root windows. Validate it before
-any UFS-controller activity; root-read support and separate userdata assembly are
-required before claiming a desktop. The macOS/Xcode kernel CI environment is verified and no longer depends on
-the local Linux root installer. Data seed, addon, runtime memory/GOP and root
-transport qualification remain separate requirements.
-
-The earlier `artifacts/unixnu-b5q/boot.img` is a UEFI-menu build, **not** this macOS port's output.
-No macOS boot image or package.manifest.json has been generated by this repository.
-
-## Build checkpoint, 2026-11-19
-
-- Complete pinned UEFI FD: CI runs 44402720981 and 44408313388 PASS.
-- Complete local FD (pinned EDK II, Clang17): 3145728 bytes,
-  SHA256 `f1fa4e0e4e4f42ce5f6acb03488735abfcddadc4ecb89c76a88fe704c0f598e0`.
-- RamBlock and VerifiedRoot host CI: run 44409204189 PASS, not a phone gate.
-- XNU: follow `reports/ci-stage123.json`; archive compilation is not a linked kernel.
-- Root transport: see `reports/ufs-reference-audit.json`; sheng board policies
-  are not a b5q driver. No deployment extent is selected automatically.
-
-Local binary/log paths and compiler provenance are in
-`reports/stage123-source-checks.json`. FD is a firmware image, not directly a
-Samsung-flashable Android boot image or proof of a working macOS payload.
+Host tests cover real root-manifest/GPT parser rejection, the production SMMU
+mapping algorithm, signed policy identity, original PMGR instruction fixtures,
+source-contract checks and installer error paths. Hardware macOS boot, desktop,
+Metal and input are not established by host compilation. The first UFS version
+requires a powered/idle firmware handoff and a private available SMMU context;
+it does not implement cold PHY/reset initialization. Data is volatile.

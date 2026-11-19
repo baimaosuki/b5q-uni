@@ -5,7 +5,7 @@ Firmware/kernel transport bytes are preserved. Only the FAT payload is replaced;
 new build output, original Apple root windows and matching template Data are
 checked before a manifest is published. No device connection or write occurs.
 """
-import argparse,hashlib,importlib.util,json,os,shutil,struct,subprocess,sys,tomllib,re,zlib
+import argparse,hashlib,importlib.util,json,os,shutil,struct,subprocess,sys,tomllib,re,zlib,tarfile
 from pathlib import Path
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--ci-files',type=Path,required=True);p.add_argument('--root-dir',type=Path,required=True);p.add_argument('--template',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();workspace=Path(__file__).resolve().parents[2];core=workspace/'UniXNU';sys.path.insert(0,str(core/'scripts'))
 from unixnu import ramdisk,bootimg
@@ -19,6 +19,8 @@ manifest=json.loads((f/'package.manifest.json').read_text());report=json.loads((
 assert manifest['os_profile']=='macos-27.3-26C5035r' and manifest['storage']['ufs_controller'] and manifest['storage']['persistent_block_writes'] is False
 assert kernel['mapping_complete'] and kernel['missing']=={} and not kernel['allow_missing'] and kernel['stub_symbol'] is None
 assert seed['volume_uuid']=='1552CFEE-78FF-48D8-8A6C-694B867D61AC' and seed['template_owners_preserved'] and seed['logical_bytes']==29*2**30
+profile=tomllib.loads((core/'profiles/os/macos-27.3-26C5035r/profile.toml').read_text());assert seed['os_image_sha256']==profile['root']['os_image_sha256']
+assert seed.get('discovered_volume_uuids',[seed['volume_uuid']])==[seed['volume_uuid']]
 for name,src in [('kernel.macho',f/'kernel/kernel.macho'),('payload.img',f/'payload/payload.img')]:
  assert src.stat().st_size==manifest['outputs'][name]['bytes'] and sha(src)==manifest['outputs'][name]['sha256'];shutil.copyfile(src,out/name)
 assert root['image_bytes']==17603493888 and root['image_sha256']==sha(roots/'delivery/macosroot.img')
@@ -27,7 +29,7 @@ os.link(roots/'delivery/macosroot.img',out/'macosroot.img');shutil.copytree(root
 # source-level claim that root policies were enabled.
 policy_source=(workspace/'UniXNU-b5q/package/B5qUfs/B5qRootPolicies.h').read_text()
 key_match=re.search(r'b5q_root_key\[\d+\]=\{([^}]+)\}',policy_source);assert key_match
-anchor=bytes(map(int,key_match.group(1).split(',')));linked=(out/'kernel.macho').read_bytes();assert anchor in linked
+anchor=bytes(map(int,key_match.group(1).split(',')));linked=(out/'kernel.macho').read_bytes();assert anchor in linked;assert seed['volume_uuid'].encode() in linked
 header_region=policy_source.split('b5q_root_headers[3][544]=',1)[1]
 headers=[bytes(map(int,x.split(','))) for x in re.findall(r'\{([^{}]+)\}',header_region)]
 assert len(headers)==3
@@ -49,7 +51,7 @@ for rel,src in apps.items():
  subprocess.run(['mcopy','-o','-i',str(out/'payload.img'),str(src),'::/'+rel],check=True)
 # Main manifest describes the locally assembled FAT after adding the transport apps.
 # The original CI payload report is retained separately.
-shutil.copyfile(f/'payload/payload.json',out/'ci-payload.json');shutil.copyfile(f/'package.manifest.json',out/'ci-package.manifest.json');shutil.copyfile(f/'runtime/data-seed.json',out/'data-seed.json')
+shutil.copyfile(f/'payload/payload.json',out/'ci-payload.json');shutil.copyfile(f/'package.manifest.json',out/'ci-package.manifest.json');shutil.copyfile(f/'runtime/data-seed.json',out/'ci-data-seed.json');seed['existing_kernel_bound']=True;(out/'data-seed.json').write_text(json.dumps(seed,indent=2)+'\n')
 template=a.template.resolve();original=template.read_bytes();assert original[:8]==b'ANDROID!';assert sha(template)=='3b216aab477e8ca486aa36f9a0e1937db0308689babed153f133d84239ccc8b4';version=struct.unpack_from('<I',original,40)[0];assert version==4
 ks,rs,_,hs=struct.unpack_from('<4I',original,8);sig=struct.unpack_from('<I',original,1580)[0];assert hs==1584 and sig in (0,4096)
 ramstart=4096+((ks+4095)//4096)*4096;assert ramstart+rs<=len(original)
@@ -66,10 +68,11 @@ assert hashlib.sha256(built[ramstart:ramstart+compressed.stat().st_size]).hexdig
 unpacker=zlib.decompressobj(16+zlib.MAX_WBITS);transport=unpacker.decompress(original[4096:4096+ks]);assert unpacker.eof
 boot_check=bootimg.verify(boot,transport,unpacker.unused_data,compressed,{'header_version':4,'pagesize':4096},'gzip')
 (out/'boot-verification.json').write_text(json.dumps(boot_check,indent=2)+'\n')
+with tarfile.open(out/'boot-b5q-firstboot.tar','w',format=tarfile.USTAR_FORMAT) as tar:tar.add(boot,arcname='boot.img')
 compressed.unlink()
 readiness={'scope':'first hardware boot candidate, not a proven macOS desktop','ci_run':index['run'],'source_commit':index['commit'],'host_build_complete':True,'flash_candidate_ready':True,'hardware_boot_verified':False,'macos_desktop_verified':False,'root_read_only':True,'data_volatile':True,'protected_partition_access_in_driver':False,'macosroot_first_lba':49692663,'macosroot_last_lba':62275574,'macosroot_capacity':51539607552,'boot_capacity':100663296,'esp_capacity':838860800,'transport_template_sha256':sha(template),'transport_kernel_sha256':hashlib.sha256(original[4096:4096+ks]).hexdigest(),'transport_kernel_preserved':True,'new_v4_boot_signature_bytes':0,'old_transport_signature_reused':False,'payload_chunk_roundtrip_verified':True,'new_kernel_symbols_missing':kernel['missing'],'new_data_uuid':seed['volume_uuid'],'root_policies_bound':'three local signed headers and anchor compiled in B5qRootPolicies.h; table digests verified on actual reads','original_loader_files':{rel:{'bytes':src.stat().st_size,'sha256':sha(src)} for rel,src in apps.items()},'limitations':['Controller/link must remain powered at firmware handoff; no cold-reset or QMP-PHY init is attempted.','Actual Samsung SMMU stream and free-bank ownership checked at boot, refusal is displayed on panic screen.','No Adreno power/Metal desktop or input hardware success is claimed.','Data modifications disappear on reboot.','No local phone flashing was performed.']}
 (out/'BUILD-STATUS.json').write_text(json.dumps(readiness,indent=2)+'\n')
-manifest['scope']=readiness['scope'];manifest['build_status']=readiness;manifest['outputs']={name:{'bytes':(out/name).stat().st_size,'sha256':sha(out/name)} for name in ['kernel.macho','payload.img','boot.img','macosroot.img']};manifest['deploy_kernel_sha256']=sha(member/'kernel.macho');manifest['ci_payload_sha256']=report['payload_sha256'];manifest['hardware_tested']=False
+manifest['scope']=readiness['scope'];manifest['build_status']=readiness;manifest['outputs']={name:{'bytes':(out/name).stat().st_size,'sha256':sha(out/name)} for name in ['kernel.macho','payload.img','boot.img','boot-b5q-firstboot.tar','macosroot.img']};manifest['deploy_kernel_sha256']=sha(member/'kernel.macho');manifest['ci_payload_sha256']=report['payload_sha256'];manifest['hardware_tested']=False
 (out/'package.manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
 subprocess.run([sys.executable,str(workspace/'scripts/b5q-install/verify-firstboot.py'),'--directory',str(out),'--ci-files',str(f)],check=True)
 (out/'SHA256SUMS').write_text(''.join(sha(path)+'  '+str(path.relative_to(out))+'\n' for path in sorted(out.rglob('*')) if path.is_file() and path.name!='SHA256SUMS'))

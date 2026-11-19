@@ -65,12 +65,6 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.13'
-      - name: Check device record and upstream template
-        run: |
-          set -euo pipefail
-          test "$OS_PROFILE" = macos-27.3-26C5035r
-          cmp UniXNU/templates/package.sh UniXNU-b5q/scripts/package.sh
-          python3 UniXNU/scripts/porting-record.py check --device UniXNU-b5q
       - name: Install upstream macOS host tools
         run: |
           set -euo pipefail
@@ -79,23 +73,6 @@ jobs:
             brew install unifdef
             echo "$(brew --prefix unifdef)/bin" >> "$GITHUB_PATH"
           fi
-      - name: Report and verify runner tools
-        run: |
-          set -euo pipefail
-          sw_vers
-          uname -m
-          test -d "$DEVELOPER_DIR"
-          xcodebuild -version
-          xcrun --sdk iphoneos --show-sdk-version
-          xcrun --sdk macosx --show-sdk-version
-          xcrun --sdk iphoneos --find mig
-          clang --version | head -n 1
-          "$(brew --prefix llvm)/bin/clang" --version | head -n 1
-          python3 --version
-          for tool in git make clang cmake ninja unifdef ld.lld mformat mcopy dtc xcodebuild; do
-            command -v "$tool"
-          done
-          df -h "$GITHUB_WORKSPACE"
       - name: Resolve full b5q target
         working-directory: UniXNU
         env:

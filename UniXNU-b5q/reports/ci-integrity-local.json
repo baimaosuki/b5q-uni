@@ -1,0 +1,25 @@
+{
+  "policy": "User instruction on 2026-11-19: added integrity checks local before CI; verify generated outputs locally after return.",
+  "workflow": ".github/workflows/b5q-stage123.yml",
+  "removed_ci_steps": [
+    "Check device record and upstream template",
+    "Report and verify runner tools"
+  ],
+  "removed_supplemental_gates": [
+    "Local Data UUID/hash comparison in device payload helper",
+    "Final FAT member/hash verification in device payload helper",
+    "Extra original OS hash/logical-size/volume uniqueness gates in seed helper"
+  ],
+  "local_preflight": "scripts/b5q-install/pre-ci.py",
+  "local_output_checks": [
+    "scripts/b5q-install/assemble-firstboot.py",
+    "scripts/b5q-install/verify-firstboot.py"
+  ],
+  "existing_builds_preserved": [
+    44493823201,
+    44494359247
+  ],
+  "build_44493823201": "completed success; actual 24 returned CI files verified by encrypted transport receiver",
+  "future_ci_scope": "Dependencies, original compilation/package, diagnostic collection, real artifact return; no newly added mid-run integrity gates",
+  "phone_access_performed": false
+}

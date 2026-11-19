@@ -5,6 +5,7 @@
 ## 1. 文件与布局
 
 - `boot.img`：沿用现有 b5q 启动传输代码，装入新内核、ADT、原始 trust caches 和 Data seed 的 FAT 负载。
+- `boot-b5q-firstboot.tar`：仅含同一 `boot.img` 的 Odin AP 包；系统根仍按下方脚本写入 `macosroot`。
 - `kernel.macho`：完整链接的原始构建输出。
 - `payload.img`：包含入口探针及 panic 屏幕补丁后的部署内核，以及对应 ADT、trust cache、Data seed 的 FAT 文件系统。
 - `macosroot.img`：SHNGROOT v2 原始镜像，包含三个系统卷及三份逐块哈希表。

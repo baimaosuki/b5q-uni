@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import struct
 import subprocess
@@ -57,7 +58,7 @@ deploy = out / 'esp-files/EFI/UniXNU/Payloads/kernel.macho'
 with tempfile.TemporaryDirectory(prefix='b5q-firstboot-post-') as temporary:
     copy = Path(temporary) / 'kernel.macho'
     copy.write_bytes(deploy.read_bytes())
-    subprocess.run([sys.executable, str(workspace / 'UniXNU/scripts/seal-source-crypto-kernel.py'), str(copy), '--kernel-args', entry['args']], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.run([sys.executable, str(workspace / 'UniXNU/scripts/seal-source-crypto-kernel.py'), str(copy), '--kernel-args', entry['args']], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=dict(os.environ, UNIXNU_XNU_ARCH='arm64e', UNIXNU_IOS_VERSION='27.0', UNIXNU_XNU_TARGET='macosx'))
     assert sha(copy) == sha(deploy), 'Deployment source POST seal was not already correct'
 status = {'verification': 'PASS', 'mapping_complete': True, 'missing': {}, 'stubbed': [], 'actual_original_pmgr_branches': branches, 'deployment_source_POST_already_correct': True, 'hardware_boot_verified': False, 'scope': 'real built outputs; no runtime or desktop assertion'}
 (out / 'build-verification.json').write_text(json.dumps(status, indent=2) + '\n')
