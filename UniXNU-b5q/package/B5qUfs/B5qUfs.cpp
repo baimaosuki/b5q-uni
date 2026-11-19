@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause-Patent
 // Samsung DT-backed UFS warm-handoff, serial read-only queue, authenticated roots.
-// No SCSI WRITE, FORMAT, UNMAP, vendor commands, GPIO, clocks or PHY reset paths.
+// Root commands stay read-only; B5qLogUfs adds only validated journal-slot writes.
 #include <IOKit/IOService.h>
 #include <IOKit/IODeviceTreeSupport.h>
 #include <IOKit/IOBufferMemoryDescriptor.h>
@@ -10,6 +10,10 @@
 #include <libkern/c++/OSString.h>
 #include <libkern/crypto/sha2.h>
 #include <kern/thread.h>
+#include <kern/clock.h>
+#include "B5qLogProtocol.h"
+#include "B5qLogCore.h"
+#include "B5qLogArgs.h"
 #include <pexpert/pexpert.h>
 #include <vm/vm_kern.h>
 #include <vm/vm_kern_xnu.h>
@@ -219,6 +223,7 @@ static bool selectLun() {
 }
 struct Root { Entry image,table;vr_view policy;vm_offset_t allocation;vm_size_t allocated;uint8_t digest[48];char uuid[37];bool verified; };
 static Root roots[3];
+#include "B5qLogUfs.h"
 static void uuidString(const uint8_t *p,char *out) {const char hex[]="0123456789ABCDEF";unsigned n=0;for(unsigned i=0;i<16;++i){if(i==4||i==6||i==8||i==10)out[n++]='-';out[n++]=hex[p[i]>>4];out[n++]=hex[p[i]&15];}out[n]=0;}
 static bool authenticateRoots() {
  uint8_t block[4096],hash[32];Entry entries[6];uint64_t total=0;
@@ -291,5 +296,6 @@ extern "C" void b5q_ufs_start(IOService *provider) {
  if(!wakeDevice())fail("UFS device wake/readiness");
  if(!selectLun())fail("macosroot discovery failed");
  if(!authenticateRoots())fail("root signature/hash-table authentication");
+ nabuLogStart();
  provider->retain();thread_t thread=nullptr;if(kernel_thread_start(publish,provider,&thread)!=KERN_SUCCESS)fail("publisher thread");thread_deallocate(thread);
 }

@@ -1,0 +1,493 @@
+diff --git a/bsd/kern/kern_newsysctl.c b/bsd/kern/kern_newsysctl.c
+index 6bdf244..9a6262e 100644
+--- a/bsd/kern/kern_newsysctl.c
++++ b/bsd/kern/kern_newsysctl.c
+@@ -1957,7 +1957,13 @@ found:
+ 	lck_rw_done(&sysctl_geometry_lock);
+ 
+ #if CONFIG_MACF
+-	if (!from_kernel) {
++	/*
++	 * Reading the page size (hw.pagesize, which getpagesize() and sysconf(_SC_PAGESIZE) ask) is left to everyone: the GPU's
++	 * userspace -- the Metal plugin, its Vulkan bridge and driver -- sizes its mappings by it inside WebKit's GPU process, whose
++	 * sandbox refuses the read, and a page size of -1 refused every IOSurface it was to draw into.
++	 */
++	const bool page_size_read = namelen == 2 && name[0] == CTL_HW && name[1] == HW_PAGESIZE && req->newptr == USER_ADDR_NULL;
++	if (!from_kernel && !page_size_read) {
+ 		error = mac_system_check_sysctlbyname(kauth_cred_get(),
+ 		    namestring,
+ 		    name,
+diff --git a/bsd/miscfs/bindfs/bind_vfsops.c b/bsd/miscfs/bindfs/bind_vfsops.c
+index 199a91b..7ccec6c 100644
+--- a/bsd/miscfs/bindfs/bind_vfsops.c
++++ b/bsd/miscfs/bindfs/bind_vfsops.c
+@@ -222,6 +222,8 @@ bindfs_mount(struct mount * mp, __unused vnode_t devvp, user_addr_t user_data, v
+ 	vfs_setfsprivate(mp, xmp);
+ 	vfs_getnewfsid(mp);
+ 	vfs_setlocklocal(mp);
++	/* Paths from file IDs (fsgetpath, volfs): mount_lookupby_volfsid only finds a mount that says it can. See bindfs_vget. */
++	mp->mnt_kern_flag |= MNTK_PATH_FROM_ID;
+ 
+ 	/* fill in the stat block */
+ 	sp = vfs_statfs(mp);
+@@ -413,13 +415,10 @@ bindfs_vfs_getattr(struct mount * mp, struct vfs_attr * vfap, vfs_context_t ctx)
+ 	if (bindfs_vfs_getlowerattr(vnode_mount(bind_mp->bindm_lowerrootvp), &vfa, ctx) == 0) {
+ 		if (VFSATTR_IS_SUPPORTED(&vfa, f_capabilities)) {
+ 			memcpy(&capabilities, &vfa.f_capabilities, sizeof(capabilities));
+-			/* don't support vget */
+-			capabilities.capabilities[VOL_CAPABILITIES_FORMAT] &= ~(VOL_CAP_FMT_PERSISTENTOBJECTIDS | VOL_CAP_FMT_PATH_FROM_ID);
+-
++			/* File IDs are the lower file system's and bindfs_vget resolves them, so its persistent object IDs and paths
++			 * from IDs are kept (CoreFoundation gives no file ID, which LaunchServices records bundles by, without them). */
+ 			capabilities.capabilities[VOL_CAPABILITIES_FORMAT] |= VOL_CAP_FMT_HIDDEN_FILES; /* Always support UF_HIDDEN */
+ 
+-			capabilities.valid[VOL_CAPABILITIES_FORMAT] &= ~(VOL_CAP_FMT_PERSISTENTOBJECTIDS | VOL_CAP_FMT_PATH_FROM_ID);
+-
+ 			capabilities.valid[VOL_CAPABILITIES_FORMAT] |= VOL_CAP_FMT_HIDDEN_FILES; /* Always support UF_HIDDEN */
+ 
+ 			/* dont' support interfaces that only make sense on a writable file system
+@@ -539,6 +538,64 @@ bindfs_vfs_start(__unused struct mount * mp, __unused int flags, __unused vfs_co
+ 	return 0;
+ }
+ 
++/*
++ * Lookup by file ID (fsgetpath, volfs paths). LaunchServices records a bundle's files by volume and file ID and resolves them
++ * back through fsgetpath; without a vfs_vget every bundle seen through a bind mount came back unresolvable, so it was registered
++ * with no platform and its plug-ins with no extension point (a widget extension then looks "restricted" to chronod). bindfs
++ * reports the lower file system's file IDs, so: get the lower vnode, take its path relative to the bound root, and look that
++ * path up from our root -- the vnode returned is ours, named and parented under the mount point, as build_path needs. An ID
++ * outside the bound tree is not found.
++ */
++static int
++bindfs_vget(struct mount * mp, ino64_t ino, struct vnode ** vpp, vfs_context_t ctx)
++{
++	struct bind_mount * bindm = MOUNTTOBINDMOUNT(mp);
++	vnode_t lowervp = NULLVP;
++	char * lowerpath = NULL;
++	char * rootpath = NULL;
++	const char * relative = NULL;
++	size_t rootlen;
++	int len, error;
++
++	*vpp = NULLVP;
++	if (bindm == NULL || bindm->bindm_rootvp == NULLVP || bindm->bindm_lowerrootvp == NULLVP) {
++		return ENOTSUP;
++	}
++	error = VFS_VGET(vnode_mount(bindm->bindm_lowerrootvp), ino, &lowervp, ctx);
++	if (error) {
++		return error;
++	}
++	if (lowervp == bindm->bindm_lowerrootvp) {
++		vnode_put(lowervp);
++		error = vnode_get(bindm->bindm_rootvp);
++		if (error == 0) {
++			*vpp = bindm->bindm_rootvp;
++		}
++		return error;
++	}
++	lowerpath = kalloc_data(MAXPATHLEN, Z_WAITOK | Z_NOFAIL);
++	rootpath = kalloc_data(MAXPATHLEN, Z_WAITOK | Z_NOFAIL);
++	len = MAXPATHLEN;
++	error = vn_getpath(lowervp, lowerpath, &len);
++	vnode_put(lowervp);
++	if (error == 0) {
++		len = MAXPATHLEN;
++		error = vn_getpath(bindm->bindm_lowerrootvp, rootpath, &len);
++	}
++	if (error == 0) {
++		rootlen = strlen(rootpath);
++		if (rootlen == 1 && rootpath[0] == '/') {
++			relative = lowerpath + 1;
++		} else if (strncmp(lowerpath, rootpath, rootlen) == 0 && lowerpath[rootlen] == '/') {
++			relative = lowerpath + rootlen + 1;
++		}
++		error = relative && *relative ? vnode_lookupat(relative, VNODE_LOOKUP_NOFOLLOW, vpp, ctx, bindm->bindm_rootvp) : ENOENT;
++	}
++	kfree_data(lowerpath, MAXPATHLEN);
++	kfree_data(rootpath, MAXPATHLEN);
++	return error;
++}
++
+ extern const struct vnodeopv_desc bindfs_vnodeop_opv_desc;
+ 
+ const struct vnodeopv_desc * bindfs_vnodeopv_descs[] = {
+@@ -552,6 +609,7 @@ struct vfsops bindfs_vfsops = {
+ 	.vfs_root               = bindfs_root,
+ 	.vfs_getattr            = bindfs_vfs_getattr,
+ 	.vfs_sync               = bindfs_sync,
++	.vfs_vget               = bindfs_vget,
+ 	.vfs_init               = bindfs_init,
+ 	.vfs_sysctl             = NULL,
+ 	.vfs_setattr            = NULL,
+diff --git a/bsd/vm/vm_unix.c b/bsd/vm/vm_unix.c
+index a28151f..0438563 100644
+--- a/bsd/vm/vm_unix.c
++++ b/bsd/vm/vm_unix.c
+@@ -2582,8 +2582,9 @@ map_with_linking_np(
+ 	}
+ 
+ 	/* some older devs have s/w page size > h/w page size, no need to support them */
+-	if (info_hdr->mwli_page_size != PAGE_SIZE) {
+-		/* no printf, since this is expected on some devices */
++	if (info_hdr->mwli_page_size != PAGE_SIZE && info_hdr->mwli_page_size != (4 * PAGE_SIZE)) {
++		printf("%s: [%d(%s)]: mwli_page_size(0x%x) != PAGE_SIZE(0x%lx) -- MWL rejected\n",
++		    __func__, proc_getpid(p), p->p_comm, info_hdr->mwli_page_size, (unsigned long)PAGE_SIZE);
+ 		kr = KERN_INVALID_ARGUMENT;
+ 		goto done;
+ 	}
+diff --git a/osfmk/vm/vm_dyld_pager.c b/osfmk/vm/vm_dyld_pager.c
+index d3cd6e8..750e53e 100644
+--- a/osfmk/vm/vm_dyld_pager.c
++++ b/osfmk/vm/vm_dyld_pager.c
+@@ -145,12 +145,12 @@ const struct memory_object_pager_ops dyld_pager_ops = {
+ 
+ /* funciton that calculates delta pointer that remains within the same page by using nospec ISA */
+ static inline bool
+-_delta_ptr_within_page_nospec(uint64_t ** __nonnull ptr, uint64_t deltaByteCount, bool *crossing_page, uintptr_t userVA)
++_delta_ptr_within_page_nospec(uint64_t ** __nonnull ptr, uint64_t deltaByteCount, bool *crossing_page, uintptr_t userVA, unsigned int page_shift)
+ {
+-	uintptr_t old_page = (uintptr_t)*ptr >> PAGE_SHIFT;
+-	uintptr_t new_page = ((uintptr_t)*ptr + deltaByteCount) >> PAGE_SHIFT;
++	uintptr_t old_page = (uintptr_t)*ptr >> page_shift;
++	uintptr_t new_page = ((uintptr_t)*ptr + deltaByteCount) >> page_shift;
+ 	uint64_t  nospec_delta = deltaByteCount;
+-	uintptr_t page_offset = (uintptr_t)*ptr & PAGE_MASK;
++	uintptr_t page_offset = (uintptr_t)*ptr & ((1UL << page_shift) - 1);
+ #if __arm64__
+ 	bool      nospec_delta_valid = false;
+ 	SPECULATION_GUARD_ZEROING_XXX(
+@@ -372,7 +372,8 @@ fixupPage64(
+ 	struct mwl_info_hdr                   *hdr = (struct mwl_info_hdr *)link_info;
+ 	uint64_t                              *bindsArray  = (uint64_t *)((uintptr_t)hdr + hdr->mwli_binds_offset);
+ 	uint16_t                              firstStartOffset = segInfo->page_start[pageIndex];
+-	vm_offset_t                           end_contents = contents + PAGE_SIZE;
++	vm_offset_t                           end_contents = contents + segInfo->page_size;
++	unsigned int                          page_shift = __builtin_ctz((uint32_t)segInfo->page_size);
+ 	//  For DYLD_CHAINED_PTR_64 (arm64 and x86_64) and DYLD_CHAINED_PTR_32 (arm64_32) the stride is always 4
+ 	uint64_t                              step_multiplier = 4; // 4-byte stride
+ 	/*
+@@ -428,7 +429,7 @@ fixupPage64(
+ 		}
+ 		/* shifts chain to a delta, chain cannot be used to access outside of page speculatively after this point */
+ 		bool crossing_page = false;
+-		valid_chain = _delta_ptr_within_page_nospec(&chain, delta, &crossing_page, (uintptr_t)userVA);
++		valid_chain = _delta_ptr_within_page_nospec(&chain, delta, &crossing_page, (uintptr_t)userVA, page_shift);
+ 		if (crossing_page) {
+ 			return KERN_FAILURE;
+ 		}
+@@ -590,6 +591,7 @@ signPointer(
+ 		} else {
+ 			*signedAddr = (uintptr_t)pmap_sign_user_ptr((void *)unsignedAddr, key, extendedDiscriminator, pager->dyld_a_key);
+ 		}
++
+ 		break;
+ 
+ 	default:
+@@ -619,7 +621,8 @@ fixupPageAuth64(
+ 	uint32_t             link_info_size = pager->dyld_link_info_size;
+ 	struct mwl_info_hdr  *hdr = (struct mwl_info_hdr *)link_info;
+ 	uint64_t             *bindsArray = (uint64_t*)((uintptr_t)link_info + hdr->mwli_binds_offset);
+-	vm_offset_t          end_contents = contents + PAGE_SIZE;
++	vm_offset_t          end_contents = contents + segInfo->page_size;
++	unsigned int         page_shift = __builtin_ctz((uint32_t)segInfo->page_size);
+ 	bool                 valid_chain = false;
+ 	uint64_t             step_multiplier = 8; // always 8-bytes stride for arm64e pages
+ 
+@@ -664,6 +667,7 @@ fixupPageAuth64(
+ 		/* delta that can be used speculatively */
+ 		delta = (value >> 51) & 0x7FF;
+ 		delta *= step_multiplier;
++
+ 		bool isAuth = (value & 0x8000000000000000ULL);
+ 		bool isBind = (value & 0x4000000000000000ULL);
+ 		if (isAuth) {
+@@ -719,7 +723,7 @@ fixupPageAuth64(
+ 			}
+ 		}
+ 		bool crossing_page = false;;
+-		valid_chain = _delta_ptr_within_page_nospec(&chain, delta, &crossing_page, (uintptr_t)userVA);
++		valid_chain = _delta_ptr_within_page_nospec(&chain, delta, &crossing_page, (uintptr_t)userVA, page_shift);
+ 
+ 		if (crossing_page) {
+ 			return KERN_FAILURE;
+@@ -742,7 +746,8 @@ fixupCachePageAuth64(
+ 	void                 *link_info = pager->dyld_link_info;
+ 	uint32_t             link_info_size = pager->dyld_link_info_size;
+ 	struct mwl_info_hdr  *hdr = (struct mwl_info_hdr *)link_info;
+-	vm_offset_t          end_contents = contents + PAGE_SIZE;
++	vm_offset_t          end_contents = contents + segInfo->page_size;
++	unsigned int         page_shift = __builtin_ctz((uint32_t)segInfo->page_size);
+ 	bool                 valid_chain = false;
+ 	uint64_t             step_multiplier = 8; // always 8-bytes stride for arm64e
+ 
+@@ -786,6 +791,7 @@ fixupCachePageAuth64(
+ 		/* delta that can be used speculatively */
+ 		delta = (value >> 52) & 0x7FF;
+ 		delta *= step_multiplier;
++
+ 		bool isAuth = (value & 0x8000000000000000ULL);
+ 		if (isAuth) {
+ 			bool        addrDiv = ((value & (1ULL << 50)) != 0);
+@@ -806,7 +812,7 @@ fixupCachePageAuth64(
+ 			*chain = target + high8;
+ 		}
+ 		bool crossing_page = false;
+-		valid_chain = _delta_ptr_within_page_nospec(&chain, delta, &crossing_page, (uintptr_t)userVA);
++		valid_chain = _delta_ptr_within_page_nospec(&chain, delta, &crossing_page, (uintptr_t)userVA, page_shift);
+ 		if (crossing_page) {
+ 			return KERN_FAILURE;
+ 		}
+@@ -865,7 +871,8 @@ fixup_page(
+ 		segEndAddress = segStartAddress + seg->page_count * seg->page_size;
+ 		if (segStartAddress <= userVA && userVA < segEndAddress) {
+ 			segInfo = seg;
+-			pageIndex = (uint32_t)(userVA - segStartAddress) / PAGE_SIZE;
++			pageIndex = (uint32_t)(userVA - segStartAddress) / seg->page_size;
++
+ 
+ 			/* ensure seg->size fits in link_info_size */
+ 			if ((uintptr_t)seg + seg->size > (uintptr_t)link_info + link_info_size) {
+@@ -954,6 +961,74 @@ fixup_page(
+ 	return KERN_SUCCESS;
+ }
+ 
++/*
++ * Fault one backing page into a kernel buffer (mirrors shared_region_pager_peek).
++ * Used when the fixup page size exceeds PAGE_SIZE so the full fixup page can be assembled.
++ */
++static kern_return_t
++dyld_pager_peek(
++	vm_object_t                    object,
++	vm_object_offset_t             backing_offset,
++	void                           *buffer,
++	struct vm_object_fault_info    *fault_info)
++{
++	vm_page_t page, top_page;
++	vm_prot_t prot;
++	kern_return_t error_code;
++	vm_fault_return_t vmfr;
++	/* The caller's fault_info may have been mutated by the page's own fault (shadow offset); fault the peeked page at its own range. */
++	struct vm_object_fault_info local_fault = *fault_info;
++	local_fault.lo_offset = backing_offset;
++	local_fault.hi_offset = backing_offset + PAGE_SIZE;
++
++retry:
++	vm_page_grab_prime();
++	vm_object_lock(object);
++	vm_object_paging_begin(object);
++	error_code = 0;
++	prot = VM_PROT_READ;
++	page = VM_PAGE_NULL;
++	vmfr = vm_fault_page(object, backing_offset, VM_PROT_READ, FALSE, FALSE, &prot, &page, &top_page, NULL,
++	    &error_code, FALSE, &local_fault, NULL);
++	switch (vmfr) {
++	case VM_FAULT_SUCCESS:
++		break;
++	case VM_FAULT_RETRY:
++		goto retry;
++	case VM_FAULT_MEMORY_SHORTAGE:
++		if (vm_page_wait(local_fault.interruptible)) {
++			goto retry;
++		}
++		return KERN_RESOURCE_SHORTAGE;
++	case VM_FAULT_SUCCESS_NO_VM_PAGE:
++		vm_object_paging_end(object);
++		vm_object_unlock(object);
++		return KERN_MEMORY_ERROR;
++	default:
++		return KERN_MEMORY_ERROR;
++	}
++	vm_object_t page_object = VM_PAGE_OBJECT(page);
++	const void *source = (const void *)phystokv((pmap_paddr_t)VM_PAGE_GET_PHYS_PAGE(page) << PAGE_SHIFT);
++	if (page_object->code_signed) {
++		vm_page_validate_cs_mapped(page, PAGE_SIZE, 0, source);
++	}
++	const bool tainted = page->vmp_cs_tainted;
++	if (!tainted) {
++		bcopy(source, buffer, PAGE_SIZE);
++	}
++
++	vm_page_wakeup_done(page_object, page);
++	vm_object_paging_end(page_object);
++	vm_object_unlock(page_object);
++	if (top_page != VM_PAGE_NULL) {
++		vm_object_lock(object);
++		VM_PAGE_FREE(top_page);
++		vm_object_paging_end(object);
++		vm_object_unlock(object);
++	}
++	return tainted ? KERN_CODESIGN_ERROR : KERN_SUCCESS;
++}
++
+ /*
+  * dyld_pager_data_request()
+  *
+@@ -991,6 +1066,10 @@ dyld_pager_data_request(
+ 	struct mwl_info_hdr     *hdr;
+ 	uint32_t                r;
+ 	uint64_t                userVA;
++	uint32_t                mwli_page_size;
++	void                   *fixup_buffer = NULL;
++	void                   *fixup_alloc = NULL;
++	uint32_t                i;
+ 
+ 	fault_info.stealth = TRUE;
+ 	fault_info.io_sync = FALSE;
+@@ -1003,6 +1082,7 @@ dyld_pager_data_request(
+ 	assert(os_ref_get_count_raw(&pager->dyld_ref_count) > 1); /* pager is alive */
+ 	assert(pager->dyld_is_mapped); /* pager is mapped */
+ 	hdr = (struct mwl_info_hdr *)pager->dyld_link_info;
++	mwli_page_size = hdr->mwli_page_size;
+ 
+ 	/*
+ 	 * Gather in a UPL all the VM pages requested by VM.
+@@ -1041,6 +1121,20 @@ dyld_pager_data_request(
+ 	assert(src_top_object != VM_OBJECT_NULL);
+ 	vm_object_reference(src_top_object); /* keep the source object alive */
+ 
++	/*
++	 * 16 KiB fixup pages on a 4 KiB kernel: assemble the whole fixup page in a scratch
++	 * buffer, apply the chain once, then copy out the requested 4 KiB part.
++	 */
++	if (mwli_page_size > PAGE_SIZE) {
++		/* The chain walk finds page boundaries from the buffer address, so align it to the fixup page size. */
++		fixup_alloc = kalloc_data(2 * (vm_size_t)mwli_page_size, Z_WAITOK);
++		if (fixup_alloc == NULL) {
++			retval = KERN_RESOURCE_SHORTAGE;
++			goto done;
++		}
++		fixup_buffer = (void *)(((uintptr_t)fixup_alloc + mwli_page_size - 1) & ~((uintptr_t)mwli_page_size - 1));
++	}
++
+ 	/*
+ 	 * Fill in the contents of the pages requested by VM.
+ 	 */
+@@ -1164,6 +1258,8 @@ retry_src_fault:
+ 		 */
+ 		bcopy((const char *)src_vaddr, (char *)dst_vaddr, PAGE_SIZE);
+ 
++
++
+ 		/*
+ 		 * Figure out what the original user virtual address was, based on the offset.
+ 		 */
+@@ -1187,6 +1283,58 @@ retry_src_fault:
+ 				panic("%s(): Range not found for offset 0x%llx", __func__, (long long)cur_offset);
+ 			}
+ 			retval = KERN_FAILURE;
++		} else if (mwli_page_size > PAGE_SIZE) {
++			/* Assemble the whole fixup page, apply the chain once, copy out the requested part. */
++			vm_object_offset_t page_off = offset + cur_offset;
++			vm_object_offset_t base_off = page_off & ~(vm_object_offset_t)(mwli_page_size - 1);
++			uint32_t part = (uint32_t)((page_off - base_off) / PAGE_SIZE);
++			uint64_t base_userVA = userVA - (uint64_t)(page_off - base_off);
++
++			/* The current page's source is already faulted and still mapped: copy it, then read the other parts. */
++			bcopy((const char *)src_vaddr, (char *)fixup_buffer + (vm_offset_t)part * PAGE_SIZE, PAGE_SIZE);
++
++			/*
++			 * The source page and its placeholder in the top object are released before the other parts are read,
++			 * the way the end of this loop releases them. A part that is not resident is paged in from the file, and
++			 * APFS pages a file with integrity verification in by the whole verification block, with a UPL over all
++			 * of its pages that waits, uninterruptibly, for every busy page of the block. A source page held busy
++			 * across the reads is such a page: the thread would wait in vm_object_upl_request for itself (or for a
++			 * thread whose page-in waits for this page), and its paging reference on the file's object would keep
++			 * every later private mapping of the file waiting in vm_object_copy_delayed.
++			 */
++			vm_object_lock(src_page_object);
++			vm_page_wakeup_done(src_page_object, src_page);
++			src_page = VM_PAGE_NULL;
++			vm_object_paging_end(src_page_object);
++			vm_object_unlock(src_page_object);
++			if (top_page != VM_PAGE_NULL) {
++				assert(VM_PAGE_OBJECT(top_page) == src_top_object);
++				vm_object_lock(src_top_object);
++				VM_PAGE_FREE(top_page);
++				vm_object_paging_end(src_top_object);
++				vm_object_unlock(src_top_object);
++				top_page = VM_PAGE_NULL;
++			}
++
++			retval = KERN_SUCCESS;
++			for (i = 0; i < mwli_page_size / PAGE_SIZE; ++i) {
++				if (i == part) {
++					continue;
++				}
++				kr = dyld_pager_peek(src_top_object, base_off + (vm_object_offset_t)i * PAGE_SIZE,
++				    (char *)fixup_buffer + (vm_offset_t)i * PAGE_SIZE, &fault_info);
++				if (kr != KERN_SUCCESS) {
++					retval = kr;
++					break;
++				}
++			}
++			if (retval == KERN_SUCCESS) {
++				if (fixup_page((vm_offset_t)fixup_buffer, base_userVA, pager) != KERN_SUCCESS) {
++					retval = KERN_FAILURE;
++				} else {
++					bcopy((const char *)fixup_buffer + (vm_offset_t)part * PAGE_SIZE, (char *)dst_vaddr, PAGE_SIZE);
++				}
++			}
+ 		} else if (fixup_page(dst_vaddr, userVA, pager) != KERN_SUCCESS) {
+ 			/* KDBG / printf was done under fixup_page() */
+ 			retval = KERN_FAILURE;
+@@ -1198,6 +1346,11 @@ retry_src_fault:
+ 			}
+ 		}
+ 
++		if (src_page == VM_PAGE_NULL) {
++			/* a fixup page larger than a page: its source page is already released (above) */
++			continue;
++		}
++
+ 		assert(VM_PAGE_OBJECT(src_page) == src_page_object);
+ 		assert(src_page->vmp_busy);
+ 		assert(src_page_object->paging_in_progress > 0);
+@@ -1253,6 +1406,9 @@ done:
+ 	if (src_top_object != VM_OBJECT_NULL) {
+ 		vm_object_deallocate(src_top_object);
+ 	}
++	if (fixup_alloc != NULL) {
++		kfree_data(fixup_alloc, 2 * (vm_size_t)mwli_page_size);
++	}
+ 	return retval;
+ }
+ 
+diff --git a/pexpert/gen/bootargs.c b/pexpert/gen/bootargs.c
+index 1ef8caa..36275ba 100644
+--- a/pexpert/gen/bootargs.c
++++ b/pexpert/gen/bootargs.c
+@@ -188,13 +188,23 @@ gotit:
+ 	return arg_found;
+ }
+ 
++/*
++ * UniXNU: boot arguments a board builds into its kernel, the switches it always sets, so the boot
++ * loader's command line (DarwinBoot keeps at most 1023 bytes) carries only what changes between
++ * boots. An argument on the command line wins; one absent from it is looked up here (a switch the
++ * board sets is turned off with name=0 on the command line). A board that defines none gets this
++ * empty one.
++ */
++__attribute__((weak)) char PE_builtin_boot_args[] = "";
++
+ boolean_t
+ PE_parse_boot_argn(
+ 	const char      *arg_string,
+ 	void            *arg_ptr,
+ 	int                     max_len)
+ {
+-	return PE_parse_boot_argn_internal(PE_boot_args(), arg_string, arg_ptr, max_len, FALSE);
++	return PE_parse_boot_argn_internal(PE_boot_args(), arg_string, arg_ptr, max_len, FALSE) ||
++	       PE_parse_boot_argn_internal(PE_builtin_boot_args, arg_string, arg_ptr, max_len, FALSE);
+ }
+ 
+ boolean_t
+@@ -214,7 +224,8 @@ PE_parse_boot_arg_str(
+ 	char            *arg_ptr,
+ 	int                     strlen)
+ {
+-	return PE_parse_boot_argn_internal(PE_boot_args(), arg_string, arg_ptr, strlen, TRUE);
++	return PE_parse_boot_argn_internal(PE_boot_args(), arg_string, arg_ptr, strlen, TRUE) ||
++	       PE_parse_boot_argn_internal(PE_builtin_boot_args, arg_string, arg_ptr, strlen, TRUE);
+ }
+ 
+ #if defined(CONFIG_XNUPOST)

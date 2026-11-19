@@ -36,7 +36,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-mount-verify-') as temp:
  temp=Path(temp);files={}
  for name in ['kernel.macho','kernel.macho.adt','kernel.macho.trustcache','kernel.macho.gpuaddon','scratch-data.img']:
   target=temp/name;subprocess.run(['mcopy','-i',str(package/'esp.img'),'::/EFI/UniXNU/Payloads/'+name,str(target)],check=True);files[name]=target
- assert hashlib.sha256(files['kernel.macho'].read_bytes()).hexdigest()=='bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835'
+ assert hashlib.sha256(files['kernel.macho'].read_bytes()).hexdigest()==manifest['deploy_kernel_sha256']
  logical,extents=packed_ramdisk.regions(files['scratch-data.img'].read_bytes());assert logical==2*2**30
  identities=set();superblocks=0;policy=None
  for offset,chunk in extents:
@@ -65,5 +65,5 @@ with tempfile.TemporaryDirectory(prefix='b5q-mount-verify-') as temp:
   if body[:4]==b'\xcf\xfa\xed\xfe':
    cdhashes=codesign(body);assert all(h in trusted for h in cdhashes),name;signed[name]=[h.hex() for h in cdhashes]
  assert 'bootshim/apfs_boot_util' in signed and entries['bootshim/apfs_boot_util'][0]&0o111
- report={'scope':'Actual final ESP extracted kernel, Data, addon and trust cache; local verification only','kernel_byte_identical_to_v10':True,'logical_Data_bytes':logical,'APFS_superblock_checksums_verified':superblocks,'APFS_volume_UUIDs':sorted(identities),'watchdogd_seed_policy':policy,'addon_paths':sorted(entries),'signed_and_trusted_executables':signed,'original_Apple_trust_modules_byte_identical':True,'hardware_tested':False}
+ report={'scope':'Actual final ESP extracted kernel, Data, addon and trust cache; local verification only','kernel_sha256':manifest['deploy_kernel_sha256'],'logical_Data_bytes':logical,'APFS_superblock_checksums_verified':superblocks,'APFS_volume_UUIDs':sorted(identities),'watchdogd_seed_policy':policy,'addon_paths':sorted(entries),'signed_and_trusted_executables':signed,'original_Apple_trust_modules_byte_identical':True,'hardware_tested':False}
  (package/'mount-verification.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

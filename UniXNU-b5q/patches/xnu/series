@@ -6,3 +6,12 @@ macos-kernel-stack-alignment.patch
 native-arm64e-user-memory.patch
 # Keep vc-text=1 visible after kPEAcquireScreen.
 native-text-console-retain.patch
+
+# Portable console ring, persisted only by validated ESP journal writer.
+b5q-console-journal.patch
+
+# macOS 27.3 public Lockdown Mode query ABI.
+macos-lockdown-public-state.patch
+
+# Latest sheng main generic macOS runtime (hardware-independent, source-attributed).
+sheng-macos27-generic-runtime.patch

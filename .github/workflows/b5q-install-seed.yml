@@ -8,7 +8,7 @@ permissions:
   contents: read
 jobs:
   seed:
-    if: ${{ !contains(github.event.head_commit.message, '[payload-only]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[payload-only]') && !contains(github.event.head_commit.message, '[reuse-data]') }}
     runs-on: macos-26
     timeout-minutes: 90
     steps:
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/UniXNU
-          ref: 563595abedfdfa413ad583b66b6176d82007e633
+          ref: 8542980d02b4d2cc5c32ee3542de1760b2562aac
           path: pinned-UniXNU
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1

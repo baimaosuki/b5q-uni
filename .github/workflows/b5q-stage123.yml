@@ -26,6 +26,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: b5q-stage123-${{ github.ref }}
@@ -58,7 +59,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/UniXNU
-          ref: 563595abedfdfa413ad583b66b6176d82007e633
+          ref: 8542980d02b4d2cc5c32ee3542de1760b2562aac
           path: UniXNU
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -81,13 +82,15 @@ jobs:
           set -euo pipefail
           ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
           ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
-      - name: Build exact-UUID template Data before the kernel
+      - name: Reuse completed v11 RAM Data
         env:
-          UNIXNU_IPSW_JOBS: '16'
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          python3 scripts/b5q-install/build-data-seed.py --unixnu UniXNU --out "$RUNNER_TEMP/b5q-first-root" --gpt scripts/b5q-install/gpt-input.json --ram-gib 2 --skip-setup --disable-watchdogd 2>&1 | tee "$RUNNER_TEMP/b5q-template-console.log"
-          echo "B5Q_DATA_SEED=$RUNNER_TEMP/b5q-first-root/runtime/data.dbr" >> "$GITHUB_ENV"
+          gh run download 44616733365 --repo "$GITHUB_REPOSITORY" --name b5q-build-44616733365 --dir "$RUNNER_TEMP/b5q-v11"
+          python3 scripts/b5q-install/reuse-v11-data.py --artifact "$RUNNER_TEMP/b5q-v11" --out "$RUNNER_TEMP/b5q-reused-data"
+          rm -rf "$RUNNER_TEMP/b5q-v11"
+          echo "B5Q_DATA_SEED=$RUNNER_TEMP/b5q-reused-data/data.dbr" >> "$GITHUB_ENV"
       - name: Build full-component XNU
         id: kernel
         working-directory: UniXNU
@@ -200,6 +203,8 @@ jobs:
             UniXNU/out/b5q/**/payload/payload.img
             UniXNU/out/b5q/**/payload/payload.json
             UniXNU/out/b5q/**/runtime/data-seed.json
+            UniXNU/out/b5q/**/runtime/generated.json
+            UniXNU/out/b5q/**/runtime/inputs.json
             UniXNU/out/b5q/**/package.manifest.json
           if-no-files-found: warn
           compression-level: 1

@@ -60,7 +60,7 @@ title = "UniXNU b5q macOS 27.3"
 panic_screen = true
 tools = true
 # b5q-root selects authenticated read-only macosroot; Data remains volatile in RAM.
-kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "offline-mobile-graphics-client=1", "disable-watchdogd=1"]
+kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "disable-watchdogd=1", "cs-lazy=1", "boot-payload-release=1", "exec-log=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2"]
 
 [payload.adt]
 # EFI allocator chooses a real contiguous window; no physical DRAM address is invented.
@@ -77,6 +77,8 @@ kernel-ctrr-to-be-enabled = 0
 [adt.defaults.u32]
 sleep-disabled = 1
 "kern.maxvnodes" = 66560
+# macOS guest-platform policy, consumed by kern.hv_vmm_present.
+"vmm-present" = 1
 
 [package]
 unixnu = "../UniXNU"

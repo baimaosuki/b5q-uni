@@ -40,7 +40,10 @@ def main():
     report=json.loads((ci/'payload/payload.json').read_text());kernel=json.loads((ci/'kernel/kernel.json').read_text())
     assert manifest['os_profile']=='macos-27.3-26C5035r'
     assert kernel['mapping_complete'] and kernel['missing']=={} and not kernel['allow_missing'] and kernel['stub_symbol'] is None
-    assert report['panic_screen'] and manifest['storage']['persistent_block_writes'] is False
+    assert report['panic_screen']
+    if a.version>=12:
+        assert manifest['storage']['persistent_block_writes']=='validated XNU2LOG.BIN A/B slots only' and manifest['storage']['root_read_only']
+    else:assert manifest['storage']['persistent_block_writes'] is False
     for name in ['kernel/kernel.macho','payload/payload.img','package.manifest.json','payload/payload.json']:
         assert record(ci/name)=={k:index['files'][name][k] for k in ['bytes','sha256']},name
     for name,rel in [('kernel.macho','kernel/kernel.macho'),('payload.img','payload/payload.img')]:
@@ -69,11 +72,17 @@ def main():
         assert seed['sha256']==sha(files/'scratch-data.img')
         assert seed['logical_bytes']==(2 if a.version>=11 else 29)*2**30
         if a.version>=11:
-            assert expected['kernel.macho']=='bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835'
+            if a.version==11:assert expected['kernel.macho']=='bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835'
+            else:
+                assert expected['kernel.macho']!='bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835'
+                assert 'b5q-log=1' in line.split() and 'b5q-log-token=411839cbaebac4088c251c0ea57579a2' in line.split()
             assert seed['watchdogd_disabled_in_seed'] and seed['skip_setup']
             assert sha(files/'kernel.macho.gpuaddon')==report['gpu_addon_sha256']
         nodes=adt_decode((files/'kernel.macho.adt').read_bytes())
         for path,key,fmt,val in [('/chosen','dram-base','<Q',0x80000000),('/chosen','dram-size','<Q',0x80000000),('/chosen','kernel-ctrr-to-be-enabled','<I',0),('/defaults','sleep-disabled','<I',1)]:assert nodes[path][key]==struct.pack(fmt,val),(path,key)
+        if a.version>=12:
+            assert nodes['/defaults']['vmm-present']==struct.pack('<I',1)
+            assert all(arg in line.split() for arg in ['cs-lazy=1','boot-payload-release=1','exec-log=1'])
         if a.version>=11:
             assert nodes['/chosen']['darwinboot-memory-size']==struct.pack('<Q',0x100000000)
             assert nodes['/defaults']['kern.maxvnodes']==struct.pack('<I',66560)
@@ -107,10 +116,14 @@ def main():
         anchor=bytes(map(int,re.search(r'b5q_root_key\[\d+\]=\{([^}]+)\}',policy)[1].split(',')));assert anchor in linked
         for header in re.findall(r'\{([^{}]+)\}',policy.split('b5q_root_headers[3][544]=',1)[1]):assert bytes(map(int,header.split(','))) in linked
         assert seed['volume_uuid'].encode() in linked
+        if a.version>=12:
+            run([sys.executable,ROOT/'scripts/b5q-install/make-xnu2log.py','--out',stage/'XNU2LOG.BIN','--token','411839cbaebac4088c251c0ea57579a2'])
         esp=out/'esp.img'
         with esp.open('wb') as stream:stream.truncate(800*2**20)
         run(['mkfs.fat','--invariant','-F','32','-S','4096','-s','1','-n','B5QMACOS',esp])
-        run(['mcopy','-s','-i',esp,stage/'EFI','::/']);run(['mcopy','-i',esp,stage/'startup.nsh','::/startup.nsh']);run(['fsck.fat','-n',esp])
+        run(['mcopy','-s','-i',esp,stage/'EFI','::/']);run(['mcopy','-i',esp,stage/'startup.nsh','::/startup.nsh'])
+        if a.version>=12:run(['mcopy','-i',esp,stage/'XNU2LOG.BIN','::/XNU2LOG.BIN'])
+        run(['fsck.fat','-n',esp])
         members={}
         for src in sorted(stage.rglob('*')):
             if not src.is_file():continue
@@ -119,7 +132,12 @@ def main():
         with esp.open('rb') as stream:bpb=stream.read(512)
         assert struct.unpack_from('<H',bpb,11)[0]==4096 and bpb[13]==1 and bpb[82:90]==b'FAT32   ' and bpb[510:512]==b'\x55\xaa'
         assert struct.unpack_from('<I',bpb,32)[0]*4096==esp.stat().st_size
-        delivery=dict(os_profile=manifest['os_profile'],scope=f'v{a.version} payload update on existing memory-v8 boot and macosroot',
+        log_proof=None
+        if a.version>=12:
+            proof=out/'log-allocation.json'
+            run([sys.executable,ROOT/'scripts/b5q-install/verify-esp-log.py','--esp',esp,'--out',proof])
+            log_proof=json.loads(proof.read_text())
+        delivery=dict(log_journal=log_proof,os_profile=manifest['os_profile'],scope=f'v{a.version} payload update on existing memory-v8 boot and macosroot',
           ci_run=index['run'],source_commit=index['commit'],deploy_kernel_sha256=expected['kernel.macho'],
           raw_kernel=record(ci/'kernel/kernel.macho'),ci_payload=record(ci/'payload/payload.img'),
           kernel_command_line=line,outputs={'esp.img':record(esp)},esp_files=members,retained_loader_modules=retained,

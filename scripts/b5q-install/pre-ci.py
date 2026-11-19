@@ -38,6 +38,8 @@ assert 'b5q-root=1' in board['payload']['kernel_args']
 assert len(board['components']['include']) == 13
 run('porting-record', [sys.executable, 'UniXNU/scripts/porting-record.py', 'check', '--device', device])
 run('source-contract', [sys.executable, 'tests/b5q-ufs/test-source-contract.py'])
+run('lockdown-public', [sys.executable, 'tests/b5q-ufs/test-lockdown-public.py'])
+run('log-writer', [sys.executable, 'tests/b5q-ufs/test-log-writer.py'])
 run('installer-errors', [sys.executable, 'tests/b5q-ufs/test-installer.py'])
 flags = ['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-Wno-misleading-indentation', '-fsanitize=address,undefined', '-I', device / 'package/B5qUfs']
 for name in ['root-format', 'smmu', 'protocol']:

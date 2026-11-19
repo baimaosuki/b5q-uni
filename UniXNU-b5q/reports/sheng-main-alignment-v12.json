@@ -1,0 +1,110 @@
+{
+  "checked_date": "2026-11-20",
+  "target": "macos-27.3-26C5035r",
+  "sheng_live_main": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+  "local_reference_matches_live_main": true,
+  "core_live_main": "8542980d02b4d2cc5c32ee3542de1760b2562aac",
+  "core_since_previous_pin": "2 commits; devices.toml and device documentation records only; no compiler, profile, patch, template or runtime code changed",
+  "soc_live_main": "2dc650ca76ae38715cd0712e60a44b14fe251745",
+  "locked_dependency_difference": {
+    "b5q_only": "QcomDwc3",
+    "all_shared_source_commits_match": true
+  },
+  "merged_generic": {
+    "existing": [
+      "user TTBR0 47-bit and native kernel stack geometry",
+      "high DRAM/cache attribute and pmap batch maintenance"
+    ],
+    "this_build": [
+      "public Lockdown Mode sysctl (uint64 ABI backed by initialized native state)",
+      "4K kernel accepts 16K dyld chained-fixup pages; safe full-page reconstruction and source-page release before peer faults",
+      "bindfs persistent file IDs and vget path resolution under bound root",
+      "sandboxed hw.pagesize read for shared Metal userspace",
+      "generic weak built-in boot-argument fallback (no Xiaomi policy string)",
+      "vmm-present typed u32, explicit cs-lazy and boot-payload-release flags; v11 APFS shim retained"
+    ]
+  },
+  "deliberate_differences": {
+    "lockdown_public": "Latest Sheng uses CTLTYPE_INT/4 bytes; b5q retains the user-requested and NABU-tested CTLTYPE_QUAD/8 bytes ABI",
+    "memory": "b5q runtime-FDT-backed firmware and 4GiB owned window; no Sheng reservations/6GiB/outside-memory values",
+    "storage": "b5q discovered-LUN verified macosroot read-only plus volatile RAM Data and newly authorized ESP journal; no userdata or Xiaomi fastboot",
+    "peripherals": "No Sheng GPIO, Novatek, firmware, power votes, display timings, WiFi/audio/BT board aggregation or BootWatchdogPolicy clock defaults copied",
+    "cpu": "No unqualified Sheng idle/SIGP/cluster policy enabled merely by importing its boot flags",
+    "graphics": "Generic shared Adreno archive remains; b5q-specific firmware/GMU/display hardware bring-up is separate from source alignment"
+  },
+  "reference_sha256": {
+    "zzzz-sheng-ipados27-bringup.patch": "4e7dc2b97c3e285ed79d23a69038b1e43a0ccfcd864936f717d7c804bdec12d2",
+    "vmwait-dyld-pager-source-release.patch": "916c930f4b6b2e7515329bafc8d2ab52ba014d4dacbc8c706e8cc5d603ff5a32"
+  },
+  "boot_arg_comparison": {
+    "shared": [
+      "-no_slto_panic",
+      "aks-sls=3",
+      "aks=1",
+      "apfs-boot-shim=1",
+      "debug=0x14e",
+      "disable-watchdogd=1",
+      "kt_fixed_zones=120",
+      "native-source-storage=1",
+      "offline-key-events=1",
+      "offline-legacy-cpu-present=1",
+      "offline-legacy-gop=1",
+      "offline-legacy-phase=4",
+      "offline-legacy-pm=1",
+      "offline-legacy-register=1",
+      "offline-legacy-transfer=1",
+      "offline-legacy-validate=1",
+      "offline-mobile-graphics-load=1",
+      "timebase-hz=24000000",
+      "use_contiguous_hint=0"
+    ],
+    "sheng_only_reviewed": [
+      "adsp=2",
+      "armcpu-self-ipi=1",
+      "armcpu-spi-ipi=1",
+      "audio=12",
+      "autoreset=7200",
+      "backlight=1",
+      "bluetooth=1",
+      "build-tag=s00000",
+      "buttons=1",
+      "ca-free-wakeup=1",
+      "ca-triple-buffer=1",
+      "ci-mps=0",
+      "cpufreq=4",
+      "data-persist=2",
+      "diag-export=7140",
+      "diag=1",
+      "dpu-scanout=2",
+      "ethernet=1",
+      "fb-bgra=1",
+      "fb-gpu=1",
+      "fb-half=2",
+      "gpu-addon=1",
+      "gpu-dcvs=1",
+      "gpu-metal=1",
+      "gpu-power=9",
+      "gpu-trace=1",
+      "keyboard=1",
+      "log-bluetooth=3",
+      "log-gpu=1",
+      "log-video=1",
+      "log=1",
+      "native-ufs-root=1",
+      "no-lc=1",
+      "offline-hid-home=1",
+      "offline-hid-input=1",
+      "offline-legacy-unit-scale=2",
+      "offline-mobile-graphics-client=1",
+      "smp=1",
+      "touch-hid=1",
+      "touch=4",
+      "uefi-watchdog=1",
+      "usb=1",
+      "vsync-fixed=1",
+      "vsync=120",
+      "wifi=5"
+    ]
+  },
+  "hardware_tested": false
+}

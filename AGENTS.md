@@ -64,3 +64,7 @@
 ## 增量构建优先（2026-11-20，最新用户指令）
 
 配置、ADT、Data seed、启动参数和用户态 addon 的修改复用已完成且匹配的 kernel.macho，只运行必要的 payload/runtime 步骤；不触发完整 XNU 或固件构建。Data 不变时复用既有 seed；只有内核源码、内核配置或其 ABI 输入确有变化才重新编译内核。
+
+## XNU2LOG 受限持久日志（2026-11-20，最新明确用户授权）
+
+允许 XNU 控制台 RAM 采集及复用实际发现的根 LUN，将快照用 WRITE(10) FUA + SYNCHRONIZE CACHE(10) 写到经 GPT/FAT32/双 FAT/连续簇/无别名/token+CRC 校验的 ESP XNU2LOG.BIN A/B 槽位（file_first+1..file_first+2050）。config 块、FAT、目录、GPT、macosroot、userdata 和三星受保护分区禁止写入。此例外取代此前完全禁止持久写的约束，仅作用于日志槽位；根盘仍只读，Data 在 RAM。允许必要诊断和同阶段批量修复，先本地完整检查再一次提交构建；不授权直接刷写。

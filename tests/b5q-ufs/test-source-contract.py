@@ -18,7 +18,7 @@ assert 'vr_open_header(' in source and 'vr_open(' in source and 'vr_verify_block
 assert 'VM_PROT_READ' in source and 'OSDynamicCast(B5qRootBlock' in source
 assert 'b5q-root=1' in board['payload']['kernel_args']
 assert 'native-ufs-root=1' not in board['payload']['kernel_args'] # retained upstream sheng PMGR preflight is not this implementation
-assert 'vmm-present' not in board.get('adt',{}).get('defaults',{}).get('u32',{})
+assert board['adt']['defaults']['u32']['vmm-present']==1 # user-authorized macOS guest platform policy
 assert 'B5qRootBinding.cpp' in recipe and 'B5qUfs.cpp' in recipe and 'SourceStorage.cpp' not in recipe
 for flag in ['OWNER_ROOT_AUDIT','OWNER_ROOT_TRUST','OWNER_DATA_MOUNT','OWNER_CACHE_MOUNT','OWNER_BOOT_MANIFEST']:assert 'CONFIG_XNU_'+flag+'=y' in config
 assert '1552CFEE-78FF-48D8-8A6C-694B867D61AC' in config

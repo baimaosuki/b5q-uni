@@ -1,0 +1,26 @@
+diff --git a/bsd/kern/lockdown_mode.c b/bsd/kern/lockdown_mode.c
+index 1c104b3..64e12f1 100644
+--- a/bsd/kern/lockdown_mode.c
++++ b/bsd/kern/lockdown_mode.c
+@@ -40,6 +40,21 @@ int lockdown_mode_state = 0;
+ SYSCTL_DECL(_security_mac);
+ SYSCTL_INT(_security_mac, OID_AUTO, lockdown_mode_state, CTLFLAG_RD | CTLFLAG_LOCKED, &lockdown_mode_state, 0, "Lockdown Mode state");
+ 
++/* macOS 27.3 reads the initialized native state using an eight-byte public ABI. */
++static int
++sysctl_lockdown_mode_state_public SYSCTL_HANDLER_ARGS
++{
++	(void)oidp;
++	(void)arg1;
++	(void)arg2;
++	uint64_t state = get_lockdown_mode_state() != 0;
++	return SYSCTL_OUT(req, &state, sizeof(state));
++}
++
++SYSCTL_PROC(_security_mac, OID_AUTO, lockdown_mode_state_public,
++    CTLTYPE_QUAD | CTLFLAG_RD | CTLFLAG_LOCKED, 0, 0,
++    sysctl_lockdown_mode_state_public, "Q", "Public Lockdown Mode state");
++
+ __startup_func
+ void
+ lockdown_mode_init(void)

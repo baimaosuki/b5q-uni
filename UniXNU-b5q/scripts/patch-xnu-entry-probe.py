@@ -234,6 +234,11 @@ def assemble_c(source, va, workdir, symbols):
                          'set --uefi PATH or [build] uefi in unixnu.local.toml '
                          '(UNIXNU_UEFI for direct script calls)')
     obj, elf, binary = (workdir / name for name in ('panic.o', 'panic.elf', 'panic.bin'))
+    capture = symbols.get('_nabu_capture_append')
+    if capture is None or not any(base <= capture < base + size for base, size, _, _ in SEGMENTS):
+        raise SystemExit('b5q log panic renderer requires the linked RAM capture producer')
+    if not -(1 << 27) <= capture - va < (1 << 27):
+        raise SystemExit('RAM capture call is outside direct ARM64 branch range')
     definitions = []
     for macro, name, width in (('MAX_MEM', '_max_mem', 8),
                                ('PAGE_TOTAL', '_vm_page_pages', 4),
@@ -260,7 +265,7 @@ def assemble_c(source, va, workdir, symbols):
     if int(sizes[1]) or int(sizes[2]):
         # The code runs from the kernel's read-only text: a global would fault on its first store.
         raise SystemExit(f'{source.name} has writable data (data {sizes[1]}, bss {sizes[2]}); use the stack')
-    subprocess.run([lld, '-T', script, '-e', 'panic_screen', obj, '-o', elf], check=True)
+    subprocess.run([lld, '-T', script, f'--defsym=b5q_panic_capture={capture:#x}', '-e', 'panic_screen', obj, '-o', elf], check=True)
     # Only .text: a plain binary dump would start at the ELF headers kept in front of it.
     subprocess.run([objcopy, '-O', 'binary', '-j', '.text', elf, binary], check=True)
     readelf = tool('llvm-readelf')
@@ -507,7 +512,7 @@ _start:
         if word(PANIC_VA) in (0, 0xFFFFFFFF) or any(data[file_offset(PANIC_CAVE):file_offset(PANIC_CAVE_END)]):
             raise SystemExit('panic() or the panic screen padding is not as expected')
         with tempfile.TemporaryDirectory() as tmp:
-            code, load, entry = assemble_c(ROOT / 'scripts/xnu-panic-screen.c', PANIC_CAVE, Path(tmp), kernel_names)
+            code, load, entry = assemble_c(Path(__file__).with_name('xnu-panic-screen.c'), PANIC_CAVE, Path(tmp), kernel_names)
             common_entry = panic_common_entry(Path(tmp), code, load)
         if load + len(code) > PANIC_CAVE_END:
             raise SystemExit(f'panic screen is {len(code):#x} bytes at {load:#x}, the padding ends at {PANIC_CAVE_END:#x}')

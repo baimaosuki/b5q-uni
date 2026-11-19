@@ -667,6 +667,21 @@
       "name": "native-text-console-retain.patch",
       "sha256": "bd28f4bc96939cdf0db10036b750f3a7a11d6e86e3ada0b02271eddf486761c2",
       "result": "PASS"
+    },
+    {
+      "name": "b5q-console-journal.patch",
+      "sha256": "289d6f910ba8639ad8d4b17927a5e3dd2a5ab9408c6fb0a3a26f9df4c9b63577",
+      "result": "PASS"
+    },
+    {
+      "name": "macos-lockdown-public-state.patch",
+      "sha256": "21506dd452543f8466ccc01b7997ef3c56738cf506f0bc9ed48027650b8dc8c8",
+      "result": "PASS"
+    },
+    {
+      "name": "sheng-macos27-generic-runtime.patch",
+      "sha256": "36d8a14270c7beb07452c76cb3856be9a302e3d211e8c10fe643d8124cd605bb",
+      "result": "PASS"
     }
   ],
   "result": "PASS"

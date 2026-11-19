@@ -1,0 +1,116 @@
+{
+  "scope": "b5q XNU2LOG scoped integration, no firmware or device access",
+  "reference": {
+    "commit": "44bb65d0178f15382b65a837f8fe47078ec0caeb",
+    "files": {
+      "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogCore.h": "c8e0da622649d35823d676825960884b8a3fb3b9b6736c7c0bb1126347254a6b",
+      "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogVolume.h": "b63c5d7dfeab742717570837e1066d9d5b87cd512a1eb831ba1780c33027481d",
+      "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+      "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogUfs.h": "d8cc87887e7ec0406f1fbb69fdf13e6ae323f82ebe1abd390a4bc33900cbcf95"
+    }
+  },
+  "changes": [
+    "portable 4MiB RAM capture in console_write, unbuffered output, serial kprintf and native panic funnel",
+    "deployment panic renderer calls the same RAM capture producer",
+    "independent TryLock UFS journal requests use discovered LUN and exact validated extent; root allowlist unchanged",
+    "WRITE10 FUA, then range-bounded SYNC10, header, range-bounded SYNC10; config and filesystem metadata immutable",
+    "b5q GPT table <=1MiB, <=8192 entries, exact ESP and macosroot geometry/nonoverlap; FAT mirror, token/CRC and alias proof",
+    "reuse completed v11 RAM Data; preserve authenticated roots and original Apple trust",
+    "single native4K 800MiB esp.img includes contiguous 2051-cluster journal"
+  ],
+  "local_logger_tests": {
+    "result": "PASS",
+    "production_worker_transport_volume_ring": [
+      "ok",
+      "headerfail",
+      "mirror",
+      "chain",
+      "fatalias",
+      "diralias",
+      "token",
+      "gptcrc",
+      "overlap",
+      "rootbounds",
+      "damagedslots"
+    ],
+    "nonzero_discovered_lun": 3,
+    "gpt_entries": 512,
+    "metadata_and_config_unchanged": true,
+    "original_decoder_compatible": true,
+    "ASan_UBSan": true,
+    "hardware_tested": false
+  },
+  "build_status": "local checks PASS; combined target compiler pending",
+  "hardware_tested": false,
+  "ordered_patch_replay": {
+    "result": "PASS",
+    "count": 136,
+    "report": "reports/xnu-patch-application.json"
+  },
+  "renderer_source_compile": {
+    "scope": "Compile/link renderer source only with prior layout fixture; not runtime or new kernel validation",
+    "compiler": "clang17 aarch64-none-elf",
+    "code_bytes": 2663,
+    "available_bytes": 2720,
+    "no_writable_static_data": true,
+    "common_panic_entry_verified": true,
+    "hardware_tested": false
+  },
+  "local_pre_ci": [
+    "upstream-package-template",
+    "porting-record",
+    "source-contract",
+    "lockdown-public",
+    "log-writer",
+    "installer-errors",
+    "root-format-compile",
+    "root-format-runtime",
+    "smmu-compile",
+    "smmu-runtime",
+    "protocol-compile",
+    "protocol-runtime",
+    "exact-local-root-policies",
+    "full-root-image-sha256",
+    "original-pmgr-fixture",
+    "device-tree-syntax",
+    "python-syntax",
+    "no-added-ci-integrity-gates"
+  ],
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qUfs/B5qLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+    "UniXNU-b5q/package/B5qUfs/B5qLogCore.h": "df12bcfa1ef14e21328d83e465d0ffff63a9fe60d4aceb1cfc088f5aec402b40",
+    "UniXNU-b5q/package/B5qUfs/B5qLogVolume.h": "ecb267c9adbda425d9c59d0bd6167e22b3036a25599d12f581a48fa693a46cb0",
+    "UniXNU-b5q/package/B5qUfs/B5qLogArgs.h": "a41d505915d4fe13cdce209197bd610e97c56f0ddef1a2bceb12e1280ed3e887",
+    "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "32c07ae59e263097af051aada8445d286be2f472ae5fe11cb180666bfb4d6447",
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "f4bc7fadfa7ff746e690a5acaa50f2578480e06b7c104bca49f2760c79dfa133",
+    "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "289d6f910ba8639ad8d4b17927a5e3dd2a5ab9408c6fb0a3a26f9df4c9b63577",
+    "UniXNU-b5q/scripts/xnu-panic-screen.c": "2f8e98d46b03c2f00ac079d9900a2b17c5fa1d75fc5def0ff6abc081b448558d",
+    "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "6a9ecd77c7c551b7737f51557eb0ee5f05ae3fb7219b8e92aca0ad41da699f40",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "043a1a97b3492dae3b80670da8a8fc243d474fd379807d3dd6e60486e5e992a3",
+    "UniXNU-b5q/board.toml": "fb8a8e221bfdddd29c1591c3c611001bdc17c55f48551199f302774fe334d96a",
+    "UniXNU-b5q/patches/xnu/macos-kernel-stack-alignment.patch": "a1b4caf6c1bbc087b405a5813753c404617a69f32b876aeaf4a9ac2534c5e3d5",
+    "UniXNU-b5q/patches/xnu/native-arm64e-user-memory.patch": "647b87ca4ea8a8d218dcf2b12edbce9b4cbdfb7aa633a4434986a62b7dbdf022",
+    "UniXNU-b5q/patches/xnu/macos-lockdown-public-state.patch": "21506dd452543f8466ccc01b7997ef3c56738cf506f0bc9ed48027650b8dc8c8",
+    "UniXNU-b5q/patches/xnu/prelinked-corecrypto-hooks.patch": "14b51f6bdc5037d89f8a2664c1b5ed2c96b383dca6f9cea28f88b3a6f12b9800",
+    "UniXNU-b5q/patches/xnu/native-text-console-retain.patch": "bd28f4bc96939cdf0db10036b750f3a7a11d6e86e3ada0b02271eddf486761c2",
+    "UniXNU-b5q/patches/xnu/sheng-macos27-generic-runtime.patch": "36d8a14270c7beb07452c76cb3856be9a302e3d211e8c10fe643d8124cd605bb",
+    "UniXNU-b5q/scripts/build-b5q-payload.py": "cb9c2176cda6455a3e362fb807adbe555bba5c28d861b5120b13cbe880d1378e"
+  },
+  "initproc_fix": {
+    "photo": "/tmp/codex-clipboard-b0df8d14-a3e4-44aa-8daa-3543da6faf10.png",
+    "photo_sha256": "6e915c7382a297b97c96fd702aa4e188eb2cdf838853af10e51574ca7aef7737",
+    "observed": "initproc exited namespace2 subcode6; free0xeba 4K pages",
+    "known_ABI_defect": "public lockdown sysctl missing from prior b5q patch plan",
+    "reference": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/panicdiag-1700-repair/evidence.json",
+    "reference_sha256": "7f6b5ac93eeb490eb2b5fcc1d0e1bae830c857c3d604b6c5aee49f87b680fe13",
+    "b5q_userspace_abort_caller": "not available in photo; reference hardware call chain is not b5q proof",
+    "repair": "read-only uint64 state via initialized get_lockdown_mode_state; no fake success state",
+    "args": [
+      "cs-lazy=1",
+      "boot-payload-release=1",
+      "exec-log=1"
+    ],
+    "vmm_present": "1 u32 as latest Sheng macOS guest-platform policy"
+  },
+  "latest_main_alignment": "reports/sheng-main-alignment-v12.json"
+}

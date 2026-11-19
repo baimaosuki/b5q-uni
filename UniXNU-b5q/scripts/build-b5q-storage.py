@@ -32,5 +32,5 @@ for source in sources:
 import json,sys
 objects += [Path(p) for p in json.loads(subprocess.check_output([sys.executable,str(ROOT/'scripts/build-b5q-pmgr.py')],text=True))]
 path=archive(out/'libRamBlock.a',objects)
-report(path,objects,sources,dict(ufs_controller=True,persistent_block_writes=False,root_partition="macosroot",data_in_ram=True,original_storage_class_size_checked_at_runtime=True))
-print('PASS: macOS source storage ABI, actual RamBlock and VerifiedRoot; b5q authenticated read-only macosroot driver linked; no persistent writes')
+report(path,objects,sources,dict(ufs_controller=True,persistent_block_writes="validated ESP XNU2LOG.BIN slots only",root_partition="macosroot",data_in_ram=True,original_storage_class_size_checked_at_runtime=True))
+print('PASS: macOS source storage ABI, actual RamBlock and VerifiedRoot; b5q authenticated read-only macosroot driver linked; root read-only; isolated ESP journal writer enabled')

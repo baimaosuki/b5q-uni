@@ -28,13 +28,14 @@ shutil.copyfile(provided.with_name('data-seed.json'),runtime/'data-seed.json')
 trust=provided.with_name('original-ipsw-trust.bundle')
 if not trust.is_file():raise SystemExit('Original IPSW trust bundle is missing')
 env=dict(os.environ,UNIXNU_UNIQUE_CHIP_ID=seedfile.read_text().strip(),UNIXNU_UEFI=str(font))
+# The official runtime invokes boot_shims only when it collects/pairs trust itself.
 trust_args=[] if ctx.board.get('payload',{}).get('runtime',{}).get('boot_shims') else ['--trust-cache',str(trust)]
 subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--os','macos-27.3-26C5035r','--data-ramdisk',str(seed),*trust_args],cwd=core,env=env,check=True)
 files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/payload.img'}
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)
 manifest=pipeline.write_manifest(ctx,modules,plan,files)
 data=json.loads(manifest.read_text());data['scope']='Initial b5q macosroot reader build; authenticated roots plus volatile template Data; hardware boot not yet observed'
-data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':True,'persistent_block_writes':False,'smmu_mode':'b5q-smmu-reuse=1; no SMMU MMIO; arbitrary DMA compatibility requires hardware verification','persistent_root_windows':True,'root_partition':'macosroot','data_seed':'official template-derived sparse RAM Data; size and exact UUID recorded in runtime/data-seed.json'}
+data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':True,'persistent_block_writes':'validated XNU2LOG.BIN A/B slots only', 'root_read_only':True, 'log_file':'XNU2LOG.BIN','smmu_mode':'b5q-smmu-reuse=1; no SMMU MMIO; arbitrary DMA compatibility requires hardware verification','persistent_root_windows':True,'root_partition':'macosroot','data_seed':'official template-derived sparse RAM Data; size and exact UUID recorded in runtime/data-seed.json'}
 data['identity']={'kind':'fresh development build namespace','published_seed':False}
 data['memory_handoff']={'dts_dram':'b5q low physical bank 0x80000000 + 0x80000000 for DRAM classification; not the allocator window','physical_window':'DarwinBoot EFI allocator at load time, not a fabricated b5q physical address'}
 data['hardware_tested']=False
