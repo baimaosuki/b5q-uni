@@ -651,7 +651,7 @@ reference = "reports/link-closure-rounds.json"
 result = "Actual completed run and returned kernel.json/kernel.macho; exact payload stdout retrieval replaces inference."
 
 [[area.evidence]]
-kind = "test"
+kind = "source"
 reference = "reports/payload-probe-fix.json"
 result = "Actual run44452872414 kernel symbol extraction, guarded entry/MMU/panic patch, source POST reseal and negative guard cases. Source override hash and real input kernel hash recorded."
 
