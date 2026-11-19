@@ -164,7 +164,7 @@ public:
    if(!rootRead(root->image.offset+index*4096,4096,bounce)||vr_verify_block(&root->policy,index,bounce,4096,&vr_xnu_crypto)!=VR_OK){status=kIOReturnIOError;break;}
    if(buffer->writeBytes(done,bounce+in,take)!=take){status=kIOReturnIOError;break;}offset+=take;remaining-=take;done+=take;
   }
-  IOLockUnlock(readLock);IOStorage::complete(completion,status,done);return kIOReturnSuccess;
+  IOLockUnlock(readLock);completion->action(completion->target,completion->parameter,status,done);return kIOReturnSuccess;
  }
 };
 OSDefineMetaClassAndStructors(B5qRootBlock,IOBlockStorageDevice)

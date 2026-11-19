@@ -15,7 +15,7 @@ int main(){
  Mock duplicate;duplicate.reg[0x808]=0x80000060;assert(!duplicate.run()&&duplicate.writes.empty());
  Mock noBank;for(unsigned i=0;i<8;++i)noBank.reg[(2+i)*4096]=1;assert(!noBank.run()&&noBank.writes.empty());
  Mock width;assert(!width.run(1ULL<<40)&&width.writes.empty());
- Mock huge;width.reg[0x24]=0x80000008;assert(!width.run()&&width.writes.empty());
+ Mock huge;huge.reg[0x24]=0x80000008;assert(!huge.run()&&huge.writes.empty());
  Mock otherBank;otherBank.reg[0x808]=0x80001920;otherBank.reg[0xc08]=7;assert(otherBank.run()&&otherBank.reg[0xc00]==6&&otherBank.reg[0xc08]==7);
  puts("PASS: real SMMU configuration preserves display/other streams; rejects masks, duplicates, busy banks and DMA width overflow");
 }

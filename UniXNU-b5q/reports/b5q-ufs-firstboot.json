@@ -118,7 +118,7 @@
       "dma_coherent": true
     }
   ],
-  "lun_policy": "Discover active normal LUNs using READ CAPACITY16 and valid GPT; accept exactly one macosroot at supplied 49692663..62275574 bounds",
+  "lun_policy": "Read-only Unit descriptor excludes disabled and boot-LUN units before READ CAPACITY16; discover normal LUN0..7, valid GPT CRC and unique macosroot at supplied 49692663..62275574 bounds",
   "partition_write_commands": false,
   "stage": "initial compile and host tests; actual live handoff not yet observed",
   "root_headers": {
@@ -157,5 +157,22 @@
   ],
   "software_display_policy": "Phase4 GOP CPU presentation using exact macOS display ABI; no Adreno power votes or Xiaomi peripherals added",
   "compiled": false,
-  "hardware_tested": false
+  "hardware_tested": false,
+  "latest_ci_attempt": {
+    "run": 44491129022,
+    "commit": "f8cc392e22a7a8f5889c915e94054fe5e477379e",
+    "status": "completed",
+    "conclusion": "failure",
+    "final_unresolved": [
+      "IOStorage::complete(IOStorageCompletion*, int, unsigned long long)"
+    ],
+    "repair": "Exact public callback action used, matching original IOStorage.cpp and actual NativeRamBlock",
+    "runtime_observed": false
+  },
+  "host_validation": {
+    "smmu": "ASan/UBSan production algorithm mocks PASS",
+    "root_format": "ASan/UBSan actual root manifest and GPT negative cases PASS",
+    "installer": "mock ADB actual installer: exact geometry/hash checks before writes; readback failure stops boot write PASS",
+    "pmgr": "pinned original entrypoint byte guards PASS"
+  }
 }
