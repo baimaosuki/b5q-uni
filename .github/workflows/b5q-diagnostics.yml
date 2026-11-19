@@ -7,7 +7,7 @@ on:
     inputs:
       run_id:
         required: true
-        default: '44412976670'
+        default: '44452872414'
 permissions:
   contents: read
   actions: read
@@ -23,7 +23,7 @@ jobs:
       - name: Read actual failed-run logs with scoped Actions identity
         env:
           GH_TOKEN: ${{ github.token }}
-          TARGET_RUN: ${{ inputs.run_id || '44412976670' }}
+          TARGET_RUN: ${{ inputs.run_id || '44452872414' }}
         run: |
           python3 - <<'PY'
           import io,json,os,re,sys,traceback,urllib.request,urllib.error,urllib.parse,zipfile
@@ -51,29 +51,30 @@ jobs:
                   # Never forward GitHub Authorization to signed object storage.
                   response=urllib.request.urlopen(urllib.request.Request(target,headers={'User-Agent':'b5q-first-error'}),timeout=90)
               with response:return response.read(128*1024*1024)
-          artifacts=json.loads(get('/actions/runs/'+run+'/artifacts'))['artifacts']
-          wanted=[a for a in artifacts if a['name'].startswith('b5q-kernel-logs-')]
-          if not wanted:raise RuntimeError('No kernel text artifact; names='+str([a['name'] for a in artifacts]))
-          payload=get('/actions/artifacts/'+str(wanted[0]['id'])+'/zip')
           import pathlib
           output=pathlib.Path(os.environ['RUNNER_TEMP'])/'b5q-prior-run'
           (output/'logs').mkdir(parents=True,exist_ok=True)
+          payload=get('/actions/runs/'+run+'/logs')
           symbols=[]
           with zipfile.ZipFile(io.BytesIO(payload)) as z:
-              paths=[name for name in z.namelist() if name.split('/')[-1]=='kernel.log']
-              if not paths:raise RuntimeError('Actual final kernel.log missing')
-              for name in paths:
+              paths=[name for name in z.namelist() if name.endswith('.txt') and any(x in name.lower() for x in ('payload','xnu','kernel'))]
+              if not paths:raise RuntimeError('Target job text logs missing')
+              for index,name in enumerate(paths):
                   text=z.read(name).decode(errors='replace')
-                  (output/'logs'/('final-'+name.split('/')[-1])).write_text(text)
+                  (output/'logs'/(f'{index:02d}-'+name.split('/')[-1])).write_text(text)
+                  if 'payload' in name.lower():
+                      lines=text.splitlines()[-35:]
+                      for at in range(0,len(lines),8):
+                          message='\n'.join(lines[at:at+8]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
+                          print('::warning title=b5q actual payload failure::'+message)
                   start=text.rfind('Undefined symbols for architecture')
                   if start<0:continue
                   block=text[start:].split('ld: symbol(s) not found',1)[0]
                   for line in block.splitlines():
-                      if re.match(r'^\s+"[^"\n]+", referenced from:',line):
-                          symbol=line.strip().split('"')[1]
-                          if symbol not in symbols:symbols.append(symbol)
+                      match=re.search(r'"([^"\n]+)", referenced from:',line)
+                      if match and match[1] not in symbols:symbols.append(match[1])
           print('Exact unresolved symbols from actual final link:',len(symbols))
-          if not symbols:raise RuntimeError('No undefined-symbol block found; inspect uploaded source logs')
+          if not symbols:print('No undefined-symbol block; kernel may already be linked.')
           for start in range(0,len(symbols),8):
               message=' | '.join(symbols[start:start+8]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
               print(f'::warning title=b5q unresolved symbols {start+1}-{min(start+8,len(symbols))}::'+message)

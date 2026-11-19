@@ -48,13 +48,19 @@
     },
     {
       "round": 4,
-      "status": "preflight",
+      "status": "kernel.macho-success-payload-failed",
       "batch": [
         "hidden local weak fallback symbols",
         "match upstream source crypto bootstrap and late AES registration",
         "retain all HMAC/POST/prelink checks"
       ],
-      "same_hard_symbol_stall": false
+      "same_hard_symbol_stall": false,
+      "run": 44452872414,
+      "remaining_undefined_symbols": [],
+      "kernel_bytes": 142966784,
+      "kernel_local": "artifacts/b5q-link-closure/round4-44452872414/files/kernel/kernel.macho",
+      "kernel_mapping_complete": true,
+      "payload_error": "Retrieving full actual job stdout, no cause guessed"
     }
   ],
   "success": false,
