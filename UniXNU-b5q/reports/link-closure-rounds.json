@@ -60,7 +60,19 @@
       "kernel_bytes": 142966784,
       "kernel_local": "artifacts/b5q-link-closure/round4-44452872414/files/kernel/kernel.macho",
       "kernel_mapping_complete": true,
-      "payload_error": "Retrieving full actual job stdout, no cause guessed"
+      "payload_error": "Real fileset has no top-level llvm-nm symbols; legacy MMU address mismatch and insufficient conservative panic padding. Verified local instruction/symbol-based override and source POST reseal."
+    },
+    {
+      "round": 5,
+      "status": "local-payload-guarded-probe-pass-await-ci",
+      "remaining_undefined_symbols": [],
+      "batch": [
+        "Read actual relocated non-STAB source symbols from com.apple.kernel",
+        "Compact probe caves only inside verified zero entry padding",
+        "Retain panic screen and source POST reseal",
+        "Publish actual payload step failure diagnostics"
+      ],
+      "local_evidence": "reports/payload-probe-fix.json"
     }
   ],
   "success": false,

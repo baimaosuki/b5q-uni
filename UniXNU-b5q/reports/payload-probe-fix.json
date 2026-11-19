@@ -1,0 +1,39 @@
+{
+  "upstream": "563595abedfdfa413ad583b66b6176d82007e633",
+  "upstream_sha256": "3262e7231f206178e3fae81e0d04902eb1964074caef4411bb95595a143b9d85",
+  "changes": [
+    "Read relocated non-STAB N_SECT symbols from actual com.apple.kernel entry; do not guess fileset addresses",
+    "Retain all entry, unique MMU sequence, instruction, cave, branch and panic-funnel guards",
+    "Align panic code after actual probe end, retaining original PANIC_CAVE_END and complete zero-padding checks"
+  ],
+  "hardware_values_added": false,
+  "input_kernel_sha256": "111bb2040b6ffd998d17cd396e566e60b070e72f98f608371913be52cf5cf0db",
+  "actual_symbols": {
+    "_start_first_cpu": "0xfffffff00bb9405c",
+    "_panic": "0xfffffff00c29e204",
+    "_vinfo": "0xfffffff00c93b008",
+    "_panic_trap_to_debugger": "0xfffffff00b976498",
+    "_max_mem": "0xfffffff00c93c958",
+    "_vm_page_pages": "0xfffffff00c93acbc",
+    "_vm_page_free_count": "0xfffffff00c936b00"
+  },
+  "mmu_enable": "0xfffffff00bb94418",
+  "after_mmu": "0xfffffff00bb94438",
+  "cave_start": "0xfffffff00bb92490",
+  "panic_code_end_guard": "0xfffffff00bb92ff0",
+  "negative_tests": [
+    {
+      "name": "wrong-mmu-instruction",
+      "result": "PASS refuses without file modification",
+      "message": "Require one verified SCTLR/ISB/CPACR entry sequence"
+    },
+    {
+      "name": "nonzero-first-cave",
+      "result": "PASS refuses without file modification",
+      "message": "Padding at 0xfffffff00bb92490 is not empty"
+    }
+  ],
+  "real_kernel_probe": "PASS",
+  "real_kernel_post_probe_seal": "PASS; selftests remain required",
+  "source_sha256": "e67dd5ba255a78a7d6f1ad20a9c82cefbedfa804b071837851fddaf878991da5"
+}

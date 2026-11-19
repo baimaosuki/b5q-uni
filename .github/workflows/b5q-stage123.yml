@@ -130,6 +130,7 @@ jobs:
         if: always()
         env:
           KERNEL_OUTCOME: ${{ steps.kernel.outcome }}
+          PAYLOAD_OUTCOME: ${{ steps.payload.outcome }}
         run: |
           python3 - <<'PY'
           import os, re, shutil
@@ -180,6 +181,15 @@ jobs:
                   tail = '\n'.join(line[:240] for line in text.splitlines()[-18:])[-3000:]
                   escaped = tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
                   print('::error title=b5q kernel first-failure diagnostics::' + escaped)
+          console = Path(os.environ['RUNNER_TEMP']) / 'b5q-payload-console.log'
+          if console.is_file():
+              text = console.read_text(errors='replace')
+              text = re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)', '***', text)
+              (dest / 'payload-console.log').write_text(text)
+              if os.environ.get('PAYLOAD_OUTCOME') == 'failure':
+                  for index, line in enumerate(text.splitlines()[-24:]):
+                      escaped = line[:1200].replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                      print(f'::error title=b5q actual payload failure {index+1}::' + escaped)
           (dest / 'scope.txt').write_text('Pinned full-component b5q kernel attempt. No phone flash or hardware qualification. Apple-derived binaries are not published by this diagnostic workflow.\n')
           print(f'{count} text logs collected')
           PY
