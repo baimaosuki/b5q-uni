@@ -62,7 +62,68 @@
     "local_pre_ci_report": "artifacts/b5q-firstboot/local-pre-ci/report.json",
     "ordered_patch_application": "PASS 133/133",
     "smmu_reuse": "actual helper executed with callbacks that assert on all register access; zero reads/writes; zero and overflowing DMA rejected",
-    "target_build": "pending"
+    "target_build": {
+      "run": 44598173747,
+      "commit": "170f1ad1cfa01afdef68414efdbf2e7e592c660f",
+      "kernel": "success",
+      "official_payload": "success",
+      "final_ci_conclusion": "failure in legacy transfer status PATCH only",
+      "transfer_recovered": "all 3024/3024 encrypted chunks from already-completed run recovered and authenticated; no repeat build",
+      "link_mapping_complete": true,
+      "undefined_symbols": {}
+    },
+    "native_header_static_assertions": "PASS actual patched proc_reg.h preprocessed for arm64e-apple-macosx, BCM2837, 4K/subpage: T0SZ_USER17, BOOT26, RT_WRITECOMB, EPD0"
   },
-  "hardware_tested": false
+  "hardware_tested": false,
+  "delivery_scripts": {
+    "scripts/b5q-install/build-ci-esp.py": "34983947389dfbed4f1bc26f3cf3f063f0adb84d6b26458e1b7397c3f05a85aa",
+    "scripts/b5q-install/check-lowdram-boot.py": "a07eddb23dea8805cec9c57874b2b44720eadb46a91d3500ae518a0b931cd1d3"
+  },
+  "transport_policy": {
+    "ordinary_actions_artifact": true,
+    "qemu_required": false,
+    "existing_build": "kernel and official payload succeeded; final Checks status PATCH returned HTTP404; recovering existing bytes rather than recompiling",
+    "workflow_sha256": {
+      ".github/workflows/b5q-stage123.yml": "7ed5b1d793d6249349d194d34af23023dddc8b04305a361967df6411e7d4c2a2",
+      ".github/workflows/b5q-diagnostics.yml": "0fc363ae7ae658eba64f8a5b82ce4f7627ec37c9e5a0b4f44db1fb55a4fd9ada"
+    }
+  },
+  "delivery": {
+    "directory": "artifacts/b5q-esp-kernel-v9",
+    "outputs": {
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "700af2c8e87b412581190af8e38e23c5993bec244e6c65ce80d32e5815f82f09"
+      }
+    },
+    "deployment_kernel_sha256": "41aa4c128404e626f7e9efc4e3f1e4a91b70f8f1ca7900be2622094cf7d131de",
+    "checks": {
+      "mapping_complete": true,
+      "missing_symbols": {},
+      "post_reseal_idempotent": true,
+      "root_policies_bound": true,
+      "adt_typed_properties": true,
+      "fat_roundtrip": true
+    },
+    "binary_audit": {
+      "kernel_sha256": "41aa4c128404e626f7e9efc4e3f1e4a91b70f8f1ca7900be2622094cf7d131de",
+      "symbols": {
+        "_pmap_user_va_bits": "0xfffffff00bb7cd04",
+        "_pmap_apply_user_tcr": "0xfffffff00bb67f94",
+        "_pmap_pt_attr_4k_user": "0xfffffff007dd9200",
+        "_native_user_pt_attr": "0xfffffff007dd9278",
+        "_switch_to_video_console": "0xfffffff00bb5482c",
+        "_kernel_bootstrap_thread": "0xfffffff00c2b75fc",
+        "__ZN12_GLOBAL__N_112mapUfsStreamEv": "0xfffffff00c29ece8"
+      },
+      "user_va_bits": 47,
+      "text_console_call_present": true,
+      "smmu_reuse_argument_and_failure_details_present": true,
+      "new_probes_added": false,
+      "hardware_tested": false
+    },
+    "qemu_run": false,
+    "hardware_tested": false,
+    "temporary_staging_released": true
+  }
 }

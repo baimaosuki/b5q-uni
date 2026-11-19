@@ -11,7 +11,6 @@ on:
 permissions:
   contents: read
   actions: read
-  checks: write
 jobs:
   inspect:
     runs-on: ubuntu-24.04
@@ -79,9 +78,11 @@ jobs:
               message=' | '.join(symbols[start:start+8]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
               print(f'::warning title=b5q unresolved symbols {start+1}-{min(start+8,len(symbols))}::'+message)
           PY
-      - name: Relay complete actual final linker log
-        if: success()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          python3 UniXNU-b5q/scripts/ci-transfer.py send --root "$RUNNER_TEMP/b5q-prior-run" --public UniXNU-b5q/scripts/ci-recipient-public.pem --out "$RUNNER_TEMP/b5q-prior-transfer" --publish
+      - name: Upload existing-run diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-prior-run-logs-${{ github.run_id }}
+          path: ${{ runner.temp }}/b5q-prior-run/logs/
+          if-no-files-found: warn
+          retention-days: 3
