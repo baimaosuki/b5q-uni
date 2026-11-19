@@ -1,0 +1,3303 @@
+{
+  "run": 44412976670,
+  "conclusion": "completed/failure",
+  "symbol_count": 60,
+  "symbols": [
+    {
+      "symbol": "NativeAdrenoBoard::parseIommus(unsigned char const*, unsigned long, unsigned int, unsigned short*, unsigned long, unsigned long*)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp",
+          "line": 50,
+          "source": "if(!reg || NativeAdrenoBoard::parseReg("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 4,
+          "source": "* the provider's device-tree reg windows through NativeAdrenoBoard and maps the"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 17,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 220,
+          "source": "if(!reg || NativeAdrenoBoard::parseReg("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 293,
+          "source": "if(cells && iommus && NativeAdrenoBoard::parseIommus("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.cpp",
+          "line": 48,
+          "source": "if(!reg || NativeAdrenoBoard::parseReg("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.cpp",
+          "line": 2,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.cpp",
+          "line": 8,
+          "source": "IOReturn NativeAdrenoBoard::parseIommus(const uint8_t *cells,size_t length,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.cpp",
+          "line": 29,
+          "source": "IOReturn NativeAdrenoBoard::parseReg(const uint8_t *cells,size_t length,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.h",
+          "line": 6,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.h",
+          "line": 20,
+          "source": "class NativeAdrenoBoard final {"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.h",
+          "line": 21,
+          "source": "NativeAdrenoBoard()=delete;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.h",
+          "line": 6,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_board.cpp",
+          "line": 4,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_board.cpp",
+          "line": 24,
+          "source": "CHECK(NativeAdrenoBoard::parseReg(raw,bytes,2,2,windows,NativeAdrenoMaxWindows,&count)==kIOReturnSuccess);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_board.cpp",
+          "line": 36,
+          "source": "CHECK(NativeAdrenoBoard::parseReg(raw,bytes,2,2,windows,NativeAdrenoMaxWindows,&count)==kIOReturnSuccess);"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoBoard::parseReg(unsigned char const*, unsigned long, unsigned int, unsigned int, NativeAdrenoWindow*, unsigned long, unsigned long*)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp",
+          "line": 50,
+          "source": "if(!reg || NativeAdrenoBoard::parseReg("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 4,
+          "source": "* the provider's device-tree reg windows through NativeAdrenoBoard and maps the"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 17,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 220,
+          "source": "if(!reg || NativeAdrenoBoard::parseReg("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 293,
+          "source": "if(cells && iommus && NativeAdrenoBoard::parseIommus("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.cpp",
+          "line": 48,
+          "source": "if(!reg || NativeAdrenoBoard::parseReg("
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.cpp",
+          "line": 2,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.cpp",
+          "line": 8,
+          "source": "IOReturn NativeAdrenoBoard::parseIommus(const uint8_t *cells,size_t length,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.cpp",
+          "line": 29,
+          "source": "IOReturn NativeAdrenoBoard::parseReg(const uint8_t *cells,size_t length,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.h",
+          "line": 6,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.h",
+          "line": 20,
+          "source": "class NativeAdrenoBoard final {"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoBoard.h",
+          "line": 21,
+          "source": "NativeAdrenoBoard()=delete;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.h",
+          "line": 6,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_board.cpp",
+          "line": 4,
+          "source": "#include \"NativeAdrenoBoard.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_board.cpp",
+          "line": 24,
+          "source": "CHECK(NativeAdrenoBoard::parseReg(raw,bytes,2,2,windows,NativeAdrenoMaxWindows,&count)==kIOReturnSuccess);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_board.cpp",
+          "line": 36,
+          "source": "CHECK(NativeAdrenoBoard::parseReg(raw,bytes,2,2,windows,NativeAdrenoMaxWindows,&count)==kIOReturnSuccess);"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoMemory::publishForDevice(unsigned long, unsigned long, bool, bool, unsigned int)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 72,
+          "source": "NativeAdrenoMemory ring_mem_,fence_mem_,sqe_mem_,pwrup_mem_;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 79,
+          "source": "struct RingCache {NativeAdrenoMemory *ring;NativeAdrenoMemory *fence;};"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 15,
+          "source": "* checks, 10..19 NativeAdrenoMemory::importTask's. */"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 122,
+          "source": "NativeAdrenoMemory *NativeAdrenoUserClient::memoryOf(uint64_t handle)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 191,
+          "source": "NativeAdrenoMemory *NativeAdrenoUserClient::memoryForToken(uint32_t token)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 211,
+          "source": "(NativeAdrenoMemory::memoryPressure()?NativeAdrenoParamsMemoryPressure:0u);params->max_bo_bytes=maxBoBytes();"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoCpu.cpp",
+          "line": 2,
+          "source": "#include \"NativeAdrenoMemory.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuMemory.h",
+          "line": 4,
+          "source": "#include \"NativeAdrenoMemory.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 20,
+          "source": "NativeAdrenoMemory memory;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 113,
+          "source": "NativeAdrenoMemory *memoryForToken(uint32_t token);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 118,
+          "source": "/* BoAlloc's system pages prepared before the driver's lock (NativeAdrenoMemory::prepareSystem), offered to the next allocBo under the"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 121,
+          "source": "/* Where the next freeBo under the lock leaves a system BO's pages (NativeAdrenoMemory::releaseSystemInto), for the caller to unwire"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 166,
+          "source": "NativeAdrenoMemory *memoryOf(uint64_t handle);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoMemory.h",
+          "line": 9,
+          "source": "/* System memory prepared outside the driver's lock (NativeAdrenoMemory::prepareSystem): a wired descriptor of the VM's pages, or a"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoMemory.h",
+          "line": 53,
+          "source": "class NativeAdrenoMemory final {"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoMemory.h",
+          "line": 75,
+          "source": "NativeAdrenoMemory()=default;"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoMemory::acquireDeviceWrites(unsigned long, unsigned long, unsigned int)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 72,
+          "source": "NativeAdrenoMemory ring_mem_,fence_mem_,sqe_mem_,pwrup_mem_;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 79,
+          "source": "struct RingCache {NativeAdrenoMemory *ring;NativeAdrenoMemory *fence;};"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 15,
+          "source": "* checks, 10..19 NativeAdrenoMemory::importTask's. */"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 122,
+          "source": "NativeAdrenoMemory *NativeAdrenoUserClient::memoryOf(uint64_t handle)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 191,
+          "source": "NativeAdrenoMemory *NativeAdrenoUserClient::memoryForToken(uint32_t token)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 211,
+          "source": "(NativeAdrenoMemory::memoryPressure()?NativeAdrenoParamsMemoryPressure:0u);params->max_bo_bytes=maxBoBytes();"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoCpu.cpp",
+          "line": 2,
+          "source": "#include \"NativeAdrenoMemory.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuMemory.h",
+          "line": 4,
+          "source": "#include \"NativeAdrenoMemory.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 20,
+          "source": "NativeAdrenoMemory memory;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 113,
+          "source": "NativeAdrenoMemory *memoryForToken(uint32_t token);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 118,
+          "source": "/* BoAlloc's system pages prepared before the driver's lock (NativeAdrenoMemory::prepareSystem), offered to the next allocBo under the"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 121,
+          "source": "/* Where the next freeBo under the lock leaves a system BO's pages (NativeAdrenoMemory::releaseSystemInto), for the caller to unwire"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.h",
+          "line": 166,
+          "source": "NativeAdrenoMemory *memoryOf(uint64_t handle);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoMemory.h",
+          "line": 9,
+          "source": "/* System memory prepared outside the driver's lock (NativeAdrenoMemory::prepareSystem): a wired descriptor of the VM's pages, or a"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoMemory.h",
+          "line": 53,
+          "source": "class NativeAdrenoMemory final {"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoMemory.h",
+          "line": 75,
+          "source": "NativeAdrenoMemory()=default;"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::gMetaClass",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::requestIdle()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::doSetPriority(IOBlockStorageDeviceExtent*, unsigned int, unsigned char)",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::setProperties(OSObject*)",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::doGetProvisionStatus(unsigned long long, unsigned long long, unsigned int*, IOBlockStorageProvisionDeviceExtent*, unsigned long long)",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice4()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice5()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice6()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice7()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice8()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice9()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice10()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice11()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice12()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice13()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice14()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice15()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice16()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice17()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice18()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice19()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice20()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice21()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice22()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice23()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice24()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice25()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice26()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice27()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice28()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice29()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice30()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice31()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::init(OSDictionary*)",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::doUnmap(IOBlockStorageDeviceExtent*, unsigned int, unsigned int)",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::IOBlockStorageDevice(OSMetaClass const*)",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::~IOBlockStorageDevice()",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoGmuContext::bringUp(ArmSmmu4KIo const*, unsigned int, unsigned int, unsigned int, unsigned short, void (*)(unsigned int), NativeAdrenoGmuContextReport*)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 20,
+          "source": "#include \"NativeAdrenoGmuContext.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 63,
+          "source": "NativeAdrenoGmuContext gmu_ctx_;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 331,
+          "source": "/* The GMU context at its fixed a6xx_gmu.c addresses (NativeAdrenoGmuContext). The ring, fence,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 342,
+          "source": "NativeAdrenoGmuContextReport report{};"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 2,
+          "source": "#include \"NativeAdrenoGmuContext.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 7,
+          "source": "unsigned slot,NativeAdrenoGmuContextReport *r)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 18,
+          "source": "IOReturn NativeAdrenoGmuContext::bringUp(const ArmSmmu4KIo *io,unsigned bank,unsigned asid,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 19,
+          "source": "unsigned slot,uint16_t sid,void (*progress)(uint32_t),NativeAdrenoGmuContextReport *report)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 92,
+          "source": "static NativeAdrenoGmuContext *board_context;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 93,
+          "source": "extern \"C\" IOReturn NativeAdrenoGmuContextBringup(volatile uint8_t *smmu,size_t bytes,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 95,
+          "source": "NativeAdrenoGmuContextReport *report)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 99,
+          "source": "NativeAdrenoGmuContext *&context=board_context;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 103,
+          "source": "context=new NativeAdrenoGmuContext;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuContext.cpp",
+          "line": 107,
+          "source": "extern \"C\" IOReturn NativeAdrenoGmuContextPayloads(NativeAdrenoGmuPayload out[5])"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGpuContext.cpp",
+          "line": 14,
+          "source": "const uint16_t sids[2],void (*progress)(uint32_t),NativeAdrenoGmuContextReport *report)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGpuContext.cpp",
+          "line": 250,
+          "source": "NativeAdrenoGmuContextReport *report)"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoGmuService::metaClass",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp",
+          "line": 12,
+          "source": "#include \"NativeAdrenoGmuService.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp",
+          "line": 14,
+          "source": "OSDefineMetaClassAndStructors(NativeAdrenoGmuService,IOService)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp",
+          "line": 33,
+          "source": "IOService *NativeAdrenoGmuService::probe(IOService *provider,SInt32 *score)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp",
+          "line": 39,
+          "source": "bool NativeAdrenoGmuService::start(IOService *provider)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp",
+          "line": 88,
+          "source": "void NativeAdrenoGmuService::stop(IOService *provider)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 22,
+          "source": "#include \"NativeAdrenoGmuService.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 254,
+          "source": "OSDictionary *matching=IOService::serviceMatching(\"NativeAdrenoGmuService\");"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 258,
+          "source": "NativeAdrenoGmuService *node=OSDynamicCast(NativeAdrenoGmuService,gmu);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.h",
+          "line": 8,
+          "source": "class NativeAdrenoGmuService : public IOService {"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuService.h",
+          "line": 9,
+          "source": "OSDeclareDefaultStructors(NativeAdrenoGmuService)"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoKernelTime::now_us(void*, unsigned long long*)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 25,
+          "source": "#include \"NativeAdrenoKernelTime.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 195,
+          "source": "NativeAdrenoKernelTime::now_us(nullptr,&microseconds);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 199,
+          "source": "static uint64_t vm_clock_us(void) {uint64_t microseconds=0;NativeAdrenoKernelTime::now_us(nullptr,&microseconds);return microseconds;}"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 410,
+          "source": "NativeAdrenoKernelTime::now_us,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 411,
+          "source": "NativeAdrenoKernelTime::wait_us};"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoKernelTime.cpp",
+          "line": 2,
+          "source": "#include \"NativeAdrenoKernelTime.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoKernelTime.cpp",
+          "line": 5,
+          "source": "int NativeAdrenoKernelTime::now_us(void *cookie,uint64_t *value)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoKernelTime.cpp",
+          "line": 13,
+          "source": "int NativeAdrenoKernelTime::wait_us(void *cookie,unsigned microseconds)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoKernelTime.h",
+          "line": 9,
+          "source": "struct NativeAdrenoKernelTime {"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoUserClient::dispatch(unsigned int, void const*, unsigned long, void*, unsigned long, NativeAdrenoRingClock const*)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 48,
+          "source": "#include \"NativeAdrenoUserClient.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 54,
+          "source": "static IOUserClient *createGpuClient(task_t,void *,UInt32,OSDictionary *,NativeAdrenoUserClient *);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 77,
+          "source": "NativeAdrenoUserClient *core_=nullptr;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 504,
+          "source": "core_=new NativeAdrenoUserClient;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 559,
+          "source": "NativeAdrenoUserClient *core_=nullptr;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 564,
+          "source": "void setCore(NativeAdrenoUserClient *core) {core_=core;}"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 636,
+          "source": "OSDictionary *properties,NativeAdrenoUserClient *core)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 4,
+          "source": "#include \"NativeAdrenoUserClient.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 13,
+          "source": "bool NativeAdrenoUserClient::systemWriteCombined() {return native_adreno_wc_enabled && !ownedCoherent();}"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 46,
+          "source": "NativeAdrenoUserClient::Entry *NativeAdrenoUserClient::find(uint64_t handle)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 54,
+          "source": "void NativeAdrenoUserClient::publish(Entry &entry)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 59,
+          "source": "void NativeAdrenoUserClient::clear(Entry &entry)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 69,
+          "source": "NativeAdrenoUserClient::Entry *NativeAdrenoUserClient::free()"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 78,
+          "source": "bool NativeAdrenoUserClient::grow()"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 97,
+          "source": "void NativeAdrenoUserClient::releaseEntries()"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 103,
+          "source": "bool NativeAdrenoUserClient::growQueues()"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoGmuPlatform::bind(NativeAdrenoGmuWindow const*, ShengGmuIo*)",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 21,
+          "source": "#include \"NativeAdrenoGmuPlatform.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 64,
+          "source": "NativeAdrenoGmuPlatform gmu_platform_;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 418,
+          "source": "else if(NativeAdrenoGmuPlatform::services(&time,&services))"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 2,
+          "source": "#include \"NativeAdrenoGmuPlatform.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 5,
+          "source": "int NativeAdrenoGmuPlatform::read32(void *cookie,unsigned window,size_t at,uint32_t *out)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 8,
+          "source": "NativeAdrenoGmuPlatform *self=static_cast<NativeAdrenoGmuPlatform *>(cookie);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 14,
+          "source": "int NativeAdrenoGmuPlatform::write32(void *cookie,unsigned window,size_t at,uint32_t value)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 17,
+          "source": "NativeAdrenoGmuPlatform *self=static_cast<NativeAdrenoGmuPlatform *>(cookie);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 23,
+          "source": "int NativeAdrenoGmuPlatform::barrier(void *cookie)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 29,
+          "source": "IOReturn NativeAdrenoGmuPlatform::bind(const NativeAdrenoGmuWindow windows[ShengGmuWindows],"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.cpp",
+          "line": 52,
+          "source": "IOReturn NativeAdrenoGmuPlatform::services(const NativeAdrenoGmuTime *time,"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoGmuPlatform.h",
+          "line": 24,
+          "source": "class NativeAdrenoGmuPlatform final {"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoKernelTime.h",
+          "line": 4,
+          "source": "#include \"NativeAdrenoGmuPlatform.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_gmuplatform.cpp",
+          "line": 4,
+          "source": "#include \"NativeAdrenoGmuPlatform.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_gmuplatform.cpp",
+          "line": 22,
+          "source": "NativeAdrenoGmuPlatform platform;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_gmuplatform.cpp",
+          "line": 62,
+          "source": "CHECK(NativeAdrenoGmuPlatform::services(&time,&services)==kIOReturnSuccess);"
+        }
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoSmmuService::metaClass",
+      "batch_fix": "build-b5q-adreno.py: full pinned NativeAdreno*.cpp implementation, SMMU/PM4/HFI support closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 30,
+          "source": "#include \"NativeAdrenoSmmuService.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 285,
+          "source": "OSDictionary *smmu_match=IOService::serviceMatching(\"NativeAdrenoSmmuService\");"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 311,
+          "source": "NativeAdrenoSmmuService *node=OSDynamicCast(NativeAdrenoSmmuService,smmu);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.cpp",
+          "line": 10,
+          "source": "#include \"NativeAdrenoSmmuService.h\""
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.cpp",
+          "line": 12,
+          "source": "OSDefineMetaClassAndStructors(NativeAdrenoSmmuService,IOService)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.cpp",
+          "line": 31,
+          "source": "IOService *NativeAdrenoSmmuService::probe(IOService *provider,SInt32 *score)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.cpp",
+          "line": 37,
+          "source": "bool NativeAdrenoSmmuService::start(IOService *provider)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.cpp",
+          "line": 90,
+          "source": "void NativeAdrenoSmmuService::stop(IOService *provider)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.h",
+          "line": 8,
+          "source": "class NativeAdrenoSmmuService : public IOService {"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoSmmuService.h",
+          "line": 9,
+          "source": "OSDeclareDefaultStructors(NativeAdrenoSmmuService)"
+        }
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::getProperty(OSSymbol const*) const",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "vtable for IOBlockStorageDevice",
+      "batch_fix": "build-b5q-storage.py: actual public IOBlockStorageDevice.cpp + macOS target; deferred original-family parent",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 3,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 67,
+          "source": "class NativeRamBlock : public IOBlockStorageDevice {"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 351,
+          "source": "OSDefineMetaClassAndStructors(NativeRamBlock, IOBlockStorageDevice)"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 355,
+          "source": "if (!IOBlockStorageDevice::start(provider)) return false;"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 601,
+          "source": "IOBlockStorageDevice::stop(provider);"
+        },
+        {
+          "file": "UniXNU/drivers/RamBlock/NativeRamBlock.cpp",
+          "line": 629,
+          "source": "IOBlockStorageDevice::free();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 6,
+          "source": "#include <IOKit/storage/IOBlockStorageDevice.h>"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 11,
+          "source": "extern \"C\" void b5q_storage_base_init(void) __asm__(\"__GLOBAL__sub_I_IOBlockStorageDevice.cpp\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 24,
+          "source": "const OSSymbol *name=OSSymbol::withCString(\"IOBlockStorageDevice\");"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qRamStorage.cpp",
+          "line": 27,
+          "source": "if(!parent || parent->getClassSize()!=sizeof(IOBlockStorageDevice))"
+        }
+      ]
+    },
+    {
+      "symbol": "_arm64_platform_sleep_hook",
+      "batch_fix": "B5qAbsentBoard.cpp: typed absent-provider/diagnostic definition; UFS refuses and root authorization stays false",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/ArmCpu/ArmCpu.cpp",
+          "line": 65,
+          "source": "extern \"C\" void (*arm64_platform_sleep_hook) (boolean_t boot_cpu) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU/drivers/ArmCpu/ArmCpu.cpp",
+          "line": 600,
+          "source": "if (sleep == 1 && &arm64_platform_sleep_hook && !skipGic && psciConduit (&gSleepHvc)) {"
+        },
+        {
+          "file": "UniXNU/drivers/ArmCpu/ArmCpu.cpp",
+          "line": 602,
+          "source": "arm64_platform_sleep_hook = &armcpuPlatformSleep;"
+        },
+        {
+          "file": "UniXNU/drivers/ArmCpu/ArmCpu.cpp",
+          "line": 1041,
+          "source": "// arm64_platform_sleep_hook there instead: a core other than the boot core goes off with PSCI CPU_OFF (it comes back through CPU_ON"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+          "line": 14,
+          "source": "__attribute__((weak)) void (*arm64_platform_sleep_hook)(boolean_t)=nullptr;"
+        }
+      ]
+    },
+    {
+      "symbol": "_boot_kthread_report_nth",
+      "batch_fix": "B5qAbsentBoard.cpp: typed absent-provider/diagnostic definition; UFS refuses and root authorization stays false",
+      "call_declarations": [
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 530,
+          "source": "extern \"C\" int boot_kthread_report_nth(const char *prefix, unsigned nth, char *name, unsigned name_size, char *out, unsigned size);"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 540,
+          "source": "if (boot_kthread_report_nth(\"IOConfigThread\", n, name, sizeof name, where, sizeof where)) {"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+          "line": 43,
+          "source": "int boot_kthread_report_nth(const char *,unsigned,char *name,unsigned cap,char *out,unsigned size) {"
+        }
+      ]
+    },
+    {
+      "symbol": "_boot_progress_cancel_scanout",
+      "batch_fix": "B5qAbsentBoard.cpp: typed absent-provider/diagnostic definition; UFS refuses and root authorization stays false",
+      "call_declarations": [
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 86,
+          "source": "extern void boot_progress_cancel_scanout(void) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 113,
+          "source": "if(boot_progress_cancel_scanout)boot_progress_cancel_scanout();"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+          "line": 40,
+          "source": "void boot_progress_cancel_scanout(void) {}"
+        }
+      ]
+    },
+    {
+      "symbol": "_boot_progress_prepare_scanout",
+      "batch_fix": "B5qAbsentBoard.cpp: typed absent-provider/diagnostic definition; UFS refuses and root authorization stays false",
+      "call_declarations": [
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 85,
+          "source": "extern int boot_progress_prepare_scanout(void) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 94,
+          "source": "if (!boot_progress_prepare_scanout) return true;"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 102,
+          "source": "if (boot_progress_prepare_scanout()) {"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+          "line": 39,
+          "source": "int boot_progress_prepare_scanout(void) { return 1; }"
+        }
+      ]
+    },
+    {
+      "symbol": "_boot_progress_pulse_anchor",
+      "batch_fix": "B5qAbsentBoard.cpp: typed absent-provider/diagnostic definition; UFS refuses and root authorization stays false",
+      "call_declarations": [
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 33,
+          "source": "extern \"C\" int boot_progress_pulse_anchor(uintptr_t,uint64_t,unsigned,unsigned,unsigned) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 442,
+          "source": "if(boot_progress_pulse_anchor && !diagnosticAnchorMapping) {"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 449,
+          "source": "if(boot_progress_pulse_anchor(mapping->getVirtualAddress(),mapping->getLength(),width,height,"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+          "line": 41,
+          "source": "int boot_progress_pulse_anchor(uintptr_t,uint64_t,unsigned,unsigned,unsigned) { return 0; }"
+        }
+      ]
+    },
+    {
+      "symbol": "_boot_progress_stage",
+      "batch_fix": "B5qAbsentBoard.cpp: typed absent-provider/diagnostic definition; UFS refuses and root authorization stays false",
+      "call_declarations": [
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 87,
+          "source": "extern void boot_progress_stage(const char *) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 285,
+          "source": "if(status!=kIOReturnSuccess && boot_progress_stage) {"
+        },
+        {
+          "file": "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+          "line": 288,
+          "source": "boot_progress_stage(message);"
+        },
+        {
+          "file": "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+          "line": 42,
+          "source": "void boot_progress_stage(const char *) {}"
+        }
+      ]
+    },
+    {
+      "symbol": "_native_adreno_fences",
+      "batch_fix": "NativeAdrenoPublish.cpp/NativeAdrenoVm.cpp + full implementation closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 62,
+          "source": "extern \"C\" bool native_adreno_fences(uint32_t *submitted,uint32_t *retired) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 63,
+          "source": "extern \"C\" bool native_adreno_fences_detail(uint32_t *,uint32_t *,uint32_t *) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 229,
+          "source": "if(&native_adreno_fences && native_adreno_fences(&submitted,&retired)){const int32_t d=int32_t(submitted-retired);outstanding=d>0?(d>255?255:uint32_t(d)):0;}"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 382,
+          "source": "if(!&native_adreno_fences_detail && !&native_adreno_fences) {"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 385,
+          "source": "const bool known=&native_adreno_fences_detail?native_adreno_fences_detail(&submitted,&retired,detail):"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 386,
+          "source": "(&native_adreno_fences && native_adreno_fences(&submitted,&retired));"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoPublish.cpp",
+          "line": 748,
+          "source": "* The display's prefix (native_adreno_fences) is not the measure here: it stays below a finished fence of the high ring for as long"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoPublish.cpp",
+          "line": 1359,
+          "source": "extern \"C\" bool native_adreno_fences_detail(uint32_t *submitted,uint32_t *retired,uint32_t *detail)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoPublish.cpp",
+          "line": 1373,
+          "source": "extern \"C\" bool native_adreno_fences(uint32_t *submitted,uint32_t *retired)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoPublish.cpp",
+          "line": 1375,
+          "source": "return native_adreno_fences_detail(submitted,retired,nullptr);"
+        }
+      ]
+    },
+    {
+      "symbol": "_native_adreno_fences_detail",
+      "batch_fix": "NativeAdrenoPublish.cpp/NativeAdrenoVm.cpp + full implementation closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 63,
+          "source": "extern \"C\" bool native_adreno_fences_detail(uint32_t *,uint32_t *,uint32_t *) __attribute__((weak_import));"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 382,
+          "source": "if(!&native_adreno_fences_detail && !&native_adreno_fences) {"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 385,
+          "source": "const bool known=&native_adreno_fences_detail?native_adreno_fences_detail(&submitted,&retired,detail):"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoPublish.cpp",
+          "line": 1359,
+          "source": "extern \"C\" bool native_adreno_fences_detail(uint32_t *submitted,uint32_t *retired,uint32_t *detail)"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoPublish.cpp",
+          "line": 1375,
+          "source": "return native_adreno_fences_detail(submitted,retired,nullptr);"
+        }
+      ]
+    },
+    {
+      "symbol": "_native_adreno_vm_now_us",
+      "batch_fix": "NativeAdrenoPublish.cpp/NativeAdrenoVm.cpp + full implementation closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 198,
+          "source": "extern \"C\" uint64_t (*native_adreno_vm_now_us)(void);"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoService.cpp",
+          "line": 202,
+          "source": "native_adreno_vm_now_us=vm_clock_us;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 31,
+          "source": "extern \"C\" {extern uint64_t (*native_adreno_vm_now_us)(void);volatile uint32_t native_adreno_method_stats[20][4];volatile uint32_t native_adreno_map_fail[7][2];"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+          "line": 559,
+          "source": "native_adreno_vm_now_us=[]()->uint64_t{return vm_clock && vm_clock->now_us?vm_clock->now_us(vm_clock->cookie):0;};"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoVm.cpp",
+          "line": 66,
+          "source": "extern \"C\" {uint64_t (*native_adreno_vm_now_us)(void)=nullptr;volatile uint64_t native_adreno_vm_phase_us[2][8];}"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoVm.cpp",
+          "line": 72,
+          "source": "uint64_t last=native_adreno_vm_now_us?native_adreno_vm_now_us():0,began=last;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoVm.cpp",
+          "line": 74,
+          "source": "if(!native_adreno_vm_now_us)return;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoVm.cpp",
+          "line": 75,
+          "source": "const uint64_t now=native_adreno_vm_now_us();native_adreno_vm_phase_us[row][slot]+=now-last;last=now;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoVm.cpp",
+          "line": 77,
+          "source": "uint64_t elapsed() const {return native_adreno_vm_now_us?native_adreno_vm_now_us()-began:0;}"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoVm.cpp",
+          "line": 79,
+          "source": "if(!native_adreno_vm_now_us)return;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeAdrenoVm.cpp",
+          "line": 80,
+          "source": "const uint64_t total=native_adreno_vm_now_us()-began;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_vm.cpp",
+          "line": 28,
+          "source": "extern \"C\" {extern uint64_t (*native_adreno_vm_now_us)(void);extern volatile uint64_t native_adreno_vm_phase_us[2][8];}"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_vm.cpp",
+          "line": 200,
+          "source": "native_adreno_vm_now_us=nowUs;uint64_t before=native_adreno_vm_phase_us[0][5];"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/tests/test_vm.cpp",
+          "line": 204,
+          "source": "native_adreno_vm_now_us=nullptr;fixture.mode=Contiguous;"
+        }
+      ]
+    },
+    {
+      "symbol": "_native_exit_trace",
+      "batch_fix": "B5qAbsentBoard.cpp: typed absent-provider/diagnostic definition; UFS refuses and root authorization stays false",
+      "call_declarations": [
+        {
+          "file": "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+          "line": 48,
+          "source": "void native_exit_trace(int,const char *,int) {}"
+        }
+      ]
+    },
+    {
+      "symbol": "_native_gpu_trace_enabled",
+      "batch_fix": "NativeAdrenoPublish.cpp/NativeAdrenoVm.cpp + full implementation closure",
+      "call_declarations": [
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp",
+          "line": 215,
+          "source": "if(&native_gpu_trace_enabled && native_gpu_trace_enabled()) {"
+        },
+        {
+          "file": "UniXNU/drivers/GopFramebuffer/NativeGpuTrace.h",
+          "line": 36,
+          "source": "int native_gpu_trace_enabled(void) NATIVE_GPU_TRACE_LINK;"
+        },
+        {
+          "file": "UniXNU/drivers/Adreno740/NativeGpuTrace.h",
+          "line": 36,
+          "source": "int native_gpu_trace_enabled(void) NATIVE_GPU_TRACE_LINK;"
+        }
+      ]
+    }
+  ],
+  "scope": "Complete observed final linker set and batched fix mapping before round 1"
+}

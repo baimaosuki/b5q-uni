@@ -5,14 +5,26 @@
   "rounds": [
     {
       "round": 1,
-      "status": "local-preflight-complete-not-yet-CI-compiled",
+      "status": "failure",
       "batch": [
         "actual macOS source storage ABI and deferred RAM adapter",
         "complete shared Adreno and support kits",
         "typed absent board/persistence hooks",
         "official FAT payload and package manifest",
         "encrypted full-log/artifact return"
+      ],
+      "run": 44417344446,
+      "first_error": "ShengGmu.c includes board-generated ShengGmuSource.h; cold-start cannot be treated as generic",
+      "passed": [
+        "real storage recipe",
+        "GOP/AES recipe",
+        "all selected NativeAdreno C++ implementation units"
       ]
+    },
+    {
+      "round": 2,
+      "status": "preflight-complete",
+      "fix": "Exclude board-generated GMU cold-start C rather than copying private rules; retain all generic units; fix transfer root lookup"
     }
   ],
   "success": false,

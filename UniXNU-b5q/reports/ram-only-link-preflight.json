@@ -118,5 +118,8 @@
   "planned_sources_missing": [],
   "ufs_controller_linked": false,
   "stubs": "B5qAbsentBoard.cpp, explicit unavailable-provider/diagnostic behavior",
-  "result": "PASS"
+  "result": "PASS",
+  "callback_signature_report": "reports/board-signature-preflight.json",
+  "full_missing_symbol_map": "reports/link-baseline-symbol-coverage.json",
+  "preflight_result": "PASS source existence, recipe expansion, typed callback declarations, real ADT serializer; target compilation required"
 }

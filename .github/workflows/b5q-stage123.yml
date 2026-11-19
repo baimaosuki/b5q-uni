@@ -198,6 +198,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          root="$(find UniXNU/out/b5q/macos-27.3-26C5035r -type d -name logs -print -quit | sed 's,/logs$,,')"
+          root="$(find UniXNU/out/b5q/macos-27.3-26C5035r -maxdepth 2 -type d -name logs -print -quit | sed 's,/logs$,,')"
           test -n "$root"
           python3 UniXNU-b5q/scripts/ci-transfer.py send --root "$root" --public UniXNU-b5q/scripts/ci-recipient-public.pem --out "$RUNNER_TEMP/b5q-result-transfer" --publish

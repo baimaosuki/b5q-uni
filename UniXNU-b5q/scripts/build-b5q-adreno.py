@@ -8,7 +8,9 @@ includes=[]
 for path in ['kits/Sm8550Platform','kits/AdrenoFirmware','kits/AdrenoPM4','kits/ArmSmmu4K','drivers/Adreno740','.cache/xnu-work/osfmk']:
  includes+=['-I',str(ROOT/path)]
 sources=sorted(p for p in (ROOT/'drivers/Adreno740').glob('NativeAdreno*.cpp') if p.name!='NativeAdrenoAccelerator.cpp')
-sources += [ROOT/'kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c']]
+# Do not compile ShengGmu.c: it requires Xiaomi-generated register rules.
+# Without those headers the shared GPU service excludes cold-start code.
+# All generic C++ implementation and firmware/PM4/SMMU parsers remain real.
 sources += [ROOT/'kits/AdrenoFirmware'/name for name in ['AdrenoHfi.c','AdrenoHfiStartup.c','AdrenoHfiVotes.c','AdrenoFirmware.c']]
 sources += sorted((ROOT/'kits/ArmSmmu4K').glob('ArmSmmu4K*.c'))+[ROOT/'kits/AdrenoPM4/AdrenoPM4.c']
 # No generated board address/rate headers and no Xiaomi signed firmware.

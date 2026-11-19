@@ -1,0 +1,17 @@
+{
+  "scope": "Host C++ declaration equivalence only; actual pinned signatures, no XNU ABI claim",
+  "result": "PASS",
+  "checked_prototypes": [
+    "unsigned native_ufs_store_mode(void);",
+    "int native_ufs_store_open(uint64_t, uint64_t *, const char **);",
+    "int native_ufs_store_read(uint64_t, uint32_t, void *);",
+    "int native_ufs_store_write(uint64_t, uint32_t, const void *);",
+    "int native_ufs_store_write_cached(uint64_t, uint32_t, const void *);",
+    "int native_ufs_store_sync(void);",
+    "unsigned native_ufs_store_gpt_check(void);",
+    "extern \"C\" void (*arm64_platform_sleep_hook) (boolean_t boot_cpu);",
+    "extern \"C\" int boot_progress_pulse_anchor(uintptr_t,uint64_t,unsigned,unsigned,unsigned);",
+    "extern \"C\" int boot_kthread_report_nth(const char *prefix, unsigned nth, char *name, unsigned name_size, char *out, unsigned size);"
+  ],
+  "source_sha256": "dd30f172b0514cbe867c32e8222afa8eeaf305050cb1c0f2d06661e7139be5dc"
+}
