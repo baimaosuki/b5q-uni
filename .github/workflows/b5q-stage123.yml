@@ -1,4 +1,4 @@
-name: b5q macOS RAM-only kernel and payload
+name: b5q macOS first-root kernel and payload
 run-name: b5q ${{ inputs.os_profile || 'macos-27.3-26C5035r' }} kernel / ${{ github.sha }}
 
 on:
@@ -73,7 +73,7 @@ jobs:
       - name: Install upstream macOS host tools
         run: |
           set -euo pipefail
-          brew install llvm lld mtools dtc
+          brew install llvm lld mtools dtc blacktop/tap/ipsw
           if ! command -v unifdef >/dev/null; then
             brew install unifdef
             echo "$(brew --prefix unifdef)/bin" >> "$GITHUB_PATH"
@@ -103,6 +103,13 @@ jobs:
           set -euo pipefail
           ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
           ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
+      - name: Build exact-UUID template Data before the kernel
+        env:
+          UNIXNU_IPSW_JOBS: '16'
+        run: |
+          set -euo pipefail
+          python3 scripts/b5q-install/build-data-seed.py --unixnu UniXNU --out "$RUNNER_TEMP/b5q-first-root" --gpt scripts/b5q-install/gpt-input.json 2>&1 | tee "$RUNNER_TEMP/b5q-template-console.log"
+          echo "B5Q_DATA_SEED=$RUNNER_TEMP/b5q-first-root/runtime/data.dbr" >> "$GITHUB_ENV"
       - name: Build full-component XNU
         id: kernel
         working-directory: UniXNU
@@ -110,7 +117,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          ./unixnu build kernel --device ../UniXNU-b5q --os "$OS_PROFILE" 2>&1 | tee "$RUNNER_TEMP/b5q-kernel-console.log"
+          ./unixnu build kernel --device ../UniXNU-b5q --os "$OS_PROFILE" --data-ramdisk "$B5Q_DATA_SEED" 2>&1 | tee "$RUNNER_TEMP/b5q-kernel-console.log"
       - name: Check out pinned panic-screen font source only
         if: success()
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -127,7 +134,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference 2>&1 | tee "$RUNNER_TEMP/b5q-payload-console.log"
+          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$B5Q_DATA_SEED" 2>&1 | tee "$RUNNER_TEMP/b5q-payload-console.log"
       - name: Collect text diagnostics
         if: always()
         env:
@@ -212,4 +219,4 @@ jobs:
           set -euo pipefail
           root="$(find UniXNU/out/b5q/macos-27.3-26C5035r -maxdepth 2 -type d -name logs -print -quit | sed 's,/logs$,,')"
           test -n "$root"
-          python3 UniXNU-b5q/scripts/ci-transfer.py send --root "$root" --public UniXNU-b5q/scripts/ci-recipient-public.pem --out "$RUNNER_TEMP/b5q-result-transfer" --publish
+          python3 UniXNU-b5q/scripts/ci-transfer.py send --root "$root" --public UniXNU-b5q/scripts/ci-recipient-public.pem --out "$RUNNER_TEMP/b5q-result-transfer" --extra runtime/data.dbr --extra runtime/data-seed.json --publish

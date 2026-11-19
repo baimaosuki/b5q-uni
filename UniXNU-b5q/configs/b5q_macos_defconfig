@@ -13,3 +13,13 @@ CONFIG_XNU_NATIVE_ADRENO=y
 # RAM-only source storage: the actual public base and RamBlock live in one archive.
 CONFIG_XNU_SOURCE_STORAGE=y
 CONFIG_XNU_EXTRA_LD_ARCHIVES="-Wl,-force_load,{tree}/build/ram-block/libRamBlock.a -Wl,-force_load,{tree}/build/software-aes/libSoftwareAES.a"
+
+# Authenticated three-window macOS root; writable installation Data remains RAM-backed.
+CONFIG_XNU_OWNER_ROOT_AUDIT=y
+CONFIG_XNU_OWNER_ROOT_TRUST=y
+CONFIG_XNU_OWNER_CACHE_MOUNT=y
+CONFIG_XNU_OWNER_CACHE_STARTUP=y
+CONFIG_XNU_OWNER_BOOT_MANIFEST=y
+CONFIG_XNU_OWNER_DATA_MOUNT=y
+CONFIG_XNU_OWNER_UNION_SYSTEMOS=y
+CONFIG_XNU_OWNER_DATA_VOLUME_UUID="1552CFEE-78FF-48D8-8A6C-694B867D61AC"

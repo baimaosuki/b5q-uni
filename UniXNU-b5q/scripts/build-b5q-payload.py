@@ -6,7 +6,7 @@ physical memory, include persistent OS root windows, or claim a desktop boot.
 """
 import argparse,hashlib,importlib.util,json,os,secrets,subprocess,sys
 from pathlib import Path
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('--unixnu',type=Path,required=True);p.add_argument('--device',type=Path,required=True);p.add_argument('--font-source',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--unixnu',type=Path,required=True);p.add_argument('--device',type=Path,required=True);p.add_argument('--font-source',type=Path,required=True);p.add_argument('--data-ramdisk',type=Path,required=True);a=p.parse_args()
 core,device,font=a.unixnu.resolve(),a.device.resolve(),a.font_source.resolve()
 sys.path.insert(0,str(core/'scripts'))
 from unixnu.cli import parser
@@ -20,21 +20,20 @@ if not seedfile.exists():
  fd=os.open(seedfile,os.O_WRONLY|os.O_CREAT|os.O_EXCL,0o600)
  with os.fdopen(fd,'w') as f:f.write(f'{secrets.randbits(64) or 1:016x}\n')
 seed=runtime/'data.dbr'
-if not seed.exists():
- raw=runtime/'ram-data.cdr'
- subprocess.run(['hdiutil','create','-size','512m','-layout','NONE','-fs','APFS','-volname','Data','-type','UDTO',str(raw)],check=True)
- spec=importlib.util.spec_from_file_location('b5q_packed_ramdisk',ctx.tree/'drivers/DarwinBoot/Test/packed_ramdisk.py');packed=importlib.util.module_from_spec(spec);spec.loader.exec_module(packed)
- packed.pack(raw,seed)
- logical,regions=packed.regions(seed.read_bytes())
- if logical!=512*1024*1024:raise SystemExit('Unexpected volatile APFS logical size')
- raw.unlink()
+import shutil
+provided=a.data_ramdisk.resolve()
+record=json.loads(provided.with_name('data-seed.json').read_text())
+if record['volume_uuid']!='1552CFEE-78FF-48D8-8A6C-694B867D61AC' or hashlib.sha256(provided.read_bytes()).hexdigest()!=record['sha256']:
+ raise SystemExit('Data seed/compiled volume identity mismatch')
+shutil.copyfile(provided,seed)
+shutil.copyfile(provided.with_name('data-seed.json'),runtime/'data-seed.json')
 env=dict(os.environ,UNIXNU_UNIQUE_CHIP_ID=seedfile.read_text().strip(),UNIXNU_UEFI=str(font))
 subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--os','macos-27.3-26C5035r','--data-ramdisk',str(seed)],cwd=core,env=env,check=True)
 files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/payload.img'}
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)
 manifest=pipeline.write_manifest(ctx,modules,plan,files)
-data=json.loads(manifest.read_text());data['scope']='RAM-only compile/link bring-up; not a full macOS installation or hardware qualification'
-data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':False,'persistent_root_windows':False,'data_seed':'new 512MiB volatile APFS filesystem, not a reused installation'}
+data=json.loads(manifest.read_text());data['scope']='Initial b5q macosroot reader build; authenticated roots plus volatile template Data; hardware boot not yet observed'
+data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':True,'persistent_block_writes':False,'persistent_root_windows':True,'root_partition':'macosroot','data_seed':'official template-derived 29GiB sparse RAM Data; exact UUID bound to this kernel'}
 data['identity']={'kind':'fresh development build namespace','published_seed':False}
 data['memory_handoff']={'dts_dram':'zero placeholder from the Samsung static source','physical_window':'DarwinBoot EFI allocator at load time, not a fabricated b5q physical address'}
 data['hardware_tested']=False
@@ -47,4 +46,4 @@ for relative,source in [('EFI/UniXNU/Payloads/kernel.macho',None),('EFI/UniXNU/P
  content=subprocess.check_output(['mtype','-i',str(files['payload.img']),'::/'+relative])
  if not content:raise SystemExit('Empty payload member '+relative)
  if source and hashlib.sha256(content).hexdigest()!=hashlib.sha256(source.read_bytes()).hexdigest():raise SystemExit('Payload seed mismatch')
-print('PASS: actual kernel, FAT members, volatile APFS seed and official package manifest hashes')
+print('PASS: actual first-root kernel, FAT members, template RAM Data and manifest hashes; hardware boot unobserved')

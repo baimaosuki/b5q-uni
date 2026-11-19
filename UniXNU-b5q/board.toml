@@ -60,7 +60,7 @@ title = "UniXNU b5q macOS 27.3"
 panic_screen = true
 tools = true
 # No UFS-root, persistence, Xiaomi GPIO or GPU power votes are enabled by these arguments.
-kernel_args = ["-v", "debug=0x14e", "vc-text=1"]
+kernel_args = ["-v", "debug=0x14e", "vc-text=1", "native-source-storage=1", "b5q-root=1"]
 
 [payload.adt]
 chip_id = "6050"

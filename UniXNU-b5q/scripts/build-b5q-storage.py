@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build actual macOS IOBlockStorageDevice + RamBlock, without any UFS driver."""
+"""Build actual macOS IOBlockStorageDevice + RamBlock, with Samsung b5q read-only root transport."""
 import importlib.util,os,subprocess
 from pathlib import Path
 from b5q_compile import ROOT,compile,archive,late,report
@@ -21,14 +21,16 @@ OSDefineAbstractStructors(IOBlockStorageDevice, IOService)
 OSDefineOperatorMethods(IOBlockStorageDevice)
 '''))
 osx=out/'macos-target.h';osx.write_text('#include <TargetConditionals.h>\n#undef TARGET_OS_OSX\n#define TARGET_OS_OSX 1\n')
-includes=['-I',str(out/'headers/include'),'-I',str(ROOT/'.cache/xnu-work/osfmk'),'-I',str(ROOT/'kits/VerifiedRoot/include')]
+includes=['-I',str(out/'headers/include'),'-I',str(ROOT/'.cache/xnu-work/osfmk'),'-I',str(ROOT/'kits/VerifiedRoot/include'),'-I',str(ROOT/'kits/b5q/B5qUfs')]
 flags=['-include',str(osx)]
-sources=[base,ROOT/'drivers/RamBlock/NativeRamBlock.cpp',ROOT/'kits/b5q/B5qRamStorage.cpp',ROOT/'kits/b5q/B5qAbsentBoard.cpp',ROOT/'kits/VerifiedRoot/src/verified_root.c',ROOT/'kits/VerifiedRoot/adapters/xnu_crypto.c']
+sources=[base,ROOT/'drivers/RamBlock/NativeRamBlock.cpp',ROOT/'kits/b5q/B5qRamStorage.cpp',ROOT/'kits/b5q/B5qAbsentBoard.cpp',ROOT/'kits/b5q/B5qUfs/B5qUfs.cpp',ROOT/'kits/b5q/B5qRootBinding.cpp',ROOT/'kits/VerifiedRoot/src/verified_root.c',ROOT/'kits/VerifiedRoot/adapters/xnu_crypto.c']
 objects=[]
 for source in sources:
  obj=compile(source,out/(source.stem+'.o'),includes,flags+(['-Wno-error'] if source==base else []))
- if source in sources[:2]:obj=late(source,obj)
+ if source in sources[:2] or source.name=="B5qUfs.cpp":obj=late(source,obj)
  objects.append(obj)
+import json,sys
+objects += [Path(p) for p in json.loads(subprocess.check_output([sys.executable,str(ROOT/'scripts/build-b5q-pmgr.py')],text=True))]
 path=archive(out/'libRamBlock.a',objects)
-report(path,objects,sources,dict(ufs_controller=False,volatile_only=True,original_storage_class_size_checked_at_runtime=True))
-print('PASS: macOS source storage ABI, actual RamBlock and VerifiedRoot; no UFS implementation linked')
+report(path,objects,sources,dict(ufs_controller=True,persistent_block_writes=False,root_partition="macosroot",data_in_ram=True,original_storage_class_size_checked_at_runtime=True))
+print('PASS: macOS source storage ABI, actual RamBlock and VerifiedRoot; b5q authenticated read-only macosroot driver linked; no persistent writes')

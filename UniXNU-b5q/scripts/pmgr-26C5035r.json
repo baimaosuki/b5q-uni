@@ -1,0 +1,29 @@
+{
+  "kernelcache_sha256": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9",
+  "collection_slide": "0x1f000000000",
+  "bindings": {
+    "construct": {
+      "name": "__ZN9ApplePMGRC2EPK11OSMetaClass",
+      "address": "0xfffffe0009897c48",
+      "first_32_bytes": "5f2403d57f2303d5f657bda9f44f01a9fd7b02a9fd830091f30300aa08cc4191"
+    },
+    "factory": {
+      "name": "__ZN12ApplePMGRNub17withRegistryEntryEP15IORegistryEntryP9IOService",
+      "address": "0xfffffe00098ebac8",
+      "first_32_bytes": "5f2403d57f2303d5f657bda9f44f01a9fd7b02a9fd830091f40301aaf50300aa"
+    },
+    "read": {
+      "name": "__ZN12ApplePMGRNub25getPMGRAONSecuritySetOnlyEv",
+      "address": "0xfffffe00098ef408",
+      "first_32_bytes": "5f2403d5004440f9a00100b4100040f9f10300aa31b4f9f2301ac1da118081d2"
+    },
+    "write": {
+      "name": "__ZN12ApplePMGRNub25setPMGRAONSecuritySetOnlyEj",
+      "address": "0xfffffe00098ece48",
+      "first_32_bytes": "5f2403d5004440f9a00100b4100040f9f10300aa31b4f9f2301ac1da118181d2"
+    }
+  },
+  "base_read": "__ZN9ApplePMGR25getPMGRAONSecuritySetOnlyEv",
+  "base_write": "__ZN9ApplePMGR25setPMGRAONSecuritySetOnlyEj",
+  "scope": "Original PMGR base constructor and actual nub factory only; no virtual machine flag, AMFI patch, power-control claim or Apple hardware start."
+}

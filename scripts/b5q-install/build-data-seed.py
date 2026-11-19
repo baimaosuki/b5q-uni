@@ -21,7 +21,7 @@ ctx=SimpleNamespace(board=profile,out_root=out/'inputs',args=SimpleNamespace(ips
 source=Ipsw(ctx,profile['ipsw']['url']);os_image=source.disk_image('OS');digest=sha256_file(os_image)
 if digest!=profile['root']['os_image_sha256']:raise SystemExit('Fresh OS image differs from exact profile pin')
 runtime=out/'runtime';runtime.mkdir(exist_ok=True);seed=runtime/'data.dbr'
-subprocess.run(['sudo','-n',sys.executable,str(core/'scripts/make-macos-data-seed.py'),str(os_image),str(seed),'--gib',str(gib)],check=True)
+subprocess.run(['sudo','-n',sys.executable,str(core/'scripts/make-macos-data-seed.py'),str(os_image),str(seed),'--gib',str(gib),'--volume-uuid','1552CFEE-78FF-48D8-8A6C-694B867D61AC'],check=True)
 spec=importlib.util.spec_from_file_location('packed_seed',core/'drivers/DarwinBoot/Test/packed_ramdisk.py');packed=importlib.util.module_from_spec(spec);spec.loader.exec_module(packed);logical,regions=packed.regions(seed.read_bytes());assert logical==gib*2**30
 identities=set()
 for _,data in regions:

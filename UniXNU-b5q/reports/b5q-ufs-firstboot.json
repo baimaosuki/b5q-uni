@@ -1,0 +1,131 @@
+{
+  "origin": "Samsung original firmware F7310ZCS7EYF3 vendor_boot DTB extraction; no live observations",
+  "bases": [
+    {
+      "source": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/base-0.dtb",
+      "sha256": "dc7719ad12f6a629d382ae78f868c60b20972511b5ada41e1f445843a780e32d",
+      "ufs_reg": [
+        30949376,
+        12288,
+        30965760,
+        32768,
+        30998528,
+        36864
+      ],
+      "ufs_iommus": [
+        66,
+        96,
+        0
+      ],
+      "ufs_interrupts": [
+        0,
+        265,
+        4
+      ],
+      "smmu_reg": [
+        352321536,
+        1048576,
+        354410496,
+        64
+      ],
+      "dma_coherent": true
+    },
+    {
+      "source": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/base-1.dtb",
+      "sha256": "e0e9b1f7f67f97ebf2804baee2590c1a17e318798880dc4c387306fee1cef4b1",
+      "ufs_reg": [
+        30949376,
+        12288,
+        30965760,
+        32768,
+        30998528,
+        36864
+      ],
+      "ufs_iommus": [
+        66,
+        96,
+        0
+      ],
+      "ufs_interrupts": [
+        0,
+        265,
+        4
+      ],
+      "smmu_reg": [
+        352321536,
+        1048576,
+        354410496,
+        64
+      ],
+      "dma_coherent": true
+    },
+    {
+      "source": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/base-2.dtb",
+      "sha256": "8d3f65f648bf7d1028de9eb79cea8c7735e8dcb0f5497fe4b1424317b5200d79",
+      "ufs_reg": [
+        30949376,
+        12288,
+        30965760,
+        32768,
+        30998528,
+        36864
+      ],
+      "ufs_iommus": [
+        66,
+        96,
+        0
+      ],
+      "ufs_interrupts": [
+        0,
+        265,
+        4
+      ],
+      "smmu_reg": [
+        352321536,
+        1048576,
+        354410496,
+        64
+      ],
+      "dma_coherent": true
+    },
+    {
+      "source": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/base-3.dtb",
+      "sha256": "f5a8b85a513500ef5058daf94f3bc7934c2e1d6dd688f3110fcd3d986aa206ba",
+      "ufs_reg": [
+        30949376,
+        12288,
+        30965760,
+        32768,
+        30998528,
+        36864
+      ],
+      "ufs_iommus": [
+        66,
+        96,
+        0
+      ],
+      "ufs_interrupts": [
+        0,
+        265,
+        4
+      ],
+      "smmu_reg": [
+        352321536,
+        1048576,
+        354410496,
+        64
+      ],
+      "dma_coherent": true
+    }
+  ],
+  "lun_policy": "Discover active normal LUNs using READ CAPACITY16 and valid GPT; accept exactly one macosroot at supplied 49692663..62275574 bounds",
+  "partition_write_commands": false,
+  "stage": "initial compile and host tests; actual live handoff not yet observed",
+  "root_headers": {
+    "OS": "39adef8118e3b036a2e6006bc633882e0f247e3ca56e3520d7ab6ed1f38e5b52",
+    "SystemOS": "d6d76b2f46fb4ba5fee122ffd52be8bee1a6c756b7445ef835322a24d4c86995",
+    "App": "eda2bbf719b8da0467c4570ffcff2ab66e737105cb20037b7fa9e6b1e2d632e5"
+  },
+  "public_anchor_sha256": "c02f35430ee6f894dff93ea812bb595a1186c3486ba8e0b494a0972c8692bafe",
+  "private_key_in_source": false
+}

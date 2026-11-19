@@ -12,8 +12,8 @@
 #include <stdint.h>
 extern "C" {
 __attribute__((weak, visibility("hidden"))) void (*arm64_platform_sleep_hook)(boolean_t)=nullptr;
-__attribute__((weak, visibility("hidden"))) volatile int native_owner_root_accepted=0;
-__attribute__((weak, visibility("hidden"))) volatile dev_t native_owner_root_mount_device=NODEV;
+// Root acceptance and mount device are now defined by the real XNU owner-root audit path.
+
 unsigned native_ufs_store_mode(void) { return 0; }
 int native_ufs_store_open(uint64_t,uint64_t *bytes,const char **why) {
     if(bytes)*bytes=0;
