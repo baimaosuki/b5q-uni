@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <vector>
 using namespace B5qFormat;
 static void put32(uint8_t *p,uint32_t n){for(unsigned i=0;i<4;++i)p[i]=n>>(8*i);}
 static void put64(uint8_t *p,uint64_t n){put32(p,uint32_t(n));put32(p+4,uint32_t(n>>32));}
@@ -19,5 +20,16 @@ int main(int argc,char **argv){assert(argc==2);FILE *f=fopen(argv[1],"rb");asser
  put64(table+32,firstLba-1);g.crc=crc32(table,4096);assert(!target(table,g));put64(table+32,firstLba);
  memcpy(table+128,table,128);g.crc=crc32(table,4096);assert(!target(table,g));memset(table+128,0,128);
  table[128]=1;put64(table+128+32,firstLba+5);put64(table+128+40,lastLba-5);g.crc=crc32(table,4096);assert(!target(table,g));
+ // Real Samsung-sized metadata envelopes: 8192 x 128 B fits the existing
+ // authorized 1 MiB/GPT-LBA1..264 reader; the old arbitrary 4096 cap did not.
+ std::vector<uint8_t> large(1024*1024);uint8_t *e=large.data()+36*128;e[0]=1;put64(e+32,firstLba);put64(e+40,lastLba);for(unsigned i=0;i<sizeof(name);++i)e[56+2*i]=name[i];
+ put32(h+80,8192);put32(h+88,crc32(large.data(),large.size()));seal(h);const char *why=nullptr;assert(header(h,70000000,g,&why));assert(target(large.data(),g,&why)&&strcmp(why,"matched")==0);
+ put64(h+32,69999998);seal(h);assert(!header(h,70000000,g,&why)&&strcmp(why,"gpt-backup-lba")==0);put64(h+32,69999999);seal(h);
+ h[90]^=1;assert(!header(h,70000000,g,&why)&&strcmp(why,"gpt-header-crc")==0);h[90]^=1;
+ put64(h+72,10);seal(h);assert(!header(h,70000000,g,&why)&&strcmp(why,"gpt-table-bounds")==0);put64(h+72,2);seal(h);
+ put32(h+80,8193);seal(h);assert(!header(h,70000000,g,&why)&&strcmp(why,"gpt-entry-shape")==0);put32(h+80,8192);seal(h);assert(header(h,70000000,g));
+ large[80]^=1;assert(!target(large.data(),g,&why)&&strcmp(why,"gpt-table-crc")==0);large[80]^=1;
+ put64(e+32,firstLba-1);g.crc=crc32(large.data(),large.size());assert(!target(large.data(),g,&why)&&strcmp(why,"macosroot-bounds")==0);put64(e+32,firstLba);
+ memcpy(large.data()+37*128,e,128);g.crc=crc32(large.data(),large.size());assert(!target(large.data(),g,&why)&&strcmp(why,"macosroot-duplicate")==0);
  assert(!inside(UINT64_MAX,4096,partitionBytes));assert(!inside(0,0,partitionBytes));puts("PASS: actual root manifest, GPT CRC/identity/bounds, metadata confinement, duplicate and overlap rejection");
 }

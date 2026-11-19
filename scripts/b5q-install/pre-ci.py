@@ -40,7 +40,7 @@ run('porting-record', [sys.executable, 'UniXNU/scripts/porting-record.py', 'chec
 run('source-contract', [sys.executable, 'tests/b5q-ufs/test-source-contract.py'])
 run('installer-errors', [sys.executable, 'tests/b5q-ufs/test-installer.py'])
 flags = ['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-Wno-misleading-indentation', '-fsanitize=address,undefined', '-I', device / 'package/B5qUfs']
-for name in ['root-format', 'smmu']:
+for name in ['root-format', 'smmu', 'protocol']:
     executable = out / name
     run(name + '-compile', [*flags, 'tests/b5q-ufs/' + name + '.cpp', '-o', executable])
     run(name + '-runtime', [executable, *([root_dir / 'delivery/macosroot.img'] if name == 'root-format' else [])])

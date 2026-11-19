@@ -1,0 +1,45 @@
+{
+  "photo_sha256": "834b5a0c0ce2b072b5addeade68343a126c23118ad776cd50c29309195461b7b",
+  "observed": "v9 selectLun failed after SCSI Response UPIU; OCS0 type21 reuse1; not the previous SMMU external abort",
+  "confirmed_defects": [
+    "wake/readiness commands absent",
+    "valid CHECK CONDITION with residual can poison transport",
+    "panic omits SCSI/sense/LUN and conflates failures"
+  ],
+  "powerdown_on_b5q": "unknown; photo does not carry bCurrentPowerMode or sense",
+  "protocol_reference": "sources/reference-ShengUfs/NativeUfs.cpp:1423-1465 and RootCommands.h:291-320; standard UFS commands only",
+  "status": "local checks passed; preparing single full kernel build",
+  "hardware_success": false,
+  "changes": [
+    "NOP OUT -> READ ATTRIBUTE power -> optional SSU ACTIVE to D0 -> 50ms -> power requery",
+    "per normal LUN TUR retry <=20 at10ms before capacity",
+    "CHECK CONDITION/sense parsed before data residual validation; no poison on device status",
+    "RC10 fallback only for explicit RC16 illegal-request sense 05/20/00 or05/24/00",
+    "GPT rejection reason plus same CRC, BackupLBA and exact root bounds; count max8192 within unchanged1MiB metadata read bound",
+    "SHNGROOTv2 and all signed table/image bindings retained, phase-specific root errors",
+    "full panic state plus per-LUN rejection list; ordinary artifact; no QEMU"
+  ],
+  "tests": {
+    "pre_ci": "PASS16 checks",
+    "protocol": "ASan/UBSan production helper/state-machine regression PASS",
+    "root_format": "actual 17.6GB root image SHA256 and signed policy inputs PASS; full1MiB GPT and negative cases PASS"
+  },
+  "root_audit": {
+    "backup_lba": "kept == capacity_blocks - 1; GPT standard, not changed without actual header evidence",
+    "metadata_reads": "still LBA1..264, entriesLba2..64, <=1MiB",
+    "root_lba": [
+      49692663,
+      62275574
+    ],
+    "SHNGROOTv2": "all6 names, aligned offsets, lengths, flags, header SHA256, RSA trust anchor and3 table hashes remain checked",
+    "arbitrary_count_cap": "4096 raised to8192 because8192x128=1MiB fits the existing read envelope; actual phone GPT count unknown"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "fa5f0d7114d9b2573aca9295bb7fd09eb0aeb61e68be85647206753e8c73e5d0",
+    "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "1fc7e24d21d789d8309aafc681d74871dfc4fbfb7232b3c4d01c48279fca42e6",
+    "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
+    "tests/b5q-ufs/protocol.cpp": "c80e1cbb1547dc36016e9dbc8e513f1f9cfebc93bfdb8ec2119374712730cc13",
+    "tests/b5q-ufs/root-format.cpp": "383fff81d9fae3d32d94a73cf2a06fcf2a2daf29dc0397ac39a05167b90ff21a",
+    "scripts/b5q-install/download-ci-artifact.py": "01f76f5f45c58b7434d5d788b9f669b9547188e141f1e86ba104f0c3a399714a"
+  }
+}

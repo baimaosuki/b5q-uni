@@ -34,6 +34,7 @@ def main():
     parser.add_argument('--base',type=Path,default=ROOT/'artifacts/b5q-esp-adt-v7')
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--qemu',action='store_true')
+    parser.add_argument('--version',type=int,default=10)
     a=parser.parse_args();ci=a.ci_files.resolve();base=a.base.resolve();out=a.out.resolve()
     index=json.loads((ci/'transfer-index.json').read_text());manifest=json.loads((ci/'package.manifest.json').read_text())
     report=json.loads((ci/'payload/payload.json').read_text());kernel=json.loads((ci/'kernel/kernel.json').read_text())
@@ -83,7 +84,8 @@ def main():
         assert entry['path']=='Payloads/kernel.macho' and entry['initrd']=='Payloads/scratch-data.img'
         if not menu.get('driver'):
             config=config.replace('[[entry]]','[[driver]]\npath = "Drivers/DarwinBoot.efi"\n\n[[entry]]',1)
-        if '[ui]' not in config:config=config.replace('version = 1','version = 1\n[ui]\ntitle = "b5q macOS - ESP v9"',1)
+        if '[ui]' not in config:config=config.replace('version = 1','version = 1\n[ui]\ntitle = "b5q macOS - ESP vVERSION"',1)
+        config=config.replace('ESP vVERSION',f'ESP v{a.version}')
         config_path.write_text(config);menu=tomllib.loads(config)
         assert menu['driver']==[{'path':'Drivers/DarwinBoot.efi'}]
         assert [e['id'] for e in menu['entry']]==[e['id'] for e in tomllib.loads((base/'esp-files/EFI/UniXNU/unixnu.toml').read_text())['entry']]
@@ -108,11 +110,11 @@ def main():
         with esp.open('rb') as stream:bpb=stream.read(512)
         assert struct.unpack_from('<H',bpb,11)[0]==4096 and bpb[13]==1 and bpb[82:90]==b'FAT32   ' and bpb[510:512]==b'\x55\xaa'
         assert struct.unpack_from('<I',bpb,32)[0]*4096==esp.stat().st_size
-        delivery=dict(os_profile=manifest['os_profile'],scope='v9 kernel/SMMU/text-console update on existing memory-v8 boot and macosroot',
+        delivery=dict(os_profile=manifest['os_profile'],scope=f'v{a.version} UFS wake/readiness and SCSI response update on existing memory-v8 boot and macosroot',
           ci_run=index['run'],source_commit=index['commit'],deploy_kernel_sha256=expected['kernel.macho'],
           raw_kernel=record(ci/'kernel/kernel.macho'),ci_payload=record(ci/'payload/payload.img'),
           kernel_command_line=line,outputs={'esp.img':record(esp)},esp_files=members,retained_loader_modules=retained,
-          build_status=dict(delivery_version='b5q-esp-kernel-v9',flash_candidate_ready=True,esp_install_required=True,root_read_only=True,data_volatile=True,esp_fat_sector_bytes=4096,esp_sectors_per_cluster=1,hardware_boot_verified=False),
+          build_status=dict(delivery_version=f'b5q-esp-kernel-v{a.version}',flash_candidate_ready=True,esp_install_required=True,root_read_only=True,data_volatile=True,esp_fat_sector_bytes=4096,esp_sectors_per_cluster=1,hardware_boot_verified=False),
           checks=dict(mapping_complete=True,missing_symbols={},post_reseal_idempotent=True,root_policies_bound=True,adt_typed_properties=True,fat_roundtrip=True),hardware_tested=False)
         (package/'package.manifest.json').write_text(json.dumps(delivery,indent=2)+'\n')
         if a.qemu:

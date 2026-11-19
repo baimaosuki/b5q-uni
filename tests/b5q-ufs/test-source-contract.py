@@ -6,11 +6,14 @@ root=Path(__file__).resolve().parents[2];device=root/'UniXNU-b5q';source=(device
 assert '0x01d84000,0x3000' in source and '0x15000000,0x100000' in source
 smmu=(device/'package/B5qUfs/B5qSmmu.h').read_text()
 assert '0x80000060U' in smmu and '0x1401' not in source+smmu
-assert 'if(!normalUnit(lun))continue' in source and 'unit[4]==0' in source and 'last<lastLba' in source
-assert '0x9e&&cdb[1]==0x10' in source and 'cdb[0]!=0x88' in source
+assert 'if(!normalUnit(lun))' in source and 'if(unit[4]!=0)' in source and 'last<lastLba' in source
+protocol=(device/'package/B5qUfs/B5qUfsProtocol.h').read_text()
+assert 'cdb[0]==0x9e&&cdb[1]==0x10' in protocol and 'cdb[0]==0x88' in protocol
+assert 'if(!wakeDevice())' in source and 'ready(lun,readinessCommand' in source
+assert 'if(lun==0xd0)' in protocol and 'cdb[4]!=0x10' in protocol
 assert 'host.selected||lba<1||lba>264||count>265-lba' in source
 assert 'lun!=host.lun||lba<firstLba||lba>lastLba' in source
-assert 'out.entriesLba<=64' in fmt and '265-out.entriesLba' in fmt
+assert 'out.entriesLba>64' in fmt and '265-out.entriesLba' in fmt
 assert 'vr_open_header(' in source and 'vr_open(' in source and 'vr_verify_block(' in source
 assert 'VM_PROT_READ' in source and 'OSDynamicCast(B5qRootBlock' in source
 assert 'b5q-root=1' in board['payload']['kernel_args']
