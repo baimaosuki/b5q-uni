@@ -246,5 +246,71 @@
   },
   "root_policy_hosts_verified": true,
   "kernel_policy_anchor_bound": false,
-  "data_seed_status": "pending actual official macOS CI build; no reused empty RAM seed"
+  "data_seed_status": "actual official template-derived seed built by macOS CI 44482188463, encrypted returned and independently verified locally",
+  "data_seed": {
+    "profile": "macos-27.3-26C5035r",
+    "source": "fresh Apple IPSW OS template; pinned official make-macos-data-seed.py",
+    "os_image_sha256": "40d8282eb8650da9b4d7437a981764c48d47ee4bdc5b8b362248f25ecbce0e70",
+    "bytes": 21581984,
+    "sha256": "93f9b069dbd573f1f9af39949a23fc8cda36cd8122626eb1931460e9d1b98a03",
+    "logical_bytes": 31138512896,
+    "data_gib": 29,
+    "volume_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+    "fresh_first_install": true,
+    "template_owners_preserved": true,
+    "account_created": false,
+    "skip_setup": false,
+    "auto_login": false,
+    "existing_kernel_bound": false,
+    "macosroot_partition_bytes": 51539607552,
+    "root_image_bytes": 17603493888,
+    "size_formula": "official seed-data-grow.auto_gib(capacity, default 1024MiB reserve); no persistent transport enabled",
+    "ci_run": "44482188463",
+    "hardware_tested": false
+  },
+  "data_seed_ci": {
+    "run": 44482188463,
+    "commit": "8be7133847c273a96149275d3cbbb8e11a606200",
+    "status": "completed",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 135416829046,
+        "name": "seed",
+        "status": "completed",
+        "conclusion": "success",
+        "active": []
+      },
+      {
+        "id": 135418624263,
+        "name": "b5q-transfer-44482188463-000",
+        "status": "completed",
+        "conclusion": "success",
+        "active": []
+      },
+      {
+        "id": 135418685339,
+        "name": "b5q-transfer-44482188463-001",
+        "status": "completed",
+        "conclusion": "success",
+        "active": []
+      }
+    ]
+  },
+  "delivery_directory": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/delivery",
+  "guide": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/delivery/\u5237\u5165\u6307\u5357.md",
+  "flash_ready": false,
+  "kernel_root_transport": false,
+  "new_policy_and_data_kernel_binding": false,
+  "archive": {
+    "archive": "/home/baimao/zflip5/artifacts/b5q-full-27.3-26C5035r/b5q-27.3-26C5035r-installation-inputs.tar.zst",
+    "bytes": 13602899435,
+    "sha256": "7c3608c35e3c7ee223bd165c0d5bca6531a132c685f17002272f09f1fc2cd633",
+    "zstd_stream_checksum_valid": true,
+    "all_archive_member_hashes_match_delivery": true,
+    "file_count": 37,
+    "complete_flash_package": false,
+    "flash_ready": false,
+    "scope": "Fresh exact-version system-root images, host-signed policies, template-derived Data and existing RAM test menu. Pending b5q root transport and rebuilt policy/Data binding."
+  }
 }
