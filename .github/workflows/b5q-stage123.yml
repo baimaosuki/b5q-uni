@@ -199,6 +199,8 @@ jobs:
           name: b5q-build-${{ github.run_id }}
           path: |
             UniXNU/out/b5q/**/kernel/kernel.macho
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
+            UniXNU/out/b5q/**/tree/build/**/*.a
             UniXNU/out/b5q/**/kernel/*.json
             UniXNU/out/b5q/**/payload/payload.img
             UniXNU/out/b5q/**/payload/payload.json

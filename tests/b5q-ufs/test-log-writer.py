@@ -44,6 +44,8 @@ HARNESS=r'''
 #include "B5qLogProtocol.h"
 #include "B5qLogArgs.h"
 using namespace B5qUfsProtocol;
+static void *IOMalloc(size_t n){return malloc(n);}
+static void IOFree(void*p,size_t){free(p);}
 typedef int IOReturn;typedef int wait_result_t;typedef void* thread_t;
 #define KERN_SUCCESS 0
 #define kMillisecondScale 1
@@ -94,6 +96,7 @@ static void thread_yield_internal(int){
 }
 int main(int argc,char**argv){
  assert(argc==4);media=fopen(argv[1],"r+b");assert(media);fail_header=atoi(argv[2]);bool negative=atoi(argv[3]);
+ static nb_log_volume fixture;nabu_log_volume_ptr=&fixture;
  uint8_t token[16];assert(b5qLogArgs(bootargs.c_str(),token));
  for(const char*s:{"b5q-log=0 b5q-log-token=411839cbaebac4088c251c0ea57579a2","b5q-log=1 b5q-log-token=123","b5q-log=1 b5q-log-token=00000000000000000000000000000000","b5q-log=1 b5q-log=1 b5q-log-token=411839cbaebac4088c251c0ea57579a2"})assert(!b5qLogArgs(s,token));
  // Root protocol cannot ever emit journal writes or SYNC.
@@ -103,6 +106,10 @@ int main(int argc,char**argv){
  quarantine=true;assert(nabuLogIo(false,1,1,payload)==-1);assert(!submissions&&!held);
  for(uint8_t c:dma)assert(c==0xa5);quarantine=false;host.poisoned=false;
  assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,true,false,3163314,1));
+ std::vector<uint8_t> ring(NB_LOG_CAPACITY);
+ nabu_capture_append("EARLY-BOOT\n",11);
+ assert(nabu_capture_expand(ring.data()));
+ uint8_t early[11];assert(nabu_capture_copy(0,11,early)&&!memcmp(early,"EARLY-BOOT\n",11));
  std::vector<char> text(NB_LOG_CAPACITY+77);for(unsigned i=0;i<text.size();++i)text[i]='a'+i%26;
  nabu_capture_append(text.data(),text.size());
  nabu_capture_lock=1;nabu_capture_append("DROP",4);nabu_capture_lock=0;

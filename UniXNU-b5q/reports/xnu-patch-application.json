@@ -670,7 +670,7 @@
     },
     {
       "name": "b5q-console-journal.patch",
-      "sha256": "289d6f910ba8639ad8d4b17927a5e3dd2a5ab9408c6fb0a3a26f9df4c9b63577",
+      "sha256": "94cc79c884f48c9738d50de127b2d8a9821a692d4ef147206ad0bdd3fed662a2",
       "result": "PASS"
     },
     {

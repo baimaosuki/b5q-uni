@@ -14,8 +14,9 @@
 #include <kern/clock.h>
 static const uint8_t nabu_log_build_id[32]="b5q-log-v12-26C5035r";
 
-static struct nb_log_volume nabu_log_volume;
-static uint8_t nabu_log_payload[NB_LOG_CAPACITY] __attribute__((aligned(4096)));
+static struct nb_log_volume *nabu_log_volume_ptr;
+#define nabu_log_volume (*nabu_log_volume_ptr)
+static uint8_t *nabu_log_payload;
 static uint8_t nabu_log_headers[2][4096],nabu_log_header[4096];
 static const char *nabu_log_io_reason="none";
 static IOReturn nabu_log_io_result;
@@ -238,6 +239,15 @@ static void nabuLogStart(void) {
     IOLog("B5QLOG2: start skipped reason=token-gate detail=%s\n",nabuLogTokenReason(gate));
     return;
   }
+  nabu_log_volume_ptr=static_cast<nb_log_volume *>(IOMalloc(sizeof(nb_log_volume)));
+  nabu_log_payload=static_cast<uint8_t *>(IOMalloc(NB_LOG_CAPACITY));
+  if(!nabu_log_volume_ptr || !nabu_log_payload) {
+    if(nabu_log_volume_ptr)IOFree(nabu_log_volume_ptr,sizeof(nb_log_volume));
+    if(nabu_log_payload)IOFree(nabu_log_payload,NB_LOG_CAPACITY);
+    nabu_log_volume_ptr=nullptr;nabu_log_payload=nullptr;
+    nabu_log_writer_state=3;IOLog("B5QLOG2: logger buffer allocation failed; RAM capture continues\n");return;
+  }
+  bzero(nabu_log_volume_ptr,sizeof(nb_log_volume));
   thread_t thread=nullptr;
   nabu_log_writer_state=1;
   if(kernel_thread_start(nabuLogThread,nullptr,&thread)==KERN_SUCCESS) {

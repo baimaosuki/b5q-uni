@@ -78,12 +78,12 @@
   ],
   "source_sha256": {
     "UniXNU-b5q/package/B5qUfs/B5qLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
-    "UniXNU-b5q/package/B5qUfs/B5qLogCore.h": "df12bcfa1ef14e21328d83e465d0ffff63a9fe60d4aceb1cfc088f5aec402b40",
+    "UniXNU-b5q/package/B5qUfs/B5qLogCore.h": "8d0a834dadea6ca796ece05d9f464157d210e2eb9d5f5d598ea1138aa7144643",
     "UniXNU-b5q/package/B5qUfs/B5qLogVolume.h": "ecb267c9adbda425d9c59d0bd6167e22b3036a25599d12f581a48fa693a46cb0",
     "UniXNU-b5q/package/B5qUfs/B5qLogArgs.h": "a41d505915d4fe13cdce209197bd610e97c56f0ddef1a2bceb12e1280ed3e887",
     "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "32c07ae59e263097af051aada8445d286be2f472ae5fe11cb180666bfb4d6447",
-    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "f4bc7fadfa7ff746e690a5acaa50f2578480e06b7c104bca49f2760c79dfa133",
-    "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "289d6f910ba8639ad8d4b17927a5e3dd2a5ab9408c6fb0a3a26f9df4c9b63577",
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "4c2fa2194b0e9f06d5d72bfd632d59b552a2edd10f4a2aa66c8ba19631e92dd3",
+    "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "94cc79c884f48c9738d50de127b2d8a9821a692d4ef147206ad0bdd3fed662a2",
     "UniXNU-b5q/scripts/xnu-panic-screen.c": "2f8e98d46b03c2f00ac079d9900a2b17c5fa1d75fc5def0ff6abc081b448558d",
     "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "6a9ecd77c7c551b7737f51557eb0ee5f05ae3fb7219b8e92aca0ad41da699f40",
     "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "043a1a97b3492dae3b80670da8a8fc243d474fd379807d3dd6e60486e5e992a3",
@@ -112,5 +112,15 @@
     ],
     "vmm_present": "1 u32 as latest Sheng macOS guest-platform policy"
   },
-  "latest_main_alignment": "reports/sheng-main-alignment-v12.json"
+  "latest_main_alignment": "reports/sheng-main-alignment-v12.json",
+  "first_target_run": {
+    "run": 44623888081,
+    "conclusion": "failure",
+    "first_final_failure": "XnuPrelink Layout.validate: Native __DATA overlaps a retained segment",
+    "native_compile": "completed (bootstrap unresolved board archives are expected; final failure was prelink placement)",
+    "cause": "10MiB static ring+payload+volume exceeds original retained DATA gap (prior native DATA1.42MiB with1.09MiB headroom)",
+    "repair": "64KiB bootstrap ring promoted to wired4MiB at official KMEM startup; 2MiB volume proof and4MiB snapshot payload use IOMalloc at token-gated log start",
+    "no_linker_validation_bypassed": true,
+    "full_log_directory": "artifacts/b5q-log-v12-work/failure-44623888081"
+  }
 }
