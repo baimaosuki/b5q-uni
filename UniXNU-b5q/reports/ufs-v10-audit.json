@@ -8,7 +8,7 @@
   ],
   "powerdown_on_b5q": "unknown; photo does not carry bCurrentPowerMode or sense",
   "protocol_reference": "sources/reference-ShengUfs/NativeUfs.cpp:1423-1465 and RootCommands.h:291-320; standard UFS commands only",
-  "status": "local checks passed; preparing single full kernel build",
+  "status": "v10 READ10 kernel/payload CI success and local ESP image verification complete",
   "hardware_success": false,
   "changes": [
     "NOP OUT -> READ ATTRIBUTE power -> optional SSU ACTIVE to D0 -> 50ms -> power requery",
@@ -23,7 +23,8 @@
   "tests": {
     "pre_ci": "PASS16 checks",
     "protocol": "ASan/UBSan production helper/state-machine regression PASS",
-    "root_format": "actual 17.6GB root image SHA256 and signed policy inputs PASS; full1MiB GPT and negative cases PASS"
+    "root_format": "actual 17.6GB root image SHA256 and signed policy inputs PASS; full1MiB GPT and negative cases PASS",
+    "read10": "PASS actual root endpoints,32bit limit, READ16 only above limit, counts, UCD byte layout, invalid fields and prohibited block-write opcodes"
   },
   "root_audit": {
     "backup_lba": "kept == capacity_blocks - 1; GPT standard, not changed without actual header evidence",
@@ -99,12 +100,68 @@
     "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
     "tests/b5q-ufs/protocol.cpp": "2b7390b2a3e01fd03d5169ab0bcfcdf72e68b2d9a6fa8f75aec8c3ebb5da76e8",
     "tests/b5q-ufs/root-format.cpp": "383fff81d9fae3d32d94a73cf2a06fcf2a2daf29dc0397ac39a05167b90ff21a",
-    "scripts/b5q-install/download-ci-artifact.py": "01f76f5f45c58b7434d5d788b9f669b9547188e141f1e86ba104f0c3a399714a"
+    "scripts/b5q-install/download-ci-artifact.py": "a856896271be568ced07113eb2f6c3c8a9f53c9c4f395a8fbcbbb69194ff063b"
   },
   "ci": {
-    "run": 44606291718,
-    "commit": "612f009e6339cc582c12486577803c7c401790ac",
-    "transport": "ordinary Actions artifact",
-    "status": "in progress"
+    "run": 44606991063,
+    "commit": "b6fd887c07b729e7e6a36d144aabe04f7648b842",
+    "status": "completed",
+    "conclusion": "success",
+    "ordinary_artifact": {
+      "id": 14570714234,
+      "archive_sha256": "970c830f1bc9c9c8d985481295140d563691aff54e41b8ca861204a7af557cdb",
+      "github_digest_verified": true
+    },
+    "prior_run_retained": 44606291718,
+    "download": "first digest mismatch rejected; retry matched GitHub artifact digest; no bypass or CI recompile"
+  },
+  "photo_limits": [
+    "OCS0 and UPIU21 establish completed request/response, not SCSI GOOD or arbitrary read reachability",
+    "Photo lacks response status/flags/sense/power, so exact device rejection code remains unknown",
+    "Normal-unit eligibility reached on at least one LUN; LUN0 identity cannot be established from omitted fields",
+    "Prior reference power33 is another board observation, used only to implement standard wake flow, not asserted as b5q measurement"
+  ],
+  "delivery": {
+    "path": "artifacts/b5q-esp-kernel-v10/esp.img",
+    "outputs": {
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "8b64abce3ee1b4338d3614e8b46e82d0a2d253871b4b0869203ad78b37990087"
+      }
+    },
+    "raw_kernel": {
+      "bytes": 142999552,
+      "sha256": "1b1c21158ccbd16a0ab9d3d6e6f8ef4687f7a8f0d3eea3f1788139d718997d7d"
+    },
+    "payload": {
+      "bytes": 268435456,
+      "sha256": "2b802d9fab9d1cf87a23982756e0ca558996ae4e6f343824e5bddd7cd26e0230"
+    },
+    "deployment_kernel_sha256": "bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835",
+    "local_checks": {
+      "mapping_complete": true,
+      "missing_symbols": {},
+      "post_reseal_idempotent": true,
+      "root_policies_bound": true,
+      "adt_typed_properties": true,
+      "fat_roundtrip": true
+    },
+    "binary_audit": {
+      "deployment_kernel_sha256": "bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835",
+      "wire_read10_opcode_in_actual_read_builder": true,
+      "wake_and_ready_commands_and_full_panic_fields": true,
+      "user_va_bits": 47,
+      "symbols": {
+        "__ZN12_GLOBAL__N_18rootReadEyyPv": "0xfffffff00c2a0218",
+        "_b5q_ufs_start.cold.1": "0xfffffff00c36c978",
+        "_b5q_ufs_start": "0xfffffff00c29c0f4",
+        "_pmap_user_va_bits": "0xfffffff00bb7cd04"
+      },
+      "new_probes": false,
+      "qemu": false,
+      "hardware_tested": false
+    },
+    "qemu": false,
+    "hardware_tested": false
   }
 }

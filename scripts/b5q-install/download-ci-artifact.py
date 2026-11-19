@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Download ordinary Actions artifacts; validate and unpack in local staging."""
-import argparse,hashlib,json,os,stat,tempfile,urllib.request,urllib.error,urllib.parse,zipfile
+import argparse,hashlib,json,os,stat,tempfile,time,urllib.request,urllib.error,urllib.parse,zipfile
 from pathlib import Path
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--run',type=int,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
 repo='baimaosuki/b5q-uni';token=os.environ.get('GH_TOKEN') or (Path.home()/'.config/gh/token').read_text().strip()
@@ -16,17 +16,23 @@ artifact=found[0]
 class NoRedirect(urllib.request.HTTPRedirectHandler):
  def redirect_request(self,*args,**kwargs):return None
 with tempfile.TemporaryDirectory(prefix='b5q-artifact-') as tmp:
- archive=Path(tmp)/'artifact.zip'
- try:response=urllib.request.build_opener(NoRedirect).open(urllib.request.Request(base+'/actions/artifacts/'+str(artifact['id'])+'/zip',headers=headers),timeout=90)
- except urllib.error.HTTPError as e:
-  if e.code!=302:raise
-  url=e.headers['Location'];parts=urllib.parse.urlsplit(url);host=parts.hostname or ''
-  assert parts.scheme=='https' and any(host.endswith(s) for s in ['.githubusercontent.com','.blob.core.windows.net','.amazonaws.com'])
-  response=urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'b5q-build-download'}),timeout=120)
- with response,archive.open('wb') as output:
-  while block:=response.read(1024*1024):output.write(block)
- digest=sha(archive);expected=artifact.get('digest')
- if expected:assert expected=='sha256:'+digest,'Actions artifact digest mismatch'
+ archive=Path(tmp)/'artifact.zip';expected=artifact.get('digest')
+ for attempt in range(3):
+  try:
+   try:response=urllib.request.build_opener(NoRedirect).open(urllib.request.Request(base+'/actions/artifacts/'+str(artifact['id'])+'/zip',headers=headers),timeout=90)
+   except urllib.error.HTTPError as e:
+    if e.code!=302:raise
+    url=e.headers['Location'];parts=urllib.parse.urlsplit(url);host=parts.hostname or ''
+    assert parts.scheme=='https' and any(host.endswith(s) for s in ['.githubusercontent.com','.blob.core.windows.net','.amazonaws.com'])
+    response=urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'b5q-build-download'}),timeout=120)
+   with response,archive.open('wb') as output:
+    while block:=response.read(1024*1024):output.write(block)
+   digest=sha(archive)
+   if expected:assert expected=='sha256:'+digest,'Actions artifact digest mismatch'
+   break
+  except Exception:
+   if attempt==2:raise
+   print('Retrying artifact download; verification remains required',flush=True);time.sleep(2)
  with zipfile.ZipFile(archive) as z:
   members=z.infolist();manifests=[v for v in members if Path(v.filename).name=='package.manifest.json'];assert len(manifests)==1
   prefix=Path(manifests[0].filename).parent;dest=a.out.resolve();dest.mkdir(parents=True,exist_ok=False)
