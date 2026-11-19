@@ -17,7 +17,7 @@
   "memory_plan": "request4GiB via ADT; actual UEFI allocator still must supply conventional memory; do not relabel the full5GiB as proven free",
   "watchdogd": "existing b5q kernel does not include BootWatchdogPolicy argument handler; disable only com.apple.watchdogd through RAM Data disabled.plist",
   "hardware_tested": false,
-  "status": "local preflight PASS; submit payload-only build",
+  "status": "payload-only CI and delivered ESP validation complete",
   "preflight": {
     "checks": [
       "python/yaml syntax",
@@ -36,6 +36,67 @@
     "UniXNU-b5q/scripts/reuse-v10-kernel.py": "7540dd020d6791c769ac1e7aa3200922b42a19564a942f8270dc007573e1ab11",
     "scripts/b5q-install/build-data-seed.py": "68379f8fc2c8e33eaaaa647c4ec4faf0b2697fc09fc2814297d307d7457461c8",
     "scripts/b5q-install/build-ci-esp.py": "914556a1bb5c9933accdb0eecf497add72e7a4dd6beedb146d9ccf2b0ff9be65",
-    ".github/workflows/b5q-runtime.yml": "c7d56f6600112fdd0273c79ffc2f199ed794019e10d44738094f1af45dfb5406"
+    ".github/workflows/b5q-runtime.yml": "c7d56f6600112fdd0273c79ffc2f199ed794019e10d44738094f1af45dfb5406",
+    "scripts/b5q-install/verify-mount-runtime.py": "4c74dbd4235a4f6da39cafc633b8dd6bdfd3f0f1fd08fc0fa936096516691e50",
+    "AGENTS.md": "1b8669d1c4bff22fb896e4c94b761bded428d99376fcf87095622d18e96ded49"
+  },
+  "ci": {
+    "run": 44616733365,
+    "commit": "5302eabc4ba6a834d4cd133ba14a0d656af0fd50",
+    "conclusion": "success",
+    "kernel_build_job": "skipped",
+    "firmware_build": "not scheduled",
+    "artifact": {
+      "id": 14575486223,
+      "archive_sha256": "57c2ab38bfed0134d3d104e44d9e13a3860db67298dd4e12c29779bbdb4683bd",
+      "github_digest_verified": true
+    },
+    "kernel_reuse": 44606991063
+  },
+  "delivery": {
+    "directory": "artifacts/b5q-esp-mount-v11",
+    "outputs": {
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "dd5983250f0529cfbdbb8f7aba96bd44941ef3b5f25068b42fc01d9367c807f3"
+      }
+    },
+    "deploy_kernel_sha256": "bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835",
+    "checks": {
+      "scope": "Actual final ESP extracted kernel, Data, addon and trust cache; local verification only",
+      "kernel_byte_identical_to_v10": true,
+      "logical_Data_bytes": 2147483648,
+      "APFS_superblock_checksums_verified": 13,
+      "APFS_volume_UUIDs": [
+        "1552CFEE-78FF-48D8-8A6C-694B867D61AC"
+      ],
+      "watchdogd_seed_policy": {
+        "com.apple.watchdogd": true
+      },
+      "addon_paths": [
+        "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+        "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+        "Library/User Template/Non_localized/.skipbuddy",
+        "bin/unixnu-absentd",
+        "bootshim/apfs_boot_util",
+        "test/share/manual-session"
+      ],
+      "signed_and_trusted_executables": {
+        "bootshim/apfs_boot_util": [
+          "60f17d89f11e23963543d9ca10de23b802e314ad"
+        ],
+        "bin/unixnu-absentd": [
+          "0cef40d0596e9367adb00dfbae1b78389be58d7e"
+        ]
+      },
+      "original_Apple_trust_modules_byte_identical": true,
+      "hardware_tested": false,
+      "actual_seed_production_sparse_import_and_write_read": "PASS ASan/UBSan; logical2GiB and volatile tail sector roundtrip, no persistent transport"
+    },
+    "ADT_memory_bytes": 4294967296,
+    "maxvnodes": 66560,
+    "kernel_args": "-v debug=0x14e use_contiguous_hint=0 kt_fixed_zones=120 -no_slto_panic vc-text=1 native-source-storage=1 b5q-root=1 b5q-smmu-reuse=1 offline-mobile-graphics-load=1 offline-legacy-register=1 offline-legacy-gop=1 offline-legacy-pm=1 offline-legacy-validate=1 offline-legacy-transfer=1 offline-legacy-cpu-present=1 offline-legacy-phase=4 aks=1 aks-sls=3 offline-key-events=1 apfs-boot-shim=1 timebase-hz=24000000 offline-mobile-graphics-client=1 disable-watchdogd=1",
+    "qemu": false,
+    "hardware_tested": false
   }
 }
