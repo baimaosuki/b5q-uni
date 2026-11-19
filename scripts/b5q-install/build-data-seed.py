@@ -29,5 +29,7 @@ for _,data in regions:
   block=data[at:at+4096]
   if block[32:36]==b'APSB':identities.add(str(uuid.UUID(bytes=bytes(block[240:256]))).upper())
 if len(identities)!=1:raise SystemExit('Require exactly one APFS Data volume UUID')
+trust_inputs=[source.extract(name) for name in ['StaticTrustCache','Cryptex1,SystemTrustCache','Cryptex1,AppTrustCache']]
+subprocess.run([sys.executable,str(core/'scripts/bundle-ipsw-trust.py'),str(runtime/'original-ipsw-trust.bundle'),*[str(x) for x in trust_inputs]],check=True)
 record={'profile':'macos-27.3-26C5035r','source':'fresh Apple IPSW OS template; pinned official make-macos-data-seed.py','os_image_sha256':digest,'bytes':seed.stat().st_size,'sha256':sha256_file(seed),'logical_bytes':logical,'data_gib':gib,'volume_uuid':identities.pop(),'fresh_first_install':True,'template_owners_preserved':True,'account_created':False,'skip_setup':False,'auto_login':False,'existing_kernel_bound':False,'macosroot_partition_bytes':capacity,'root_image_bytes':root_bytes,'size_formula':'official seed-data-grow.auto_gib(capacity, default 1024MiB reserve); no persistent transport enabled','ci_run':os.environ.get('GITHUB_RUN_ID'),'hardware_tested':False}
 (runtime/'data-seed.json').write_text(json.dumps(record,indent=2)+'\n');print('PASS: actual template-derived Data seed; administrator/Setup and kernel binding remain explicit integration tasks')

@@ -127,5 +127,35 @@
     "App": "eda2bbf719b8da0467c4570ffcff2ab66e737105cb20037b7fa9e6b1e2d632e5"
   },
   "public_anchor_sha256": "c02f35430ee6f894dff93ea812bb595a1186c3486ba8e0b494a0972c8692bafe",
-  "private_key_in_source": false
+  "private_key_in_source": false,
+  "command_allowlist": [
+    "READ CAPACITY(16)",
+    "READ(16)"
+  ],
+  "gpt_metadata_read_lba_range": [
+    1,
+    264
+  ],
+  "root_partition_lba_range": [
+    49692663,
+    62275574
+  ],
+  "mmio_write_scope": [
+    "UFS transfer-list stop/base/run/doorbell/completion status and UTRCS IRQ mask",
+    "only exact UFS SID0x60 SMMU mapping to a free unused context bank"
+  ],
+  "persistent_block_write_commands": false,
+  "other_streams_modified": false,
+  "lun_hardcoded": false,
+  "template_data_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+  "owned_memory_size_request": 2147483648,
+  "owned_memory_physical_address": "Chosen by actual EFI allocator at boot, never hardcoded",
+  "host_tests": [
+    "actual root manifest and synthetic GPT CRC/duplicate/overlap/bounds rejection with ASan+UBSan",
+    "source command-allowlist, metadata and root bounds and root-auth flag contract",
+    "original PMGR exact fixture entrypoint bytes against hash-pinned source kernelcache"
+  ],
+  "software_display_policy": "Phase4 GOP CPU presentation using exact macOS display ABI; no Adreno power votes or Xiaomi peripherals added",
+  "compiled": false,
+  "hardware_tested": false
 }

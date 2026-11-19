@@ -60,9 +60,11 @@ title = "UniXNU b5q macOS 27.3"
 panic_screen = true
 tools = true
 # No UFS-root, persistence, Xiaomi GPIO or GPU power votes are enabled by these arguments.
-kernel_args = ["-v", "debug=0x14e", "vc-text=1", "native-source-storage=1", "b5q-root=1"]
+kernel_args = ["-v", "debug=0x14e", "vc-text=1", "native-source-storage=1", "b5q-root=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3"]
 
 [payload.adt]
+# EFI allocator chooses a real contiguous window; no physical DRAM address is invented.
+owned_memory_size = "0x80000000"
 chip_id = "6050"
 unique_chip_id = "required"
 packed_data_ramdisk = true

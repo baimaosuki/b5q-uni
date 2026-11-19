@@ -9,7 +9,7 @@ constexpr uint64_t partitionBytes=(lastLba-firstLba+1)*4096ULL;
 inline uint32_t le32(const uint8_t *p) { return uint32_t(p[0])|(uint32_t(p[1])<<8)|(uint32_t(p[2])<<16)|(uint32_t(p[3])<<24); }
 inline uint64_t le64(const uint8_t *p) { return le32(p)|(uint64_t(le32(p+4))<<32); }
 inline uint32_t be32(const uint8_t *p) { return (uint32_t(p[0])<<24)|(uint32_t(p[1])<<16)|(uint32_t(p[2])<<8)|p[3]; }
-inline void putBe32(uint8_t *p,uint32_t v) { for(unsigned i=0;i<4;++i)p[i]=v>>(24-8*i); }
+inline void putBe32(uint8_t *p,uint32_t v) { for(unsigned i=0;i<4;++i)p[i]=uint8_t(v>>(24-8*i)); }
 inline void putBe64(uint8_t *p,uint64_t v) { putBe32(p,uint32_t(v>>32));putBe32(p+4,uint32_t(v)); }
 inline uint32_t crc32(const uint8_t *p,size_t size) { uint32_t crc=~0U;for(size_t i=0;i<size;++i){crc^=p[i];for(unsigned b=0;b<8;++b)crc=(crc>>1)^(0xedb88320U&uint32_t(-int(crc&1)));}return ~crc; }
 inline bool equal(const void *a,const void *b,size_t n) { const auto *p=static_cast<const uint8_t*>(a),*q=static_cast<const uint8_t*>(b);uint8_t d=0;while(n--)d|=*p++^*q++;return !d; }

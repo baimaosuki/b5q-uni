@@ -10,6 +10,7 @@ on:
       - 'UniXNU-b5q/porting.toml'
       - 'UniXNU-b5q/configs/**'
       - 'UniXNU-b5q/dts/**'
+      - 'UniXNU-b5q/package/**'
       - 'UniXNU-b5q/scripts/**'
       - 'UniXNU-b5q/patches/**'
   workflow_dispatch:

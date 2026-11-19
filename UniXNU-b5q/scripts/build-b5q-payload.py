@@ -27,8 +27,10 @@ if record['volume_uuid']!='1552CFEE-78FF-48D8-8A6C-694B867D61AC' or hashlib.sha2
  raise SystemExit('Data seed/compiled volume identity mismatch')
 shutil.copyfile(provided,seed)
 shutil.copyfile(provided.with_name('data-seed.json'),runtime/'data-seed.json')
+trust=provided.with_name('original-ipsw-trust.bundle')
+if not trust.is_file():raise SystemExit('Original IPSW trust bundle is missing')
 env=dict(os.environ,UNIXNU_UNIQUE_CHIP_ID=seedfile.read_text().strip(),UNIXNU_UEFI=str(font))
-subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--os','macos-27.3-26C5035r','--data-ramdisk',str(seed)],cwd=core,env=env,check=True)
+subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--os','macos-27.3-26C5035r','--data-ramdisk',str(seed),'--trust-cache',str(trust)],cwd=core,env=env,check=True)
 files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/payload.img'}
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)
 manifest=pipeline.write_manifest(ctx,modules,plan,files)
@@ -42,7 +44,7 @@ for name,path in files.items():
  digest=hashlib.sha256(path.read_bytes()).hexdigest()
  if path.stat().st_size!=data['outputs'][name]['bytes'] or digest!=data['outputs'][name]['sha256']:raise SystemExit('Manifest mismatch: '+name)
 # Verify actual FAT members against the linked kernel and packed RAM seed.
-for relative,source in [('EFI/UniXNU/Payloads/kernel.macho',None),('EFI/UniXNU/Payloads/scratch-data.img',seed),('EFI/UniXNU/Payloads/kernel.macho.adt',None),('EFI/UniXNU/unixnu.toml',None)]:
+for relative,source in [('EFI/UniXNU/Payloads/kernel.macho',None),('EFI/UniXNU/Payloads/scratch-data.img',seed),('EFI/UniXNU/Payloads/kernel.macho.trustcache',trust),('EFI/UniXNU/Payloads/kernel.macho.adt',None),('EFI/UniXNU/unixnu.toml',None)]:
  content=subprocess.check_output(['mtype','-i',str(files['payload.img']),'::/'+relative])
  if not content:raise SystemExit('Empty payload member '+relative)
  if source and hashlib.sha256(content).hexdigest()!=hashlib.sha256(source.read_bytes()).hexdigest():raise SystemExit('Payload seed mismatch')

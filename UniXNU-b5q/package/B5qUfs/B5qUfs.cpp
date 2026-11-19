@@ -69,7 +69,7 @@ static bool startTransport() {
  if(!waitValue(0x58,~0U,0,200000)||!waitValue(0x78,~0U,0,200000))return false;
  // Stop transfer-list execution without resetting link/PHY or task-management state.
  write32(host.hc,0x60,0);if(!waitValue(0x60,1,0,10000)||read32(host.hc,0x58))return false;
- host.memory=IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task,kIODirectionInOut|kIOMemoryPhysicallyContiguous|kIOMemoryMapperNone,dmaBytes,4096);
+ host.memory=IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task,static_cast<IOOptionBits>(kIODirectionInOut)|static_cast<IOOptionBits>(kIOMemoryPhysicallyContiguous)|static_cast<IOOptionBits>(kIOMemoryMapperNone),dmaBytes,4096);
  if(!host.memory)return false;host.dma=static_cast<uint8_t*>(host.memory->getBytesNoCopy());IOByteCount contiguous=0;host.physical=host.memory->getPhysicalSegment(0,&contiguous,kIOMemoryMapperNone);
  if(!host.dma||!host.physical||(host.physical&4095)||contiguous<dmaBytes||(!(read32(host.hc,0)&(1U<<24))&&host.physical+dmaBytes>0x100000000ULL))return false;
  if(!mapUfsStream())return false;host.lock=IOLockAlloc();if(!host.lock)return false;
@@ -94,6 +94,21 @@ static int command(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,void *output
  }else host.poisoned=true;
  write32(host.hc,0x20,1);IOLockUnlock(host.lock);return status;
 }
+// Read only the standard Unit descriptor before any LUN content. UFS boot
+// LUNs (bBootLunID != 0) and disabled units are never given block commands.
+static bool normalUnit(uint8_t lun) {
+ if(lun>7||host.poisoned)return false;IOLockLock(host.lock);
+ if(read32(host.hc,0x58)||read32(host.hc,0x20)&fatalStatus){IOLockUnlock(host.lock);return false;}
+ bzero(host.dma,dmaBytes);auto *utrd=reinterpret_cast<uint32_t*>(host.dma);auto *ucd=host.dma+commandOffset;
+ utrd[0]=0x10000000U;utrd[2]=15;utrd[4]=uint32_t(host.physical+commandOffset);utrd[5]=uint32_t((host.physical+commandOffset)>>32);utrd[6]=(512U/4)|((responseOffset/4)<<16);utrd[7]=((prdOffset/4)<<16);
+ ucd[0]=0x16;ucd[5]=1;ucd[12]=1;ucd[13]=2;ucd[14]=lun;ucd[18]=0;ucd[19]=0xff;
+ clean(host.dma,dmaBytes);write32(host.hc,0x20,1);write32(host.hc,0x58,1);
+ if(!waitValue(0x58,1,0,200000)||read32(host.hc,0x20)&fatalStatus){host.poisoned=true;IOLockUnlock(host.lock);return false;}
+ clean(host.dma,dmaBytes);const uint8_t *rsp=ucd+responseOffset;unsigned length=(unsigned(rsp[10])<<8)|rsp[11],echo=(unsigned(rsp[18])<<8)|rsp[19];
+ bool ok=(utrd[2]&255)==0&&rsp[0]==0x36&&!rsp[2]&&!rsp[3]&&!rsp[6]&&!rsp[8]&&rsp[12]==1&&rsp[13]==2&&rsp[14]==lun&&!rsp[15]&&length>=0x13&&length<=255&&echo==length;
+ if(ok){const uint8_t *unit=rsp+32;ok=unit[0]>=0x13&&unit[0]<=length&&unit[1]==2&&unit[2]==lun&&unit[3]==1&&unit[4]==0&&unit[10]==12;}
+ write32(host.hc,0x20,1);IOLockUnlock(host.lock);return ok;
+}
 static bool readLba(uint8_t lun,uint64_t lba,uint32_t count,void *out,bool metadata=false) {
  if(lun>7||!count||count>maxTransfer/4096||!host.capacity[lun]||lba>=host.capacity[lun]||count>host.capacity[lun]-lba)return false;
  if(metadata){if(host.selected||lba<1||lba>264||count>265-lba)return false;}
@@ -106,9 +121,9 @@ static bool rootRead(uint64_t offset,uint64_t bytes,void *out) {
 }
 static bool selectLun() {
  uint8_t *block=static_cast<uint8_t*>(IOMalloc(4096));if(!block)return false;unsigned found=0;uint8_t selected=0;
- for(uint8_t lun=0;lun<8;++lun){uint8_t cdb[16]={0x9e,0x10};putBe32(cdb+10,32);int result=-1;
+ for(uint8_t lun=0;lun<8;++lun){if(!normalUnit(lun))continue;uint8_t cdb[16]={0x9e,0x10};putBe32(cdb+10,32);int result=-1;
   for(unsigned retry=0;retry<3;++retry){result=command(lun,cdb,32,block);if(!result)break;IODelay(1000);}if(result){if(host.poisoned)break;continue;}
-  uint64_t last=(uint64_t(be32(block))<<32)|be32(block+4);if(be32(block+8)!=4096||last==UINT64_MAX)continue;host.capacity[lun]=last+1;
+  uint64_t last=(uint64_t(be32(block))<<32)|be32(block+4);if(be32(block+8)!=4096||last==UINT64_MAX||last<lastLba)continue;host.capacity[lun]=last+1;
   if(!readLba(lun,1,1,block,true))continue;Gpt g={};if(!header(block,last+1,g))continue;
   size_t raw=size_t(g.count)*g.stride,allocated=(raw+4095)&~size_t(4095);auto *table=static_cast<uint8_t*>(IOMalloc(allocated));if(!table){IOFree(block,4096);return false;}
   bool ok=true;for(size_t at=0;at<allocated;){uint32_t take=uint32_t(allocated-at>maxTransfer?maxTransfer:allocated-at);if(!readLba(lun,g.entriesLba+at/4096,take/4096,table+at,true)){ok=false;break;}at+=take;}
@@ -175,13 +190,14 @@ static bool mediaReady(B5qRootBlock *root,const char *uuid) {
  iterator->release();return found;
 }
 static void publish(void *context,wait_result_t) {auto *provider=static_cast<IOService*>(context);unsigned order[]={1,2,0};
- for(unsigned i:order){auto *disk=new B5qRootBlock;if(!disk||!disk->init()||!disk->configure(i)||!disk->attach(provider)||!disk->start(provider))fail("root block publication");
+ for(unsigned i:order){auto *disk=new B5qRootBlock;if(!disk||!disk->init(static_cast<OSDictionary*>(nullptr))||!disk->configure(i)||!disk->attach(provider)||!disk->start(provider))fail("root block publication");
   bool ready=false;for(unsigned retry=0;retry<1200&&!ready;++retry){ready=mediaReady(disk,roots[i].uuid);if(!ready)IOSleep(50);}if(!ready)fail("APFS volume media timeout");IOLog("B5qUfs: authenticated %s volume %s ready\n",roots[i].image.name,roots[i].uuid);
  }
  provider->release();thread_terminate(current_thread());
 }
 }
 extern "C" void b5q_ufs_start(IOService *provider) {
+ unsigned requested=0;if(!PE_parse_boot_argn("b5q-root",&requested,sizeof(requested))||requested!=1)fail("explicit b5q-root=1 required");
  if(!startTransport())fail("Samsung firmware warm handoff/queue/SMMU unavailable");if(!selectLun())fail("no unique exact macosroot GPT match");if(!authenticateRoots())fail("root signature/hash-table authentication");
  provider->retain();thread_t thread=nullptr;if(kernel_thread_start(publish,provider,&thread)!=KERN_SUCCESS)fail("publisher thread");thread_deallocate(thread);
 }
