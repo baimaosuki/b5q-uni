@@ -11,6 +11,7 @@ struct Mock {
 };
 int main(){
  Mock ok;assert(ok.run());assert(ok.reg[0x800]==0x80000060&&ok.reg[0xc00]==7);assert(ok.reg[0x804]==0x80001c00&&ok.reg[0xc04]==3&&ok.reg[5*4096]==1);assert(ok.writes.size()==5);
+ Mock distinct;distinct.reg[0x800]=0x80008060;assert(distinct.run());assert(distinct.reg[0x800]==0x80008060&&distinct.reg[0xc00]==2);assert(distinct.reg[0x81c]==0x80000060);
  Mock masked;masked.reg[0x800]|=1U<<16;assert(!masked.run()&&masked.writes.empty());
  Mock duplicate;duplicate.reg[0x808]=0x80000060;assert(!duplicate.run()&&duplicate.writes.empty());
  Mock noBank;for(unsigned i=0;i<8;++i)noBank.reg[(2+i)*4096]=1;assert(!noBank.run()&&noBank.writes.empty());

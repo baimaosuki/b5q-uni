@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause-Patent
-// Explicit unavailable-provider ABI for the RAM-only build, not hardware drivers.
-// Every UFS operation refuses; no MMIO, DMA, firmware loading or GPT access.
+// Optional persistent-Data/GPU ABI refusals; authenticated root transport is B5qUfs.
+// These callbacks never issue persistent reads/writes or export diagnostics to UFS.
 #include <IOKit/IOReturn.h>
 #include <IOKit/IOLib.h>
 #include <mach/vm_types.h>
@@ -17,7 +17,7 @@ __attribute__((weak, visibility("hidden"))) void (*arm64_platform_sleep_hook)(bo
 unsigned native_ufs_store_mode(void) { return 0; }
 int native_ufs_store_open(uint64_t,uint64_t *bytes,const char **why) {
     if(bytes)*bytes=0;
-    if(why)*why="b5q RAM-only build: no persistent provider";
+    if(why)*why="b5q RAM Data: no persistent Data provider";
     return -1;
 }
 int native_ufs_store_read(uint64_t,uint32_t,void *) { return -1; }

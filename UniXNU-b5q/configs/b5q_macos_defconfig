@@ -10,7 +10,7 @@ CONFIG_XNU_KERNEL_CHAINED_FIXUPS=y
 CONFIG_XNU_NATIVE_RAM_BLOCK=y
 CONFIG_XNU_NATIVE_LEGACY_DISPLAY=y
 CONFIG_XNU_NATIVE_ADRENO=y
-# RAM-only source storage: the actual public base and RamBlock live in one archive.
+# Actual public storage base, RAM Data and read-only b5q roots share one archive.
 CONFIG_XNU_SOURCE_STORAGE=y
 CONFIG_XNU_EXTRA_LD_ARCHIVES="-Wl,-force_load,{tree}/build/ram-block/libRamBlock.a -Wl,-force_load,{tree}/build/software-aes/libSoftwareAES.a"
 

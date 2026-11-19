@@ -52,6 +52,7 @@
 &gpu { unixnu,adt-name = "gpu"; status = "okay"; };
 &gmu { unixnu,adt-name = "gmu"; status = "okay"; };
 &gpu_smmu { unixnu,adt-name = "gpu-smmu"; status = "okay"; };
-// RamBlock qualification precedes all UFS controller activity.
+// Root transport warm-adopts exact stock-DT MMIO directly in B5qUfs;
+// leave generic DT-matched UFS/PHY drivers disabled to prevent a second owner.
 &ufs { status = "disabled"; };
 &ufsphy { status = "disabled"; };

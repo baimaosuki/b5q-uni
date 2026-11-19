@@ -634,15 +634,9 @@ void native_legacy_display_late_probe(void) {
         OSArray *ranges=OSArray::withCapacity(1);
         if(nub && memory && ranges && parent && nub->init()) {
             ranges->setObject(memory);nub->setDeviceMemory(ranges);nub->setName("NativeGOPFramebuffer");
-#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
-            // macOS: the panel's density (12.4 inch, 3048 x 2032: 294 dots per inch), which the framebuffer reports as its dot pitch
-            // and turns into the display's physical size. Without one WindowServer saw a 0 x 0 inch panel and made the unscaled
-            // 3048 x 2032 mode the default (macOS run40); with it the default is the 2x mode, 1524 x 1016 points.
-            {
-                const uint32_t dotsPerInch=294;
-                if(OSData *pitch=OSData::withBytes(&dotsPerInch,sizeof(dotsPerInch))){nub->setProperty("dot-pitch",pitch);pitch->release();}
-            }
-#endif
+// b5q physical panel dimensions/density are not copied from another board.
+            // GOP provides the current pixel geometry; dot-pitch remains unset.
+
             nubAttached=nub->attach(parent);if(nubAttached)nubStarted=nub->start(parent);
             if(nubStarted) {
                 unsigned phase=0;PE_parse_boot_argn("offline-legacy-phase",&phase,sizeof(phase));

@@ -10,7 +10,7 @@ static bool b5qConfigureUfsStream(uint64_t dma,uint64_t dmaLength,Read read,Writ
  const unsigned bits[]={32,36,40,42,44,48};for(unsigned shift=0;shift<=8;shift+=4){unsigned code=(idr2>>shift)&15;if(code>=6||dma>=(1ULL<<bits[code])||dmaLength>(1ULL<<bits[code])-dma)return false;}
  int slot=-1,freeSlot=-1;unsigned matches=0;
  for(unsigned i=0;i<groups;++i){uint32_t smr=read(0x800+4*i);if(!(smr>>31)){freeSlot=int(i);continue;}
-  uint32_t mask=(smr>>16)&0x7fff;if(((smr^0x60U)&0x7fff&~mask)==0){if(mask||++matches>1)return false;slot=int(i);}}
+  uint32_t mask=(smr>>16)&0x7fff;if(((smr^0x60U)&0xffff&~mask)==0){if(mask||++matches>1)return false;slot=int(i);}}
  if(slot<0)slot=freeSlot;if(slot<0)return false;
  int bank=-1;
  for(unsigned b=banks;b-->1;){bool used=false;for(unsigned i=0;i<groups;++i){uint32_t smr=read(0x800+4*i),s2=read(0xc00+4*i);if((smr>>31)&&((s2>>16)&3)==0&&(s2&255)==b)used=true;}if(!used&&read((pages+b)*4096)==0){bank=int(b);break;}}
