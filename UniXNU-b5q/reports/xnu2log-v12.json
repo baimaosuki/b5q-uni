@@ -40,7 +40,7 @@
     "ASan_UBSan": true,
     "hardware_tested": false
   },
-  "build_status": "local checks PASS; combined target compiler pending",
+  "build_status": "PASS: real target kernel/prelink/payload and final native4K ESP verified locally",
   "hardware_tested": false,
   "ordered_patch_replay": {
     "result": "PASS",
@@ -122,5 +122,211 @@
     "repair": "64KiB bootstrap ring promoted to wired4MiB at official KMEM startup; 2MiB volume proof and4MiB snapshot payload use IOMalloc at token-gated log start",
     "no_linker_validation_bypassed": true,
     "full_log_directory": "artifacts/b5q-log-v12-work/failure-44623888081"
-  }
+  },
+  "completed_run": {
+    "run": 44626576574,
+    "source_commit": "dfe020141aa42aaf03da15c2c89c502e3cb376c5",
+    "conclusion": "success",
+    "url": "https://github.com/baimaosuki/b5q-uni/actions/runs/44626576574",
+    "core_revision": "8542980d02b4d2cc5c32ee3542de1760b2562aac",
+    "shared_soc_revision": "2dc650ca76ae38715cd0712e60a44b14fe251745"
+  },
+  "delivery": {
+    "path": "artifacts/b5q-esp-log-v12/esp.img",
+    "bytes": 838860800,
+    "sha256": "226cefe802f13751a62d88aaa9ed7b14104c239e4a59ab4ac4d1607293c7d1a4",
+    "deployed_kernel_sha256": "f1faca1ac10ba103a8689516a6862f884c6d8f82ef07ef748a6860930998e5ba",
+    "raw_kernel": {
+      "bytes": 142999552,
+      "sha256": "0ecafade099a1fc5dce2c81a9c41ae833d9c6709f7ebe4e7e45ddfb7a1611a1b"
+    },
+    "ci_payload": {
+      "bytes": 268435456,
+      "sha256": "75f36d315b2424d0ee81dd52dd296edc211798767eb8fc742f4bb095c5405311"
+    },
+    "no_firmware_rebuild": true,
+    "no_QEMU": true
+  },
+  "actual_binary_checks": {
+    "lockdown-verification.json": {
+      "passed": true,
+      "image": "artifacts/b5q-log-v12-work/deployed-kernel.macho",
+      "sha256": "f1faca1ac10ba103a8689516a6862f884c6d8f82ef07ef748a6860930998e5ba",
+      "fileset": true,
+      "public_query": "security.mac.lockdown_mode_state_public",
+      "width": 8,
+      "read_only": true,
+      "native_parent": true,
+      "original_integer_query_preserved": true,
+      "early_registration_present": true,
+      "actual_compiled_handler_executed": true,
+      "locks_and_copyout_mocked": true,
+      "cases": [
+        {
+          "native_state": 0,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 0,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 12,
+          "handler_result": 12
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 14,
+          "handler_result": 14
+        }
+      ],
+      "PAuth_not_tested": true,
+      "device_tested": false
+    },
+    "log-binary-verification.json": {
+      "result": "PASS",
+      "kernel_sha256": "f1faca1ac10ba103a8689516a6862f884c6d8f82ef07ef748a6860930998e5ba",
+      "console_to_capture_calls": {
+        "_console_write": {
+          "mode": "inlined-producer",
+          "memory_refs": {
+            "_nabu_capture_ring": [
+              "0xfffffff00bb55ab8"
+            ],
+            "_nabu_capture_end": [
+              "0xfffffff00bb55ac4",
+              "0xfffffff00bb55af8"
+            ],
+            "_nabu_capture_capacity": [
+              "0xfffffff00bb55abc"
+            ],
+            "_nabu_capture_lock": [
+              "0xfffffff00bb55ab0",
+              "0xfffffff00bb55afc"
+            ],
+            "_nabu_capture_lost": [
+              "0xfffffff00bb55b1c"
+            ]
+          }
+        },
+        "_console_write_unbuffered": {
+          "mode": "inlined-producer",
+          "memory_refs": {
+            "_nabu_capture_ring": [
+              "0xfffffff00bb5605c"
+            ],
+            "_nabu_capture_end": [
+              "0xfffffff00bb5603c",
+              "0xfffffff00bb56070"
+            ],
+            "_nabu_capture_capacity": [
+              "0xfffffff00bb56044"
+            ],
+            "_nabu_capture_lock": [
+              "0xfffffff00bb5602c",
+              "0xfffffff00bb56074"
+            ],
+            "_nabu_capture_lost": [
+              "0xfffffff00bb56088"
+            ]
+          }
+        },
+        "_serial_putc_crlf": {
+          "mode": "direct-call",
+          "sites": [
+            "0xfffffff00c1f3fd4"
+          ]
+        },
+        "_panic": [
+          "0xfffffff00bb965a8"
+        ],
+        "_panic_trap_to_debugger": [
+          "0xfffffff00bb965a8"
+        ]
+      },
+      "capture_symbol": "0xfffffff00bb5525c",
+      "writer": "__ZN12_GLOBAL__N_113nabuLogThreadEPvi",
+      "bounded_io": "__ZN12_GLOBAL__N_19nabuLogIoEbyjPhb",
+      "TryLock_in_actual_binary": true,
+      "write10_and_sync10_present": true,
+      "panic_screen_capture_hook_present": true,
+      "hardware_tested": false
+    },
+    "mount-verification.json": {
+      "scope": "Actual final ESP extracted kernel, Data, addon and trust cache; local verification only",
+      "kernel_sha256": "f1faca1ac10ba103a8689516a6862f884c6d8f82ef07ef748a6860930998e5ba",
+      "logical_Data_bytes": 2147483648,
+      "APFS_superblock_checksums_verified": 13,
+      "APFS_volume_UUIDs": [
+        "1552CFEE-78FF-48D8-8A6C-694B867D61AC"
+      ],
+      "watchdogd_seed_policy": {
+        "com.apple.watchdogd": true
+      },
+      "addon_paths": [
+        "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+        "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+        "Library/User Template/Non_localized/.skipbuddy",
+        "bin/unixnu-absentd",
+        "bootshim/apfs_boot_util",
+        "test/share/manual-session"
+      ],
+      "signed_and_trusted_executables": {
+        "bootshim/apfs_boot_util": [
+          "60f17d89f11e23963543d9ca10de23b802e314ad"
+        ],
+        "bin/unixnu-absentd": [
+          "0cef40d0596e9367adb00dfbae1b78389be58d7e"
+        ]
+      },
+      "original_Apple_trust_modules_byte_identical": true,
+      "hardware_tested": false
+    },
+    "log-allocation.json": {
+      "scope": "Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence",
+      "result": "PASS",
+      "file_bytes": 8400896,
+      "file_sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea",
+      "token": "411839cbaebac4088c251c0ea57579a2",
+      "file_first_lba": 3203656,
+      "clusters": 2051,
+      "contiguous": true,
+      "no_aliases": true,
+      "mirrored_FAT": true,
+      "fat_blocks_each": 200,
+      "config_readonly": true,
+      "write_first_lba": 3203657,
+      "write_last_lba": 3205706,
+      "committed_slots": 0,
+      "source_GPT_entries": 512,
+      "production_volume_checker": true,
+      "hardware_tested": false
+    }
+  },
+  "data_reused": {
+    "source_run": 44616733365,
+    "bytes": 21577856,
+    "sha256": "804692b96d9ba6bfcb64cbb430a627923dfdb4f072da4872ee14674365dc46b8",
+    "logical_bytes": 2147483648
+  },
+  "limits": [
+    "Actual b5q boot/writer completion requires device observation; no phone was accessed or flashed",
+    "RAM capture uses single-attempt locking with counted contention drops; only last4MiB retained",
+    "Background persistence starts after successful UFS root authentication and volume proof; storage failure cannot save through that failed path",
+    "Panic renderer appends to RAM without disk I/O; last snapshot not committed before CPU halt can be lost",
+    "Host syscall execution mocks sleep locks/copyout and skips PAuth operations; no hardware qualification implied"
+  ]
 }
