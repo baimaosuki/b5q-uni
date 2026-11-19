@@ -60,11 +60,11 @@ title = "UniXNU b5q macOS 27.3"
 panic_screen = true
 tools = true
 # b5q-root selects authenticated read-only macosroot; Data remains volatile in RAM.
-kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3"]
+kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "offline-mobile-graphics-client=1", "disable-watchdogd=1"]
 
 [payload.adt]
 # EFI allocator chooses a real contiguous window; no physical DRAM address is invented.
-owned_memory_size = "0x80000000"
+owned_memory_size = "0x100000000"
 chip_id = "6050"
 unique_chip_id = "required"
 packed_data_ramdisk = true
@@ -76,9 +76,22 @@ kernel-ctrr-to-be-enabled = 0
 # The device has no implemented suspend path (official device-tree guide).
 [adt.defaults.u32]
 sleep-disabled = 1
+"kern.maxvnodes" = 66560
 
 [package]
 unixnu = "../UniXNU"
 
 [package.defconfig]
 "macos-27.3-26C5035r" = "b5q_macos_defconfig"
+
+# macOS boot task shim; actual Metal/GPU addon stays at its existing milestone.
+[payload.runtime]
+tool = "scripts/build-boot-runtime.py"
+target = "macos27"
+build = "26C5035r"
+data_seed_tool = "scripts/make-macos-data-seed.py"
+data_gib = 2
+skip_setup = true
+boot_shims = true
+gpu_addon = false
+trust_components = ["StaticTrustCache", "Cryptex1,SystemTrustCache", "Cryptex1,AppTrustCache"]

@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  checks: write
 jobs:
   seed:
+    if: ${{ !contains(github.event.head_commit.message, '[payload-only]') }}
     runs-on: macos-26
     timeout-minutes: 90
     steps:
@@ -31,18 +31,20 @@ jobs:
         with:
           python-version: '3.13'
       - name: Install official AEA key retrieval tool
-        run: brew install blacktop/tap/ipsw
+        run: |
+          brew install blacktop/tap/ipsw
+          git -C pinned-UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
       - name: Make Data from a newly extracted IPSW OS template
         env:
           UNIXNU_IPSW_JOBS: '16'
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/b5q-install/logs"
-          python3 scripts/b5q-install/build-data-seed.py --unixnu pinned-UniXNU --out "$RUNNER_TEMP/b5q-install" --gpt scripts/b5q-install/gpt-input.json 2>&1 | tee "$RUNNER_TEMP/b5q-install/logs/data-seed.log"
-      - name: Encrypt and return actual Data seed or failure logs
+          python3 scripts/b5q-install/build-data-seed.py --unixnu pinned-UniXNU --out "$RUNNER_TEMP/b5q-install" --gpt scripts/b5q-install/gpt-input.json --ram-gib 2 --skip-setup --disable-watchdogd 2>&1 | tee "$RUNNER_TEMP/b5q-install/logs/data-seed.log"
+      - name: Upload actual Data seed and logs
         if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          python3 UniXNU-b5q/scripts/ci-transfer.py send --root "$RUNNER_TEMP/b5q-install" --public UniXNU-b5q/scripts/ci-recipient-public.pem --out "$RUNNER_TEMP/seed-transfer" --extra runtime/data.dbr --extra runtime/data-seed.json --publish
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-install-seed-${{ github.run_id }}
+          path: ${{ runner.temp }}/b5q-install/
+          retention-days: 3

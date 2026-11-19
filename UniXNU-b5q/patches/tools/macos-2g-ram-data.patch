@@ -1,0 +1,46 @@
+--- a/scripts/make-macos-data-seed.py
++++ b/scripts/make-macos-data-seed.py
+@@ -75,6 +75,7 @@
+     parser.add_argument('os', type=Path, help='system volume mount or its disk image')
+     parser.add_argument('output', type=Path)
+     parser.add_argument('--gib', type=int, required=True)
++    parser.add_argument('--disable-watchdogd', action='store_true', help='disable only com.apple.watchdogd in this RAM Data seed')
+     parser.add_argument('--skip-setup', action='store_true',
+                         help='mark Setup Assistant done (/private/var/db/.AppleSetupDone)')
+     add_account_arguments(parser)
+@@ -347,8 +348,8 @@
+         parser.error(f'no {TEMPLATE} in the system volume')
+     if args.output.exists():
+         parser.error('refuse to overwrite an existing installation seed')
+-    if not 3 <= args.gib <= 1024:
+-        parser.error('--gib must be in 3..1024')
++    if not 2 <= args.gib <= 1024:
++        parser.error('--gib must be in 2..1024')
+     owner = os.environ.get('SUDO_UID'), os.environ.get('SUDO_GID')
+     prepare_output_directory(args.output.parent, owner)
+     with tempfile.TemporaryDirectory(prefix='new-macos-data-', dir=args.output.parent) as td:
+@@ -374,6 +375,11 @@
+                 add_keyboard_types(scratch, args.keyboard_type)
+             if args.auto_login:
+                 add_auto_login(scratch, *args.user.split(':', 1))
++            if args.disable_watchdogd:
++                disabled = scratch / 'private/var/db/com.apple.xpc.launchd/disabled.plist'
++                settings = plistlib.loads(disabled.read_bytes()) if disabled.is_file() else {}
++                settings['com.apple.watchdogd'] = True
++                write_root(disabled, plistlib.dumps(settings, fmt=plistlib.FMT_XML), 0o644)
+             remove_volume_logs(scratch)
+             with new_volume(raw, '512m') as mount:
+                 subprocess.run(['ditto', scratch, mount], check=True)
+--- a/scripts/seed-data-grow.py
++++ b/scripts/seed-data-grow.py
+@@ -148,8 +148,8 @@
+         gib = auto_gib(args.userdata_bytes or userdata_bytes_from_fastboot(), args.reserve_mib)
+     else:
+         gib = args.gib
+-    if not 3 <= gib <= MAX_GIB:
+-        sys.exit(f'{gib} GiB is outside 3..{MAX_GIB}')
++    if not 2 <= gib <= MAX_GIB:
++        sys.exit(f'{gib} GiB is outside 2..{MAX_GIB}')
+     target = gib * GIB
+     blob = args.base.read_bytes()
+     logical, extents = packed_ramdisk.regions(blob)

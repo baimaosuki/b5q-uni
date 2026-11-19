@@ -1,0 +1,50 @@
+{
+  "scope": "Requested named-feature investigation and blank XNU2LOG allocation creation; no kernel/firmware build, ESP change or connected device access",
+  "reference_repository": "/home/baimao/nabu_macos",
+  "reference_commit": "44bb65d0178f15382b65a837f8fe47078ec0caeb",
+  "reference_worktree_files_sha256": {
+    "/home/baimao/nabu_macos/scripts/make_xnu2log.py": "0856eccb984f5133d2e1bd9318045f993ef34771b16cd3e86ad92784afc5e729",
+    "/home/baimao/nabu_macos/scripts/nabu_log_volume.py": "2627c66e9bb4eebfcc5baa746b755c52dfc4f76c930da3511a3bd53f0363808d",
+    "/home/baimao/nabu_macos/scripts/prepare_nabu_esp_log.py": "798d13c5c942bebdb7cbd2125fbbf29d4e8b0e61309ab95060cc6832038feac5",
+    "/home/baimao/nabu_macos/scripts/read_xnu2log.py": "4222aff70e94ce002a2c91ceb0d30cc96dfb82e86b809c30507194f68b0afe0d",
+    "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+    "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogCore.h": "c8e0da622649d35823d676825960884b8a3fb3b9b6736c7c0bb1126347254a6b",
+    "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogVolume.h": "b63c5d7dfeab742717570837e1066d9d5b87cd512a1eb831ba1780c33027481d",
+    "/home/baimao/nabu_macos/platform/nabu/macos26/log/NabuLogUfs.h": "d8cc87887e7ec0406f1fbb69fdf13e6ae323f82ebe1abd390a4bc33900cbcf95"
+  },
+  "output": {
+    "path": "artifacts/b5q-xnu2log/XNU2LOG.BIN",
+    "bytes": 8400896,
+    "sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea",
+    "format": "NABUCFG2 config + two NABULOG2 journal slots",
+    "block_bytes": 4096,
+    "blocks": 2051,
+    "capacity_per_slot": 4194304,
+    "slot_bytes": 4198400,
+    "allocation_identity": "411839cbaebac4088c251c0ea57579a2",
+    "committed_slots": 0,
+    "contains_captured_logs": false
+  },
+  "checks": {
+    "original_generator_byte_equivalence": "PASS",
+    "original_C_nb_config_valid": "PASS",
+    "C_ASan_UBSan_negative_cases": "PASS",
+    "blank_not_decodable_as_log": "PASS",
+    "existing_reference_hardware_sample_decode": "PASS",
+    "sample_payload_bytes": 1161446
+  },
+  "current_b5q_v10": {
+    "logging_writer_compiled": false,
+    "log_boot_arguments_present": false,
+    "persistent_block_writes": false,
+    "ESP_changed": false
+  },
+  "integration_requirements": [
+    "Console capture into RAM ring; NabuLogCore is generic but missing in b5q",
+    "b5q writer/transport adapter with writes bounded to verified preallocated slot blocks",
+    "Adapt generic GPT/FAT ownership verification to b5q geometry and discover LUN; NABU assumes LUN0 and <=128 GPT entries",
+    "Preallocate 2051 contiguous clusters in physical 800MiB native4K ESP and pair allocation identity with the actual kernel",
+    "Existing nabu flags are not recognized by b5q-v10; do not advertise them as an enable switch",
+    "Storage must work before file persistence; an early UFS failure cannot be saved through that failed path"
+  ]
+}

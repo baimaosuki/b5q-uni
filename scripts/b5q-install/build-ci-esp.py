@@ -66,9 +66,18 @@ def main():
         for name,digest in expected.items():assert sha(files/name)==digest,name
         seed=json.loads((ci/'runtime/data-seed.json').read_text())
         assert seed['volume_uuid']=='1552CFEE-78FF-48D8-8A6C-694B867D61AC' and seed['template_owners_preserved']
-        assert seed['sha256']==sha(files/'scratch-data.img') and seed['logical_bytes']==29*2**30
+        assert seed['sha256']==sha(files/'scratch-data.img')
+        assert seed['logical_bytes']==(2 if a.version>=11 else 29)*2**30
+        if a.version>=11:
+            assert expected['kernel.macho']=='bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835'
+            assert seed['watchdogd_disabled_in_seed'] and seed['skip_setup']
+            assert sha(files/'kernel.macho.gpuaddon')==report['gpu_addon_sha256']
         nodes=adt_decode((files/'kernel.macho.adt').read_bytes())
         for path,key,fmt,val in [('/chosen','dram-base','<Q',0x80000000),('/chosen','dram-size','<Q',0x80000000),('/chosen','kernel-ctrr-to-be-enabled','<I',0),('/defaults','sleep-disabled','<I',1)]:assert nodes[path][key]==struct.pack(fmt,val),(path,key)
+        if a.version>=11:
+            assert nodes['/chosen']['darwinboot-memory-size']==struct.pack('<Q',0x100000000)
+            assert nodes['/defaults']['kern.maxvnodes']==struct.pack('<I',66560)
+            assert len(nodes['/chosen/memory-map']['GpuAddon'])==16
         assert {path for path in nodes if path.startswith('/arm-io/')}=={'/arm-io/intc'}
         assert not any({'interrupts','interrupt-parent','interrupts-extended','interrupt-map','AAPL,interrupts'}.intersection(props) for props in nodes.values())
         # Keep the already-used transport interfaces; the official payload omits
@@ -110,7 +119,7 @@ def main():
         with esp.open('rb') as stream:bpb=stream.read(512)
         assert struct.unpack_from('<H',bpb,11)[0]==4096 and bpb[13]==1 and bpb[82:90]==b'FAT32   ' and bpb[510:512]==b'\x55\xaa'
         assert struct.unpack_from('<I',bpb,32)[0]*4096==esp.stat().st_size
-        delivery=dict(os_profile=manifest['os_profile'],scope=f'v{a.version} UFS wake/readiness and SCSI response update on existing memory-v8 boot and macosroot',
+        delivery=dict(os_profile=manifest['os_profile'],scope=f'v{a.version} payload update on existing memory-v8 boot and macosroot',
           ci_run=index['run'],source_commit=index['commit'],deploy_kernel_sha256=expected['kernel.macho'],
           raw_kernel=record(ci/'kernel/kernel.macho'),ci_payload=record(ci/'payload/payload.img'),
           kernel_command_line=line,outputs={'esp.img':record(esp)},esp_files=members,retained_loader_modules=retained,

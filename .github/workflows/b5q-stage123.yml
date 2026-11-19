@@ -38,7 +38,7 @@ env:
 
 jobs:
   kernel:
-    if: ${{ !contains(github.event.head_commit.message, '[seed-only]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[seed-only]') && !contains(github.event.head_commit.message, '[payload-only]') }}
     name: macOS XNU full-component build
     runs-on: macos-26
     timeout-minutes: 360
@@ -68,6 +68,7 @@ jobs:
         run: |
           set -euo pipefail
           brew install llvm lld mtools dtc blacktop/tap/ipsw
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           if ! command -v unifdef >/dev/null; then
             brew install unifdef
             echo "$(brew --prefix unifdef)/bin" >> "$GITHUB_PATH"
@@ -85,7 +86,7 @@ jobs:
           UNIXNU_IPSW_JOBS: '16'
         run: |
           set -euo pipefail
-          python3 scripts/b5q-install/build-data-seed.py --unixnu UniXNU --out "$RUNNER_TEMP/b5q-first-root" --gpt scripts/b5q-install/gpt-input.json 2>&1 | tee "$RUNNER_TEMP/b5q-template-console.log"
+          python3 scripts/b5q-install/build-data-seed.py --unixnu UniXNU --out "$RUNNER_TEMP/b5q-first-root" --gpt scripts/b5q-install/gpt-input.json --ram-gib 2 --skip-setup --disable-watchdogd 2>&1 | tee "$RUNNER_TEMP/b5q-template-console.log"
           echo "B5Q_DATA_SEED=$RUNNER_TEMP/b5q-first-root/runtime/data.dbr" >> "$GITHUB_ENV"
       - name: Build full-component XNU
         id: kernel

@@ -1,0 +1,41 @@
+{
+  "scope": "Payload-only repair for user-reported mount-phase-1 abort and Data device not ready; reuse exact v10 kernel",
+  "reported_evidence": "User-pasted analysis describes LUN0 exact macosroot, APFS/launchd/apfs_boot_util execution, role-volume timeout; original five photographs not attached in this turn",
+  "confirmed_source_defects": [
+    "29GiB packed Data enters NativeRamBlock isBig and refuses writes without direct persistent store",
+    "APFS boot shim patch is in existing133-patch stack, but no addon and no enabling argument",
+    "AppleKeyStore stand-in requires offline-key-events",
+    "2GiB requested owned-memory size; user requests4GiB from actual b5q high memory range"
+  ],
+  "uuid_correction": {
+    "pasted": "1552CFEE-78FF-48D0-8A6C-694B867D61AC",
+    "actual_compiled": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+    "action": "retain actual compiled UUID"
+  },
+  "data_plan": "2GiB sparse volatile Data, exactUUID, preserve template ownership, skip setup; no administrator/password invented",
+  "tool_adaptation": "minimum size3->2 in official seed creator/grow, add explicit seed watchdogd launchd policy; applied only in CI checkout and host disposable test",
+  "memory_plan": "request4GiB via ADT; actual UEFI allocator still must supply conventional memory; do not relabel the full5GiB as proven free",
+  "watchdogd": "existing b5q kernel does not include BootWatchdogPolicy argument handler; disable only com.apple.watchdogd through RAM Data disabled.plist",
+  "hardware_tested": false,
+  "status": "local preflight PASS; submit payload-only build",
+  "preflight": {
+    "checks": [
+      "python/yaml syntax",
+      "no encrypted relay",
+      "exact pinned tool patch application and syntax",
+      "board runtime, typed ADT and commandline contract",
+      "actual v10 binary shim/argument support and DataUUID"
+    ],
+    "result": "PASS",
+    "RamBlock_sparse_production_test": "PASS4000 differential operations/ASan/UBSan using actual production header; only obsolete negative fixture changed from2GiB+4096 to1TiB+4096 in disposable host test to match current parser bound"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "bbe9e21c660b81ffe829ae6a282b82287085272b4e61d3704feb1dacdc9c5df7",
+    "UniXNU-b5q/patches/tools/macos-2g-ram-data.patch": "d72219d4385243318d5434cf4dd99e3c988aa22fe76fb154b63a919f7cef7c36",
+    "UniXNU-b5q/scripts/build-b5q-payload.py": "429f203b6ee1c2ea1d30dafbf605b0ca13c4e4bc754a07e2aaa7c8f854b4740a",
+    "UniXNU-b5q/scripts/reuse-v10-kernel.py": "7540dd020d6791c769ac1e7aa3200922b42a19564a942f8270dc007573e1ab11",
+    "scripts/b5q-install/build-data-seed.py": "68379f8fc2c8e33eaaaa647c4ec4faf0b2697fc09fc2814297d307d7457461c8",
+    "scripts/b5q-install/build-ci-esp.py": "914556a1bb5c9933accdb0eecf497add72e7a4dd6beedb146d9ccf2b0ff9be65",
+    ".github/workflows/b5q-runtime.yml": "c7d56f6600112fdd0273c79ffc2f199ed794019e10d44738094f1af45dfb5406"
+  }
+}
