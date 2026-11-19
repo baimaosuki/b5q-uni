@@ -1,0 +1,54 @@
+{
+  "checks": {
+    "fileset_mapping_complete": true,
+    "hardware_tested": false,
+    "manifest_hashes": true,
+    "missing_mapping_allowed": false,
+    "missing_symbols": {},
+    "packed_APFS_logical_bytes": 536870912,
+    "packed_regions": 5,
+    "panic_screen": true,
+    "source_POST_seal_already_valid": true,
+    "ufs_controller": false
+  },
+  "ci_run": "44455422555",
+  "deployment": {
+    "entry": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-26C5035r-ram/menu-entry.toml",
+    "files": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-26C5035r-ram/menu-files",
+    "operation": "Copy three files into the same EFI/UniXNU directory tree as the existing configuration, then append the entry snippet. Do not replace the existing configuration or write the FAT image over boot."
+  },
+  "fat_members": {
+    "kernel.macho": {
+      "bytes": 142966784,
+      "sha256": "d4bc4d1d347c5345886c5864b13992ef240f414c2d89a033ca787adffe2076da"
+    },
+    "kernel.macho.adt": {
+      "bytes": 16272,
+      "sha256": "a18cd2250a9de1a0feeb90d97390a9cad1d2be58b0023b483dc1b0f1dd6e910d"
+    },
+    "scratch-data.img": {
+      "bytes": 110704,
+      "sha256": "b449fda07058cb6c9624af3ec69940b08f17b9cf07b258895a179e7b4f808cb6"
+    }
+  },
+  "files": {
+    "kernel.macho": {
+      "bytes": 142966784,
+      "path": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-26C5035r-ram/kernel.macho",
+      "sha256": "cd0016c599a6cd2dcd6a739328aca02d8da3ff6eaa7926695dfb3c8554346636"
+    },
+    "package.manifest.json": {
+      "bytes": 18026,
+      "path": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-26C5035r-ram/package.manifest.json",
+      "sha256": "43a56d348540be7b17ab47e5476297859f0786530c3863d87a601098843b9500"
+    },
+    "payload.img": {
+      "bytes": 268435456,
+      "path": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-26C5035r-ram/payload.img",
+      "sha256": "d150627e7d2d22e1ba3d70f71af257602eee281ff71357601c22dcc6b36dda47"
+    }
+  },
+  "scope": "RAM-only compiled kernel and payload; empty volatile APFS Data filesystem, not a full OS/root installation",
+  "source_commit": "0b8712cdc3508099a276bdb57f842ae4ca8fbeba",
+  "target": "macos-27.3-26C5035r"
+}

@@ -64,7 +64,7 @@
     },
     {
       "round": 5,
-      "status": "local-payload-guarded-probe-pass-await-ci",
+      "status": "success-kernel-payload-manifest-downloaded-verified",
       "remaining_undefined_symbols": [],
       "batch": [
         "Read actual relocated non-STAB source symbols from com.apple.kernel",
@@ -72,12 +72,17 @@
         "Retain panic screen and source POST reseal",
         "Publish actual payload step failure diagnostics"
       ],
-      "local_evidence": "reports/payload-probe-fix.json"
+      "local_evidence": "reports/ram-only-build-success.json",
+      "run": 44455422555,
+      "commit": "0b8712cdc3508099a276bdb57f842ae4ca8fbeba",
+      "local_artifacts": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-26C5035r-ram"
     }
   ],
-  "success": false,
+  "success": true,
   "device_required_for_build": false,
   "ufs_controller": false,
   "baseline_full_log": "artifacts/b5q-link-closure/baseline-44412976670/files/logs/final-kernel.log",
-  "baseline_full_symbol_count": 72
+  "baseline_full_symbol_count": 72,
+  "same_hard_symbol_stall": false,
+  "remaining_undefined_symbols": []
 }
