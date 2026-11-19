@@ -1,17 +1,15 @@
 # Core build selection. No inherited sheng storage archive, UUID or power policy.
 CONFIG_XNU_BUILD_ARCHIVES=y
 # Use the selected macOS profile crypto bootstrap; do not override it here.
-CONFIG_XNU_NATIVE_AES=y
+# AES is started by the ABI-qualified late probe, not an early personality.
+CONFIG_XNU_NATIVE_AES=n
+CONFIG_XNU_CRYPTO_BOOTSTRAP="source"
 CONFIG_XNU_DT_PANIC_REGION=y
 CONFIG_XNU_ARMVIRT_PLATFORM=n
 CONFIG_XNU_KERNEL_CHAINED_FIXUPS=y
 CONFIG_XNU_NATIVE_RAM_BLOCK=y
 CONFIG_XNU_NATIVE_LEGACY_DISPLAY=y
 CONFIG_XNU_NATIVE_ADRENO=y
-# prng_random omits the source-only bootstrap in prelinked mode. OSKext must
-# likewise call the original startfunc, not undefined source-provider hooks.
-CONFIG_XNU_EXTRA_CFLAGS="-Wno-reserved-identifier -Wno-pre-c11-compat -Wno-missing-designated-field-initializers -Wno-suggest-override -Wno-unnecessary-virtual-specifier -Wno-suggest-destructor-override -Wno-ms-bitfield-padding -DXNU_PRELINKED_CORECRYPTO=1"
-
 # RAM-only source storage: the actual public base and RamBlock live in one archive.
 CONFIG_XNU_SOURCE_STORAGE=y
-CONFIG_XNU_EXTRA_LD_ARCHIVES="-Wl,-force_load,{tree}/build/ram-block/libRamBlock.a"
+CONFIG_XNU_EXTRA_LD_ARCHIVES="-Wl,-force_load,{tree}/build/ram-block/libRamBlock.a -Wl,-force_load,{tree}/build/software-aes/libSoftwareAES.a"

@@ -1,0 +1,1590 @@
+{
+  "format": "MH_FILESET",
+  "inputs": {
+    "kernelcache_sha256": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9",
+    "native_sha256": "7bee819a2656d384c232c67d0cd3106d75f88731049dca5d5d8dd2b1d1b5cb9d",
+    "entry": "com.apple.kernel"
+  },
+  "matcher_version": 8,
+  "matcher_signature": "92454ffd2835401495a52e9cee39d2088e4c59521fc6fce7c4f7c3e1211804c2",
+  "reference_sha256": null,
+  "closure": [
+    "com.apple.AppleFSCompression.AppleFSCompressionTypeDataless",
+    "com.apple.AppleFSCompression.AppleFSCompressionTypeZlib",
+    "com.apple.AppleSystemPolicy",
+    "com.apple.UVCService",
+    "com.apple.driver.AppleARMPlatform",
+    "com.apple.driver.AppleARMWatchdogTimer",
+    "com.apple.driver.AppleAudioClockLibs",
+    "com.apple.driver.AppleDiskImages2",
+    "com.apple.driver.AppleEffaceableStorage",
+    "com.apple.driver.AppleFDEKeyStore",
+    "com.apple.driver.AppleHIDKeyboard",
+    "com.apple.driver.AppleIISController",
+    "com.apple.driver.AppleInputDeviceSupport",
+    "com.apple.driver.AppleM2ScalerCSCDriver",
+    "com.apple.driver.AppleMobileFileIntegrity",
+    "com.apple.driver.AppleMultitouchDriver",
+    "com.apple.driver.ApplePMGR",
+    "com.apple.driver.AppleTopCaseHIDEventDriver",
+    "com.apple.driver.AppleUSBDeviceMux",
+    "com.apple.driver.AppleUSBHostMergeProperties",
+    "com.apple.driver.AppleUSBXDCI",
+    "com.apple.driver.DiskImages",
+    "com.apple.driver.DiskImages.FileBackingStore",
+    "com.apple.driver.DiskImages.KernelBacked",
+    "com.apple.driver.DiskImages.RAMBackingStore",
+    "com.apple.driver.DiskImages.ReadWriteDiskImage",
+    "com.apple.driver.DiskImages.UDIFDiskImage",
+    "com.apple.driver.IODARTFamily",
+    "com.apple.driver.IOSlaveProcessor",
+    "com.apple.driver.corecapture",
+    "com.apple.driver.driverkit.serial",
+    "com.apple.driver.mDNSOffloadUserClient",
+    "com.apple.driver.usb.AppleUSBCommon",
+    "com.apple.driver.usb.AppleUSBHostCompositeDevice",
+    "com.apple.driver.usb.AppleUSBHostPlatformProperties",
+    "com.apple.driver.usb.AppleUSBHub",
+    "com.apple.driver.usb.AppleUSBXHCI",
+    "com.apple.driver.usb.IOUSBHostHIDDevice",
+    "com.apple.filesystems.apfs",
+    "com.apple.filesystems.hfs.kext",
+    "com.apple.filesystems.lifs",
+    "com.apple.iokit.CoreAnalyticsFamily",
+    "com.apple.iokit.EndpointSecurity",
+    "com.apple.iokit.IO80211Family",
+    "com.apple.iokit.IOAVFamily",
+    "com.apple.iokit.IOAccessoryManager",
+    "com.apple.iokit.IOAudio2Family",
+    "com.apple.iokit.IOBluetoothFamily",
+    "com.apple.iokit.IOCECFamily",
+    "com.apple.iokit.IOCryptoAcceleratorFamily",
+    "com.apple.iokit.IOGPUFamily",
+    "com.apple.iokit.IOGraphicsFamily",
+    "com.apple.iokit.IOHDCPFamily",
+    "com.apple.iokit.IOHIDFamily",
+    "com.apple.iokit.IOMobileGraphicsFamily",
+    "com.apple.iokit.IONetworkingFamily",
+    "com.apple.iokit.IOPCIFamily",
+    "com.apple.iokit.IOPortFamily",
+    "com.apple.iokit.IOReportFamily",
+    "com.apple.iokit.IOSCSIArchitectureModelFamily",
+    "com.apple.iokit.IOSCSIBlockCommandsDevice",
+    "com.apple.iokit.IOSerialFamily",
+    "com.apple.iokit.IOSkywalkFamily",
+    "com.apple.iokit.IOSlowAdaptiveClockingFamily",
+    "com.apple.iokit.IOStorageFamily",
+    "com.apple.iokit.IOSurface",
+    "com.apple.iokit.IOTimeSyncFamily",
+    "com.apple.iokit.IOUSBDeviceFamily",
+    "com.apple.iokit.IOUSBHostFamily",
+    "com.apple.iokit.IOUSBMassStorageDriver",
+    "com.apple.kec.Libm",
+    "com.apple.kec.corecrypto",
+    "com.apple.kext.AppleMatch",
+    "com.apple.kext.CoreTrust",
+    "com.apple.kpi.bsd",
+    "com.apple.kpi.dsep",
+    "com.apple.kpi.iokit",
+    "com.apple.kpi.libkern",
+    "com.apple.kpi.mach",
+    "com.apple.kpi.private",
+    "com.apple.kpi.unsupported",
+    "com.apple.plugin.IOgPTPPlugin",
+    "com.apple.security.AppleImage4",
+    "com.apple.security.Image4",
+    "com.apple.security.quarantine",
+    "com.apple.security.sandbox"
+  ],
+  "collection_base": "0xfffffff007004000",
+  "collection_slide": "0x1f000000000",
+  "native_link_address": "0xfffffff007004000",
+  "statistics": {
+    "segment_layout": {
+      "__TEXT": {
+        "old": "0xfffffff007004000",
+        "new": "0xfffffff00719c000",
+        "size": "0x194000"
+      },
+      "__DATA_CONST": {
+        "old": "0xfffffff007198000",
+        "new": "0xfffffff007dc4000",
+        "size": "0x144000"
+      },
+      "__TEXT_EXEC": {
+        "old": "0xfffffff0072dc000",
+        "new": "0xfffffff00b924000",
+        "size": "0xa0c000"
+      },
+      "__KLD": {
+        "old": "0xfffffff007ce8000",
+        "new": "0xfffffff00c330000",
+        "size": "0x4000"
+      },
+      "__LASTDATA_CONST": {
+        "old": "0xfffffff007cec000",
+        "new": "0xfffffff007f08000",
+        "size": "0x4000"
+      },
+      "__LAST": {
+        "old": "0xfffffff007cf0000",
+        "new": "0xfffffff00c334000",
+        "size": "0x0"
+      },
+      "__KLDDATA": {
+        "old": "0xfffffff007cf0000",
+        "new": "0xfffffff00f76c000",
+        "size": "0x8000"
+      },
+      "__DATA": {
+        "old": "0xfffffff007cf8000",
+        "new": "0xfffffff00c884000",
+        "size": "0x168000"
+      },
+      "__BOOTDATA": {
+        "old": "0xfffffff007e60000",
+        "new": "0xfffffff00f774000",
+        "size": "0xd4000"
+      },
+      "__PRELINK_TEXT": {
+        "old": "0xfffffff004004000",
+        "new": "0xfffffff00c334000",
+        "size": "0x0"
+      },
+      "__PRELINK_INFO": {
+        "old": "0xfffffff007f34000",
+        "new": "0xfffffff00c334000",
+        "size": "0x0"
+      },
+      "__PLK_TEXT_EXEC": {
+        "old": "0xfffffff007f34000",
+        "new": "0xfffffff00c334000",
+        "size": "0x0"
+      },
+      "__PRELINK_DATA": {
+        "old": "0xfffffff007f34000",
+        "new": "0xfffffff00c9ec000",
+        "size": "0x0"
+      },
+      "__PLK_DATA_CONST": {
+        "old": "0xfffffff007f34000",
+        "new": "0xfffffff00c334000",
+        "size": "0x0"
+      },
+      "__PLK_LLVM_COV": {
+        "old": "0xfffffff007f34000",
+        "new": "0xfffffff00c334000",
+        "size": "0x0"
+      },
+      "__PLK_LINKEDIT": {
+        "old": "0xfffffff007f34000",
+        "new": "0xfffffff00c334000",
+        "size": "0x0"
+      },
+      "__LINKINFO": {
+        "old": "0xfffffff007f34000",
+        "new": "0xfffffff00e6c4000",
+        "size": "0x48000"
+      },
+      "__LINKEDIT": {
+        "old": "0xfffffff007f7c000",
+        "new": "0xfffffff00e70c000",
+        "size": "0x9d8000"
+      }
+    },
+    "native_original_branches_rebound": 224,
+    "native_split_relocations": {
+      "kind_4": 53,
+      "kind_3": 17203,
+      "pointers": 121785,
+      "kind_5": 151356,
+      "kind_6": 160968,
+      "kind_7": 2252
+    },
+    "native_chain_sites": 121785,
+    "old_kernel_sites_dropped": 71544,
+    "unselected_chain_sites_dropped": 609757,
+    "kext_chain_sites_kept": 336083,
+    "kext_pointers_rebound": 244406,
+    "inline_data_pools_preserved": 6,
+    "inline_data_bytes_preserved": 7204,
+    "component_hmacs": {
+      "com.apple.kec.corecrypto": "af83a7a90d19d9291c1a1799e2f38dc3a6dec2fc8ef06c1ee382ed07288211b8"
+    },
+    "unselected_entries_dropped": 291,
+    "native_base": "0xfffffff00719c000",
+    "native_fileoff": "0x198000"
+  },
+  "native_original_branches": [
+    {
+      "symbol": "__ZN13IOAcceleratorC2EPK11OSMetaClass",
+      "source": "0xfffffff00c24a664",
+      "target": "0xfffffff00aae62e0",
+      "owner": "com.apple.iokit.IOGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN13IOAcceleratorD2Ev",
+      "source": "0xfffffff00c24a66c",
+      "target": "0xfffffff00aae6350",
+      "owner": "com.apple.iokit.IOGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator12_completeAESEP23IOAESAcceleratorCommand",
+      "source": "0xfffffff00c25dc98",
+      "target": "0xfffffff00a9d56b8",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator12_queueLockedEP23IOAESAcceleratorCommand",
+      "source": "0xfffffff00c25dca0",
+      "target": "0xfffffff00a9d53f8",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator13_startCommandEv",
+      "source": "0xfffffff00c25dca8",
+      "target": "0xfffffff00a9d55dc",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator17createSpecialKeysEv",
+      "source": "0xfffffff00c25dcb0",
+      "target": "0xfffffff00a9d590c",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator17performAESQuantumEP23IOAESAcceleratorCommand",
+      "source": "0xfffffff00c25dcb8",
+      "target": "0xfffffff00a9d5390",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator18completeAESQuantumEP23IOAESAcceleratorCommand",
+      "source": "0xfffffff00c25dcc0",
+      "target": "0xfffffff00a9d5294",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator18disableHardwareKeyEj",
+      "source": "0xfffffff00c25dcc8",
+      "target": "0xfffffff00a9d53cc",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAccelerator19performImmediateAESEP23IOAESAcceleratorCommand",
+      "source": "0xfffffff00c25dcd0",
+      "target": "0xfffffff00a9d53bc",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAcceleratorC2EPK11OSMetaClass",
+      "source": "0xfffffff00c25dcd8",
+      "target": "0xfffffff00a9d4024",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN16IOAESAcceleratorD2Ev",
+      "source": "0xfffffff00c25dce0",
+      "target": "0xfffffff00a9d4094",
+      "owner": "com.apple.iokit.IOCryptoAcceleratorFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy13setPropertiesEP8OSObject",
+      "source": "0xfffffff00c252c18",
+      "target": "0xfffffff00ac2baec",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque272_308552Ev",
+      "source": "0xfffffff00c252c20",
+      "target": "0xfffffff00ac3368c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque273_118723Ev",
+      "source": "0xfffffff00c252c28",
+      "target": "0xfffffff00ac33694",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque274_229744Ev",
+      "source": "0xfffffff00c252c30",
+      "target": "0xfffffff00ac3369c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque275_138256Ev",
+      "source": "0xfffffff00c252c38",
+      "target": "0xfffffff00ac262d8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque276_117298Ev",
+      "source": "0xfffffff00c252c40",
+      "target": "0xfffffff00ac2863c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque277_105425Ev",
+      "source": "0xfffffff00c252c48",
+      "target": "0xfffffff00ac28778",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque278_169329Ev",
+      "source": "0xfffffff00c252c50",
+      "target": "0xfffffff00ac28780",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque279_370757Ev",
+      "source": "0xfffffff00c252c58",
+      "target": "0xfffffff00ac287bc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque280_160526Ev",
+      "source": "0xfffffff00c252c60",
+      "target": "0xfffffff00ac287f0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque281_189376Ev",
+      "source": "0xfffffff00c252c68",
+      "target": "0xfffffff00ac2bdec",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque282_101494Ev",
+      "source": "0xfffffff00c252c70",
+      "target": "0xfffffff00ac29294",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque283_113506Ev",
+      "source": "0xfffffff00c252c78",
+      "target": "0xfffffff00ac295b4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque284_200011Ev",
+      "source": "0xfffffff00c252c80",
+      "target": "0xfffffff00ac29dc4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque285_116826Ev",
+      "source": "0xfffffff00c252c88",
+      "target": "0xfffffff00ac2b7e8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque286_106263Ev",
+      "source": "0xfffffff00c252c90",
+      "target": "0xfffffff00ac2fc3c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque287_206276Ev",
+      "source": "0xfffffff00c252c98",
+      "target": "0xfffffff00ac2fd20",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque288_111179Ev",
+      "source": "0xfffffff00c252ca0",
+      "target": "0xfffffff00ac336a8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque292_137237Ev",
+      "source": "0xfffffff00c252ca8",
+      "target": "0xfffffff00ac2f980",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque293_150448Ev",
+      "source": "0xfffffff00c252cb0",
+      "target": "0xfffffff00ac287cc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque295_106968Ev",
+      "source": "0xfffffff00c252cb8",
+      "target": "0xfffffff00ac2fad4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque296_166493Ev",
+      "source": "0xfffffff00c252cc0",
+      "target": "0xfffffff00ac2fb38",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque297_155788Ev",
+      "source": "0xfffffff00c252cc8",
+      "target": "0xfffffff00ac2f138",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque298_115227Ev",
+      "source": "0xfffffff00c252cd0",
+      "target": "0xfffffff00ac2f368",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque299_154195Ev",
+      "source": "0xfffffff00c252cd8",
+      "target": "0xfffffff00ac2f6d0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque300_168695Ev",
+      "source": "0xfffffff00c252ce0",
+      "target": "0xfffffff00ac2f8fc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque301_140141Ev",
+      "source": "0xfffffff00c252ce8",
+      "target": "0xfffffff00ac2f2b8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque302_209388Ev",
+      "source": "0xfffffff00c252cf0",
+      "target": "0xfffffff00ac2df4c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque303_105949Ev",
+      "source": "0xfffffff00c252cf8",
+      "target": "0xfffffff00ac2df5c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque304_232483Ev",
+      "source": "0xfffffff00c252d00",
+      "target": "0xfffffff00ac2df6c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque305_100043Ev",
+      "source": "0xfffffff00c252d08",
+      "target": "0xfffffff00ac2e09c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque306_116180Ev",
+      "source": "0xfffffff00c252d10",
+      "target": "0xfffffff00ac2df8c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque308_170013Ev",
+      "source": "0xfffffff00c252d18",
+      "target": "0xfffffff00ac2dfbc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque309_261311Ev",
+      "source": "0xfffffff00c252d20",
+      "target": "0xfffffff00ac2df9c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque310_109357Ev",
+      "source": "0xfffffff00c252d28",
+      "target": "0xfffffff00ac2dfac",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque311_148438Ev",
+      "source": "0xfffffff00c252d30",
+      "target": "0xfffffff00ac2dfec",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque314_140952Ev",
+      "source": "0xfffffff00c252d38",
+      "target": "0xfffffff00ac2e08c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque315_238463Ev",
+      "source": "0xfffffff00c252d40",
+      "target": "0xfffffff00ac2e0a4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque316_143060Ev",
+      "source": "0xfffffff00c252d48",
+      "target": "0xfffffff00ac2e2c8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque317_229446Ev",
+      "source": "0xfffffff00c252d50",
+      "target": "0xfffffff00ac2cbc8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque319_193675Ev",
+      "source": "0xfffffff00c252d58",
+      "target": "0xfffffff00ac336b4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque321_143981Ev",
+      "source": "0xfffffff00c252d60",
+      "target": "0xfffffff00ac2ea5c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque322_108068Ev",
+      "source": "0xfffffff00c252d68",
+      "target": "0xfffffff00ac2eb4c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque323_107839Ev",
+      "source": "0xfffffff00c252d70",
+      "target": "0xfffffff00ac2ec68",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque324_106527Ev",
+      "source": "0xfffffff00c252d78",
+      "target": "0xfffffff00ac264d8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque325_155223Ev",
+      "source": "0xfffffff00c252d80",
+      "target": "0xfffffff00ac26620",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque326_154425Ev",
+      "source": "0xfffffff00c252d88",
+      "target": "0xfffffff00ac336c0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque327_109755Ev",
+      "source": "0xfffffff00c252d90",
+      "target": "0xfffffff00ac336d0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque328_186193Ev",
+      "source": "0xfffffff00c252d98",
+      "target": "0xfffffff00ac293e8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque329_114307Ev",
+      "source": "0xfffffff00c252da0",
+      "target": "0xfffffff00ac32b80",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque330_111598Ev",
+      "source": "0xfffffff00c252da8",
+      "target": "0xfffffff00ac32b8c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque331_180162Ev",
+      "source": "0xfffffff00c252db0",
+      "target": "0xfffffff00ac32b9c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque332_156573Ev",
+      "source": "0xfffffff00c252db8",
+      "target": "0xfffffff00ac336e0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque333_112619Ev",
+      "source": "0xfffffff00c252dc0",
+      "target": "0xfffffff00ac336f0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque334_114864Ev",
+      "source": "0xfffffff00c252dc8",
+      "target": "0xfffffff00ac33700",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque335_182436Ev",
+      "source": "0xfffffff00c252dd0",
+      "target": "0xfffffff00ac33710",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque336_119352Ev",
+      "source": "0xfffffff00c252dd8",
+      "target": "0xfffffff00ac33720",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque337_153074Ev",
+      "source": "0xfffffff00c252de0",
+      "target": "0xfffffff00ac33730",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque338_135384Ev",
+      "source": "0xfffffff00c252de8",
+      "target": "0xfffffff00ac33740",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque339_164055Ev",
+      "source": "0xfffffff00c252df0",
+      "target": "0xfffffff00ac33750",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque340_132053Ev",
+      "source": "0xfffffff00c252df8",
+      "target": "0xfffffff00ac33760",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque341_254365Ev",
+      "source": "0xfffffff00c252e00",
+      "target": "0xfffffff00ac33770",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque342_104239Ev",
+      "source": "0xfffffff00c252e08",
+      "target": "0xfffffff00ac33780",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque344_111630Ev",
+      "source": "0xfffffff00c252e10",
+      "target": "0xfffffff00ac32c78",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque345_140309Ev",
+      "source": "0xfffffff00c252e18",
+      "target": "0xfffffff00ac2efbc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque346_130737Ev",
+      "source": "0xfffffff00c252e20",
+      "target": "0xfffffff00ac31490",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque347_241138Ev",
+      "source": "0xfffffff00c252e28",
+      "target": "0xfffffff00ac31314",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque348_101441Ev",
+      "source": "0xfffffff00c252e30",
+      "target": "0xfffffff00ac31344",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque349_472491Ev",
+      "source": "0xfffffff00c252e38",
+      "target": "0xfffffff00ac2dfcc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque350_134280Ev",
+      "source": "0xfffffff00c252e40",
+      "target": "0xfffffff00ac2dfdc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque351_199604Ev",
+      "source": "0xfffffff00c252e48",
+      "target": "0xfffffff00ac31354",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque352_130861Ev",
+      "source": "0xfffffff00c252e50",
+      "target": "0xfffffff00ac31364",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque353_180178Ev",
+      "source": "0xfffffff00c252e58",
+      "target": "0xfffffff00ac31374",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque354_162787Ev",
+      "source": "0xfffffff00c252e60",
+      "target": "0xfffffff00ac31384",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque355_122702Ev",
+      "source": "0xfffffff00c252e68",
+      "target": "0xfffffff00ac31324",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque356_115291Ev",
+      "source": "0xfffffff00c252e70",
+      "target": "0xfffffff00ac31334",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque357_114043Ev",
+      "source": "0xfffffff00c252e78",
+      "target": "0xfffffff00ac33790",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque358_188722Ev",
+      "source": "0xfffffff00c252e80",
+      "target": "0xfffffff00ac33798",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque359_114903Ev",
+      "source": "0xfffffff00c252e88",
+      "target": "0xfffffff00ac2777c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque360_121545Ev",
+      "source": "0xfffffff00c252e90",
+      "target": "0xfffffff00ac27814",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque363_133754Ev",
+      "source": "0xfffffff00c252e98",
+      "target": "0xfffffff00ac337a4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque364_102779Ev",
+      "source": "0xfffffff00c252ea0",
+      "target": "0xfffffff00ac337b0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque365_154801EPjS0_",
+      "source": "0xfffffff00c252ea8",
+      "target": "0xfffffff00ac337bc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque366_170640Ev",
+      "source": "0xfffffff00c252eb0",
+      "target": "0xfffffff00ac337dc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque367_159458Ev",
+      "source": "0xfffffff00c252eb8",
+      "target": "0xfffffff00ac337e8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque368_243652Ev",
+      "source": "0xfffffff00c252ec0",
+      "target": "0xfffffff00ac337f4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque369_122432Ev",
+      "source": "0xfffffff00c252ec8",
+      "target": "0xfffffff00ac33800",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque370_228843Ev",
+      "source": "0xfffffff00c252ed0",
+      "target": "0xfffffff00ac3380c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque371_211193Ev",
+      "source": "0xfffffff00c252ed8",
+      "target": "0xfffffff00ac33818",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque372_127316Ev",
+      "source": "0xfffffff00c252ee0",
+      "target": "0xfffffff00ac33824",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque373_213408Ev",
+      "source": "0xfffffff00c252ee8",
+      "target": "0xfffffff00ac33830",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque374_100488Ev",
+      "source": "0xfffffff00c252ef0",
+      "target": "0xfffffff00ac3383c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque375_271436Ev",
+      "source": "0xfffffff00c252ef8",
+      "target": "0xfffffff00ac33848",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque376_161016Ev",
+      "source": "0xfffffff00c252f00",
+      "target": "0xfffffff00ac33854",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque377_120106Ev",
+      "source": "0xfffffff00c252f08",
+      "target": "0xfffffff00ac33860",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque378_139414Ev",
+      "source": "0xfffffff00c252f10",
+      "target": "0xfffffff00ac33868",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque379_191243Ev",
+      "source": "0xfffffff00c252f18",
+      "target": "0xfffffff00ac33878",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque380_308819Ev",
+      "source": "0xfffffff00c252f20",
+      "target": "0xfffffff00ac33884",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque381_299023Ev",
+      "source": "0xfffffff00c252f28",
+      "target": "0xfffffff00ac33894",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque382_183982Ev",
+      "source": "0xfffffff00c252f30",
+      "target": "0xfffffff00ac2e954",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque383_109864Ev",
+      "source": "0xfffffff00c252f38",
+      "target": "0xfffffff00ac2e94c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque384_145754Ev",
+      "source": "0xfffffff00c252f40",
+      "target": "0xfffffff00ac33684",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque385_139290Ev",
+      "source": "0xfffffff00c252f48",
+      "target": "0xfffffff00ac338a0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque386_133451Ev",
+      "source": "0xfffffff00c252f50",
+      "target": "0xfffffff00ac338a8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque387_134560Ev",
+      "source": "0xfffffff00c252f58",
+      "target": "0xfffffff00ac338b4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque388_205747Ev",
+      "source": "0xfffffff00c252f60",
+      "target": "0xfffffff00ac338c0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque389_147047Ev",
+      "source": "0xfffffff00c252f68",
+      "target": "0xfffffff00ac338cc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque390_165404Ev",
+      "source": "0xfffffff00c252f70",
+      "target": "0xfffffff00ac338d8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque391_183055Ev",
+      "source": "0xfffffff00c252f78",
+      "target": "0xfffffff00ac338e4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque392_157372Ev",
+      "source": "0xfffffff00c252f80",
+      "target": "0xfffffff00ac338ec",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque393_107381Ev",
+      "source": "0xfffffff00c252f88",
+      "target": "0xfffffff00ac338fc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque394_153570Ev",
+      "source": "0xfffffff00c252f90",
+      "target": "0xfffffff00ac33904",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque395_128056Ev",
+      "source": "0xfffffff00c252f98",
+      "target": "0xfffffff00ac33914",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque396_106377Ev",
+      "source": "0xfffffff00c252fa0",
+      "target": "0xfffffff00ac33924",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque397_146095Ev",
+      "source": "0xfffffff00c252fa8",
+      "target": "0xfffffff00ac33934",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque398_113530Ev",
+      "source": "0xfffffff00c252fb0",
+      "target": "0xfffffff00ac33944",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque399_106809Ev",
+      "source": "0xfffffff00c252fb8",
+      "target": "0xfffffff00ac33954",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque400_145958Ev",
+      "source": "0xfffffff00c252fc0",
+      "target": "0xfffffff00ac33964",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque401_105343Ev",
+      "source": "0xfffffff00c252fc8",
+      "target": "0xfffffff00ac33974",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque402_201401Ev",
+      "source": "0xfffffff00c252fd0",
+      "target": "0xfffffff00ac33984",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque403_373050Ev",
+      "source": "0xfffffff00c252fd8",
+      "target": "0xfffffff00ac33994",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque404_118296Ev",
+      "source": "0xfffffff00c252fe0",
+      "target": "0xfffffff00ac339a4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque405_131245Ev",
+      "source": "0xfffffff00c252fe8",
+      "target": "0xfffffff00ac339b4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque406_129394Ev",
+      "source": "0xfffffff00c252ff0",
+      "target": "0xfffffff00ac339c4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque407_190106Ev",
+      "source": "0xfffffff00c252ff8",
+      "target": "0xfffffff00ac339d4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque408_140789Ev",
+      "source": "0xfffffff00c253000",
+      "target": "0xfffffff00ac335f0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque410_130714Ev",
+      "source": "0xfffffff00c253008",
+      "target": "0xfffffff00ac2be04",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque412_107872Ev",
+      "source": "0xfffffff00c253010",
+      "target": "0xfffffff00ac2be18",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque413_166049Ev",
+      "source": "0xfffffff00c253018",
+      "target": "0xfffffff00ac2be24",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque414_197644Ev",
+      "source": "0xfffffff00c253020",
+      "target": "0xfffffff00ac2be0c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque415_122804Ev",
+      "source": "0xfffffff00c253028",
+      "target": "0xfffffff00ac339dc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque416_140922Ev",
+      "source": "0xfffffff00c253030",
+      "target": "0xfffffff00ac2df28",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque418_133162Ev",
+      "source": "0xfffffff00c253038",
+      "target": "0xfffffff00ac2df40",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque419_366143Ev",
+      "source": "0xfffffff00c253040",
+      "target": "0xfffffff00ac33a10",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque420_117901Ev",
+      "source": "0xfffffff00c253048",
+      "target": "0xfffffff00ac2c4d8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque421_370741Ev",
+      "source": "0xfffffff00c253050",
+      "target": "0xfffffff00ac2c688",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque422_103550Ev",
+      "source": "0xfffffff00c253058",
+      "target": "0xfffffff00ac290b4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque424_110682Ev",
+      "source": "0xfffffff00c253060",
+      "target": "0xfffffff00ac33a1c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque425_124790Ev",
+      "source": "0xfffffff00c253068",
+      "target": "0xfffffff00ac2fd80",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque426_149920Ev",
+      "source": "0xfffffff00c253070",
+      "target": "0xfffffff00ac33a28",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque427_130151Ev",
+      "source": "0xfffffff00c253078",
+      "target": "0xfffffff00ac2cbc0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque430_251281Ev",
+      "source": "0xfffffff00c253080",
+      "target": "0xfffffff00ac33a30",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque431_285227Ev",
+      "source": "0xfffffff00c253088",
+      "target": "0xfffffff00ac31588",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque432_298713Ev",
+      "source": "0xfffffff00c253090",
+      "target": "0xfffffff00ac318c4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque433_123317Ev",
+      "source": "0xfffffff00c253098",
+      "target": "0xfffffff00ac3164c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque434_114760Ev",
+      "source": "0xfffffff00c2530a0",
+      "target": "0xfffffff00ac31ae8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque435_132913Ev",
+      "source": "0xfffffff00c2530a8",
+      "target": "0xfffffff00ac31bf4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque436_165158Ev",
+      "source": "0xfffffff00c2530b0",
+      "target": "0xfffffff00ac31d38",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque437_104515Ev",
+      "source": "0xfffffff00c2530b8",
+      "target": "0xfffffff00ac31ec8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque438_144493Ev",
+      "source": "0xfffffff00c2530c0",
+      "target": "0xfffffff00ac32878",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque439_168739Ev",
+      "source": "0xfffffff00c2530c8",
+      "target": "0xfffffff00ac31500",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque440_147767Ev",
+      "source": "0xfffffff00c2530d0",
+      "target": "0xfffffff00ac31510",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque441_178698Ev",
+      "source": "0xfffffff00c2530d8",
+      "target": "0xfffffff00ac33a38",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque442_444747Ev",
+      "source": "0xfffffff00c2530e0",
+      "target": "0xfffffff00ac33a44",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque443_125979Ev",
+      "source": "0xfffffff00c2530e8",
+      "target": "0xfffffff00ac33a4c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque444_371921Ev",
+      "source": "0xfffffff00c2530f0",
+      "target": "0xfffffff00ac3032c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque445_212476Ev",
+      "source": "0xfffffff00c2530f8",
+      "target": "0xfffffff00ac33a54",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque446_251866Ev",
+      "source": "0xfffffff00c253100",
+      "target": "0xfffffff00ac33a60",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque447_179389Ev",
+      "source": "0xfffffff00c253108",
+      "target": "0xfffffff00ac31274",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque448_129164Ev",
+      "source": "0xfffffff00c253110",
+      "target": "0xfffffff00ac33a6c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque449_102028Ev",
+      "source": "0xfffffff00c253118",
+      "target": "0xfffffff00ac33a74",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque450_214343Ev",
+      "source": "0xfffffff00c253120",
+      "target": "0xfffffff00ac33a7c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque451_239304Ev",
+      "source": "0xfffffff00c253128",
+      "target": "0xfffffff00ac33a84",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque452_107553Ev",
+      "source": "0xfffffff00c253130",
+      "target": "0xfffffff00ac33a8c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque453_151994Ev",
+      "source": "0xfffffff00c253138",
+      "target": "0xfffffff00ac33a98",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque454_147863Ev",
+      "source": "0xfffffff00c253140",
+      "target": "0xfffffff00ac33aa8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque455_106858Ev",
+      "source": "0xfffffff00c253148",
+      "target": "0xfffffff00ac33ab8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque456_139627Ev",
+      "source": "0xfffffff00c253150",
+      "target": "0xfffffff00ac33ac8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque457_212201Ev",
+      "source": "0xfffffff00c253158",
+      "target": "0xfffffff00ac33ad8",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque458_107234Ev",
+      "source": "0xfffffff00c253160",
+      "target": "0xfffffff00ac2894c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque459_104700Ev",
+      "source": "0xfffffff00c253168",
+      "target": "0xfffffff00ac27694",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque460_137093Ev",
+      "source": "0xfffffff00c253170",
+      "target": "0xfffffff00ac29200",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque461_202156Ev",
+      "source": "0xfffffff00c253178",
+      "target": "0xfffffff00ac33ae4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque464_128470Ev",
+      "source": "0xfffffff00c253180",
+      "target": "0xfffffff00ac3236c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque465_136364Ev",
+      "source": "0xfffffff00c253188",
+      "target": "0xfffffff00ac2667c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque466_149046Ev",
+      "source": "0xfffffff00c253190",
+      "target": "0xfffffff00ac33af0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque467_106055Ev",
+      "source": "0xfffffff00c253198",
+      "target": "0xfffffff00ac33afc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque468_307181Ev",
+      "source": "0xfffffff00c2531a0",
+      "target": "0xfffffff00ac2e4b4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque469_114276Ev",
+      "source": "0xfffffff00c2531a8",
+      "target": "0xfffffff00ac2ee5c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque471_150913Ev",
+      "source": "0xfffffff00c2531b0",
+      "target": "0xfffffff00ac26dbc",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque472_150163Ev",
+      "source": "0xfffffff00c2531b8",
+      "target": "0xfffffff00ac2cd64",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque473_219291Ev",
+      "source": "0xfffffff00c2531c0",
+      "target": "0xfffffff00ac2ce20",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque474_114492Ev",
+      "source": "0xfffffff00c2531c8",
+      "target": "0xfffffff00ac2ce64",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque475_146747Ev",
+      "source": "0xfffffff00c2531d0",
+      "target": "0xfffffff00ac33b08",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque476_169830Ev",
+      "source": "0xfffffff00c2531d8",
+      "target": "0xfffffff00ac33b14",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque477_233785Ev",
+      "source": "0xfffffff00c2531e0",
+      "target": "0xfffffff00ac33b1c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque478_226810Ev",
+      "source": "0xfffffff00c2531e8",
+      "target": "0xfffffff00ac33b24",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque479_100604EP26OriginalLegacyStateRequestb",
+      "source": "0xfffffff00c2531f0",
+      "target": "0xfffffff00ac2edc0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque480_102403Ev",
+      "source": "0xfffffff00c2531f8",
+      "target": "0xfffffff00ac33b2c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque481_122906Ev",
+      "source": "0xfffffff00c253200",
+      "target": "0xfffffff00ac2ee44",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy16opaque482_151514Ev",
+      "source": "0xfffffff00c253208",
+      "target": "0xfffffff00ac2ee50",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy18systemWillShutdownEj",
+      "source": "0xfffffff00c253210",
+      "target": "0xfffffff00ac2748c",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy4initEP12OSDictionary",
+      "source": "0xfffffff00c253218",
+      "target": "0xfffffff00ac24a60",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacy5probeEP9IOServicePi",
+      "source": "0xfffffff00c253220",
+      "target": "0xfffffff00ac24bc4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacyC2EPK11OSMetaClass",
+      "source": "0xfffffff00c253228",
+      "target": "0xfffffff00ac244b4",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZN25IOMobileFramebufferLegacyD2Ev",
+      "source": "0xfffffff00c253230",
+      "target": "0xfffffff00ac244ec",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "__ZNK25IOMobileFramebufferLegacy11getWorkLoopEv",
+      "source": "0xfffffff00c253238",
+      "target": "0xfffffff00ac287b0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "_native_legacy_hotplug_notify",
+      "source": "0xfffffff00c253240",
+      "target": "0xfffffff00ac2e954",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "_native_legacy_ioav_color",
+      "source": "0xfffffff00c253248",
+      "target": "0xfffffff00a7e80c0",
+      "owner": "com.apple.iokit.IOAVFamily"
+    },
+    {
+      "symbol": "_native_legacy_ioav_timing",
+      "source": "0xfffffff00c253250",
+      "target": "0xfffffff00a7e8d68",
+      "owner": "com.apple.iokit.IOAVFamily"
+    },
+    {
+      "symbol": "_native_legacy_ioav_timing_colors",
+      "source": "0xfffffff00c253258",
+      "target": "0xfffffff00a7ea2ac",
+      "owner": "com.apple.iokit.IOAVFamily"
+    },
+    {
+      "symbol": "_native_legacy_set_refresh_properties",
+      "source": "0xfffffff00c253260",
+      "target": "0xfffffff00ac329d0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "_native_legacy_surface_allocate",
+      "source": "0xfffffff00c253268",
+      "target": "0xfffffff00aede790",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_surface_create",
+      "source": "0xfffffff00c253270",
+      "target": "0xfffffff00aef4218",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_surface_descriptor",
+      "source": "0xfffffff00c253278",
+      "target": "0xfffffff00aee2648",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_surface_format",
+      "source": "0xfffffff00c253280",
+      "target": "0xfffffff00aee2744",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_surface_height",
+      "source": "0xfffffff00c253288",
+      "target": "0xfffffff00aee2768",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_surface_planes",
+      "source": "0xfffffff00c253290",
+      "target": "0xfffffff00aee27b0",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_surface_stride",
+      "source": "0xfffffff00c253298",
+      "target": "0xfffffff00aee2780",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_surface_width",
+      "source": "0xfffffff00c2532a0",
+      "target": "0xfffffff00aee275c",
+      "owner": "com.apple.iokit.IOSurface"
+    },
+    {
+      "symbol": "_native_legacy_swap_info_dispatch",
+      "source": "0xfffffff00c2532a8",
+      "target": "0xfffffff00ac2e8a0",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    },
+    {
+      "symbol": "_native_legacy_vsync_notify",
+      "source": "0xfffffff00c2532b0",
+      "target": "0xfffffff00ac2e678",
+      "owner": "com.apple.iokit.IOMobileGraphicsFamily"
+    }
+  ],
+  "missing": {},
+  "stubbed": {},
+  "stub_symbol": null,
+  "personalities_dropped": [
+    "com.apple.iokit.IOAccessoryManager",
+    "com.apple.iokit.IOPCIFamily",
+    "com.apple.iokit.IOSerialFamily",
+    "com.apple.iokit.IOSkywalkFamily",
+    "com.apple.driver.AppleUSBHostMergeProperties",
+    "com.apple.security.Image4",
+    "com.apple.driver.usb.AppleUSBHostPlatformProperties"
+  ],
+  "early_security_init": {
+    "com.apple.driver.AppleMobileFileIntegrity": "0xfffffe0009840dd4"
+  },
+  "missing_address_space": "output collection",
+  "mapping_complete": true,
+  "runtime_qualified": false,
+  "loadable": false,
+  "candidate_bytes": 142884864,
+  "candidate_sha256": "fdde707c27a6c7168a750d11aeac7e8931dc4a3d166a0edbd7baf978481b91dc",
+  "scope": "DIAGNOSTIC SURVEY ONLY. HMAC-native-provider missing was caught after verification. No output image is written or delivered; real fix aligns source bootstrap with upstream source-storage config.",
+  "diagnostic_original_error": [
+    "Expected one 32-byte corecrypto HMAC field"
+  ],
+  "image_written": false
+}

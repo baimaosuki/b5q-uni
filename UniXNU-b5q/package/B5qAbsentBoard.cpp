@@ -11,9 +11,9 @@
 #include <string.h>
 #include <stdint.h>
 extern "C" {
-__attribute__((weak)) void (*arm64_platform_sleep_hook)(boolean_t)=nullptr;
-__attribute__((weak)) volatile int native_owner_root_accepted=0;
-__attribute__((weak)) volatile dev_t native_owner_root_mount_device=NODEV;
+__attribute__((weak, visibility("hidden"))) void (*arm64_platform_sleep_hook)(boolean_t)=nullptr;
+__attribute__((weak, visibility("hidden"))) volatile int native_owner_root_accepted=0;
+__attribute__((weak, visibility("hidden"))) volatile dev_t native_owner_root_mount_device=NODEV;
 unsigned native_ufs_store_mode(void) { return 0; }
 int native_ufs_store_open(uint64_t,uint64_t *bytes,const char **why) {
     if(bytes)*bytes=0;
@@ -26,9 +26,9 @@ int native_ufs_store_write_cached(uint64_t,uint32_t,const void *) { return -1; }
 int native_ufs_store_sync(void) { return -1; }
 unsigned native_ufs_store_gpt_check(void) { return 0; }
 volatile uint32_t native_ufs_dpu_state=0;
-__attribute__((weak)) volatile uint32_t native_gpu_dcvs[15]={};
+__attribute__((weak, visibility("hidden"))) volatile uint32_t native_gpu_dcvs[15]={};
 // Without the optional pmap observation, conservatively retain pages.
-__attribute__((weak)) unsigned int native_pmap_user_mappings(ppnum_t,void **object,uint64_t *address,char *name) {
+__attribute__((weak, visibility("hidden"))) unsigned int native_pmap_user_mappings(ppnum_t,void **object,uint64_t *address,char *name) {
     if(object)*object=nullptr;
     if(address)*address=0;
     if(name)*name=0;

@@ -37,10 +37,24 @@
     },
     {
       "round": 3,
-      "status": "ordered-patch-check-pass",
+      "status": "native-link-pass-prelink-import-error",
       "fix": "OS-generic stack.c alignment hunk required by exact XnuPrelink macOS fixture",
       "ordered_patches": "132/132 PASS",
-      "board_values_copied": false
+      "board_values_copied": false,
+      "run": 44450700994,
+      "remaining_undefined_symbols": [],
+      "first_error": "Chained fixup imports are not supported: one local weak native_pmap_user_mappings import",
+      "local_diagnostic_next": "Native FIPS field absent in prelinked mode; exact source-storage bootstrap alignment required"
+    },
+    {
+      "round": 4,
+      "status": "preflight",
+      "batch": [
+        "hidden local weak fallback symbols",
+        "match upstream source crypto bootstrap and late AES registration",
+        "retain all HMAC/POST/prelink checks"
+      ],
+      "same_hard_symbol_stall": false
     }
   ],
   "success": false,
