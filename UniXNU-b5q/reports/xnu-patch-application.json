@@ -657,6 +657,11 @@
       "name": "prelinked-corecrypto-hooks.patch",
       "sha256": "14b51f6bdc5037d89f8a2664c1b5ed2c96b383dca6f9cea28f88b3a6f12b9800",
       "result": "PASS"
+    },
+    {
+      "name": "macos-kernel-stack-alignment.patch",
+      "sha256": "a1b4caf6c1bbc087b405a5813753c404617a69f32b876aeaf4a9ac2534c5e3d5",
+      "result": "PASS"
     }
   ],
   "result": "PASS"

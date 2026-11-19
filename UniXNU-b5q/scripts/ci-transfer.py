@@ -28,9 +28,14 @@ def pack(root,public,out):
  out.mkdir(parents=True,exist_ok=True)
  archive=out/'results.tar.gz'
  files=[]
- for relative in ['kernel/kernel.macho','kernel/kernel.map.json','payload/payload.img','payload/payload.json','package.manifest.json','payload/.complete.json']:
+ for relative in ['kernel/kernel.macho','kernel/kernel.map.json','kernel/kernel.json','kernel/kernel.failed.json','payload/payload.img','payload/payload.json','package.manifest.json','payload/.complete.json']:
   p=root/relative
   if p.is_file():files.append((p,relative))
+ native=root/'tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf'
+ if native.is_file():files.append((native,'native/mach.development.bcm2837.unstripped.noctf'))
+ for p in sorted((root/'kernel').glob('*.json')) if (root/'kernel').exists() else []:
+  pair=(p,'kernel/'+p.name)
+  if pair not in files:files.append(pair)
  # Actual logs, not a reconstructed list: preserve full failing linker output.
  for p in sorted((root/'logs').rglob('*.log')) if (root/'logs').exists() else []:
   if p.stat().st_size<=160*1024*1024:files.append((p,'logs/'+str(p.relative_to(root/'logs'))))

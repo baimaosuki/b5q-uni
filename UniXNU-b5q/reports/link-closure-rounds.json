@@ -23,11 +23,29 @@
     },
     {
       "round": 2,
-      "status": "preflight-complete",
-      "fix": "Exclude board-generated GMU cold-start C rather than copying private rules; retain all generic units; fix transfer root lookup"
+      "status": "native-kernel-link-pass-prelink-failure",
+      "fix": "Exclude board-generated GMU cold-start C rather than copying private rules; retain all generic units; fix transfer root lookup",
+      "run": 44449322719,
+      "remaining_undefined_symbols": [],
+      "first_error": "Reviewed site names a missing native symbol: _unixnu_kernel_stack_shift",
+      "logs_returned": "artifacts/b5q-link-closure/round2-44449322719/files/logs",
+      "passed": [
+        "actual full native arm64e link",
+        "source IOStorageFamily/RamBlock/VerifiedRoot closure",
+        "full shared Adreno implementation and original accelerator binding"
+      ]
+    },
+    {
+      "round": 3,
+      "status": "ordered-patch-check-pass",
+      "fix": "OS-generic stack.c alignment hunk required by exact XnuPrelink macOS fixture",
+      "ordered_patches": "132/132 PASS",
+      "board_values_copied": false
     }
   ],
   "success": false,
   "device_required_for_build": false,
-  "ufs_controller": false
+  "ufs_controller": false,
+  "baseline_full_log": "artifacts/b5q-link-closure/baseline-44412976670/files/logs/final-kernel.log",
+  "baseline_full_symbol_count": 72
 }

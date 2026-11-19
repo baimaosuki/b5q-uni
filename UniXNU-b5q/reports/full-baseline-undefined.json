@@ -1,0 +1,496 @@
+{
+  "run": 44412976670,
+  "log_sha256": "12bb6c2c6fe3faf944648704018cb23cffce2f3361883e0faf29d1b0453df825",
+  "scope": "Actual complete final link output downloaded and authenticated, not capped Check annotations",
+  "undefined": [
+    {
+      "symbol": "NativeAdrenoBoard::parseIommus(unsigned char const*, unsigned long, unsigned int, unsigned short*, unsigned long, unsigned long*)",
+      "references": [
+        "NativeAdrenoGpuService::start(IOService*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoBoard::parseReg(unsigned char const*, unsigned long, unsigned int, unsigned int, NativeAdrenoWindow*, unsigned long, unsigned long*)",
+      "references": [
+        "NativeAdrenoGpuService::start(IOService*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoMemory::publishForDevice(unsigned long, unsigned long, bool, bool, unsigned int)",
+      "references": [
+        "NativeAdrenoGpuService::ring_publish(void*, unsigned int const volatile*, unsigned long) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoMemory::acquireDeviceWrites(unsigned long, unsigned long, unsigned int)",
+      "references": [
+        "NativeAdrenoGpuService::fence_acquire(void*, unsigned int volatile*, unsigned long) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::gMetaClass",
+      "references": [
+        "NativeRamBlock::MetaClass::MetaClass() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::MetaClass::MetaClass() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      __GLOBAL__sub_I_NativeRamBlock.cpp in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::superClass in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::requestIdle()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::doSetPriority(IOBlockStorageDeviceExtent*, unsigned int, unsigned char)",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::setProperties(OSObject*)",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::doGetProvisionStatus(unsigned long long, unsigned long long, unsigned int*, IOBlockStorageProvisionDeviceExtent*, unsigned long long)",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice4()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice5()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice6()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice7()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice8()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice9()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice10()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice11()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice12()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice13()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice14()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice15()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice16()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice17()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice18()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice19()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice20()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice21()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice22()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice23()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice24()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice25()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice26()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice27()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice28()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice29()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice30()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::_RESERVEDIOBlockStorageDevice31()",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::init(OSDictionary*)",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::doUnmap(IOBlockStorageDeviceExtent*, unsigned int, unsigned int)",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::IOBlockStorageDevice(OSMetaClass const*)",
+      "references": [
+        "NativeRamBlock::NativeRamBlock(OSMetaClass const*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::NativeRamBlock() in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::~IOBlockStorageDevice()",
+      "references": [
+        "NativeRamBlock::~NativeRamBlock() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::~NativeRamBlock() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::~NativeRamBlock() in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoGmuContext::bringUp(ArmSmmu4KIo const*, unsigned int, unsigned int, unsigned int, unsigned short, void (*)(unsigned int), NativeAdrenoGmuContextReport*)",
+      "references": [
+        "NativeAdrenoGpuService::start(IOService*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoGmuService::metaClass",
+      "references": [
+        "NativeAdrenoGpuService::start(IOService*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoKernelTime::now_us(void*, unsigned long long*)",
+      "references": [
+        "NativeAdrenoGpuService::ring_now(void*) in libAdreno740.a[2](NativeAdreno.o)",
+        "      vm_clock_us() in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoUserClient::dispatch(unsigned int, void const*, unsigned long, void*, unsigned long, NativeAdrenoRingClock const*)",
+      "references": [
+        "NativeAdrenoGpuClient::action(OSObject*, void*, IOExternalMethodArguments*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoGmuPlatform::bind(NativeAdrenoGmuWindow const*, ShengGmuIo*)",
+      "references": [
+        "NativeAdrenoGpuService::start(IOService*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "NativeAdrenoSmmuService::metaClass",
+      "references": [
+        "NativeAdrenoGpuService::start(IOService*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "IOBlockStorageDevice::getProperty(OSSymbol const*) const",
+      "references": [
+        "vtable for NativeRamBlock in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "vtable for IOBlockStorageDevice",
+      "references": [
+        "NativeRamBlock::start(IOService*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::stop(IOService*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::free() in libRamBlock.a[2](NativeRamBlock.o)",
+        "   NOTE: a missing vtable usually means the first non-inline virtual member function has no definition."
+      ]
+    },
+    {
+      "symbol": "_arm64_platform_sleep_hook",
+      "references": [
+        "ArmCpu::start(IOService*) in libArmCpu.a[2](ArmCpu.o)"
+      ]
+    },
+    {
+      "symbol": "_boot_kthread_report_nth",
+      "references": [
+        "_reportConfigThreads in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)"
+      ]
+    },
+    {
+      "symbol": "_boot_progress_cancel_scanout",
+      "references": [
+        "_native_legacy_prepare_scanout in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)",
+        "      l_boot_progress_cancel_scanout$auth_ptr$ia$18983 in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)"
+      ]
+    },
+    {
+      "symbol": "_boot_progress_prepare_scanout",
+      "references": [
+        "_native_legacy_prepare_scanout in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)",
+        "      l_boot_progress_prepare_scanout$auth_ptr$ia$42271 in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)"
+      ]
+    },
+    {
+      "symbol": "_boot_progress_pulse_anchor",
+      "references": [
+        "_native_legacy_gop_mapping_observed in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)",
+        "      l_boot_progress_pulse_anchor$auth_ptr$ia$32564 in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)"
+      ]
+    },
+    {
+      "symbol": "_boot_progress_stage",
+      "references": [
+        "_native_legacy_transfer_observed in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)",
+        "      l_boot_progress_stage$auth_ptr$ia$10942 in libNativeLegacyDisplay.late.a[5](LegacyDisplayProbe.o)"
+      ]
+    },
+    {
+      "symbol": "_native_adreno_fences",
+      "references": [
+        "NativeLegacyDisplay::note(unsigned int, int, OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      NativeLegacyDisplay::gpuWrote(OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      l_native_adreno_fences$auth_ptr$ia$58622 in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)"
+      ]
+    },
+    {
+      "symbol": "_native_adreno_fences_detail",
+      "references": [
+        "NativeLegacyDisplay::gpuWrote(OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      l_native_adreno_fences_detail$auth_ptr$ia$48301 in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)"
+      ]
+    },
+    {
+      "symbol": "_native_adreno_vm_now_us",
+      "references": [
+        "NativeAdrenoGpuService::probe(IOService*, int*) in libAdreno740.a[2](NativeAdreno.o)"
+      ]
+    },
+    {
+      "symbol": "_native_exit_trace",
+      "references": [
+        "_exit in kern_exit.o",
+        "      l_native_exit_trace$auth_ptr$ia$61145 in kern_exit.o"
+      ]
+    },
+    {
+      "symbol": "_native_gpu_trace_enabled",
+      "references": [
+        "NativeLegacyDisplay::note(unsigned int, int, OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      l_native_gpu_trace_enabled$auth_ptr$ia$42271 in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)"
+      ]
+    },
+    {
+      "symbol": "_native_gpu_trace_record",
+      "references": [
+        "NativeLegacyDisplay::note(unsigned int, int, OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      NativeLegacyDisplay::note(unsigned int, int, OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      NativeLegacyDisplay::latchFired(OSObject*, IOTimerEventSource*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      NativeLegacyDisplay::gpuWrote(OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      NativeLegacyDisplay::gpuWrote(OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      NativeLegacyDisplay::gpuWrote(OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      NativeLegacyDisplay::gpuWrote(OriginalLegacySwapRequest const*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      ..."
+      ]
+    },
+    {
+      "symbol": "_native_owner_root_accepted",
+      "references": [
+        "_openat_dprotected_np in vfs_syscalls.o"
+      ]
+    },
+    {
+      "symbol": "_native_owner_root_mount_device",
+      "references": [
+        "_openat_dprotected_np in vfs_syscalls.o"
+      ]
+    },
+    {
+      "symbol": "_native_ufs_dpu_map",
+      "references": [
+        "NativeLegacyDisplay::directSlot(OSObject*, IOMemoryDescriptor*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)",
+        "      l_native_ufs_dpu_map$auth_ptr$ia$1799 in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)"
+      ]
+    },
+    {
+      "symbol": "_native_ufs_dpu_state",
+      "references": [
+        "NativeLegacyDisplay::start(IOService*) in libNativeLegacyDisplay.late.a[2](NativeLegacyDisplay.late.o)"
+      ]
+    },
+    {
+      "symbol": "_native_ufs_store_gpt_check",
+      "references": [
+        "NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      l_native_ufs_store_gpt_check$auth_ptr$ia$42271 in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "_native_ufs_store_mode",
+      "references": [
+        "NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      l_native_ufs_store_mode$auth_ptr$ia$42271 in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "_native_ufs_store_open",
+      "references": [
+        "NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      l_native_ufs_store_open$auth_ptr$ia$11002 in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "_native_ufs_store_read",
+      "references": [
+        "NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      bool persist::Overlay::forEachPresent<NativeRamBlock::StoreOps, NativeRamBlock::attachStore()::Loader>(NativeRamBlock::StoreOps&, NativeRamBlock::attachStore()::Loader&, unsigned char*, unsigned int) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      ..."
+      ]
+    },
+    {
+      "symbol": "_native_ufs_store_sync",
+      "references": [
+        "NativeRamBlock::flushStore(bool) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::flushStore(bool) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      l_native_ufs_store_sync$auth_ptr$ia$42271 in libRamBlock.a[2](NativeRamBlock.o)"
+      ]
+    },
+    {
+      "symbol": "_native_ufs_store_write",
+      "references": [
+        "NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      bool persist::Overlay::writeRun<NativeRamBlock::StoreOps>(NativeRamBlock::StoreOps&, unsigned long long, unsigned int, void const*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::attachStore() in libRamBlock.a[2](NativeRamBlock.o)",
+        "      ..."
+      ]
+    },
+    {
+      "symbol": "_native_ufs_store_write_cached",
+      "references": [
+        "NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::directReadWrite(IOMemoryDescriptor*, unsigned long long, unsigned long long, unsigned long long*, unsigned long long*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      bool persist::Overlay::writeRun<NativeRamBlock::StoreOps>(NativeRamBlock::StoreOps&, unsigned long long, unsigned int, void const*) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      NativeRamBlock::flushStore(bool) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      bool persist::Overlay::commitRun<NativeRamBlock::StoreOps>(NativeRamBlock::StoreOps&, unsigned long long, unsigned int) in libRamBlock.a[2](NativeRamBlock.o)",
+        "      ..."
+      ]
+    }
+  ],
+  "count": 72
+}

@@ -1,2 +1,5 @@
 # OS-only compatibility: match the selected original/prelinked crypto bootstrap.
 prelinked-corecrypto-hooks.patch
+
+# OS-only CoreEntitlements stack alignment, exact reviewed XnuPrelink fixture.
+macos-kernel-stack-alignment.patch
