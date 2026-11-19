@@ -126,8 +126,8 @@ static int command(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,void *output
  if(host.poisoned||!allowed(lun,cdb,bytes)||(bytes&&!output))return -1;
  IOLockLock(host.lock);
  if(host.poisoned||read32(host.hc,0x58)||(read32(host.hc,0x20)&fatalStatus)){host.poisoned=true;IOLockUnlock(host.lock);return -1;}
- host.commandLun=lun;host.opcode=cdb[0];host.commandLba=cdb[0]==0x88?(uint64_t(be32(cdb+2))<<32)|be32(cdb+6):0;
- host.stage=cdb[0]==0x1b?"START STOP UNIT ACTIVE":cdb[0]==0?"TEST UNIT READY":cdb[0]==0x88?"READ16":"READ CAPACITY";
+ host.commandLun=lun;host.opcode=cdb[0];host.commandLba=cdb[0]==0x28?be32(cdb+2):cdb[0]==0x88?(uint64_t(be32(cdb+2))<<32)|be32(cdb+6):0;
+ host.stage=cdb[0]==0x1b?"START STOP UNIT ACTIVE":cdb[0]==0?"TEST UNIT READY":cdb[0]==0x28?"READ10":cdb[0]==0x88?"READ16":"READ CAPACITY";
  bzero(host.dma,dmaBytes);auto *utrd=reinterpret_cast<uint32_t*>(host.dma);auto *ucd=host.dma+commandOffset;
  if(!B5qUfsProtocol::command(utrd,ucd,host.physical,lun,cdb,bytes)){IOLockUnlock(host.lock);return -1;}
  if(!submit()){IOLockUnlock(host.lock);return -1;}
@@ -176,7 +176,7 @@ static bool readLba(uint8_t lun,uint64_t lba,uint32_t count,void *out,bool metad
  if(lun>7||!count||count>maxTransfer/4096||!host.capacity[lun]||lba>=host.capacity[lun]||count>host.capacity[lun]-lba)return false;
  if(metadata){if(host.selected||lba<1||lba>264||count>265-lba)return false;}
  else if(!host.selected||lun!=host.lun||lba<firstLba||lba>lastLba||count>lastLba-lba+1)return false;
- uint8_t cdb[16]={0x88};putBe64(cdb+2,lba);putBe32(cdb+10,count);return command(lun,cdb,count*4096,out)==0;
+ uint8_t cdb[16];if(!readCdb(cdb,lba,count))return false;return command(lun,cdb,count*4096,out)==0;
 }
 static bool rootRead(uint64_t offset,uint64_t bytes,void *out) {
  if(offset%4096||bytes%4096||!inside(offset,bytes,partitionBytes))return false;auto *p=static_cast<uint8_t*>(out);

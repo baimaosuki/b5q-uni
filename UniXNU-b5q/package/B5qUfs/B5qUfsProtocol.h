@@ -16,7 +16,22 @@ inline bool allowed(uint8_t lun,const uint8_t cdb[16],uint32_t bytes) {
  if(cdb[0]==0){if(bytes)return false;for(unsigned i=1;i<16;++i)if(cdb[i])return false;return true;}
  if(cdb[0]==0x9e&&cdb[1]==0x10&&bytes==32&&be32(cdb+10)==32){for(unsigned i=2;i<16;++i)if(i<10||i>=14)if(cdb[i])return false;return true;}
  if(cdb[0]==0x25&&bytes==8){for(unsigned i=1;i<16;++i)if(cdb[i])return false;return true;}
+ if(cdb[0]==0x28){
+  unsigned blocks=(unsigned(cdb[7])<<8)|cdb[8];
+  if(!blocks||!bytes||bytes>128*1024||bytes%4096||blocks!=bytes/4096)return false;
+  if(cdb[1]||cdb[6]||cdb[9])return false;
+  for(unsigned i=10;i<16;++i)if(cdb[i])return false;
+  return true;
+ }
  return cdb[0]==0x88&&bytes&&bytes<=128*1024&&bytes%4096==0&&be32(cdb+10)==bytes/4096;
+}
+inline bool readCdb(uint8_t cdb[16],uint64_t lba,uint32_t count) {
+ for(unsigned i=0;i<16;++i)cdb[i]=0;
+ if(!count||count>128*1024/4096||uint64_t(count)-1>UINT64_MAX-lba)return false;
+ if(lba<=UINT32_MAX&&count<=0xffffU&&uint64_t(count)-1<=UINT32_MAX-lba){
+  cdb[0]=0x28;putBe32(cdb+2,uint32_t(lba));cdb[7]=uint8_t(count>>8);cdb[8]=uint8_t(count);
+ } else {cdb[0]=0x88;putBe64(cdb+2,lba);putBe32(cdb+10,count);}
+ return true;
 }
 inline void descriptor(uint32_t *utrd,uint64_t dma,uint32_t bytes) {
  utrd[0]=0x10000000U|(bytes?(2U<<25):0);utrd[2]=15;

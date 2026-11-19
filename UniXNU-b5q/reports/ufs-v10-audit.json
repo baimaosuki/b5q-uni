@@ -17,7 +17,8 @@
     "RC10 fallback only for explicit RC16 illegal-request sense 05/20/00 or05/24/00",
     "GPT rejection reason plus same CRC, BackupLBA and exact root bounds; count max8192 within unchanged1MiB metadata read bound",
     "SHNGROOTv2 and all signed table/image bindings retained, phase-specific root errors",
-    "full panic state plus per-LUN rejection list; ordinary artifact; no QEMU"
+    "full panic state plus per-LUN rejection list; ordinary artifact; no QEMU",
+    "Latest user review: all current GPT/root reads use mandatory READ10 opcode28 with big-endian32bitLBA/16bitcount; READ16 only beyond32bitLBA, never reached for authorized root. CDB/layout/overflow/allowlist regressions added."
   ],
   "tests": {
     "pre_ci": "PASS16 checks",
@@ -32,14 +33,78 @@
       62275574
     ],
     "SHNGROOTv2": "all6 names, aligned offsets, lengths, flags, header SHA256, RSA trust anchor and3 table hashes remain checked",
-    "arbitrary_count_cap": "4096 raised to8192 because8192x128=1MiB fits the existing read envelope; actual phone GPT count unknown"
+    "arbitrary_count_cap": "4096 raised to8192 because8192x128=1MiB fits the existing read envelope; actual phone GPT count unknown",
+    "actual_input_validation": {
+      "scope": "Actual existing SHNGROOTv2 layout and three on-disk verified-root hash-table bytes; no phone access",
+      "header_sha256": "PASS",
+      "total_bytes": 17603493888,
+      "root_partition_bytes": 51539607552,
+      "entries": [
+        {
+          "name": "OS",
+          "offset": 1048576,
+          "bytes": 14493417472,
+          "block": 512,
+          "flags": 1,
+          "table_sha256_checked": false
+        },
+        {
+          "name": "SystemOS",
+          "offset": 14494466048,
+          "bytes": 2917138432,
+          "block": 512,
+          "flags": 1,
+          "table_sha256_checked": false
+        },
+        {
+          "name": "App",
+          "offset": 17411604480,
+          "bytes": 54525952,
+          "block": 512,
+          "flags": 1,
+          "table_sha256_checked": false
+        },
+        {
+          "name": "OS.vroot",
+          "offset": 17466130432,
+          "bytes": 113229824,
+          "block": 4096,
+          "flags": 3,
+          "table_sha256_checked": true
+        },
+        {
+          "name": "SystemOS.vroot",
+          "offset": 17579376640,
+          "bytes": 22790144,
+          "block": 4096,
+          "flags": 3,
+          "table_sha256_checked": true
+        },
+        {
+          "name": "App.vroot",
+          "offset": 17602445312,
+          "bytes": 425984,
+          "block": 4096,
+          "flags": 3,
+          "table_sha256_checked": true
+        }
+      ],
+      "table_hashes": "PASS",
+      "signature_checks_retained": true
+    }
   },
   "source_sha256": {
-    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "fa5f0d7114d9b2573aca9295bb7fd09eb0aeb61e68be85647206753e8c73e5d0",
-    "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "1fc7e24d21d789d8309aafc681d74871dfc4fbfb7232b3c4d01c48279fca42e6",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "eb31791758823c45b878471bd3403c527c7ec1c651cd680d86a7b88643df955f",
+    "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "ad290e7858a31901468a0ed901d50cf9901e0dc352464e6bc8726c4e978a03dc",
     "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
-    "tests/b5q-ufs/protocol.cpp": "c80e1cbb1547dc36016e9dbc8e513f1f9cfebc93bfdb8ec2119374712730cc13",
+    "tests/b5q-ufs/protocol.cpp": "2b7390b2a3e01fd03d5169ab0bcfcdf72e68b2d9a6fa8f75aec8c3ebb5da76e8",
     "tests/b5q-ufs/root-format.cpp": "383fff81d9fae3d32d94a73cf2a06fcf2a2daf29dc0397ac39a05167b90ff21a",
     "scripts/b5q-install/download-ci-artifact.py": "01f76f5f45c58b7434d5d788b9f669b9547188e141f1e86ba104f0c3a399714a"
+  },
+  "ci": {
+    "run": 44606291718,
+    "commit": "612f009e6339cc582c12486577803c7c401790ac",
+    "transport": "ordinary Actions artifact",
+    "status": "in progress"
   }
 }

@@ -34,6 +34,12 @@ int main(){
  assert(p.utrd[0]==0x14000000&&p.utrd[2]==15&&p.utrd[4]==0xce327000&&p.utrd[5]==8&&p.utrd[6]==0x00800080&&p.utrd[7]==0x01000001);
  assert(p.ucd[0]==1&&p.ucd[1]==0x40&&be32(p.ucd+12)==32&&memcmp(p.ucd+16,cap,16)==0);
  uint32_t *prd=reinterpret_cast<uint32_t*>(p.ucd+1024);assert(prd[0]==0xce328000&&prd[1]==8&&prd[3]==31);
+ uint8_t read[16];assert(readCdb(read,49692663,32)&&read[0]==0x28&&be32(read+2)==49692663&&read[7]==0&&read[8]==32&&allowed(0,read,32*4096));
+ Packet readPacket;assert(command(readPacket.utrd,readPacket.ucd,0x8ce326000ULL,0,read,32*4096));assert(readPacket.ucd[16]==0x28&&be32(readPacket.ucd+18)==49692663&&readPacket.ucd[24]==32);
+ assert(readCdb(read,62275574,1)&&read[0]==0x28&&allowed(0,read,4096));
+ assert(readCdb(read,UINT32_MAX,1)&&read[0]==0x28);assert(readCdb(read,uint64_t(UINT32_MAX)+1,1)&&read[0]==0x88&&allowed(0,read,4096));
+ assert(readCdb(read,UINT32_MAX,2)&&read[0]==0x88);assert(!readCdb(read,UINT64_MAX,2)&&!readCdb(read,0,0)&&!readCdb(read,0,33));
+ assert(readCdb(read,1,1));read[8]=2;assert(!allowed(0,read,4096));read[8]=1;read[10]=1;assert(!allowed(0,read,4096));
  uint8_t ssu[16]={0x1b,0,0,0,0x10},tur[16]={};Packet zero;
  assert(command(zero.utrd,zero.ucd,0x8ce326000ULL,0xd0,ssu,0));assert(zero.utrd[0]==0x10000000&&zero.utrd[7]==0x01000000&&zero.ucd[1]==0);
  assert(!allowed(0,ssu,0)&&!allowed(0xd0,tur,0)&&!allowed(0xd0,cap,32));ssu[4]=0x20;assert(!allowed(0xd0,ssu,0));
