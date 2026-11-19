@@ -10,6 +10,13 @@ struct Mock {
  bool run(uint64_t dma=0x100000000ULL){return b5qConfigureUfsStream(dma,0x25000,[&](unsigned off){return reg[off];},[&](unsigned off,uint32_t v){writes.push_back({off,v});reg[off]=v;});}
 };
 int main(){
+ unsigned reads=0,writes=0;
+ auto blockedRead=[&](unsigned)->uint32_t{++reads;assert(false && "firmware reuse touched SMMU");return 0;};
+ auto blockedWrite=[&](unsigned,uint32_t){++writes;assert(false && "firmware reuse wrote SMMU");};
+ assert(b5qConfigureUfsStream(0x8c0004000ULL,0x25000,blockedRead,blockedWrite,true));
+ assert(!b5qConfigureUfsStream(0,0x25000,blockedRead,blockedWrite,true));
+ assert(!b5qConfigureUfsStream(UINT64_MAX-4095,8192,blockedRead,blockedWrite,true));
+ assert(reads==0 && writes==0);
  Mock ok;assert(ok.run());assert(ok.reg[0x800]==0x80000060&&ok.reg[0xc00]==7);assert(ok.reg[0x804]==0x80001c00&&ok.reg[0xc04]==3&&ok.reg[5*4096]==1);assert(ok.writes.size()==5);
  Mock distinct;distinct.reg[0x800]=0x80008060;assert(distinct.run());assert(distinct.reg[0x800]==0x80008060&&distinct.reg[0xc00]==2);assert(distinct.reg[0x81c]==0x80000060);
  Mock masked;masked.reg[0x800]|=1U<<16;assert(!masked.run()&&masked.writes.empty());

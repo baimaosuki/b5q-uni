@@ -8,15 +8,14 @@
     model = "Samsung Galaxy Z Flip5";
     compatible = "samsung,b5q", "qcom,sm8550";
 
-    // Runtime banks and scanout geometry are supplied by firmware handoff.
-    // Do not turn the stock /memory/reg=<0 0> placeholder into invented RAM,
-    // or infer framebuffer stride/base from the splash reservation.
-    // Offline compilation placeholder, matching the original Samsung DT.
-    // DarwinBoot obtains the allocated physical window from the EFI map;
-    // neither address nor RAM capacity is inferred from this property.
-    memory {
+    // SM8550/b5q low physical DRAM bank, from b5q reference /ddr-regions/region0.
+    // Supplies nonzero chosen/dram-base/size and classifies 0xB8000000
+    // framebuffer memory as DRAM. This is not the full allocatable RAM map
+    // and does not replace calibration against the live firmware FDT.
+    // DarwinBoot still allocates the XNU-owned window from the EFI map.
+    memory@80000000 {
         device_type = "memory";
-        reg = <0 0 0 0>;
+        reg = <0 0x80000000 0 0x80000000>;
     };
     reserved-memory {
         #address-cells = <2>;
@@ -49,9 +48,11 @@
 // The rest of the live reservation set (including UH/RKP) must be enforced
 // by b5q firmware from its incoming FDT/EFI map. This subset never defines
 // the extent of allocatable RAM.
-&gpu { unixnu,adt-name = "gpu"; status = "okay"; };
-&gmu { unixnu,adt-name = "gmu"; status = "okay"; };
-&gpu_smmu { unixnu,adt-name = "gpu-smmu"; status = "okay"; };
+// Keep the hardware FDT nodes enabled. The current ADT converter does not
+// export the AAPL,phandle needed by IOKit to resolve GPU and GMU interrupts.
+&gpu { status = "okay"; };
+&gmu { status = "okay"; };
+&gpu_smmu { status = "okay"; };
 // Root transport warm-adopts exact stock-DT MMIO directly in B5qUfs;
 // leave generic DT-matched UFS/PHY drivers disabled to prevent a second owner.
 &ufs { status = "disabled"; };

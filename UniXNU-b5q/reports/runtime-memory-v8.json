@@ -1,0 +1,64 @@
+{
+  "source": "adb-sys-firmware-fdt",
+  "sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+  "device": "b5q",
+  "model": "SM-F731B",
+  "physical_high_bank": {
+    "base": "0x880000000",
+    "end": "0xa00000000"
+  },
+  "high_memory_fragments": [
+    {
+      "base": "0x880000000",
+      "end": "0x8b9a00000"
+    },
+    {
+      "base": "0x8b9c00000",
+      "end": "0x8bba00000"
+    },
+    {
+      "base": "0x8c0000000",
+      "end": "0xa00000000"
+    }
+  ],
+  "reserved_high_ranges": [
+    {
+      "base": "0x880100000",
+      "end": "0x880b02000",
+      "sources": [
+        "runtime /reserved-memory/sec_debug_region_pool@880100000",
+        "runtime /reserved-memory/sec_rst_ex_info_region@8801FF000",
+        "runtime /reserved-memory/sec_log_buf_region@880200000",
+        "runtime /reserved-memory/sec_debug_bl_region@880400000",
+        "runtime /reserved-memory/sec_pmsg_region@880900000",
+        "runtime /reserved-memory/google_debug_kinfo_region@880B00000",
+        "runtime /reserved-memory/hdm_region@880B01000"
+      ],
+      "size": "0xa02000"
+    },
+    {
+      "base": "0x880c00000",
+      "end": "0x88b900000",
+      "sources": [
+        "runtime /reserved-memory/sec_qcom_rdx_bootdev_region@880C00000"
+      ],
+      "size": "0xad00000"
+    },
+    {
+      "base": "0x8b9a00000",
+      "end": "0x8b9c00000",
+      "sources": [
+        "runtime /memory gap"
+      ],
+      "size": "0x200000"
+    },
+    {
+      "base": "0x8bba00000",
+      "end": "0x8c0000000",
+      "sources": [
+        "runtime /memory gap"
+      ],
+      "size": "0x4600000"
+    }
+  ]
+}

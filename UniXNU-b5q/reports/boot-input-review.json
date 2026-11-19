@@ -1,0 +1,123 @@
+{
+  "date": "2026-11-20",
+  "scope": "Review of actual deployment inputs and supported configuration corrections; no device access",
+  "status": "configuration_corrections_verified_but_dram_input_unresolved",
+  "source_changes": {
+    "board.toml": [
+      "use_contiguous_hint=0",
+      "adt.chosen.u32.kernel-ctrr-to-be-enabled=0",
+      "adt.defaults.u32.sleep-disabled=1"
+    ],
+    "dts/b5q.dts": [
+      "Corrected misleading comment; no memory constants changed"
+    ],
+    "README.md": [
+      "Document unresolved DRAM defect; historical v5 restoration is not a boot fix"
+    ]
+  },
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "445fbfed380e1ff4e0f3755d0ef9b559ec076866f35a771c008ed9fc77a82ca8",
+    "UniXNU-b5q/dts/b5q.dts": "c49cbc58bae4a4739e507289545d82bd8ec05fa61a5bc0d7893823d0b7f95d96",
+    "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "e67dd5ba255a78a7d6f1ad20a9c82cefbedfa804b071837851fddaf878991da5",
+    "UniXNU-b5q/README.md": "70bf93342e423224251a1c6b8945bcee2975808f9d463e4c738f6642388b2fd5"
+  },
+  "actual_deployed_adt": {
+    "sha256": "47ffabd4968cbdd7846011d24b003c2c26470956a77309db78440547a84b9c64",
+    "dram_base": 0,
+    "dram_size": 0,
+    "ctrr_present": false,
+    "sleep_disabled_present": false
+  },
+  "candidate_adt": {
+    "path": "/home/baimao/zflip5/artifacts/b5q-boot-audit/input-review/candidate-NOT-FOR-FLASH.adt",
+    "sha256": "89ab64c29de39d0914f90725c3ae2bf90dfd65ef8fe139ecd9c56b92f37a18cb",
+    "dram_base": 0,
+    "dram_size": 0,
+    "ctrr": {
+      "bytes": 4,
+      "value": 0
+    },
+    "sleep_disabled": {
+      "bytes": 4,
+      "value": 1
+    },
+    "boot_ready": false
+  },
+  "qemu_reproduction": {
+    "kernel_sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df",
+    "scope": "Raw unmodified XNU on QEMU max; synthetic bootargs, no b5q hardware emulation",
+    "framebuffer": "synthetic 64x64 32bpp at QEMU RAM address 0xb8000000; not measured phone GOP",
+    "panic_format": "%s: gDramBase/gDramSize not initialized @%s:%d",
+    "gDramBase": 0,
+    "gDramSize": 0,
+    "vinfo_zero": true,
+    "stop_pc": "0xfffffff00b976498",
+    "guest_kernel_code_modified": false,
+    "breakpoint_kind": "QEMU GDB hardware breakpoints",
+    "snapshot": "/home/baimao/zflip5/artifacts/b5q-boot-audit/framebuffer-input-audit/snapshot.json"
+  },
+  "review_verdicts": [
+    {
+      "claim": "Zero ADT DRAM causes console initialization failure",
+      "verdict": "Confirmed by actual deployed ADT, XNU source and synthetic-framebuffer host execution; not proof of the earliest phone failure"
+    },
+    {
+      "claim": "Native-4K block-split path needs use_contiguous_hint=0",
+      "verdict": "Selected patch + upstream same-SoC device record support the configuration correction; no b5q phone trace of that assert"
+    },
+    {
+      "claim": "CTRR property missing",
+      "verdict": "Confirmed; XNU requires exactly 4 bytes to initialize the queried state"
+    },
+    {
+      "claim": "macOS user address space patch absent",
+      "verdict": "Incorrect; selected OS series already includes macos-user-address-space.patch. No duplicate board patch added"
+    },
+    {
+      "claim": "Framebuffer address and first failing instruction are proven by colored bars",
+      "verdict": "Not established; magenta is written before SCTLR. Synthetic framebuffer reproducer proves an input defect, not actual scanout geometry or the first phone fault"
+    },
+    {
+      "claim": "Static b5q reference memory fragments can directly replace actual physical banks",
+      "verdict": "Not established; eight reference OS-visible fragments and original-package zero placeholders have different provenance"
+    }
+  ],
+  "unresolved": {
+    "required": "Verified nonzero b5q physical DRAM description or a separately reviewed runtime source for chosen/dram-base and chosen/dram-size",
+    "why_window_is_insufficient": "boot_args PhysicalBase/MemorySize describes kernel-owned allocation; gDramBase/gDramSize classifies physical DRAM, including framebuffer. Substituting the allocation window can classify a real DRAM framebuffer as Device memory.",
+    "reference": "reports/hardware-baseline.json: phone_extracted_input_present=false; reports/official-firmware-hardware.json: phone_extracted=false"
+  },
+  "validation": {
+    "toml": "PASS",
+    "only_expected_board_settings_changed": "PASS",
+    "dtc": "PASS",
+    "official_adt_generator": "PASS",
+    "typed_property_widths": "PASS",
+    "platform_identity_preserved": "PASS",
+    "packed_data_and_trustcache_placeholders_preserved": "PASS",
+    "upstream_package_template": "PASS",
+    "porting_record": "PASS",
+    "new_probes_added": false,
+    "kernel_or_firmware_modified": false,
+    "ci_started_or_modified": false,
+    "phone_access": false,
+    "new_flash_package_released": false,
+    "device_boot_verified": false,
+    "known_qemu_dram_console_return": "PASS"
+  },
+  "qemu_control": {
+    "scope": "Control: original unmodified XNU, QEMU-known physical RAM range 0x40000000+4GiB, candidate config, synthetic framebuffer; not Samsung DRAM values",
+    "kernel_sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df",
+    "pc": "0xfffffff00c2e400c",
+    "console_returned": true,
+    "dram_base_hex": "0000004000000000",
+    "dram_size_hex": "0000000001000000",
+    "vinfo_hex": "40000000400000002000000000010000000000d3f0ffffff00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "deployment_memory_values_used": false
+  },
+  "reproduction_command": "python3 artifacts/b5q-boot-audit/input-review/verify-inputs.py",
+  "local_control_scripts": [
+    "/home/baimao/zflip5/artifacts/b5q-boot-audit/input-review/b5q-framebuffer-input-audit.py",
+    "/home/baimao/zflip5/artifacts/b5q-boot-audit/input-review/b5q-framebuffer-input-control.py"
+  ]
+}

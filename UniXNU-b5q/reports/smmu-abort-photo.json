@@ -1,0 +1,93 @@
+{
+  "date": "2026-11-20",
+  "scope": "Photo and exact deployed-kernel symbol/disassembly analysis; no device MMIO test",
+  "photo_sha256": "25a4f81a4a672904f5c116fbe8bf86ff61c4fb7287d27d16934bb0f4198593d9",
+  "kernel_sha256": "7ea22869a35061a45d00221d503442a3d58b6f845c6d1d7fbecd7f49ff18cacf",
+  "esr": "0x96000010",
+  "far": "0xfffffff2854e6c00",
+  "frames": [
+    {
+      "address": "0xfffffff00c2e6104",
+      "symbol": "_handle_user_abort.cold.1",
+      "offset": "0x0"
+    },
+    {
+      "address": "0xfffffff00bb8f1c0",
+      "symbol": "_handle_user_abort",
+      "offset": "0x0"
+    },
+    {
+      "address": "0xfffffff00bb8e874",
+      "symbol": "_fleh_synchronous",
+      "offset": "0x18"
+    },
+    {
+      "address": "0xfffffff00c29a9a0",
+      "symbol": "__ZN12_GLOBAL__N_112mapUfsStreamEv",
+      "offset": "0x1a4"
+    },
+    {
+      "address": "0xfffffff00c297924",
+      "symbol": "_b5q_ram_storage_start",
+      "offset": "0x270"
+    },
+    {
+      "address": "0xfffffff00c2853d4",
+      "symbol": "_native_legacy_display_late_probe",
+      "offset": "0x6c"
+    },
+    {
+      "address": "0xfffffff00beab14c",
+      "symbol": "_bsd_init",
+      "offset": "0x6d4"
+    },
+    {
+      "address": "0xfffffff00c2b33b4",
+      "symbol": "_kernel_bootstrap_thread",
+      "offset": "0x3ec"
+    },
+    {
+      "address": "0xfffffff00bb945d0",
+      "symbol": "_Call_continuation",
+      "offset": "0x70"
+    }
+  ],
+  "faulting_operation": {
+    "function": "mapUfsStream",
+    "source": "package/B5qUfs/B5qSmmu.h:16",
+    "smr_read_instruction": {
+      "pc": "0xfffffff00c29a99c",
+      "assembly": "ldr w17, [x17]"
+    },
+    "s2cr_read_instruction": {
+      "pc": "0xfffffff00c29a9a0",
+      "assembly": "ldr w0, [x15], #4"
+    },
+    "smmu_base": "0x15000000",
+    "s2cr0_offset": "0xc00",
+    "s2cr0_physical": "0x15000c00",
+    "interpretation": "Unconditional S2CR read during global stream/context-bank scan. FAR page offset and symbolized frame match S2CR[0].",
+    "ownership_reason": "The access was rejected or the register window unavailable. The precise hypervisor/security/firewall/alias mechanism is not established from ESR and photo alone."
+  },
+  "hardware_fdt": {
+    "sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+    "ufs_sid": "0x60",
+    "smmu_compatible": [
+      "qcom,qsmmu-v500"
+    ],
+    "smmu_reg_cells": [
+      352321536,
+      1048576,
+      354410496,
+      64
+    ],
+    "handoff_smrs": [
+      7168,
+      2
+    ]
+  },
+  "startup_stage": "bsd_init -> native_legacy_display_late_probe -> b5q_ram_storage_start -> b5q_ufs_start -> mapUfsStream",
+  "impact": "No GPT scan or root authentication has been reached at this failure. Queue run-stop was already touched earlier by startTransport; no persistent block write is indicated.",
+  "next_fix": "Review Samsung SMMU access aliases, register ownership and existing UFS stream/context handoff. Replace unrestricted global S2CR/context-bank scans with an ownership-backed UFS takeover. Requires a kernel rebuild.",
+  "code_changed_in_storage_driver": false
+}

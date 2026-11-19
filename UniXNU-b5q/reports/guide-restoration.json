@@ -1,0 +1,197 @@
+{
+  "date": "2026-11-20",
+  "device": "b5q",
+  "profile": "macos-27.3-26C5035r",
+  "request": "Re-read UniXNU porting guides; revert assistant-added ungrounded v3/v4 changes without new probes or CI.",
+  "guide_revision": "563595abedfdfa413ad583b66b6176d82007e633",
+  "online_pinned_guide_verification": [
+    {
+      "source": "https://raw.githubusercontent.com/UniXNU/UniXNU/563595abedfdfa413ad583b66b6176d82007e633/docs/guide/debugging.md",
+      "saved": "artifacts/b5q-guide-review/upstream-docs-guide-debugging.md",
+      "sha256": "0dfdd4094ee57508faf4ac0ce7186112be63f4857c393d1b652e71e75e857c35",
+      "matches_pinned_checkout": true
+    },
+    {
+      "source": "https://raw.githubusercontent.com/UniXNU/UniXNU/563595abedfdfa413ad583b66b6176d82007e633/docs/porting/macos.md",
+      "saved": "artifacts/b5q-guide-review/upstream-docs-porting-macos.md",
+      "sha256": "704e31904c9b0f4276460cdceb837e598d9feec2010e207029c6c9ecec18f666",
+      "matches_pinned_checkout": true
+    },
+    {
+      "source": "https://raw.githubusercontent.com/UniXNU/UniXNU/563595abedfdfa413ad583b66b6176d82007e633/docs/porting/packaging.md",
+      "saved": "artifacts/b5q-guide-review/upstream-docs-porting-packaging.md",
+      "sha256": "918b1232a8f20138160858e2dd3acd08bf4208bd09a49885276ac832e939fcb7",
+      "matches_pinned_checkout": true
+    },
+    {
+      "source": "https://raw.githubusercontent.com/UniXNU/UniXNU/563595abedfdfa413ad583b66b6176d82007e633/docs/concepts/payload.md",
+      "saved": "artifacts/b5q-guide-review/upstream-docs-concepts-payload.md",
+      "sha256": "1215da765672c405a182f5ee2e54cc6ff2a0d152d4ec461ae7e1ff5fb617eea5",
+      "matches_pinned_checkout": true
+    }
+  ],
+  "guide_decisions": [
+    {
+      "reference": "UniXNU/docs/guide/debugging.md:202-230",
+      "rule": "panic_screen=true runs the existing --panic-screen --no-reset payload processing; the same step supplies blue/magenta markers.",
+      "action": "Restore prior panic_screen setting and exact completed payload member; no new reset modes."
+    },
+    {
+      "reference": "UniXNU/docs/porting/bring-up.md:1-8",
+      "rule": "Isolate one stage and keep the last image/log before changing inputs.",
+      "action": "Restore every original ESP-v2 file byte-for-byte; only native-sector FAT container changes."
+    },
+    {
+      "reference": "UniXNU/docs/porting/packaging.md:3-24",
+      "rule": "Use the unchanged templates/package.sh; board settings in TOML, sources pinned.",
+      "action": "Template verified unchanged; board restored exactly to saved published baseline; the local ESP recovery assembler does not replace release workflow."
+    },
+    {
+      "reference": "UniXNU/docs/porting/macos.md:1-29,111-119",
+      "rule": "Retain selected macOS profile, XNU target/identity, and carry full OS name for commands.",
+      "action": "No OS/XNU patch sequence, component, root or kernel argument changes."
+    },
+    {
+      "reference": "UniXNU/scripts/unixnu/payload.py:191-211,278-291",
+      "rule": "Intermediate kernel is copied, payload diagnostics applied, source POST resealed; kernel_sha256 and payload_kernel_sha256 are distinct report fields.",
+      "action": "Revert the v4 assumption that raw intermediate should replace payload output."
+    }
+  ],
+  "admitted_errors": [
+    "Expanded the prohibition on NEW probes into disabling the EXISTING documented panic-screen step.",
+    "Combined a physical FAT sector correction with substitution of the deployment kernel.",
+    "Added custom v3 timed reset modes and diagnostic menu entries instead of holding the prior baseline.",
+    "Presented raw-kernel QEMU evidence without making the changed visual indicators sufficiently explicit."
+  ],
+  "reverted": {
+    "board_toml_equals_pre_v3_v4": true,
+    "entry_adapter_equals_pre_v3_v4": true,
+    "custom_reset_modes_removed": true,
+    "v3_builder": "withdrawn and refuses execution",
+    "custom_host_diagnostic_sources": "archived outside active source tree in artifacts/b5q-guide-review/reverted-assistant-changes",
+    "raw_intermediate_substitution": false,
+    "active_payload_kernel": "7ea22869a35061a45d00221d503442a3d58b6f845c6d1d7fbecd7f49ff18cacf"
+  },
+  "retained_with_evidence": {
+    "physical_esp_sector_bytes": 4096,
+    "sectors_per_cluster": 1,
+    "justification": "User-reported 4096-byte logical device and successful mount after reformat; previous Linux FAT source audit confirms old512-byte BPB mismatch.",
+    "explicit_DarwinBoot_driver": "Existing v2 delivery fix; real missing-loader regression was recorded before these changes.",
+    "physical_esp_delivery": "Previously user-observed ESP-v2 menu with blue/magenta entry; no firmware replacement."
+  },
+  "binary_stage_diff": {
+    "raw_kernel_sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df",
+    "deployed_kernel_sha256": "7ea22869a35061a45d00221d503442a3d58b6f845c6d1d7fbecd7f49ff18cacf",
+    "ci_payload_member_equal": true,
+    "differences_limited_to": [
+      {
+        "file_offset": "0x4b8e488",
+        "bytes": 4,
+        "purpose": "entry branch"
+      },
+      {
+        "file_offset": "0x4b90418",
+        "bytes": 4,
+        "purpose": "pre-MMU branch"
+      },
+      {
+        "file_offset": "0x52a15d4",
+        "bytes": 4,
+        "purpose": "panic branch"
+      },
+      {
+        "file_offset": "0x4972498",
+        "bytes": 4,
+        "purpose": "common panic branch"
+      },
+      {
+        "file_offset": "0x4b8e490",
+        "bytes": 2912,
+        "purpose": "entry padding renderers"
+      },
+      {
+        "file_offset": "0x33c97d",
+        "bytes": 32,
+        "purpose": "POST HMAC"
+      }
+    ],
+    "other_kernel_changes": false
+  },
+  "verification": {
+    "result": "PASS",
+    "every_esp_file_matches_v2": true,
+    "deployment_kernel_matches_actual_completed_ci_payload": true,
+    "all_fat_members_read_back": true,
+    "fat_fsck": "PASS",
+    "source_POST_seal": {
+      "verification": "PASS",
+      "mapping_complete": true,
+      "missing": {},
+      "stubbed": [],
+      "actual_original_pmgr_branches": {
+        "_b5q_original_pmgr_construct": {
+          "symbol": "_b5q_original_pmgr_construct",
+          "source": "0xfffffff00c29c7d4",
+          "target": "0xfffffff009897c48",
+          "owner": "com.apple.driver.ApplePMGR"
+        },
+        "_b5q_original_pmgr_factory": {
+          "symbol": "_b5q_original_pmgr_factory",
+          "source": "0xfffffff00c29c7dc",
+          "target": "0xfffffff0098ebac8",
+          "owner": "com.apple.driver.ApplePMGR"
+        },
+        "_b5q_original_pmgr_read": {
+          "symbol": "_b5q_original_pmgr_read",
+          "source": "0xfffffff00c29c7e4",
+          "target": "0xfffffff0098ef408",
+          "owner": "com.apple.driver.ApplePMGR"
+        },
+        "_b5q_original_pmgr_write": {
+          "symbol": "_b5q_original_pmgr_write",
+          "source": "0xfffffff00c29c7ec",
+          "target": "0xfffffff0098ece48",
+          "owner": "com.apple.driver.ApplePMGR"
+        }
+      },
+      "deployment_source_POST_already_correct": true,
+      "hardware_boot_verified": false,
+      "scope": "real built outputs; no runtime or desktop assertion"
+    },
+    "installer_mock": "PASS; device/FAT sector check; selected partition only",
+    "official_package_script_unchanged": true,
+    "new_kernel_patch_execution": false,
+    "ci_started": false,
+    "phone_accessed": false
+  },
+  "green_bar_interpretation": "Removing the original entry markers necessarily removes blue/magenta output; a green-only v4 photo is not proof that the CPU stopped before XNU entry. Current hardware execution stop remains unknown.",
+  "output": {
+    "directory": "/home/baimao/zflip5/artifacts/b5q-esp-guide-restored-v5",
+    "images": {
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "d8dbac3e402c99ebe17701dd5a0db9e81490c6d372ba6a4e59ff139aee580ded"
+      },
+      "payload.img": {
+        "bytes": 838860800,
+        "sha256": "d8dbac3e402c99ebe17701dd5a0db9e81490c6d372ba6a4e59ff139aee580ded"
+      },
+      "kernel.macho": {
+        "bytes": 142983168,
+        "sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df"
+      }
+    },
+    "deploy_kernel_sha256": "7ea22869a35061a45d00221d503442a3d58b6f845c6d1d7fbecd7f49ff18cacf"
+  },
+  "source_sha256": {
+    "AGENTS.md": "7fa1350cc9754ddf6067f95afe672a6fbfc4e652691abb47b2c3421d33c04872",
+    "UniXNU-b5q/board.toml": "2b7d60d760f8f8426e0f55a34b41a1590cca0930ea455a7a4583742ab56d3384",
+    "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "e67dd5ba255a78a7d6f1ad20a9c82cefbedfa804b071837851fddaf878991da5",
+    "scripts/b5q-install/build-4kn-esp.py": "64ef94b6643df38660d0245c8063257d459b6ef44939f7901ca75e4c6578a82e",
+    "scripts/b5q-install/install-firstboot.py": "c5892b6452845830829560dbb442b26dd83ca0532e6ff0ef46e0f4680a488d7f",
+    "scripts/b5q-install/ESP-4KN.zh-CN.md": "469ba64b66c0b2c08a0638b0785361a30c931955f505db1aa873ee75e1b9c0a9",
+    "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
+    "UniXNU-b5q/scripts/package.sh": "f7b8e3ea043058b9c61d5b45c32b8e7669a85737c89d55d404957c3b43ec4aab"
+  },
+  "limits": "Restoring the prior visible checkpoint is not a new hardware boot/desktop result. No new probes, driver changes, DTS/memory edits, firmware build, CI or phone I/O performed."
+}

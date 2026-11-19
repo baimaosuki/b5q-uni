@@ -1,3 +1,8 @@
 
 # OS-only CoreEntitlements stack alignment, exact reviewed XnuPrelink fixture.
 macos-kernel-stack-alignment.patch
+
+# Native arm64e userspace geometry and memory attributes.
+native-arm64e-user-memory.patch
+# Keep vc-text=1 visible after kPEAcquireScreen.
+native-text-console-retain.patch

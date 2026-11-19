@@ -1,0 +1,184 @@
+{
+  "date": "2026-11-20",
+  "status": "boot_image_built_local_verification_pass",
+  "outputs": {
+    "boot.img": {
+      "bytes": 19275776,
+      "sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1"
+    },
+    "boot-b5q-memory-v8.tar": {
+      "bytes": 19281920,
+      "sha256": "73937ea2b6664bba023fffe5f7b97a58de3669b39e32a9096c804374fde8452a"
+    }
+  },
+  "runtime_fdt_sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+  "device": "b5q",
+  "model": "SM-F731B",
+  "reserved_high_ranges": [
+    {
+      "base": "0x880100000",
+      "end": "0x880b02000",
+      "sources": [
+        "runtime /reserved-memory/sec_debug_region_pool@880100000",
+        "runtime /reserved-memory/sec_rst_ex_info_region@8801FF000",
+        "runtime /reserved-memory/sec_log_buf_region@880200000",
+        "runtime /reserved-memory/sec_debug_bl_region@880400000",
+        "runtime /reserved-memory/sec_pmsg_region@880900000",
+        "runtime /reserved-memory/google_debug_kinfo_region@880B00000",
+        "runtime /reserved-memory/hdm_region@880B01000"
+      ],
+      "size": "0xa02000"
+    },
+    {
+      "base": "0x880c00000",
+      "end": "0x88b900000",
+      "sources": [
+        "runtime /reserved-memory/sec_qcom_rdx_bootdev_region@880C00000"
+      ],
+      "size": "0xad00000"
+    },
+    {
+      "base": "0x8b9a00000",
+      "end": "0x8b9c00000",
+      "sources": [
+        "runtime /memory gap"
+      ],
+      "size": "0x200000"
+    },
+    {
+      "base": "0x8bba00000",
+      "end": "0x8c0000000",
+      "sources": [
+        "runtime /memory gap"
+      ],
+      "size": "0x4600000"
+    }
+  ],
+  "source_sha256": {
+    "sources/Mu-Silicium/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c": "8a18883b21362fd088b2c0c47b471ff6121a73764ca93df7b14036c1aef06bdb",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c": "8a18883b21362fd088b2c0c47b471ff6121a73764ca93df7b14036c1aef06bdb",
+    "scripts/b5q-install/build-memory-boot.py": "1a57d8b26b837648e99327c5333de38832d394c0ef95057d3ac4a999f5992d7b",
+    "patches/mu-silicium/0003-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+    "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+    "UniXNU-b5q/README.md": "4df26bd8db8ed7068d6b49ace0b1ed44484d90ee09f428465730f4517debaea7"
+  },
+  "source_revisions": {
+    "sources/Mu-Silicium": "50a0ef121fe633fed786ff14e293f9d6e2da229d",
+    "sources/Mu-Silicium/Mu_Basecore": "64f478939955e45faa632c160ae2a75a5ff7ef7f",
+    "sources/UniXNU": "bba3b57879e94e5ec1632daafb74cbcab8af49a5",
+    "sources/UniXNU/drivers/DarwinBoot": "5243c68ec332a227fe3680cd5da6d5a0e127035c"
+  },
+  "window_regression": {
+    "result": "PASS",
+    "scope": "Actual MemoryMapLib.c with exact ParseMemoryRange, RunEnd and AllocateWindow function bodies under simulated EFI services",
+    "before": {
+      "window_base": "0x880004000",
+      "window_size": "0x80000000",
+      "free_ranges": [
+        {
+          "base": "0x880000000",
+          "size": "0x180000000"
+        }
+      ]
+    },
+    "after": {
+      "window_base": "0x8c0004000",
+      "window_size": "0x80000000",
+      "free_ranges": [
+        {
+          "base": "0x880000000",
+          "size": "0x100000"
+        },
+        {
+          "base": "0x880b02000",
+          "size": "0xfe000"
+        },
+        {
+          "base": "0x88b900000",
+          "size": "0x2e100000"
+        },
+        {
+          "base": "0x8b9c00000",
+          "size": "0x1e00000"
+        },
+        {
+          "base": "0x8c0000000",
+          "size": "0x140000000"
+        }
+      ]
+    },
+    "source_sha256": {
+      "sources/Mu-Silicium/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c": "8a18883b21362fd088b2c0c47b471ff6121a73764ca93df7b14036c1aef06bdb",
+      "sources/Mu-Silicium/Silicon/Silicium/SiliciumPkg/Drivers/RamManagerDxe/RamManager.c": "f21045e2ca73208d3dc55a1bcadae71bcf55cd2c60baafd68d6664a51398e527",
+      "sources/UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/DarwinBoot.c": "1d19ca1091962bd48b4154e3aae3d0ad80699f6c892a5a407dd3de0d62907fd9"
+    },
+    "reserved_ranges_avoided": [
+      {
+        "base": "0x880100000",
+        "end": "0x880b02000",
+        "sources": [
+          "runtime /reserved-memory/sec_debug_region_pool@880100000",
+          "runtime /reserved-memory/sec_rst_ex_info_region@8801FF000",
+          "runtime /reserved-memory/sec_log_buf_region@880200000",
+          "runtime /reserved-memory/sec_debug_bl_region@880400000",
+          "runtime /reserved-memory/sec_pmsg_region@880900000",
+          "runtime /reserved-memory/google_debug_kinfo_region@880B00000",
+          "runtime /reserved-memory/hdm_region@880B01000"
+        ],
+        "size": "0xa02000"
+      },
+      {
+        "base": "0x880c00000",
+        "end": "0x88b900000",
+        "sources": [
+          "runtime /reserved-memory/sec_qcom_rdx_bootdev_region@880C00000"
+        ],
+        "size": "0xad00000"
+      },
+      {
+        "base": "0x8b9a00000",
+        "end": "0x8b9c00000",
+        "sources": [
+          "runtime /memory gap"
+        ],
+        "size": "0x200000"
+      },
+      {
+        "base": "0x8bba00000",
+        "end": "0x8c0000000",
+        "sources": [
+          "runtime /memory gap"
+        ],
+        "size": "0x4600000"
+      }
+    ],
+    "sanitizers": "address,undefined"
+  },
+  "binary_verification": {
+    "sec_embedded_te_matches_built_module": true,
+    "four_reserved_hob_records_in_boot_sec_verified": true,
+    "native_resource_hobs_not_mapped_in_pei": true,
+    "shim_matches_deployed": true,
+    "samsung_dtb_matches_deployed": true,
+    "bare_fat_bootstrap_matches_deployed": true,
+    "bootstrap_has_no_shadow_menu": true,
+    "boot_header_version": 4,
+    "empty_signature_slot_removed_like_deployed_boot": true,
+    "boot_tar_roundtrip": "PASS"
+  },
+  "build_log": "artifacts/b5q-memory-v8-work/logs/firmware.log",
+  "installer_mock": "PASS",
+  "phone_actions": [
+    "identify b5q recovery",
+    "read /sys/firmware/fdt",
+    "read /proc/iomem"
+  ],
+  "phone_flash_performed": false,
+  "new_firmware_boot_tested": false,
+  "note": "ESR/FAR identifies a synchronous external abort and virtual heap location. The exact physical faulting page has not been recovered from the reported panic. The live FDT confirms the allocator input defect addressed here.",
+  "connected_installer_check": {
+    "result": "not-completed-device-disconnected",
+    "local_boot_hash": "PASS",
+    "device_geometry": "not checked after ADB disconnected"
+  }
+}

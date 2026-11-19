@@ -33,9 +33,9 @@ files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/pay
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)
 manifest=pipeline.write_manifest(ctx,modules,plan,files)
 data=json.loads(manifest.read_text());data['scope']='Initial b5q macosroot reader build; authenticated roots plus volatile template Data; hardware boot not yet observed'
-data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':True,'persistent_block_writes':False,'persistent_root_windows':True,'root_partition':'macosroot','data_seed':'official template-derived 29GiB sparse RAM Data; exact UUID bound to this kernel'}
+data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':True,'persistent_block_writes':False,'smmu_mode':'b5q-smmu-reuse=1; no SMMU MMIO; arbitrary DMA compatibility requires hardware verification','persistent_root_windows':True,'root_partition':'macosroot','data_seed':'official template-derived 29GiB sparse RAM Data; exact UUID bound to this kernel'}
 data['identity']={'kind':'fresh development build namespace','published_seed':False}
-data['memory_handoff']={'dts_dram':'zero placeholder from the Samsung static source','physical_window':'DarwinBoot EFI allocator at load time, not a fabricated b5q physical address'}
+data['memory_handoff']={'dts_dram':'b5q low physical bank 0x80000000 + 0x80000000 for DRAM classification; not the allocator window','physical_window':'DarwinBoot EFI allocator at load time, not a fabricated b5q physical address'}
 data['hardware_tested']=False
 manifest.write_text(json.dumps(data,indent=2,sort_keys=True)+'\n')
 print('Built first-root kernel, FAT payload and package manifest; verification is performed locally after return')

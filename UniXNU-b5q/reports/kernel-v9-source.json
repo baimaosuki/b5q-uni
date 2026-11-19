@@ -1,0 +1,68 @@
+{
+  "scope": "2026-11-20 requested kernel rebuild v9; source and host evidence, not hardware success",
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "fcca46f5ac25605286df2de60588c88f23a18c3f518c6fada9ce82d4c0f70048",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "f653d0985c836941fb3eacc529042fcee164c9f6f1794fcc0c7cb9afeed3c103",
+    "UniXNU-b5q/package/B5qUfs/B5qSmmu.h": "de60642e39d4c15b33b55cfb34d2e4c6a8199d64f68d4c9ccc48885090111d5e",
+    "tests/b5q-ufs/smmu.cpp": "4b54932d4a2325b2eac1fafcb611fdc22d4cc4b90671f2e0d7e1156e54b9fed7",
+    "UniXNU-b5q/patches/xnu/series": "fb1031392c42e673714a0450c87bcd68ad3fd69a1568ad3cf70004b9886799a5",
+    "UniXNU-b5q/patches/xnu/native-arm64e-user-memory.patch": "647b87ca4ea8a8d218dcf2b12edbce9b4cbdfb7aa633a4434986a62b7dbdf022",
+    "UniXNU-b5q/patches/xnu/native-text-console-retain.patch": "bd28f4bc96939cdf0db10036b750f3a7a11d6e86e3ada0b02271eddf486761c2",
+    "UniXNU-b5q/scripts/build-b5q-payload.py": "72faa09636d286014d907c263683e14030b83110bc03ef4ffe662adff5122400"
+  },
+  "reference_commit": "6c42e1055ffb3b335fda991190ad221edaa7af3c",
+  "generic_hunks": {
+    "selected_reference_hunks": {
+      "osfmk/arm/arm_init.c": [
+        357
+      ],
+      "osfmk/arm/pmap/pmap.c": [
+        335,
+        2277,
+        6000,
+        6040,
+        7962,
+        7972,
+        10949,
+        12965
+      ],
+      "osfmk/arm/pmap/pmap.h": [
+        295
+      ],
+      "osfmk/arm/pmap/pmap_pt_geometry.h": [
+        168
+      ],
+      "osfmk/arm64/arm_vm_init.c": [
+        2182
+      ],
+      "osfmk/arm64/proc_reg.h": [
+        1103,
+        1182,
+        1807
+      ],
+      "osfmk/arm64/sleh.c": [
+        1663
+      ],
+      "osfmk/arm64/start.s": [
+        879
+      ],
+      "osfmk/mach/arm/vm_param.h": [
+        293
+      ]
+    },
+    "generated": [
+      "UniXNU-b5q/patches/xnu/native-arm64e-user-memory.patch",
+      "UniXNU-b5q/patches/xnu/native-text-console-retain.patch"
+    ],
+    "baseline_ci_patches": 131,
+    "host_apply_check": "PASS"
+  },
+  "tests": {
+    "local_pre_ci": "PASS 14 checks",
+    "local_pre_ci_report": "artifacts/b5q-firstboot/local-pre-ci/report.json",
+    "ordered_patch_application": "PASS 133/133",
+    "smmu_reuse": "actual helper executed with callbacks that assert on all register access; zero reads/writes; zero and overflowing DMA rejected",
+    "target_build": "pending"
+  },
+  "hardware_tested": false
+}

@@ -1,0 +1,158 @@
+{
+  "date": "2026-11-19",
+  "device": "b5q",
+  "profile": "macos-27.3-26C5035r",
+  "user_instruction": "No new entry/MMU/reset probes. Analyze existing source and compiled artifacts. Physical ESP native logical block is 4096; user reports successful mount after 4096-byte FAT reformat.",
+  "confirmed_packaging_defect": {
+    "old_esp": {
+      "bytes_per_sector": 512,
+      "sectors_per_cluster": 8,
+      "cluster_bytes": 4096,
+      "bytes": 838860800,
+      "sha256": "8732f8266084c7a07bcc4f966403375c57dc661ed6b75351e071f7ccc2dd473b"
+    },
+    "corrected_esp": {
+      "bytes_per_sector": 4096,
+      "sectors_per_cluster": 1,
+      "cluster_bytes": 4096,
+      "bytes": 838860800,
+      "sha256": "c9bbd3f00fc21cab7045c0cebf4b5b5da3bc14d2a668e032ede6ead4cb88f499"
+    },
+    "reason": "FAT BPB sector was 512 despite the target logical block size 4096; 8 sectors per cluster did not fix the sector mismatch."
+  },
+  "primary_source": {
+    "linux_fat": {
+      "url": "https://raw.githubusercontent.com/torvalds/linux/master/fs/fat/inode.c",
+      "local_path": "artifacts/b5q-boot-audit/no-probes/linux-fat-inode.c",
+      "sha256": "2e2c1f16d7a4f2e3c0431fe43315842093ff8b0097b0267f7f5e8442733200eb",
+      "lines": "1636 sb_min_blocksize; 1663-1666 rejects logical_sector_size < sb->s_blocksize"
+    },
+    "uefi_fat": {
+      "path": "sources/Mu-Silicium/Mu_Basecore/FatPkg/EnhancedFatDxe/Init.c",
+      "lines": "74-77 allows 512/1024/2048/4096 BlockIo sizes; 361+ uses BPB sector offsets via DiskIo",
+      "sha256": "7f11ba66cf8dba7dd8218dafea152e5e8ef7e3bc303a7cdc002901a708f130e3"
+    }
+  },
+  "interpretation": {
+    "linux_mount": "512-byte FAT BPB incompatible with 4096-byte device logical blocks",
+    "uefi": "Do not infer universal UEFI failure from Linux rejection; UEFI DiskIo is byte-addressed. New package actually boots a 4096-byte logical/physical QEMU SCSI disk.",
+    "photo": "New menu and existing blue/magenta bands establish that the old menu delivery had already reached XNU; FAT mismatch alone does not identify the later phone stall.",
+    "cpu_pages": "Disk sector size and ARM MMU 4KiB translation granule are independent.",
+    "storage_layers": "B5qUfs physical READ16 uses count*4096 and firstLba+offset/4096; its 512-byte virtual root disk is separately converted into authenticated 4096-byte reads. Do not blindly change virtual image block geometry.",
+    "display_log": "B5_S6E3FC5_AMB338EH01 in photo is the 720x748 panel per original Samsung DT report lines1749-1752, not the 1080x2640 B5_S6E3FAC_AMF670BS03. It does not prove inner scanout shutdown."
+  },
+  "source_checks": {
+    "kernel_tcr_el1_boot": "0x00080022a51a251a; IPS=2 (40-bit), TG0=0 (4KiB), TG1=2 (4KiB)",
+    "phone_reported_parange": "2 from supplied photo; no PA-size mismatch established",
+    "kernel_bootstrap_table_capacity": "16 pages in actual linked entry, two separate TTBR roots; bounds checked",
+    "source_storage_read_bytes": "READ16 count*4096, offset conversion audited without modification",
+    "link_and_post": {
+      "verification": "PASS",
+      "mapping_complete": true,
+      "missing": {},
+      "stubbed": [],
+      "actual_original_pmgr_branches": {
+        "_b5q_original_pmgr_construct": {
+          "symbol": "_b5q_original_pmgr_construct",
+          "source": "0xfffffff00c29c7d4",
+          "target": "0xfffffff009897c48",
+          "owner": "com.apple.driver.ApplePMGR"
+        },
+        "_b5q_original_pmgr_factory": {
+          "symbol": "_b5q_original_pmgr_factory",
+          "source": "0xfffffff00c29c7dc",
+          "target": "0xfffffff0098ebac8",
+          "owner": "com.apple.driver.ApplePMGR"
+        },
+        "_b5q_original_pmgr_read": {
+          "symbol": "_b5q_original_pmgr_read",
+          "source": "0xfffffff00c29c7e4",
+          "target": "0xfffffff0098ef408",
+          "owner": "com.apple.driver.ApplePMGR"
+        },
+        "_b5q_original_pmgr_write": {
+          "symbol": "_b5q_original_pmgr_write",
+          "source": "0xfffffff00c29c7ec",
+          "target": "0xfffffff0098ece48",
+          "owner": "com.apple.driver.ApplePMGR"
+        }
+      },
+      "deployment_source_POST_already_correct": true,
+      "hardware_boot_verified": false,
+      "scope": "real built outputs; no runtime or desktop assertion"
+    }
+  },
+  "changes": [
+    "board.toml panic_screen=false prevents the existing payload recipe from adding entry/panic probes",
+    "v3 diagnostic builder retired by explicit user instruction",
+    "physical ESP builders use FAT32 -S4096 -s1; RAM bootstrap FAT retained with its independent 512-byte BlockIo",
+    "installer verifies native4K BPB locally and blockdev --getss before any ESP write",
+    "v4 deploys exact raw CI kernel with no additional text patches and only normal menu entries"
+  ],
+  "local_tests": {
+    "fat": "fsck and every member roundtrip PASS",
+    "installer": "actual installer with mocked ADB: wrong sector rejected before writes, 512-byte BPB rejected before ADB, ESP-only check works",
+    "efi_max": {
+      "scope": "Real AAVMF/UniXNU/DarwinBoot to raw CI XNU on QEMU max; native 4096-byte disk, no device claim",
+      "stop": "T05thread:01;",
+      "pc": "0xfffffff00c2e3444",
+      "boot_args_va": "0xfffffff00f860000",
+      "sp": "0xfffffff00f850000",
+      "kernel_sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df",
+      "disk_logical_block_size": 4096,
+      "disk_physical_block_size": 4096,
+      "guest_kernel_instructions_modified": false,
+      "boot_args": {
+        "virtual_base": "0xfffffff007004000",
+        "physical_base": "0x48004000",
+        "memory_size": "0x80000000",
+        "top_of_kernel_data": "0x51d8c000"
+      },
+      "translation_reached_arm_init": true,
+      "serial_sha256": "af7831ce2171f53a07e9bc1d707ae6f621ae1b69ab37073bca3da4ea6f623950",
+      "result": "PASS"
+    },
+    "efi_cortex_a710": {
+      "scope": "Real AAVMF/UniXNU/DarwinBoot to raw CI XNU on QEMU cortex-a710; native 4096-byte disk, no device claim",
+      "stop": "T05thread:01;",
+      "pc": "0xfffffff00c2e3444",
+      "boot_args_va": "0xfffffff00f860000",
+      "sp": "0xfffffff00f850000",
+      "kernel_sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df",
+      "qemu_cpu": "cortex-a710",
+      "disk_logical_block_size": 4096,
+      "disk_physical_block_size": 4096,
+      "guest_kernel_instructions_modified": false,
+      "boot_args": {
+        "virtual_base": "0xfffffff007004000",
+        "physical_base": "0x48004000",
+        "memory_size": "0x80000000",
+        "top_of_kernel_data": "0x51d8c000"
+      },
+      "translation_reached_arm_init": true,
+      "live_original_instructions": {
+        "entry": "0x140006f5",
+        "sctlr_enable": "0xd5181000",
+        "arm_init": "0xd503237f"
+      },
+      "serial_sha256": "af7831ce2171f53a07e9bc1d707ae6f621ae1b69ab37073bca3da4ea6f623950",
+      "result": "PASS"
+    },
+    "retired_diagnostic_builder": "PASS refuses before creating any output"
+  },
+  "kernel_sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df",
+  "source_sha256": {
+    "AGENTS.md": "446717a78c1b61a3d89f107c586c32b11bef9ceaa176d78e57dbe181fdc50f9e",
+    "UniXNU-b5q/board.toml": "7f1e9554d1b7c53c0c5f6d7fc1583d1fd80442d1aa86217fccb0c1a0b6722a12",
+    "scripts/b5q-install/install-firstboot.py": "c5892b6452845830829560dbb442b26dd83ca0532e6ff0ef46e0f4680a488d7f",
+    "scripts/b5q-install/build-4kn-esp.py": "3a4d09817022d83881abca8624d84b81f578103745b9d0c9406f54368ad56e05",
+    "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
+    "scripts/b5q-install/build-earlyboot-diag.py": "bd41703b279b0d854a5353edd9efe7714c776dc9282afd864a33c1d3914111bb",
+    "tests/b5q-ufs/test-installer.py": "bd0183b26eff849cdb3c66bd6a990708ad9552abc1e49c53199738a9c6537026",
+    "tests/b5q-boot/check-4kn-handoff.py": "5cbf6b14476fbcefd441adc5c107fb5794d165b4c53590ffa3d110b97e1eda57"
+  },
+  "no_ci": true,
+  "no_phone_io": true,
+  "hardware_macos_boot_verified": false,
+  "limitations": "Offline QEMU is not a Samsung EL2/UH, watchdog, display or UFS handoff emulation. Actual phone stall root cause is not established by this audit."
+}

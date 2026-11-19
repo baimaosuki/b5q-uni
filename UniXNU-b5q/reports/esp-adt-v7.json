@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-20",
+  "status": "esp_v7_local_validation_complete",
+  "archive": "/home/baimao/zflip5/artifacts/b5q-esp-adt-v7.tar.zst",
+  "outputs": {
+    "esp.img": {
+      "bytes": 838860800,
+      "sha256": "7812db2b32383af37ea6865c04ae07599ca68bb742e56a6a515447dd74b4228b"
+    },
+    "payload.img": {
+      "bytes": 838860800,
+      "sha256": "7812db2b32383af37ea6865c04ae07599ca68bb742e56a6a515447dd74b4228b"
+    }
+  },
+  "kernel_sha256": "7ea22869a35061a45d00221d503442a3d58b6f845c6d1d7fbecd7f49ff18cacf",
+  "v6_adt_sha256": "ace5c7f2de5595fc43d8245d061d3b444aa11b8e25d0bf8ac62228166ed7583d",
+  "v7_adt_sha256": "b3d8b5b6d68a1112e770aff0d4a8ed2a1b52ecb5bf312d93161e47bb4f3307de",
+  "changes_from_v6": [
+    "EFI/UniXNU/Payloads/kernel.macho.adt",
+    "EFI/UniXNU/unixnu.toml"
+  ],
+  "interrupts": {
+    "removed_exports": [
+      "/arm-io/gpu",
+      "/arm-io/gmu",
+      "/arm-io/gpu-smmu"
+    ],
+    "arm_io_exports": [
+      "/arm-io/intc"
+    ],
+    "interrupt_consumers": [],
+    "qemu_results": {
+      "v6": "Reproduced IODTGetICellCounts+0x34 with FAR=0 on Cortex-A710.",
+      "delivered_v7": "PE_create_console, InitIOKit, ConfigureIOKit, arm_vm_prot_finalize and StartIOKitMatching completed or reached. ArmCpu::mapGic returned false on the QEMU virt memory map. AppleARMCPU fallback complained about CPU configuration and panicked before bsd_init.",
+      "virt_gic_control": "Changed ranges, reg and redistributor stride only in the transient ADT. ArmCpu::mapGic returned true, bsd_init and IOKitBSDInit were reached, then B5qUfs stopped at Samsung firmware warm handoff/queue/SMMU unavailable."
+    },
+    "qemu_evidence": {
+      "v6-baseline": "host-checks/v6-baseline/summary.json",
+      "delivery": "host-checks/delivery/summary.json",
+      "virt-gic": "host-checks/virt-gic/summary.json"
+    },
+    "source_sha256": {
+      "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
+      "UniXNU-b5q/board.toml": "ce648fa90921e6c4a42b4e44dc29b53e1891035d5386daf3a74fe0dcf609c614",
+      "UniXNU-b5q/README.md": "0fade96faa986d0da8153f67c423ac70c400296bae037b7a5b768a1136831540",
+      "UniXNU/scripts/unixnu/devicetree.py": "dd72d2e5dfa8183c9ea320a52017d424c1dee70b057972b1ad91225686c49606",
+      "scripts/b5q-install/build-lowdram-esp.py": "ffcaa0429801ee6116124ba8c7623f2b8196a9e628286f55dd70718c28d414b0",
+      "scripts/b5q-install/check-lowdram-boot.py": "38ac9ccfe3f4d38976edaa2eb7318dcf4b4705477b9bb1ed195b7a479f941d04",
+      "sources/UniXNU/out/feeds/xnu-3199e8bc/iokit/Kernel/IODeviceTreeSupport.cpp": "ad59e33481df5b0959a1ea9b2a8f495d0fba4b708b71f21a84bf851ccbedb3b1",
+      "sources/UniXNU/drivers/ArmCpu/ArmCpu.cpp": "2518e60ea9cffce9664a1761e9280d18e6a3d9d0e0beb7756ac7b71d1b14edfd"
+    }
+  },
+  "v6_root_cause": "IODTFindInterruptParent uses the AAPL,phandle registration table. The GPU and GMU use interrupt-parent=1 and the ADT generator emitted only phandle=1 on intc.",
+  "b5q_gic": [
+    "0x17100000",
+    "0x17180000"
+  ],
+  "qemu_virt_gic": [
+    "0x08000000",
+    "0x080a0000"
+  ],
+  "qemu_results": {
+    "v6": "Reproduced IODTGetICellCounts+0x34 with FAR=0 on Cortex-A710.",
+    "delivered_v7": "PE_create_console, InitIOKit, ConfigureIOKit, arm_vm_prot_finalize and StartIOKitMatching completed or reached. ArmCpu::mapGic returned false on the QEMU virt memory map. AppleARMCPU fallback complained about CPU configuration and panicked before bsd_init.",
+    "virt_gic_control": "Changed ranges, reg and redistributor stride only in the transient ADT. ArmCpu::mapGic returned true, bsd_init and IOKitBSDInit were reached, then B5qUfs stopped at Samsung firmware warm handoff/queue/SMMU unavailable."
+  },
+  "qemu_evidence": {
+    "v6-baseline": "host-checks/v6-baseline/summary.json",
+    "delivery": "host-checks/delivery/summary.json",
+    "virt-gic": "host-checks/virt-gic/summary.json"
+  },
+  "adreno_effect": "The shared Adreno services match compatible properties on IOKit nubs. GPU matching requires restoring the exports with valid interrupt bindings.",
+  "source_sha256": {
+    "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
+    "UniXNU-b5q/board.toml": "ce648fa90921e6c4a42b4e44dc29b53e1891035d5386daf3a74fe0dcf609c614",
+    "UniXNU-b5q/README.md": "0fade96faa986d0da8153f67c423ac70c400296bae037b7a5b768a1136831540",
+    "UniXNU/scripts/unixnu/devicetree.py": "dd72d2e5dfa8183c9ea320a52017d424c1dee70b057972b1ad91225686c49606",
+    "scripts/b5q-install/build-lowdram-esp.py": "ffcaa0429801ee6116124ba8c7623f2b8196a9e628286f55dd70718c28d414b0",
+    "scripts/b5q-install/check-lowdram-boot.py": "38ac9ccfe3f4d38976edaa2eb7318dcf4b4705477b9bb1ed195b7a479f941d04",
+    "sources/UniXNU/out/feeds/xnu-3199e8bc/iokit/Kernel/IODeviceTreeSupport.cpp": "ad59e33481df5b0959a1ea9b2a8f495d0fba4b708b71f21a84bf851ccbedb3b1",
+    "sources/UniXNU/drivers/ArmCpu/ArmCpu.cpp": "2518e60ea9cffce9664a1761e9280d18e6a3d9d0e0beb7756ac7b71d1b14edfd"
+  },
+  "host_checks": {
+    "native_4kn_fat_roundtrip": "PASS",
+    "esp_only_installer_mock": "PASS",
+    "kernel_post_idempotent": "PASS",
+    "upstream_package_template_exact": "PASS"
+  },
+  "hardware_boot_tested": false
+}

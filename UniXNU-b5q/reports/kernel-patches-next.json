@@ -1,0 +1,109 @@
+{
+  "scope": "Read exact 131-patch CI manifest, replay onto original pinned XNU selected files, inspect resulting definitions/functions. No compilation or kernel edit.",
+  "ci_run": "44494359247",
+  "source_commit": "5b19c2aab0127326f2b95aa5a3cd803de26a6312",
+  "xnu_revision": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+  "items": [
+    {
+      "name": "47-bit user TTBR0 and four-level user pmap",
+      "status": "MISSING",
+      "existing": "macos-user-address-space.patch changes MACH_VM_MAX_ADDRESS_RAW and commpage assertion only; T0SZ_BOOT remains 26 for 4K/subpage L1, with no T0SZ_USER override.",
+      "required": [
+        "T0SZ_USER=17 and TCR_EL1_KVA_ENTRY/EPD0 policy in proc_reg.h",
+        "pmap_pt_attr_4k_user, native_user_pt_attr, root allocation assertion and kernel/user geometry selection",
+        "pmap_user_tcr/pmap_apply_user_tcr and pmap switching/clear callbacks",
+        "arm_init early TCR update before signing, arm_vm_init handoff and secondary arm_init_tramp TCR update",
+        "pmap_user_va_bits, sleh PAC fault mask and VM_USER_STRIP_MASK use the user range"
+      ],
+      "reference": "sources/UniXNU-sheng/patches/xnu-12377/zzzz-sheng-ipados27-bringup.patch:786-790,849-891,900-902,940-979,1068-1104,1210-1237,1264,1300-1307,1575",
+      "replayed_locations": {
+        "#define T0SZ_BOOT 26ULL": [
+          1100
+        ],
+        "TCR_EL1_BASE": [
+          1146,
+          1155,
+          1165,
+          1167,
+          1171,
+          1172,
+          1174,
+          1178,
+          1182,
+          1183
+        ]
+      }
+    },
+    {
+      "name": "wimg_to_pte managed DRAM outside low classification range",
+      "status": "MISSING",
+      "existing": "VM_WIMG_RT and VM_WIMG_WCOMB branches check is_dram_addr(pa) only.",
+      "required": [
+        "In these two branches, recognize is_dram_addr(pa) || pa_valid(pa). pa_valid establishes managed ownership; do not label every high address DRAM."
+      ],
+      "reference": "sources/UniXNU-sheng/patches/xnu-12377/zzzz-sheng-ipados27-bringup.patch:918-932",
+      "replayed_locations": {
+        "case VM_WIMG_RT:": [
+          6052
+        ],
+        "case VM_WIMG_WCOMB:": [
+          6092
+        ]
+      }
+    },
+    {
+      "name": "CACHE_ATTRINDX_RT native non-Apple normal-memory selection",
+      "status": "MISSING_NATIVE_BRANCH",
+      "existing": "The WRITECOMB define already exists under HAS_UCNORMAL_MEM || APPLEVIRTUALPLATFORM; native BCM2837 does not select it and instead gets POSTED_COMBINED_REORDERED.",
+      "required": [
+        "Add native target to the Normal noncacheable WRITECOMB selection, scoped to actual native build; preserve Device mappings for MMIO."
+      ],
+      "reference": "sources/UniXNU-sheng/patches/xnu-12377/zzzz-sheng-ipados27-bringup.patch:1245-1254",
+      "replayed_locations": {
+        "#if HAS_UCNORMAL_MEM || APPLEVIRTUALPLATFORM": [
+          1810
+        ],
+        "#define CACHE_ATTRINDX_RT": [
+          1811,
+          1813
+        ]
+      }
+    },
+    {
+      "name": "pmap_batch_set_cache_attributes_internal non-RT cache synchronization",
+      "status": "MISSING_NON_RT_TRANSITION_SYNC",
+      "existing": "Original batch state machine has a dedicated RT cache-flush pass. It lacks the extra pmap_sync_wimg call on changed non-RT attributes; pmap_set_cache_attributes has its own synchronization.",
+      "required": [
+        "After pvh_unlock in update pass, for wimg_bits_new != wimg_bits_prev && wimg_bits_new != VM_WIMG_RT call pmap_sync_wimg(pn,wimg_bits_prev,wimg_bits_new); preserve existing RT pass."
+      ],
+      "reference": "sources/UniXNU-sheng/patches/xnu-12377/zzzz-sheng-ipados27-bringup.patch:959-968",
+      "replayed_locations": {
+        "pmap_batch_set_cache_attributes_internal(": [
+          10837,
+          10840,
+          10880,
+          10989
+        ],
+        "if (wimg_bits_new == VM_WIMG_RT && wimg_bits_prev != VM_WIMG_RT)": [
+          11054
+        ]
+      }
+    }
+  ],
+  "numeric_correction": "0x7FFFFE000000 is 128 TiB minus 32 MiB, not 512 GiB. 455-512 GiB is the user mapping region discussed by the patch; it exceeds the current 38-bit (256 GiB) TTBR0 range.",
+  "patches_applied_to_delivered_kernel": false,
+  "rebuild_performed": false,
+  "source_sha256": {
+    "pexpert/pexpert/arm64/BCM2837.h": "417afe889da430033197dcf190f3e5c9789c0136ba06d22736dce91d881edfb2",
+    "osfmk/arm64/arm_vm_init.c": "eb7e453b45e89639ba23828b15b3f020ce83e538d8d7d12a90c9d6d24d8b160f",
+    "osfmk/arm64/start.s": "a7b815137b2eaa75e7095421c7cfa8ad41b2ecb3ae2a7611f8aadd0cd29ce7a4",
+    "osfmk/arm64/machine_routines.c": "fff177ec028aac229bafc3c630d56b54288dc9e71a07dcfdf28b35b36fe03f8e",
+    "osfmk/arm64/proc_reg.h": "5bdb14d2cc33dfa5d771f81794dea0a961801331be519904c02fdc6141f57ab5",
+    "osfmk/arm64/sleh.c": "8e6c00bdcac95b9c885e4d41f4fe40f20bd9f7efcff8a2a712fb26dc733d07ff",
+    "osfmk/arm/arm_init.c": "8dc6ab51fdf2689afd8071df7ddf7f9a063fd0da41cf15163e16b79cf5f2ff50",
+    "osfmk/mach/arm/vm_param.h": "8d9cda0c968e45118a632b54636323ccb57f2b223aae8dd81280977b36ceb7e3",
+    "osfmk/arm/pmap/pmap_pt_geometry.h": "907e6976800f9fcc205590df56676861ab465bf05e75d0cc8b04923403de082a",
+    "osfmk/arm/pmap/pmap.h": "eb253ac683599e385300b5b0877ed61a0d1ecd52ebd8c6e36f31f89288a78b4b",
+    "osfmk/arm/pmap/pmap.c": "a907fc74b9c2b2deeb46efa46f06f01a78098bd6a97b750c2a9a23d314c0d541"
+  }
+}

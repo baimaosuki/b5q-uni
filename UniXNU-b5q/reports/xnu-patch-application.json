@@ -657,6 +657,16 @@
       "name": "macos-kernel-stack-alignment.patch",
       "sha256": "a1b4caf6c1bbc087b405a5813753c404617a69f32b876aeaf4a9ac2534c5e3d5",
       "result": "PASS"
+    },
+    {
+      "name": "native-arm64e-user-memory.patch",
+      "sha256": "647b87ca4ea8a8d218dcf2b12edbce9b4cbdfb7aa633a4434986a62b7dbdf022",
+      "result": "PASS"
+    },
+    {
+      "name": "native-text-console-retain.patch",
+      "sha256": "bd28f4bc96939cdf0db10036b750f3a7a11d6e86e3ada0b02271eddf486761c2",
+      "result": "PASS"
     }
   ],
   "result": "PASS"

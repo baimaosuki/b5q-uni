@@ -1,0 +1,134 @@
+{
+  "date": "2026-11-20",
+  "status": "esp_candidate_built_local_checks_pass",
+  "directory": "/home/baimao/zflip5/artifacts/b5q-esp-lowdram-v6",
+  "archive": "/home/baimao/zflip5/artifacts/b5q-esp-lowdram-v6.tar.zst",
+  "outputs": {
+    "esp.img": {
+      "bytes": 838860800,
+      "sha256": "0ec7cd972e059b9e13a1bd1671bb8e4597a283b5f203a3d8983b53e2404dccab"
+    },
+    "payload.img": {
+      "bytes": 838860800,
+      "sha256": "0ec7cd972e059b9e13a1bd1671bb8e4597a283b5f203a3d8983b53e2404dccab"
+    }
+  },
+  "changed_esp_members": [
+    "EFI/UniXNU/Payloads/kernel.macho.adt",
+    "EFI/UniXNU/unixnu.toml"
+  ],
+  "verification": {
+    "typed_adt": {
+      "dram-base": {
+        "bytes": 8,
+        "value": "0x80000000"
+      },
+      "dram-size": {
+        "bytes": 8,
+        "value": "0x80000000"
+      },
+      "kernel-ctrr-to-be-enabled": {
+        "bytes": 4,
+        "value": "0x0"
+      },
+      "sleep-disabled": {
+        "bytes": 4,
+        "value": "0x1"
+      }
+    },
+    "kernel_command_line": "-v debug=0x14e use_contiguous_hint=0 kt_fixed_zones=120 -no_slto_panic vc-text=1 native-source-storage=1 b5q-root=1 offline-mobile-graphics-load=1 offline-legacy-register=1 offline-legacy-gop=1 offline-legacy-pm=1 offline-legacy-validate=1 offline-legacy-transfer=1 offline-legacy-cpu-present=1 offline-legacy-phase=4 aks=1 aks-sls=3",
+    "kernel_command_line_bytes": 333,
+    "fat_sector_bytes": 4096,
+    "fat_cluster_sectors": 1,
+    "esp_bytes": 838860800,
+    "all_fat_members_roundtrip": "PASS",
+    "installer_mock": "PASS",
+    "post_check_on_copy_no_byte_change": "PASS",
+    "kernel_sha256": "7ea22869a35061a45d00221d503442a3d58b6f845c6d1d7fbecd7f49ff18cacf",
+    "adt_sha256": "ace5c7f2de5595fc43d8245d061d3b444aa11b8e25d0bf8ac62228166ed7583d",
+    "new_probe_code": false,
+    "kernel_recompiled": false,
+    "ci_triggered": false,
+    "device_accessed": false,
+    "console_returned": true,
+    "after_console": "kernel_bootstrap -> kernel_bootstrap_thread -> IODTGetICellCounts+0x34 null read",
+    "qemu_exception": {
+      "esr": "0x25/0x96000005",
+      "far": "0x0",
+      "elr": "0xfffffff00c0ed3a8",
+      "symbol": "__ZL18IODTGetICellCountsP15IORegistryEntryPjS1_",
+      "symbol_address": "0xfffffff00c0ed374",
+      "offset": "0x34",
+      "instruction": "ldr x16, [x0]",
+      "source": "iokit/Kernel/IODeviceTreeSupport.cpp:606 IODTGetICellCounts"
+    }
+  },
+  "qemu": {
+    "checkpoints": [
+      {
+        "name": "_PE_create_console",
+        "pc": "0xfffffff00c1ee040",
+        "lr": "0xfffffff00c2e400c",
+        "stop": "T05thread:01;"
+      },
+      {
+        "name": "PE_create_console returned",
+        "pc": "0xfffffff00c2e400c",
+        "lr": "0xc1d631b00c2e400c",
+        "stop": "T05thread:01;"
+      },
+      {
+        "name": "_kernel_bootstrap",
+        "pc": "0xfffffff00b9c41a4",
+        "lr": "0xfffffff00c2e408c",
+        "stop": "T05thread:01;"
+      },
+      {
+        "name": "_kernel_bootstrap_thread",
+        "pc": "0xfffffff00c2b2fc8",
+        "lr": "0xfffffff00bb945d0",
+        "stop": "T05thread:01;"
+      },
+      {
+        "name": "_panic",
+        "pc": "0xfffffff00c2a55d4",
+        "lr": "0xfffffff00c2e4fd4",
+        "stop": "T05thread:01;",
+        "format": "%s at pc 0x%016llx, lr 0x%016llx (saved state: %p%s)\n\t  x0:  0x%016llx x1:  0x%016llx  x2:  0x%016llx  x3:  0x%016llx\n\t  x4:  0x%016llx x5:  0x%016llx  x6:  0x%016llx  x7:  0x%016llx\n\t  x8:  0x%016llx x9:  0x%016llx  x10: 0x%016llx  x11: 0x%016llx\n\t  x12: 0x%016llx x13: 0x%016llx  x14: 0x%016llx  x15: 0x%016llx\n\t  x16: 0x%016llx x17: 0x%016llx  x18: 0x%016llx  x19: 0x%016llx\n\t  x20: 0x%016llx x21:",
+        "x1_hex": "100040f9f70300aa37b4f9f2f10300aa31b4f9f2301ac1da115f80d21002118b080240f9d076f6f210093fd718eafd9018831291200500b4f60300aa010340f94a28fe97600300b4100040f9f10300aa31b4f9f2301ac1da112c80d21002118b080240f9f90300aa7073f7f210093fd71f100071e1010054e00319aae80319aa28b4f9f2300340f91019c1da113380d21002118b080240f91048faf210093fd7080040b9a80200b9390080520200001419008052d00240f9f10316aa31b4f9f2301ac1da088e42f8e00316aaf050e7f210093fd759010037688ffdd008593c91494c8052e82700a9608ffdf000ec00917d05049428008052a80200b9c8440090",
+        "arguments": []
+      }
+    ],
+    "exception": {
+      "esr": "0x25/0x96000005",
+      "far": "0x0",
+      "elr": "0xfffffff00c0ed3a8",
+      "symbol": "__ZL18IODTGetICellCountsP15IORegistryEntryPjS1_",
+      "symbol_address": "0xfffffff00c0ed374",
+      "offset": "0x34",
+      "instruction": "ldr x16, [x0]",
+      "source": "iokit/Kernel/IODeviceTreeSupport.cpp:606 IODTGetICellCounts"
+    },
+    "kernel_code_modified": false,
+    "dram_properties_unchanged": true
+  },
+  "next_kernel_rebuild_report": "reports/kernel-patches-next.json",
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "ce648fa90921e6c4a42b4e44dc29b53e1891035d5386daf3a74fe0dcf609c614",
+    "UniXNU-b5q/dts/b5q.dts": "35dda509ead351493ee32f5addbaf56c68d10379f9558ba02e7af436cc3b5a48",
+    "UniXNU-b5q/README.md": "59bdbe5b3ab3d23ec0a9337b0c81cc7eb66eb830e54f12fdaefc59588ac36a6b",
+    "scripts/b5q-install/build-lowdram-esp.py": "6266e7df72bdee7b05dbdea86c218afdf372ccaaa6c55d5cb236c506767a4053",
+    "scripts/b5q-install/check-lowdram-boot.py": "e9143f1493be364196b8138f9bbedac0d154703292bdb68565d9e1584ece9df9"
+  },
+  "final_archive_verification": {
+    "result": "PASS",
+    "archive": "/home/baimao/zflip5/artifacts/b5q-esp-lowdram-v6.tar.zst",
+    "bytes": 95258666,
+    "sha256": "14fcc8615cdb43e50deeb4c700e67b4e954b93342d9c7c07cb10da1244cd51b3",
+    "zstd_test": "PASS",
+    "required_members": "PASS",
+    "archive_small_members_match_tested_files": "PASS",
+    "member_count": 36,
+    "source_dtb_sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be"
+  }
+}

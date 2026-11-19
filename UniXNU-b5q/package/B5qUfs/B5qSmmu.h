@@ -3,7 +3,9 @@
 #include <stdint.h>
 // Queue must be quiescent. Only exact UFS SID and an unused bank can change.
 template<class Read,class Write>
-static bool b5qConfigureUfsStream(uint64_t dma,uint64_t dmaLength,Read read,Write write) {
+static bool b5qConfigureUfsStream(uint64_t dma,uint64_t dmaLength,Read read,Write write,bool reuseFirmwareMapping=false) {
+ // Reuse the firmware stream without issuing any SMMU register access.
+ if(reuseFirmwareMapping)return dma && dmaLength && dmaLength<=UINT64_MAX-dma;
  uint32_t idr0=read(0x20),idr1=read(0x24),idr2=read(0x28);
  unsigned groups=idr0&255,banks=idr1&255,pages=1U<<(((idr1>>28)&7)+1);
  if(!(idr0&(1U<<30))||!(idr2&(1U<<12))||(idr1>>31)||!groups||groups>128||banks<2||banks>128||pages>128||(pages+banks)*4096>0x100000)return false;
@@ -13,7 +15,7 @@ static bool b5qConfigureUfsStream(uint64_t dma,uint64_t dmaLength,Read read,Writ
   uint32_t mask=(smr>>16)&0x7fff;if(((smr^0x60U)&0xffff&~mask)==0){if(mask||++matches>1)return false;slot=int(i);}}
  if(slot<0)slot=freeSlot;if(slot<0)return false;
  int bank=-1;
- for(unsigned b=banks;b-->1;){bool used=false;for(unsigned i=0;i<groups;++i){uint32_t smr=read(0x800+4*i),s2=read(0xc00+4*i);if((smr>>31)&&((s2>>16)&3)==0&&(s2&255)==b)used=true;}if(!used&&read((pages+b)*4096)==0){bank=int(b);break;}}
+ for(unsigned b=banks;b-->1;){bool used=false;for(unsigned i=0;i<groups;++i){uint32_t smr=read(0x800+4*i);if(!(smr>>31))continue;uint32_t s2=read(0xc00+4*i);if(((s2>>16)&3)==0&&(s2&255)==b)used=true;}if(!used&&read((pages+b)*4096)==0){bank=int(b);break;}}
  if(bank<0)return false;
  write(0x1000+4*unsigned(bank),0x10000);write(0x1800+4*unsigned(bank),1);
  if(read(0x1000+4*unsigned(bank))!=0x10000||read(0x1800+4*unsigned(bank))!=1)return false;

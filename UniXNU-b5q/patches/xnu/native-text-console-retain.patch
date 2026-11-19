@@ -1,0 +1,17 @@
+--- a/osfmk/kern/startup.c
++++ b/osfmk/kern/startup.c
+@@ -825,6 +825,14 @@
+ 	 */
+ 	initialize_screen(NULL, kPEAcquireScreen);
+ 
++#if defined(__arm64__)
++	unsigned int text_console = 0;
++	if (PE_parse_boot_argn("vc-text", &text_console, sizeof(text_console)) && text_console) {
++		(void) switch_to_video_console();
++		initialize_screen(NULL, kPETextScreen);
++	}
++#endif
++
+ 	/*
+ 	 *	Initialize the shared region module.
+ 	 */

@@ -1,0 +1,5 @@
+{
+  "boot_img_only": "PASS: rebuilt with updated assembler in TemporaryDirectory, SHA256 matches e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1; only boot.img declared; no TAR, FAT or DTB retained",
+  "python_syntax": "PASS for build-memory-boot.py, build-lowdram-esp.py and package-twrp.py",
+  "scope": "Updated active boot/TWRP assemblers to omit TAR and active ESP assembler to omit duplicate payload.img; project instruction prevents future optional archives. Existing artifacts retained."
+}

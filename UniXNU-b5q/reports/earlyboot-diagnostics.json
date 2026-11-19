@@ -1,0 +1,125 @@
+{
+  "date": "2026-11-19",
+  "hardware_observation": {
+    "source": "user-supplied photograph",
+    "image_sha256": "d630349cda6ecee5f24d77c9f68bba686050a0f621517392d0c77462b7870344",
+    "confirmed": [
+      "ESP v2 menu visible",
+      "green loader handoff band",
+      "blue XNU entry band",
+      "magenta pre-SCTLR_EL1 write band"
+    ],
+    "not_established": [
+      "successful MMU transition",
+      "arm_init execution",
+      "UFS root mount",
+      "graphics desktop"
+    ],
+    "old_menu_pixels": "remain in the framebuffer; no evidence of control returning to the menu"
+  },
+  "checkpoint_sites": {
+    "entry": "0xfffffff00bb92488",
+    "mmu_enable": "0xfffffff00bb94418",
+    "post_mmu": "0xfffffff00bb94438",
+    "arm_init_before_pacibsp": "0xfffffff00c2e3444"
+  },
+  "local_package": {
+    "directory": "/home/baimao/zflip5/artifacts/b5q-earlyboot-diag-v3",
+    "esp": {
+      "bytes": 838860800,
+      "sha256": "6f391577810bf43eeed59c1e35cc2e29b9db75f55960f3f2552e0e7b0cd9bd66"
+    },
+    "normal_kernel_unchanged": true,
+    "three_terminal_diagnostics": [
+      {
+        "id": "entry-control",
+        "title": "1 CONTROL - reset 6s after blue",
+        "kernel": {
+          "bytes": 142983168,
+          "sha256": "23121405210f6e82ceb8f28e51c26861f34d7b1f981a34b861fa7329008383e4"
+        },
+        "delay_seconds": 6,
+        "frequency": "CNTFRQ_EL0",
+        "terminal": true,
+        "post_seal_idempotent": true
+      },
+      {
+        "id": "post-mmu",
+        "title": "2 MMU - reset 6s after MMU checkpoint",
+        "kernel": {
+          "bytes": 142983168,
+          "sha256": "9227acad9af7f2ba3e8d771c79af811b09d5ccd073c85a77745dc9c0e606509c"
+        },
+        "delay_seconds": 6,
+        "frequency": "CNTFRQ_EL0",
+        "terminal": true,
+        "post_seal_idempotent": true
+      },
+      {
+        "id": "arm-init",
+        "title": "3 ARM_INIT - reset 6s at virtual entry",
+        "kernel": {
+          "bytes": 142983168,
+          "sha256": "125dc46905106835f2a1f92aac9fc4bcc5f3a72e96c4e625e56c0c5e89ff5906"
+        },
+        "delay_seconds": 6,
+        "frequency": "CNTFRQ_EL0",
+        "terminal": true,
+        "post_seal_idempotent": true
+      }
+    ],
+    "menu_manual_only": true,
+    "root_or_boot_update_required": false,
+    "no_device_access": true,
+    "no_ci": true
+  },
+  "host_tests": {
+    "probe_execution": {
+      "result": "PASS",
+      "input_kernel_sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df",
+      "scope": "ARM64 terminal snippet execution with hooked timer/SMC; no real MMU or device execution",
+      "checks": [
+        "entry-control: real ARM64 bytecode, 19200000Hz, six-second PSCI ABI PASS",
+        "entry-control: real ARM64 bytecode, 24000000Hz, six-second PSCI ABI PASS",
+        "entry-control: real ARM64 bytecode, 62500000Hz, six-second PSCI ABI PASS",
+        "post-mmu: real ARM64 bytecode, 19200000Hz, six-second PSCI ABI PASS",
+        "post-mmu: real ARM64 bytecode, 24000000Hz, six-second PSCI ABI PASS",
+        "post-mmu: real ARM64 bytecode, 62500000Hz, six-second PSCI ABI PASS",
+        "arm-init: real ARM64 bytecode, 19200000Hz, six-second PSCI ABI PASS",
+        "arm-init: real ARM64 bytecode, 24000000Hz, six-second PSCI ABI PASS",
+        "arm-init: real ARM64 bytecode, 62500000Hz, six-second PSCI ABI PASS",
+        "bad-mmu-site: refused without mutation PASS",
+        "occupied-cave: refused without mutation PASS",
+        "wrong-arm-init-prologue: refused without mutation PASS",
+        "conflicting-modes: refused without mutation PASS",
+        "invalid-delay: refused without mutation PASS"
+      ],
+      "hardware_verified": false
+    },
+    "real_efi_menu": {
+      "result": "PASS",
+      "scope": "Real EFI diagnostic menu discovery and manual selection only",
+      "entries": [
+        "entry-control",
+        "post-mmu",
+        "arm-init"
+      ],
+      "automatic_boot": false,
+      "expected_loader_refusals": 3,
+      "reason": "1GiB QEMU cannot allocate the requested 2GiB window",
+      "log_sha256": "6717b7511f1bafa2599d20a40b072536c1dba281bb3fa6d4d796947d79476229",
+      "hardware_verified": false
+    },
+    "all_fat_members_roundtrip": "PASS before menu reorder; reordered config independently read back byte-for-byte",
+    "normal_entry_mmu_snippets": "byte-identical to deployed v2; full packaged normal kernel hash unchanged",
+    "post_seal_idempotence": true,
+    "installer_mock": "PASS"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "0804af7cc7530621d11da8fc686fa5833f7cee97469a2de68fb339bda600f9b3",
+    "scripts/b5q-install/build-earlyboot-diag.py": "a5923872756e33841c014bbc5494d49d6d74fcfc42ed2046645dc9b4d38f423b",
+    "tests/b5q-boot/test-entry-probes.py": "1ce03d87c69067892cbdb54d6eb5871f6e14d7dd600695a77dcf56bcc3eaf627",
+    "tests/b5q-boot/test-diag-menu.py": "2db5d09e7d3e0689b9c02f3f6193aacc8113b624eb9a2ce37c5fcfe107b74128"
+  },
+  "limits": "CPU instruction tests hook counter reads and SMC; QEMU menu refuses the 2GiB allocation in its 1GiB environment. Neither simulates Samsung MMU handoff. No claim of a repaired hardware boot."
+}

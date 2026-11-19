@@ -28,6 +28,10 @@ struct Transport {
  IOMemoryMap *hcMap=nullptr,*smmuMap=nullptr,*gccMap=nullptr;
  IOBufferMemoryDescriptor *memory=nullptr;
  uintptr_t hc=0,smmu=0;uint8_t *dma=nullptr;uint64_t physical=0;
+ const char *stage="initial";
+ uint32_t lastOcs=0xffffffffU;
+ uint8_t lastResponse=0;
+ bool reuseSmmu=false;
  IOLock *lock=nullptr;uint8_t lun=0;bool selected=false,poisoned=false;uint64_t capacity[8]={};
 };
 static Transport host;
@@ -39,59 +43,120 @@ static uintptr_t map(uint64_t physical,uint64_t size,IOMemoryMap **keep) {
 }
 static void clean(void *p,size_t n) { uintptr_t a=uintptr_t(p)&~63ULL;for(uintptr_t end=uintptr_t(p)+n;a<end;a+=64)__asm__ volatile("dc civac, %0"::"r"(a):"memory");__asm__ volatile("dsb sy":::"memory"); }
 static bool waitValue(unsigned reg,uint32_t mask,uint32_t value,unsigned loops) { for(unsigned i=0;i<loops;++i){if((read32(host.hc,reg)&mask)==value)return true;IODelay(10);}return false; }
-static void fail(const char *why) { panic("B5qUfs: %s (HCE=%x HCS=%x IS=%x DB=%x)",why,host.hc?read32(host.hc,0x34):0,host.hc?read32(host.hc,0x30):0,host.hc?read32(host.hc,0x20):0,host.hc?read32(host.hc,0x58):0); }
-// Find an unused bypass bank, preserving all streams except exact Samsung UFS SID.
+static void transportDiagnostic(const char *why) {
+ IOLog("B5qUfs: %s stage=%s HCE=%x HCS=%x IS=%x DB=%x OCS=%x rsp=%x phys=%llx reuse=%u\n",
+       why,host.stage,host.hc?read32(host.hc,0x34):0,
+       host.hc?read32(host.hc,0x30):0,host.hc?read32(host.hc,0x20):0,
+       host.hc?read32(host.hc,0x58):0,host.lastOcs,host.lastResponse,
+       static_cast<unsigned long long>(host.physical),host.reuseSmmu);
+}
+static void fail(const char *why) {
+ panic("B5qUfs: %s stage=%s HCE=%x HCS=%x IS=%x DB=%x OCS=%x rsp=%x phys=%llx reuse=%u",
+       why,host.stage,host.hc?read32(host.hc,0x34):0,
+       host.hc?read32(host.hc,0x30):0,host.hc?read32(host.hc,0x20):0,
+       host.hc?read32(host.hc,0x58):0,host.lastOcs,host.lastResponse,
+       static_cast<unsigned long long>(host.physical),host.reuseSmmu);
+}
+// Default firmware reuse performs no SMMU mapping or register access.
+// Explicit non-reuse mode configures only the exact Samsung UFS SID.
 // The UFS queue is already stopped and has no pending DMA before this executes.
 static bool mapUfsStream() {
- return b5qConfigureUfsStream(host.physical,dmaBytes,[](unsigned off){return read32(host.smmu,off);},[](unsigned off,uint32_t v){write32(host.smmu,off,v);});
+ return b5qConfigureUfsStream(host.physical,dmaBytes,[](unsigned off){return read32(host.smmu,off);},[](unsigned off,uint32_t v){write32(host.smmu,off,v);},host.reuseSmmu);
 }
 static bool startTransport() {
- IOMemoryMap *gcc=nullptr;uintptr_t g=map(0x00177000,0x1000,&gcc);host.gccMap=gcc;
- // Offsets are shared SM8550 clock-register facts, checked against Samsung DT clock IDs.
+ unsigned reuse=0;
+ PE_parse_boot_argn("b5q-smmu-reuse",&reuse,sizeof(reuse));
+ host.reuseSmmu=reuse==1;
+ host.stage="UFS clock handoff";
+ IOMemoryMap *gcc=nullptr;
+ uintptr_t g=map(0x00177000,0x1000,&gcc);
+ host.gccMap=gcc;
+ // Shared SM8550 clock-register facts checked against Samsung DT clock IDs.
  if(!g||!(read32(g,4)&0x80000000U)||!(read32(g,0x18)&1)||!(read32(g,0x24)&1))return false;
- host.hc=map(0x01d84000,0x3000,&host.hcMap);host.smmu=map(0x15000000,0x100000,&host.smmuMap);
- if(!host.hc||!host.smmu)return false;
+ host.stage="UFS host mapping";
+ host.hc=map(0x01d84000,0x3000,&host.hcMap);
+ if(!host.hc)return false;
+ if(!host.reuseSmmu){
+  host.stage="SMMU mapping";
+  host.smmu=map(0x15000000,0x100000,&host.smmuMap);
+  if(!host.smmu)return false;
+ }
+ host.stage="UFS link ready";
  if((read32(host.hc,0x34)&1)!=1||(read32(host.hc,0x30)&0x0f)!=0x0f||read32(host.hc,0x20)&fatalStatus)return false;
+ host.stage="drain firmware queues";
  if(!waitValue(0x58,~0U,0,200000)||!waitValue(0x78,~0U,0,200000))return false;
- // Stop transfer-list execution without resetting link/PHY or task-management state.
- write32(host.hc,0x60,0);if(!waitValue(0x60,1,0,10000)||read32(host.hc,0x58))return false;
+ host.stage="stop transfer queue";
+ write32(host.hc,0x60,0);
+ if(!waitValue(0x60,1,0,10000)||read32(host.hc,0x58))return false;
+ host.stage="DMA buffer allocation";
  host.memory=IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task,static_cast<IOOptionBits>(kIODirectionInOut)|static_cast<IOOptionBits>(kIOMemoryPhysicallyContiguous)|static_cast<IOOptionBits>(kIOMemoryMapperNone),dmaBytes,4096);
- if(!host.memory)return false;host.dma=static_cast<uint8_t*>(host.memory->getBytesNoCopy());IOByteCount contiguous=0;host.physical=host.memory->getPhysicalSegment(0,&contiguous,kIOMemoryMapperNone);
+ if(!host.memory)return false;
+ host.dma=static_cast<uint8_t*>(host.memory->getBytesNoCopy());
+ IOByteCount contiguous=0;
+ host.physical=host.memory->getPhysicalSegment(0,&contiguous,kIOMemoryMapperNone);
+ host.stage="DMA address width";
  if(!host.dma||!host.physical||(host.physical&4095)||contiguous<dmaBytes||(!(read32(host.hc,0)&(1U<<24))&&host.physical+dmaBytes>0x100000000ULL))return false;
- if(!mapUfsStream())return false;host.lock=IOLockAlloc();if(!host.lock)return false;
- bzero(host.dma,dmaBytes);clean(host.dma,dmaBytes);
- // Serialize/poll one slot. Disable UTRCS IRQ only, preserving error enables.
- write32(host.hc,0x24,read32(host.hc,0x24)&~1U);write32(host.hc,0x50,uint32_t(host.physical));write32(host.hc,0x54,uint32_t(host.physical>>32));write32(host.hc,0x20,1);write32(host.hc,0x60,1);
- return (read32(host.hc,0x60)&1)&&read32(host.hc,0x50)==uint32_t(host.physical)&&read32(host.hc,0x54)==uint32_t(host.physical>>32);
+ host.stage=host.reuseSmmu?"firmware SMMU reuse":"configure UFS stream";
+ if(!mapUfsStream())return false;
+ host.lock=IOLockAlloc();
+ if(!host.lock)return false;
+ bzero(host.dma,dmaBytes);
+ clean(host.dma,dmaBytes);
+ host.stage="start transfer queue";
+ // Serialize/poll one slot while preserving error enables.
+ write32(host.hc,0x24,read32(host.hc,0x24)&~1U);
+ write32(host.hc,0x50,uint32_t(host.physical));
+ write32(host.hc,0x54,uint32_t(host.physical>>32));
+ write32(host.hc,0x20,1);
+ write32(host.hc,0x60,1);
+ bool ready=(read32(host.hc,0x60)&1)&&read32(host.hc,0x50)==uint32_t(host.physical)&&read32(host.hc,0x54)==uint32_t(host.physical>>32);
+ if(ready)transportDiagnostic("ready");
+ return ready;
 }
 // Opcode allowlist prevents block writes at the command construction boundary.
 static int command(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,void *output) {
  if(host.poisoned||lun>7||!bytes||bytes>maxTransfer||bytes%4||!output||(!(cdb[0]==0x9e&&cdb[1]==0x10)&&cdb[0]!=0x88))return -1;
  IOLockLock(host.lock);if(host.poisoned||read32(host.hc,0x58)||read32(host.hc,0x20)&fatalStatus){IOLockUnlock(host.lock);return -1;}
+ host.stage="SCSI read/capacity";
  bzero(host.dma,dmaBytes);auto *utrd=reinterpret_cast<uint32_t*>(host.dma);auto *ucd=host.dma+commandOffset;
  utrd[0]=0x10000000U|(2U<<25);utrd[2]=15;utrd[4]=uint32_t(host.physical+commandOffset);utrd[5]=uint32_t((host.physical+commandOffset)>>32);utrd[6]=(512U/4)|((responseOffset/4)<<16);utrd[7]=1|((prdOffset/4)<<16);
  ucd[0]=1;ucd[1]=0x40;ucd[2]=lun;ucd[3]=0;putBe32(ucd+12,bytes);memcpy(ucd+16,cdb,16);
  auto *prd=reinterpret_cast<uint32_t*>(ucd+prdOffset);prd[0]=uint32_t(host.physical+dataOffset);prd[1]=uint32_t((host.physical+dataOffset)>>32);prd[3]=bytes-1;
  clean(host.dma,dmaBytes);write32(host.hc,0x20,1);write32(host.hc,0x58,1);
- bool done=waitValue(0x58,1,0,200000);if(!done||read32(host.hc,0x20)&fatalStatus){host.poisoned=true;IOLockUnlock(host.lock);return -1;}
- clean(host.dma,dmaBytes);const uint8_t *rsp=ucd+responseOffset;int status=-1;
+ bool done=waitValue(0x58,1,0,200000);
+ clean(host.dma,dmaBytes);
+ host.lastOcs=utrd[2]&255;
+ host.lastResponse=ucd[responseOffset];
+ if(!done||read32(host.hc,0x20)&fatalStatus){
+  transportDiagnostic("SCSI DMA failure");host.poisoned=true;IOLockUnlock(host.lock);return -1;
+ }
+ const uint8_t *rsp=ucd+responseOffset;int status=-1;
  if((utrd[2]&255)==0&&rsp[0]==0x21&&rsp[2]==lun&&rsp[3]==0&&!rsp[8]&&((unsigned(rsp[10])<<8)|rsp[11])<=480&&!(rsp[1]&0x60)&&!be32(rsp+12)&&!rsp[6]){
   status=rsp[7];if(!status)memcpy(output,host.dma+dataOffset,bytes);
  }else host.poisoned=true;
+ if(status)transportDiagnostic("SCSI response failure");
  write32(host.hc,0x20,1);IOLockUnlock(host.lock);return status;
 }
 // Read only the standard Unit descriptor before any LUN content. UFS boot
 // LUNs (bBootLunID != 0) and disabled units are never given block commands.
 static bool normalUnit(uint8_t lun) {
  if(lun>7||host.poisoned)return false;IOLockLock(host.lock);
+ host.stage="unit descriptor DMA";
  if(read32(host.hc,0x58)||read32(host.hc,0x20)&fatalStatus){IOLockUnlock(host.lock);return false;}
  bzero(host.dma,dmaBytes);auto *utrd=reinterpret_cast<uint32_t*>(host.dma);auto *ucd=host.dma+commandOffset;
  utrd[0]=0x10000000U;utrd[2]=15;utrd[4]=uint32_t(host.physical+commandOffset);utrd[5]=uint32_t((host.physical+commandOffset)>>32);utrd[6]=(512U/4)|((responseOffset/4)<<16);utrd[7]=((prdOffset/4)<<16);
  ucd[0]=0x16;ucd[5]=1;ucd[12]=1;ucd[13]=2;ucd[14]=lun;ucd[18]=0;ucd[19]=0xff;
  clean(host.dma,dmaBytes);write32(host.hc,0x20,1);write32(host.hc,0x58,1);
- if(!waitValue(0x58,1,0,200000)||read32(host.hc,0x20)&fatalStatus){host.poisoned=true;IOLockUnlock(host.lock);return false;}
- clean(host.dma,dmaBytes);const uint8_t *rsp=ucd+responseOffset;unsigned length=(unsigned(rsp[10])<<8)|rsp[11],echo=(unsigned(rsp[18])<<8)|rsp[19];
+ bool done=waitValue(0x58,1,0,200000);
+ clean(host.dma,dmaBytes);
+ host.lastOcs=utrd[2]&255;
+ host.lastResponse=ucd[responseOffset];
+ if(!done||read32(host.hc,0x20)&fatalStatus){
+  transportDiagnostic("unit descriptor DMA failure");host.poisoned=true;IOLockUnlock(host.lock);return false;
+ }
+ const uint8_t *rsp=ucd+responseOffset;unsigned length=(unsigned(rsp[10])<<8)|rsp[11],echo=(unsigned(rsp[18])<<8)|rsp[19];
  bool ok=(utrd[2]&255)==0&&rsp[0]==0x36&&!rsp[2]&&!rsp[3]&&!rsp[6]&&!rsp[8]&&rsp[12]==1&&rsp[13]==2&&rsp[14]==lun&&!rsp[15]&&length>=0x13&&length<=255&&echo==length;
+ if(!ok)transportDiagnostic("unit descriptor response failure");
  if(ok){const uint8_t *unit=rsp+32;ok=unit[0]>=0x13&&unit[0]<=length&&unit[1]==2&&unit[2]==lun&&unit[3]==1&&unit[4]==0&&unit[10]==12;}
  write32(host.hc,0x20,1);IOLockUnlock(host.lock);return ok;
 }
