@@ -9,6 +9,7 @@ from pathlib import Path
 
 PARTITIONS = {
     'macosroot': ('macosroot.img', 49692663 * 4096, 51539607552),
+    'esp': ('esp.img', 3162880 * 4096, 838860800),
     'boot': ('boot.img', 152448 * 4096, 100663296),
 }
 
@@ -45,7 +46,9 @@ def main():
     action.add_argument('--check', action='store_true', help='verify local files and device layout only (default)')
     action.add_argument('--root', action='store_true', help='write macosroot.img and verify readback')
     action.add_argument('--boot', action='store_true', help='write boot.img and verify readback')
-    action.add_argument('--all', action='store_true', help='write and verify macosroot, then boot')
+    action.add_argument('--esp', action='store_true', help='replace the dedicated ESP with esp.img and verify readback')
+    action.add_argument('--repair', action='store_true', help='update ESP then boot; keep the already written macosroot')
+    action.add_argument('--all', action='store_true', help='write and verify macosroot, ESP, then boot')
     args = parser.parse_args()
     directory = args.directory.resolve()
     manifest = json.loads((directory / 'package.manifest.json').read_text())
@@ -54,18 +57,20 @@ def main():
     status = manifest['build_status']
     if not status['flash_candidate_ready'] or not status['root_read_only'] or not status['data_volatile']:
         raise SystemExit('Package is not the expected read-only-root/RAM-Data candidate')
-    chosen = ['macosroot', 'boot'] if args.all or args.check or not (args.root or args.boot) else ['macosroot' if args.root else 'boot']
+    writing = args.root or args.boot or args.esp or args.repair or args.all
+    if args.repair:
+        chosen = ['esp', 'boot']
+    elif args.all or not writing:
+        chosen = ['macosroot', 'esp', 'boot']
+    else:
+        chosen = ['macosroot' if args.root else 'esp' if args.esp else 'boot']
+    if 'esp' in chosen and not status.get('esp_install_required'):
+        raise SystemExit('This installer requires the corrected ESP-v2 package manifest')
     adb = ['adb'] + (['-s', args.serial] if args.serial else [])
 
     def shell(text):
         return subprocess.check_output(adb + ['shell', '-T', text], text=True).strip()
 
-    if shell('id -u') != '0' or not shell('getprop ro.twrp.version'):
-        raise SystemExit('Run with the phone already in TWRP with root ADB')
-    device = shell('getprop ro.product.device').lower()
-    model = shell('getprop ro.product.model').upper()
-    if not (device.startswith('b5q') or model.startswith('SM-F731')):
-        raise SystemExit('Connected device is not identified as b5q/SM-F731')
     # Validate every selected image and partition before the first write.
     for name in chosen:
         filename, expected_start, expected_size = PARTITIONS[name]
@@ -76,6 +81,14 @@ def main():
         print(f'Checking {filename} SHA256...', flush=True)
         if digest(image) != record['sha256']:
             raise SystemExit(f'{filename}: SHA256 mismatch')
+    if shell('id -u') != '0' or not shell('getprop ro.twrp.version'):
+        raise SystemExit('Run with the phone already in TWRP with root ADB')
+    device = shell('getprop ro.product.device').lower()
+    model = shell('getprop ro.product.model').upper()
+    if not (device.startswith('b5q') or model.startswith('SM-F731')):
+        raise SystemExit('Connected device is not identified as b5q/SM-F731')
+    for name in chosen:
+        filename, expected_start, expected_size = PARTITIONS[name]
         rows = shell(partition_probe(name)).splitlines()
         if len(rows) != 4 or not re.fullmatch(r'[A-Za-z0-9_.-]+', rows[0]):
             raise SystemExit(f'{name}: invalid block geometry response')
@@ -83,9 +96,20 @@ def main():
         if int(rows[1]) * 512 != expected_start or int(rows[2]) * 512 != expected_size or int(rows[3]) != expected_size:
             raise SystemExit(f'{name}: device layout differs from supplied GPT')
         print(f'PASS {name}: offset={expected_start} capacity={expected_size}', flush=True)
-    if not (args.root or args.boot or args.all):
+    if not writing:
         print('CHECK PASS; no writes performed')
         return
+    # Only unmount the explicitly selected dedicated ESP before replacing it.
+    # Do not attempt to unmount or access any protected Samsung partition.
+    if 'esp' in chosen:
+        shell('''set -e
+real=$(readlink -f /dev/block/by-name/esp)
+while read -r dev point type options dump pass; do
+    if [ "$(readlink -f "$dev")" = "$real" ]; then
+        umount "$point" || exit 1
+    fi
+done < /proc/mounts
+''')
     for name in chosen:
         filename, _, _ = PARTITIONS[name]
         record = manifest['outputs'][filename]
@@ -100,7 +124,7 @@ def main():
         if not text or text.split()[0] != expected:
             raise SystemExit(f'{name}: readback SHA256 mismatch; installation stopped')
         print(f'PASS {name}: {expected}', flush=True)
-    print('INSTALL PASS; reboot manually after reviewing the guide')
+    print('INSTALL PASS; ESP + boot deployment verified when selected; reboot manually after reviewing the guide')
 
 
 if __name__ == '__main__':

@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Assemble a first-boot candidate using the user's already booted menu transport.
+"""Legacy v1 assembly: follow with repair-esp-package.py before delivery.
+
+Assemble a first-boot candidate using the user's already booted menu transport.
 
 Firmware/kernel transport bytes are preserved. Only the FAT payload is replaced;
 new build output, original Apple root windows and matching template Data are

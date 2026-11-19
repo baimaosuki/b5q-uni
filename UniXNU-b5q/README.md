@@ -64,3 +64,20 @@ The latest user instruction moves added integrity checks out of CI. Run
 `python3 scripts/b5q-install/pre-ci.py` from the workspace before submitting a
 build. New kernel/payload output checks execute locally after return, and existing
 completed build results are retained.
+
+## ESP delivery correction
+
+The original firstboot-v1 delivery did not install the physical ESP, and its
+menu did not declare the supplied DarwinBoot driver. A matching boot/root
+readback therefore did not prove new-menu discovery. Treat the v1 delivery as
+superseded. Use `scripts/b5q-install/repair-esp-package.py` to make the ESP-v2
+package: explicit800MiB physical ESP, declared loader, bare FAT16 bootstrap
+without a shadow configuration, same XNU and authenticated roots.
+
+`install-firstboot.py --repair` installs ESP then boot and leaves the already
+written macosroot untouched. Full ESP replacement overwrites other ESP files;
+use the documented merge-copy method when those must be preserved.
+`scripts/b5q-install/test-esp-menu.py` locally exercises the exact emitted two
+FAT images with AArch64 UniXNU/DarwinBoot under QEMU. This verifies discovery
+and loader handoff only; no SM8550/macOS runtime success is inferred.
+See `reports/esp-delivery-audit.json` for actual embedded-driver bytes and logs.

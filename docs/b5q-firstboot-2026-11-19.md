@@ -1,3 +1,5 @@
+> **交付更正：firstboot-v1 已被 ESP-v2 替代。** v1 安装器没有写物理 ESP，配置没有显式加载 DarwinBoot。下面保留为历史构建记录，不再作为安装步骤。新包见 `artifacts/b5q-macos-27.3-esp-v2/`；已刷根镜像用修复包执行 `python3 install-firstboot.py --repair`。核查记录见 `UniXNU-b5q/reports/esp-delivery-audit.json`。
+
 # b5q macOS 27.3 首版启动候选包
 
 最终 CI `44494359247` 完成 SUCCESS，构建源码 `5b19c2aab0127326f2b95aa5a3cd803de26a6312`。真实内核完整链接，无未解析符号，XnuPrelink 完整映射，无 missing/stubbed；全部产物已取回本地。

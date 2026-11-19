@@ -118,5 +118,8 @@
     "archive_member_hashes": "PASS",
     "files": 33,
     "hardware_boot_verified": false
-  }
+  },
+  "delivery_superseded": true,
+  "delivery_issue": "v1 did not install physical ESP and lacked explicit DarwinBoot driver config; built kernel retained",
+  "replacement_report": "reports/esp-delivery-audit.json"
 }

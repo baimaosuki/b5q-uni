@@ -22,7 +22,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-install-test-') as tmp:
         image = directory / filename
         image.write_bytes((name + '\n').encode() * 16)
         outputs[filename] = {'bytes': image.stat().st_size, 'sha256': module.digest(image)}
-    manifest = {'os_profile': 'macos-27.3-26C5035r', 'build_status': {'flash_candidate_ready': True, 'root_read_only': True, 'data_volatile': True}, 'outputs': outputs}
+    manifest = {'os_profile': 'macos-27.3-26C5035r', 'build_status': {'flash_candidate_ready': True, 'root_read_only': True, 'data_volatile': True, 'esp_install_required': True}, 'outputs': outputs}
     (directory / 'package.manifest.json').write_text(json.dumps(manifest))
 
     def case(flag, *, wrong_start=None, wrong_readback=None, expect_failure=False):
@@ -34,6 +34,8 @@ with tempfile.TemporaryDirectory(prefix='b5q-install-test-') as tmp:
             basic = {'id -u': '0', 'getprop ro.twrp.version': '3.7.1', 'getprop ro.product.device': 'b5q', 'getprop ro.product.model': 'SM-F7310'}
             if cmd in basic:
                 return basic[cmd]
+            if 'done < /proc/mounts' in cmd:
+                return ''
             for name, (_, offset, size) in module.PARTITIONS.items():
                 if cmd == module.partition_probe(name):
                     return f'sda{37 if name == "macosroot" else 21}\n{offset // 512 + (1 if wrong_start == name else 0)}\n{size // 512}\n{size}\n'
@@ -60,7 +62,11 @@ with tempfile.TemporaryDirectory(prefix='b5q-install-test-') as tmp:
     assert case('--check')[0] == []
     assert case('--root')[0] == ['macosroot']
     assert case('--boot')[0] == ['boot']
-    assert case('--all')[0] == ['macosroot', 'boot']
+    assert case('--esp')[0] == ['esp']
+    assert case('--repair')[0] == ['esp', 'boot']
+    assert case('--all')[0] == ['macosroot', 'esp', 'boot']
+    assert case('--repair', wrong_start='esp', expect_failure=True)[0] == []
+    assert case('--repair', wrong_readback='esp', expect_failure=True)[0] == ['esp']
     assert case('--all', wrong_start='boot', expect_failure=True)[0] == []
     assert case('--all', wrong_readback='macosroot', expect_failure=True)[0] == ['macosroot']
     (directory / 'boot.img').write_bytes(b'corrupt')

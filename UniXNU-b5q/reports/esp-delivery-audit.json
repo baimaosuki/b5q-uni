@@ -1,0 +1,131 @@
+{
+  "user_observation": "Two partition readbacks match v1; device still runs old HelloPayload from existing physical ESP. No new device operations performed here.",
+  "confirmed_defects": [
+    "v1 installer only writes macosroot/boot and never installs the supplied ESP tree",
+    "v1 config includes DarwinBoot.efi file but no [[driver]] declaration; missing loader reproduced with actual EFI binary in QEMU",
+    "v1 host checks validated packed FAT roundtrip but did not validate multi-volume menu discovery or deployment to physical ESP"
+  ],
+  "embedded_module_audit": {
+    "boot_kernel_sha256": "a39551a8154e1aa6a87610c86a26ffa9285dc3921f52c5b1d2046448f4beeb52",
+    "decoded_transport_sha256": "96e108cf9f0b1e868cf8a5fbd900a852762edd33e60be95c6b086f7207ae933d",
+    "ramdisk_offset": 2498560,
+    "ramdisk_size": 53541544,
+    "ramdisk_magic": "UNXNFAT1",
+    "modules": {
+      "UniXNURamDiskDxe": {
+        "embedded_sha256": "a1ecbdcfb73118e34bc476ef565e42bbcf05c0c658c4712cc1511505a14e6eea",
+        "bytes": 25088,
+        "equals_previously_inspected_external_file": true,
+        "packed_magic_present": true,
+        "strings": [
+          "no initrd",
+          "packed",
+          "chunk",
+          "UNXNFAT1"
+        ]
+      },
+      "DarwinBoot": {
+        "embedded_sha256": "95578b1fba1f7d18bc7cb95b77ec839707b2282804be886dbbafbafde60ace76",
+        "bytes": 43520,
+        "equals_previously_inspected_external_file": true,
+        "packed_magic_present": false,
+        "strings": []
+      },
+      "UniXNU": {
+        "embedded_sha256": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b",
+        "bytes": 104448,
+        "equals_previously_inspected_external_file": true,
+        "packed_magic_present": false,
+        "strings": [
+          "loader protocol"
+        ]
+      }
+    }
+  },
+  "packed_codec_claim": "Actual embedded UniXNURamDiskDxe equals previously inspected file and contains UNXNFAT1/packed/chunk code; only-bare-FAT claim not established by supplied hardware symptom. New delivery avoids packed FAT entirely.",
+  "repair": "800MiB physical ESP with explicit loader config plus bare FAT16 bootstrap with no shadow config; root/kernel unchanged, no CI",
+  "repair_script": "scripts/b5q-install/repair-esp-package.py",
+  "local_qemu_reproduction_log": "artifacts/b5q-boot-audit/v1-menu-no-loader.clean.log",
+  "new_qemu_test": {
+    "result": "PASS",
+    "configuration": "actual bootstrap EFI application with separate raw physical esp.img",
+    "expected": [
+      "4 entries, 1 drivers",
+      "DarwinBoot.efi (config): started",
+      "boot: entry xnu",
+      "xnu: handing off"
+    ],
+    "no_hello": true,
+    "no_missing_loader": true,
+    "scope": "menu and loader discovery, not kernel boot",
+    "QEMU_runtime_limit": "1GiB emulation cannot allocate requested2GiB XNU window; reports Out of Resources as expected",
+    "log_sha256": "836dbff6f1495fbb880f700d3203b01f5ece2e01048ec4ba940464cb8deba2b3"
+  },
+  "hardware_verified": false,
+  "repair_outputs": {
+    "boot-b5q-esp-v2.tar": {
+      "bytes": 19281920,
+      "sha256": "6496f643aba6bbcee113ff162cbf3f86ae9ace018068f6e07706519ab44923f9"
+    },
+    "boot.img": {
+      "bytes": 19275776,
+      "sha256": "79618ef587f12f058ab07442850305e16ff9028131d37a55177c4e6df544ee25"
+    },
+    "esp.img": {
+      "bytes": 838860800,
+      "sha256": "8732f8266084c7a07bcc4f966403375c57dc661ed6b75351e071f7ccc2dd473b"
+    },
+    "kernel.macho": {
+      "bytes": 142983168,
+      "sha256": "12515af5f800b1f2ce0b6cd80446c4c3da6b8ed09124341197db10666bf975df"
+    },
+    "macosroot.img": {
+      "bytes": 17603493888,
+      "sha256": "35b1c581c7074c626b4b3750af93901a988425e42671f1aaeafd7fd6e13de199"
+    },
+    "payload.img": {
+      "bytes": 838860800,
+      "sha256": "8732f8266084c7a07bcc4f966403375c57dc661ed6b75351e071f7ccc2dd473b"
+    }
+  },
+  "exact_image_regression": {
+    "result": "PASS",
+    "scope": "Menu discovery and explicit loader protocol only; NOT Samsung/XNU boot",
+    "real_exact_images": {
+      "bootstrap.fat": {
+        "bytes": 16777216,
+        "sha256": "ec709a0a612ce76091cf117104b70f18837c1881c648338f590ff6b1281ffb96"
+      },
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "8732f8266084c7a07bcc4f966403375c57dc661ed6b75351e071f7ccc2dd473b"
+      }
+    },
+    "checks": [
+      "config: loaded \\EFI\\UniXNU\\unixnu.toml",
+      "4 entries, 1 drivers",
+      "DARWINBOOT: loader v2 installed",
+      "driver \\EFI\\UniXNU\\Drivers\\DarwinBoot.efi (config): started",
+      "b5q macOS - ESP v2",
+      "boot: entry 'xnu'",
+      "xnu: handing off"
+    ],
+    "hello_executed": false,
+    "missing_loader": false,
+    "qemu_memory_bytes": 1073741824,
+    "xnu_owned_window_bytes": 2147483648,
+    "expected_environment_refusal": "QEMU has1GiB RAM, loader2GiB window cannot be allocated; kernel not executed",
+    "log_sha256": "856e4313451c791ff84d0ced161e2ebdd3013f5538c939eb7dacab15515db408",
+    "hardware_verified": false
+  },
+  "repair_directory": "/home/baimao/zflip5/artifacts/b5q-esp-menu-repair-v2",
+  "full_directory": "/home/baimao/zflip5/artifacts/b5q-macos-27.3-esp-v2",
+  "repair_archive": {
+    "path": "/home/baimao/zflip5/artifacts/b5q-esp-menu-repair-v2.tar.zst",
+    "bytes": 50921255,
+    "sha256": "558a86e8cd8f496e88af3abef14c1a053e81af85bf7bba6d764257ad758bfc33",
+    "archive_hashes": "PASS",
+    "members": 10,
+    "scope": "ESP/boot repair package; existing root unchanged"
+  }
+}
