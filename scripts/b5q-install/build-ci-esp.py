@@ -35,6 +35,7 @@ def main():
     parser.add_argument('--out',type=Path,required=True)
     parser.add_argument('--qemu',action='store_true')
     parser.add_argument('--version',type=int,default=10)
+    parser.add_argument('--gpu-firmware-dir',type=Path,help='local Samsung firmware; stays outside Git and CI source')
     a=parser.parse_args();ci=a.ci_files.resolve();base=a.base.resolve();out=a.out.resolve()
     index=json.loads((ci/'transfer-index.json').read_text());manifest=json.loads((ci/'package.manifest.json').read_text())
     report=json.loads((ci/'payload/payload.json').read_text());kernel=json.loads((ci/'kernel/kernel.json').read_text())
@@ -89,6 +90,32 @@ def main():
             assert len(nodes['/chosen/memory-map']['GpuAddon'])==16
         assert {path for path in nodes if path.startswith('/arm-io/')}=={'/arm-io/intc'}
         assert not any({'interrupts','interrupt-parent','interrupts-extended','interrupt-map','AAPL,interrupts'}.intersection(props) for props in nodes.values())
+        firmware_adt=None
+        if a.gpu_firmware_dir:
+            from unixnu.devicetree import generate
+            from unixnu.profiles import merge
+            inventory=json.loads((ROOT/'UniXNU-b5q/reports/samsung-gpu-inputs.json').read_text())
+            config={}
+            for rel in ['UniXNU/profiles/arch/arm64e/profile.toml','sources/UniXNU-sm8550-common/soc.toml',
+                        'UniXNU/profiles/os/macos-27.3-26C5035r/profile.toml','UniXNU-b5q/board.toml']:
+                config=merge(config,tomllib.loads((ROOT/rel).read_text()))
+            firmware_adt={}
+            for name,property_name in [('gmu_gen70200.bin','b5q-gmu-fw'),('a740_sqe.fw','b5q-sqe-fw'),('a740_zap.mbn','b5q-zap-fw')]:
+                source=a.gpu_firmware_dir/name;body=source.read_bytes();item=inventory['files'][name]
+                assert len(body)==item['bytes'] and hashlib.sha256(body).hexdigest()==item['sha256']
+                config.setdefault('adt',{}).setdefault('chosen',{}).setdefault('bytes',{})[property_name]=body.hex()
+                firmware_adt[property_name]={'file':name,'bytes':len(body),'sha256':item['sha256']}
+            dtb=temp/'hardware.dtb'
+            run(['dtc','-I','dts','-O','dtb','-i',ROOT/'sources/UniXNU-sm8550-common/dts','-o',dtb,ROOT/'UniXNU-b5q/dts/b5q.dts'])
+            identity=int.from_bytes(nodes['/chosen']['unique-chip-id'],'little')
+            new=generate(dtb,config,unique_chip_id=f'{identity:x}',data=True,trust=True,addon=True)
+            new_nodes=adt_decode(new);assert new_nodes.keys()==nodes.keys()
+            for node,properties in nodes.items():
+                for key,value in properties.items():
+                    if (node,key)!=('/chosen','random-seed'):assert new_nodes[node][key]==value,(node,key)
+            assert set(new_nodes['/chosen'])-set(nodes['/chosen'])==set(firmware_adt)
+            for key,item in firmware_adt.items():assert hashlib.sha256(new_nodes['/chosen'][key]).hexdigest()==item['sha256']
+            (files/'kernel.macho.adt').write_bytes(new);expected['kernel.macho.adt']=sha(files/'kernel.macho.adt');nodes=new_nodes
         # Keep the already-used transport interfaces; the official payload omits
         # these when loader="firmware". Record both retained modules separately.
         retained={}
@@ -143,6 +170,8 @@ def main():
           kernel_command_line=line,outputs={'esp.img':record(esp)},esp_files=members,retained_loader_modules=retained,
           build_status=dict(delivery_version=f'b5q-esp-kernel-v{a.version}',flash_candidate_ready=True,esp_install_required=True,root_read_only=True,data_volatile=True,esp_fat_sector_bytes=4096,esp_sectors_per_cluster=1,hardware_boot_verified=False),
           checks=dict(mapping_complete=True,missing_symbols={},post_reseal_idempotent=True,root_policies_bound=True,adt_typed_properties=True,fat_roundtrip=True),hardware_tested=False)
+        if firmware_adt:delivery['local_firmware_adt']={'inputs':firmware_adt,'adt_sha256':expected['kernel.macho.adt'],
+            'vendor_signature_authentication_performed':False,'uploaded_to_git':False,'hardware_executed':False}
         (package/'package.manifest.json').write_text(json.dumps(delivery,indent=2)+'\n')
         if a.qemu:
             for name,extra in [('delivery',[]),('virt-gic',['--virt-gic'])]:

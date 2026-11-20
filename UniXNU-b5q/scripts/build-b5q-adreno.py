@@ -13,6 +13,8 @@ sources=sorted(p for p in (ROOT/'drivers/Adreno740').glob('NativeAdreno*.cpp') i
 # All generic C++ implementation and firmware/PM4/SMMU parsers remain real.
 sources += [ROOT/'kits/AdrenoFirmware'/name for name in ['AdrenoHfi.c','AdrenoHfiStartup.c','AdrenoHfiVotes.c','AdrenoFirmware.c']]
 sources += sorted((ROOT/'kits/ArmSmmu4K').glob('ArmSmmu4K*.c'))+[ROOT/'kits/AdrenoPM4/AdrenoPM4.c']
+sources += [ROOT/'kits/b5q/B5qGpu.cpp']
+includes += ['-I',str(ROOT/'kits/b5q')]
 # No generated board address/rate headers and no Xiaomi signed firmware.
 for forbidden in ['ShengGmuSource.h','ShengGmuVotesSource.h','ShengGmuCommandDbSource.h']:
  if any((ROOT/path/forbidden).exists() for path in ['kits/b5q','build/adreno740']):raise SystemExit('Unexpected board-specific generated header '+forbidden)

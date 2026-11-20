@@ -682,6 +682,11 @@
       "name": "sheng-macos27-generic-runtime.patch",
       "sha256": "36d8a14270c7beb07452c76cb3856be9a302e3d211e8c10fe643d8124cd605bb",
       "result": "PASS"
+    },
+    {
+      "name": "b5q-windowserver-signal.patch",
+      "sha256": "8d4328609ecf90066cfbfc520b160fe5fafbb6edd6f4975e3755bbe578607571",
+      "result": "PASS"
     }
   ],
   "result": "PASS"

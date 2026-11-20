@@ -1,0 +1,11 @@
+# v19 input and hardware progress
+
+v18 journal SHA256711d60fb80d8f5f9cd3635c05ab6e1b900f68643b6e11bc510b11057336d54dd validates both slots,seq88/106755bytes,no lost/overwrite.10rules applied,32frame copies reached the logging cap; WindowServer109 exitsSIGSEGV at1846 and395SIGBUS at1958. No recorded SIGABRT in this snapshot,not proof of permanent elimination or visible login pixels.
+
+Add a bounded current-task WindowServer fatal-signal collector before corpse creation. It captures savedPC/LR/FP/SP/FAR/ESR,16user/16kernel frames and dyld cache base/slide,at most8times. Console capture persists it through the existing asynchronous ESP logger; no signal/restart policy or persistent write range changes.
+
+b5q USB host code binds the original427-slot AppleUSBXHCI26C5035r and native host/HID families. IRQ165,core0xa600000 and SID0x40 match six DT inputs. Native device-stop/host-role/HCRST waits are bounded. It contains no apps_smmu MMIO,shared-UFS-domain changes,Xiaomi retimer/UCSI/GPIO/PMIC tables. A firmware-established identity-DMA/powered-PHY handoff must cover owned RAM before controller access. No such handoff producer is currently present,so the current image will stop this branch at dma-handoff; it must not be described as working keyboard/mouse support.
+
+GPU progresses through local Samsung GMU/SQE/ZAP identity checking and an actual Samsung gen7 GMU firmware loader. Real DT GMU window0x3d68000,not0x3d6a000,agrees across stock overlays and captured runtime FDT. Source from pinned Samsung SM8550 Lineage kernel/modules supplies gen7 memory regions and TCM register locations. Loader validates all destinations before writes and requires powered/held-reset GMU plus owned cache/SMMU mapping. The current firmware supplies none of that handoff,so no MMIO load is attempted. HFI/DCVS/power/clock votes,securePAS and command submission remain unresolved; no Metal-ready service is published.
+
+Samsung proprietary bytes are provided only by the local final ESP assembler through official typed ADT byte properties; no firmware blobs are pushed to Git. Actual kernel CI and final binary/image checks are tracked in runtime-v19.json. Data and firmware transport stay unchanged. This is source progress and a next-fault capture build,not a completed GPU/USB hardware repair.

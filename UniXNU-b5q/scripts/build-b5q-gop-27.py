@@ -543,11 +543,12 @@ aes_archive = ROOT / 'build/software-aes/libSoftwareAES.a'
 aes_archive.parent.mkdir(parents=True, exist_ok=True)
 aes_archive.unlink(missing_ok=True)
 run(['xcrun', 'ar', 'rcs', aes_archive, *input_objects])
+usb_objects = json.loads(subprocess.check_output([sys.executable, str(ROOT/'scripts/build-b5q-usb.py')], text=True))
 archive = OUT / 'libNativeLegacyDisplay.late.a'
 archive.unlink(missing_ok=True)
 run(['xcrun', 'ar', 'rcs', archive, late, OUT / 'original-bindings.o',
      OUT / 'original-addresses.o', OUT / 'LegacyDisplayProbe.o',
-     OUT / 'LegacyDisplaySupport27.o', gop_late, OUT / 'KeyStoreProbe.o', keyevents_late, *ethernet_objects])
+     OUT / 'LegacyDisplaySupport27.o', gop_late, OUT / 'KeyStoreProbe.o', keyevents_late, *ethernet_objects, *usb_objects])
 sources = [Path(__file__), ABI_PATH,
            Path(__file__).with_name(f'software-aes-{BUILD}.json'),
            Path(__file__).with_name(f'net-ether-{BUILD}.json'), KITS/'B5qEthernet.cpp', KITS/'LegacyDisplayProbe.cpp']

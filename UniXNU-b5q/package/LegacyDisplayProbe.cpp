@@ -596,6 +596,8 @@ void busyReport(void *, wait_result_t) {
 }  // namespace
 
 extern "C" void b5q_ethernet_start(void);
+extern "C" void b5q_usb_start(void);
+extern "C" void b5q_gpu_start(void);
 void native_legacy_display_late_probe(void) {
     {thread_t thread = nullptr; if (kernel_thread_start(busyReport, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);}
     // NativeAES first: AppleImage4 waits for the real IOAESAccelerator service.
@@ -603,6 +605,8 @@ void native_legacy_display_late_probe(void) {
     b5q_ram_storage_start();
     native_keystore_probe();
     b5q_ethernet_start();
+    b5q_usb_start();
+    b5q_gpu_start();
     // Board peripherals are not emulated by this OS-only display lifecycle.
     IOService *display=pendingLegacyDisplay;if(!display){native_legacy_display_checkpoint();return;}pendingLegacyDisplay=nullptr;
     native_legacy_surface_status=OSKextLoadKextWithIdentifier("com.apple.iokit.IOSurface");

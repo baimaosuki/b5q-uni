@@ -1,0 +1,2358 @@
+{
+  "scope": "b5q peripheral inputs: captured runtime FDT and original firmware DTBs agree on selected USB/GPU windows; not DMA ownership proof",
+  "sources": [
+    {
+      "path": "b5q-runtime.fdt",
+      "sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+      "nodes": {
+        "aop_cmd_db_region@81c60000": {
+          "path": "/reserved-memory/aop_cmd_db_region@81c60000",
+          "enabled": true,
+          "compatible": [
+            "qcom,cmd-db"
+          ],
+          "reg": [
+            0,
+            2177236992,
+            0,
+            131072
+          ]
+        },
+        "qcom,kgsl-3d0@3d00000": {
+          "path": "/soc/qcom,kgsl-3d0@3d00000",
+          "enabled": true,
+          "clock-names": [
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb",
+            "apb_pclk"
+          ],
+          "clocks": [
+            59,
+            32,
+            59,
+            33,
+            83,
+            0,
+            68,
+            0
+          ],
+          "interrupts": [
+            0,
+            300,
+            4
+          ],
+          "reg-names": [
+            "kgsl_3d0_reg_memory",
+            "cx_dbgc",
+            "rscc",
+            "isense_cntl",
+            "cx_misc",
+            "qdss_gfx",
+            "qdss_etr",
+            "qdss_tmc"
+          ],
+          "reg": [
+            63963136,
+            262144,
+            64360448,
+            2048,
+            64290816,
+            65536,
+            64532480,
+            8192,
+            64610304,
+            4096,
+            277872640,
+            524288,
+            268730368,
+            32768,
+            279990272,
+            4096
+          ],
+          "compatible": [
+            "qcom,adreno-gpu-gen7-2-1",
+            "qcom,kgsl-3d0"
+          ]
+        },
+        "kgsl-smmu@3da0000": {
+          "path": "/soc/kgsl-smmu@3da0000",
+          "enabled": true,
+          "compatible": [
+            "qcom,qsmmu-v500",
+            "qcom,adreno-smmu"
+          ],
+          "reg": [
+            64618496,
+            262144,
+            64905216,
+            64
+          ],
+          "reg-names": [
+            "base",
+            "tcu-base"
+          ],
+          "clocks": [
+            83,
+            15,
+            59,
+            32,
+            59,
+            33,
+            83,
+            0
+          ],
+          "clock-names": [
+            "gpu_cc_hlos1_vote_gpu_smmu",
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb"
+          ],
+          "interrupts": [
+            0,
+            673,
+            4,
+            0,
+            677,
+            4,
+            0,
+            678,
+            4,
+            0,
+            679,
+            4,
+            0,
+            680,
+            4,
+            0,
+            681,
+            4,
+            0,
+            682,
+            4,
+            0,
+            683,
+            4,
+            0,
+            684,
+            4,
+            0,
+            685,
+            4,
+            0,
+            686,
+            4,
+            0,
+            687,
+            4,
+            0,
+            422,
+            4,
+            0,
+            476,
+            4,
+            0,
+            574,
+            4,
+            0,
+            575,
+            4,
+            0,
+            576,
+            4,
+            0,
+            577,
+            4,
+            0,
+            659,
+            4,
+            0,
+            661,
+            4,
+            0,
+            664,
+            4,
+            0,
+            665,
+            4,
+            0,
+            666,
+            4,
+            0,
+            668,
+            4,
+            0,
+            669,
+            4,
+            0,
+            699,
+            4
+          ]
+        },
+        "ssusb@a600000": {
+          "path": "/soc/ssusb@a600000",
+          "enabled": true,
+          "compatible": [
+            "qcom,dwc-usb3-msm"
+          ],
+          "reg": [
+            174063616,
+            1048576,
+            33316864,
+            4
+          ],
+          "reg-names": [
+            "core_base",
+            "tcsr_dyn_en_dis"
+          ],
+          "clocks": [
+            59,
+            156,
+            59,
+            11,
+            59,
+            3,
+            59,
+            158,
+            59,
+            161
+          ],
+          "clock-names": [
+            "core_clk",
+            "iface_clk",
+            "bus_aggr_clk",
+            "utmi_clk",
+            "sleep_clk"
+          ],
+          "qcom,core-clk-rate": [
+            200000000
+          ],
+          "samsung,cc_dir": [
+            125,
+            11,
+            0
+          ]
+        },
+        "dwc3@a600000": {
+          "path": "/soc/ssusb@a600000/dwc3@a600000",
+          "enabled": true,
+          "compatible": [
+            "snps,dwc3"
+          ],
+          "reg": [
+            174063616,
+            55612
+          ],
+          "iommus": [
+            66,
+            64,
+            0
+          ],
+          "qcom,iommu-dma-addr-pool": [
+            2415919104,
+            1610612736
+          ],
+          "interrupts": [
+            0,
+            133,
+            4
+          ]
+        },
+        "hsphy@88e3000": {
+          "path": "/soc/hsphy@88e3000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-snps-eusb2-phy"
+          ],
+          "reg": [
+            143536128,
+            340,
+            143532032,
+            4,
+            203907072,
+            4
+          ],
+          "reg-names": [
+            "eusb2_phy_base",
+            "eud_enable_reg",
+            "eud_detect_reg"
+          ],
+          "clocks": [
+            60,
+            27,
+            84,
+            4
+          ],
+          "clock-names": [
+            "ref_clk_src",
+            "ref_clk"
+          ]
+        },
+        "ssphy@88e8000": {
+          "path": "/soc/ssphy@88e8000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-ssphy-qmp-dp-combo"
+          ],
+          "reg": [
+            143556608,
+            12288
+          ],
+          "reg-names": [
+            "qmp_phy_base"
+          ],
+          "clocks": [
+            59,
+            162,
+            59,
+            165,
+            59,
+            166,
+            81,
+            60,
+            27,
+            84,
+            5,
+            59,
+            164
+          ],
+          "clock-names": [
+            "aux_clk",
+            "pipe_clk",
+            "pipe_clk_mux",
+            "pipe_clk_ext_src",
+            "ref_clk_src",
+            "ref_clk",
+            "com_aux_clk"
+          ]
+        },
+        "qcom,gmu@3d69000": {
+          "path": "/soc/qcom,gmu@3d69000",
+          "enabled": true,
+          "iommus": [
+            224,
+            5,
+            0
+          ],
+          "qcom,gmu-freq-table": [
+            220000000,
+            64,
+            550000000,
+            128
+          ],
+          "clock-names": [
+            "gmu_clk",
+            "cxo_clk",
+            "axi_clk",
+            "memnoc_clk",
+            "ahb_clk",
+            "hub_clk"
+          ],
+          "clocks": [
+            83,
+            3,
+            83,
+            5,
+            59,
+            13,
+            59,
+            32,
+            83,
+            0,
+            83,
+            18
+          ],
+          "interrupts": [
+            0,
+            304,
+            4,
+            0,
+            305,
+            4
+          ],
+          "reg-names": [
+            "gmu",
+            "gmu_pdc",
+            "gmu_ao_blk_dec0"
+          ],
+          "reg": [
+            64389120,
+            225280,
+            187170816,
+            65536,
+            64225280,
+            65536
+          ],
+          "compatible": [
+            "qcom,gen7-gmu"
+          ]
+        }
+      }
+    },
+    {
+      "path": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay0.dtb",
+      "sha256": "e13ebde60453411032645217339de9ff136b94718c3f18bea065680e54876c1a",
+      "nodes": {
+        "aop_cmd_db_region@81c60000": {
+          "path": "/reserved-memory/aop_cmd_db_region@81c60000",
+          "enabled": true,
+          "compatible": [
+            "qcom,cmd-db"
+          ],
+          "reg": [
+            0,
+            2177236992,
+            0,
+            131072
+          ]
+        },
+        "qcom,kgsl-3d0@3d00000": {
+          "path": "/soc/qcom,kgsl-3d0@3d00000",
+          "enabled": true,
+          "clock-names": [
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb",
+            "apb_pclk"
+          ],
+          "clocks": [
+            59,
+            32,
+            59,
+            33,
+            83,
+            0,
+            68,
+            0
+          ],
+          "interrupts": [
+            0,
+            300,
+            4
+          ],
+          "reg-names": [
+            "kgsl_3d0_reg_memory",
+            "cx_dbgc",
+            "rscc",
+            "isense_cntl",
+            "cx_misc",
+            "qdss_gfx",
+            "qdss_etr",
+            "qdss_tmc"
+          ],
+          "reg": [
+            63963136,
+            262144,
+            64360448,
+            2048,
+            64290816,
+            65536,
+            64532480,
+            8192,
+            64610304,
+            4096,
+            277872640,
+            524288,
+            268730368,
+            32768,
+            279990272,
+            4096
+          ],
+          "compatible": [
+            "qcom,adreno-gpu-gen7-2-1",
+            "qcom,kgsl-3d0"
+          ]
+        },
+        "kgsl-smmu@3da0000": {
+          "path": "/soc/kgsl-smmu@3da0000",
+          "enabled": true,
+          "compatible": [
+            "qcom,qsmmu-v500",
+            "qcom,adreno-smmu"
+          ],
+          "reg": [
+            64618496,
+            262144,
+            64905216,
+            64
+          ],
+          "reg-names": [
+            "base",
+            "tcu-base"
+          ],
+          "clocks": [
+            83,
+            15,
+            59,
+            32,
+            59,
+            33,
+            83,
+            0
+          ],
+          "clock-names": [
+            "gpu_cc_hlos1_vote_gpu_smmu",
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb"
+          ],
+          "interrupts": [
+            0,
+            673,
+            4,
+            0,
+            677,
+            4,
+            0,
+            678,
+            4,
+            0,
+            679,
+            4,
+            0,
+            680,
+            4,
+            0,
+            681,
+            4,
+            0,
+            682,
+            4,
+            0,
+            683,
+            4,
+            0,
+            684,
+            4,
+            0,
+            685,
+            4,
+            0,
+            686,
+            4,
+            0,
+            687,
+            4,
+            0,
+            422,
+            4,
+            0,
+            476,
+            4,
+            0,
+            574,
+            4,
+            0,
+            575,
+            4,
+            0,
+            576,
+            4,
+            0,
+            577,
+            4,
+            0,
+            659,
+            4,
+            0,
+            661,
+            4,
+            0,
+            664,
+            4,
+            0,
+            665,
+            4,
+            0,
+            666,
+            4,
+            0,
+            668,
+            4,
+            0,
+            669,
+            4,
+            0,
+            699,
+            4
+          ]
+        },
+        "ssusb@a600000": {
+          "path": "/soc/ssusb@a600000",
+          "enabled": true,
+          "samsung,cc_dir": [
+            125,
+            11,
+            0
+          ],
+          "compatible": [
+            "qcom,dwc-usb3-msm"
+          ],
+          "reg": [
+            174063616,
+            1048576,
+            33316864,
+            4
+          ],
+          "reg-names": [
+            "core_base",
+            "tcsr_dyn_en_dis"
+          ],
+          "clocks": [
+            59,
+            156,
+            59,
+            11,
+            59,
+            3,
+            59,
+            158,
+            59,
+            161
+          ],
+          "clock-names": [
+            "core_clk",
+            "iface_clk",
+            "bus_aggr_clk",
+            "utmi_clk",
+            "sleep_clk"
+          ],
+          "qcom,core-clk-rate": [
+            200000000
+          ]
+        },
+        "dwc3@a600000": {
+          "path": "/soc/ssusb@a600000/dwc3@a600000",
+          "enabled": true,
+          "compatible": [
+            "snps,dwc3"
+          ],
+          "reg": [
+            174063616,
+            55612
+          ],
+          "iommus": [
+            66,
+            64,
+            0
+          ],
+          "qcom,iommu-dma-addr-pool": [
+            2415919104,
+            1610612736
+          ],
+          "interrupts": [
+            0,
+            133,
+            4
+          ]
+        },
+        "hsphy@88e3000": {
+          "path": "/soc/hsphy@88e3000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-snps-eusb2-phy"
+          ],
+          "reg": [
+            143536128,
+            340,
+            143532032,
+            4,
+            203907072,
+            4
+          ],
+          "reg-names": [
+            "eusb2_phy_base",
+            "eud_enable_reg",
+            "eud_detect_reg"
+          ],
+          "clocks": [
+            60,
+            27,
+            84,
+            4
+          ],
+          "clock-names": [
+            "ref_clk_src",
+            "ref_clk"
+          ]
+        },
+        "ssphy@88e8000": {
+          "path": "/soc/ssphy@88e8000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-ssphy-qmp-dp-combo"
+          ],
+          "reg": [
+            143556608,
+            12288
+          ],
+          "reg-names": [
+            "qmp_phy_base"
+          ],
+          "clocks": [
+            59,
+            162,
+            59,
+            165,
+            59,
+            166,
+            81,
+            60,
+            27,
+            84,
+            5,
+            59,
+            164
+          ],
+          "clock-names": [
+            "aux_clk",
+            "pipe_clk",
+            "pipe_clk_mux",
+            "pipe_clk_ext_src",
+            "ref_clk_src",
+            "ref_clk",
+            "com_aux_clk"
+          ]
+        },
+        "qcom,gmu@3d69000": {
+          "path": "/soc/qcom,gmu@3d69000",
+          "enabled": true,
+          "iommus": [
+            224,
+            5,
+            0
+          ],
+          "qcom,gmu-freq-table": [
+            220000000,
+            64,
+            550000000,
+            128
+          ],
+          "clock-names": [
+            "gmu_clk",
+            "cxo_clk",
+            "axi_clk",
+            "memnoc_clk",
+            "ahb_clk",
+            "hub_clk"
+          ],
+          "clocks": [
+            83,
+            3,
+            83,
+            5,
+            59,
+            13,
+            59,
+            32,
+            83,
+            0,
+            83,
+            18
+          ],
+          "interrupts": [
+            0,
+            304,
+            4,
+            0,
+            305,
+            4
+          ],
+          "reg-names": [
+            "gmu",
+            "gmu_pdc",
+            "gmu_ao_blk_dec0"
+          ],
+          "reg": [
+            64389120,
+            225280,
+            187170816,
+            65536,
+            64225280,
+            65536
+          ],
+          "compatible": [
+            "qcom,gen7-gmu"
+          ]
+        }
+      }
+    },
+    {
+      "path": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay1.dtb",
+      "sha256": "aa633bab864b336d87fa2a20bdcf21ea098ad5c550ed9a7af43f992d3c368d9d",
+      "nodes": {
+        "aop_cmd_db_region@81c60000": {
+          "path": "/reserved-memory/aop_cmd_db_region@81c60000",
+          "enabled": true,
+          "compatible": [
+            "qcom,cmd-db"
+          ],
+          "reg": [
+            0,
+            2177236992,
+            0,
+            131072
+          ]
+        },
+        "qcom,kgsl-3d0@3d00000": {
+          "path": "/soc/qcom,kgsl-3d0@3d00000",
+          "enabled": true,
+          "clock-names": [
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb",
+            "apb_pclk"
+          ],
+          "clocks": [
+            59,
+            32,
+            59,
+            33,
+            83,
+            0,
+            68,
+            0
+          ],
+          "interrupts": [
+            0,
+            300,
+            4
+          ],
+          "reg-names": [
+            "kgsl_3d0_reg_memory",
+            "cx_dbgc",
+            "rscc",
+            "isense_cntl",
+            "cx_misc",
+            "qdss_gfx",
+            "qdss_etr",
+            "qdss_tmc"
+          ],
+          "reg": [
+            63963136,
+            262144,
+            64360448,
+            2048,
+            64290816,
+            65536,
+            64532480,
+            8192,
+            64610304,
+            4096,
+            277872640,
+            524288,
+            268730368,
+            32768,
+            279990272,
+            4096
+          ],
+          "compatible": [
+            "qcom,adreno-gpu-gen7-2-1",
+            "qcom,kgsl-3d0"
+          ]
+        },
+        "kgsl-smmu@3da0000": {
+          "path": "/soc/kgsl-smmu@3da0000",
+          "enabled": true,
+          "compatible": [
+            "qcom,qsmmu-v500",
+            "qcom,adreno-smmu"
+          ],
+          "reg": [
+            64618496,
+            262144,
+            64905216,
+            64
+          ],
+          "reg-names": [
+            "base",
+            "tcu-base"
+          ],
+          "clocks": [
+            83,
+            15,
+            59,
+            32,
+            59,
+            33,
+            83,
+            0
+          ],
+          "clock-names": [
+            "gpu_cc_hlos1_vote_gpu_smmu",
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb"
+          ],
+          "interrupts": [
+            0,
+            673,
+            4,
+            0,
+            677,
+            4,
+            0,
+            678,
+            4,
+            0,
+            679,
+            4,
+            0,
+            680,
+            4,
+            0,
+            681,
+            4,
+            0,
+            682,
+            4,
+            0,
+            683,
+            4,
+            0,
+            684,
+            4,
+            0,
+            685,
+            4,
+            0,
+            686,
+            4,
+            0,
+            687,
+            4,
+            0,
+            422,
+            4,
+            0,
+            476,
+            4,
+            0,
+            574,
+            4,
+            0,
+            575,
+            4,
+            0,
+            576,
+            4,
+            0,
+            577,
+            4,
+            0,
+            659,
+            4,
+            0,
+            661,
+            4,
+            0,
+            664,
+            4,
+            0,
+            665,
+            4,
+            0,
+            666,
+            4,
+            0,
+            668,
+            4,
+            0,
+            669,
+            4,
+            0,
+            699,
+            4
+          ]
+        },
+        "ssusb@a600000": {
+          "path": "/soc/ssusb@a600000",
+          "enabled": true,
+          "samsung,cc_dir": [
+            125,
+            11,
+            0
+          ],
+          "compatible": [
+            "qcom,dwc-usb3-msm"
+          ],
+          "reg": [
+            174063616,
+            1048576,
+            33316864,
+            4
+          ],
+          "reg-names": [
+            "core_base",
+            "tcsr_dyn_en_dis"
+          ],
+          "clocks": [
+            59,
+            156,
+            59,
+            11,
+            59,
+            3,
+            59,
+            158,
+            59,
+            161
+          ],
+          "clock-names": [
+            "core_clk",
+            "iface_clk",
+            "bus_aggr_clk",
+            "utmi_clk",
+            "sleep_clk"
+          ],
+          "qcom,core-clk-rate": [
+            200000000
+          ]
+        },
+        "dwc3@a600000": {
+          "path": "/soc/ssusb@a600000/dwc3@a600000",
+          "enabled": true,
+          "compatible": [
+            "snps,dwc3"
+          ],
+          "reg": [
+            174063616,
+            55612
+          ],
+          "iommus": [
+            66,
+            64,
+            0
+          ],
+          "qcom,iommu-dma-addr-pool": [
+            2415919104,
+            1610612736
+          ],
+          "interrupts": [
+            0,
+            133,
+            4
+          ]
+        },
+        "hsphy@88e3000": {
+          "path": "/soc/hsphy@88e3000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-snps-eusb2-phy"
+          ],
+          "reg": [
+            143536128,
+            340,
+            143532032,
+            4,
+            203907072,
+            4
+          ],
+          "reg-names": [
+            "eusb2_phy_base",
+            "eud_enable_reg",
+            "eud_detect_reg"
+          ],
+          "clocks": [
+            60,
+            27,
+            84,
+            4
+          ],
+          "clock-names": [
+            "ref_clk_src",
+            "ref_clk"
+          ]
+        },
+        "ssphy@88e8000": {
+          "path": "/soc/ssphy@88e8000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-ssphy-qmp-dp-combo"
+          ],
+          "reg": [
+            143556608,
+            12288
+          ],
+          "reg-names": [
+            "qmp_phy_base"
+          ],
+          "clocks": [
+            59,
+            162,
+            59,
+            165,
+            59,
+            166,
+            81,
+            60,
+            27,
+            84,
+            5,
+            59,
+            164
+          ],
+          "clock-names": [
+            "aux_clk",
+            "pipe_clk",
+            "pipe_clk_mux",
+            "pipe_clk_ext_src",
+            "ref_clk_src",
+            "ref_clk",
+            "com_aux_clk"
+          ]
+        },
+        "qcom,gmu@3d69000": {
+          "path": "/soc/qcom,gmu@3d69000",
+          "enabled": true,
+          "iommus": [
+            224,
+            5,
+            0
+          ],
+          "qcom,gmu-freq-table": [
+            220000000,
+            64,
+            550000000,
+            128
+          ],
+          "clock-names": [
+            "gmu_clk",
+            "cxo_clk",
+            "axi_clk",
+            "memnoc_clk",
+            "ahb_clk",
+            "hub_clk"
+          ],
+          "clocks": [
+            83,
+            3,
+            83,
+            5,
+            59,
+            13,
+            59,
+            32,
+            83,
+            0,
+            83,
+            18
+          ],
+          "interrupts": [
+            0,
+            304,
+            4,
+            0,
+            305,
+            4
+          ],
+          "reg-names": [
+            "gmu",
+            "gmu_pdc",
+            "gmu_ao_blk_dec0"
+          ],
+          "reg": [
+            64389120,
+            225280,
+            187170816,
+            65536,
+            64225280,
+            65536
+          ],
+          "compatible": [
+            "qcom,gen7-gmu"
+          ]
+        }
+      }
+    },
+    {
+      "path": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay2.dtb",
+      "sha256": "d2f55ca4aa212277231df59cda54fa4c2ea2150336eca23274a46e9b4474e270",
+      "nodes": {
+        "aop_cmd_db_region@81c60000": {
+          "path": "/reserved-memory/aop_cmd_db_region@81c60000",
+          "enabled": true,
+          "compatible": [
+            "qcom,cmd-db"
+          ],
+          "reg": [
+            0,
+            2177236992,
+            0,
+            131072
+          ]
+        },
+        "qcom,kgsl-3d0@3d00000": {
+          "path": "/soc/qcom,kgsl-3d0@3d00000",
+          "enabled": true,
+          "clock-names": [
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb",
+            "apb_pclk"
+          ],
+          "clocks": [
+            59,
+            32,
+            59,
+            33,
+            83,
+            0,
+            68,
+            0
+          ],
+          "interrupts": [
+            0,
+            300,
+            4
+          ],
+          "reg-names": [
+            "kgsl_3d0_reg_memory",
+            "cx_dbgc",
+            "rscc",
+            "isense_cntl",
+            "cx_misc",
+            "qdss_gfx",
+            "qdss_etr",
+            "qdss_tmc"
+          ],
+          "reg": [
+            63963136,
+            262144,
+            64360448,
+            2048,
+            64290816,
+            65536,
+            64532480,
+            8192,
+            64610304,
+            4096,
+            277872640,
+            524288,
+            268730368,
+            32768,
+            279990272,
+            4096
+          ],
+          "compatible": [
+            "qcom,adreno-gpu-gen7-2-1",
+            "qcom,kgsl-3d0"
+          ]
+        },
+        "kgsl-smmu@3da0000": {
+          "path": "/soc/kgsl-smmu@3da0000",
+          "enabled": true,
+          "compatible": [
+            "qcom,qsmmu-v500",
+            "qcom,adreno-smmu"
+          ],
+          "reg": [
+            64618496,
+            262144,
+            64905216,
+            64
+          ],
+          "reg-names": [
+            "base",
+            "tcu-base"
+          ],
+          "clocks": [
+            83,
+            15,
+            59,
+            32,
+            59,
+            33,
+            83,
+            0
+          ],
+          "clock-names": [
+            "gpu_cc_hlos1_vote_gpu_smmu",
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb"
+          ],
+          "interrupts": [
+            0,
+            673,
+            4,
+            0,
+            677,
+            4,
+            0,
+            678,
+            4,
+            0,
+            679,
+            4,
+            0,
+            680,
+            4,
+            0,
+            681,
+            4,
+            0,
+            682,
+            4,
+            0,
+            683,
+            4,
+            0,
+            684,
+            4,
+            0,
+            685,
+            4,
+            0,
+            686,
+            4,
+            0,
+            687,
+            4,
+            0,
+            422,
+            4,
+            0,
+            476,
+            4,
+            0,
+            574,
+            4,
+            0,
+            575,
+            4,
+            0,
+            576,
+            4,
+            0,
+            577,
+            4,
+            0,
+            659,
+            4,
+            0,
+            661,
+            4,
+            0,
+            664,
+            4,
+            0,
+            665,
+            4,
+            0,
+            666,
+            4,
+            0,
+            668,
+            4,
+            0,
+            669,
+            4,
+            0,
+            699,
+            4
+          ]
+        },
+        "ssusb@a600000": {
+          "path": "/soc/ssusb@a600000",
+          "enabled": true,
+          "samsung,cc_dir": [
+            125,
+            11,
+            0
+          ],
+          "compatible": [
+            "qcom,dwc-usb3-msm"
+          ],
+          "reg": [
+            174063616,
+            1048576,
+            33316864,
+            4
+          ],
+          "reg-names": [
+            "core_base",
+            "tcsr_dyn_en_dis"
+          ],
+          "clocks": [
+            59,
+            156,
+            59,
+            11,
+            59,
+            3,
+            59,
+            158,
+            59,
+            161
+          ],
+          "clock-names": [
+            "core_clk",
+            "iface_clk",
+            "bus_aggr_clk",
+            "utmi_clk",
+            "sleep_clk"
+          ],
+          "qcom,core-clk-rate": [
+            200000000
+          ]
+        },
+        "dwc3@a600000": {
+          "path": "/soc/ssusb@a600000/dwc3@a600000",
+          "enabled": true,
+          "compatible": [
+            "snps,dwc3"
+          ],
+          "reg": [
+            174063616,
+            55612
+          ],
+          "iommus": [
+            66,
+            64,
+            0
+          ],
+          "qcom,iommu-dma-addr-pool": [
+            2415919104,
+            1610612736
+          ],
+          "interrupts": [
+            0,
+            133,
+            4
+          ]
+        },
+        "hsphy@88e3000": {
+          "path": "/soc/hsphy@88e3000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-snps-eusb2-phy"
+          ],
+          "reg": [
+            143536128,
+            340,
+            143532032,
+            4,
+            203907072,
+            4
+          ],
+          "reg-names": [
+            "eusb2_phy_base",
+            "eud_enable_reg",
+            "eud_detect_reg"
+          ],
+          "clocks": [
+            60,
+            27,
+            84,
+            4
+          ],
+          "clock-names": [
+            "ref_clk_src",
+            "ref_clk"
+          ]
+        },
+        "ssphy@88e8000": {
+          "path": "/soc/ssphy@88e8000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-ssphy-qmp-dp-combo"
+          ],
+          "reg": [
+            143556608,
+            12288
+          ],
+          "reg-names": [
+            "qmp_phy_base"
+          ],
+          "clocks": [
+            59,
+            162,
+            59,
+            165,
+            59,
+            166,
+            81,
+            60,
+            27,
+            84,
+            5,
+            59,
+            164
+          ],
+          "clock-names": [
+            "aux_clk",
+            "pipe_clk",
+            "pipe_clk_mux",
+            "pipe_clk_ext_src",
+            "ref_clk_src",
+            "ref_clk",
+            "com_aux_clk"
+          ]
+        },
+        "qcom,gmu@3d69000": {
+          "path": "/soc/qcom,gmu@3d69000",
+          "enabled": true,
+          "iommus": [
+            224,
+            5,
+            0
+          ],
+          "qcom,gmu-freq-table": [
+            220000000,
+            64,
+            550000000,
+            128
+          ],
+          "clock-names": [
+            "gmu_clk",
+            "cxo_clk",
+            "axi_clk",
+            "memnoc_clk",
+            "ahb_clk",
+            "hub_clk"
+          ],
+          "clocks": [
+            83,
+            3,
+            83,
+            5,
+            59,
+            13,
+            59,
+            32,
+            83,
+            0,
+            83,
+            18
+          ],
+          "interrupts": [
+            0,
+            304,
+            4,
+            0,
+            305,
+            4
+          ],
+          "reg-names": [
+            "gmu",
+            "gmu_pdc",
+            "gmu_ao_blk_dec0"
+          ],
+          "reg": [
+            64389120,
+            225280,
+            187170816,
+            65536,
+            64225280,
+            65536
+          ],
+          "compatible": [
+            "qcom,gen7-gmu"
+          ]
+        }
+      }
+    },
+    {
+      "path": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay3.dtb",
+      "sha256": "70c3f63a7628d3830452d6c32cb7b8b7148249c246cda90e03d9721367ec5627",
+      "nodes": {
+        "aop_cmd_db_region@81c60000": {
+          "path": "/reserved-memory/aop_cmd_db_region@81c60000",
+          "enabled": true,
+          "compatible": [
+            "qcom,cmd-db"
+          ],
+          "reg": [
+            0,
+            2177236992,
+            0,
+            131072
+          ]
+        },
+        "qcom,kgsl-3d0@3d00000": {
+          "path": "/soc/qcom,kgsl-3d0@3d00000",
+          "enabled": true,
+          "clock-names": [
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb",
+            "apb_pclk"
+          ],
+          "clocks": [
+            59,
+            32,
+            59,
+            33,
+            83,
+            0,
+            68,
+            0
+          ],
+          "interrupts": [
+            0,
+            300,
+            4
+          ],
+          "reg-names": [
+            "kgsl_3d0_reg_memory",
+            "cx_dbgc",
+            "rscc",
+            "isense_cntl",
+            "cx_misc",
+            "qdss_gfx",
+            "qdss_etr",
+            "qdss_tmc"
+          ],
+          "reg": [
+            63963136,
+            262144,
+            64360448,
+            2048,
+            64290816,
+            65536,
+            64532480,
+            8192,
+            64610304,
+            4096,
+            277872640,
+            524288,
+            268730368,
+            32768,
+            279990272,
+            4096
+          ],
+          "compatible": [
+            "qcom,adreno-gpu-gen7-2-1",
+            "qcom,kgsl-3d0"
+          ]
+        },
+        "kgsl-smmu@3da0000": {
+          "path": "/soc/kgsl-smmu@3da0000",
+          "enabled": true,
+          "compatible": [
+            "qcom,qsmmu-v500",
+            "qcom,adreno-smmu"
+          ],
+          "reg": [
+            64618496,
+            262144,
+            64905216,
+            64
+          ],
+          "reg-names": [
+            "base",
+            "tcu-base"
+          ],
+          "clocks": [
+            83,
+            15,
+            59,
+            32,
+            59,
+            33,
+            83,
+            0
+          ],
+          "clock-names": [
+            "gpu_cc_hlos1_vote_gpu_smmu",
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb"
+          ],
+          "interrupts": [
+            0,
+            673,
+            4,
+            0,
+            677,
+            4,
+            0,
+            678,
+            4,
+            0,
+            679,
+            4,
+            0,
+            680,
+            4,
+            0,
+            681,
+            4,
+            0,
+            682,
+            4,
+            0,
+            683,
+            4,
+            0,
+            684,
+            4,
+            0,
+            685,
+            4,
+            0,
+            686,
+            4,
+            0,
+            687,
+            4,
+            0,
+            422,
+            4,
+            0,
+            476,
+            4,
+            0,
+            574,
+            4,
+            0,
+            575,
+            4,
+            0,
+            576,
+            4,
+            0,
+            577,
+            4,
+            0,
+            659,
+            4,
+            0,
+            661,
+            4,
+            0,
+            664,
+            4,
+            0,
+            665,
+            4,
+            0,
+            666,
+            4,
+            0,
+            668,
+            4,
+            0,
+            669,
+            4,
+            0,
+            699,
+            4
+          ]
+        },
+        "ssusb@a600000": {
+          "path": "/soc/ssusb@a600000",
+          "enabled": true,
+          "samsung,cc_dir": [
+            125,
+            11,
+            0
+          ],
+          "compatible": [
+            "qcom,dwc-usb3-msm"
+          ],
+          "reg": [
+            174063616,
+            1048576,
+            33316864,
+            4
+          ],
+          "reg-names": [
+            "core_base",
+            "tcsr_dyn_en_dis"
+          ],
+          "clocks": [
+            59,
+            156,
+            59,
+            11,
+            59,
+            3,
+            59,
+            158,
+            59,
+            161
+          ],
+          "clock-names": [
+            "core_clk",
+            "iface_clk",
+            "bus_aggr_clk",
+            "utmi_clk",
+            "sleep_clk"
+          ],
+          "qcom,core-clk-rate": [
+            200000000
+          ]
+        },
+        "dwc3@a600000": {
+          "path": "/soc/ssusb@a600000/dwc3@a600000",
+          "enabled": true,
+          "compatible": [
+            "snps,dwc3"
+          ],
+          "reg": [
+            174063616,
+            55612
+          ],
+          "iommus": [
+            66,
+            64,
+            0
+          ],
+          "qcom,iommu-dma-addr-pool": [
+            2415919104,
+            1610612736
+          ],
+          "interrupts": [
+            0,
+            133,
+            4
+          ]
+        },
+        "hsphy@88e3000": {
+          "path": "/soc/hsphy@88e3000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-snps-eusb2-phy"
+          ],
+          "reg": [
+            143536128,
+            340,
+            143532032,
+            4,
+            203907072,
+            4
+          ],
+          "reg-names": [
+            "eusb2_phy_base",
+            "eud_enable_reg",
+            "eud_detect_reg"
+          ],
+          "clocks": [
+            60,
+            27,
+            84,
+            4
+          ],
+          "clock-names": [
+            "ref_clk_src",
+            "ref_clk"
+          ]
+        },
+        "ssphy@88e8000": {
+          "path": "/soc/ssphy@88e8000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-ssphy-qmp-dp-combo"
+          ],
+          "reg": [
+            143556608,
+            12288
+          ],
+          "reg-names": [
+            "qmp_phy_base"
+          ],
+          "clocks": [
+            59,
+            162,
+            59,
+            165,
+            59,
+            166,
+            81,
+            60,
+            27,
+            84,
+            5,
+            59,
+            164
+          ],
+          "clock-names": [
+            "aux_clk",
+            "pipe_clk",
+            "pipe_clk_mux",
+            "pipe_clk_ext_src",
+            "ref_clk_src",
+            "ref_clk",
+            "com_aux_clk"
+          ]
+        },
+        "qcom,gmu@3d69000": {
+          "path": "/soc/qcom,gmu@3d69000",
+          "enabled": true,
+          "iommus": [
+            224,
+            5,
+            0
+          ],
+          "qcom,gmu-freq-table": [
+            220000000,
+            64,
+            550000000,
+            128
+          ],
+          "clock-names": [
+            "gmu_clk",
+            "cxo_clk",
+            "axi_clk",
+            "memnoc_clk",
+            "ahb_clk",
+            "hub_clk"
+          ],
+          "clocks": [
+            83,
+            3,
+            83,
+            5,
+            59,
+            13,
+            59,
+            32,
+            83,
+            0,
+            83,
+            18
+          ],
+          "interrupts": [
+            0,
+            304,
+            4,
+            0,
+            305,
+            4
+          ],
+          "reg-names": [
+            "gmu",
+            "gmu_pdc",
+            "gmu_ao_blk_dec0"
+          ],
+          "reg": [
+            64389120,
+            225280,
+            187170816,
+            65536,
+            64225280,
+            65536
+          ],
+          "compatible": [
+            "qcom,gen7-gmu"
+          ]
+        }
+      }
+    },
+    {
+      "path": "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay4.dtb",
+      "sha256": "ba51947a9e486c2a98becdc2fb41a7f6006732f3131fdb2fb0419be0047c67a8",
+      "nodes": {
+        "aop_cmd_db_region@81c60000": {
+          "path": "/reserved-memory/aop_cmd_db_region@81c60000",
+          "enabled": true,
+          "compatible": [
+            "qcom,cmd-db"
+          ],
+          "reg": [
+            0,
+            2177236992,
+            0,
+            131072
+          ]
+        },
+        "qcom,kgsl-3d0@3d00000": {
+          "path": "/soc/qcom,kgsl-3d0@3d00000",
+          "enabled": true,
+          "clock-names": [
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb",
+            "apb_pclk"
+          ],
+          "clocks": [
+            59,
+            32,
+            59,
+            33,
+            83,
+            0,
+            68,
+            0
+          ],
+          "interrupts": [
+            0,
+            300,
+            4
+          ],
+          "reg-names": [
+            "kgsl_3d0_reg_memory",
+            "cx_dbgc",
+            "rscc",
+            "isense_cntl",
+            "cx_misc",
+            "qdss_gfx",
+            "qdss_etr",
+            "qdss_tmc"
+          ],
+          "reg": [
+            63963136,
+            262144,
+            64360448,
+            2048,
+            64290816,
+            65536,
+            64532480,
+            8192,
+            64610304,
+            4096,
+            277872640,
+            524288,
+            268730368,
+            32768,
+            279990272,
+            4096
+          ],
+          "compatible": [
+            "qcom,adreno-gpu-gen7-2-1",
+            "qcom,kgsl-3d0"
+          ]
+        },
+        "kgsl-smmu@3da0000": {
+          "path": "/soc/kgsl-smmu@3da0000",
+          "enabled": true,
+          "compatible": [
+            "qcom,qsmmu-v500",
+            "qcom,adreno-smmu"
+          ],
+          "reg": [
+            64618496,
+            262144,
+            64905216,
+            64
+          ],
+          "reg-names": [
+            "base",
+            "tcu-base"
+          ],
+          "clocks": [
+            83,
+            15,
+            59,
+            32,
+            59,
+            33,
+            83,
+            0
+          ],
+          "clock-names": [
+            "gpu_cc_hlos1_vote_gpu_smmu",
+            "gcc_gpu_memnoc_gfx",
+            "gcc_gpu_snoc_dvm_gfx",
+            "gpu_cc_ahb"
+          ],
+          "interrupts": [
+            0,
+            673,
+            4,
+            0,
+            677,
+            4,
+            0,
+            678,
+            4,
+            0,
+            679,
+            4,
+            0,
+            680,
+            4,
+            0,
+            681,
+            4,
+            0,
+            682,
+            4,
+            0,
+            683,
+            4,
+            0,
+            684,
+            4,
+            0,
+            685,
+            4,
+            0,
+            686,
+            4,
+            0,
+            687,
+            4,
+            0,
+            422,
+            4,
+            0,
+            476,
+            4,
+            0,
+            574,
+            4,
+            0,
+            575,
+            4,
+            0,
+            576,
+            4,
+            0,
+            577,
+            4,
+            0,
+            659,
+            4,
+            0,
+            661,
+            4,
+            0,
+            664,
+            4,
+            0,
+            665,
+            4,
+            0,
+            666,
+            4,
+            0,
+            668,
+            4,
+            0,
+            669,
+            4,
+            0,
+            699,
+            4
+          ]
+        },
+        "ssusb@a600000": {
+          "path": "/soc/ssusb@a600000",
+          "enabled": true,
+          "samsung,cc_dir": [
+            125,
+            11,
+            0
+          ],
+          "compatible": [
+            "qcom,dwc-usb3-msm"
+          ],
+          "reg": [
+            174063616,
+            1048576,
+            33316864,
+            4
+          ],
+          "reg-names": [
+            "core_base",
+            "tcsr_dyn_en_dis"
+          ],
+          "clocks": [
+            59,
+            156,
+            59,
+            11,
+            59,
+            3,
+            59,
+            158,
+            59,
+            161
+          ],
+          "clock-names": [
+            "core_clk",
+            "iface_clk",
+            "bus_aggr_clk",
+            "utmi_clk",
+            "sleep_clk"
+          ],
+          "qcom,core-clk-rate": [
+            200000000
+          ]
+        },
+        "dwc3@a600000": {
+          "path": "/soc/ssusb@a600000/dwc3@a600000",
+          "enabled": true,
+          "compatible": [
+            "snps,dwc3"
+          ],
+          "reg": [
+            174063616,
+            55612
+          ],
+          "iommus": [
+            66,
+            64,
+            0
+          ],
+          "qcom,iommu-dma-addr-pool": [
+            2415919104,
+            1610612736
+          ],
+          "interrupts": [
+            0,
+            133,
+            4
+          ]
+        },
+        "hsphy@88e3000": {
+          "path": "/soc/hsphy@88e3000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-snps-eusb2-phy"
+          ],
+          "reg": [
+            143536128,
+            340,
+            143532032,
+            4,
+            203907072,
+            4
+          ],
+          "reg-names": [
+            "eusb2_phy_base",
+            "eud_enable_reg",
+            "eud_detect_reg"
+          ],
+          "clocks": [
+            60,
+            27,
+            84,
+            4
+          ],
+          "clock-names": [
+            "ref_clk_src",
+            "ref_clk"
+          ]
+        },
+        "ssphy@88e8000": {
+          "path": "/soc/ssphy@88e8000",
+          "enabled": true,
+          "compatible": [
+            "qcom,usb-ssphy-qmp-dp-combo"
+          ],
+          "reg": [
+            143556608,
+            12288
+          ],
+          "reg-names": [
+            "qmp_phy_base"
+          ],
+          "clocks": [
+            59,
+            162,
+            59,
+            165,
+            59,
+            166,
+            81,
+            60,
+            27,
+            84,
+            5,
+            59,
+            164
+          ],
+          "clock-names": [
+            "aux_clk",
+            "pipe_clk",
+            "pipe_clk_mux",
+            "pipe_clk_ext_src",
+            "ref_clk_src",
+            "ref_clk",
+            "com_aux_clk"
+          ]
+        },
+        "qcom,gmu@3d69000": {
+          "path": "/soc/qcom,gmu@3d69000",
+          "enabled": true,
+          "iommus": [
+            224,
+            5,
+            0
+          ],
+          "qcom,gmu-freq-table": [
+            220000000,
+            64,
+            550000000,
+            128
+          ],
+          "clock-names": [
+            "gmu_clk",
+            "cxo_clk",
+            "axi_clk",
+            "memnoc_clk",
+            "ahb_clk",
+            "hub_clk"
+          ],
+          "clocks": [
+            83,
+            3,
+            83,
+            5,
+            59,
+            13,
+            59,
+            32,
+            83,
+            0,
+            83,
+            18
+          ],
+          "interrupts": [
+            0,
+            304,
+            4,
+            0,
+            305,
+            4
+          ],
+          "reg-names": [
+            "gmu",
+            "gmu_pdc",
+            "gmu_ao_blk_dec0"
+          ],
+          "reg": [
+            64389120,
+            225280,
+            187170816,
+            65536,
+            64225280,
+            65536
+          ],
+          "compatible": [
+            "qcom,gen7-gmu"
+          ]
+        }
+      }
+    }
+  ],
+  "firmware_inputs": {
+    "gmu_gen70200.bin": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/gmu_gen70200.bin",
+      "bytes": 66844,
+      "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98",
+      "matches_upstream_inputs": [
+        "qcom/gmu_gen70200.bin"
+      ]
+    },
+    "a740_sqe.fw": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_sqe.fw",
+      "bytes": 76724,
+      "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473",
+      "matches_upstream_inputs": []
+    },
+    "a740_zap.mbn": {
+      "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/gpu/a740_zap.mbn",
+      "bytes": 12088,
+      "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e",
+      "matches_upstream_inputs": []
+    }
+  },
+  "USB_DMA_handoff": "pending; DT IOVA pool and SID do not prove retained mapping or physical bypass",
+  "GPU_cold_start": "pending power/clock/RPMh votes and owned GMU/GPU context; independent GPU SMMU is not assumed accessible merely from base address",
+  "direct_apps_smmu_MMIO": false
+}

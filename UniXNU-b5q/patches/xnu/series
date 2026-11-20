@@ -15,3 +15,6 @@ macos-lockdown-public-state.patch
 
 # Latest sheng main generic macOS runtime (hardware-independent, source-attributed).
 sheng-macos27-generic-runtime.patch
+
+# Bounded WindowServer fatal-signal user/kernel context; existing console ring.
+b5q-windowserver-signal.patch
