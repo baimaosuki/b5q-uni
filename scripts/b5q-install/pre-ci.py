@@ -45,6 +45,8 @@ run('runtime-gates', [sys.executable, 'tests/b5q-ufs/test-runtime-gates.py'])
 run('ethernet-lifecycle', [sys.executable, 'tests/b5q-ufs/test-ethernet-lifecycle.py'])
 run('ethernet-start', [sys.executable, 'tests/b5q-ufs/test-ethernet-start.py'])
 run('read-status', [sys.executable, 'tests/b5q-ufs/test-read-status.py'])
+run('log-read', [sys.executable, 'tests/b5q-ufs/test-log-read.py'])
+run('verified-read', [sys.executable, 'tests/b5q-ufs/test-verified-read.py'])
 run('installer-errors', [sys.executable, 'tests/b5q-ufs/test-installer.py'])
 flags = ['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-Wno-misleading-indentation', '-fsanitize=address,undefined', '-I', device / 'package/B5qUfs']
 for name in ['root-format', 'smmu', 'protocol']:

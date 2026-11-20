@@ -24,6 +24,7 @@
 #include "B5qSmmu.h"
 #include "B5qUfsProtocol.h"
 #include "B5qRootPolicies.h"
+#include "B5qVerifiedRead.h"
 using namespace B5qFormat;
 extern "C" const struct vr_crypto vr_xnu_crypto;
 namespace {
@@ -249,14 +250,14 @@ class B5qRootBlock:public IOBlockStorageDevice {
  OSDeclareDefaultStructors(B5qRootBlock)
  Root *root=nullptr;IOLock *readLock=nullptr;uint8_t *bounce=nullptr;bool online=false;
 public:
- bool configure(unsigned i){if(i>=3||!roots[i].verified)return false;root=&roots[i];readLock=IOLockAlloc();bounce=static_cast<uint8_t*>(IOMalloc(4096));return readLock&&bounce;}
+ bool configure(unsigned i){if(i>=3||!roots[i].verified||roots[i].image.bytes%4096)return false;root=&roots[i];readLock=IOLockAlloc();bounce=static_cast<uint8_t*>(IOMalloc(maxTransfer));return readLock&&bounce;}
  bool authenticates(const char *uuid,uint8_t *digest) {if(!online||!root||!root->verified||!uuid||strcmp(uuid,root->uuid))return false;if(digest)memcpy(digest,root->digest,48);return true;}
  bool start(IOService *p) override {if(!root||!IOBlockStorageDevice::start(p))return false;
   OSDictionary *protocol=OSDictionary::withCapacity(2);OSString *location=OSString::withCString("Internal"),*connection=OSString::withCString("Virtual Interface");
   if(!protocol||!location||!connection)return false;protocol->setObject("Physical Interconnect Location",location);protocol->setObject("Physical Interconnect",connection);setProperty("Protocol Characteristics",protocol);location->release();connection->release();protocol->release();
   OSDictionary *device=OSDictionary::withCapacity(1);OSString *solid=OSString::withCString("Solid State");if(device&&solid){device->setObject("Medium Type",solid);setProperty("Device Characteristics",device);}OSSafeReleaseNULL(device);OSSafeReleaseNULL(solid);
   online=true;registerService();return true;}
- void free() override {if(bounce)IOFree(bounce,4096);if(readLock)IOLockFree(readLock);IOBlockStorageDevice::free();}
+ void free() override {if(bounce)IOFree(bounce,maxTransfer);if(readLock)IOLockFree(readLock);IOBlockStorageDevice::free();}
  IOReturn doEjectMedia() override{return kIOReturnUnsupported;} IOReturn doFormatMedia(UInt64) override{return kIOReturnNotWritable;}
  UInt32 doGetFormatCapacities(UInt64 *,UInt32) const override{return 0;}
  char *getVendorString() override{return const_cast<char*>("Samsung b5q");} char *getProductString() override{return root?root->image.name:const_cast<char*>("macosroot");}
@@ -270,12 +271,12 @@ public:
  IOReturn doAsyncReadWrite(IOMemoryDescriptor *buffer,UInt64 block,UInt64 count,IOStorageAttributes *,IOStorageCompletion *completion) override {
   if(!online||!buffer||!completion||!completion->action||!count||block>=root->image.bytes/512||count>root->image.bytes/512-block||buffer->getLength()<count*512)return kIOReturnBadArgument;
   if(buffer->getDirection()!=kIODirectionIn)return kIOReturnNotWritable;
-  IOLockLock(readLock);uint64_t offset=block*512,remaining=count*512,done=0;IOReturn status=kIOReturnSuccess;
-  while(remaining){uint64_t index=offset/4096;size_t in=size_t(offset%4096),take=size_t(remaining<4096-in?remaining:4096-in);
-   if(!rootRead(root->image.offset+index*4096,4096,bounce)||vr_verify_block(&root->policy,index,bounce,4096,&vr_xnu_crypto)!=VR_OK){status=kIOReturnIOError;break;}
-   if(buffer->writeBytes(done,bounce+in,take)!=take){status=kIOReturnIOError;break;}offset+=take;remaining-=take;done+=take;
-  }
-  IOLockUnlock(readLock);completion->action(completion->target,completion->parameter,status,done);return kIOReturnSuccess;
+  IOLockLock(readLock);
+  auto result=B5qVerifiedRead::transfer(block*512,count*512,root->image.bytes,bounce,maxTransfer,
+   [&](uint64_t at,uint32_t n,uint8_t *out){return rootRead(root->image.offset+at,n,out);},
+   [&](uint64_t index,const uint8_t *data){return vr_verify_block(&root->policy,index,data,4096,&vr_xnu_crypto)==VR_OK;},
+   [&](uint64_t at,const uint8_t *data,uint32_t n){return buffer->writeBytes(at,data,n);});
+  IOLockUnlock(readLock);completion->action(completion->target,completion->parameter,result.success?kIOReturnSuccess:kIOReturnIOError,result.done);return kIOReturnSuccess;
  }
 };
 OSDefineMetaClassAndStructors(B5qRootBlock,IOBlockStorageDevice)

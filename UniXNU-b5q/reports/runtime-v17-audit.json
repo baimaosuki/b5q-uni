@@ -1,0 +1,76 @@
+{
+  "scope": "Audit current source against latest v14 device capture; bounded journal read recovery and authenticated root batching",
+  "status": "25 local pre-CI checks passed; combined target build pending",
+  "latest_device_log": {
+    "path": "logs/b5q-xnu2log-v14/XNU2LOG.BIN",
+    "sha256": "d29670dcadf21fb21c90fc1706ef8632e9ca742c07c1f3e113bda7ac3ded8934",
+    "newer_device_log_available": false,
+    "interpretation": "IOKit quiet/no capture loss; no new wait stack or hardware desktop evidence. Preserve v15 clock/software compositor policies."
+  },
+  "upstream_sheng_head": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+  "input_source_sha256": {
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "4c2fa2194b0e9f06d5d72bfd632d59b552a2edd10f4a2aa66c8ba19631e92dd3",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "366787f1f6c09c71f695377ac188274fc6d877b50821e1a66f2118d87c4a5c76"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "cf64cac11d7b999be2c98b453fb13b4571ceb513d575d8ceb6c256580ba8d599",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "3c407a0aa2aee5a6da91a0c7ddcb1f7720917318a1ff4bf53b03213754d291f7",
+    "UniXNU-b5q/package/B5qUfs/B5qVerifiedRead.h": "969e8a14b7132089c00303d8e53bdfac1101add1ad152126056f3e8b7bf3c885",
+    "tests/b5q-ufs/test-log-read.py": "349746069de2ab94b7b4dc6c1f66e4d0cb4da95d6dd986b137aef847044f84cf",
+    "tests/b5q-ufs/test-verified-read.py": "9c25f5db0190bb67d697725efeb0851ece235568549d577ae084e350215ad0ee",
+    "scripts/b5q-install/pre-ci.py": "01eda66c63a85f4dd944e08f8767ad21476a874a97465fd5fbb811756615eeff"
+  },
+  "fixes": [
+    {
+      "area": "diagnostics",
+      "finding": "Standards-valid BUSY/TASK SET FULL/UNIT ATTENTION/NOT READY journal reads were treated as terminal. Slot-read caller stops writer on one failed read. Retry only these valid reads at most 3 times/50ms with 10ms pause outside lock; malformed/short/permanent responses fail immediately. Classify response under lock before shared state can change.",
+      "evidence": "tests/b5q-ufs/test-log-read.py extracts actual nabuLogIo/Pause/Read and uses production UFS request/response plus status overwrite at unlock. Old source makes 1 failed attempt, new recovers on third. Exhaustion/short/permanent/malformed/transport/lock deadline/write/SYNC gates pass ASan/UBSan."
+    },
+    {
+      "area": "storage",
+      "finding": "doAsyncReadWrite formerly requested one 4KiB UFS read per block despite a 128KiB transport limit. Batch into a 128KiB per-device scratch buffer and still verify each block with vr_verify_block before copying. Descriptor short copy now reports actual verified bytes copied, instead of dropping them from completion count.",
+      "evidence": "tests/b5q-ufs/test-verified-read.py extracts actual old/new dispatch, links production verified_root.c and real SHA256. 1MiB command count 256->8; 35 aligned/unaligned ranges, corrupted block/prefix, second-read failure, short23byte copy, final512byte sector, out-of-range and writes tested with ASan/UBSan. No measured device-speed claim."
+    }
+  ],
+  "unchanged": [
+    "board/ADT/boot arguments",
+    "XNU patches and logger allocation",
+    "firmware",
+    "signed root policy/verification",
+    "Data seed from v11",
+    "log write/SYNC retry behavior and authorized ranges"
+  ],
+  "hardware_tested": false,
+  "qemu_run": false,
+  "local_pre_ci": {
+    "result": "PASS",
+    "checks": [
+      "upstream-package-template",
+      "porting-record",
+      "source-contract",
+      "lockdown-public",
+      "log-startup",
+      "log-writer",
+      "runtime-gates",
+      "ethernet-lifecycle",
+      "ethernet-start",
+      "read-status",
+      "log-read",
+      "verified-read",
+      "installer-errors",
+      "root-format-compile",
+      "root-format-runtime",
+      "smmu-compile",
+      "smmu-runtime",
+      "protocol-compile",
+      "protocol-runtime",
+      "exact-local-root-policies",
+      "full-root-image-sha256",
+      "original-pmgr-fixture",
+      "device-tree-syntax",
+      "python-syntax",
+      "no-added-ci-integrity-gates"
+    ],
+    "report_sha256": "896a273e77b2e0f476bb56aba1e1e283e9d005f524e57339e38e1e4a1ec42320"
+  }
+}

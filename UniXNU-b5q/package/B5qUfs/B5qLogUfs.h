@@ -25,7 +25,7 @@ extern "C" {
 volatile unsigned nabu_log_writer_state=0,nabu_log_writer_rounds=0,nabu_log_writer_failures=0;
 uint64_t nabu_log_committed_end=0;
 }
-/* 1 success, 0 bounded contention, -1 transport/gate failure. The existing root
+/* 1 success, 0 bounded contention, -2 retryable read, -1 transport/gate failure. The existing root
  * read path stays read-only. Only this function can emit the bounded WRITE(10). */
 static int nabuLogIo(bool write,uint64_t lba,uint32_t blocks,uint8_t *data,bool sync=false)
 {
@@ -48,10 +48,13 @@ static int nabuLogIo(bool write,uint64_t lba,uint32_t blocks,uint8_t *data,bool 
     bool valid=response(ucd+responseOffset,host.lastOcs,host.lun,bytes,host.status);
     if(!valid)host.poisoned=true;
     if(valid && host.status.exact) {result=1;if(!write && bytes)nb_copy(data,host.dma+dataOffset,bytes);}
+    // A valid temporary SCSI refusal is not a bad transport. Retry only reads;
+    // journal writes and cache flushes retain their original failure behavior.
+    else if(valid && !write && !sync && retryable(host.status))result=-2;
     write32(host.hc,0x20,1);
   }
   nabu_log_io_scsi=host.status.scsi;nabu_log_io_result=result;
-  nabu_log_io_reason=result==1?"ok":"transport";
+  nabu_log_io_reason=result==1?"ok":result==-2?"retryable-read":"transport";
   IOLockUnlock(host.lock);return result;
 }
 /* Keep the counter deadline, but give each priority depression an expiry.
@@ -74,11 +77,14 @@ static int nabuLogRead(void *,uint64_t lba,uint32_t blocks,uint8_t *data)
    * count-only budget could then be consumed within microseconds. */
   uint64_t deadline;
   clock_interval_to_deadline(50,kMillisecondScale,&deadline);
+  unsigned transient=0;
   for(unsigned attempt=0;attempt<1000;attempt++) {
     int result=nabuLogIo(false,lba,blocks,data);
-    if(result) return result==1;
+    if(result==1)return 1;
+    if(result<0 && result!=-2)return 0;
+    if(result==-2 && ++transient==3)return 0;
     if(mach_absolute_time()>=deadline) break;
-    nabuLogPause(1);
+    nabuLogPause(result==-2?10:1);
   }
   return 0;
 }
