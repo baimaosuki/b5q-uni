@@ -81,7 +81,7 @@ for present, value in [(0, 0), (1, 0), (1, 1), (1, 2)]:
 assert '__ZN6ArmCpu5probeEP9IOServicePi' in names
 result = dict(passed=True, kernel_sha256=hashlib.sha256(raw).hexdigest(),
               actual_compiled_launch_constraint_gate=True, cases=cases,
-              ArmCpu_probe_present=True, kernel_recompiled=False,
+              ArmCpu_probe_present=True, verifier_compiles_kernel=False,
               boot_parser_mocked=True, PAuth_not_tested=True, hardware_tested=False)
 a.out.write_text(json.dumps(result, indent=2) + '\n')
 print(json.dumps(result, indent=2))
