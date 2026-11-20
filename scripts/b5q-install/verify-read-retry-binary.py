@@ -9,7 +9,7 @@ root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/'sources/Uni
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('kernel',type=Path);p.add_argument('--out',required=True,type=Path);a=p.parse_args();raw=a.kernel.read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1])if outer.entries else outer;names={n:v for v,ns in im.symbols().items()for n in ns}
 def one(part):
  n=[n for n in names if part in n];assert len(n)==1,(part,n);return names[n[0]]
-entry=one('7readLbaE');command=one('7commandEh');host=one('4hostE');source=(root/'UniXNU-b5q/package/B5qUfs/B5qUfs.cpp').read_text();transport=re.search(r'struct Transport \{.*?\n\};',source,re.S)[0]
+entry=one('7readLbaE');command=one('7commandEhPKhjPvPN14B5qUfsProtocol6StatusE');host=one('4hostE');source=(root/'UniXNU-b5q/package/B5qUfs/B5qUfs.cpp').read_text();transport=re.search(r'struct Transport \{.*?\n\};',source,re.S)[0]
 with tempfile.TemporaryDirectory(prefix='b5q-read-layout-')as t:
  t=Path(t);(t/'offset.cpp').write_text('#include <cstdio>\n#include <cstddef>\n#include "B5qUfsProtocol.h"\nstruct IOMemoryMap;struct IOBufferMemoryDescriptor;struct IOLock;using namespace B5qUfsProtocol;\n'+transport+'''\nint main(){
 #define O(t,f) printf(#t "." #f " %zu\\n",offsetof(t,f))

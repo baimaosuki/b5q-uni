@@ -1,5 +1,5 @@
 {
-  "status": "implementation and local checks in progress; CI not submitted",
+  "status": "verified IMG delivered; physical peripherals pending",
   "reference_sources": {
     "CpuFreqProbe.cpp": {
       "source": "sources/UniXNU-sheng/package/CpuFreqProbe.cpp",
@@ -2823,11 +2823,11 @@
   "integration": {
     "core_compile": false,
     "GPU_userspace_compile": false,
-    "new_Data": "official tool --gib2 --user baimao:1234 --auto-login; returned APFS verification pending",
+    "new_Data": "PASS actual APFS account andoriginalinode uid/gid/mode; data-account-verification.json",
     "HID_matching": "real OSKextLoadKextWithIdentifier + IOCatalogue::startMatching(OSSymbol); no private SDK layout mix",
     "optional_idle_helper": "compile-time detection from unchanged core symbols; missing => mode3 and no undefined import",
     "build_recipe": "same b5q_peripherals.py in normal GOP builder and incremental relinker",
-    "physical_hardware_result": "pending"
+    "physical_hardware_result": "pending; no device writes"
   },
   "source_sha256": {
     "UniXNU-b5q/package/ThermalProbe.h": "d01a2864bf4cd553d7791fa02941d64d43aa21da92397b4697e17c59e44cf974",
@@ -2858,7 +2858,7 @@
     "UniXNU-b5q/package/B5qUsbHost.cpp": "efcdb3ee74e028a99462d03f21bcbf386b6cc2cd0ad4740d26542c34582c1723",
     "UniXNU-b5q/package/B5qGmuVotes.c": "8a259d9d49657ac2c90b1542b39e5726039ecfe72564f20f20eff0fb4178c054",
     "UniXNU-b5q/package/CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
-    "UniXNU-b5q/package/B5qGpu.cpp": "2085f16ef8c8bc5d59ecb635520b04524bfc140f564871b733f8ee9f6bb81a45",
+    "UniXNU-b5q/package/B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
     "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
     "UniXNU-b5q/package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
     "UniXNU-b5q/package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
@@ -2873,7 +2873,8 @@
     "TouchComm_config_C1_framing_malformed_20000": "PASS_ASAN_UBSAN",
     "GENI_read_without_address_write_NACK_cancel_abort": "PASS_ASAN_UBSAN",
     "official_account_autologin_writers": "PASS",
-    "actual_APFS_readonly_reader_on_v20": "PASS; newData verification pending"
+    "actual_APFS_readonly_reader_on_v20": "PASS; newData verification pending",
+    "actual_v21_Data_account": "PASS APFS originalinodes, PBKDF2 andautologin"
   },
   "pinctrl_source": {
     "repository": "LineageOS/android_kernel_samsung_sm8550",
@@ -2899,12 +2900,15 @@
   },
   "local_apfs_reader": "Verified against actual v20 packed Data: SetupDone root:wheel0644,admin group inode root:wheel0600; v21Account actualverification pending",
   "current_ci": {
-    "run": 44828924826,
-    "commit": "69a684f65f4a622078034ada5d86e77cb4fbcadb",
-    "native_link": "passed",
-    "stage": "payload-only repair prepared; completed v21kernel reused",
-    "kernel_core_compiled": false,
-    "Mesa_Turnip_Metal_compiled": false
+    "run": 44831204824,
+    "source_commit": "d38be559238dbde4e0999b423764442e7ac6ddc8",
+    "conclusion": "success",
+    "GPU_cache": "exact key hit44794616634-1",
+    "brew_cache": "exact key hit44794616634",
+    "kernel_reused_from_run": 44828924826,
+    "target_translation_units_in_final_run": 0,
+    "artifact_download": "ordinary GitHub artifact SHA256 verified",
+    "hardware_tested": false
   },
   "ci_payload_error": {
     "run": 44828924826,
@@ -2937,5 +2941,412 @@
       "emulation_scope": "actual short leaf functions; no QEMU or OS hardware emulation"
     }
   },
-  "post_tool_patch_sha256": "1c9fdd2a2d102708ffb6ad9775de33f9cbed64862d0b011ad8246c2cf856ace1"
+  "post_tool_patch_sha256": "1c9fdd2a2d102708ffb6ad9775de33f9cbed64862d0b011ad8246c2cf856ace1",
+  "actual_Xcode_ABI": {
+    "passed": true,
+    "actual_Xcode_run": 44828924826,
+    "HID": {
+      "slots": 334,
+      "vtables": [
+        "__ZTV14NativeHidInput"
+      ],
+      "all_diversities_checked": true
+    },
+    "XHCI_slots": 427,
+    "all_pointer_authentication_diversities_match": true,
+    "fixture_addresses_match_both_Apple_and_LLVM21_objects": true,
+    "hardware_PAuth_execution_tested": false
+  },
+  "final_ci": {
+    "run": 44831204824,
+    "source_commit": "d38be559238dbde4e0999b423764442e7ac6ddc8",
+    "conclusion": "success",
+    "GPU_cache": "exact key hit44794616634-1",
+    "brew_cache": "exact key hit44794616634",
+    "kernel_reused_from_run": 44828924826,
+    "target_translation_units_in_final_run": 0,
+    "artifact_download": "ordinary GitHub artifact SHA256 verified",
+    "hardware_tested": false
+  },
+  "ten_item_acceptance": {
+    "passed": true,
+    "checks": {
+      "1": {
+        "passed": true,
+        "evidence": "data-account-verification.json; actual APFS files, PBKDF2, group membership and inode uid/gid/mode"
+      },
+      "2": {
+        "passed": true,
+        "evidence": "pre-ci/peripheral-policy; actual returned USB strings and board archive"
+      },
+      "3": {
+        "passed": true,
+        "fake_ADT_handoff_gate_count": 0
+      },
+      "4": {
+        "passed": true,
+        "actual_deployment_vtable_slots": 334,
+        "all_diversities_match": true,
+        "Apple_compiled_object_diversities_verified": true,
+        "undefined_symbols": []
+      },
+      "5": {
+        "passed": true,
+        "actual_deployment_vtable_slots": 427,
+        "all_diversities_match": true,
+        "Apple_compiled_object_diversities_verified": true,
+        "undefined_symbols": []
+      },
+      "6": {
+        "passed": true,
+        "actual_kernel_probes": {
+          "sheng_cpufreq_probe": "0xfffffff00c2a9968",
+          "sheng_thermal_probe": "0xfffffff00c2aa398",
+          "sheng_thermal_level_probe": "0xfffffff00c2ab97c",
+          "sheng_board_clock_probe": "0xfffffff00c2acd3c",
+          "sheng_buttons_probe": "0xfffffff00c2ad658",
+          "native_hid_input_probe": "0xfffffff00c2b1dc0",
+          "b5q_touch_probe": "0xfffffff00c2b2614",
+          "sheng_dpu_probe": "0xfffffff00c2ae3e4"
+        }
+      },
+      "7": {
+        "passed": true,
+        "actual_menu_matches_board": true,
+        "kernel_args_bytes": 998,
+        "seven_text_fixups": "preserved and bound in ADT"
+      },
+      "8": {
+        "passed": true,
+        "new_board_apps_smmu_mapping_count": 0,
+        "root_GPT_code_unchanged": true
+      },
+      "9": {
+        "passed": true,
+        "unchanged_XNU_core_sha256": "1fce36d7ee6c79cb2b1aca01b3635cdda568c8dadef6a5c3490007610a3a3d3b",
+        "compiled_XNU_core_units": 0,
+        "compiled_Mesa_Turnip_Metal_units": 0,
+        "only_changed_Adreno_archive_member": [
+          "B5qGpu.o"
+        ],
+        "board_units_compiled": 14,
+        "gpu_addon_byte_identical_v19_v20": true
+      },
+      "10": {
+        "passed": true,
+        "bytes": 838860800,
+        "FAT_sector": 4096,
+        "sectors_per_cluster": 1,
+        "sha256": "2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b",
+        "evidence": [
+          "package.manifest.json",
+          "mount-verification.json",
+          "log-allocation.json",
+          "runtime-verification.json"
+        ]
+      }
+    },
+    "source_commit": "d38be559238dbde4e0999b423764442e7ac6ddc8",
+    "CI": 44831204824,
+    "hardware_tested": false
+  },
+  "actual_APFS_account": {
+    "administrator": "baimao",
+    "uid": 501,
+    "gid": 20,
+    "groups": [
+      "admin",
+      "staff"
+    ],
+    "PBKDF2_password_verified": true,
+    "skip_setup": true,
+    "skipbuddy": true,
+    "autoLoginUser": "baimao",
+    "kcpassword_12_bytes_verified": true,
+    "actual_APFS_inodes": {
+      "private/var/db/.AppleSetupDone": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "private/var/db/dslocal/nodes/Default/users/baimao.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 722
+      },
+      "private/var/db/dslocal/nodes/Default/groups/admin.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 390
+      },
+      "private/var/db/dslocal/nodes/Default/groups/staff.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 370
+      },
+      "Users/baimao": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 16872,
+        "bytes": 0
+      },
+      "Users/baimao/.skipbuddy": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "Library/Preferences/com.apple.loginwindow.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 67
+      },
+      "private/etc/kcpassword": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 12
+      }
+    },
+    "hardware_tested": false,
+    "seed_sha256": "e18547798efd726b0a42dc53cb828888e0772654e29e8c68b3a7c0d083df7948",
+    "logical_bytes": 2147483648,
+    "read_only_APFS_parser": true
+  },
+  "runtime_verification": {
+    "passed": true,
+    "kernel_updated_with_Ethernet": true,
+    "administrator_Data_seed": true,
+    "menu_runtime_switches": true,
+    "ADT_CPU_affinities_and_PSCI_match_saved_b5q_FDT": true,
+    "actual_deployment_binary_gates_and_logger_verified": true,
+    "hardware_tested": false
+  },
+  "image": {
+    "path": "/home/baimao/zflip5/artifacts/b5q-esp-runtime-v21/esp.img",
+    "bytes": 838860800,
+    "sha256": "2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b"
+  },
+  "raw_kernel": {
+    "bytes": 143147008,
+    "sha256": "126e48240b99c3c22978c605bc2c44e27798888d5de2cfafa84111eb478d7606"
+  },
+  "deploy_kernel_sha256": "821a19d60baee123b230db980d813f0b6c5b4e6858f209504e99fb67418fcefe",
+  "inputs_reuse": {
+    "source_run": 44789459847,
+    "source_commit": "6c57bd844b2ad2fd67a93854781481c095db7c53",
+    "unchanged_inputs": {
+      "build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.link/mach.development.bcm2837.a": "1fce36d7ee6c79cb2b1aca01b3635cdda568c8dadef6a5c3490007610a3a3d3b",
+      "build/firehose/sym/Release-iphoneos/liblibfirehose_kernel.a": "14edf57551a5f2935656b9e4635ff06162266c7666e271b478d072a4ad481333",
+      "build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a": "4d74783c8cbbb784301878f4bb8a863c396269d9e4dd2ef129f9908ff897bc2e",
+      "build/armdt-platform/libArmDTPlatform.a": "325ae920c90f1958235ec9bb3b8bff798063e2267b610811c69f7dd74d85fc5c",
+      "build/armcpu/libArmCpu.a": "bfbcf0279411190446804f0db629335bfe7b66c7cb09443e53828703fc553585",
+      "build/adreno740/libAdreno740.a": "8641555806bdfe0484c861bb10ca78cba50a52437a1c250cc800349bf2fc78e4",
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": "d861d98eee6070ab2b7f467e59cf5e7eeaa1ab0f823d350cfbf2dbe542dacd22",
+      "build/libpthread-kernel/libpthread_kernel.a": "f89fd1e65dff95282c2fbd60f86c76e116d4f3df61e893409077c123af1ee341",
+      "build/ram-block/libRamBlock.a": "00c85035da017b25ef12cd121f61d4b86ff6a24d485c378e69a3ca17153e855b",
+      "build/software-aes/libSoftwareAES.a": "d0c2999f6a2c2cc5e6609826d6070d52c0692e148684ee1c238cb14bedc7723e"
+    },
+    "native_reference_sha256": "08c1a0d2abafd0f625bf2d3f0d3d731d6c85b028ffb50cd1465207e850d2ddbd",
+    "source_sha256": {
+      "B5qUsbHost.cpp": "efcdb3ee74e028a99462d03f21bcbf386b6cc2cd0ad4740d26542c34582c1723",
+      "B5qUsbPolicy.h": "ce3970985da5c96b6fb9c5d6cffcbeaa570b12cf8c22b67f22ebebc996b5195e",
+      "LegacyDisplayProbe.cpp": "8a5716c35e59e1f3dada42e1051e617a4d843f12a97a0c29e43d4f593db989e1",
+      "B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+      "B5qSpmi.cpp": "d6fc53e19e4e82a48a87c221ce6cc891eda18cdf1f4f4214a748c58bfd9ee914",
+      "CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
+      "ThermalProbe.cpp": "e8d87241e31137f3b18a825df1256629053d297ec03d62724c89edbbd929db81",
+      "ThermalLevel.cpp": "7ca106c7f8f94ef7da3c233b1f5353e542897e4be59de02778a361f2d1dbc1b8",
+      "BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+      "ButtonProbe.cpp": "423b425c8a31c9f35a8bf5171e8a63136f0a8ca1afb9a2713af5128bade4fd0f",
+      "DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+      "NativeHidInput.cpp": "4c4ab5b8c4402bb9e5dd3a8db0b0a30e19101a43bde86cd89f13b115286aa3a0",
+      "HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+      "B5qTouch.cpp": "a53a854f5dca6f697859033177092599ab85e7bf02253028163b365d39f1d5d6",
+      "GeniI2c.c": "825569be3276ebde2dadd4649bec51cc4f2a345b511f06731f7b3a9f5a83f367"
+    },
+    "core_translation_units_compiled": 0,
+    "board_translation_units_compiled": 14,
+    "aliases_from_same_v19_native": {
+      "_ifnet_resolve_multicast": "_dlil_resolve_multi",
+      "_in_cksum": "_inet_cksum_simple",
+      "_inet_arp_handle_input": "_arp_ip_handle_input",
+      "_inet_arp_init_ifaddr": "_arp_ifinit",
+      "_inet_arp_lookup": "_arp_lookup_ip",
+      "_ubc_create_upl": "_ubc_create_upl_external",
+      "__ZN11OSSerialize18binaryWithCapacityEjPvS0_": "__ZN11OSSerialize18binaryWithCapacityEjPFPK15OSMetaClassBasePvPS_P12OSCollectionPK8OSSymbolS2_ES3_",
+      "_kmod_info": "_invalid_kmod_info",
+      "_os_ref_init_count_external": "_os_ref_init_count_internal",
+      "_os_ref_release_barrier_external": "_os_ref_release_barrier_internal",
+      "_os_ref_release_external": "_os_ref_release_internal",
+      "_os_ref_release_locked_external": "_os_ref_release_locked_internal",
+      "_os_ref_release_relaxed_external": "_os_ref_release_relaxed_internal",
+      "_os_ref_retain_external": "_os_ref_retain_internal",
+      "_os_ref_retain_locked_external": "_os_ref_retain_locked_internal",
+      "_os_ref_retain_try_external": "_os_ref_retain_try_internal",
+      "_sha1_init": "_SHA1Init",
+      "_sha1_loop": "_SHA1Update",
+      "_sha1_result": "_SHA1Final_r",
+      "_sysctlbyname": "_kernel_sysctlbyname",
+      "_convert_port_to_task_suspension_token": "_convert_port_to_task_suspension_token_external",
+      "_convert_task_suspension_token_to_port": "_convert_task_suspension_token_to_port_external",
+      "_convert_task_to_port": "_convert_task_to_port_external",
+      "_convert_task_read_to_port": "_convert_task_read_to_port_external",
+      "_ifnet_notice_master_elected": "_ifnet_notice_primary_elected",
+      "_kalloc_data": "_kalloc_data_external",
+      "_kalloc_shared_data": "_kalloc_shared_data_external",
+      "_kalloc_type_impl": "_kalloc_type_impl_external",
+      "_kalloc_type_var_impl": "_kalloc_type_var_impl_external",
+      "_kfree_data": "_kfree_data_external",
+      "_kfree_shared_data": "_kfree_shared_data_external",
+      "_kfree_data_addr": "_kfree_data_addr_external",
+      "_kfree_shared_data_addr": "_kfree_shared_data_addr_external",
+      "_kfree_type_impl": "_kfree_type_impl_external",
+      "_kfree_type_var_impl": "_kfree_type_var_impl_external",
+      "_kmem_alloc_kobject": "_kmem_alloc_kobject_external",
+      "_kmem_alloc_pageable": "_kmem_alloc_pageable_external",
+      "_m_free": "_mbuf_free",
+      "_m_freem": "_mbuf_freem",
+      "_m_trailingspace": "_mbuf_trailingspace",
+      "_mach_vm_allocate": "_mach_vm_allocate_external",
+      "_mach_vm_deallocate": "_mach_vm_deallocate_external",
+      "_mbuf_get_priority": "_mbuf_get_traffic_class",
+      "_mbuf_is_service_class_privileged": "_mbuf_is_traffic_class_privileged",
+      "_net_add_domain": "_net_add_domain_old",
+      "_net_add_proto": "_net_add_proto_old",
+      "_net_del_domain": "_net_del_domain_old",
+      "_net_del_proto": "_net_del_proto_old",
+      "_pffinddomain": "_pffinddomain_old",
+      "_pffindproto": "_pffindproto_old",
+      "_port_name_to_task": "_port_name_to_task_external",
+      "_vm_fault": "_vm_fault_external",
+      "_vm_map_create": "_vm_map_create_external",
+      "_apfs_smr": "__vfs_smr",
+      "_task_id_token_port_name_to_task": "_task_id_token_port_name_to_task_external",
+      "_mach_vm_map": "_mach_vm_map_external",
+      "_mach_vm_remap": "_mach_vm_remap_external",
+      "_task_deallocate": "_task_deallocate_external",
+      "_task_reference": "_task_reference_external",
+      "_vm_kernel_addrhash": "_vm_kernel_addrhash_external",
+      "_vm_map": "_vm_map_external",
+      "_proc_ucred": "_proc_ucred_unsafe",
+      "_IOLockLock": "_lck_mtx_lock",
+      "_IOLockTryLock": "_lck_mtx_try_lock",
+      "_IOLockUnlock": "_lck_mtx_unlock",
+      "_IOMalloc": "_IOMalloc_external",
+      "_IOMallocAligned": "_IOMallocAligned_external",
+      "_IOMallocData": "_IOMallocData_external",
+      "_IOMallocZero": "_IOMallocZero_external",
+      "_IOMallocZeroData": "_IOMallocZeroData_external",
+      "_IOMallocDataShareable": "_IOMallocDataShareable_external",
+      "_IOMallocZeroDataShareable": "_IOMallocZeroDataShareable_external",
+      "_IORWLockRead": "_lck_rw_lock_shared",
+      "_IORWLockTryRead": "_lck_rw_try_lock_shared",
+      "_IORWLockTryWrite": "_lck_rw_try_lock_exclusive",
+      "_IORWLockUnlock": "_lck_rw_done",
+      "_IORWLockWrite": "_lck_rw_lock_exclusive",
+      "_IOSimpleLockLock": "_lck_spin_lock",
+      "_IOSimpleLockTryLock": "_lck_spin_try_lock",
+      "_IOSimpleLockUnlock": "_lck_spin_unlock",
+      "_PE_cpu_start": "_PE_cpu_start_from_kext",
+      "__ZN22IOInterruptEventSource27getPimaryInterruptTimestampEv": "__ZN22IOInterruptEventSource28getPrimaryInterruptTimestampEv",
+      "__ZN9IOService9resourcesEv": "__ZN9IOService18getResourceServiceEv",
+      "_current_act": "_current_thread",
+      "_kmem_alloc": "_kmem_alloc_external",
+      "_kmem_free": "_kmem_free_external",
+      "_krealloc_data": "_krealloc_data_external",
+      "_krealloc_shared_data": "_krealloc_shared_data_external",
+      "_processor_exit": "_processor_exit_from_kext",
+      "_processor_start": "_processor_start_from_kext",
+      "_task_resume2": "_task_resume2_external",
+      "_task_suspend2": "_task_suspend2_external",
+      "_vm_allocate": "_vm_allocate_external",
+      "_vm_map_wire": "_vm_map_wire_external",
+      "_kpc_set_running": "_kpc_set_running_external",
+      "_kpc_set_config": "_kpc_set_config_external"
+    },
+    "linkflags": [
+      "-nostdlib",
+      "-fapple-kext",
+      "-Wl,-e,__start",
+      "-Wl,-sectalign,__TEXT,__text,0x1000",
+      "-Wl,-sectalign,__DATA,__common,0x1000",
+      "-Wl,-sectalign,__DATA,__bss,0x1000",
+      "-Wl,-sectcreate,__PRELINK_TEXT,__text,/dev/null",
+      "-Wl,-segprot,__PRELINK_TEXT,r-x,r-x",
+      "-Wl,-sectcreate,__PRELINK_INFO,__info,/dev/null",
+      "-Wl,-pagezero_size,0x0",
+      "-Wl,-version_load_command",
+      "-Wl,-function_starts",
+      "-Wl,-headerpad,152",
+      "-Wl,-pie",
+      "-Wl,-static",
+      "-Wl,-segaddr,__PRELINK_TEXT,0xfffffff004004000",
+      "-Wl,-image_base,0xfffffff007004000",
+      "-Wl,-rename_section,__HIB,__text,__TEXT_EXEC,__hib_text",
+      "-Wl,-rename_section,__HIB,__const,__DATA_CONST,__hib_const",
+      "-Wl,-rename_section,__HIB,__cstring,__DATA_CONST,__hib_const",
+      "-Wl,-rename_section,__HIB,__literal8,__DATA_CONST,__hib_const",
+      "-Wl,-rename_section,__HIB,__literal16,__DATA_CONST,__hib_const",
+      "-Wl,-rename_segment,__HIB,__HIBDATA",
+      "-Wl,-sectalign,__DATA,__const,0x4000",
+      "-Wl,-sectalign,__DATA,__percpu,0x4000",
+      "-Wl,-sectalign,__DATA,__data,0x4000",
+      "-Wl,-rename_section,__DATA,__mod_init_func,__DATA_CONST,__mod_init_func",
+      "-Wl,-rename_section,__DATA,__mod_term_func,__DATA_CONST,__mod_term_func",
+      "-Wl,-rename_section,__DATA,__auth_ptr,__DATA_CONST,__auth_ptr",
+      "-Wl,-rename_section,__DATA,__auth_got,__DATA_CONST,__auth_got",
+      "-Wl,-rename_section,__DATA,__const,__DATA_CONST,__const",
+      "-Wl,-segprot,__DATA_CONST,r--,r--",
+      "-Wl,-rename_section,__KLD,__const,__KLDDATA,__const",
+      "-Wl,-rename_section,__KLD,__cstring,__KLDDATA,__cstring",
+      "-Wl,-segprot,__KLDDATA,rw-,rw-",
+      "-Wl,-segprot,__KLD,r-x,r-x",
+      "-Wl,-rename_section,__TEXT,__text,__TEXT_EXEC,__text",
+      "-Wl,-rename_section,__TEXT,__stubs,__TEXT_EXEC,__stubs",
+      "-Wl,-sectcreate,__PLK_TEXT_EXEC,__text,/dev/null",
+      "-Wl,-sectcreate,__PRELINK_DATA,__data,/dev/null",
+      "-Wl,-sectcreate,__PLK_DATA_CONST,__data,/dev/null",
+      "-Wl,-sectcreate,__PLK_LLVM_COV,__llvm_covmap,/dev/null",
+      "-Wl,-sectcreate,__PLK_LINKEDIT,__data,/dev/null",
+      "-Wl,-rename_section,__PPLDATA,__const,__PPLDATA_CONST,__const",
+      "-Wl,-segment_order,__TEXT:__DATA_CONST:__DATA_SPTM:__LINKEDIT:__TEXT_EXEC:__TEXT_BOOT_EXEC:__KLD:__PPLTEXT:__PPLTRAMP:__PPLDATA_CONST:__LASTDATA_CONST:__LAST:__PPLDATA:__KLDDATA:__DATA:__HIBDATA:__BOOTDATA",
+      "-Wl,-segprot,__TEXT,r--,r--",
+      "-Wl,-segprot,__TEXT_EXEC,r-x,r-x",
+      "-Wl,-segprot,__TEXT_BOOT_EXEC,r-x,r-x",
+      "-Wl,-segprot,__PPLTEXT,r-x,r-x",
+      "-Wl,-segprot,__PPLTRAMP,r-x,r-x",
+      "-Wl,-segprot,__PPLDATA_CONST,r--,r--",
+      "-Wl,-segprot,__LASTDATA_CONST,r--,r--",
+      "-Wl,-segprot,__LAST,r-x,r-x"
+    ],
+    "added_objects": {
+      "B5qSpmi.o": "8aca7499851e7803d93cf059e120c834e8e05b0235c5d3d4ae5b20bd4de1ba5a",
+      "CpuFreqProbe.o": "9aadb955394fc215ac4ecf9ec591d8e4814ed0a2d8f38fa81a72aba78b1b0482",
+      "ThermalProbe.o": "75ab588a0341a8fca9e31b404ca9f1513c9d1ba0a55c7f1a5a74c82400fb01ec",
+      "ThermalLevel.late.o": "47830e4016290534052dc5da3dc6f67e8180066c1820098b0611c6d4d99e875f",
+      "BoardClock.o": "6bf6caeff7e8f9b82c8f8e621617fcb505cfb797c3bbed3c5c9948316a322daa",
+      "ButtonProbe.o": "8e25863baad27b3af00645339d9354a49d7cf32089adbe93f823509e7966000a",
+      "DisplayTimingProbe.o": "47876e9e998b37cc07e41026a3f6d92acc95ab5d7860ac06a030abb3ccc24928",
+      "NativeHidInput.late.o": "2e8452d10e1b4b52d7ef1b381a3c89d942d67c1b403d2e261076af24e40aba9f",
+      "HidInputProbe.o": "3da1aa69e584ac8bac51ebf38baa1d7ddfe03ae5da657b209cffe13de04a70ae",
+      "B5qTouch.o": "8bf957d2fb5f22bddc61323a55824de415bde6246124017b63fe369a62a3870d",
+      "GeniI2c.o": "53c80b7323081085a10b3febe6ce3e93524ce1a8fd69da6ced8afee1c8d8dcf0",
+      "hid-bindings.o": "2b6363bbdf5bb1f74f9548d0453ec26057098f06a91c8927c3e4167d390bacc7",
+      "hid-addresses.o": "8a468772cb9f5d8d69703c215998de72c2a09a9a138cdc9bec28ac6fbbb1d31e"
+    },
+    "optional_cpu_idle_helper_present": false,
+    "unchanged_core_after_link_sha256": "1fce36d7ee6c79cb2b1aca01b3635cdda568c8dadef6a5c3490007610a3a3d3b",
+    "native_output_sha256": "f0ecb9f4078e286c2c28d1ad260d1e45af92436199e74e3a186385ff20f3d3ab",
+    "archive_outputs": {
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": "0b1ddb978421d70c92b15e62bba229b0f6c49e1ed1b696eb1387a12e2a35cc0a",
+      "build/adreno740/libAdreno740.a": "1e286a38f12ffc7b8832f81f4555f357678f860d4af72734543b110dc40d0d65"
+    }
+  },
+  "local_verifier_repair": "Exact UFS SCSI command overload selected after new TouchComm command helper made prior substring lookup ambiguous; actual UFS retry regressionpassed; production UFS bytesunchanged."
 }

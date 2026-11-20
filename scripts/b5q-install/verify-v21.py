@@ -30,6 +30,7 @@ def main():
    ix,kind,section,desc,value=struct.unpack_from('<IBBHQ',raw,sy+16*i)
    if kind==1 and not value:missing.append(raw[strings+ix:raw.index(b'\0',strings+ix)].decode())
   assert not missing,missing
+  apple=json.loads((work/'apple-object-ABI.json').read_text());assert apple['passed']
   checks[2]={'passed':True,'evidence':'pre-ci/peripheral-policy; actual returned USB strings and board archive'}
   for text in [b'B5qUsb: %s gsnpsid=',b'qscratch_cfg=%08x qscratch_hs=%08x qscratch_ss=%08x',b'before-prepare\0',b'after-prepare\0',b'B5qTouch: stage=application-info']:
    assert text in raw,text
@@ -38,7 +39,7 @@ def main():
   for item,fixture,vt in [(4,'hid-device-26C5035r.json','__ZTV14NativeHidInput'),(5,'usb-xhci-26C5035r.json','__ZTV10B5qUsbHost')]:
    abi=json.loads((ROOT/'UniXNU-b5q/scripts'/fixture).read_text());slots=abi['slots'];words=struct.unpack('<'+str(len(slots))+'Q',im.read(names[vt]+16,len(slots)*8))
    assert all((word>>32&0xffff)==int(slot[1],16) for word,slot in zip(words,slots)),vt
-   checks[item]={'passed':True,'actual_deployment_vtable_slots':len(slots),'all_diversities_match':True,'undefined_symbols':missing}
+   checks[item]={'passed':True,'actual_deployment_vtable_slots':len(slots),'all_diversities_match':True,'Apple_compiled_object_diversities_verified':True,'undefined_symbols':missing}
   probes=['sheng_cpufreq_probe','sheng_thermal_probe','sheng_thermal_level_probe','sheng_board_clock_probe','sheng_buttons_probe','native_hid_input_probe','b5q_touch_probe','sheng_dpu_probe']
   for name in probes:
    va=names['_'+name];assert im.read(va,4)!=bytes.fromhex('c0035fd6'),name
