@@ -191,6 +191,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -338,6 +340,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -766,6 +770,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -829,6 +835,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -928,6 +936,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -982,6 +992,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -1049,6 +1061,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -1349,6 +1363,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -1637,6 +1653,8 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 [[area.evidence]]
 kind = "host"
+command = "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+revision = "d38be559238dbde4e0999b423764442e7ac6ddc8"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
