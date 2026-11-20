@@ -10,15 +10,25 @@
 #include <string>
 int main(int argc,char **argv) {
  assert(argc==2);
- B5qUsbPolicy::Handoff h={B5qUsbPolicy::magic,1,0x40,7,0,0x8c0000000,0x100000000};
- assert(B5qUsbPolicy::accepts(&h,sizeof(h),0x8c0004000,0x80000000));
- assert(!B5qUsbPolicy::accepts(nullptr,sizeof(h),0x8c0004000,0x80000000));
- for(unsigned flags=0;flags<16;++flags){h.flags=flags;assert(B5qUsbPolicy::accepts(&h,sizeof(h),0x8c0004000,0x80000000)==(flags==7));}h.flags=7;
- h.sid=0x60;assert(!B5qUsbPolicy::accepts(&h,sizeof(h),0x8c0004000,0x80000000));h.sid=0x40;
- assert(!B5qUsbPolicy::accepts(&h,sizeof(h)-1,0x8c0004000,0x80000000));
- assert(!B5qUsbPolicy::accepts(&h,sizeof(h),0x8bffff000,4096));
- assert(!B5qUsbPolicy::accepts(&h,sizeof(h),0x9bffff000,8192));
- assert(!B5qUsbPolicy::accepts(&h,sizeof(h),UINT64_MAX-1,8));
+ assert(B5qUsbPolicy::validRam(0x8c0004000,0x80000000));
+ assert(!B5qUsbPolicy::validRam(0,0x80000000));
+ assert(!B5qUsbPolicy::validRam(0x8c0004001,0x80000000));
+ assert(!B5qUsbPolicy::validRam(0x8c0004000,4097));
+ assert(!B5qUsbPolicy::validRam(UINT64_MAX-1,8));
+ {
+  std::map<unsigned,unsigned> registers={{0x39004,0},{0x50018,0},{0x3902c,0},{0x39030,0},{0x39044,0},{0x39048,0},
+    {0x39088,0},{0x39018,0},{0x3908c,0},{0x39024,0},{0x39028,0}};
+  unsigned delays=0;
+  auto read=[&](unsigned off,unsigned &v){v=registers[off];return true;};
+  auto write=[&](unsigned off,unsigned v){registers[off]=(off==0x3902c||off==0x39044)?(v&~1u):v;if(off==0x39004||off==0x50018)registers[off]|=1u<<31;return true;};
+  assert(!B5qUsbPolicy::clocks(read,write,[&](unsigned us){assert(us==100);++delays;}));
+  assert(delays<=2000);
+  // A domain which never powers on must stop before any PHY/core access.
+  delays=0;registers[0x39004]=0;unsigned writes=0;
+  auto stuckWrite=[&](unsigned off,unsigned v){assert(off==0x39004);registers[off]=v;++writes;return true;};
+  assert(std::string(B5qUsbPolicy::clocks(read,stuckWrite,[&](unsigned us){assert(us==100);++delays;}))=="gcc-domain-timeout");
+  assert(delays==1000 && writes==1);
+ }
  for(std::string mode: {"ok","identity","device-timeout","halt-timeout","reset-timeout","register-fault","32-bit-only"}) {
   std::map<unsigned,unsigned> registers={{0xc120,0x55333330},{0xc110,0x2000},{0xc704,0},{0xc70c,1U<<22},{0,0x1000020},{0x10,1},{0x20,0},{0x24,1}};
   if(mode=="identity")registers[0xc120]=0;
@@ -52,5 +62,5 @@ int main(int argc,char **argv) {
    assert(!memcmp(mmio.data()+off,image.data()+b.payload_offset,b.bytes));}
  }
  image[512]^=1;NativeAdrenoSha256::hash(image.data(),image.size(),hash);assert(memcmp(hash,B5qHardware::gmuFirmwareSha256,32));
- puts("PASS USB DMA gates/host reset bounds and actual Samsung GMU firmware plan/load/hash controls; no device I/O");
+ puts("PASS USB RAM input/clock timeouts/host reset bounds and actual Samsung GMU firmware plan/load/hash controls; no device I/O");
 }

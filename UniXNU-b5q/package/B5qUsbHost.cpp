@@ -8,6 +8,7 @@
 #include <IOKit/IOPlatformExpert.h>
 #include <IOKit/IODeviceTreeSupport.h>
 #include <libkern/OSKextLib.h>
+#include <libkern/c++/OSNumber.h>
 #include <kern/thread.h>
 #include <pexpert/pexpert.h>
 #include <pexpert/arm64/boot.h>
@@ -20,6 +21,77 @@ volatile int b5q_usb_state=0;
 }
 namespace {
 void barrier(){__asm__ volatile("dsb sy" ::: "memory");}
+constexpr uint64_t kUsbCoreBytes = 0x10000;
+constexpr uint64_t kQscratchBase = 0xa6f8000ULL;
+constexpr uint64_t kGccBase = 0x100000ULL;
+constexpr uint64_t kGccBytes = 0x1f0000ULL;
+
+struct Mapping {
+ IODeviceMemory *memory=nullptr;
+ IOMemoryMap *map=nullptr;
+ volatile uint8_t *va=nullptr;
+ bool open(uint64_t base,uint64_t bytes) {
+  memory=IODeviceMemory::withRange(base,bytes);
+  map=memory?memory->map(kIOMapAnywhere|kIOMapInhibitCache):nullptr;
+  va=map?reinterpret_cast<volatile uint8_t *>(map->getVirtualAddress()):nullptr;
+  return va!=nullptr;
+ }
+ void close() { OSSafeReleaseNULL(map); OSSafeReleaseNULL(memory); va=nullptr; }
+ ~Mapping() { close(); }
+};
+
+template <typename T>
+bool readReg(volatile uint8_t *base,uint64_t bytes,uint32_t off,T &out) {
+ if(!base || off%4 || uint64_t(off)+sizeof(T)>bytes)return false;
+ const volatile uint32_t *p=reinterpret_cast<const volatile uint32_t *>(base+off);
+ if constexpr(sizeof(T)==4) out=T(*p);
+ else out=T(p[0])|(T(p[1])<<32);
+ return true;
+}
+bool writeReg(volatile uint8_t *base,uint64_t bytes,uint32_t off,uint32_t value) {
+ if(!base || off%4 || uint64_t(off)+4>bytes)return false;
+ *reinterpret_cast<volatile uint32_t *>(base+off)=value;barrier();return true;
+}
+
+void monitor(void *argument,wait_result_t) {
+ Mapping *mapping=static_cast<Mapping *>(argument);
+ uint32_t cap=0;readReg(mapping->va,kUsbCoreBytes,0,cap);const uint32_t op=cap&255;
+ uint32_t last[4]={0,0,0,0};unsigned samples=0,lastDevices=~0u,lastId=~0u;
+ for(;;) {
+  uint32_t values[4]={0,0,0,0};
+  readReg(mapping->va,kUsbCoreBytes,op,values[0]);
+  readReg(mapping->va,kUsbCoreBytes,op+4,values[1]);
+  readReg(mapping->va,kUsbCoreBytes,op+0x400,values[2]);
+  readReg(mapping->va,kUsbCoreBytes,op+0x410,values[3]);
+  bool changed=samples<5;
+  for(unsigned i=0;i<4;++i) changed|=values[i]!=last[i];
+  OSDictionary *matching=IOService::serviceMatching("IOUSBHostDevice");
+  unsigned devices=0;uint32_t lastIdNow=0;
+  if(matching) {
+   OSIterator *iterator=IOService::getMatchingServices(matching);matching->release();
+   if(iterator) {
+    while(OSObject *object=iterator->getNextObject()) {
+     IORegistryEntry *device=OSDynamicCast(IORegistryEntry,object);++devices;
+     if(device) {
+      OSNumber *vendor=OSDynamicCast(OSNumber,device->getProperty("idVendor"));
+      OSNumber *product=OSDynamicCast(OSNumber,device->getProperty("idProduct"));
+      if(vendor && product)lastIdNow=(vendor->unsigned32BitValue()<<16)|(product->unsigned32BitValue()&0xffff);
+     }
+    }
+    iterator->release();
+   }
+  }
+  changed|=devices!=lastDevices || lastIdNow!=lastId;
+  if(changed) {
+   IOLog("B5qUsb: cmd=%08x sts=%08x port1=%08x port2=%08x devs=%u last=%08x\n",
+     values[0],values[1],values[2],values[3],devices,lastIdNow);
+   for(unsigned i=0;i<4;++i)last[i]=values[i];
+   lastDevices=devices;lastId=lastIdNow;
+  }
+  ++samples;
+  IOSleep(2000);
+ }
+}
 }
 class B5qUsbHost : public AppleUSBXHCI {
  OSDeclareDefaultStructors(B5qUsbHost)
@@ -72,25 +144,35 @@ public:
 OSDefineMetaClassAndStructors(B5qUsbNub,IOService)
 namespace {
 static void worker(void *,wait_result_t) {
- const char *stage="dma-handoff";IOMemoryMap *mapping=nullptr;B5qUsbNub *nub=nullptr;
+ const char *stage="boot-ram";Mapping core,qScratch,gcc;B5qUsbNub *nub=nullptr;
  IODeviceMemory *memory=nullptr;OSArray *ranges=nullptr;B5qUsbHost *host=nullptr;
- bool attached=false,hostAttached=false;
+ bool attached=false,hostAttached=false,startAttempted=false;
  do {
-  IORegistryEntry *chosen=IORegistryEntry::fromPath("/chosen",gIODTPlane);
-  OSData *handoff=chosen?OSDynamicCast(OSData,chosen->getProperty("b5q-usb-handoff")):nullptr;
   auto *boot=static_cast<boot_args*>(PE_state.bootArgs);
-  bool valid=boot && handoff && B5qUsbPolicy::accepts(handoff->getBytesNoCopy(),handoff->getLength(),boot->physBase,boot->memSize);
-  OSSafeReleaseNULL(chosen);
-  if(!valid)break;
-  stage="load-AppleUSBXHCI";
-  OSReturn loaded=OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBXHCI");
-  if(loaded!=kOSReturnSuccess && loaded!=kOSKextReturnStartStopError)break;
-  stage="map-core";memory=IODeviceMemory::withRange(B5qHardware::usbBase,B5qHardware::usbBytes);
-  mapping=memory?memory->map(kIOMapAnywhere|kIOMapInhibitCache):nullptr;if(!mapping)break;
-  auto *reg=reinterpret_cast<volatile uint32_t*>(mapping->getVirtualAddress());
-  auto read=[&](uint32_t off,uint32_t &v){if(off%4 || off>B5qHardware::usbBytes-4)return false;v=reg[off/4];return true;};
-  auto write=[&](uint32_t off,uint32_t v){if(off%4 || off>B5qHardware::usbBytes-4)return false;reg[off/4]=v;barrier();return true;};
+  if(!boot || !B5qUsbPolicy::validRam(boot->physBase,boot->memSize))break;
+  stage="map-core";
+  if(!core.open(B5qHardware::usbBase,kUsbCoreBytes) ||
+     !qScratch.open(kQscratchBase,0x1000) || !gcc.open(kGccBase,kGccBytes))break;
+  uint32_t gdsc=0,master=0;
+  readReg(gcc.va,kGccBytes,0x39004,gdsc);readReg(gcc.va,kGccBytes,0x39018,master);
+  IOLog("B5qUsb: stage=warm-clocks initial-gdsc=%08x master=%08x\n",gdsc,master);
+  auto gccRead=[&](unsigned off,uint32_t &v){return readReg(gcc.va,kGccBytes,off,v);};
+  auto gccWrite=[&](unsigned off,uint32_t v){return writeReg(gcc.va,kGccBytes,off,v);};
+  stage=B5qUsbPolicy::clocks(gccRead,gccWrite,[](unsigned us){IODelay(us);});if(stage)break;
+  uint32_t hs=0,ss=0;
+  readReg(qScratch.va,0x1000,0x810,hs);readReg(qScratch.va,0x1000,0x830,ss);
+  IOLog("B5qUsb: stage=warm-phy scratch-hs=%08x scratch-ss=%08x\n",hs,ss);
+  stage="prepare-host";
+  auto read=[&](uint32_t off,uint32_t &v){return readReg(core.va,kUsbCoreBytes,off,v);};
+  auto write=[&](uint32_t off,uint32_t v){return writeReg(core.va,kUsbCoreBytes,off,v);};
   stage=B5qUsbPolicy::prepare(read,write,[](unsigned us){IODelay(us);});if(stage)break;
+  const char *families[]={"com.apple.iokit.IOUSBHostFamily","com.apple.driver.usb.AppleUSBXHCI"};
+  bool familiesLoaded=true;
+  for(const char *family:families) {
+   stage=family;OSReturn status=OSKextLoadKextWithIdentifier(family);
+   if(status!=kOSReturnSuccess) { IOLog("B5qUsb: stage=%s load=%08x\n",family,status);familiesLoaded=false;break; }
+  }
+  if(!familiesLoaded)break;
   stage="metaclasses";void *handle=OSMetaClass::preModLoad(g_kernel_kmod_info.name);if(!handle)break;
   b5q_usb_static_init();if(OSMetaClass::postModLoad(handle))break;
   stage="provider";nub=OSTypeAlloc(B5qUsbNub);
@@ -102,19 +184,34 @@ static void worker(void *,wait_result_t) {
   nub->setName("b5q-usb-host0");nub->setDeviceMemory(ranges);
   if(!(attached=nub->attach(IOService::getPlatform())))break;
   stage="start-AppleUSBXHCI";host=OSTypeAlloc(B5qUsbHost);
-  if(!host || !host->init() || !(hostAttached=host->attach(nub)) || !host->start(nub))break;
+  if(!host || !host->init() || !(hostAttached=host->attach(nub)))break;
+  // start may allocate DMA rings before returning false. Pin both objects in
+  // that case; no shared-context reset or release of live DMA storage.
+  startAttempted=true;
+  if(!host->start(nub)){host->retain();nub->retain();break;}
   host->registerService();nub->registerService();host->retain();nub->retain();
   b5q_usb_state=1;stage="host-started";
+  OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBHub");
+  OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBHostCompositeDevice");
+  OSKextLoadKextWithIdentifier("com.apple.driver.AppleHIDKeyboard");
   OSReturn hid=OSKextLoadKextWithIdentifier("com.apple.driver.usb.IOUSBHostHIDDevice");
   IOLog("B5qUsb: stage=%s base=0x%llx irq=%llu HID-load=0x%x\n",stage,B5qHardware::usbBase,B5qHardware::usbIrq,hid);
+  Mapping *monitorMapping=new Mapping;
+  if(monitorMapping && monitorMapping->open(B5qHardware::usbBase,kUsbCoreBytes)) {
+   thread_t monitorThread=nullptr;
+   if(kernel_thread_start(monitor,monitorMapping,&monitorThread)==KERN_SUCCESS) {
+    thread_deallocate(monitorThread);monitorMapping=nullptr;
+   }
+  }
+  delete monitorMapping;
  }while(false);
  if(b5q_usb_state!=1) {
-  if(hostAttached)host->detach(nub);
-  if(attached)nub->detach(IOService::getPlatform());
+  if(hostAttached && !startAttempted)host->detach(nub);
+  if(attached && !startAttempted)nub->detach(IOService::getPlatform());
   b5q_usb_state=-1;
   IOLog("B5qUsb: stage=%s base=0x%llx SID=0x%llx; USB stopped; UFS and apps_smmu unchanged\n",stage,B5qHardware::usbBase,B5qHardware::usbSid);
  }
- OSSafeReleaseNULL(host);OSSafeReleaseNULL(nub);OSSafeReleaseNULL(ranges);OSSafeReleaseNULL(mapping);OSSafeReleaseNULL(memory);
+ OSSafeReleaseNULL(host);OSSafeReleaseNULL(nub);OSSafeReleaseNULL(ranges);OSSafeReleaseNULL(memory);
  thread_terminate(current_thread());
 }
 }

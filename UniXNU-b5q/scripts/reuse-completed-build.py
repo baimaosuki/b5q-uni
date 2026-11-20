@@ -52,13 +52,14 @@ if a.kernel_only:
 out = a.data_out
 out.mkdir(parents=True, exist_ok=True)
 for src, dest in [('scratch-data.img', 'data.dbr'),
-                  ('kernel.macho.trustcache', 'original-ipsw-trust.bundle')]:
+                  ('kernel.macho.trustcache', 'owner-trust.bundle'),
+                  ('kernel.macho.gpuaddon','gpu-addon.bin')]:
     subprocess.run(['mcopy', '-i', str(source / 'payload/payload.img'),
                     '::/EFI/UniXNU/Payloads/' + src, str(out / dest)], check=True)
 # Retain original Apple modules; the official runtime regenerates and signs
 # its owner module together with its boot shim addon in the new payload.
 trust = out / 'original-ipsw-trust.bundle'
-data = trust.read_bytes()
+data = (out/'owner-trust.bundle').read_bytes()
 count = struct.unpack_from('<I', data)[0]
 offsets = list(struct.unpack_from(f'<{count}I', data, 4)) + [len(data)]
 mods = [data[offsets[i]:offsets[i + 1]] for i in range(3)]

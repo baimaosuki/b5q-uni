@@ -60,12 +60,20 @@ title = "UniXNU b5q macOS 27.3"
 panic_screen = true
 # Sheng macOS 27.3 hardware-Metal display policy, same inspected build.
 # CPU renderer overrides from v15/v18 are excluded from this hardware path.
-text_fixups = ["dyld_shared_cache_arm64e.03,5de1134,08060037,1f2003d5"]
+text_fixups = [
+  "dyld_shared_cache_arm64e.03,5de1134,08060037,1f2003d5",
+  "dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a",
+  "dyld_shared_cache_arm64e.03,5c3685c,a00180524039a672010080d2020080d2,68ca42f9c800e037e00313aa010080d2",
+  "dyld_shared_cache_arm64e.03,5c3686c,030080d2040080d28ffd8294,e1a5ff971f2003d51f2003d5",
+  "dyld_shared_cache_arm64e.03,28bb658,ce674e95,00008052",
+  "dyld_shared_cache_arm64e.03,6cf7304,fb214094,00008052",
+  "dyld_shared_cache_arm64e.03,239d0ec,a1ab6595,00008052",
+]
 tools = true
 # b5q-root selects authenticated read-only macosroot; Data remains volatile in RAM.
 # The existing ArmCpu secondary/SM8550 IPI path is opt-in. no-lc selects the
 # already-built launch-constraint policy for signed, owner-trusted boot shims.
-kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "no-lc=1", "ethernet=1", "vsync=60", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "disable-watchdogd=1", "cs-lazy=1", "boot-payload-release=1", "exec-log=1", "b5q-ws-signal=1", "b5q-usb=1", "gpu-power=9", "gpu-metal=1", "fb-gpu=1", "fb-bgra=1", "gpu-dcvs=1", "gpu-addon=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2"]
+kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "no-lc=1", "ethernet=1", "vsync=60", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "disable-watchdogd=1", "cs-lazy=1", "boot-payload-release=1", "exec-log=1", "b5q-ws-signal=1", "b5q-usb=1", "gpu-power=9", "gpu-metal=1", "fb-gpu=1", "fb-bgra=1", "fb-half=2", "gpu-dcvs=1", "gpu-addon=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2"]
 
 [payload.adt]
 # EFI allocator chooses a real contiguous window; no physical DRAM address is invented.

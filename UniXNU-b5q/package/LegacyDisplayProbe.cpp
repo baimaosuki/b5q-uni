@@ -10,7 +10,9 @@
 #include <libkern/c++/OSData.h>
 #include <kern/task.h>
 #include <kern/thread.h>
-#include <sys/proc.h>
+// Only opaque process helpers are used; avoid importing private proc layouts.
+extern "C" void *get_bsdtask_info(task_t);
+extern "C" int proc_pid(struct proc *);
 #include <pexpert/pexpert.h>
 #include <mach/kmod.h>
 #include <machine/machine_routines.h>
@@ -145,6 +147,11 @@ void native_legacy_surface_rejected(uint64_t width,uint64_t height,uint32_t form
 // The display's request layout (rectangles, masks, options, dimensions, surfaces); the iPadOS 17 one when the display has none.
 extern "C" const unsigned native_legacy_request_layout[6] __attribute__((weak_import));
 static void recordRejectedSwap(unsigned reason,const void *request,const void *surface) {
+    native_legacy_rej_reason=reason;
+    for(unsigned i=0;i<4;++i)native_legacy_rej_surfaces[i]=0;
+    for(unsigned i=0;i<3;++i){native_legacy_rej_state[i]=0;native_legacy_rej_options[i]=0;}
+    for(unsigned i=0;i<2;++i){native_legacy_rej_size[i]=0;for(unsigned j=0;j<4;++j)native_legacy_rej_rects[i][j]=0;}
+    native_legacy_rej_class[0]=0;
     const unsigned char *bytes=reinterpret_cast<const unsigned char *>(request);
     if(!bytes)return;
     static const unsigned ios17[6]={17,81,792,804,816,2624};
@@ -258,10 +265,37 @@ extern "C" unsigned native_legacy_prepare_report(char *out,unsigned cap) {
     }
     return at;
 }
+extern "C" uint32_t native_legacy_surface_format(OSObject *);
 void native_legacy_swap_validation_observed(bool accepted,unsigned reason,const void *request,const void *surface) {
     if(accepted)native_legacy_swap_stage(0);
-    if(accepted)native_legacy_swap_accepted_count=native_legacy_swap_accepted_count+1;
-    else {native_legacy_swap_rejected_count=native_legacy_swap_rejected_count+1;recordRejectedSwap(reason,request,surface);}
+    if(accepted) {
+        native_legacy_swap_accepted_count=native_legacy_swap_accepted_count+1;
+        if(native_legacy_swap_accepted_count<=8)
+            IOLog("b5q-fb: swap accepted #%u fmt=%08x\n",native_legacy_swap_accepted_count,
+                  surface?native_legacy_surface_format(const_cast<OSObject *>(static_cast<const OSObject *>(surface))):0);
+    } else {
+        native_legacy_swap_rejected_count=native_legacy_swap_rejected_count+1;
+        // A rejection before the surface checks must not reuse an old surface's
+        // format/stride. The validator fills these only for reason4.
+        if(reason!=4)for(unsigned i=0;i<7;++i)native_legacy_rej_surface[i]=0;
+        recordRejectedSwap(reason,request,surface);
+        static unsigned lastReason=~0u;static uint64_t lastFormat=~uint64_t(0);
+        const uint64_t format=native_legacy_rej_surface[2];
+        if(native_legacy_swap_rejected_count<=8 || reason!=lastReason || format!=lastFormat) {
+            IOLog("b5q-fb: REJ acc=%u rej=%u r=%u st=%x/%x/%x op=%x/%x/%x wh=%ux%u s=%llx/%llx/%llx/%llx cls=%.24s\n",
+                native_legacy_swap_accepted_count,native_legacy_swap_rejected_count,native_legacy_rej_reason,
+                native_legacy_rej_state[0],native_legacy_rej_state[1],native_legacy_rej_state[2],
+                native_legacy_rej_options[0],native_legacy_rej_options[1],native_legacy_rej_options[2],
+                native_legacy_rej_size[0],native_legacy_rej_size[1],
+                native_legacy_rej_surfaces[0],native_legacy_rej_surfaces[1],native_legacy_rej_surfaces[2],native_legacy_rej_surfaces[3],native_legacy_rej_class);
+            IOLog("b5q-fb: REJ2 rect0=%u,%u,%u,%u rect1=%u,%u,%u,%u surf %llux%llu fmt=%08llx planes=%llu stride=%llu alloc=%llu len=%llu\n",
+                native_legacy_rej_rects[0][0],native_legacy_rej_rects[0][1],native_legacy_rej_rects[0][2],native_legacy_rej_rects[0][3],
+                native_legacy_rej_rects[1][0],native_legacy_rej_rects[1][1],native_legacy_rej_rects[1][2],native_legacy_rej_rects[1][3],
+                native_legacy_rej_surface[0],native_legacy_rej_surface[1],native_legacy_rej_surface[2],native_legacy_rej_surface[3],
+                native_legacy_rej_surface[4],native_legacy_rej_surface[5],native_legacy_rej_surface[6]);
+        }
+        lastReason=reason;lastFormat=format;
+    }
     native_legacy_swap_validation_calls=native_legacy_swap_validation_calls+1;
     native_legacy_swap_validation_result=accepted;native_legacy_swap_validation_reason=reason;
     native_legacy_swap_request=(uintptr_t)request;native_legacy_swap_surface=(uintptr_t)surface;
@@ -330,7 +364,7 @@ void native_legacy_registration_observed(IOService *display) {
 }
 void native_legacy_client_enter(task_t task,uint32_t type) {
     native_legacy_client_calls=native_legacy_client_calls+1;native_legacy_client_task=(uintptr_t)task;
-    native_legacy_client_type=type;native_legacy_client_pid=task?proc_pid((proc_t)get_bsdtask_info(task)):0;
+    native_legacy_client_type=type;native_legacy_client_pid=task?proc_pid(static_cast<struct proc *>(get_bsdtask_info(task))):0;
 }
 // Every framebuffer user client seen (object, pid), with what it does: the original client's vtable is copied and two entries (externalMethod, slot 168,
 // and registerNotificationPort(port,type,refCon), slot 175) are pointed at wrappers that count and forward to the original function. The original code

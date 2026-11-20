@@ -6,7 +6,7 @@ physical memory, include persistent OS root windows, or claim a desktop boot.
 """
 import argparse,hashlib,importlib.util,json,os,secrets,subprocess,sys
 from pathlib import Path
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('--unixnu',type=Path,required=True);p.add_argument('--device',type=Path,required=True);p.add_argument('--font-source',type=Path,required=True);p.add_argument('--data-ramdisk',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--unixnu',type=Path,required=True);p.add_argument('--device',type=Path,required=True);p.add_argument('--font-source',type=Path,required=True);p.add_argument('--data-ramdisk',type=Path,required=True);p.add_argument('--reuse-addon',action='store_true');a=p.parse_args()
 core,device,font=a.unixnu.resolve(),a.device.resolve(),a.font_source.resolve()
 sys.path.insert(0,str(core/'scripts'))
 from unixnu.cli import parser
@@ -30,6 +30,8 @@ if not trust.is_file():raise SystemExit('Original IPSW trust bundle is missing')
 env=dict(os.environ,UNIXNU_UNIQUE_CHIP_ID=seedfile.read_text().strip(),UNIXNU_UEFI=str(font))
 # The official runtime invokes boot_shims only when it collects/pairs trust itself.
 trust_args=[] if ctx.board.get('payload',{}).get('runtime',{}).get('boot_shims') else ['--trust-cache',str(trust)]
+if a.reuse_addon:
+ trust_args=['--gpu-addon',str(provided.with_name('gpu-addon.bin')),'--owner-trust-cache',str(provided.with_name('owner-trust.bundle'))]
 subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--os','macos-27.3-26C5035r','--data-ramdisk',str(seed),*trust_args],cwd=core,env=env,check=True)
 files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/payload.img'}
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)

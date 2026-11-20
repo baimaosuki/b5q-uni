@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inspect final peripheral ABI and execute opt-in/missing-handoff stop paths."""
+"""Inspect final peripheral ABI and execute opt-in/warm-USB mapping paths."""
 import argparse,hashlib,json,struct,sys
 from pathlib import Path
 from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
@@ -21,8 +21,11 @@ assert names['_backtrace_user']in call_targets and names['_backtrace']in call_ta
 assert sum(i.mnemonic=='mov'and i.op_str=='w1, #0x10'for i in instructions)>=2
 prepare=names['_proc_prepareexit'];end=min(v for v in names.values()if v>prepare)
 assert any(i.mnemonic=='bl'and int(i.op_str[1:],16)==context for i in md.disasm(im.read(prepare,end-prepare),prepare))
-for s in [b'B5Q-WS-SIGNAL: saved pc=',b'cache_slide=0x',b'b5q-usb-handoff\0',b'b5q-gmu-fw\0',b'B5qGpu: stage=Samsung-firmware-invalid'] :assert s in raw,s
+for s in [b'B5Q-WS-SIGNAL: saved pc=',b'cache_slide=0x',b'b5q-gmu-fw\0',b'B5qGpu: stage=Samsung-firmware-invalid'] :assert s in raw,s
 assert b'b5q-gmu-handoff\0' not in raw
+assert b'b5q-usb-handoff\0' not in raw
+for value in [b'B5qUsb: stage=warm-clocks',b'B5qUsb: cmd=%08x',b'b5q-fb: REJ acc=',b'b5q-fb: REJ2 rect0=',b'b5q-fb: swap accepted #']:
+ assert value in raw,value
 for symbol in ['_ShengGmuColdStart','_ShengGmuBuildStartup','_ShengGmuCommandDbInputs','_NativeAdrenoGmuContextBringup','_NativeAdrenoGpuContextBringup']:
  assert symbol in names,symbol
 # Inspect compiled b5q CM3 state offset and shared cold-start call rather than
@@ -52,7 +55,10 @@ def hook(e,pc,size,unused):
   workers.append(e.reg_read(UC_ARM64_REG_X0));e.mem_write(e.reg_read(UC_ARM64_REG_X2),struct.pack('<Q',base+0x1000));ret(0);return
  if pc==names['_thread_deallocate']:ret();return
  if pc in frompath:ret(0);return
- if pc in map_targets:map_calls+=1;raise AssertionError('missing handoff reached a controller mapping')
+ if pc in map_targets:
+  physical=e.reg_read(UC_ARM64_REG_X0);length=e.reg_read(UC_ARM64_REG_X1)
+  assert physical==0xa600000 and length==0x10000,(hex(physical),hex(length))
+  map_calls+=1;ret(0);return
  if pc==names['_IOLog']:
   fmt=cstr(e.reg_read(UC_ARM64_REG_X0));messages.append({'format':fmt,'stage':cstr(struct.unpack('<Q',bytes(e.mem_read(e.reg_read(UC_ARM64_REG_SP),8)))[0]) if 'stage=%s' in fmt else fmt});ret();return
  if pc==names['_thread_terminate']:e.emu_stop();return
@@ -73,8 +79,14 @@ for prefix in ['usb','gpu']:
  for on in [0,1]:
   enabled=on;u.reg_write(UC_ARM64_REG_SP,stack);u.reg_write(UC_ARM64_REG_X30,stop);u.emu_start(entry,stop,count=10000)
   assert len(workers)==before+on
+ if prefix=='usb':
+  # PE_state.bootArgs offset160; boot_args.physBase/memSize offset16/24
+  # from the pinned pexpert headers. No fabricated firmware handoff property.
+  u.mem_write(names['_PE_state']+160,struct.pack('<Q',base+0x2000))
+  u.mem_write(base+0x2010,struct.pack('<QQ',0x8c0004000,0x100000000))
  worker=workers[-1];u.reg_write(UC_ARM64_REG_X0,0);u.reg_write(UC_ARM64_REG_X1,0);u.reg_write(UC_ARM64_REG_SP,stack);u.reg_write(UC_ARM64_REG_X30,stop)
- u.emu_start(worker,stop,count=30000);expected='dma-handoff'if prefix=='usb'else'B5qGpu: stage=Samsung-firmware-invalid\n';assert messages[-1]['stage']==expected,(prefix,messages)
- results.append({'worker':prefix,'opt_in_gate_executed':True,'missing_input_stop':expected,'controller_maps':map_calls})
+ u.emu_start(worker,stop,count=30000);expected='map-core'if prefix=='usb'else'B5qGpu: stage=Samsung-firmware-invalid\n';assert messages[-1]['stage']==expected,(prefix,messages)
+ if prefix=='usb':assert map_calls==1
+ results.append({'worker':prefix,'opt_in_gate_executed':True,'mocked_stop':expected,'controller_maps':map_calls})
 a.out.write_text(json.dumps(dict(passed=True,kernel_sha256=hashlib.sha256(raw).hexdigest(),XHCI_vtable_slots=len(words),saved_signal_collector_called_before_corpse=True,actual_user_and_kernel_backtrace_calls=True,frame_limits=16,actual_compiled_missing_input_paths=results,boot_parser_threads_registry_and_logging_mocked=True,PAuth_not_tested=True,device_or_GPU_execution_tested=False,b5q_compiled_timer_offsets_executed=[0x16220,0x16224]),indent=2)+'\n')
-print('PASS final427-slot xHCI ABI, fatal-context calls and actual compiled USB/GPU stop paths')
+print('PASS final427-slot xHCI ABI, fatal-context calls and compiled USB opt-in reaching actual core mapping')

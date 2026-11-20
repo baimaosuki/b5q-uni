@@ -2036,6 +2036,8 @@ void startHeartbeatThread() {
     thread_t thread = nullptr;
     if (kernel_thread_start(heartbeatThread, nullptr, &thread) == KERN_SUCCESS) {thread_deallocate(thread); gHeartbeatThread = true;}
 }
+extern "C" unsigned native_legacy_prepare_report(char *,unsigned);
+extern "C" {extern volatile uint32_t native_legacy_gpu_fallbacks,native_legacy_gpu_last_status;}
 void heartbeat() {
     // Row 4 from now on: seconds since the run ended, GX state, and (only with GX on) the GPU status words, so a photo
     // tells a live kernel from a hung one and shows whether the GPU stays idle.
@@ -2088,6 +2090,10 @@ void heartbeat() {
             snprintf(row, sizeof row, "H%u gx-off g%x", t, info);
         }
         setRow(4, row);
+        if(t%30==0) {
+            char display[512]={};native_legacy_prepare_report(display,sizeof(display));
+            IOLog("b5q-fb: %s fallbacks=%u last=%08x\n",display,native_legacy_gpu_fallbacks,native_legacy_gpu_last_status);
+        }
         metalRows();
         registerExecObserver();
         if (!(gxOn() && gpuRd(A740_CP_RB_RPTR) != gpuRd(A740_CP_RB_WPTR))) gicRow();
