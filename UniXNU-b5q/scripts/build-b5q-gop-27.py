@@ -401,6 +401,95 @@ def object_vtable(data, found, name, count):
 
 board_dir = ROOT / "build/b5q"
 input_objects = []
+ethernet_objects = []
+# macOS: the board's Ethernet controller en0 (B5qEthernet.cpp), an IOEthernetController of the original IONetworkingFamily compiled with
+# the macOS SDK's public family headers (after the kernel's own, so only IOKit/network comes from there). Its vtable must be the
+# collection's slot for slot (net-ether-<build>.json): every entry signed with the original diversity, every inherited entry bound to
+# the original target, every family import bound to the collection's symbol.
+if MACOS:
+    ETH_OUT = board_dir / 'ethernet'
+    ETH_OUT.mkdir(parents=True, exist_ok=True)
+    eth_abi = json.loads(Path(__file__).resolve().with_name(f'net-ether-{BUILD}.json').read_text())
+    require(eth_abi['kernelcache_sha256'] == abi['kernelcache_sha256'], 'Ethernet fixture of the same collection')
+    macsdk = run(['xcrun', '--sdk', 'macosx', '--show-sdk-path'], text=True).strip()
+    # The SDK declares IONetworkController's reserved slots 2-5 unused; the shipped family uses them (outputStart,
+    # setInputPacketPollingEnable, pollInputPackets, networkInterfaceNotification). Apple's published IONetworkingFamily headers
+    # declare them under __PRIVATE_SPI__, so those headers, as IOKit/network, come first.
+    ionet = ROOT / '.cache/IONetworkingFamily-188'
+    if not (ionet / 'IONetworkController.h').is_file():
+        subprocess.run(['git', 'init', '-q', str(ionet)], check=True)
+        subprocess.run(['git', '-C', str(ionet), 'fetch', '-q', '--depth', '1',
+                        'https://github.com/apple-oss-distributions/IONetworkingFamily.git',
+                        'bb910e2b458939f6b1f53c0fa6907f258b431ea4'], check=True)
+        subprocess.run(['git', '-C', str(ionet), 'checkout', '-q', 'FETCH_HEAD'], check=True)
+    ionet_include = ETH_OUT / 'include/IOKit'
+    ionet_include.mkdir(parents=True, exist_ok=True)
+    if not (ionet_include / 'network').exists():
+        (ionet_include / 'network').symlink_to(ionet)
+    # The family's instance sizes as the collection has them: the source asserts the SDK headers give the same.
+    compile_cpp(KITS / 'B5qEthernet.cpp', ETH_OUT / 'B5qEthernet.o',
+                ('-I', str(ETH_OUT / 'include'), '-idirafter', f'{macsdk}/System/Library/Frameworks/Kernel.framework/Headers',
+                 f'-DB5Q_ETHERNET_CONTROLLER_SIZE={eth_abi["instance_size"]}',
+                 ))
+    eth_raw = (ETH_OUT / 'B5qEthernet.o').read_bytes()
+    eth_found = object_symbols(eth_raw)
+    eth_pure = int(eth_abi['pure_target'], 16)
+    eth_bindings = {n: int(v, 16) + slide for n, v in eth_abi['bindings'].items()}
+    family = tuple(f'{len(c)}{c}' for c in ('IONetworkController', 'IOEthernetController', 'IONetworkMedium', 'IONetworkInterface',
+                                           'IOEthernetInterface', 'IOOutputQueue'))
+    eth_used = {n for n, _, k in eth_found if k == 1 and any(c in n for c in family)}
+
+    def family_vtable(cls, base, slots):
+        """Check the vtable of cls, a subclass of the family's class base, against base's slots in the collection; the slots cls overrides."""
+        vt = f'__ZTV{len(cls)}{cls}'
+        own = (f'__ZN{len(cls)}{cls}', f'__ZNK{len(cls)}{cls}')
+        entries = object_vtable(eth_raw, eth_found, vt, len(slots) + 1)
+        require(all(entries[:len(slots)]) and not entries[len(slots)], f'{vt}: exactly the {len(slots)} {base} entries')
+        override_slot = {}
+        for i, (name, word) in enumerate(entries[:len(slots)]):
+            require(word >> 63 and word >> 48 & 1 and word >> 49 & 3 == 0 and (word >> 32) & 0xffff == slots[i][1],
+                    f'{vt} slot {i} ({name}) signed with the original diversity {slots[i][1]:#x}')
+            if name.startswith(own):
+                override_slot[name[len(own[0]) if name.startswith(own[0]) else len(own[1]):]] = i
+            elif any(c in name for c in family):
+                require(slots[i][0] != eth_pure, f'{vt} slot {i}: the abstract original slot is implemented')
+                require(eth_bindings.setdefault(name, slots[i][0] + slide) == slots[i][0] + slide,
+                        f'{vt} slot {i} ({name}) is the original entry')
+            else:
+                # The kernel's own classes (OSObject, IOService): the kernel defines these, the link resolves them.
+                require(i < BASE, f'{vt} slot {i} ({name}) is a kernel method within the IOService slots')
+        for name in sorted(eth_used - set(eth_bindings)):
+            # A qualified call of a base method the family class does not override itself (IOEthernetController::start is
+            # IONetworkController's): the original entry of the slot this class overrides with the same method.
+            tail = next((name[len(q):] for q in (f'__ZN{len(base)}{base}', f'__ZNK{len(base)}{base}') if name.startswith(q)), None)
+            if tail in override_slot:
+                eth_bindings[name] = slots[override_slot[tail]][0] + slide
+        eth_used.update(e[0] for e in entries[:len(slots)] if not e[0].startswith(own) and any(c in e[0] for c in family))
+        return vt
+
+    eth_slots = [(int(t, 16), int(d, 16)) for t, d in eth_abi['slots']]
+    eth_vt = family_vtable('B5qEthernet', 'IOEthernetController', eth_slots)
+    for name in sorted(eth_used - set(eth_bindings)):
+        require(False, f'{name}: bound to the collection')
+    eth_text, eth_addresses = '.text\n.p2align 2\n', ''
+    for name in sorted(eth_used):
+        va = eth_bindings[name]
+        if name.endswith('10gMetaClassE') or name.startswith('__ZTV'):
+            eth_addresses += f'.globl {name}\n.set {name}, {va:#x}\n'
+        else:
+            eth_addresses += f'.globl {name}.original\n.set {name}.original, {va:#x}\n'
+            eth_text += f'.globl {name}\n{name}:\n bti c\n b {name}.original\n'
+    (ETH_OUT / 'eth-bindings.S').write_text(eth_text)
+    (ETH_OUT / 'eth-addresses.S').write_text(eth_addresses)
+    for stem in ('eth-bindings', 'eth-addresses'):
+        run(['xcrun', 'clang', '-target', TRIPLE, '-isysroot', sdk, '-c', ETH_OUT / (stem + '.S'), '-o', ETH_OUT / (stem + '.o')])
+    eth_late = ETH_OUT / 'B5qEthernet.late.o'
+    run([llvm / 'llvm-objcopy', '--remove-section=__DATA,__mod_init_func', '--globalize-symbol=__GLOBAL__sub_I_B5qEthernet.cpp',
+         ETH_OUT / 'B5qEthernet.o', eth_late])
+    ethernet_objects += [eth_late, ETH_OUT / 'eth-bindings.o', ETH_OUT / 'eth-addresses.o']
+    print(f'Ethernet: {len(eth_used)} original bindings, {eth_vt} matches the original {len(eth_slots)} diversities, '
+          'local clock interface, no Wi-Fi ABI or hardware')
+
 if MACOS:
     AES_OUT = board_dir / 'software-aes'
     AES_OUT.mkdir(parents=True, exist_ok=True)
@@ -458,9 +547,10 @@ archive = OUT / 'libNativeLegacyDisplay.late.a'
 archive.unlink(missing_ok=True)
 run(['xcrun', 'ar', 'rcs', archive, late, OUT / 'original-bindings.o',
      OUT / 'original-addresses.o', OUT / 'LegacyDisplayProbe.o',
-     OUT / 'LegacyDisplaySupport27.o', gop_late, OUT / 'KeyStoreProbe.o', keyevents_late])
+     OUT / 'LegacyDisplaySupport27.o', gop_late, OUT / 'KeyStoreProbe.o', keyevents_late, *ethernet_objects])
 sources = [Path(__file__), ABI_PATH,
-           Path(__file__).with_name(f'software-aes-{BUILD}.json')]
+           Path(__file__).with_name(f'software-aes-{BUILD}.json'),
+           Path(__file__).with_name(f'net-ether-{BUILD}.json'), KITS/'B5qEthernet.cpp', KITS/'LegacyDisplayProbe.cpp']
 for directory in (ROOT/'drivers/GopFramebuffer', ROOT/'drivers/SoftwareAES',
                   ROOT/'drivers/AppleKeyStoreState', KITS):
     sources += sorted(p for p in directory.rglob('*') if p.suffix in ('.h','.cpp','.c'))

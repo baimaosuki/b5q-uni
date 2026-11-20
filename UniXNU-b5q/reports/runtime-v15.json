@@ -1,0 +1,715 @@
+{
+  "scope": "v14 log-linked TimeSync local Ethernet clock and exact 26C5035r CPU compositor policy",
+  "status": "local checks before one kernel CI",
+  "log_input": {
+    "path": "logs/b5q-xnu2log-v14/XNU2LOG.BIN",
+    "bytes": 8400896,
+    "sha256": "d29670dcadf21fb21c90fc1706ef8632e9ca742c07c1f3e113bda7ac3ded8934"
+  },
+  "decode": {
+    "slot": 1,
+    "valid": true,
+    "sequence": 80,
+    "boot_id": "392e2335000000000100000000000000",
+    "committed_total": 96215,
+    "lost_on_contention": 0,
+    "ring_overwritten": 0,
+    "payload_bytes": 96215,
+    "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000",
+    "format": "NABULOG2",
+    "version": 2,
+    "allocation_token": "411839cbaebac4088c251c0ea57579a2",
+    "slots": [
+      {
+        "slot": 0,
+        "valid": true,
+        "sequence": 79,
+        "boot_id": "392e2335000000000100000000000000",
+        "committed_total": 96074,
+        "lost_on_contention": 0,
+        "ring_overwritten": 0,
+        "payload_bytes": 96074,
+        "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+      },
+      {
+        "slot": 1,
+        "valid": true,
+        "sequence": 80,
+        "boot_id": "392e2335000000000100000000000000",
+        "committed_total": 96215,
+        "lost_on_contention": 0,
+        "ring_overwritten": 0,
+        "payload_bytes": 96215,
+        "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+      }
+    ],
+    "selected_slot": 1,
+    "stored_checksum": "crc32_header_and_payload",
+    "stored_checksum_valid": true,
+    "config_checksum_valid": true,
+    "structural_validation": "passed",
+    "ring_capacity": 4194304,
+    "ring_order": "already_linearised",
+    "lost_bytes_exact": 0,
+    "captured_bytes_lower_bound": 96215,
+    "lost_bytes_lower_bound": 0,
+    "capture_complete_through_snapshot": true,
+    "complete_boot_log": false,
+    "freshness": "boot_id_present_requires_run_binding",
+    "snapshot_consistency": "CRC_verified_committed_snapshot",
+    "payload_sha256": "0b9ab1b7eb7ce25c592787cd51583db56e0f87803ee812b6930b7424e805419d",
+    "warnings": [
+      "Bytes after the last completed commit may be missing.",
+      "Only bytes reaching the installed console producers are captured."
+    ],
+    "nul_bytes": 0,
+    "utf8_valid": true,
+    "decoded": true
+  },
+  "events": [
+    {
+      "line": 192,
+      "text": "b5q-fb: default surface 0xfffffff7f8b39020 status 0x0 valid 1 1080x2640 stride 4352 bytes 11489280"
+    },
+    {
+      "line": 302,
+      "text": "IOKit busy 1: K114cAP(IOPlatformExpertDevice,1,m)"
+    },
+    {
+      "line": 766,
+      "text": "exec: pid 106 WindowServer"
+    },
+    {
+      "line": 860,
+      "text": "exec: pid 133 clocksyncd"
+    },
+    {
+      "line": 876,
+      "text": "static IOReturn IOMobileFramebufferUserClient::s_map_display_type(IOMobileFramebufferUserClient *, void *, IOExternalMethodArguments *) UserClient display type is 0 "
+    },
+    {
+      "line": 1021,
+      "text": "exec: pid 178 unixnu-absentd"
+    },
+    {
+      "line": 1052,
+      "text": "exec: pid 181 unixnu-absentd"
+    },
+    {
+      "line": 1187,
+      "text": "IOKit busy 0:"
+    }
+  ],
+  "observations": [
+    "IOKit quiet reached; not evidence that all eight CPUs actually execute scheduler work",
+    "No unixnu-absentd kill/exit recorded; not a proof of complete service behavior",
+    "One s_map_display_type, no TimeSync clock-port or presented frame message in snapshot; no WindowServer wait stack collected",
+    "No ring wrap/loss in96215byte snapshot; increasing4MiB ring unnecessary for this capture",
+    "Snapshot cannot prove no reboot/panic after its last committed bytes"
+  ],
+  "changes": {
+    "Ethernet": "OS-only IOEthernetController subclass; boot-namespace locally administered unicast address; publishes real original-family interface, drops packets, no WiFi/ioctl client or controller hardware",
+    "runtime_arguments": [
+      "ethernet=1",
+      "vsync=60"
+    ],
+    "software_policy_count": 5,
+    "policy_reason": "Use qualified final-framebuffer BGRA fix instead of superseded partial branch. No canonical seven-policy list found in current evidence; five rules cover original renderer-null fallbacks, final framebuffer format, capability-once and intermediate pool. Do not invent extra patches."
+  },
+  "sources": {
+    "official_doc": "sources/UniXNU/docs/porting/macos.md:281; zh:264",
+    "Ethernet_reference_commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+    "Ethernet_reference_file": "sources/UniXNU-sheng/package/ShengEthernet.cpp",
+    "Ethernet_reference_sha256": "4b431d8e16976b491056ec2073db35657f2cd32ca7eec1619437b96d82645511",
+    "Ethernet_builder_reference_sha256": "0681663cf1a7c5ffc784aa83d4ccff7972054e0572626f7a5a04f617850914de",
+    "IONetworkingFamily_commit": "bb910e2b458939f6b1f53c0fa6907f258b431ea4",
+    "IONetworkingFamily_tag": "IONetworkingFamily-188",
+    "compositor_replay_reference": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/tests/test_cpu_startup27.py and test_cpu_surface_format27.py; same26C5035r OS-only instructions"
+  },
+  "Ethernet_ABI": {
+    "regenerated_from_original_kernelcache": true,
+    "fixture_byte_identical": true,
+    "passed": true,
+    "target": "arm64e-apple-macos27.0",
+    "vtable_entries": 400,
+    "authenticated_diversities_match_original": true,
+    "private_type_fixture": "public SDK lacks XNU ifnet_ctl_cmd_t; exact uint32_t typedef only for local host compile; production uses actual XNU compile headers",
+    "compiler": "LLVM21 Linux, final Apple kernel flags in CI",
+    "actual_hardware": false,
+    "unbound_imports": [],
+    "family_original_bindings": 135
+  },
+  "software_pages": {
+    "build": "26C5035r",
+    "five_complete_policy_sites": true,
+    "page_bytes": 4096,
+    "superseded_partial_BGRA_branch_excluded": true,
+    "disk_cache_modified": false,
+    "source_rules": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/nabu-27.3-26C5035r-esp-session-aeabf17/cpu-userland-rules.json",
+    "source_rules_sha256": "5b79aa1eac9bdd828d24f82a9b7e5e9caf97b9b521b7506343a1a87e45040290",
+    "patches": [
+      {
+        "name": "AccelServer::renderer",
+        "va": "0x18df51d00",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x5b51d00",
+        "original": "7f2303d5f44fbea9",
+        "replacement": "000080d2c0035fd6",
+        "page_sha256": "c48176f0e65e28794b1579a3c6464c618050b70d30e6a625806466450b44b42a",
+        "patched_page_sha256": "860b6cad5cf6b027ea252a38b135f009501a14a8a69ac1cc64516341c39156ce"
+      },
+      {
+        "name": "VirtualServer::renderer",
+        "va": "0x18df4263c",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x5b4263c",
+        "original": "7f2303d5f657bda9",
+        "replacement": "000080d2c0035fd6",
+        "page_sha256": "429f38cd13e743244bf226d8da3a9fff1aaf209aac43307af65d6a9f832c3395",
+        "patched_page_sha256": "f0ce01ef77d21d28be4245943785fc80da5e84485c185cfdfeec32bd75ff0460"
+      },
+      {
+        "name": "IOMFBDisplay::CPU-final-framebuffer-BGRA",
+        "va": "0x18e1e63cc",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x5de63cc",
+        "original": "1811981a",
+        "replacement": "f803082a",
+        "page_sha256": "534eb22cb60d777d1b8bd1c3bdc2dccae664c7edd5d9172ff7eefb7e72805d90",
+        "patched_page_sha256": "b81dfa5fdaa2e324eecc18fc428953ece166a8b17ff9fe937ff4f06dacba7427"
+      },
+      {
+        "name": "SkyLight::Metal-capability-no-device",
+        "va": "0x1828dfd5c",
+        "file": "dyld_shared_cache_arm64e.01",
+        "offset": "0x24dfd5c",
+        "original": "ff4302d1f65706a9",
+        "replacement": "ff2303d5c0035fd6",
+        "page_sha256": "510a4ab095574afdfddfce5ef84e3d8a29a1c5a08f5dd65a96da21293b8a2879",
+        "patched_page_sha256": "2b3768a2c069f78907a158d67f580833b2081de4d1e2a95fa69e0cec607d3a8f"
+      },
+      {
+        "name": "SLCADisplay::software-pool-BGRA8",
+        "va": "0x182acde70",
+        "file": "dyld_shared_cache_arm64e.01",
+        "offset": "0x26cde70",
+        "original": "f40300aa",
+        "replacement": "140a80d2",
+        "page_sha256": "0f7866d7f0e47ecc4e2f7b277b35cf8a9089c27d0b4e4e7c17bf70c6d7b908a9",
+        "patched_page_sha256": "3c101c4bf8d9fe936dd59edd3e2ec69694983bcac1875e8d0a6ec547a2cd6f50"
+      }
+    ],
+    "entries": [
+      "dyld_shared_cache_arm64e.03,5b51d00,7f2303d5f44fbea9,000080d2c0035fd6",
+      "dyld_shared_cache_arm64e.03,5b4263c,7f2303d5f657bda9,000080d2c0035fd6",
+      "dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a",
+      "dyld_shared_cache_arm64e.01,24dfd5c,ff4302d1f65706a9,ff2303d5c0035fd6",
+      "dyld_shared_cache_arm64e.01,26cde70,f40300aa,140a80d2"
+    ]
+  },
+  "compositor_replay": {
+    "passed": true,
+    "build": "26C5035r",
+    "actual_original_instructions": true,
+    "PAC_not_tested": true,
+    "dispatch_once_transport_modeled": true,
+    "device_tested": false,
+    "cases": [
+      {
+        "test": "capability",
+        "patched": false,
+        "original_abort_reached": true,
+        "metal_state": 0
+      },
+      {
+        "test": "capability",
+        "patched": true,
+        "original_abort_reached": false,
+        "metal_state": 0
+      },
+      {
+        "test": "original-selector",
+        "dispatch_once_completion_modeled": true,
+        "actual_activate_sw_reached": true,
+        "metal_state": 0
+      },
+      {
+        "test": "original-shadow-initializer",
+        "disabled": true
+      },
+      {
+        "test": "actual-SurfacePool-Acquire-format",
+        "patched": false,
+        "pixel_format": 115,
+        "query_before_edit": true
+      },
+      {
+        "test": "actual-SurfacePool-Acquire-format",
+        "patched": true,
+        "pixel_format": 80,
+        "query_before_edit": true
+      }
+    ]
+  },
+  "framebuffer_replay": {
+    "passed": true,
+    "actual_original_instructions": true,
+    "native_format_guard_preserved": true,
+    "CF_and_kernel_transport_modeled": true,
+    "PAC_tested": false,
+    "device_tested": false,
+    "cases": [
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x52476841"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": "0x52476841",
+        "path": "reuse",
+        "selected": "0x52476841"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": "0x52476841",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x26424741"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": "0x26424741",
+        "path": "reuse",
+        "selected": "0x26424741"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": "0x26424741",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x62336138"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": "0x62336138",
+        "path": "reuse",
+        "selected": "0x62336138"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": "0x62336138",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x77343061"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": "0x77343061",
+        "path": "reuse",
+        "selected": "0x77343061"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": "0x77343061",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": "0x52476841",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": "0x52476841",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": "0x26424741",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": "0x26424741",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": "0x62336138",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": "0x62336138",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": "0x77343061",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": "0x77343061",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x42475241",
+        "accepted": true
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x52476841",
+        "accepted": false
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x26424741",
+        "accepted": false
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x62336138",
+        "accepted": false
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x77343061",
+        "accepted": false
+      },
+      {
+        "test": "native-IOSurfaceCreate-properties",
+        "properties": {
+          "BytesPerElement": 4,
+          "BytesPerRow": 6400,
+          "Width": 1600,
+          "Height": 2560,
+          "PixelFormat": 1111970369,
+          "CacheMode": 1024,
+          "AllocSize": 16384000,
+          "MapCacheAttribute": 0
+        }
+      }
+    ]
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qEthernet.cpp": "e82601c4e240b09cb765cd5be002640b5d3030cae3230b56da251e6d1496d63f",
+    "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "d432c3117beb0733e3e52ecb31a4ca2911dedd3d586946b36679b468bb7e0d1c",
+    "UniXNU-b5q/scripts/build-b5q-gop-27.py": "e52c5387396e06adb444ba6fd2601840068802fcb0a605e7d3be9e2e8db386cd",
+    "UniXNU-b5q/scripts/net-ether-26C5035r.json": "60026416c10909af0d814ad142aeb6c31c51cec029a8c46fc58b683e2745ee22",
+    "UniXNU-b5q/scripts/software-compositor-26C5035r.json": "b2a518968aa4dddcf90b211df22bfa1634e7754e01d6da752dfd1023793ec7f6",
+    "UniXNU-b5q/board.toml": "766b2776ad3181656f6fa1a34f57eed2ccdc52228d52607a361be937ff0af123",
+    "tests/b5q-ufs/test-ethernet-lifecycle.py": "2dad19a30eecabe5d55f7afd555afacd00d54c6b68b27807dcf0929cc76e4ddd",
+    "tests/b5q-ufs/test-software-compositor.py": "9e9ff94e25bcc927836f47958c04efc8ce8fd0a2e26c9dcfea330e4e8a6ee8a6",
+    "tests/b5q-ufs/test-software-framebuffer-format.py": "d0f437c01f01d5632e6d4a7e996a54f9fbf9afdc4ae226b5f8b4001fb85512c7",
+    "scripts/b5q-install/pre-ci.py": "e89a40797a99b4081ae83b77032535f1027fec4d5cd70a2f2082206c663cd101"
+  },
+  "build_policy": {
+    "kernel_recompile_required": "New B5qEthernet class and late-start linkage change native archive input; existing workflow performs source-correct build; no unchanged Data/firmware rebuild",
+    "Data": "reuse completed unchanged v11 seed",
+    "firmware": "unchanged",
+    "QEMU": false,
+    "CI_added_integrity_gates": false,
+    "delivery": "single800MiB4KnESP IMG"
+  },
+  "hardware_tested": false,
+  "limits": [
+    "No unique WindowServer wait chain proven by v14 log",
+    "No b5q desktop or new physical NIC transport claimed"
+  ],
+  "local_pre_ci": {
+    "result": "PASS",
+    "checks": [
+      "upstream-package-template",
+      "porting-record",
+      "source-contract",
+      "lockdown-public",
+      "log-startup",
+      "log-writer",
+      "runtime-gates",
+      "ethernet-lifecycle",
+      "installer-errors",
+      "root-format-compile",
+      "root-format-runtime",
+      "smmu-compile",
+      "smmu-runtime",
+      "protocol-compile",
+      "protocol-runtime",
+      "exact-local-root-policies",
+      "full-root-image-sha256",
+      "original-pmgr-fixture",
+      "device-tree-syntax",
+      "python-syntax",
+      "no-added-ci-integrity-gates"
+    ],
+    "count": 21,
+    "report_sha256": "f0b9900e2e6edbfa86cb78469f6f5c304d9c98f38c535a781f51db352ce4808b"
+  }
+}

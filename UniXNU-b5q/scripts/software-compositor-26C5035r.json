@@ -1,0 +1,68 @@
+{
+  "build": "26C5035r",
+  "five_complete_policy_sites": true,
+  "page_bytes": 4096,
+  "superseded_partial_BGRA_branch_excluded": true,
+  "disk_cache_modified": false,
+  "source_rules": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/nabu-27.3-26C5035r-esp-session-aeabf17/cpu-userland-rules.json",
+  "source_rules_sha256": "5b79aa1eac9bdd828d24f82a9b7e5e9caf97b9b521b7506343a1a87e45040290",
+  "patches": [
+    {
+      "name": "AccelServer::renderer",
+      "va": "0x18df51d00",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x5b51d00",
+      "original": "7f2303d5f44fbea9",
+      "replacement": "000080d2c0035fd6",
+      "page_sha256": "c48176f0e65e28794b1579a3c6464c618050b70d30e6a625806466450b44b42a",
+      "patched_page_sha256": "860b6cad5cf6b027ea252a38b135f009501a14a8a69ac1cc64516341c39156ce"
+    },
+    {
+      "name": "VirtualServer::renderer",
+      "va": "0x18df4263c",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x5b4263c",
+      "original": "7f2303d5f657bda9",
+      "replacement": "000080d2c0035fd6",
+      "page_sha256": "429f38cd13e743244bf226d8da3a9fff1aaf209aac43307af65d6a9f832c3395",
+      "patched_page_sha256": "f0ce01ef77d21d28be4245943785fc80da5e84485c185cfdfeec32bd75ff0460"
+    },
+    {
+      "name": "IOMFBDisplay::CPU-final-framebuffer-BGRA",
+      "va": "0x18e1e63cc",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x5de63cc",
+      "original": "1811981a",
+      "replacement": "f803082a",
+      "page_sha256": "534eb22cb60d777d1b8bd1c3bdc2dccae664c7edd5d9172ff7eefb7e72805d90",
+      "patched_page_sha256": "b81dfa5fdaa2e324eecc18fc428953ece166a8b17ff9fe937ff4f06dacba7427"
+    },
+    {
+      "name": "SkyLight::Metal-capability-no-device",
+      "va": "0x1828dfd5c",
+      "file": "dyld_shared_cache_arm64e.01",
+      "offset": "0x24dfd5c",
+      "original": "ff4302d1f65706a9",
+      "replacement": "ff2303d5c0035fd6",
+      "page_sha256": "510a4ab095574afdfddfce5ef84e3d8a29a1c5a08f5dd65a96da21293b8a2879",
+      "patched_page_sha256": "2b3768a2c069f78907a158d67f580833b2081de4d1e2a95fa69e0cec607d3a8f"
+    },
+    {
+      "name": "SLCADisplay::software-pool-BGRA8",
+      "va": "0x182acde70",
+      "file": "dyld_shared_cache_arm64e.01",
+      "offset": "0x26cde70",
+      "original": "f40300aa",
+      "replacement": "140a80d2",
+      "page_sha256": "0f7866d7f0e47ecc4e2f7b277b35cf8a9089c27d0b4e4e7c17bf70c6d7b908a9",
+      "patched_page_sha256": "3c101c4bf8d9fe936dd59edd3e2ec69694983bcac1875e8d0a6ec547a2cd6f50"
+    }
+  ],
+  "entries": [
+    "dyld_shared_cache_arm64e.03,5b51d00,7f2303d5f44fbea9,000080d2c0035fd6",
+    "dyld_shared_cache_arm64e.03,5b4263c,7f2303d5f657bda9,000080d2c0035fd6",
+    "dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a",
+    "dyld_shared_cache_arm64e.01,24dfd5c,ff4302d1f65706a9,ff2303d5c0035fd6",
+    "dyld_shared_cache_arm64e.01,26cde70,f40300aa,140a80d2"
+  ]
+}

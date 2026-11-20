@@ -58,11 +58,20 @@ size_mib = 256
 loader = "firmware"
 title = "UniXNU b5q macOS 27.3"
 panic_screen = true
+# 26C5035r original software compositor and final/intermediate BGRA formats.
+# Source bytes and 4KiB page hashes verified in reports/runtime-v15.json.
+text_fixups = [
+  "dyld_shared_cache_arm64e.03,5b51d00,7f2303d5f44fbea9,000080d2c0035fd6",
+  "dyld_shared_cache_arm64e.03,5b4263c,7f2303d5f657bda9,000080d2c0035fd6",
+  "dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a",
+  "dyld_shared_cache_arm64e.01,24dfd5c,ff4302d1f65706a9,ff2303d5c0035fd6",
+  "dyld_shared_cache_arm64e.01,26cde70,f40300aa,140a80d2",
+]
 tools = true
 # b5q-root selects authenticated read-only macosroot; Data remains volatile in RAM.
 # The existing ArmCpu secondary/SM8550 IPI path is opt-in. no-lc selects the
 # already-built launch-constraint policy for signed, owner-trusted boot shims.
-kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "no-lc=1", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "disable-watchdogd=1", "cs-lazy=1", "boot-payload-release=1", "exec-log=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2"]
+kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "no-lc=1", "ethernet=1", "vsync=60", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "disable-watchdogd=1", "cs-lazy=1", "boot-payload-release=1", "exec-log=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2"]
 
 [payload.adt]
 # EFI allocator chooses a real contiguous window; no physical DRAM address is invented.
