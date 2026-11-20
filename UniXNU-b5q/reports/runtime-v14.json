@@ -1,0 +1,170 @@
+{
+  "scope": "v13 actual log fixes: opt in existing SMP/IPI implementation and existing launch-constraint policy; payload-only",
+  "status": "local pre-CI",
+  "log_input": {
+    "path": "logs/b5q-xnu2log-v13/XNU2LOG.BIN",
+    "sha256": "85f58ff8ef9694d87ce46493a0ca991e11898ed4e3555b58dda5a6bce8c4fbb9"
+  },
+  "arguments_added": [
+    "smp=1",
+    "armcpu-spi-ipi=1",
+    "armcpu-self-ipi=1",
+    "no-lc=1"
+  ],
+  "cpu_inputs": {
+    "hardware_FDT_sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+    "cpu_affinities": [
+      "0x0",
+      "0x100",
+      "0x200",
+      "0x300",
+      "0x400",
+      "0x500",
+      "0x600",
+      "0x700"
+    ],
+    "psci": "smc",
+    "GICD": "0x17100000",
+    "GICR": "0x17180000",
+    "redistributor_stride": "0x40000",
+    "IPI1008_to1015_FDT_claims": [],
+    "actual_secondary_startup": "pending real-device observation",
+    "kernel_args_bytes": 579,
+    "official_ADT_generated_locally": true,
+    "ADT_CPU_affinities_match_live_FDT": true,
+    "no_new_MMIO_constants": true
+  },
+  "kernel_gate_test": {
+    "passed": true,
+    "kernel_sha256": "2ffc9610bf9db0b6f58c287b45ef653d9060f763cedac38a7eea2d806a382d19",
+    "actual_compiled_launch_constraint_gate": true,
+    "cases": [
+      {
+        "argument_present": false,
+        "value": 0,
+        "outcome": "original_policy"
+      },
+      {
+        "argument_present": true,
+        "value": 0,
+        "outcome": "original_policy"
+      },
+      {
+        "argument_present": true,
+        "value": 1,
+        "outcome": "return_0"
+      },
+      {
+        "argument_present": true,
+        "value": 2,
+        "outcome": "return_0"
+      }
+    ],
+    "ArmCpu_probe_present": true,
+    "kernel_recompiled": false,
+    "boot_parser_mocked": true,
+    "PAuth_not_tested": true,
+    "hardware_tested": false
+  },
+  "reuse_test": {
+    "passed": true,
+    "actual_reuse_script_executed": true,
+    "kernel_sha256": "2ffc9610bf9db0b6f58c287b45ef653d9060f763cedac38a7eea2d806a382d19",
+    "data_sha256": "804692b96d9ba6bfcb64cbb430a627923dfdb4f072da4872ee14674365dc46b8",
+    "data_logical_bytes": 2147483648,
+    "data_metadata_byte_identical": true,
+    "source_run": 44688079841,
+    "no_build_invocation": true
+  },
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "52d22c6eae26b8759af756046ae4918df2b01096f0552f4739635b008ab4429b",
+    "UniXNU-b5q/scripts/reuse-v13-build.py": "4c866dd96ec06f9e160ffd29d8fe7eeec21b58635e733428e15f67cf8a970413",
+    ".github/workflows/b5q-runtime.yml": "fdfd8f2b0353fe5dffa7e4c90eabcfa15c6fb866c7cf95499d00fdc6bf4ed032",
+    "tests/b5q-ufs/test-runtime-gates.py": "e4187b3a87d4084a3d669d6c4a751c277b3ef6f6d8db34ba385baff3259ea841",
+    "scripts/b5q-install/pre-ci.py": "9ad0371fd166b4803ecb56a3e051ac6bda2bb595c3e978eb2cd017205323f037",
+    "scripts/b5q-install/verify-runtime-gates-binary.py": "5c58bc0f8027b375daadc7abd6a37d17696ce625c022e79b93116d9203babd09"
+  },
+  "sources": {
+    "ArmCpu_probe": "sources/UniXNU/drivers/ArmCpu/ArmCpu.cpp:367-386; start/finishSecondary/startCPU retain original IOCPU lifecycle and PSCI",
+    "IPI_policy": "ArmCpu README and latest pinned sheng27.3 board.toml:243; b5q FDT has matching GIC/CPU/PSCI and no declared SPI1008..1015 consumers; reservation/security ownership not proven by an absent DT claim",
+    "launch_gate": "sources/UniXNU/patches/xnu-12377/zzyc-owner-skip-launch-constraints.patch; compiled v13 native mac_proc_check_launch_constraints executed for absent/0/1/2",
+    "reference_sheng_commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+    "core_commit": "8542980d02b4d2cc5c32ee3542de1760b2562aac"
+  },
+  "unchanged": [
+    "DTS and physical memory",
+    "kernel code and patches",
+    "Data seed",
+    "root policies, signatures and VerifiedRoot",
+    "log OSLOG startup and bounded WRITE10/FUA/SYNC10",
+    "panic_screen and existing menu entries"
+  ],
+  "hardware_tested": false,
+  "remaining": [
+    "Secondary physical CPU startup and resulting IOKit quiet require next real log",
+    "No proven WindowServer wait stack or frame submission in v13; no speculative GPU/text-fixup change"
+  ],
+  "local_pre_ci": {
+    "result": "PASS",
+    "checks": [
+      "upstream-package-template",
+      "porting-record",
+      "source-contract",
+      "lockdown-public",
+      "log-startup",
+      "log-writer",
+      "runtime-gates",
+      "installer-errors",
+      "root-format-compile",
+      "root-format-runtime",
+      "smmu-compile",
+      "smmu-runtime",
+      "protocol-compile",
+      "protocol-runtime",
+      "exact-local-root-policies",
+      "full-root-image-sha256",
+      "original-pmgr-fixture",
+      "device-tree-syntax",
+      "python-syntax",
+      "no-added-ci-integrity-gates"
+    ],
+    "report_sha256": "64b3491651589dc4d6c8536e0034f8c9c3e1c2a3bd5bce06a2c07b199fef708b"
+  },
+  "reuse_kernel_source_audit": {
+    "source_commit": "8cda67dd11db65f04f270f3585c9e4644cad195c",
+    "all_byte_identical": true,
+    "paths": [
+      "UniXNU-b5q/configs/b5q_macos_defconfig",
+      "UniXNU-b5q/feeds.toml",
+      "UniXNU-b5q/package/B5qAbsentBoard.cpp",
+      "UniXNU-b5q/package/B5qPmgr.cpp",
+      "UniXNU-b5q/package/B5qRamStorage.cpp",
+      "UniXNU-b5q/package/B5qRootBinding.cpp",
+      "UniXNU-b5q/package/B5qUfs/B5qLogArgs.h",
+      "UniXNU-b5q/package/B5qUfs/B5qLogCore.h",
+      "UniXNU-b5q/package/B5qUfs/B5qLogFormat.h",
+      "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h",
+      "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h",
+      "UniXNU-b5q/package/B5qUfs/B5qLogVolume.h",
+      "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h",
+      "UniXNU-b5q/package/B5qUfs/B5qRootPolicies.h",
+      "UniXNU-b5q/package/B5qUfs/B5qSmmu.h",
+      "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp",
+      "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h",
+      "UniXNU-b5q/package/KeyStoreProbe.cpp",
+      "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+      "UniXNU-b5q/package/SoftwareAesProbe.cpp",
+      "UniXNU-b5q/patches/xnu/b5q-console-journal.patch",
+      "UniXNU-b5q/patches/xnu/macos-kernel-stack-alignment.patch",
+      "UniXNU-b5q/patches/xnu/macos-lockdown-public-state.patch",
+      "UniXNU-b5q/patches/xnu/native-arm64e-user-memory.patch",
+      "UniXNU-b5q/patches/xnu/native-text-console-retain.patch",
+      "UniXNU-b5q/patches/xnu/prelinked-corecrypto-hooks.patch",
+      "UniXNU-b5q/patches/xnu/series",
+      "UniXNU-b5q/patches/xnu/sheng-macos27-generic-runtime.patch",
+      "UniXNU-b5q/scripts/build-b5q-adreno.py",
+      "UniXNU-b5q/scripts/build-b5q-gop-27.py",
+      "UniXNU-b5q/scripts/build-b5q-storage.py"
+    ]
+  }
+}

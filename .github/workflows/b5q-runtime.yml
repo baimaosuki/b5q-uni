@@ -1,4 +1,4 @@
-name: b5q macOS payload-only mount repair
+name: b5q macOS payload-only runtime
 on:
   push:
     branches: [main]
@@ -43,7 +43,7 @@ jobs:
           set -euo pipefail
           brew install llvm lld mtools dtc blacktop/tap/ipsw
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
-      - name: Resolve payload sources and retain completed v10 kernel
+      - name: Resolve payload sources and reuse completed v13 kernel and Data
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
@@ -51,12 +51,9 @@ jobs:
           set -euo pipefail
           UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
           UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
-          gh run download 44606991063 --repo "$GITHUB_REPOSITORY" --name b5q-build-44606991063 --dir "$RUNNER_TEMP/v10-artifact"
-          python3 UniXNU-b5q/scripts/reuse-v10-kernel.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/v10-artifact"
-      - name: Build 2GiB volatile Data with exact existing UUID
-        run: |
-          set -euo pipefail
-          python3 scripts/b5q-install/build-data-seed.py --unixnu UniXNU --out "$RUNNER_TEMP/b5q-ram-data" --gpt scripts/b5q-install/gpt-input.json --ram-gib 2 --skip-setup --disable-watchdogd 2>&1 | tee "$RUNNER_TEMP/data-seed.log"
+          gh run download 44688079841 --repo "$GITHUB_REPOSITORY" --name b5q-build-44688079841 --dir "$RUNNER_TEMP/v13-artifact"
+          python3 UniXNU-b5q/scripts/reuse-v13-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/v13-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data"
+          rm -rf "$RUNNER_TEMP/v13-artifact"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/uefi-sheng
@@ -69,7 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$RUNNER_TEMP/b5q-ram-data/runtime/data.dbr" 2>&1 | tee "$RUNNER_TEMP/payload.log"
+          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$RUNNER_TEMP/b5q-reused-data/data.dbr" 2>&1 | tee "$RUNNER_TEMP/payload.log"
       - name: Upload actual kernel and payload outputs
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9

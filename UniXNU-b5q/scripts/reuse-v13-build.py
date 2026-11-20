@@ -1,0 +1,56 @@
+#!/usr/bin/env python3
+"""Stage the completed v13 kernel and unchanged RAM Data for payload-only CI."""
+import argparse
+import json
+import shutil
+import struct
+import subprocess
+import sys
+from pathlib import Path
+
+p = argparse.ArgumentParser(description=__doc__)
+p.add_argument('--unixnu', type=Path, required=True)
+p.add_argument('--device', type=Path, required=True)
+p.add_argument('--artifact', type=Path, required=True)
+p.add_argument('--data-out', type=Path, required=True)
+a = p.parse_args()
+core, device = a.unixnu.resolve(), a.device.resolve()
+sys.path.insert(0, str(core / 'scripts'))
+from unixnu.cli import parser
+from unixnu.config import Context
+
+ctx = Context(parser().parse_args(['build', 'payload', '--device', str(device),
+                                 '--os', 'macos-27.3-26C5035r']))
+found = list(a.artifact.rglob('package.manifest.json'))
+if len(found) != 1:
+    raise SystemExit('Completed v13 artifact must contain one package manifest')
+source = found[0].parent
+destination = ctx.work / 'kernel'
+destination.mkdir(parents=True, exist_ok=True)
+for path in (source / 'kernel').glob('*'):
+    if path.is_file():
+        shutil.copyfile(path, destination / path.name)
+record = dict(source_run=44688079841,
+              source_commit='8cda67dd11db65f04f270f3585c9e4644cad195c',
+              kernel_recompiled=False, prior_manifest=json.loads(found[0].read_text()))
+(ctx.work / 'kernel-reuse.json').write_text(json.dumps(record, indent=2) + '\n')
+out = a.data_out
+out.mkdir(parents=True, exist_ok=True)
+for src, dest in [('scratch-data.img', 'data.dbr'),
+                  ('kernel.macho.trustcache', 'original-ipsw-trust.bundle')]:
+    subprocess.run(['mcopy', '-i', str(source / 'payload/payload.img'),
+                    '::/EFI/UniXNU/Payloads/' + src, str(out / dest)], check=True)
+# Retain original Apple modules; the official runtime regenerates and signs
+# its owner module together with its boot shim addon in the new payload.
+trust = out / 'original-ipsw-trust.bundle'
+data = trust.read_bytes()
+count = struct.unpack_from('<I', data)[0]
+offsets = list(struct.unpack_from(f'<{count}I', data, 4)) + [len(data)]
+mods = [data[offsets[i]:offsets[i + 1]] for i in range(3)]
+trust.write_bytes(struct.pack('<4I', 3, 16, 16 + len(mods[0]),
+                             16 + len(mods[0]) + len(mods[1])) + b''.join(mods))
+shutil.copyfile(source / 'runtime/data-seed.json', out / 'data-seed.json')
+(out / 'reuse.json').write_text(json.dumps(dict(source_run=44688079841,
+    data_regenerated=False, original_data_run=44616733365,
+    source_seed_metadata=json.loads((out / 'data-seed.json').read_text())), indent=2) + '\n')
+print('Staged completed v13 kernel and unchanged 2GiB sparse RAM Data; payload only')

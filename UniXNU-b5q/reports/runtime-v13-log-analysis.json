@@ -1,0 +1,158 @@
+{
+  "scope": "Analysis of user-supplied physical-device journal only; no source/config/driver edits, builds or device access",
+  "input": {
+    "path": "logs/b5q-xnu2log-v13/XNU2LOG.BIN",
+    "bytes": 8400896,
+    "sha256": "85f58ff8ef9694d87ce46493a0ca991e11898ed4e3555b58dda5a6bce8c4fbb9",
+    "matches_user_hash": true
+  },
+  "decode": {
+    "selected_slot": 0,
+    "sequence": 341,
+    "payload_bytes": 147013,
+    "lost_on_contention": 0,
+    "ring_overwritten": 0,
+    "stored_checksum_valid": true,
+    "config_checksum_valid": true,
+    "payload_sha256": "a796e8da8729fd6a14770cfd1fb76bf612b203ae9dfb409d4d5a7b2330d62d2b",
+    "complete_boot_log": false
+  },
+  "slots": [
+    {
+      "slot": 0,
+      "valid": true,
+      "sequence": 341,
+      "payload_bytes": 147013
+    },
+    {
+      "slot": 1,
+      "valid": true,
+      "sequence": 340,
+      "payload_bytes": 146970
+    }
+  ],
+  "hardware_evidence": {
+    "journal": "ESP verifier and first successful commit appear in capture; two valid slots340/341 prove persistence",
+    "UFS": "unique macosroot onLUN0, three root volumes authenticated and mounted",
+    "Data": "2GiB volatile Data mounted; firmlinks and APFS boot shim succeeded",
+    "userland": "Early boot complete, loginwindow105 and WindowServer111 activated; further processes through366; no initproc panic or WindowServer/loginwindow exit recorded",
+    "display": "valid1080x2640 default IOSurface; no instrumented copy/frame events or full desktop evidence"
+  },
+  "findings": [
+    {
+      "id": "cpu-matching",
+      "certainty": "observed matching state; cause of WindowServer wait not directly sampled",
+      "log": [
+        {
+          "line": 346,
+          "text": "IOKit busy 2: cpu1(IOPlatformDevice,1,-) cpu2(IOPlatformDevice,1,-) cpu3(IOPlatformDevice,1,-) cpu4(IOPlatformDevice,1,-) cpu5(IOPlatformDevice,1,-) cpu6(IOPlatformDevice,1,-) cpu7(IOPlatformDevice,1,-)"
+        },
+        {
+          "line": 848,
+          "text": "IOKit busy 2: cpu1(IOPlatformDevice,1,-) cpu2(IOPlatformDevice,1,-) cpu3(IOPlatformDevice,1,-) cpu4(IOPlatformDevice,1,-) cpu5(IOPlatformDevice,1,-) cpu6(IOPlatformDevice,1,-) cpu7(IOPlatformDevice,1,-) IOUserResources(IOUserResources,1,-)"
+        },
+        {
+          "line": 912,
+          "text": "IOKit busy 1: cpu1(IOPlatformDevice,1,-) cpu2(IOPlatformDevice,1,-) cpu3(IOPlatformDevice,1,-) cpu4(IOPlatformDevice,1,-) cpu5(IOPlatformDevice,1,-) cpu6(IOPlatformDevice,1,-) cpu7(IOPlatformDevice,1,-)"
+        }
+      ],
+      "source": "ArmCpu.cpp:378-382 rejects secondary probe unless smp enabled; current board supplies no smp argument",
+      "next": "Resolve secondary CPU nub matching and the root busy lifecycle; verify IOKit quiet rather than assuming SMP=1 alone proves a fix"
+    },
+    {
+      "id": "absent-service-launch-constraints",
+      "certainty": "two explicit enforced kills",
+      "log": [
+        {
+          "line": 1338,
+          "text": "AMFI: Launch Constraint Violation (enforcing), error info: c[8]p[1]m[1]e[6], (Constraint not matched) launching proc[vc: 1 pid: 238]: /private/var/ngpu/bin/unixnu-absentd, launch type 1, failure proc [vc: 1 pid: 238]: /private/var/ngpu/bin/unixnu-absentd"
+        },
+        {
+          "line": 1341,
+          "text": "exit: pid 238 unixnu-absentd status 0x9 reason 3:4 flags 0x42 Launch Constraint Violation, error info: c[8]p[1]m[1]e[6], (Constraint not matched) launch type 1, failure proc [vc: 1]: /private/var/ngpu/bin/unixnu-absentd"
+        },
+        {
+          "line": 1408,
+          "text": "AMFI: Launch Constraint Violation (enforcing), error info: c[8]p[1]m[1]e[6], (Constraint not matched) launching proc[vc: 1 pid: 253]: /private/var/ngpu/bin/unixnu-absentd, launch type 1, failure proc [vc: 1 pid: 253]: /private/var/ngpu/bin/unixnu-absentd"
+        },
+        {
+          "line": 1412,
+          "text": "exit: pid 253 unixnu-absentd status 0x9 reason 3:4 flags 0x42 Launch Constraint Violation, error info: c[8]p[1]m[1]e[6], (Constraint not matched) launch type 1, failure proc [vc: 1]: /private/var/ngpu/bin/unixnu-absentd"
+        }
+      ],
+      "source": "Official zzyc-owner-skip-launch-constraints.patch is in the136-patch plan; no-lc gate is absent from current args. Shared absentd stand-in is for mobileactivationd/cryptexd, not every system service",
+      "next": "Review the existing upstream bring-up no-lc policy or correct stand-in launch constraints; preserve signature/trust and VerifiedRoot validation"
+    },
+    {
+      "id": "auxiliary-display-object",
+      "certainty": "auxiliary attachment failed; main framebuffer failure not established",
+      "log": [
+        {
+          "line": 154,
+          "text": "virtual bool IOMobileFramebufferLegacy::start(IOService *): provider was not AppleARMIODevice."
+        },
+        {
+          "line": 155,
+          "text": "b5q-fb: default surface 0xfffffff95933f418 status 0x0 valid 1 1080x2640 stride 4352 bytes 11489280"
+        },
+        {
+          "line": 159,
+          "text": "NativeLegacyDisplay: display object not attached (kext 0)"
+        }
+      ],
+      "source": "NativeLegacyDisplay.cpp:1185-1200 attachDisplayObject creates an auxiliary IODisplay/EDID/container child; kext0 means successful IOGraphicsFamily load",
+      "next": "Inspect the actual primary display/user-client path and auxiliary IODisplay allocation/attach; do not substitute primary framebuffer failure for this message"
+    },
+    {
+      "id": "frames-and-metal",
+      "certainty": "no instrumented output frames observed; future Metal crash unsupported",
+      "log": [
+        {
+          "line": 699,
+          "text": "exec: pid 105 loginwindow"
+        },
+        {
+          "line": 725,
+          "text": "exec: pid 111 WindowServer"
+        },
+        {
+          "line": 1158,
+          "text": "[System Event] [5978254343] [INFO] [Subsystem: launchd] [Event: boot] Early boot complete. Continuing system boot."
+        },
+        {
+          "line": 1170,
+          "text": "com.apple.xpc.launchd|2026-11-18 22:36:58.370876 (boot) <Notice>: Early boot complete. Continuing system boot."
+        }
+      ],
+      "no_frame_logs": true,
+      "source": "LegacyDisplayProbe.cpp emits counters for first presented frames/copies; no such events in snapshot",
+      "next": "Keep CPU-render/text-fixup and GPU-Metal claims separate until actual WindowServer stack/crash or display transfer evidence exists"
+    }
+  ],
+  "secondary_errors": {
+    "mounts": "Four mount_apfs exits0x4d00 correspond to exit77, not errno77; separate get_nx error30 is EROFS. Data/AppCryptex updates succeed. Snapshot lacks attempted mount argv, so exact target for each refused remount is not proven.",
+    "policy": "KeyStore MACF denials, nonenforcing AMFI messages and geod ActiveSoft19MB warning appear; no evidence they killed PID1. They may still affect dependent services.",
+    "memory": "992515 free pages and56061 wired are bootstrap values, not current free memory at snapshot end.",
+    "build_marker": "b5q-log-v12-26C5035r is the unchanged logger string in v13, not a unique deployment ID or proof of wrong image."
+  },
+  "source_provenance": {
+    "build_commit": "8cda67dd11db65f04f270f3585c9e4644cad195c",
+    "remote_build_sources_compared_to_local": [
+      "UniXNU-b5q/package/LegacyDisplayProbe.cpp",
+      "UniXNU-b5q/scripts/build-b5q-gop-27.py"
+    ],
+    "byte_identical": true,
+    "sources_sha256": {
+      "sources/UniXNU/drivers/ArmCpu/ArmCpu.cpp": "2518e60ea9cffce9664a1761e9280d18e6a3d9d0e0beb7756ac7b71d1b14edfd",
+      "sources/UniXNU/drivers/GopFramebuffer/NativeLegacyDisplay.cpp": "465f5ebfe1df7228c66ecebd2b17a9971a7af64882efd132a907b1b0abacb78a",
+      "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "101dc9117e173c8a703da740e389ec395df0aec60b52fde79aa247732ad97b1c",
+      "UniXNU-b5q/board.toml": "fb8a8e221bfdddd29c1591c3c611001bdc17c55f48551199f302774fe334d96a",
+      "sources/UniXNU/patches/xnu-12377/zzyc-owner-skip-launch-constraints.patch": "0b23e9bb5a3e58e26a12d567660129b1cb7d0fac031e5c94849012cd36e766f2"
+    }
+  },
+  "limits": [
+    "The CRC-validated snapshot ends at147013 bytes; output after final completed commit may be absent",
+    "Process activation without exit record does not establish liveness, responsiveness or actual wait stack",
+    "CPU busy observations and missing no-lc are actionable source/log facts; this capture does not prove a unique final desktop blocker"
+  ]
+}
