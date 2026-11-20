@@ -20,7 +20,7 @@ for off in ['0xc120','0xc110','0xc704','0xc70c','0xc200','0xc2c0','0x808','0x810
 assert '0x7fd' in (device/'package/B5qSpmi.cpp').read_text()
 for name in ['sheng_cpufreq_probe','sheng_thermal_probe','sheng_thermal_level_probe','sheng_board_clock_probe','sheng_buttons_probe','native_hid_input_probe','b5q_touch_probe','sheng_dpu_probe']:assert name+'()' in source,name
 workflow=(root/'.github/workflows/b5q-runtime.yml').read_text()
-for token in ['--user baimao:1234 --real-name baimao --auto-login','relink-b5q-peripherals.py','--reuse-addon','44789459847','44794616634','fetch xnu IOHIDFamily']:assert token in workflow,token
+for token in ['--user baimao:1234 --real-name baimao --auto-login','reuse-completed-build.py','--reuse-addon','44828924826','44794616634','fetch xnu IOHIDFamily']:assert token in workflow,token
 assert 'unixnu build kernel' not in workflow and 'build-mesa' not in workflow and 'build-adreno-metal' not in workflow
 target=json.loads((work/'target-check.log').read_text());assert target['passed'] and target['XHCI_slots']==427
 hid=json.loads((work/'hid-bindings.json').read_text());assert hid['slots']==334 and hid['all_diversities_checked']

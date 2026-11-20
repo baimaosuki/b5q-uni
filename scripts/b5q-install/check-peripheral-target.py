@@ -91,3 +91,5 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
   missing=imports-available;results[stem]['unresolved']=sorted(missing)
  for n in ['_backtrace_user','_backtrace','_task_get_all_image_info_addr','_copyin','_get_user_regs','_thread_tid','_PE_parse_boot_argn']:assert n in defined,n
 print(json.dumps(dict(passed=not duplicates and not any(v['unresolved'] for v in results.values()),duplicate_external_definitions=duplicates,XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True)))
+
+if duplicates or any(v['unresolved'] for v in results.values()):raise SystemExit(1)

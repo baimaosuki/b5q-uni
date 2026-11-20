@@ -2714,6 +2714,7 @@
   "hardware_v21": "pending",
   "target_compile": {
     "passed": true,
+    "duplicate_external_definitions": {},
     "XHCI_slots": 427,
     "objects": {
       "B5qUsbHost": {
@@ -2728,7 +2729,7 @@
       },
       "B5qGpu": {
         "target": "arm64e-ios27",
-        "imports": 153,
+        "imports": 154,
         "unresolved": []
       },
       "LegacyDisplayProbe": {
@@ -2895,5 +2896,46 @@
     },
     "fix": "remove old GPU placeholder definition; use actual HID observer storage; add cross-object strong-definition check",
     "log": "artifacts/b5q-runtime-v21-work/ci-logs-44828124075/9_Compile board objects and relink unchanged v19 XNU core.txt"
-  }
+  },
+  "local_apfs_reader": "Verified against actual v20 packed Data: SetupDone root:wheel0644,admin group inode root:wheel0600; v21Account actualverification pending",
+  "current_ci": {
+    "run": 44828924826,
+    "commit": "69a684f65f4a622078034ada5d86e77cb4fbcadb",
+    "native_link": "passed",
+    "stage": "payload-only repair prepared; completed v21kernel reused",
+    "kernel_core_compiled": false,
+    "Mesa_Turnip_Metal_compiled": false
+  },
+  "ci_payload_error": {
+    "run": 44828924826,
+    "kernel_link_and_prelink": "PASS",
+    "Data_generation": "PASS; metadata21975184B; file was not in upload list before failed payload",
+    "payload_error": "validation_disables=0x11040 static_if keys unmodeled by original POST sealer",
+    "solution": "scoped tool patch models only0x11040, keeps unknown override refusal andPOST; reuse completed kernel without recompiling",
+    "verification": {
+      "kernel_sha256": "79cd7a4ec8b9f89f205f5823338ebf7637e85562b6d11d93a135292d565ad8b5",
+      "code_file_offset": "0x4920000",
+      "code_bytes": 10945504,
+      "hmac_file_offset": "0x34047c",
+      "hmac_sha256": "3ec2f4e5e6187284ea69b6dda379e18283a02fba7abcf5c0652674e9e2f50077",
+      "static_if_sites_prepatched": 69,
+      "static_if_key_sites": {
+        "_sched_debug_preemption_disable_jump_key": 35,
+        "_sched_debug_interrupt_disable_jump_key": 24,
+        "_static_if_test_key_true_to_false_jump_key": 5,
+        "_static_if_test_key_false_to_true_jump_key": 5
+      },
+      "validation_disables": "0x11040",
+      "runtime_selftests_executed": false,
+      "passed": true,
+      "actual_compiled_override_function": true,
+      "actual_ARM64_instruction_patcher_sites": 69,
+      "all_runtime_writes_leave_sealed_text_unchanged": true,
+      "sealing_idempotent": true,
+      "POST_HMAC_recomputed_independently": true,
+      "hardware_tested": false,
+      "emulation_scope": "actual short leaf functions; no QEMU or OS hardware emulation"
+    }
+  },
+  "post_tool_patch_sha256": "1c9fdd2a2d102708ffb6ad9775de33f9cbed64862d0b011ad8246c2cf856ace1"
 }

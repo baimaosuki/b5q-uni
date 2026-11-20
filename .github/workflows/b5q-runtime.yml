@@ -71,7 +71,8 @@ jobs:
           brew install llvm lld mtools dtc blacktop/tap/ipsw
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
-      - name: Reuse completed v19 kernel, Data and original trust inputs
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
+      - name: Reuse completed v21 kernel and cached GPU/trust inputs
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
@@ -83,11 +84,12 @@ jobs:
           gh run download 44794616634 --repo "$GITHUB_REPOSITORY" --name b5q-build-44794616634 --dir "$RUNNER_TEMP/completed-artifact"
           python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44794616634 --source-commit d4c6140df3fa08082cfb5094f864da924dbc156b
           rm -rf "$RUNNER_TEMP/completed-artifact"
-          gh run download 44789459847 --repo "$GITHUB_REPOSITORY" --name b5q-build-44789459847 --dir "$RUNNER_TEMP/cached-kernel"
-      - name: Compile board objects and relink unchanged v19 XNU core
+          gh run download 44828924826 --repo "$GITHUB_REPOSITORY" --name b5q-build-44828924826 --dir "$RUNNER_TEMP/finished-v21"
+      - name: Reuse completed v21 native link and XnuPrelink without recompiling
         run: |
           set -euo pipefail
-          python3 UniXNU-b5q/scripts/relink-b5q-peripherals.py --unixnu UniXNU --device UniXNU-b5q --cached-tree "$RUNNER_TEMP/cached-kernel/macos-27.3-26C5035r/b5q_macos/tree" --out "$RUNNER_TEMP/board-relink" 2>&1 | tee "$RUNNER_TEMP/board-relink.log"
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/finished-v21" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44828924826 --source-commit 69a684f65f4a622078034ada5d86e77cb4fbcadb --kernel-only
+          cp -R "$RUNNER_TEMP/finished-v21/macos-27.3-26C5035r/b5q_macos/tree/build/." UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/
       - name: Create administrator and auto-login RAM Data with official seed tool
         run: |
           set -euo pipefail
@@ -121,6 +123,7 @@ jobs:
             UniXNU/out/b5q/**/payload/payload.img
             UniXNU/out/b5q/**/payload/payload.json
             UniXNU/out/b5q/**/runtime/data-seed.json
+            UniXNU/out/b5q/**/runtime/data.dbr
             UniXNU/out/b5q/**/runtime/generated.json
             UniXNU/out/b5q/**/runtime/inputs.json
             UniXNU/out/b5q/**/kernel-reuse.json

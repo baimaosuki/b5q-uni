@@ -98,6 +98,6 @@ assert 'Report and verify runner tools' not in workflow
 assert 'actual FAT members against' not in (device / 'scripts/build-b5q-payload.py').read_text()
 checks.append('no-added-ci-integrity-gates')
 source_paths = sorted(set([*device.glob('package/**/*.cpp'), *device.glob('package/**/*.h'), *device.glob('scripts/*.py'), device / 'board.toml', device / 'porting.toml', device / 'configs/b5q_macos_defconfig', device / 'dts/b5q.dts', workspace / '.github/workflows/b5q-stage123.yml', *workspace.glob('scripts/b5q-install/*.py')]))
-report = {'scope': 'Local source/input checks before submission; target compiler/linker runs in macOS CI', 'checks': checks, 'result': 'PASS', 'source_sha256': {str(path.relative_to(workspace)): hashlib.sha256(path.read_bytes()).hexdigest() for path in source_paths}, 'hardware_tested': False}
+report = {'scope': 'Local source/input checks before submission; target compiler/linker runs in macOS CI', 'checks': checks, 'result': 'PASS', 'source_sha256': {str(path.relative_to(workspace)): hashlib.sha256(path.read_bytes()).hexdigest() for path in source_paths}, 'hardware_tested': False, 'post_build_v21': 'python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree'}
 (out / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
 print('LOCAL PRE-CI PASS:', len(checks), 'checks;', out / 'report.json')
