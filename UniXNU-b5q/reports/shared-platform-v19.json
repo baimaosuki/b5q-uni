@@ -201,6 +201,11 @@
           "imports": 381,
           "unresolved": []
         },
+        "NativeAdrenoTimer": {
+          "target": "arm64e-ios27",
+          "imports": 0,
+          "unresolved": []
+        },
         "ShengGmu": {
           "target": "arm64e-ios27",
           "imports": 8,
@@ -223,5 +228,25 @@
     "reference_adapter_regeneration": "PASS",
     "pending": "CI build, actual binary verification, hardware execution"
   },
-  "GPU_streams_source": "b5q FDT gfx3d_user0, gfx3d_lpac1, gfx3d_secure2, GMU5; nonsecure0/1 only"
+  "GPU_streams_source": "b5q FDT gfx3d_user0, gfx3d_lpac1, gfx3d_secure2, GMU5; nonsecure0/1 only",
+  "Samsung_GCC_sha256": "d653b83fcdfdbf9524664c4455eca2d6a460ba97294588ba373c6518e0441a31",
+  "Samsung_GCC_offsets": [
+    "0x71004",
+    "0x71010",
+    "0x71018",
+    "0x52000",
+    "0x71154"
+  ],
+  "native_BGRA_policy": {
+    "file": "dyld_shared_cache_arm64e.03",
+    "file_bytes": 131268608,
+    "offset": "0x5de1134",
+    "original": "08060037",
+    "replacement": "1f2003d5",
+    "page_sha256": "8870b41a6e8d2ee6fa7db01d83f8425afabfd42dc9b29743d275fc25581bb510",
+    "patched_page_sha256": "d53e8ee21c1086f1314f83c195477f664cb23cd914fd48b25cc98bc376341031",
+    "source": "Sheng27.3 exact hardware-Metal BGRA rule; original local26C5035r cache page checked",
+    "no_disk_cache_modification": true,
+    "file_sha256": "bc161753855e6f9646b5c1ef38c62c958e72e3bc34ec967c77c7372a7b3c3863"
+  }
 }

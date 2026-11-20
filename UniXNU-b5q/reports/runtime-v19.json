@@ -322,7 +322,21 @@
       "run": 44780034968,
       "first_error": "usb-bindings.o built for macOS, final kernel targets iOS",
       "fix": "kernel_target.TRIPLE assembly + local Mach-O platform checks"
+    },
+    {
+      "run": 44789459847,
+      "kernel": "SUCCESS sha256ab83d772d5d82de5ef71aca2c90a807a46cccdf4fb4263dba7db5844b8d218fe",
+      "payload_error": "FileNotFoundError glslc at gen-turnip-smoke-shaders.py",
+      "repair": "shaderc+spirv-tools; local actual shader compilation/validation PASS; reuse completed kernel, payload-only retry; cache Turnip/Mesa/Cargo/bridge and Homebrew including failure progress"
     }
   ],
-  "shared_platform_record": "reports/shared-platform-v19.json"
+  "shared_platform_record": "reports/shared-platform-v19.json",
+  "cache_policy": {
+    "kernel": "reuse exact completed kernel artifact44789459847 without recompilation",
+    "Data": "unchanged v11seed",
+    "GPU": "pinned inputs+runnerarchitecture+Xcode key, run-suffix snapshots and prefix restore",
+    "cached_paths": "Mesa source/Ninja build, translator source, Rust bridge/target, Cargo registry/gitdb, host Python tools and Homebrew downloads",
+    "credentials_cached": false,
+    "first_cache_hit": "pending first cache producer"
+  }
 }

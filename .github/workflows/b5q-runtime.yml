@@ -38,12 +38,40 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
         with:
           python-version: '3.13'
+      - name: Restore GPU source and incremental compiler caches
+        id: gpu-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/gpu-reference/metal2vulkan
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-venv
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-tools
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/mesa-tu-macos27
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/adreno-metal-bridge
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/m2v-target
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/turnip-smoke
+            ~/.cargo/registry
+            ~/.cargo/git/db
+          key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-macos27-gpu-v1-${{ hashFiles('UniXNU/scripts/data/adreno-compiler-inputs.json', 'UniXNU/scripts/data/gpu-metal-vulkan-inputs.json', 'UniXNU/components.toml', 'UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-macos27-gpu-v1-${{ hashFiles('UniXNU/scripts/data/adreno-compiler-inputs.json', 'UniXNU/scripts/data/gpu-metal-vulkan-inputs.json', 'UniXNU/components.toml', 'UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch') }}-
+      - name: Restore Homebrew downloads
+        id: brew-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-brew-v1-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-brew-v1-
       - name: Prepare payload host tools and scoped seed tool adaptation
         run: |
           set -euo pipefail
-          brew install llvm lld mtools dtc blacktop/tap/ipsw
+          brew install llvm lld mtools dtc blacktop/tap/ipsw bison ninja glslang shaderc spirv-tools pkgconf
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
-      - name: Resolve payload sources and reuse completed v17 kernel and Data
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
+          rustup toolchain install 1.98.0 --profile minimal --component rust-src
+      - name: Reuse completed v19 kernel and existing v11 RAM Data
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
@@ -51,9 +79,12 @@ jobs:
           set -euo pipefail
           UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
           UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
-          gh run download 44746455235 --repo "$GITHUB_REPOSITORY" --name b5q-build-44746455235 --dir "$RUNNER_TEMP/completed-artifact"
-          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44746455235 --source-commit 1a3cd004cef7074133a2bb4d5be1720633643b15
+          gh run download 44789459847 --repo "$GITHUB_REPOSITORY" --name b5q-build-44789459847 --dir "$RUNNER_TEMP/completed-artifact"
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44789459847 --source-commit 6c57bd844b2ad2fd67a93854781481c095db7c53 --kernel-only
           rm -rf "$RUNNER_TEMP/completed-artifact"
+          gh run download 44616733365 --repo "$GITHUB_REPOSITORY" --name b5q-build-44616733365 --dir "$RUNNER_TEMP/b5q-v11"
+          python3 scripts/b5q-install/reuse-v11-data.py --artifact "$RUNNER_TEMP/b5q-v11" --out "$RUNNER_TEMP/b5q-reused-data"
+          rm -rf "$RUNNER_TEMP/b5q-v11"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/uefi-sheng
@@ -96,3 +127,26 @@ jobs:
             ${{ runner.temp }}/payload.log
           if-no-files-found: warn
           retention-days: 3
+
+      - name: Save completed incremental GPU work, including failed payload attempts
+        if: ${{ always() && steps.gpu-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/gpu-reference/metal2vulkan
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-venv
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-tools
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/mesa-tu-macos27
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/adreno-metal-bridge
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/m2v-target
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/turnip-smoke
+            ~/.cargo/registry
+            ~/.cargo/git/db
+          key: ${{ steps.gpu-cache.outputs.cache-primary-key }}
+      - name: Save Homebrew download cache
+        if: ${{ always() && steps.brew-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ steps.brew-cache.outputs.cache-primary-key }}
