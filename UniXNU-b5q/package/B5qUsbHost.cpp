@@ -199,9 +199,10 @@ static void worker(void *,wait_result_t) {
   if(!host || !host->init() || !(hostAttached=host->attach(nub)))break;
   // start may allocate DMA rings before returning false. Pin both objects in
   // that case; no shared-context reset or release of live DMA storage.
+  nub->registerService();
   startAttempted=true;
   if(!host->start(nub)){host->retain();nub->retain();break;}
-  host->registerService();nub->registerService();host->retain();nub->retain();
+  host->registerService();host->retain();nub->retain();
   b5q_usb_state=1;stage="host-started";
   OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBHub");
   OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBHostCompositeDevice");

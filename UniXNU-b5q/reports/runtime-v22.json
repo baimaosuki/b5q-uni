@@ -1,0 +1,751 @@
+{
+  "status": "34 localpreCIchecks PASS; seven-object incrementalCI ready",
+  "v21_log_sha256": "423da175e22cdff91c8aaba5409ab044cd193f2d36d3d2df368af89f4ce0f387",
+  "v21_deploy_kernel_sha256": "821a19d60baee123b230db980d813f0b6c5b4e6858f209504e99fb67418fcefe",
+  "actual_fault": {
+    "PC": "0xfffffff00c2b3c40",
+    "symbol": "geni_i2c_prepare+0x4c",
+    "instruction": "blraaz x8",
+    "caller_return": "0xfffffff00c2b2a90",
+    "callback_target": "0xfffffff00c2b2d38; MMIO read wrapper",
+    "producer_GeniIo_read_discriminator": "0x50c7",
+    "producer_GeniIo_write_discriminator": "0xc120",
+    "consumer_discriminator": "0x0000",
+    "classification": "PAC IA function pointer authentication mismatch, not demonstrated SEA"
+  },
+  "log": {
+    "latest_sequence": 1,
+    "bytes": 9658,
+    "lines": 152,
+    "USB": "repeater APID633 rc0; DWC_usb31 33313130; host-started; cmd0/halted, enumeration not proven",
+    "RTC": "APID53 rc0; counter109836",
+    "CPU": "probe returned beforeRTC, frequencies not logged; not proof allMMIO succeeded",
+    "auto_login": "seed files verified; runtime login not reached/proven"
+  },
+  "hardware_corrections": {
+    "GCC": "Samsung gcc-kalama.c halt0x184e4, vote0x52008bit26;0x184f4 isRCG_CFG",
+    "gcc_source": {
+      "repo": "LineageOS/android_kernel_samsung_sm8550",
+      "commit": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9",
+      "path": "drivers/clk/qcom/gcc-kalama.c",
+      "sha256": "d653b83fcdfdbf9524664c4455eca2d6a460ba97294588ba373c6518e0441a31"
+    },
+    "TM": [
+      "0xc271000",
+      "0xc272000",
+      "0xc273000"
+    ],
+    "EPSS": [
+      "0x17d91000",
+      "0x17d92000",
+      "0x17d93000"
+    ],
+    "source": "b5q DT/source evidence runtime-v21; no replacement guessed addresses"
+  },
+  "planned_changes": [
+    "defaulttouch0; branchclock checkbeforeSE; removeunnecessary cold SEprivilegedwrites",
+    "TM valid-only, noSROT/GICD",
+    "restoreSheng foreignarbiterIRQclear; noforeignperipheralreads",
+    "postdisplay asyncprobes",
+    "USBnub registerbeforehoststart",
+    "C/C++ callback typePAC ABI consistency; noPACdisable"
+  ],
+  "kernel_core_rebuild": false,
+  "GPU_userspace_rebuild": false,
+  "Data": "reusev21 samebytes",
+  "hardware_v22": "pending",
+  "implementation": "all five requested behaviors implemented with physical address corrections fromSamsung source",
+  "target_compile": {
+    "passed": true,
+    "duplicate_external_definitions": {},
+    "XHCI_slots": 427,
+    "objects": {
+      "B5qUsbHost": {
+        "target": "arm64e-ios27",
+        "imports": 501,
+        "unresolved": []
+      },
+      "B5qSpmi": {
+        "target": "arm64e-ios27",
+        "imports": 2,
+        "unresolved": []
+      },
+      "B5qGpu": {
+        "target": "arm64e-ios27",
+        "imports": 154,
+        "unresolved": []
+      },
+      "LegacyDisplayProbe": {
+        "target": "arm64e-ios27",
+        "imports": 79,
+        "unresolved": []
+      },
+      "B5qGmuVotes": {
+        "target": "arm64e-ios27",
+        "imports": 8,
+        "unresolved": []
+      },
+      "CpuFreqProbe": {
+        "target": "arm64e-ios27",
+        "imports": 6,
+        "unresolved": []
+      },
+      "ThermalProbe": {
+        "target": "arm64e-ios27",
+        "imports": 9,
+        "unresolved": []
+      },
+      "ThermalLevel": {
+        "target": "arm64e-ios27",
+        "imports": 355,
+        "unresolved": []
+      },
+      "BoardClock": {
+        "target": "arm64e-ios27",
+        "imports": 5,
+        "unresolved": []
+      },
+      "ButtonProbe": {
+        "target": "arm64e-ios27",
+        "imports": 14,
+        "unresolved": []
+      },
+      "DisplayTimingProbe": {
+        "target": "arm64e-ios27",
+        "imports": 14,
+        "unresolved": []
+      },
+      "NativeHidInput": {
+        "target": "arm64e-ios27",
+        "imports": 383,
+        "unresolved": []
+      },
+      "HidInputProbe": {
+        "target": "arm64e-ios27",
+        "imports": 34,
+        "unresolved": []
+      },
+      "B5qTouch": {
+        "target": "arm64e-ios27",
+        "imports": 17,
+        "unresolved": []
+      },
+      "GeniI2c": {
+        "target": "arm64e-ios27",
+        "imports": 0,
+        "unresolved": []
+      },
+      "NativeAdrenoService": {
+        "target": "arm64e-ios27",
+        "imports": 381,
+        "unresolved": []
+      },
+      "NativeAdrenoTimer": {
+        "target": "arm64e-ios27",
+        "imports": 0,
+        "unresolved": []
+      },
+      "ShengGmu": {
+        "target": "arm64e-ios27",
+        "imports": 7,
+        "unresolved": []
+      },
+      "ShengGmuCommandDb": {
+        "target": "arm64e-ios27",
+        "imports": 2,
+        "unresolved": []
+      },
+      "ShengGpuSmmu": {
+        "target": "arm64e-ios27",
+        "imports": 13,
+        "unresolved": []
+      }
+    },
+    "all_saved_context_external_helpers_present": true
+  },
+  "PAC_contract": {
+    "passed": true,
+    "producer_type_discriminators": {
+      "write": "0xc120",
+      "read": "0x50c7"
+    },
+    "consumer_indirect_calls": [
+      {
+        "object_offset": "0x4c",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x64",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x94",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xb8",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xd0",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xe8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x100",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x118",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x130",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x144",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x158",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x16c",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x194",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x1b4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1cc",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1e0",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x1f8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x278",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x294",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x2a8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x31c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x33c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x350",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x478",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x494",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x4ac",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x578",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x598",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x5ac",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x614",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x630",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x648",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x788",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x7a8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x7bc",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x844",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x858",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x870",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x884",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x8a0",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x938",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x968",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x9b4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x9e4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xa5c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xa80",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb24",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb38",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb50",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb74",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xb90",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xbe8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xc04",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xc4c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xc80",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xcec",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xd20",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xd44",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xde4",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xe14",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xecc",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xee8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xf68",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xf94",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xfc4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1008",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x1020",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1038",
+        "key": "IA",
+        "discriminator": "0xc120"
+      }
+    ],
+    "zero_discriminator_calls": 0,
+    "C_CPP_callback_ABI_matches": true,
+    "PAuth_enabled": true,
+    "hardware_PAuth_execution_tested": false,
+    "object_sha256": {
+      "B5qTouch.o": "2f26ded74d240642d7a01436fca80993e64ce560ac15bc8a209cf7a30ad9678d",
+      "GeniI2c.o": "a00d610c891f73627bc23b0dd18c561bacbabc053dd855ade2ab363d55d3ef7d"
+    }
+  },
+  "local_checks": {
+    "touch_clock_timeout_allfivebranches": "PASS ASAN/UBSAN; noSEaccesswithinhelper",
+    "TouchComm_GENI_NACK_andboundedtimeout": "PASS",
+    "TM_invalid_reading_rejected": "PASS",
+    "actual_Button_IRQ_handler": "PASS own peripheralack+foreignarbiter-onlyclear; leveldeassertmodeled",
+    "v22_source_contract": {
+      "passed": true,
+      "source_contracts": [
+        "touch_default_off",
+        "bounded_real_GCC_branch_check_before_SE",
+        "no_privileged_SE_writes",
+        "thermal_TM_valid_only_no_SROT_GICD",
+        "foreign_arbiter_IRQ_clear",
+        "after_display_async_peripherals",
+        "USB_provider_registered_before_host_start",
+        "typed_C_CPP_PAC",
+        "unchanged_Data_Graphics_core_cache"
+      ],
+      "kernel_args_bytes": 998,
+      "only_arg_change": "touch=1 -> touch=0",
+      "hardware_tested": false
+    },
+    "full_preCI": {
+      "scope": "Local source/input checks before submission; target compiler/linker runs in macOS CI",
+      "checks": [
+        "upstream-package-template",
+        "porting-record",
+        "source-contract",
+        "lockdown-public",
+        "log-startup",
+        "log-writer",
+        "runtime-gates",
+        "ethernet-lifecycle",
+        "ethernet-start",
+        "read-status",
+        "log-read",
+        "verified-read",
+        "ws-signal",
+        "peripheral-policy",
+        "shared-gpu",
+        "peripheral-target",
+        "touch",
+        "data-account",
+        "geni-pac",
+        "buttons-irq",
+        "v22-inputs",
+        "installer-errors",
+        "root-format-compile",
+        "root-format-runtime",
+        "smmu-compile",
+        "smmu-runtime",
+        "protocol-compile",
+        "protocol-runtime",
+        "exact-local-root-policies",
+        "full-root-image-sha256",
+        "original-pmgr-fixture",
+        "device-tree-syntax",
+        "python-syntax",
+        "no-added-ci-integrity-gates"
+      ],
+      "result": "PASS",
+      "source_sha256": {
+        ".github/workflows/b5q-stage123.yml": "9c28ca3bf210490779dc6dc9064386026b7030a8f66bab406e57a75e7b99b0b7",
+        "UniXNU-b5q/board.toml": "dbdaf216b807fa3e9141ebad8175b17e7ac852ab84d3061908b7365080d5e45f",
+        "UniXNU-b5q/configs/b5q_macos_defconfig": "acfbf5c22cbd7355f936fca197ca50b8d1762875ca8998c85931d9e0d5e50dfd",
+        "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
+        "UniXNU-b5q/package/B5qAbsentBoard.cpp": "643302e0e296ccf1032b473a37b3d151137280b3adee317aaf9af2d91ff20429",
+        "UniXNU-b5q/package/B5qEthernet.cpp": "d1abd199aaafbd9c6fe84e6dfd105802b7f909fb718c9b6917c22acf3f6f44b6",
+        "UniXNU-b5q/package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
+        "UniXNU-b5q/package/B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+        "UniXNU-b5q/package/B5qGpuFirmware.h": "b628cfaa795023d7d470d14893248ee8fe8228c6ac3f199253da02b676699494",
+        "UniXNU-b5q/package/B5qGpuPowerBoard.h": "6138dd87734ca0bf995e50490d1e7f2f8fb0b846d20f0381cc37a1b621b7fb07",
+        "UniXNU-b5q/package/B5qGpuTrace.h": "a0b2dba23a2a0fa1c356f26244553cd3e1e60413a955b082a9b099d03aaad575",
+        "UniXNU-b5q/package/B5qPeripheralHardware.h": "de7e968148612f5feba3c66141797aba4785564e664016f782d7f8adbc8f7a15",
+        "UniXNU-b5q/package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+        "UniXNU-b5q/package/B5qRamStorage.cpp": "ef9fb8763d58331abed767a3e3fb57e1175fda7e95b4cecdf0e17ad7f7e97ebb",
+        "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+        "UniXNU-b5q/package/B5qSpmi.cpp": "d6fc53e19e4e82a48a87c221ce6cc891eda18cdf1f4f4214a748c58bfd9ee914",
+        "UniXNU-b5q/package/B5qSpmi.h": "12177df32a4c17f5ff66a6f5dfd8f31b7f8877a983e3ada79b521c5e075856f2",
+        "UniXNU-b5q/package/B5qTouch.cpp": "89d5ae3ad1fd80c614ea399f39be06e400eedb49748d0363514416b6d6359710",
+        "UniXNU-b5q/package/B5qTouchClock.h": "36583a88581c02e734ed07ebbbeabe86d208bd8a05218c9b185c23a233cbabf5",
+        "UniXNU-b5q/package/B5qTouchProtocol.h": "e88213faa1126ba2236e6f81c2055b1161f43903432a7fb83ba3481dcd4982d5",
+        "UniXNU-b5q/package/B5qUfs/B5qLogArgs.h": "a41d505915d4fe13cdce209197bd610e97c56f0ddef1a2bceb12e1280ed3e887",
+        "UniXNU-b5q/package/B5qUfs/B5qLogCore.h": "8d0a834dadea6ca796ece05d9f464157d210e2eb9d5f5d598ea1138aa7144643",
+        "UniXNU-b5q/package/B5qUfs/B5qLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+        "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "c79006e1d20ff9abf71e4d23584dfa82b7f9d19e3a5d5cbf032858f397d36620",
+        "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "cf64cac11d7b999be2c98b453fb13b4571ceb513d575d8ceb6c256580ba8d599",
+        "UniXNU-b5q/package/B5qUfs/B5qLogVolume.h": "ecb267c9adbda425d9c59d0bd6167e22b3036a25599d12f581a48fa693a46cb0",
+        "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
+        "UniXNU-b5q/package/B5qUfs/B5qRootPolicies.h": "9f45e765c1e9466aa0f98cbe8860d342c7733a9b9285dccc453462d69b5e9eb4",
+        "UniXNU-b5q/package/B5qUfs/B5qSmmu.h": "de60642e39d4c15b33b55cfb34d2e4c6a8199d64f68d4c9ccc48885090111d5e",
+        "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "3c407a0aa2aee5a6da91a0c7ddcb1f7720917318a1ff4bf53b03213754d291f7",
+        "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "93d1eaf948a1c598d7398d40f5c01d0e42bb372ab1fbdc850b3ddaadc7538b9d",
+        "UniXNU-b5q/package/B5qUfs/B5qVerifiedRead.h": "969e8a14b7132089c00303d8e53bdfac1101add1ad152126056f3e8b7bf3c885",
+        "UniXNU-b5q/package/B5qUsbHost.cpp": "98e43239cfb6781b693cfeb5cd5cd6a06e0b777777a074c58a427f4b7b825b64",
+        "UniXNU-b5q/package/B5qUsbPolicy.h": "ce3970985da5c96b6fb9c5d6cffcbeaa570b12cf8c22b67f22ebebc996b5195e",
+        "UniXNU-b5q/package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+        "UniXNU-b5q/package/BoardClock.h": "47c950b288ffc659a9306c1da79ff8b0fb6968c809508aa74a1a6a4bfb79e59d",
+        "UniXNU-b5q/package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
+        "UniXNU-b5q/package/ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d",
+        "UniXNU-b5q/package/CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
+        "UniXNU-b5q/package/DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+        "UniXNU-b5q/package/GeniI2c.h": "635862b89893eb76cf32f82c092a81d1ea08ccf7b719c413652437777d9c826d",
+        "UniXNU-b5q/package/HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+        "UniXNU-b5q/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+        "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "0a4ab7e2b1ed870af524450d1b6d8a16c0aaf6dd205a409ef42906df6e2d1d53",
+        "UniXNU-b5q/package/NativeHidInput.cpp": "4c4ab5b8c4402bb9e5dd3a8db0b0a30e19101a43bde86cd89f13b115286aa3a0",
+        "UniXNU-b5q/package/ShengSleep.h": "c7469cf97ca66975539cd380698284527a9988331cdbb11f8cfc11cc33791697",
+        "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-0.h": "c94edd4260e2b73167505d49d103f1c398a50acda722f5ef1f92de7f33598819",
+        "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-1.h": "83273760c59b759217ac1006965dac60a826eec49186e3862b85c8940ab39bca",
+        "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-common.h": "c4aca6e6225cfb862c0f021e882cfdfcff50144f6d9c779d336e68a2b1ab1feb",
+        "UniXNU-b5q/package/Sm8550Inputs/B5qGpuRates.h": "a106b1e2854785b5f13ea5311572efbd621dbd8646825f463029022505a88372",
+        "UniXNU-b5q/package/Sm8550Inputs/ShengGmuCommandDbSource.h": "2ed10058e2bf9147057a73f7a074e01560dd501e0b712df446cb1a88b87c6b35",
+        "UniXNU-b5q/package/Sm8550Inputs/ShengGmuSource.h": "cca9bacf3a1773cffb0ed79b4eed1f01e9b59b018aef28d223d5d7ccdf11dde7",
+        "UniXNU-b5q/package/Sm8550Inputs/ShengGmuVotesSource.h": "83859ce5c2507eb572f66a5e7c1c9f0776e1a346abac7ada5a13bec2fa550b86",
+        "UniXNU-b5q/package/Sm8550Inputs/ShengGpuSmmuSource.h": "bb71466456a4033f1513bd3fca616a6f1e8e4e9c30d9dca0f1703509291669b6",
+        "UniXNU-b5q/package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+        "UniXNU-b5q/package/ThermalLevel.cpp": "8d256c6c898864b35b57dcc588f56c917cf12a3638153c25b057569b5a9b031f",
+        "UniXNU-b5q/package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+        "UniXNU-b5q/package/ThermalProbe.cpp": "8cbdd96857d9a0b2e295fb276d4e77d3ee159eb756865e6eaa4439898676ac3a",
+        "UniXNU-b5q/package/ThermalProbe.h": "9f8c853ce54b940c066b0b0880f825b050cf6bef3f6c7c603f887866730ea619",
+        "UniXNU-b5q/porting.toml": "8298dbf548af5a1277fd44a8174c149b8a66660209517488d7ea2b1733eb476e",
+        "UniXNU-b5q/scripts/adapt-b5q-platform.py": "84f4d8912ffaebc992eb9d1f3a77ae2768308005ac108ca4f7068c7d6e17377c",
+        "UniXNU-b5q/scripts/b5q_abi.py": "83b6abb2d75e82f4467abe1cb98a551b9c0c5a1f75fdbaaa18a21d2d23e6a7a8",
+        "UniXNU-b5q/scripts/b5q_compile.py": "acb19e4534fc20a78088f6e2bbd07964f077f99fd45b121a1f9ceb7a4a2e3880",
+        "UniXNU-b5q/scripts/b5q_hid.py": "fecddcf106c6c965bf8bf5fbe398fbba9986b5b9576d59516bde2e1586e29c8e",
+        "UniXNU-b5q/scripts/b5q_peripherals.py": "cadf81a95d19583710bea2ad11071da4daa2d50d67761d20a716db27807ddd09",
+        "UniXNU-b5q/scripts/build-b5q-adreno.py": "3c144433e16bb31221fb104bd6f752331700e367230158bdd3ad30997e4b812e",
+        "UniXNU-b5q/scripts/build-b5q-gop-27.py": "a311c64e86f68eddfe4e4601091fa6ec67ea5f9904911721141e9fd8b45fc03e",
+        "UniXNU-b5q/scripts/build-b5q-payload.py": "95edce6dba47278e56b874a0c8a1640a88316e0caa2b2a03b63eb7922ebc4bd2",
+        "UniXNU-b5q/scripts/build-b5q-pmgr.py": "7c8f84e9290c4356f2ca3cb61adaf3420eae8938ebd950b8dd19252b14c41944",
+        "UniXNU-b5q/scripts/build-b5q-storage.py": "41f5d8fc65125fb1441a6de8e994652c49d9a8b5d2e3ed53a91c680e1c343d41",
+        "UniXNU-b5q/scripts/build-b5q-usb.py": "df5bbdf3084ef245b5bc99e5bfb3716f5a53264dd5473bd7d7bdc239a0a677fb",
+        "UniXNU-b5q/scripts/check-b5q-inputs.py": "fa0a1e649264bf380767c5d5e6683c8a2f047d50684b70e3a272ecfcabe12dd6",
+        "UniXNU-b5q/scripts/check-b5q-uefi.py": "82e5c6571c09665166ece4c609c2a8fae223457de6cfc0a0abe2beeed3c86a09",
+        "UniXNU-b5q/scripts/check-xnu-patches.py": "8e5dc9477788102d351bb0f149d10834125c6dcfa4cb4cfa659a941f77eed417",
+        "UniXNU-b5q/scripts/ci-transfer.py": "09da81e49dd2a49e8920e6375f689aab67df0abea24307453f91aa305f3c5a83",
+        "UniXNU-b5q/scripts/collect-runtime-fdt.py": "be7ab9f6fe6bb99225c7ede13e89e450541c5843046d0877192f1ec9139c482d",
+        "UniXNU-b5q/scripts/inventory-hardware.py": "075d573306ebc3869be5dcb6d9b92b0b2fe6bed815702ed97f0fce4074932804",
+        "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "6a9ecd77c7c551b7737f51557eb0ee5f05ae3fb7219b8e92aca0ad41da699f40",
+        "UniXNU-b5q/scripts/prepare-b5q-gmu.py": "f891a756e9ddb23c7dc7bedd93b36ba3db96bac6a0ef0a8f649f871cbd8e5879",
+        "UniXNU-b5q/scripts/prepare-b5q-votes.py": "b80374106669a5ff39a4630ede764fdf82771daea19a1114a433ad83e3f76206",
+        "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "f3d5f48fcb8652ce9bb4b92bbb2dc0bf8ff4236480ed0d7d9bef2c88033e50b1",
+        "UniXNU-b5q/scripts/reuse-completed-build.py": "90dcf2ed973b46a347bfce25ae8f05b1fb435bb3228c456b3ee044a8726653df",
+        "UniXNU-b5q/scripts/reuse-v10-kernel.py": "7540dd020d6791c769ac1e7aa3200922b42a19564a942f8270dc007573e1ab11",
+        "UniXNU-b5q/scripts/reuse-v13-build.py": "4c866dd96ec06f9e160ffd29d8fe7eeec21b58635e733428e15f67cf8a970413",
+        "UniXNU-b5q/scripts/test-ramblock-host.py": "058a8e2e36310029a65654fe908c9610dabc2839e74049ee98c9f47bda8259f0",
+        "scripts/b5q-install/assemble-firstboot.py": "d5f84e6ef1a28531f26dae4ee48947513f405e7f86efb8f3a5dea1689a6b4e07",
+        "scripts/b5q-install/build-4kn-esp.py": "64ef94b6643df38660d0245c8063257d459b6ef44939f7901ca75e4c6578a82e",
+        "scripts/b5q-install/build-ci-esp.py": "7c7e40750ffa8140daffafc8486f9b7b4f9b1bed168618a5c4c08cbd95d61855",
+        "scripts/b5q-install/build-data-seed.py": "bab85b5542467d7628f6483ac3c2fcd4e408f758abad87629c2e744c2e691759",
+        "scripts/b5q-install/build-earlyboot-diag.py": "53b99ec5d72d45a6e3b14b961638c017739908676582e372a98b054ab94592ab",
+        "scripts/b5q-install/build-lowdram-esp.py": "93fe7efe6c63871cea05807a0dd88920479b183b60b3f2007fbd3eb946bce455",
+        "scripts/b5q-install/build-memory-boot.py": "8a9383fb4ad058c6b39dbb7d4f89c89eb4076043018665777630476d0a73d11f",
+        "scripts/b5q-install/check-geni-pac.py": "d9adcbeed727f8798b633ad38387f840f557db8d9a0cd5f7c7460cc8eb5b948c",
+        "scripts/b5q-install/check-lowdram-boot.py": "a07eddb23dea8805cec9c57874b2b44720eadb46a91d3500ae518a0b931cd1d3",
+        "scripts/b5q-install/check-peripheral-target.py": "e5a49ab3c72b623be60cc8c34a71f1df9ba42278cdb64fad836a1b96f4d7d2ea",
+        "scripts/b5q-install/download-ci-artifact.py": "a856896271be568ced07113eb2f6c3c8a9f53c9c4f395a8fbcbbb69194ff063b",
+        "scripts/b5q-install/install-firstboot.py": "c5892b6452845830829560dbb442b26dd83ca0532e6ff0ef46e0f4680a488d7f",
+        "scripts/b5q-install/make-xnu2log.py": "4778966f97ed7eb547a8edb2eb8b2343edea0c14f98849c84727341f18857445",
+        "scripts/b5q-install/pre-ci.py": "50a5c7733ecc0ad87fbcd30d5e8de88ac642066d5cf935c3817df644f7da29ad",
+        "scripts/b5q-install/repack-adt-esp.py": "23a9d43f122d41e37cc1987fccb631a4bd322a0eaafb2dc3173ff007746524f2",
+        "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
+        "scripts/b5q-install/reuse-v11-data.py": "38a0f985b8e8a537c14abcedfd8c097ee8315d36a6d1f66ef262500c87211648",
+        "scripts/b5q-install/test-esp-menu.py": "b07c10a2828d277681e3709d55dc7ab62b9dc231fe5762dc66ace4ebcbea7e5a",
+        "scripts/b5q-install/verify-batched-read-binary.py": "c4df5d2e45c261bb66c4e43159dd1109e50e1a5c548be2bee16c96e10b00ba0b",
+        "scripts/b5q-install/verify-data-account.py": "3fb757a6e92309021c768e3caf53ce739f67b6fe6503f46c27534754338e9da7",
+        "scripts/b5q-install/verify-display-network-binary.py": "8c8544f944715b44d3094a5cc44227d4b304723bef697120e6073e95a9839011",
+        "scripts/b5q-install/verify-esp-log.py": "66afae7b746b3b9eaf61f36712b6e423b1595e41811089f8e86100fefec671c5",
+        "scripts/b5q-install/verify-firstboot.py": "5833c7100d44003c8f288c7ec8f75277647b64ba15ba5b77132b992dd33ddeb4",
+        "scripts/b5q-install/verify-lockdown-binary.py": "792ad4cb5642b6afad2829953dcb702c300ef7c730b76ce4302b66801341e76b",
+        "scripts/b5q-install/verify-log-binary.py": "8b079a0a14234cd289d3732aa42a7954573c2dca763f680a8ef2bdc56a472172",
+        "scripts/b5q-install/verify-log-fix-binary.py": "01c76a1fc4a9092606cf990166cfd72a8be40aa05878905f3fe124ff288fd978",
+        "scripts/b5q-install/verify-mount-runtime.py": "7bae04dbac40214069929072d6555eddc55a9b84447e9e54f19aae8ab4906ce3",
+        "scripts/b5q-install/verify-peripherals-binary.py": "ed6fe0c6575b6726531bc88257ddbe45c4ad6bf7b37eaaa796b3ec83f695dcb2",
+        "scripts/b5q-install/verify-read-retry-binary.py": "8c3eb6b3d8656c9183fbc690e37dd08000546866d451e712873ecaf13577dbe1",
+        "scripts/b5q-install/verify-runtime-gates-binary.py": "2e7ad78cf30267c2b8b2bd158744cf08b044351e9232ef2ddcb4b95c77df6fb6",
+        "scripts/b5q-install/verify-v21.py": "441fc341fc15805be8d792e696ac0d37a3e9bfec06b1b8388df762e614b0ae3a"
+      },
+      "hardware_tested": false,
+      "post_build_v21": "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+    },
+    "v21_C_object_negative_control": {
+      "v21_actual_C_object_rejected": true,
+      "expected_failure": "AssertionError: Unqualified/zero-diversity C callback: blraaz",
+      "new_C_CPP_object_contract": "PASS",
+      "scope": "does not emulate hardware PAC"
+    }
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/ThermalProbe.h": "9f8c853ce54b940c066b0b0880f825b050cf6bef3f6c7c603f887866730ea619",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "e88213faa1126ba2236e6f81c2055b1161f43903432a7fb83ba3481dcd4982d5",
+    "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "0a4ab7e2b1ed870af524450d1b6d8a16c0aaf6dd205a409ef42906df6e2d1d53",
+    "UniXNU-b5q/package/BoardClock.h": "47c950b288ffc659a9306c1da79ff8b0fb6968c809508aa74a1a6a4bfb79e59d",
+    "UniXNU-b5q/package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
+    "UniXNU-b5q/package/DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+    "UniXNU-b5q/package/B5qEthernet.cpp": "d1abd199aaafbd9c6fe84e6dfd105802b7f909fb718c9b6917c22acf3f6f44b6",
+    "UniXNU-b5q/package/HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+    "UniXNU-b5q/package/B5qGpuPowerBoard.h": "6138dd87734ca0bf995e50490d1e7f2f8fb0b846d20f0381cc37a1b621b7fb07",
+    "UniXNU-b5q/package/B5qUsbPolicy.h": "ce3970985da5c96b6fb9c5d6cffcbeaa570b12cf8c22b67f22ebebc996b5195e",
+    "UniXNU-b5q/package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+    "UniXNU-b5q/package/B5qSpmi.h": "12177df32a4c17f5ff66a6f5dfd8f31b7f8877a983e3ada79b521c5e075856f2",
+    "UniXNU-b5q/package/GeniI2c.c": "825569be3276ebde2dadd4649bec51cc4f2a345b511f06731f7b3a9f5a83f367",
+    "UniXNU-b5q/package/ThermalProbe.cpp": "8cbdd96857d9a0b2e295fb276d4e77d3ee159eb756865e6eaa4439898676ac3a",
+    "UniXNU-b5q/package/NativeHidInput.cpp": "4c4ab5b8c4402bb9e5dd3a8db0b0a30e19101a43bde86cd89f13b115286aa3a0",
+    "UniXNU-b5q/package/B5qGpuTrace.h": "a0b2dba23a2a0fa1c356f26244553cd3e1e60413a955b082a9b099d03aaad575",
+    "UniXNU-b5q/package/B5qAbsentBoard.cpp": "643302e0e296ccf1032b473a37b3d151137280b3adee317aaf9af2d91ff20429",
+    "UniXNU-b5q/package/B5qTouch.cpp": "89d5ae3ad1fd80c614ea399f39be06e400eedb49748d0363514416b6d6359710",
+    "UniXNU-b5q/package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+    "UniXNU-b5q/package/B5qRamStorage.cpp": "ef9fb8763d58331abed767a3e3fb57e1175fda7e95b4cecdf0e17ad7f7e97ebb",
+    "UniXNU-b5q/package/B5qSpmi.cpp": "d6fc53e19e4e82a48a87c221ce6cc891eda18cdf1f4f4214a748c58bfd9ee914",
+    "UniXNU-b5q/package/B5qPeripheralHardware.h": "de7e968148612f5feba3c66141797aba4785564e664016f782d7f8adbc8f7a15",
+    "UniXNU-b5q/package/ThermalLevel.cpp": "8d256c6c898864b35b57dcc588f56c917cf12a3638153c25b057569b5a9b031f",
+    "UniXNU-b5q/package/B5qGpuFirmware.h": "b628cfaa795023d7d470d14893248ee8fe8228c6ac3f199253da02b676699494",
+    "UniXNU-b5q/package/ShengSleep.h": "c7469cf97ca66975539cd380698284527a9988331cdbb11f8cfc11cc33791697",
+    "UniXNU-b5q/package/B5qUsbHost.cpp": "98e43239cfb6781b693cfeb5cd5cd6a06e0b777777a074c58a427f4b7b825b64",
+    "UniXNU-b5q/package/B5qGmuVotes.c": "8a259d9d49657ac2c90b1542b39e5726039ecfe72564f20f20eff0fb4178c054",
+    "UniXNU-b5q/package/CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
+    "UniXNU-b5q/package/B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+    "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+    "UniXNU-b5q/package/B5qTouchClock.h": "36583a88581c02e734ed07ebbbeabe86d208bd8a05218c9b185c23a233cbabf5",
+    "UniXNU-b5q/package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+    "UniXNU-b5q/package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
+    "UniXNU-b5q/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+    "UniXNU-b5q/package/GeniI2c.h": "635862b89893eb76cf32f82c092a81d1ea08ccf7b719c413652437777d9c826d",
+    "UniXNU-b5q/package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+    "UniXNU-b5q/package/ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d"
+  }
+}

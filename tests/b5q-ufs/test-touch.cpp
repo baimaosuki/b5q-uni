@@ -1,5 +1,7 @@
 #include "B5qTouchProtocol.h"
 #include "GeniI2c.h"
+#include "B5qTouchClock.h"
+#include "ThermalProbe.h"
 #include <cassert>
 #include <cstring>
 #include <deque>
@@ -13,6 +15,16 @@ struct Bus {
 };
 int main(){
  using namespace B5qTouch;Point points[12]={};
+ for(unsigned stop:{0u,0x23294u,0x23284u,0x2327cu,0x23280u,0x184e4u}) {
+  unsigned failed=0,delays=0,writes=0;uint32_t last=0;
+  auto read=[&](unsigned off){assert(off==B5qTouchClock::vote||off==0x23294||off==0x23284||off==0x2327c||off==0x23280||off==0x184e4);return off==stop?1u<<31:0u;};
+  auto write=[&](unsigned off,uint32_t value){assert(off==0x52008&&value==B5qTouchClock::enables);++writes;};
+  bool ok=B5qTouchClock::enable(read,write,[&](unsigned us){assert(us==10);++delays;},failed,last);
+  assert(ok==!stop&&writes==1&&failed==stop&&delays==(stop?2000u:0u));
+ }
+ uint32_t invalid[]={0,0,0};int32_t mc=THERMAL_NONE;assert(!thermal_pick_valid(invalid,3,&mc)&&mc==THERMAL_NONE);
+ uint32_t valid[]={0,THERMAL_STATUS_VALID|310u,0};assert(thermal_pick_valid(valid,3,&mc)&&mc==31000);
+
  assert(hid(0)==0&&hid(4095)==32767&&hid(5000)==32767);
  uint8_t app[38]={};unsigned maximum=0;assert(!appInfo(app,37,maximum));app[36]=10;assert(appInfo(app,38,maximum)&&maximum==10);app[36]=13;assert(!appInfo(app,38,maximum));
  const uint8_t cfg[]={0x18,8,1,6,4,7,4,8,12,9,12,3,0};

@@ -221,6 +221,7 @@ extern "C" void sheng_thermal_level_probe(void) {
         return;
     }
     native_thermal_level_state = 1;
+    IOLog("B5qThermal: stage=ready thermal-level=%d keys=mTPL\n",native_thermal_level_state);
     service->release();   // the platform's attachment keeps it
 }
 

@@ -6,6 +6,7 @@
 #include <pexpert/pexpert.h>
 #include "GeniI2c.h"
 #include "B5qTouchProtocol.h"
+#include "B5qTouchClock.h"
 extern "C" {
 volatile uint32_t native_touch_seq,native_touch_count,native_touch_hid_reports;
 volatile int native_touch_xs[12],native_touch_ys[12],native_touch_ids[12];
@@ -49,16 +50,22 @@ bool command(uint8_t cmd,const uint8_t *p,unsigned n,bool getConfig=false){
 void worker(void *,wait_result_t){
  const char *stage="mapping";uint32_t proto=0;
  do {
-  tlmm=map(0,0xf100000,0x100000);gcc=map(1,0x100000,0x1f0000);se=map(2,0xa90000,0x4000);if(!tlmm||!gcc||!se)break;
-  gcc[0x52008/4]|=(1u<<18)|(1u<<19)|(1u<<20)|(1u<<21)|(1u<<26);barrier();IOSleep(20);
+  IOLog("B5qTouch: stage=clock-check\n");
+  tlmm=map(0,0xf100000,0x100000);gcc=map(1,0x100000,0x1f0000);if(!tlmm||!gcc)break;
+  unsigned failed=0;uint32_t last=0;
+  auto clockRead=[](unsigned off){return gcc[off/4];};
+  auto clockWrite=[](unsigned off,uint32_t value){gcc[off/4]=value;barrier();};
+  if(!B5qTouchClock::enable(clockRead,clockWrite,[](unsigned us){IODelay(us);},failed,last)) {
+   stage="s4-clk-off";IOLog("B5qTouch: stage=s4-clk-off offset=%08x cbcr=%08x\n",failed,last);break;
+  }
+  se=map(2,0xa90000,0x4000);if(!se)break;
   // GPIO mux1 is qup1_se4_l0/l1 in Samsung pinctrl-kalama; preserve drive/pull.
   tlmm[19*0x1000/4]&=~(1u<<9); // ATTN GPIO input, preserve pulls.
   for(unsigned pin=44;pin<=45;++pin)tlmm[pin*0x1000/4]=(tlmm[pin*0x1000/4]&~0x3cu)|(1u<<2);barrier();
   const GeniIo io={rd,wr,nullptr};
-  if(((se[GENI_FW_REVISION/4]>>8)&255)==GENI_PROTO_I2C && (!(se[GENI_CLK_CFG/4]&1)||!se[GENI_SCL_COUNTERS/4])) {
-   unsigned level=8;for(unsigned i=0;i<8&&level==8;++i){uint32_t c=gcc[(0x184f0+0x1c+4*i)/4];if(((c>>8)&7)==0&&(c&31)<=1)level=i;}
-   if(level<8){se[0x28/4]|=0x7f;se[0xe30/4]|=15;se[0x24/4]=0x7f;se[0x20/4]=1;se[0xe18/4]=0;se[0xe1c/4]|=12;se[0x7c/4]=level;se[GENI_CLK_CFG/4]=(7u<<4)|1;se[GENI_SCL_COUNTERS/4]=(10u<<20)|(12u<<10)|26u;barrier();}
-  }
+  // Warm FIFO setup only. A clock-on status is not proof of XPU access;
+  // touch stays off by default. Do not invent a cold SE/GSI firmware handoff
+  // or write privileged clock-gating/firmware-mode registers here.
   stage="geni-prepare";int prepared=geni_i2c_prepare(&bus,&io,0x20,&proto);
   IOLog("B5qTouch: stage=%s se_proto=%08x gpio19=%u clk=%08x scl=%08x rc=%d\n",stage,proto,tlmm[0x13004/4]&1,se[GENI_CLK_CFG/4],se[GENI_SCL_COUNTERS/4],prepared);if(prepared)break;
   stage="identify";if(!command(2,nullptr,0))break;

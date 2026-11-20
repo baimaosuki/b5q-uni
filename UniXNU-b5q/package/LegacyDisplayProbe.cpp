@@ -633,6 +633,24 @@ extern "C" void b5q_ethernet_start(void);
 extern "C" void b5q_usb_start(void);
 extern "C" void b5q_gpu_start(void);
 extern "C" void sheng_cpufreq_probe(void),sheng_board_clock_probe(void),sheng_thermal_probe(void),sheng_thermal_level_probe(void),sheng_buttons_probe(void),native_hid_input_probe(void),b5q_touch_probe(void),sheng_dpu_probe(void);
+namespace {
+void b5qPeripheralWorker(void *,wait_result_t) {
+    IOLog("B5qPeripherals: stage=after-display\n");
+    sheng_cpufreq_probe();sheng_board_clock_probe();
+    sheng_thermal_probe();sheng_thermal_level_probe();
+    sheng_buttons_probe();native_hid_input_probe();b5q_touch_probe();sheng_dpu_probe();
+    IOLog("B5qPeripherals: stage=ready\n");
+    thread_terminate(current_thread());
+}
+void startB5qPeripherals() {
+    static uint32_t once;
+    if(__atomic_exchange_n(&once,1u,__ATOMIC_ACQ_REL))return;
+    thread_t thread=nullptr;
+    if(kernel_thread_start(b5qPeripheralWorker,nullptr,&thread)==KERN_SUCCESS)thread_deallocate(thread);
+    else IOLog("B5qPeripherals: stage=thread-allocation-failed\n");
+}
+}
+
 void native_legacy_display_late_probe(void) {
     {thread_t thread = nullptr; if (kernel_thread_start(busyReport, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);}
     // NativeAES first: AppleImage4 waits for the real IOAESAccelerator service.
@@ -642,8 +660,6 @@ void native_legacy_display_late_probe(void) {
     b5q_ethernet_start();
     b5q_usb_start();
     b5q_gpu_start();
-    sheng_cpufreq_probe();sheng_board_clock_probe();sheng_thermal_probe();sheng_thermal_level_probe();
-    sheng_buttons_probe();native_hid_input_probe();b5q_touch_probe();sheng_dpu_probe();
     IOService *display=pendingLegacyDisplay;if(!display){native_legacy_display_checkpoint();return;}pendingLegacyDisplay=nullptr;
     native_legacy_surface_status=OSKextLoadKextWithIdentifier("com.apple.iokit.IOSurface");
     // The IOSurface root service: iOS and iPadOS name it IOCoreSurfaceRoot; macOS leaves it unnamed, so its name is its class,
@@ -723,7 +739,7 @@ void native_legacy_display_late_probe(void) {
                         }
                         finishUnitScalePolicy(true);
                         OSSafeReleaseNULL(displayTreeParent);
-                        native_legacy_display_checkpoint();return;
+                        native_legacy_display_checkpoint();startB5qPeripherals();return;
                     }
                 }
             }

@@ -93,8 +93,8 @@ int armPeripheral(int apid, uint8_t bits) {
     }
 }
 
-// Acknowledge only the two APIDs whose IRQ and write ownership we validated.
-// Foreign APIDs remain owned by their original interrupt consumer.
+// Shared EE0 level line: clear foreign APIDs in the arbiter, as Sheng
+// cleanup_irq does. Do not read or write their peripheral registers.
 void buttonsIrq(void *) {
     bool ours = false;
     for (uint32_t word = 0; word * 32 < gApids; ++word) {
@@ -103,6 +103,7 @@ void buttonsIrq(void *) {
             const int apid = (int)(word * 32 + __builtin_ctz(pending));
             pending &= pending - 1;
             if (apid != gPon && apid != gGpio) {
+                *apidReg(apid, kIrqClear) = 0xff;
                 native_buttons_stats[6] = native_buttons_stats[6] + 1;
                 continue;
             }
@@ -226,6 +227,7 @@ extern "C" int sheng_buttons_sleep_check(void) {
             const int apid = (int)(word * 32 + __builtin_ctz(pending));
             pending &= pending - 1;
             if (apid != gPon && apid != gGpio) {
+                *apidReg(apid, kIrqClear) = 0xff;
                 native_buttons_stats[6] = native_buttons_stats[6] + 1;
                 continue;
             }

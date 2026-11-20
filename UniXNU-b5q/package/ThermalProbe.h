@@ -36,7 +36,6 @@ enum {
 };
 /* TM and SROT bases of the three controllers. */
 static const uint64_t thermal_tm_base[THERMAL_CONTROLLERS] = {0x0c271000, 0x0c272000, 0x0c273000};
-static const uint64_t thermal_srot_base[THERMAL_CONTROLLERS] = {0x0c222000, 0x0c223000, 0x0c224000};
 
 /* The groups a row reports: the hottest sensor of each. The first three are the CPU frequency domains in order. */
 enum {
@@ -76,6 +75,13 @@ static inline int thermal_pick(const uint32_t *status, unsigned reads, int32_t *
         if (status[i] & THERMAL_STATUS_VALID) {*mc = thermal_status_mc(status[i]); return 1;}
     for (unsigned i = 1; i < reads; ++i)
         if ((status[i] & THERMAL_STATUS_TEMP_MASK) == (status[i - 1] & THERMAL_STATUS_TEMP_MASK)) {*mc = thermal_status_mc(status[i]); return 1;}
+    return 0;
+}
+
+/* TM-only sampling cannot use the SROT sensor-enable bitmap or treat
+ * repeated invalid register words as a stable temperature. */
+static inline int thermal_pick_valid(const uint32_t *status,unsigned reads,int32_t *mc) {
+    for(unsigned i=0;i<reads;++i)if(status[i]&THERMAL_STATUS_VALID){*mc=thermal_status_mc(status[i]);return 1;}
     return 0;
 }
 

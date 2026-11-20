@@ -70,17 +70,10 @@ constexpr uint64_t kDomainBase[3] = {0x17d91000, 0x17d92000, 0x17d93000};
 constexpr unsigned kDomainFirstCpu[3] = {0, 3, 7}, kDomainCpus[3] = {3, 4, 1};
 constexpr unsigned kCpus = 8;
 constexpr uint32_t kRegEnable = 0x0, kRegDomainState = 0x20, kRegDcvsCtrl = 0xb0, kRegFreqLut = 0x100, kRegPerfState = 0x320;
-constexpr uint32_t kRegNearIntrClr[3] = {0x300, 0x304, 0x30c};
 constexpr unsigned kLutEntries = 40;
 constexpr uint32_t kXoKHz = 19200;
-// The distributor's set-pending register that holds interrupt IDs 32 to 63, and the three limit interrupts in it (SPI n is ID 32 + n).
-constexpr uint64_t kGicd = 0x17100000;
-constexpr uint32_t kGicdIspendr1 = 0x204;
-constexpr unsigned kLimitSpi[3] = {30, 31, 19};
-
 struct Window {IOMemoryMap *map; volatile uint32_t *va;};
-Window gTm[THERMAL_CONTROLLERS], gSrot[THERMAL_CONTROLLERS], gDomain[3], gGicd;
-uint32_t gCtrl[THERMAL_CONTROLLERS];
+Window gTm[THERMAL_CONTROLLERS], gDomain[3];
 bool gReady;
 volatile uint8_t gBusy;                 // one sampler at a time: a second caller leaves the values of the one in progress
 unsigned gPeriodMs;
@@ -102,13 +95,13 @@ void sampleTemperatures() {
         uint32_t upper = 0, critical = 0;
         for (unsigned s = 0; s < THERMAL_SENSORS; ++s) {
             mc[c][s] = THERMAL_NONE;
-            if (!thermal_sensor_enabled(gCtrl[c], s)) continue;
+            // With no SROT enable bitmap, only a TM VALID reading counts.
             uint32_t status[THERMAL_READ_TRIES];
             unsigned reads = 0;
             do status[reads] = rd(gTm[c], THERMAL_TM_STATUS + 4 * s);
             while (!(status[reads++] & THERMAL_STATUS_VALID) && reads < THERMAL_READ_TRIES);
             int32_t value = THERMAL_NONE;
-            if (thermal_pick(status, reads, &value)) mc[c][s] = value;
+            if (thermal_pick_valid(status, reads, &value)) mc[c][s] = value;
             native_thermal_mc[c][s] = mc[c][s];
             // threshold bits of the last word read: bit 2 upper, bits 3 and 4 critical and max
             const uint32_t flags = (status[reads - 1] >> THERMAL_STATUS_FLAGS_SHIFT) & THERMAL_STATUS_FLAGS_MASK;
@@ -147,7 +140,6 @@ bool busyShares(unsigned busy[3]) {
 void sampleDomains() {
     unsigned busy[3] = {0, 0, 0};
     const bool measured = busyShares(busy);
-    const uint32_t pending = gGicd.va ? rd(gGicd, kGicdIspendr1) : 0;
     for (unsigned d = 0; d < 3; ++d) {
         const Window &w = gDomain[d];
         if (!w.va) continue;
@@ -165,8 +157,8 @@ void sampleDomains() {
         native_thermal_lmh[d][1] = voted;
         native_thermal_lmh[d][2] = enable;
         native_thermal_lmh[d][3] = ctrl;
-        for (unsigned i = 0; i < 3; ++i) native_thermal_lmh[d][4 + i] = rd(w, kRegNearIntrClr[i]);
-        native_thermal_lmh[d][7] = gGicd.va ? (pending >> kLimitSpi[d] & 1) : 2;
+        for (unsigned i = 0; i < 3; ++i) native_thermal_lmh[d][4 + i] = 0;
+        native_thermal_lmh[d][7] = 2; // interrupt state unavailable; no GICD read
         if (!enable || !measured) continue;
         thermal_limit &l = gLimit[d];
         thermal_limit_add(&l, busy[d], running, voted, native_thermal_now[THERMAL_GROUP_CPU_D0 + d]);
@@ -207,10 +199,8 @@ extern "C" void sheng_thermal_probe(void) {
     native_thermal_info[2] = (mode & 0xff) | periodMs << 8;
     for (unsigned c = 0; c < THERMAL_CONTROLLERS; ++c) {
         if (!mapWindow(gTm[c], thermal_tm_base[c])) {native_thermal_info[0] = 0x10 + c; return;}
-        if (!mapWindow(gSrot[c], thermal_srot_base[c])) {native_thermal_info[0] = 0x13 + c; return;}
-        native_thermal_info[3 + c] = rd(gSrot[c], THERMAL_SROT_VERSION);
-        gCtrl[c] = rd(gSrot[c], THERMAL_SROT_CTRL);
-        native_thermal_info[6 + c] = gCtrl[c];
+        native_thermal_info[3 + c] = 0; // SROT version unavailable
+        native_thermal_info[6 + c] = 0; // SROT enable bitmap unavailable
         for (unsigned s = 0; s < THERMAL_SENSORS; ++s) native_thermal_mc[c][s] = THERMAL_NONE;
     }
     for (unsigned g = 0; g < THERMAL_GROUPS; ++g) {native_thermal_now[g] = THERMAL_NONE; native_thermal_peak[g] = THERMAL_NONE;}
@@ -219,10 +209,10 @@ extern "C" void sheng_thermal_probe(void) {
         thermal_limit_init(&gLimit[d]);
         for (unsigned i = 2; i < 7; ++i) native_thermal_limit[d][i] = THERMAL_NONE;
     }
-    mapWindow(gGicd, kGicd);
     native_thermal_info[0] = 1;
     gReady = true;
     sheng_thermal_sample();
+    IOLog("B5qThermal: stage=ready tm=c271000/c272000/c273000 samples=%u tm-valid-only=1\n",native_thermal_info[1]);
     if (periodMs) {
         gPeriodMs = periodMs < 10 ? 10 : periodMs;   // a sample is about seventy register reads; faster than this measures the probe
         thread_t thread = nullptr;

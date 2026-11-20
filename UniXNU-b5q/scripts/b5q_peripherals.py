@@ -36,6 +36,7 @@ def prepare_headers(sdk, include, hid):
 def flags(sdk, include, header, package, tree, xnu, have_idle=False):
     result = ['-target', 'arm64e-apple-ios27.0', '-isysroot', str(sdk), '-O2',
               '-fptrauth-calls', '-fptrauth-returns', '-fptrauth-intrinsics',
+              '-fptrauth-function-pointer-type-discrimination',
               '-std=gnu++17', '-fno-c++-static-destructors', '-fno-exceptions',
               '-fno-rtti', '-fno-common', '-fapple-kext', '-ffreestanding',
               '-mgeneral-regs-only', '-nostdinc++', '-D__PTRAUTH_INTRINSICS__=1',
@@ -60,7 +61,7 @@ def compile_object(cxx, cflags, source, target, llvm):
     if source.suffix == '.c':
         options = [v for v in options if v not in ['-std=gnu++17', '-fno-c++-static-destructors',
                    '-fno-exceptions', '-fno-rtti', '-fapple-kext', '-nostdinc++']]
-        options += ['-x', 'c', '-std=gnu11']
+        options += ['-x', 'c', '-std=gnu11', '-fptrauth-function-pointer-type-discrimination']
     if source.name == 'NativeHidInput.cpp':
         options += ['-DNATIVE_HID_SOURCE_API=1']
     command = [str(cxx), *options, '-c', str(source), '-o', str(target)]
@@ -74,11 +75,14 @@ def compile_object(cxx, cflags, source, target, llvm):
     return target
 
 
-def build_added(package, out, cxx, cflags, llvm, scripts):
+def build_added(package, out, cxx, cflags, llvm, scripts, selected=None):
     from b5q_hid import assembly
     out.mkdir(parents=True, exist_ok=True)
+    sources = SOURCES if selected is None else [n for n in SOURCES if n in selected]
     objects = [compile_object(cxx, cflags, package / name, out / (Path(name).stem + '.o'), llvm)
-               for name in SOURCES]
+               for name in sources]
+    if selected is not None and 'NativeHidInput.cpp' not in selected:
+        return objects
     bound = json.loads((scripts / 'hid-bindings-26C5035r.json').read_text())['bindings']
     text, addresses = assembly({n: int(v, 16) for n, v in bound.items()})
     for name, body in [('hid-bindings', text), ('hid-addresses', addresses)]:

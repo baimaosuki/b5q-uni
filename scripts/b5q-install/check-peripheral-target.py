@@ -38,7 +38,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  h=t/'IOKit/hidsystem/IOHIDDescriptorParser.h';h.write_text(h.read_text().replace('#if __has_include(<MacTypes.h>)','#if __has_include(<MacTypes.h>) && !defined(KERNEL)'))
  subprocess.run(['mcopy','-i',str(a.reference),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
  raw=kernel.read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1]);defined={n for rows in im.symbols().values()for n in rows}
- flags=['-target','arm64e-apple-ios27.0','-O2','-isysroot',str(a.sdk),'-fptrauth-calls','-fptrauth-returns','-fptrauth-intrinsics','-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-fno-common','-fapple-kext','-ffreestanding','-mgeneral-regs-only','-nostdinc++','-D__PTRAUTH_INTRINSICS__=1','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-incompatible-sysroot','-Wno-deprecated-declarations','-Wno-unknown-warning-option','-Wno-unused-private-field','-Wno-c++11-narrowing','-Wno-deprecated-enum-enum-conversion']
+ flags=['-target','arm64e-apple-ios27.0','-O2','-isysroot',str(a.sdk),'-fptrauth-calls','-fptrauth-returns','-fptrauth-intrinsics','-fptrauth-function-pointer-type-discrimination','-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-fno-common','-fapple-kext','-ffreestanding','-mgeneral-regs-only','-nostdinc++','-D__PTRAUTH_INTRINSICS__=1','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-incompatible-sysroot','-Wno-deprecated-declarations','-Wno-unknown-warning-option','-Wno-unused-private-field','-Wno-c++11-narrowing','-Wno-deprecated-enum-enum-conversion']
  flags+=['-D'+v+'=1'for v in ['KERNEL','KERNEL_PRIVATE','DRIVER_PRIVATE','XNU_KERNEL_PRIVATE','XNU_TARGET_OS_OSX','PRIVATE','MACH_KERNEL_PRIVATE','__arm64__','__LP64__','__DARWIN_UNIX03']]
  for d in [t,ROOT/'UniXNU-b5q/package',a.sdk/'System/Library/Frameworks/Kernel.framework/Headers',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert',ROOT/'sources/UniXNU/drivers/Adreno740',ROOT/'sources/UniXNU/kits/AdrenoFirmware',ROOT/'UniXNU-b5q/package/B5qUfs',ROOT/'UniXNU-b5q/package/Sm8550Inputs',ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',ROOT/'UniXNU/kits/ArmSmmu4K',ROOT/'UniXNU/kits/AdrenoPM4',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/libkern',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/EXTERNAL_HEADERS']:flags+=['-I',str(d)]
  results={};objects=[];strong_owners={};duplicates={}
@@ -50,14 +50,14 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  timer=t/'NativeAdrenoTimer.cpp';timer.write_text('#include "ShengGmuSource.h"\n'+(ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoTimer.cpp').read_text().replace('TimerGmuLow = 0x14220','TimerGmuLow = (0x1f888u*4u)-SHENG_GMU_CORE_GPU_DELTA').replace('TimerGmuHigh = 0x14224','TimerGmuHigh = (0x1f889u*4u)-SHENG_GMU_CORE_GPU_DELTA'));sources.append(timer)
  sources += [ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c','ShengGpuSmmu.c']]
  for source in sources:
-  target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11']
+  target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11','-fptrauth-function-pointer-type-discrimination']
   if source.name=='NativeHidInput.cpp':cflags=cflags+['-DNATIVE_HID_SOURCE_API=1']
   subprocess.run([str(a.compiler),*cflags,'-c',str(source),'-o',str(target)],env=env,check=True)
   if source.stem=='NativeHidInput':
    import b5q_hid
    hid_bindings,hid_result=b5q_hid.bindings(target.read_bytes(),json.loads((ROOT/'UniXNU-b5q/scripts/hid-device-26C5035r.json').read_text()))
    qualified['bindings'].update({n:hex(v)for n,v in hid_bindings.items()})
-   (ROOT/'artifacts/b5q-runtime-v21-work/hid-bindings.json').write_text(json.dumps(dict(bindings={n:hex(v)for n,v in hid_bindings.items()},**hid_result),indent=2)+'\n')
+   ((a.objects_out.parent if a.objects_out else ROOT/'artifacts/b5q-runtime-v22-work')/'hid-bindings.json').write_text(json.dumps(dict(bindings={n:hex(v)for n,v in hid_bindings.items()},**hid_result),indent=2)+'\n')
   if a.objects_out:
    import shutil
    a.objects_out.mkdir(parents=True,exist_ok=True);shutil.copyfile(target,a.objects_out/target.name)

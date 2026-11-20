@@ -23,7 +23,7 @@ def main():
  p=argparse.ArgumentParser(description=__doc__)
  p.add_argument('--unixnu',type=Path,required=True);p.add_argument('--device',type=Path,required=True)
  p.add_argument('--cached-tree',type=Path,required=True);p.add_argument('--prepare-only',action='store_true')
- p.add_argument('--out',type=Path,required=True);a=p.parse_args()
+ p.add_argument('--out',type=Path,required=True);p.add_argument('--changed',help='Comma separated changed board sources; reuse all other archive members');p.add_argument('--source-run',type=int,default=44789459847);p.add_argument('--source-commit',default='6c57bd844b2ad2fd67a93854781481c095db7c53');a=p.parse_args();selected=set(a.changed.split(',')) if a.changed else None
  core,device,cached,out=map(Path.resolve,[a.unixnu,a.device,a.cached_tree,a.out]);out.mkdir(parents=True,exist_ok=True)
  sys.path[:0]=[str(device/'scripts'),str(core/'scripts'),str(core/'kits/XnuPrelink')]
  from b5q_abi import object_symbols
@@ -58,7 +58,7 @@ def main():
  alias=out/'all-alias.exp';alias.write_text(''.join(f'{v} {k}\n'for k,v in sorted(aliases.items())))
  symbolsets=next(s for s in original.sections if s['segment']=='__LINKINFO'and s['name']=='__symbolsets')
  (out/'symbolsets.plist').write_bytes(original.read(symbolsets['va'],symbolsets['size']))
- record={'source_run':44789459847,'source_commit':'6c57bd844b2ad2fd67a93854781481c095db7c53',
+ record={'source_run':a.source_run,'source_commit':a.source_commit,
    'unchanged_inputs':{rel:sha(cached/rel)for rel in inputs},'native_reference_sha256':sha(native),
    'source_sha256':{n:sha(device/'package'/n)for n in ['B5qUsbHost.cpp','B5qUsbPolicy.h','LegacyDisplayProbe.cpp','B5qGpu.cpp',*SOURCES]},
    'core_translation_units_compiled':0,'board_translation_units_compiled':0,'aliases_from_same_v19_native':aliases}
@@ -97,11 +97,12 @@ def main():
  cflags=peripheral_flags(sdk,include,header,device/'package',ctx.tree,xnu,'_sheng_cpu_idle_mach' in defined)
  replacements={'B5qUsbHost.cpp':'build/native-legacy-display/libNativeLegacyDisplay.late.a','LegacyDisplayProbe.cpp':'build/native-legacy-display/libNativeLegacyDisplay.late.a','B5qGpu.cpp':'build/adreno740/libAdreno740.a'}
  for name,rel in replacements.items():
+  if selected is not None and name not in selected:continue
   obj=compile_object(cxx,cflags,device/'package'/name,out/(Path(name).stem+'.o'),llvm)
   run(['xcrun','ar','r',ctx.tree/rel,obj]);record['board_translation_units_compiled']+=1
- added=build_added(device/'package',out/'input',cxx,cflags,llvm,device/'scripts')
+ added=build_added(device/'package',out/'input',cxx,cflags,llvm,device/'scripts',selected)
  run(['xcrun','ar','r',ctx.tree/inputs[6],*added])
- record['board_translation_units_compiled']+=len(SOURCES)
+ record['board_translation_units_compiled']+=len(SOURCES if selected is None else [n for n in SOURCES if n in selected])
  record['added_objects']={p.name:sha(p) for p in added}
  record['optional_cpu_idle_helper_present']='_sheng_cpu_idle_mach' in defined
  native_out=ctx.tree/ctx.board['kernel']['prelink']['kernel'];native_out.parent.mkdir(parents=True,exist_ok=True)
@@ -114,7 +115,7 @@ def main():
  (out/'link-command.json').write_text(json.dumps(command,indent=2)+'\n');run(command)
  run([sys.executable,ctx.tree/'scripts/seal-source-crypto-kernel.py',native_out],env=dict(os.environ,UNIXNU_XNU_ARCH='arm64e',UNIXNU_IOS_VERSION='27.0',UNIXNU_XNU_TARGET='macosx'))
  record['unchanged_core_after_link_sha256']=sha(ctx.tree/inputs[0]);record['native_output_sha256']=sha(native_out)
- record['archive_outputs']={rel:sha(ctx.tree/rel)for rel in set(replacements.values())}
+ record['archive_outputs']={rel:sha(ctx.tree/rel)for rel in [inputs[5],inputs[6]]};record['changed_board_sources']=sorted(selected) if selected is not None else None
  os.environ.update(UNIXNU_XNU_ARCH='arm64e',UNIXNU_IOS_VERSION='27.0',UNIXNU_XNU_TARGET='macosx')
  kernel.prelink(ctx)
  reuse_path=ctx.work/'kernel-reuse.json'
