@@ -1,6 +1,6 @@
 {
   "scope": "v13 actual log fixes: opt in existing SMP/IPI implementation and existing launch-constraint policy; payload-only",
-  "status": "local pre-CI",
+  "status": "CI success; final IMG locally verified; next hardware log pending",
   "log_input": {
     "path": "logs/b5q-xnu2log-v13/XNU2LOG.BIN",
     "sha256": "85f58ff8ef9694d87ce46493a0ca991e11898ed4e3555b58dda5a6bce8c4fbb9"
@@ -166,5 +166,298 @@
       "UniXNU-b5q/scripts/build-b5q-gop-27.py",
       "UniXNU-b5q/scripts/build-b5q-storage.py"
     ]
-  }
+  },
+  "CI": {
+    "id": 44697374997,
+    "head_sha": "e5f312707cd7681ef21fb44f7fe686efe0bad8d0",
+    "html_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/44697374997",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-11-20T07:45:57Z",
+    "updated_at": "2026-11-20T07:48:08Z",
+    "full_kernel_and_Data_jobs": "skipped"
+  },
+  "transfer": {
+    "id": 14611337092,
+    "archive_sha256": "9cb8405c57e9cd2fccd035a5a12c1669007ab9a478020916dfd08ba7d0a69f2c",
+    "github_digest_verified": true
+  },
+  "delivery": {
+    "path": "artifacts/b5q-esp-runtime-v14/esp.img",
+    "output": {
+      "bytes": 838860800,
+      "sha256": "34ea115eacaafd041e84390698e78898546c8c9fbf4dda771890ad999c7a9b5b"
+    },
+    "deployed_kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+    "raw_kernel": {
+      "bytes": 142999552,
+      "sha256": "2ffc9610bf9db0b6f58c287b45ef653d9060f763cedac38a7eea2d806a382d19"
+    },
+    "payload": {
+      "bytes": 268435456,
+      "sha256": "c5091ea326e22d56efc87aeb23485e2c6bad97d096365e0740298bc7aae2e3d5"
+    },
+    "only_changed_ESP_members": [
+      "EFI/UniXNU/Payloads/kernel.macho.adt",
+      "EFI/UniXNU/Payloads/kernel.macho.crypto-hmac.json",
+      "EFI/UniXNU/unixnu.toml"
+    ],
+    "deployed_kernel_byte_identical_to_v13": true,
+    "checks": {
+      "mapping_complete": true,
+      "missing_symbols": {},
+      "post_reseal_idempotent": true,
+      "root_policies_bound": true,
+      "adt_typed_properties": true,
+      "fat_roundtrip": true
+    },
+    "runtime_verification": {
+      "passed": true,
+      "raw_kernel_reused": true,
+      "unchanged_Data_seed": true,
+      "menu_runtime_switches": true,
+      "ADT_CPU_affinities_and_PSCI_match_saved_b5q_FDT": true,
+      "actual_deployment_binary_gates_and_logger_verified": true,
+      "hardware_tested": false
+    },
+    "log_volume_proof": {
+      "scope": "Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence",
+      "result": "PASS",
+      "file_bytes": 8400896,
+      "file_sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea",
+      "token": "411839cbaebac4088c251c0ea57579a2",
+      "file_first_lba": 3203656,
+      "clusters": 2051,
+      "contiguous": true,
+      "no_aliases": true,
+      "mirrored_FAT": true,
+      "fat_blocks_each": 200,
+      "config_readonly": true,
+      "write_first_lba": 3203657,
+      "write_last_lba": 3205706,
+      "committed_slots": 0,
+      "source_GPT_entries": 512,
+      "production_volume_checker": true,
+      "hardware_tested": false
+    }
+  },
+  "verification_sources": {
+    "scripts/b5q-install/build-ci-esp.py": "bcf9ce1b3b79ce306bb48d4f9d6f1526f32b643b87cefbf42605a459eab31b06",
+    "artifacts/b5q-runtime-v14-work/verify-delivery.py": "279271a9093f833bd2e275d84fa51a1a95c59dfeeabbececfcfe21b1803c867c"
+  },
+  "checks": {
+    "runtime-gates-verification.json": {
+      "passed": true,
+      "kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "actual_compiled_launch_constraint_gate": true,
+      "cases": [
+        {
+          "argument_present": false,
+          "value": 0,
+          "outcome": "original_policy"
+        },
+        {
+          "argument_present": true,
+          "value": 0,
+          "outcome": "original_policy"
+        },
+        {
+          "argument_present": true,
+          "value": 1,
+          "outcome": "return_0"
+        },
+        {
+          "argument_present": true,
+          "value": 2,
+          "outcome": "return_0"
+        }
+      ],
+      "ArmCpu_probe_present": true,
+      "kernel_recompiled": false,
+      "boot_parser_mocked": true,
+      "PAuth_not_tested": true,
+      "hardware_tested": false
+    },
+    "fix-binary-verification.json": {
+      "result": "PASS",
+      "scope": "Actual compiled startup record and log I/O function before submission; host/lock/DMA fixtures; no device I/O",
+      "kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "startup_symbol": "___startup_OSLOG_entry_b5q_console_capture_init_268",
+      "subsystem": 13,
+      "rank": 0,
+      "startup_phase_during_callback": 12,
+      "sync_requests": [
+        {
+          "cdb": "35000000000000000000000000000000",
+          "lun": 3,
+          "flags": 0,
+          "descriptor": 268435456,
+          "bytes": 0
+        },
+        {
+          "cdb": "35000000000000000000000000000000",
+          "lun": 3,
+          "flags": 0,
+          "descriptor": 268435456,
+          "bytes": 0
+        }
+      ],
+      "readonly_root_and_unvalidated_ranges_rejected": true,
+      "TryLock_busy_emits_nothing": true,
+      "WRITE10_FUA_unchanged": true,
+      "wire_expectation": "zero range CDB verified",
+      "PAuth_not_tested": true,
+      "hardware_tested": false
+    },
+    "log-binary-verification.json": {
+      "result": "PASS",
+      "kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "console_to_capture_calls": {
+        "_console_write": {
+          "mode": "inlined-producer",
+          "memory_refs": {
+            "_nabu_capture_ring": [
+              "0xfffffff00bb55ab8"
+            ],
+            "_nabu_capture_end": [
+              "0xfffffff00bb55ac4",
+              "0xfffffff00bb55af8"
+            ],
+            "_nabu_capture_capacity": [
+              "0xfffffff00bb55abc"
+            ],
+            "_nabu_capture_lock": [
+              "0xfffffff00bb55ab0",
+              "0xfffffff00bb55afc"
+            ],
+            "_nabu_capture_lost": [
+              "0xfffffff00bb55b1c"
+            ]
+          }
+        },
+        "_console_write_unbuffered": {
+          "mode": "inlined-producer",
+          "memory_refs": {
+            "_nabu_capture_ring": [
+              "0xfffffff00bb5605c"
+            ],
+            "_nabu_capture_end": [
+              "0xfffffff00bb5603c",
+              "0xfffffff00bb56070"
+            ],
+            "_nabu_capture_capacity": [
+              "0xfffffff00bb56044"
+            ],
+            "_nabu_capture_lock": [
+              "0xfffffff00bb5602c",
+              "0xfffffff00bb56074"
+            ],
+            "_nabu_capture_lost": [
+              "0xfffffff00bb56088"
+            ]
+          }
+        },
+        "_serial_putc_crlf": {
+          "mode": "direct-call",
+          "sites": [
+            "0xfffffff00c1f3fd4"
+          ]
+        },
+        "_panic": [
+          "0xfffffff00bb965a8"
+        ],
+        "_panic_trap_to_debugger": [
+          "0xfffffff00bb965a8"
+        ]
+      },
+      "capture_symbol": "0xfffffff00bb5525c",
+      "writer": "__ZN12_GLOBAL__N_113nabuLogThreadEPvi",
+      "bounded_io": "__ZN12_GLOBAL__N_19nabuLogIoEbyjPhb",
+      "TryLock_in_actual_binary": true,
+      "write10_and_sync10_present": true,
+      "panic_screen_capture_hook_present": true,
+      "hardware_tested": false
+    },
+    "lockdown-verification.json": {
+      "passed": true,
+      "image": "/tmp/b5q-v14-verify-uqc03e4h/kernel.macho",
+      "sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "fileset": true,
+      "public_query": "security.mac.lockdown_mode_state_public",
+      "width": 8,
+      "read_only": true,
+      "native_parent": true,
+      "original_integer_query_preserved": true,
+      "early_registration_present": true,
+      "actual_compiled_handler_executed": true,
+      "locks_and_copyout_mocked": true,
+      "cases": [
+        {
+          "native_state": 0,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 0,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 12,
+          "handler_result": 12
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 14,
+          "handler_result": 14
+        }
+      ],
+      "PAuth_not_tested": true,
+      "device_tested": false
+    },
+    "mount-verification.json": {
+      "scope": "Actual final ESP extracted kernel, Data, addon and trust cache; local verification only",
+      "kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "logical_Data_bytes": 2147483648,
+      "APFS_superblock_checksums_verified": 13,
+      "APFS_volume_UUIDs": [
+        "1552CFEE-78FF-48D8-8A6C-694B867D61AC"
+      ],
+      "watchdogd_seed_policy": {
+        "com.apple.watchdogd": true
+      },
+      "addon_paths": [
+        "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+        "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+        "Library/User Template/Non_localized/.skipbuddy",
+        "bin/unixnu-absentd",
+        "bootshim/apfs_boot_util",
+        "test/share/manual-session"
+      ],
+      "signed_and_trusted_executables": {
+        "bootshim/apfs_boot_util": [
+          "60f17d89f11e23963543d9ca10de23b802e314ad"
+        ],
+        "bin/unixnu-absentd": [
+          "0cef40d0596e9367adb00dfbae1b78389be58d7e"
+        ]
+      },
+      "original_Apple_trust_modules_byte_identical": true,
+      "hardware_tested": false
+    }
+  },
+  "no_QEMU": true,
+  "no_phone_access": true,
+  "temporary_binary_cleanup": "After local final verification remove this run duplicate CI kernel/payload and return only final esp.img; retain small metadata and prior reusable v13 source artifact"
 }
