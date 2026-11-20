@@ -66,6 +66,12 @@ text_fixups = [
   "dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a",
   "dyld_shared_cache_arm64e.01,24dfd5c,ff4302d1f65706a9,ff2303d5c0035fd6",
   "dyld_shared_cache_arm64e.01,26cde70,f40300aa,140a80d2",
+  # Same-build native backdrop completion and optional UI startup choices.
+  "dyld_shared_cache_arm64e.03,5c3685c,a00180524039a672010080d2020080d2,68ca42f9c800e037e00313aa010080d2",
+  "dyld_shared_cache_arm64e.03,5c3686c,030080d2040080d28ffd8294,e1a5ff971f2003d51f2003d5",
+  "dyld_shared_cache_arm64e.03,28bb658,ce674e95,00008052",
+  "dyld_shared_cache_arm64e.03,6cf7304,fb214094,00008052",
+  "dyld_shared_cache_arm64e.03,239d0ec,a1ab6595,00008052",
 ]
 tools = true
 # b5q-root selects authenticated read-only macosroot; Data remains volatile in RAM.

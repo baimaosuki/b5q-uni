@@ -1,0 +1,2053 @@
+{
+  "scope": "v17 actual log analysis and v18 ADT-only software session repair",
+  "status": "Final local 800MiB 4Kn ESP and every FAT member verified; physical v18 outcome pending",
+  "runtime_input": {
+    "path": "logs/b5q-xnu2log-v17/XNU2LOG.BIN",
+    "bytes": 8400896,
+    "sha256": "9837740e58bfd184371cc29560ce3993c2658768402b3bae71616dd18d927c07",
+    "decoded_text": "logs/b5q-xnu2log-v17/XNU2LOG.txt",
+    "decoded_text_sha256": "59cb5fae147622528145acd1c46c254e00a2c816f930cb05519fb6bed09b6881",
+    "decode": {
+      "slot": 1,
+      "valid": true,
+      "sequence": 90,
+      "boot_id": "f3ee7e3b000000000100000000000000",
+      "committed_total": 108331,
+      "lost_on_contention": 42,
+      "ring_overwritten": 0,
+      "payload_bytes": 108331,
+      "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000",
+      "format": "NABULOG2",
+      "version": 2,
+      "allocation_token": "411839cbaebac4088c251c0ea57579a2",
+      "slots": [
+        {
+          "slot": 0,
+          "valid": true,
+          "sequence": 89,
+          "boot_id": "f3ee7e3b000000000100000000000000",
+          "committed_total": 108291,
+          "lost_on_contention": 42,
+          "ring_overwritten": 0,
+          "payload_bytes": 108291,
+          "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+        },
+        {
+          "slot": 1,
+          "valid": true,
+          "sequence": 90,
+          "boot_id": "f3ee7e3b000000000100000000000000",
+          "committed_total": 108331,
+          "lost_on_contention": 42,
+          "ring_overwritten": 0,
+          "payload_bytes": 108331,
+          "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+        }
+      ],
+      "selected_slot": 1,
+      "stored_checksum": "crc32_header_and_payload",
+      "stored_checksum_valid": true,
+      "config_checksum_valid": true,
+      "structural_validation": "passed",
+      "ring_capacity": 4194304,
+      "ring_order": "already_linearised",
+      "lost_bytes_exact": 42,
+      "captured_bytes_lower_bound": 108331,
+      "lost_bytes_lower_bound": 42,
+      "capture_complete_through_snapshot": false,
+      "complete_boot_log": false,
+      "freshness": "boot_id_present_requires_run_binding",
+      "snapshot_consistency": "CRC_verified_committed_snapshot",
+      "payload_sha256": "59cb5fae147622528145acd1c46c254e00a2c816f930cb05519fb6bed09b6881",
+      "warnings": [
+        "Bytes after the last completed commit may be missing.",
+        "Only bytes reaching the installed console producers are captured."
+      ],
+      "nul_bytes": 0,
+      "utf8_valid": true,
+      "decoded": true
+    }
+  },
+  "events": [
+    {
+      "line": 190,
+      "text": "B5qEthernet: local TimeSync interface state 1"
+    },
+    {
+      "line": 961,
+      "text": "ifnet_attach: All kernel threads created for interface en0 have been scheduled at least once. Proceeding."
+    },
+    {
+      "line": 1012,
+      "text": "  IOTimeSyncTimeSyncTimePort(0x0eae2cc99a6e0008): Created general notifier 0xfffffff458112d40 for local clock port 0xfffffff3c086f200"
+    },
+    {
+      "line": 1014,
+      "text": "text-fixup: dyld_shared_cache_arm64e.03+0x5b4263c (8 bytes) applied"
+    },
+    {
+      "line": 1015,
+      "text": "text-fixup: dyld_shared_cache_arm64e.03+0x5b51d00 (8 bytes) applied"
+    },
+    {
+      "line": 1065,
+      "text": "IOKit busy 0:"
+    },
+    {
+      "line": 1070,
+      "text": "text-fixup: dyld_shared_cache_arm64e.01+0x24dfd5c (8 bytes) applied"
+    },
+    {
+      "line": 1075,
+      "text": "request_power_change fId 17 second_external 0 powerstate 1 fdisplaytype 0"
+    },
+    {
+      "line": 1417,
+      "text": "text-fixup: dyld_shared_cache_arm64e.01+0x26cde70 (4 bytes) applied"
+    },
+    {
+      "line": 1418,
+      "text": "text-fixup: dyld_shared_cache_arm64e.03+0x5de63cc (4 bytes) applied"
+    },
+    {
+      "line": 1419,
+      "text": "b5q-fb: copy 1: 11404800 bytes in 1105 us"
+    },
+    {
+      "line": 1420,
+      "text": "b5q-fb: copy 2: 11404800 bytes in 2536 us"
+    },
+    {
+      "line": 1451,
+      "text": "b5q-fb: copy 3: 11404800 bytes in 7773 us"
+    },
+    {
+      "line": 1518,
+      "text": "b5q-fb: copy 4: 11404800 bytes in 968 us"
+    },
+    {
+      "line": 1543,
+      "text": "exec: pid 313 SecurityAgent"
+    },
+    {
+      "line": 1677,
+      "text": "AMFI: Denying core dump for pid 110 (WindowServer)exit: pid 110 WindowServer status 0x6 reason 2:6 flags 0"
+    },
+    {
+      "line": 1693,
+      "text": "request_power_change fId 17 second_external 0 powerstate 1 fdisplaytype 0"
+    },
+    {
+      "line": 1698,
+      "text": "b5q-fb: copy 5: 11404800 bytes in 1042 us"
+    },
+    {
+      "line": 1699,
+      "text": "b5q-fb: copy 6: 11404800 bytes in 1037 us"
+    },
+    {
+      "line": 1770,
+      "text": "b5q-fb: copy 7: 11404800 bytes in 991 us"
+    },
+    {
+      "line": 1774,
+      "text": "b5q-fb: copy 8: 11404800 bytes in 2517 us"
+    },
+    {
+      "line": 1779,
+      "text": "exec: pid 380 SecurityAgent"
+    },
+    {
+      "line": 1792,
+      "text": "b5q-fb: copy 9: 11404800 bytes in 1094 us"
+    },
+    {
+      "line": 1843,
+      "text": "b5q-fb: copy 10: 11404800 bytes in 2501 us"
+    },
+    {
+      "line": 1847,
+      "text": "AMFI: Denying core dump for pid 357 (WindowServer)exit: pid 357 WindowServer status 0x6 reason 2:6 flags 0"
+    },
+    {
+      "line": 1869,
+      "text": "request_power_change fId 17 second_external 0 powerstate 1 fdisplaytype 0"
+    },
+    {
+      "line": 1939,
+      "text": "exec: pid 421 SecurityAgent"
+    },
+    {
+      "line": 1945,
+      "text": "AMFI: Denying core dump for pid 403 (WindowServer)exit: pid 403 WindowServer status 0x6 reason 2:6 flags 0"
+    },
+    {
+      "line": 1969,
+      "text": "request_power_change fId 17 second_external 0 powerstate 1 fdisplaytype 0"
+    },
+    {
+      "line": 2026,
+      "text": "exec: pid 439 SecurityAgent"
+    },
+    {
+      "line": 2032,
+      "text": "AMFI: Denying core dump for pid 425 (WindowServer)AMFI: Denying core dump for pid 425 (WindowServer)exit: pid 425 WindowServer status 0x6 reason 2:6 flags 0"
+    },
+    {
+      "line": 2055,
+      "text": "request_power_change fId 17 second_external 0 powerstate 1 fdisplaytype 0"
+    },
+    {
+      "line": 2105,
+      "text": "exec: pid 455 SecurityAgent"
+    },
+    {
+      "line": 2109,
+      "text": "b5q-fb: copy 11: 11404800 bytes in 7954 us"
+    },
+    {
+      "line": 2110,
+      "text": "b5q-fb: copy 12: 11404800 bytes in 7903 us"
+    },
+    {
+      "line": 2114,
+      "text": "AMFI: Denying core dump for pid 443 (WindowServer)exit: pid 443 WindowServer status 0x6 reason 2:6 flags 0"
+    }
+  ],
+  "observations": {
+    "WindowServer_SIGABRT_count": 5,
+    "framebuffer_copy_count": 12,
+    "copy_bytes_each": 11404800,
+    "ethernet_state": 1,
+    "TimeSync_clock_notifier_observed": true,
+    "display_powerstate_1_observed": true,
+    "SecurityAgent_exec_observed": true,
+    "kernel_panic_recorded": false,
+    "actual_visible_pixels_established": false,
+    "userland_backtrace_available": false,
+    "precise_assertion_in_b5q_log_available": false,
+    "backdrop_interpretation": "Same-build NABU stack identifies unfinished backdrop invalidations on software callback path; b5q proves repeated SIGABRT after SecurityAgent, but has no userland stack proving this exact assertion or a unique blocker.",
+    "capture_correction": "42 bytes lost on capture lock contention, zero overwritten; latest CRC-valid snapshot does not prove a complete panic/reboot-free session."
+  },
+  "new_policies": {
+    "build": "26C5035r",
+    "scope": "OS-only same-build backdrop lifecycle and three optional AppKit/HIToolbox startup choices; not b5q hardware constants",
+    "sources": {
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/backdrop-26C5035r.json": {
+        "sha256": "0809e4e5c08b570ecaa81d2f511e6fac30b1bf93c3110f27dc2eadf49e0b525e",
+        "scope": "Legacy CARenderOGLRender shared API used with software callbacks by CGLayerKitFetch; not Metal rendering"
+      },
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/safe-aperture-26C5035r.json": {
+        "sha256": "f24be054ace19b2350fe146973ae185c5690756b63899eb97e16d6e20c3b3725",
+        "scope": "Only the optional SafeAperture getter skips its Foundation URL query; its pre-zeroed result takes the original false path. Existing mode bits and native releases remain. Does not repair lsd bootstrap or promise a desktop."
+      },
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/magnify-26C5035r.json": {
+        "sha256": "fa81c2558477ba9247bd2e25ff3aeac86160eebd0835ded21a4dfe07cc570c8a",
+        "scope": "Return unavailable only at the optional kCFURLIsApplicationKey call. Native URL release, false/default branch and AppleMagnifiedMode preference remain. Shared block also skips inferred NSHighResolutionCapable bundle metadata; not a repair of lsd/trust evaluation."
+      },
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/managed-tcc-26C5035r.json": {
+        "sha256": "0b659d605250ff69aaa8e3cf745cbe77a7243343853f55864ddc845a3efb801e",
+        "scope": "Only AppKit managed-Mac launch-disclosure feature selection returns false; native cbz and epilogue execute. Shared method affects AppKit applications using this launch disclosure. Does not change TCC access checks, grant authorization, alter tccd, or repair LaunchServices/persona backend."
+      }
+    },
+    "cache_inputs": {
+      "dyld_shared_cache_arm64e.01": {
+        "bytes": 130711552,
+        "sha256": "b954fa0249bb2c9ab5b3d7207bb05f4767bb70d3c675b3cab6a37aafc9c6c890",
+        "cache_uuid": "7C9B5FA1-846D-3CDE-85D2-750588409133"
+      },
+      "dyld_shared_cache_arm64e.03": {
+        "bytes": 131268608,
+        "sha256": "bc161753855e6f9646b5c1ef38c62c958e72e3bc34ec967c77c7372a7b3c3863",
+        "cache_uuid": "12C09024-BD03-321F-989A-28512B5971DD"
+      }
+    },
+    "patches": [
+      {
+        "name": "CARenderOGLRender::native-backdrop-completion-1",
+        "va": "0x18e03685c",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x5c3685c",
+        "original": "a00180524039a672010080d2020080d2",
+        "replacement": "68ca42f9c800e037e00313aa010080d2",
+        "page_sha256": "f5a61945ee361010f4e61a57eb91442866f332a23cfc505bcf99f82f03a60f25",
+        "patched_page_sha256": "11a2d103679b39666c9ad43fd0762da6cea076bc95674eb7db47d3703816041d"
+      },
+      {
+        "name": "CARenderOGLRender::native-backdrop-completion-2",
+        "va": "0x18e03686c",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x5c3686c",
+        "original": "030080d2040080d28ffd8294",
+        "replacement": "e1a5ff971f2003d51f2003d5",
+        "page_sha256": "f5a61945ee361010f4e61a57eb91442866f332a23cfc505bcf99f82f03a60f25",
+        "patched_page_sha256": "11a2d103679b39666c9ad43fd0762da6cea076bc95674eb7db47d3703816041d"
+      },
+      {
+        "name": "AppKit::SafeAperture-optional-URL-unavailable",
+        "va": "0x18acbb658",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x28bb658",
+        "original": "ce674e95",
+        "replacement": "00008052",
+        "page_sha256": "66e688edac5e79a59c00ba592dee56ccf5ac389c100ea8a00d944427ece00875",
+        "patched_page_sha256": "e52e48d905eca5d9803da4a4ef86f8d78bf5957f1fbbf4a719623fb3d8dba0e3"
+      },
+      {
+        "name": "HIToolbox::Magnify-optional-URL-unavailable",
+        "va": "0x18f0f7304",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x6cf7304",
+        "original": "fb214094",
+        "replacement": "00008052",
+        "page_sha256": "0ed06982c79694e7a459b823fa45f742a5ff99b3dded708b373a0fd45a51990e",
+        "patched_page_sha256": "72bb4ac260a1c787c680d3c243cb2e03007b411779c1c94028f9fae31d63f027"
+      },
+      {
+        "name": "AppKit::managedTCC-launch-disclosure-feature-disabled",
+        "va": "0x18a79d0ec",
+        "file": "dyld_shared_cache_arm64e.03",
+        "offset": "0x239d0ec",
+        "original": "a1ab6595",
+        "replacement": "00008052",
+        "page_sha256": "835cc3f910af7264a212b1fa64d88e2a6cb018d8d932091c80439fa1c7257535",
+        "patched_page_sha256": "a5b292e7e1c68896b76d9069bb372be7d33214856c5ef01f7bc15a4ecc4e7aa7"
+      }
+    ],
+    "b5q_failure_stack_available": false,
+    "reference_backdrop_assertion_only": true
+  },
+  "local_validation": {
+    "all_10_original_sites_and_grouped_patched_4K_page_hashes_match": true,
+    "cache_identity_matches_b5q_v15_independently_bound_26C5035r_inputs": true,
+    "kernel_text_policy_limit": 32,
+    "new_total": 10,
+    "reference_test_sources": {
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/tests/test_backdrop27.py": "2b14bff8c0c3e0a2eb97b373eb6652dfd132463fafc6a3fad51b04433552bc86",
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/tests/test_safe_aperture27.py": "aff10138c2db035c25c94553dcd9640d337266918bc045da0fc9142690154d23",
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/tests/test_magnify27.py": "b6a59dbe9ffa0844f750fc76c5b2e540e0ca80f29ab19addfab29fa6df53676f",
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/tests/test_managed_tcc27.py": "d48a9eee0dbb8d7b3ed43442e294a1e5cbd5120c5b26245a078fbcac5ae285f1",
+      "/home/baimao/nabu_macos/out/nabu-27.3-fresh/sw-backdrop-repair/review.md": "8c49cd40677aa8446ee4e3c9646f761132bbf0389b3fec531f693254d3482a0b"
+    },
+    "original_instruction_replays": {
+      "backdrop": {
+        "passed": true,
+        "actual_wrapper_clip_finalizer_and_roi_guard": true,
+        "model_boundaries": [
+          "allocator",
+          "locks",
+          "CA shape algebra/refcounts",
+          "PAC transport"
+        ],
+        "actual_pixel_rendering_tested": false,
+        "device_tested": false,
+        "cases": [
+          {
+            "patched": false,
+            "backdrops": 0,
+            "existing_array": false,
+            "will_clip": true,
+            "already_finalized": false,
+            "events": [
+              "draw"
+            ],
+            "original_roi_assertion_passed": false,
+            "shape_algebra_modeled": true
+          },
+          {
+            "patched": false,
+            "backdrops": 3,
+            "existing_array": false,
+            "will_clip": true,
+            "already_finalized": false,
+            "events": [
+              "draw"
+            ],
+            "original_roi_assertion_passed": false,
+            "shape_algebra_modeled": true
+          },
+          {
+            "patched": true,
+            "backdrops": 0,
+            "existing_array": false,
+            "will_clip": true,
+            "already_finalized": false,
+            "events": [
+              "clip",
+              "finalize",
+              "draw"
+            ],
+            "original_roi_assertion_passed": true,
+            "shape_algebra_modeled": true
+          },
+          {
+            "patched": true,
+            "backdrops": 3,
+            "existing_array": false,
+            "will_clip": true,
+            "already_finalized": false,
+            "events": [
+              "clip",
+              "finalize",
+              "draw"
+            ],
+            "original_roi_assertion_passed": true,
+            "shape_algebra_modeled": true
+          },
+          {
+            "patched": true,
+            "backdrops": 3,
+            "existing_array": true,
+            "will_clip": true,
+            "already_finalized": false,
+            "events": [
+              "clip",
+              "finalize",
+              "draw"
+            ],
+            "original_roi_assertion_passed": true,
+            "shape_algebra_modeled": true
+          },
+          {
+            "patched": true,
+            "backdrops": 3,
+            "existing_array": true,
+            "will_clip": true,
+            "already_finalized": true,
+            "events": [
+              "draw"
+            ],
+            "original_roi_assertion_passed": true,
+            "shape_algebra_modeled": true
+          },
+          {
+            "patched": true,
+            "backdrops": 3,
+            "existing_array": false,
+            "will_clip": false,
+            "already_finalized": true,
+            "events": [
+              "draw"
+            ],
+            "original_roi_assertion_passed": true,
+            "shape_algebra_modeled": true
+          },
+          {
+            "patched": true,
+            "backdrops": 3,
+            "existing_array": false,
+            "will_clip": false,
+            "already_finalized": false,
+            "events": [
+              "clip",
+              "draw"
+            ],
+            "original_roi_assertion_passed": false,
+            "shape_algebra_modeled": true
+          }
+        ]
+      },
+      "safe_aperture": {
+        "passed": true,
+        "build": "26C5035r",
+        "actual_original_caller_and_getter_executed": true,
+        "modeled_boundaries": [
+          "ObjC dispatch and reference counting",
+          "Foundation URL query"
+        ],
+        "PAC_emulated": false,
+        "device_tested": false,
+        "cases": 99,
+        "rows": [
+          {
+            "test": "original-stops-at-captured-LS-edge",
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 0,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 0,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 0,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 0,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 1,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 1,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 1,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 1,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 2,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 2,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 2,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 2,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 3,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 3,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 3,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 3,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 4,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 4,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 4,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 4,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 5,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 5,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 5,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 5,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 6,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 6,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 6,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 6,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 7,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 7,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 7,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 7,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 8,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 8,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 8,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 8,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 9,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 9,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 9,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 9,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 10,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 10,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 10,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 10,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 11,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 11,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 11,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 11,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 12,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 12,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 12,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 12,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 13,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 13,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 13,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 13,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 14,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 14,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 14,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 14,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 15,
+            "bit": 1,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 15,
+            "bit": 2,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 15,
+            "bit": 4,
+            "passed": true
+          },
+          {
+            "test": "patched-native-failure-keeps-mode-and-releases",
+            "mode": 15,
+            "bit": 8,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 0,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 1,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 2,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 3,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 4,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 5,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 6,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 7,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 8,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 9,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 10,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 11,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 12,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 13,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 14,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 15,
+            "boolean": false,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 0,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 1,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 2,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 3,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 4,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 5,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 6,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 7,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 8,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 9,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 10,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 11,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 12,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 13,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 14,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "original-success-bit-control",
+            "mode": 15,
+            "boolean": true,
+            "passed": true
+          },
+          {
+            "test": "native-no-provider-control",
+            "patched": false,
+            "passed": true
+          },
+          {
+            "test": "native-no-provider-control",
+            "patched": true,
+            "passed": true
+          }
+        ]
+      },
+      "magnify": {
+        "passed": true,
+        "build": "26C5035r",
+        "cases": 57,
+        "actual_captured_block_and_preference_reader_executed": true,
+        "modeled_boundaries": [
+          "CoreFoundation bundle/URL/property functions",
+          "dyld platform",
+          "CF preferences backend"
+        ],
+        "PAC_emulated": false,
+        "device_tested": false,
+        "rows": [
+          {
+            "test": "original-reaches-captured-LS-call",
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 1,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 1,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 1,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 1,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 1,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 1,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 2,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 2,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 2,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 2,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 2,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 2,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 6,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 6,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 6,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 6,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 6,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": null,
+            "platform": 6,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 1,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 1,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 1,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 1,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 1,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 1,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 2,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 2,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 2,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 2,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 2,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 2,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 6,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 6,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 6,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 6,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 6,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": false,
+            "platform": 6,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 1,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 1,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 1,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 1,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 1,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 1,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 2,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 2,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 2,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 2,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 2,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 2,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 6,
+            "bundle": true,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 6,
+            "bundle": true,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 6,
+            "bundle": false,
+            "url": true,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 6,
+            "bundle": false,
+            "url": true,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 6,
+            "bundle": true,
+            "url": false,
+            "cached_preference": false,
+            "passed": true
+          },
+          {
+            "test": "native-unavailable-and-patched-paths-match",
+            "preference": true,
+            "platform": 6,
+            "bundle": true,
+            "url": false,
+            "cached_preference": true,
+            "passed": true
+          },
+          {
+            "test": "original-available-property-control",
+            "query": "false",
+            "passed": true
+          },
+          {
+            "test": "original-available-property-control",
+            "query": "true",
+            "passed": true
+          }
+        ]
+      },
+      "managed_tcc": {
+        "passed": true,
+        "build": "26C5035r",
+        "cases": 32,
+        "native_AppKit_method_and_caller_executed": true,
+        "matches_original_feature_disabled_branch": true,
+        "stack_and_callee_saved_registers_preserved": true,
+        "modeled_boundaries": [
+          "feature provider",
+          "ObjC dispatch",
+          "TCC IPC"
+        ],
+        "TCC_authorization_decisions_modified": false,
+        "PAC_emulated": false,
+        "device_tested": false,
+        "rows": [
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": false,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": false,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": false,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": false,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": true,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": true,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": true,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": true,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": false,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": false,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": false,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": false,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": true,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": true,
+            "identifier": false,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": true,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": true,
+            "identifier": true,
+            "caller": false,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": false,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": false,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": false,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": false,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": true,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": true,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": false,
+            "bundle": true,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": false,
+            "bundle": true,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": false,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": false,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": false,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": false,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": true,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": true,
+            "identifier": false,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "original-native-gate-control",
+            "feature": true,
+            "bundle": true,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          },
+          {
+            "test": "patched-matches-native-disabled-path",
+            "feature": true,
+            "bundle": true,
+            "identifier": true,
+            "caller": true,
+            "passed": true
+          }
+        ]
+      }
+    },
+    "instruction_replay_cases": 196,
+    "modeled_boundaries": "Allocator, locks, shape algebra/refcounts, ObjC/CF/feature/IPC/PAC transports per individual tests; not pixel rendering or authorization tests",
+    "kernel_validation_inherited_because_deployment_bytes_identical": true,
+    "board_changes_only_payload_text_fixups": true,
+    "official_package_template_unchanged": true,
+    "record_schema": "PASS14areas",
+    "python_syntax": "PASS"
+  },
+  "delivery": {
+    "log_journal": {
+      "scope": "Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence",
+      "result": "PASS",
+      "file_bytes": 8400896,
+      "file_sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea",
+      "token": "411839cbaebac4088c251c0ea57579a2",
+      "file_first_lba": 3203664,
+      "clusters": 2051,
+      "contiguous": true,
+      "no_aliases": true,
+      "mirrored_FAT": true,
+      "fat_blocks_each": 200,
+      "config_readonly": true,
+      "write_first_lba": 3203665,
+      "write_last_lba": 3205714,
+      "committed_slots": 0,
+      "source_GPT_entries": 512,
+      "production_volume_checker": true,
+      "hardware_tested": false
+    },
+    "os_profile": "macos-27.3-26C5035r",
+    "scope": "v18 local ADT-only software session update",
+    "ci_run": null,
+    "source_commit": "1a3cd004cef7074133a2bb4d5be1720633643b15",
+    "deploy_kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+    "raw_kernel": {
+      "bytes": 143032320,
+      "sha256": "e57f6ffcba05f624bdddb9db17ebc505cac2175f83ce3460d1b38a837b3cd26d"
+    },
+    "ci_payload": {
+      "bytes": 268435456,
+      "sha256": "d9a4fdfa51629750258f4c5a0326dd7e495aa6fa626127e5f3fd8206816f6830"
+    },
+    "kernel_command_line": "-v debug=0x14e use_contiguous_hint=0 kt_fixed_zones=120 -no_slto_panic smp=1 armcpu-spi-ipi=1 armcpu-self-ipi=1 no-lc=1 ethernet=1 vsync=60 vc-text=1 native-source-storage=1 b5q-root=1 b5q-smmu-reuse=1 offline-mobile-graphics-load=1 offline-legacy-register=1 offline-legacy-gop=1 offline-legacy-pm=1 offline-legacy-validate=1 offline-legacy-transfer=1 offline-legacy-cpu-present=1 offline-legacy-phase=4 aks=1 aks-sls=3 offline-key-events=1 apfs-boot-shim=1 timebase-hz=24000000 disable-watchdogd=1 cs-lazy=1 boot-payload-release=1 exec-log=1 b5q-log=1 b5q-log-token=411839cbaebac4088c251c0ea57579a2",
+    "outputs": {
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "9fe40daf1a52d40787575ba18305fd346fc0e4391c59d45fa3fe56911196ed17"
+      }
+    },
+    "esp_files": {
+      "XNU2LOG.BIN": {
+        "bytes": 8400896,
+        "sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea"
+      },
+      "startup.nsh": {
+        "bytes": 24,
+        "sha256": "340d03ff8f9e721b8e42d7efc5a826a0295640266d343ee6379f7c64b792a862"
+      },
+      "EFI/UniXNU/unixnu.toml": {
+        "bytes": 1121,
+        "sha256": "1599264a48978cf1170a3a1bd3731dca796dc48369569f26e8727e2b8f08ba43"
+      },
+      "EFI/BOOT/BOOTAA64.EFI": {
+        "bytes": 104448,
+        "sha256": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b"
+      },
+      "EFI/UniXNU/Drivers/DarwinBoot.efi": {
+        "bytes": 43520,
+        "sha256": "95578b1fba1f7d18bc7cb95b77ec839707b2282804be886dbbafbafde60ace76"
+      },
+      "EFI/UniXNU/Payloads/kernel.macho.gpuaddon": {
+        "bytes": 5384,
+        "sha256": "85f0591959de8389be69989b78f34f51ec5f13d0cab1a6c9ba048e11f9fc973b"
+      },
+      "EFI/UniXNU/Payloads/scratch-data.img": {
+        "bytes": 21577856,
+        "sha256": "804692b96d9ba6bfcb64cbb430a627923dfdb4f072da4872ee14674365dc46b8"
+      },
+      "EFI/UniXNU/Payloads/kernel.macho.trustcache": {
+        "bytes": 451340,
+        "sha256": "c30b6aba4c0a2983a2ee5a0743d23e63eb5138c7042c4df8b45f8cbcc2c12340"
+      },
+      "EFI/UniXNU/Payloads/kernel.macho.adt": {
+        "bytes": 16104,
+        "sha256": "a546397a1be8afbd098a7fe8b052b9448df51585cd24dfbd4688d9b53b6bf320"
+      },
+      "EFI/UniXNU/Payloads/kernel.macho": {
+        "bytes": 143032320,
+        "sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9"
+      },
+      "EFI/UniXNU/Payloads/kernel.macho.crypto-hmac.json": {
+        "bytes": 344,
+        "sha256": "4808541efce6f6d9a7facea35ae3bc2b1ab0ea5391e3d924c2d89dc220f50316"
+      }
+    },
+    "retained_loader_modules": {
+      "EFI/BOOT/BOOTAA64.EFI": {
+        "bytes": 104448,
+        "sha256": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b"
+      },
+      "EFI/UniXNU/Drivers/DarwinBoot.efi": {
+        "bytes": 43520,
+        "sha256": "95578b1fba1f7d18bc7cb95b77ec839707b2282804be886dbbafbafde60ace76"
+      }
+    },
+    "build_status": {
+      "delivery_version": "b5q-esp-runtime-v18",
+      "flash_candidate_ready": true,
+      "esp_install_required": true,
+      "root_read_only": true,
+      "data_volatile": true,
+      "esp_fat_sector_bytes": 4096,
+      "esp_sectors_per_cluster": 1,
+      "hardware_boot_verified": false
+    },
+    "checks": {
+      "mapping_complete": true,
+      "missing_symbols": {},
+      "post_reseal_idempotent": true,
+      "root_policies_bound": true,
+      "adt_typed_properties": true,
+      "fat_roundtrip": true
+    },
+    "hardware_tested": false,
+    "kernel_source_ci_run": "44746455235",
+    "adt_update": {
+      "source": "artifacts/b5q-esp-runtime-v17",
+      "source_esp": {
+        "bytes": 838860800,
+        "sha256": "d1ef17bd1eebde4efe8c17a948b50a18c1de093142070a4704d55a296e045371"
+      },
+      "changed_members": [
+        "EFI/UniXNU/Payloads/kernel.macho.adt",
+        "EFI/UniXNU/unixnu.toml"
+      ],
+      "changed_properties": [
+        [
+          "/chosen",
+          "random-seed"
+        ],
+        [
+          "/chosen",
+          "text-fixups"
+        ]
+      ],
+      "policy_count": 10,
+      "kernel_unchanged": true,
+      "Data_unchanged": true,
+      "addon_and_trust_unchanged": true,
+      "new_kernel_build": false,
+      "new_ci_run": false,
+      "new_firmware_build": false,
+      "official_generator_sha256": "dd72d2e5dfa8183c9ea320a52017d424c1dee70b057972b1ad91225686c49606",
+      "config_inputs": {
+        "UniXNU/profiles/arch/arm64e/profile.toml": "32407d50a9d202e80783ac6bb78cb33a37379688fce916fe07e4d063691e7ef8",
+        "sources/UniXNU-sm8550-common/soc.toml": "a7177808bb17a4548660847ef11024a4046734f26a25a32ff1feaa4e281c1bdc",
+        "UniXNU/profiles/os/macos-27.3-26C5035r/profile.toml": "944e77e4b207151ab4b6a20fb174f8d537178eada54884378ace39bc01da2225",
+        "UniXNU-b5q/board.toml": "0565c9804bfc38a45d226a808f8d6225061743f61dec656f97cc259340c61f82"
+      },
+      "hardware_dtb_sha256": "f7bbdca06f7cba5c2d0a22c550062cf3785964f1129824a06877166192c8f6ca",
+      "fat_roundtrip": true
+    }
+  },
+  "mount_verification": {
+    "scope": "Actual final ESP extracted kernel, Data, addon and trust cache; local verification only",
+    "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+    "logical_Data_bytes": 2147483648,
+    "APFS_superblock_checksums_verified": 13,
+    "APFS_volume_UUIDs": [
+      "1552CFEE-78FF-48D8-8A6C-694B867D61AC"
+    ],
+    "watchdogd_seed_policy": {
+      "com.apple.watchdogd": true
+    },
+    "addon_paths": [
+      "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+      "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+      "Library/User Template/Non_localized/.skipbuddy",
+      "bin/unixnu-absentd",
+      "bootshim/apfs_boot_util",
+      "test/share/manual-session"
+    ],
+    "signed_and_trusted_executables": {
+      "bootshim/apfs_boot_util": [
+        "60f17d89f11e23963543d9ca10de23b802e314ad"
+      ],
+      "bin/unixnu-absentd": [
+        "0cef40d0596e9367adb00dfbae1b78389be58d7e"
+      ]
+    },
+    "original_Apple_trust_modules_byte_identical": true,
+    "hardware_tested": false
+  },
+  "changes": {
+    "new_kernel_compile": false,
+    "new_ci_run": false,
+    "new_firmware_compile": false,
+    "QEMU": false,
+    "phone_access": false,
+    "Data_seed_regenerated": false,
+    "kernel_args_changed": false,
+    "kernel_patches_changed": false
+  },
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "0565c9804bfc38a45d226a808f8d6225061743f61dec656f97cc259340c61f82",
+    "UniXNU-b5q/scripts/software-session-26C5035r.json": "1fd21f00a3c5c1ea6c752c0f76349db1d735c94e26fe2047242f277a20a8eec9",
+    "scripts/b5q-install/repack-adt-esp.py": "23a9d43f122d41e37cc1987fccb631a4bd322a0eaafb2dc3173ff007746524f2"
+  },
+  "hardware_tested": false
+}

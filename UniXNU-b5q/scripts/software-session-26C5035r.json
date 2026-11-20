@@ -1,0 +1,88 @@
+{
+  "build": "26C5035r",
+  "scope": "OS-only same-build backdrop lifecycle and three optional AppKit/HIToolbox startup choices; not b5q hardware constants",
+  "sources": {
+    "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/backdrop-26C5035r.json": {
+      "sha256": "0809e4e5c08b570ecaa81d2f511e6fac30b1bf93c3110f27dc2eadf49e0b525e",
+      "scope": "Legacy CARenderOGLRender shared API used with software callbacks by CGLayerKitFetch; not Metal rendering"
+    },
+    "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/safe-aperture-26C5035r.json": {
+      "sha256": "f24be054ace19b2350fe146973ae185c5690756b63899eb97e16d6e20c3b3725",
+      "scope": "Only the optional SafeAperture getter skips its Foundation URL query; its pre-zeroed result takes the original false path. Existing mode bits and native releases remain. Does not repair lsd bootstrap or promise a desktop."
+    },
+    "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/magnify-26C5035r.json": {
+      "sha256": "fa81c2558477ba9247bd2e25ff3aeac86160eebd0835ded21a4dfe07cc570c8a",
+      "scope": "Return unavailable only at the optional kCFURLIsApplicationKey call. Native URL release, false/default branch and AppleMagnifiedMode preference remain. Shared block also skips inferred NSHighResolutionCapable bundle metadata; not a repair of lsd/trust evaluation."
+    },
+    "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/managed-tcc-26C5035r.json": {
+      "sha256": "0b659d605250ff69aaa8e3cf745cbe77a7243343853f55864ddc845a3efb801e",
+      "scope": "Only AppKit managed-Mac launch-disclosure feature selection returns false; native cbz and epilogue execute. Shared method affects AppKit applications using this launch disclosure. Does not change TCC access checks, grant authorization, alter tccd, or repair LaunchServices/persona backend."
+    }
+  },
+  "cache_inputs": {
+    "dyld_shared_cache_arm64e.01": {
+      "bytes": 130711552,
+      "sha256": "b954fa0249bb2c9ab5b3d7207bb05f4767bb70d3c675b3cab6a37aafc9c6c890",
+      "cache_uuid": "7C9B5FA1-846D-3CDE-85D2-750588409133"
+    },
+    "dyld_shared_cache_arm64e.03": {
+      "bytes": 131268608,
+      "sha256": "bc161753855e6f9646b5c1ef38c62c958e72e3bc34ec967c77c7372a7b3c3863",
+      "cache_uuid": "12C09024-BD03-321F-989A-28512B5971DD"
+    }
+  },
+  "patches": [
+    {
+      "name": "CARenderOGLRender::native-backdrop-completion-1",
+      "va": "0x18e03685c",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x5c3685c",
+      "original": "a00180524039a672010080d2020080d2",
+      "replacement": "68ca42f9c800e037e00313aa010080d2",
+      "page_sha256": "f5a61945ee361010f4e61a57eb91442866f332a23cfc505bcf99f82f03a60f25",
+      "patched_page_sha256": "11a2d103679b39666c9ad43fd0762da6cea076bc95674eb7db47d3703816041d"
+    },
+    {
+      "name": "CARenderOGLRender::native-backdrop-completion-2",
+      "va": "0x18e03686c",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x5c3686c",
+      "original": "030080d2040080d28ffd8294",
+      "replacement": "e1a5ff971f2003d51f2003d5",
+      "page_sha256": "f5a61945ee361010f4e61a57eb91442866f332a23cfc505bcf99f82f03a60f25",
+      "patched_page_sha256": "11a2d103679b39666c9ad43fd0762da6cea076bc95674eb7db47d3703816041d"
+    },
+    {
+      "name": "AppKit::SafeAperture-optional-URL-unavailable",
+      "va": "0x18acbb658",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x28bb658",
+      "original": "ce674e95",
+      "replacement": "00008052",
+      "page_sha256": "66e688edac5e79a59c00ba592dee56ccf5ac389c100ea8a00d944427ece00875",
+      "patched_page_sha256": "e52e48d905eca5d9803da4a4ef86f8d78bf5957f1fbbf4a719623fb3d8dba0e3"
+    },
+    {
+      "name": "HIToolbox::Magnify-optional-URL-unavailable",
+      "va": "0x18f0f7304",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x6cf7304",
+      "original": "fb214094",
+      "replacement": "00008052",
+      "page_sha256": "0ed06982c79694e7a459b823fa45f742a5ff99b3dded708b373a0fd45a51990e",
+      "patched_page_sha256": "72bb4ac260a1c787c680d3c243cb2e03007b411779c1c94028f9fae31d63f027"
+    },
+    {
+      "name": "AppKit::managedTCC-launch-disclosure-feature-disabled",
+      "va": "0x18a79d0ec",
+      "file": "dyld_shared_cache_arm64e.03",
+      "offset": "0x239d0ec",
+      "original": "a1ab6595",
+      "replacement": "00008052",
+      "page_sha256": "835cc3f910af7264a212b1fa64d88e2a6cb018d8d932091c80439fa1c7257535",
+      "patched_page_sha256": "a5b292e7e1c68896b76d9069bb372be7d33214856c5ef01f7bc15a4ecc4e7aa7"
+    }
+  ],
+  "b5q_failure_stack_available": false,
+  "reference_backdrop_assertion_only": true
+}
