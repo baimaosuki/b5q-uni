@@ -463,5 +463,424 @@
       "size_in_bytes": 1150298945,
       "last_accessed_at": "2026-11-20T19:15:23.626493Z"
     }
-  ]
+  ],
+  "ci_attempts": [
+    {
+      "run": 44814986018,
+      "commit": "66f37fa9192f7d2d81229f141e610fcfbc1f7fd3",
+      "conclusion": "failure before object compile",
+      "first_error": "StopIteration: no xnu-* source checkout under out/feeds",
+      "fix": "official unixnu fetch xnu before board relink; no XNU compilation",
+      "actual_GPU_cache_hit": true,
+      "actual_Homebrew_cache_hit": true
+    }
+  ],
+  "native_BGRA_instruction_replay": {
+    "passed": true,
+    "actual_original_instructions": true,
+    "native_format_guard_preserved": true,
+    "CF_and_kernel_transport_modeled": true,
+    "PAC_tested": false,
+    "device_tested": false,
+    "cases": [
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x52476841"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": "0x52476841",
+        "path": "reuse",
+        "selected": "0x52476841"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": "0x52476841",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x26424741"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": "0x26424741",
+        "path": "reuse",
+        "selected": "0x26424741"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": "0x26424741",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x62336138"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": "0x62336138",
+        "path": "reuse",
+        "selected": "0x62336138"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": "0x62336138",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x77343061"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": "0x77343061",
+        "path": "reuse",
+        "selected": "0x77343061"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": false,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": "0x77343061",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 0,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x42475241",
+        "force": 1,
+        "old": "0x42475241",
+        "path": "reuse",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 0,
+        "old": "0x52476841",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x52476841",
+        "force": 1,
+        "old": "0x52476841",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 0,
+        "old": "0x26424741",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x26424741",
+        "force": 1,
+        "old": "0x26424741",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 0,
+        "old": "0x62336138",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x62336138",
+        "force": 1,
+        "old": "0x62336138",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 0,
+        "old": "0x77343061",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": null,
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-framebuffer-allocation",
+        "patched": true,
+        "incoming": "0x77343061",
+        "force": 1,
+        "old": "0x77343061",
+        "path": "allocate",
+        "selected": "0x42475241"
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x42475241",
+        "accepted": true
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x52476841",
+        "accepted": false
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x26424741",
+        "accepted": false
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x62336138",
+        "accepted": false
+      },
+      {
+        "test": "native-destination-format-guard",
+        "pixel_format": "0x77343061",
+        "accepted": false
+      },
+      {
+        "test": "native-IOSurfaceCreate-properties",
+        "properties": {
+          "BytesPerElement": 4,
+          "BytesPerRow": 6400,
+          "Width": 1600,
+          "Height": 2560,
+          "PixelFormat": 1111970369,
+          "CacheMode": 1024,
+          "AllocSize": 16384000,
+          "MapCacheAttribute": 0
+        }
+      }
+    ]
+  }
 }

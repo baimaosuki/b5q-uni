@@ -79,6 +79,7 @@ jobs:
           set -euo pipefail
           UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
           UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
+          UniXNU/unixnu fetch xnu --device UniXNU-b5q --os macos-27.3-26C5035r
           gh run download 44794616634 --repo "$GITHUB_REPOSITORY" --name b5q-build-44794616634 --dir "$RUNNER_TEMP/completed-artifact"
           python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44794616634 --source-commit d4c6140df3fa08082cfb5094f864da924dbc156b
           rm -rf "$RUNNER_TEMP/completed-artifact"
