@@ -226,7 +226,39 @@
     },
     "host_suite_log_sha256": "0cbfe325cbc39dc34f25e883e872adaddfe29ee23805a2cd4c4a0b13293e2370",
     "reference_adapter_regeneration": "PASS",
-    "pending": "CI build, actual binary verification, hardware execution"
+    "pending": "CI build, actual binary verification, hardware execution",
+    "completed_CI_kernel": {
+      "source_run": 44789459847,
+      "sha256": "ab83d772d5d82de5ef71aca2c90a807a46cccdf4fb4263dba7db5844b8d218fe",
+      "bytes": 143097856,
+      "prelink_missing": {},
+      "allow_missing": false,
+      "local_final_binary_check": {
+        "passed": true,
+        "kernel_sha256": "ab83d772d5d82de5ef71aca2c90a807a46cccdf4fb4263dba7db5844b8d218fe",
+        "XHCI_vtable_slots": 427,
+        "saved_signal_collector_called_before_corpse": true,
+        "actual_user_and_kernel_backtrace_calls": true,
+        "frame_limits": 16,
+        "actual_compiled_missing_input_paths": [
+          {
+            "worker": "usb",
+            "opt_in_gate_executed": true,
+            "missing_input_stop": "dma-handoff",
+            "controller_maps": 0
+          },
+          {
+            "worker": "gpu",
+            "opt_in_gate_executed": true,
+            "missing_input_stop": "B5qGpu: stage=Samsung-firmware-invalid\n",
+            "controller_maps": 0
+          }
+        ],
+        "boot_parser_threads_registry_and_logging_mocked": true,
+        "PAuth_not_tested": true,
+        "device_or_GPU_execution_tested": false
+      }
+    }
   },
   "GPU_streams_source": "b5q FDT gfx3d_user0, gfx3d_lpac1, gfx3d_secure2, GMU5; nonsecure0/1 only",
   "Samsung_GCC_sha256": "d653b83fcdfdbf9524664c4455eca2d6a460ba97294588ba373c6518e0441a31",
@@ -248,5 +280,85 @@
     "source": "Sheng27.3 exact hardware-Metal BGRA rule; original local26C5035r cache page checked",
     "no_disk_cache_modification": true,
     "file_sha256": "bc161753855e6f9646b5c1ef38c62c958e72e3bc34ec967c77c7372a7b3c3863"
-  }
+  },
+  "delivery": {
+    "CI_run": 44794616634,
+    "esp_sha256": "23bdd710671f754660a9d12c8beb544959b6602411feb48c17ba624da9edfab3",
+    "kernel_source_run": 44789459847,
+    "kernel_recompiled": false,
+    "deploy_kernel_sha256": "e27dce534487a6ba32bf4ee1f0daf7c5391c4c8098c8d41b12c12226bca971f2",
+    "final_binary_check": {
+      "passed": true,
+      "kernel_sha256": "e27dce534487a6ba32bf4ee1f0daf7c5391c4c8098c8d41b12c12226bca971f2",
+      "XHCI_vtable_slots": 427,
+      "saved_signal_collector_called_before_corpse": true,
+      "actual_user_and_kernel_backtrace_calls": true,
+      "frame_limits": 16,
+      "actual_compiled_missing_input_paths": [
+        {
+          "worker": "usb",
+          "opt_in_gate_executed": true,
+          "missing_input_stop": "dma-handoff",
+          "controller_maps": 0
+        },
+        {
+          "worker": "gpu",
+          "opt_in_gate_executed": true,
+          "missing_input_stop": "B5qGpu: stage=Samsung-firmware-invalid\n",
+          "controller_maps": 0
+        }
+      ],
+      "boot_parser_threads_registry_and_logging_mocked": true,
+      "PAuth_not_tested": true,
+      "device_or_GPU_execution_tested": false,
+      "b5q_compiled_timer_offsets_executed": [
+        90656,
+        90660
+      ]
+    },
+    "Metal_pair": {
+      "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/NativeAdrenoMetal": {
+        "bytes": 25113392,
+        "sha256": "a76fda4d1d11f5d3fd85842b2985fe7a68161737b477f8548a1f20726031db3a"
+      },
+      "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/libvulkan_freedreno.dylib": {
+        "bytes": 17660128,
+        "sha256": "6841384d0fab8b16f5d65bbb6c0057bfa27cc5c8179e6ec5c73c954c0751f03a"
+      }
+    },
+    "OneUI_source_replay": {
+      "passed": true,
+      "Mesa_revision": "85fda3b36405bcaea8bffc64aa4f2651dc90770d",
+      "all_patches_replayed": 25,
+      "actual_compiler_recorded_source_diff_sha256": "ea0fa73e3521063e8a7d834b19310aad4322f8b55efce312f8809a5dfdc04730",
+      "untracked_sources_match": true,
+      "A740_OneUI_hint": true,
+      "library_build_profile_matches_exact_reconstructed_patched_source": true
+    },
+    "Samsung_firmware_adt": {
+      "inputs": {
+        "b5q-gmu-fw": {
+          "file": "gmu_gen70200.bin",
+          "bytes": 66844,
+          "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
+        },
+        "b5q-sqe-fw": {
+          "file": "a740_sqe.fw",
+          "bytes": 76724,
+          "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
+        },
+        "b5q-zap-fw": {
+          "file": "a740_zap.mbn",
+          "bytes": 12088,
+          "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+        }
+      },
+      "adt_sha256": "312d08ade4dbd4ebefd6385c4c7fcc3014a03428afa2e1ac341db13dce35d554",
+      "vendor_signature_authentication_performed": false,
+      "uploaded_to_git": false,
+      "hardware_executed": false
+    },
+    "hardware_tested": false
+  },
+  "reproducibility": "prepare-b5q-votes standalone now reproduces all6compiled headers byte-for-byte,including default common-bin policy; reference adapter regeneration matches"
 }

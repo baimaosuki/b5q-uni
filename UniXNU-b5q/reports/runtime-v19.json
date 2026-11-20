@@ -1,6 +1,6 @@
 {
-  "scope": "v18 SEGV/BUS capture plus b5q USB host ABI/warm-handoff path and GPU firmware/GMU-load layer",
-  "status": "Shared SM8550 correction: local target/host tests PASS; local full pre-CI and combined CI pending",
+  "scope": "Latest Sheng27.3 shared SM8550 GPU/HFI/CP/PAS/Metal integration with b5q inputs, bounded WindowServer fatal-context capture, cached incremental payload and USB host ABI",
+  "status": "CI44794616634SUCCESS; final4KnESP,actualbinary/ABI/signature/trust/source/seed/logger/member checks PASS; no physical GPU/HID outcome claimed",
   "runtime_input": {
     "path": "logs/b5q-xnu2log-v18/XNU2LOG.BIN",
     "sha256": "711d60fb80d8f5f9cd3635c05ab6e1b900f68643b6e11bc510b11057336d54dd",
@@ -90,18 +90,18 @@
     "UniXNU-b5q/scripts/b5q_abi.py": "83b6abb2d75e82f4467abe1cb98a551b9c0c5a1f75fdbaaa18a21d2d23e6a7a8",
     "UniXNU-b5q/scripts/usb-xhci-26C5035r.json": "c6d7ad3855b213b794b11f5a6efc4922cc957cf6285e000ad69dac7ab661946b",
     "UniXNU-b5q/scripts/build-b5q-gop-27.py": "a1857f843d5ab11d0074f6b95431d493600a7c121b61418284cd0a26a9bc1174",
-    "UniXNU-b5q/scripts/build-b5q-adreno.py": "07615ed872c29e557f5b63722cef8e7c55fea6e38ae807cd04291fa94d86b8e9",
+    "UniXNU-b5q/scripts/build-b5q-adreno.py": "3c144433e16bb31221fb104bd6f752331700e367230158bdd3ad30997e4b812e",
     "scripts/b5q-install/build-ci-esp.py": "1daa3499f425e67ecea9e50f4fc181a1ba6765f56d425f9372dbeacecbee1db0",
     "scripts/b5q-install/pre-ci.py": "2834c7d6e7860240a44d67f170dcfeb9c179ff1087031ca0f0934da4fe4a8af3",
     "tests/b5q-ufs/test-ws-signal.py": "8d347b9964de22375e65813d1dd2f251db53ae001f85fd2bef29cc26befdf9c9",
     "tests/b5q-ufs/test-peripheral-policy.cpp": "c1e7987be6342fea456e057c025f80fadd949db0328bbadff12f0b9e466da4fa",
     "tests/b5q-ufs/test-peripheral-policy.py": "ef897c0b534d44957556b7da0087e7829a3ae4762dc376617e2ec32e053c3be7",
     "UniXNU-b5q/reports/peripheral-inputs-v19.json": "21ffc99dbf2524717b8276dc534414ca947cedcd6281da75887e76899b2d263e",
-    "UniXNU-b5q/reports/runtime-v19.md": "a77a1d29b2cbc325cf77141eaabcdae199c76b58fc83a703b6fa728c52bd2389",
+    "UniXNU-b5q/reports/runtime-v19.md": "0c26863a4b6d800ac019f6bc4bc6a2f3c8b88326ef2b6291a6a65aef7df1b2c5",
     "UniXNU-b5q/scripts/usb-host-bindings-26C5035r.json": "7461de4788ea0a6eee2d222928436c1624420d82902a253a42a75caebcdb02a0",
     "UniXNU-b5q/reports/xnu-patch-application.json": "6757b0d7da70989eb61c6ebd551a580e1827a650f876d23a8a729fa4019ac4da",
-    "scripts/b5q-install/check-peripheral-target.py": "b15d5acf8b24b376485588f45e6b0dae312c65ab0faf94c19de0b0649cae0310",
-    "scripts/b5q-install/verify-peripherals-binary.py": "2c9961cb5fd6ffeab59accca983af61e773b1b472b96be1669a69f5e7a5ca702"
+    "scripts/b5q-install/check-peripheral-target.py": "0a747055e63b7cd909f76e93113472c1fcf691e1d52d52836fde49b0cdb20217",
+    "scripts/b5q-install/verify-peripherals-binary.py": "8823ea0cdb69c8cb57df6b42ed74a9ce06e7f03643a93894152047c0ad27461f"
   },
   "local_XHCI_ABI": {
     "slots": 427,
@@ -338,5 +338,298 @@
     "cached_paths": "Mesa source/Ninja build, translator source, Rust bridge/target, Cargo registry/gitdb, host Python tools and Homebrew downloads",
     "credentials_cached": false,
     "first_cache_hit": "pending first cache producer"
+  },
+  "CI_success": {
+    "runtime_run": 44794616634,
+    "runtime_source_commit": "d4c6140df3fa08082cfb5094f864da924dbc156b",
+    "kernel_source_run": 44789459847,
+    "kernel_source_commit": "6c57bd844b2ad2fd67a93854781481c095db7c53",
+    "raw_kernel_sha256": "ab83d772d5d82de5ef71aca2c90a807a46cccdf4fb4263dba7db5844b8d218fe",
+    "kernel_recompiled_in_final_run": false,
+    "transfer": {
+      "id": 14660247739,
+      "archive_sha256": "3e38ddc6a0573c43505fa4cf19c5c7e9f57fac9c57483d464679570293c70511",
+      "github_digest_verified": true
+    }
+  },
+  "delivery": {
+    "local_path": "/home/baimao/zflip5/artifacts/b5q-esp-runtime-v19/esp.img",
+    "image": {
+      "bytes": 838860800,
+      "sha256": "23bdd710671f754660a9d12c8beb544959b6602411feb48c17ba624da9edfab3"
+    },
+    "deploy_kernel_sha256": "e27dce534487a6ba32bf4ee1f0daf7c5391c4c8098c8d41b12c12226bca971f2",
+    "ci_payload": {
+      "bytes": 268435456,
+      "sha256": "3c637df062eae82e159a6eb4f82b8ab8b6a1d09803a763cb1ab67245e6cc7551"
+    },
+    "gpu_firmware_inputs": {
+      "inputs": {
+        "b5q-gmu-fw": {
+          "file": "gmu_gen70200.bin",
+          "bytes": 66844,
+          "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
+        },
+        "b5q-sqe-fw": {
+          "file": "a740_sqe.fw",
+          "bytes": 76724,
+          "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
+        },
+        "b5q-zap-fw": {
+          "file": "a740_zap.mbn",
+          "bytes": 12088,
+          "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+        }
+      },
+      "adt_sha256": "312d08ade4dbd4ebefd6385c4c7fcc3014a03428afa2e1ac341db13dce35d554",
+      "vendor_signature_authentication_performed": false,
+      "uploaded_to_git": false,
+      "hardware_executed": false
+    },
+    "hardware_tested": false
+  },
+  "cache_created": [
+    {
+      "key": "macOS-ARM64-xcode26.6-b5q-brew-v1-44794616634",
+      "size_in_bytes": 544333655,
+      "created_at": "2026-11-20T19:15:30.282595Z"
+    },
+    {
+      "key": "macOS-ARM64-xcode26.6-b5q-macos27-gpu-v1-b5010b20635f6db9c06948565333387ad8398223a324066c909ed14c934f627d-44794616634-1",
+      "size_in_bytes": 1150298945,
+      "created_at": "2026-11-20T19:15:23.626493Z"
+    }
+  ],
+  "completed_reuse_test": {
+    "passed": true,
+    "source_run": 44794616634,
+    "source_commit": "d4c6140df3fa08082cfb5094f864da924dbc156b",
+    "actual_returned_kernel_sha256": "ab83d772d5d82de5ef71aca2c90a807a46cccdf4fb4263dba7db5844b8d218fe",
+    "actual_returned_seed_sha256": "804692b96d9ba6bfcb64cbb430a627923dfdb4f072da4872ee14674365dc46b8",
+    "original_trust_module_count": 3,
+    "kernel_recompiled": false,
+    "next_payload_needs_one_artifact_download": true
+  },
+  "local_verifications": {
+    "runtime-verification.json": {
+      "passed": true,
+      "kernel_updated_with_Ethernet": true,
+      "unchanged_Data_seed": true,
+      "menu_runtime_switches": true,
+      "ADT_CPU_affinities_and_PSCI_match_saved_b5q_FDT": true,
+      "actual_deployment_binary_gates_and_logger_verified": true,
+      "hardware_tested": false
+    },
+    "peripheral-binary-verification.json": {
+      "passed": true,
+      "kernel_sha256": "e27dce534487a6ba32bf4ee1f0daf7c5391c4c8098c8d41b12c12226bca971f2",
+      "XHCI_vtable_slots": 427,
+      "saved_signal_collector_called_before_corpse": true,
+      "actual_user_and_kernel_backtrace_calls": true,
+      "frame_limits": 16,
+      "actual_compiled_missing_input_paths": [
+        {
+          "worker": "usb",
+          "opt_in_gate_executed": true,
+          "missing_input_stop": "dma-handoff",
+          "controller_maps": 0
+        },
+        {
+          "worker": "gpu",
+          "opt_in_gate_executed": true,
+          "missing_input_stop": "B5qGpu: stage=Samsung-firmware-invalid\n",
+          "controller_maps": 0
+        }
+      ],
+      "boot_parser_threads_registry_and_logging_mocked": true,
+      "PAuth_not_tested": true,
+      "device_or_GPU_execution_tested": false,
+      "b5q_compiled_timer_offsets_executed": [
+        90656,
+        90660
+      ]
+    },
+    "metal-addon-verification.json": {
+      "passed": true,
+      "addon_sha256": "b68e1164f7dd0ff822f20e116e97adc4606926a4204fc25eaa5241c2a966d82d",
+      "addon_bytes": 15500312,
+      "entries": [
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/Info.plist",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/NativeAdrenoMetal",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/libvulkan_freedreno.dylib",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/Resources/gpu-build.json",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/_CodeSignature/CodeResources",
+        "GPUBundles/NativeAdrenoMetal.publish",
+        "GPUBundles/NativeAdrenoMetal.primelist",
+        "Applications/Shader Cache.app/Contents/Info.plist",
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCache",
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCacheRegister",
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCacheWorker",
+        "Applications/Shader Cache.app/Contents/_CodeSignature/CodeResources",
+        "Library/LaunchAgents/org.unixnu.ShaderCache.register.plist",
+        "bootshim/apfs_boot_util",
+        "bin/unixnu-absentd",
+        "Library/User Template/Non_localized/.skipbuddy",
+        "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+        "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+        "test/share/manual-session"
+      ],
+      "binaries": {
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/NativeAdrenoMetal": {
+          "bytes": 25113392,
+          "sha256": "a76fda4d1d11f5d3fd85842b2985fe7a68161737b477f8548a1f20726031db3a"
+        },
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/libvulkan_freedreno.dylib": {
+          "bytes": 17660128,
+          "sha256": "6841384d0fab8b16f5d65bbb6c0057bfa27cc5c8179e6ec5c73c954c0751f03a"
+        }
+      },
+      "gpu_build": {
+        "metal_source_sha256": "531be3b8f7ab572317052f43b6dfa8a2bbb62a5b8d90ab749e30dc432084d9ce",
+        "target": "macos27",
+        "turnip": {
+          "source_id": "efca88df103b36fbb061e7e7646d8e4ddd74f9f02d7e826d4f4b296cc22ef412",
+          "profile": {
+            "mesa_revision": "85fda3b36405bcaea8bffc64aa4f2651dc90770d",
+            "target": "macos27",
+            "source_diff_sha256": "ea0fa73e3521063e8a7d834b19310aad4322f8b55efce312f8809a5dfdc04730",
+            "extra_sources": {
+              "src/freedreno/vulkan/tu_builtin_cache.cc": "ec56464c03c9a7e9dda8ca6fd7887445c7c9a277c9aca7654ba07fef3671bfbd",
+              "src/freedreno/vulkan/tu_builtin_cache.h": "4019dbc884f9a8c51d3ad6d71f46738303e5888b4ee5e65c1c820ec77977a151",
+              "src/freedreno/vulkan/tu_frame_diagnostic.h": "75fd19aca698ee89eedc5e0478d6d222870dcb58397f4aabe3d17706aefd1f2b",
+              "src/freedreno/vulkan/tu_knl_darwin.cc": "1b9e12ca533f416aae350816d3b1e61c6bac4e262ee35fd5398cc9094f88942c"
+            },
+            "patch_guard_sha256": "60f03967f4d2b56807b7b3d984181792cb810abbbc6392161d4c82b03d4433a7",
+            "compiler": "Apple clang version 21.0.0 (clang-2100.1.1.101)\nTarget: arm64-apple-darwin25.6.0\nThread model: posix\nInstalledDir: /Applications/Xcode_26.6.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin",
+            "options": [
+              "-Dgallium-drivers=",
+              "-Dvulkan-drivers=freedreno",
+              "-Dfreedreno-kmds=darwin",
+              "-Dtu-darwin-abi-dir=/Users/runner/work/b5q-uni/b5q-uni/UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/drivers/Adreno740",
+              "-Dplatforms=macos",
+              "-Dglx=disabled",
+              "-Degl=disabled",
+              "-Dgbm=disabled",
+              "-Dopengl=false",
+              "-Dgles1=disabled",
+              "-Dgles2=disabled",
+              "-Dllvm=disabled",
+              "-Dshared-glapi=disabled",
+              "-Dxmlconfig=disabled",
+              "-Dshader-cache=enabled",
+              "-Dtools=",
+              "-Dbuild-tests=false",
+              "-Dvideo-codecs=",
+              "-Dvulkan-layers=",
+              "-Dlibunwind=disabled",
+              "-Dlmsensors=disabled",
+              "-Dvalgrind=disabled",
+              "-Dexpat=disabled",
+              "-Dzstd=disabled",
+              "-Dbuildtype=release",
+              "-Db_ndebug=true"
+            ],
+            "build_script_sha256": "97ae7fcf7ff3475bb5bee481c1bc3cd3d564927821a21a6472c459a46cf5e294"
+          },
+          "embedded_pack_sha256": null,
+          "builtin_pack_required": false
+        },
+        "component": "c9ebd2fb17253996f0a8d835c9ab7c2f740778e1",
+        "bridge_component": "c9ebd2fb17253996f0a8d835c9ab7c2f740778e1",
+        "runtime_draw_checks": false,
+        "runtime": "2b4d1855f072e950948c112420d4e96d",
+        "turnip_uuid": "de82187e3124312db55fdf4dd1381395",
+        "cache_build": "2b4d1855f072e950948c112420d4e96d-de82187e3124312db55fdf4dd1381395"
+      },
+      "data_changed": false,
+      "hardware_tested": false
+    },
+    "oneui-binary-source-verification.json": {
+      "passed": true,
+      "Mesa_revision": "85fda3b36405bcaea8bffc64aa4f2651dc90770d",
+      "all_patches_replayed": 25,
+      "actual_compiler_recorded_source_diff_sha256": "ea0fa73e3521063e8a7d834b19310aad4322f8b55efce312f8809a5dfdc04730",
+      "untracked_sources_match": true,
+      "A740_OneUI_hint": true,
+      "library_build_profile_matches_exact_reconstructed_patched_source": true
+    },
+    "mount-verification.json": {
+      "scope": "Actual final ESP extracted kernel, Data, addon and trust cache; local verification only",
+      "kernel_sha256": "e27dce534487a6ba32bf4ee1f0daf7c5391c4c8098c8d41b12c12226bca971f2",
+      "logical_Data_bytes": 2147483648,
+      "APFS_superblock_checksums_verified": 13,
+      "APFS_volume_UUIDs": [
+        "1552CFEE-78FF-48D8-8A6C-694B867D61AC"
+      ],
+      "watchdogd_seed_policy": {
+        "com.apple.watchdogd": true
+      },
+      "addon_paths": [
+        "Applications/Shader Cache.app/Contents/Info.plist",
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCache",
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCacheRegister",
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCacheWorker",
+        "Applications/Shader Cache.app/Contents/_CodeSignature/CodeResources",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/Info.plist",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/NativeAdrenoMetal",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/libvulkan_freedreno.dylib",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/Resources/gpu-build.json",
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/_CodeSignature/CodeResources",
+        "GPUBundles/NativeAdrenoMetal.primelist",
+        "GPUBundles/NativeAdrenoMetal.publish",
+        "Library/LaunchAgents/org.unixnu.ShaderCache.register.plist",
+        "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+        "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+        "Library/User Template/Non_localized/.skipbuddy",
+        "bin/unixnu-absentd",
+        "bootshim/apfs_boot_util",
+        "test/share/manual-session"
+      ],
+      "signed_and_trusted_executables": {
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/NativeAdrenoMetal": [
+          "92b4b3231f293b7dea4b9f439b76bb82d2d0221c"
+        ],
+        "GPUBundles/NativeAdrenoMetal.bundle/Contents/MacOS/libvulkan_freedreno.dylib": [
+          "3fa66cd5be6439e21c3854097cc69a6cc60a322c"
+        ],
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCache": [
+          "ae9fbbdf766c4e972bf493c3fa1aeaf1cdc365d6"
+        ],
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCacheRegister": [
+          "1e4acf56ec412bd6d58671553c89532b2b6499c7"
+        ],
+        "Applications/Shader Cache.app/Contents/MacOS/ShaderCacheWorker": [
+          "624f326a2d12eeaf1da652c25dfbf818060f2901"
+        ],
+        "bootshim/apfs_boot_util": [
+          "60f17d89f11e23963543d9ca10de23b802e314ad"
+        ],
+        "bin/unixnu-absentd": [
+          "0cef40d0596e9367adb00dfbae1b78389be58d7e"
+        ]
+      },
+      "original_Apple_trust_modules_byte_identical": true,
+      "hardware_tested": false
+    },
+    "log-allocation.json": {
+      "scope": "Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence",
+      "result": "PASS",
+      "file_bytes": 8400896,
+      "file_sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea",
+      "token": "411839cbaebac4088c251c0ea57579a2",
+      "file_first_lba": 3207501,
+      "clusters": 2051,
+      "contiguous": true,
+      "no_aliases": true,
+      "mirrored_FAT": true,
+      "fat_blocks_each": 200,
+      "config_readonly": true,
+      "write_first_lba": 3207502,
+      "write_last_lba": 3209551,
+      "committed_slots": 0,
+      "source_GPT_entries": 512,
+      "production_volume_checker": true,
+      "hardware_tested": false
+    }
   }
 }

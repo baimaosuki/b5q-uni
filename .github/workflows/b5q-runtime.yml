@@ -71,7 +71,7 @@ jobs:
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
           rustup toolchain install 1.98.0 --profile minimal --component rust-src
-      - name: Reuse completed v19 kernel and existing v11 RAM Data
+      - name: Reuse completed v19 kernel, Data and original trust inputs
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
@@ -79,12 +79,9 @@ jobs:
           set -euo pipefail
           UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
           UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
-          gh run download 44789459847 --repo "$GITHUB_REPOSITORY" --name b5q-build-44789459847 --dir "$RUNNER_TEMP/completed-artifact"
-          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44789459847 --source-commit 6c57bd844b2ad2fd67a93854781481c095db7c53 --kernel-only
+          gh run download 44794616634 --repo "$GITHUB_REPOSITORY" --name b5q-build-44794616634 --dir "$RUNNER_TEMP/completed-artifact"
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44794616634 --source-commit d4c6140df3fa08082cfb5094f864da924dbc156b
           rm -rf "$RUNNER_TEMP/completed-artifact"
-          gh run download 44616733365 --repo "$GITHUB_REPOSITORY" --name b5q-build-44616733365 --dir "$RUNNER_TEMP/b5q-v11"
-          python3 scripts/b5q-install/reuse-v11-data.py --artifact "$RUNNER_TEMP/b5q-v11" --out "$RUNNER_TEMP/b5q-reused-data"
-          rm -rf "$RUNNER_TEMP/b5q-v11"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/uefi-sheng

@@ -224,7 +224,7 @@
     "base": 2177236992,
     "bytes": 131072
   },
-  "bin_selection": "pending actual SKU/speed-bin binding; compiling bin0 is not proof this is the active bin",
-  "GPU_streams_source": "Samsung kgsl GPU user/secure context bindings require runtime ownership qualification; mainline two-stream protocol retained",
+  "bin_selection": "default exact intersection of both Samsung tables through615MHz; actual SKU binding required before selecting680/719MHz bin policy",
+  "GPU_streams_source": "Samsung FDT gfx3d_user SID0, gfx3d_lpac SID1, secure SID2; only nonsecure0/1 used",
   "no_hardware_IO": true
 }

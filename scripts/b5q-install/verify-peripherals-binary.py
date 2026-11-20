@@ -11,7 +11,7 @@ p=argparse.ArgumentParser(description=__doc__);p.add_argument('kernel',type=Path
 raw=a.kernel.read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1])if outer.entries else outer
 names={n:v for v,rows in im.symbols().items()for n in rows};md=Cs(CS_ARCH_ARM64,CS_MODE_ARM)
 def one(part):
- found=[v for n,v in names.items()if part in n];assert len(found)==1,(part,found);return found[0]
+ found=[v for n,v in names.items()if n=='_'+part or part in n and not n.startswith('_'+part+'.')];assert len(found)==1,(part,found);return found[0]
 required=['_b5q_usb_start','_b5q_gpu_start','_b5q_usb_state','_native_gpu_power_stage','__ZTV10B5qUsbHost'];assert all(n in names for n in required)
 abi=json.loads((root/'UniXNU-b5q/scripts/usb-xhci-26C5035r.json').read_text());words=struct.unpack('<'+str(len(abi['slots']))+'Q',im.read(names['__ZTV10B5qUsbHost']+16,8*len(abi['slots'])))
 assert all((v>>32&0xffff)==int(slot[1],16)for v,slot in zip(words,abi['slots']))
@@ -54,7 +54,7 @@ def hook(e,pc,size,unused):
  if pc in frompath:ret(0);return
  if pc in map_targets:map_calls+=1;raise AssertionError('missing handoff reached a controller mapping')
  if pc==names['_IOLog']:
-  fmt=cstr(e.reg_read(UC_ARM64_REG_X0));messages.append({'format':fmt,'stage':cstr(e.reg_read(UC_ARM64_REG_X1)) if 'stage=%s' in fmt else fmt});ret();return
+  fmt=cstr(e.reg_read(UC_ARM64_REG_X0));messages.append({'format':fmt,'stage':cstr(struct.unpack('<Q',bytes(e.mem_read(e.reg_read(UC_ARM64_REG_SP),8)))[0]) if 'stage=%s' in fmt else fmt});ret();return
  if pc==names['_thread_terminate']:e.emu_stop();return
  ins=next(md.disasm(bytes(e.mem_read(pc,4)),pc))
  if ins.mnemonic.startswith(('pac','aut','xpac')):e.reg_write(UC_ARM64_REG_PC,pc+4)
@@ -62,6 +62,12 @@ def hook(e,pc,size,unused):
  elif ins.mnemonic.startswith(('blraa','blrab')):
   target=getattr(__import__('unicorn.arm64_const',fromlist=['*']),'UC_ARM64_REG_'+ins.op_str.split(',')[0].upper());pc2=e.reg_read(target);e.reg_write(UC_ARM64_REG_X30,pc+4);e.reg_write(UC_ARM64_REG_PC,pc2)
 u.hook_add(UC_HOOK_CODE,hook);results=[]
+# Run the actual compiled timer leaves. Samsung's wider GMU mapping starts
+# 0x2000 earlier than the reference; these offsets must advance by 0x2000.
+for term,expected in [('gmuLowOffset',0x16220),('gmuHighOffset',0x16224)]:
+ address=one(term);u.reg_write(UC_ARM64_REG_SP,stack);u.reg_write(UC_ARM64_REG_X30,stop);u.emu_start(address,stop,count=20)
+ assert u.reg_read(UC_ARM64_REG_X0)==expected,(term,hex(u.reg_read(UC_ARM64_REG_X0)))
+
 for prefix in ['usb','gpu']:
  entry=names['_b5q_'+prefix+'_start'];enabled=0;before=len(workers)
  for on in [0,1]:
@@ -70,5 +76,5 @@ for prefix in ['usb','gpu']:
  worker=workers[-1];u.reg_write(UC_ARM64_REG_X0,0);u.reg_write(UC_ARM64_REG_X1,0);u.reg_write(UC_ARM64_REG_SP,stack);u.reg_write(UC_ARM64_REG_X30,stop)
  u.emu_start(worker,stop,count=30000);expected='dma-handoff'if prefix=='usb'else'B5qGpu: stage=Samsung-firmware-invalid\n';assert messages[-1]['stage']==expected,(prefix,messages)
  results.append({'worker':prefix,'opt_in_gate_executed':True,'missing_input_stop':expected,'controller_maps':map_calls})
-a.out.write_text(json.dumps(dict(passed=True,kernel_sha256=hashlib.sha256(raw).hexdigest(),XHCI_vtable_slots=len(words),saved_signal_collector_called_before_corpse=True,actual_user_and_kernel_backtrace_calls=True,frame_limits=16,actual_compiled_missing_input_paths=results,boot_parser_threads_registry_and_logging_mocked=True,PAuth_not_tested=True,device_or_GPU_execution_tested=False),indent=2)+'\n')
+a.out.write_text(json.dumps(dict(passed=True,kernel_sha256=hashlib.sha256(raw).hexdigest(),XHCI_vtable_slots=len(words),saved_signal_collector_called_before_corpse=True,actual_user_and_kernel_backtrace_calls=True,frame_limits=16,actual_compiled_missing_input_paths=results,boot_parser_threads_registry_and_logging_mocked=True,PAuth_not_tested=True,device_or_GPU_execution_tested=False,b5q_compiled_timer_offsets_executed=[0x16220,0x16224]),indent=2)+'\n')
 print('PASS final427-slot xHCI ABI, fatal-context calls and actual compiled USB/GPU stop paths')

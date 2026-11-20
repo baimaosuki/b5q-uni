@@ -40,12 +40,23 @@ for table,v in records.items():
  (a.out/('B5qGmuVotes-'+table.rsplit('-',1)[1]+'.h')).write_text(text)
 # Explicit bin policies are retained; the generated default below uses only
 # rows identical in both Samsung tables until an active SKU is bound.
-(a.out/'ShengGmuVotesSource.h').write_text('#pragma once\n#ifndef B5Q_GPU_BIN\n#define B5Q_GPU_BIN 0\n#endif\n#if B5Q_GPU_BIN == 0\n#include "B5qGmuVotes-0.h"\n#elif B5Q_GPU_BIN == 1\n#include "B5qGmuVotes-1.h"\n#else\n#error Unsupported b5q GPU bin\n#endif\n')
+tables=list(records.values());common_rows=[e for e in tables[0]['opps'] if e in tables[1]['opps']]
+assert len(common_rows)>1
+source=(a.out/'B5qGmuVotes-1.h').read_text()
+for entry in tables[1]['opps']:
+ if entry not in common_rows:
+  source=source.replace('{'+','.join(str(int(entry[k]))for k in ['hz','level','kbps','acd_present','acd'])+'},\n','')
+source=re.sub(r'#define SHENG_GPU_OPPS \d+u',f'#define SHENG_GPU_OPPS {len(common_rows)}u',source)
+bw=sorted({e['kbps']for e in common_rows})
+source=re.sub(r'#define SHENG_GPU_BANDWIDTHS \d+u',f'#define SHENG_GPU_BANDWIDTHS {len(bw)}u',source)
+source=re.sub(r'sheng_gpu_bandwidths\[\]=\{[^}]+\}', 'sheng_gpu_bandwidths[]={'+','.join(map(str,bw))+'}',source)
+(a.out/'B5qGmuVotes-common.h').write_text(source)
+(a.out/'ShengGmuVotesSource.h').write_text('#pragma once\n#include "B5qGmuVotes-common.h"\n')
 db=next(n for n in nodes if n.strings('compatible')==['qcom,cmd-db']);ranges=registers(db);assert len(ranges)==1;address,bytes_=ranges[0]
 (a.out/'ShengGmuCommandDbSource.h').write_text(f'#include <stdint.h>\n#define SHENG_GMU_COMMAND_DB_BASE UINT64_C({address:#x})\n#define SHENG_GMU_COMMAND_DB_BYTES {bytes_}u\n')
 for name,sid in [('gfx3d_user',0),('gfx3d_lpac',1),('gfx3d_secure',2)]:
  assert next(n for n in nodes if n.name==name).cells('iommus')==[smmu.scalar('phandle'),sid,0]
 reg=registers(smmu)[0];assert reg==(0x3da0000,0x40000) and gmu.cells('iommus')[1]==5
 (a.out/'ShengGpuSmmuSource.h').write_text(f'#include <stdint.h>\n#define SHENG_GPU_SMMU_BASE UINT64_C({reg[0]:#x})\n#define SHENG_GPU_SMMU_BYTES {reg[1]}u\n#define SHENG_GPU_SMMU_GPU_STREAMS 2u\n#define SHENG_GPU_SMMU_GMU_SID 5u\nstatic const uint16_t sheng_gpu_smmu_sids[2]={{0,1}};\n')
-report=dict(device='b5q',dtb_sha256=hashlib.sha256(a.dtb.read_bytes()).hexdigest(),catalog_sha256=expected,bins=records,gmu_opps=gmu_opps,bcms=policies,command_db=dict(base=address,bytes=bytes_),bin_selection='pending actual SKU/speed-bin binding; compiling bin0 is not proof this is the active bin',GPU_streams_source='Samsung FDT gfx3d_user SID0, gfx3d_lpac SID1, secure SID2; only nonsecure0/1 used',no_hardware_IO=True)
+report=dict(device='b5q',dtb_sha256=hashlib.sha256(a.dtb.read_bytes()).hexdigest(),catalog_sha256=expected,bins=records,gmu_opps=gmu_opps,bcms=policies,command_db=dict(base=address,bytes=bytes_),bin_selection='default exact intersection of both Samsung tables through615MHz; actual SKU binding required before selecting680/719MHz bin policy',GPU_streams_source='Samsung FDT gfx3d_user SID0, gfx3d_lpac SID1, secure SID2; only nonsecure0/1 used',no_hardware_IO=True)
 (a.out/'votes-source-report.json').write_text(json.dumps(report,indent=2)+'\n');print('Derived both Samsung GPU bins, GMU votes, command-db and shared SMMU parameters')
