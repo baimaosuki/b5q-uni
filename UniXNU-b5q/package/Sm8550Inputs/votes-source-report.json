@@ -1,0 +1,230 @@
+{
+  "device": "b5q",
+  "dtb_sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+  "catalog_sha256": "ff1abc1b7735d6bd6aa07d5df776e2549be2ee70ffcc02ff24aac646dfd6a3c7",
+  "bins": {
+    "qcom,gpu-pwrlevels-0": {
+      "sku_codes": [
+        3,
+        6,
+        196849,
+        196851,
+        327921,
+        327923,
+        458993,
+        458994,
+        459006,
+        459007
+      ],
+      "opps": [
+        {
+          "hz": 0,
+          "level": 0,
+          "kbps": 0,
+          "acd_present": false,
+          "acd": 0
+        },
+        {
+          "hz": 124800000,
+          "level": 52,
+          "kbps": 2136718,
+          "acd_present": false,
+          "acd": 0
+        },
+        {
+          "hz": 220000000,
+          "level": 52,
+          "kbps": 2136718,
+          "acd_present": true,
+          "acd": 3224330237
+        },
+        {
+          "hz": 295000000,
+          "level": 56,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3761070077
+        },
+        {
+          "hz": 348000000,
+          "level": 60,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3760939005
+        },
+        {
+          "hz": 401000000,
+          "level": 64,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3224002557
+        },
+        {
+          "hz": 475000000,
+          "level": 80,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3760742397
+        },
+        {
+          "hz": 550000000,
+          "level": 128,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3760742397
+        },
+        {
+          "hz": 615000000,
+          "level": 144,
+          "kbps": 10687500,
+          "acd_present": true,
+          "acd": 2821677053
+        },
+        {
+          "hz": 680000000,
+          "level": 192,
+          "kbps": 12449218,
+          "acd_present": true,
+          "acd": 2284740605
+        },
+        {
+          "hz": 719000000,
+          "level": 224,
+          "kbps": 16500000,
+          "acd_present": true,
+          "acd": 2284740605
+        }
+      ]
+    },
+    "qcom,gpu-pwrlevels-1": {
+      "sku_codes": [
+        0
+      ],
+      "opps": [
+        {
+          "hz": 0,
+          "level": 0,
+          "kbps": 0,
+          "acd_present": false,
+          "acd": 0
+        },
+        {
+          "hz": 124800000,
+          "level": 52,
+          "kbps": 2136718,
+          "acd_present": false,
+          "acd": 0
+        },
+        {
+          "hz": 220000000,
+          "level": 52,
+          "kbps": 2136718,
+          "acd_present": true,
+          "acd": 3224330237
+        },
+        {
+          "hz": 295000000,
+          "level": 56,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3761070077
+        },
+        {
+          "hz": 348000000,
+          "level": 60,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3760939005
+        },
+        {
+          "hz": 401000000,
+          "level": 64,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3224002557
+        },
+        {
+          "hz": 475000000,
+          "level": 80,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3760742397
+        },
+        {
+          "hz": 550000000,
+          "level": 128,
+          "kbps": 6074218,
+          "acd_present": true,
+          "acd": 3760742397
+        },
+        {
+          "hz": 615000000,
+          "level": 144,
+          "kbps": 10687500,
+          "acd_present": true,
+          "acd": 2821677053
+        },
+        {
+          "hz": 680000000,
+          "level": 192,
+          "kbps": 16500000,
+          "acd_present": true,
+          "acd": 2284740605
+        }
+      ]
+    }
+  },
+  "gmu_opps": [
+    {
+      "hz": 0,
+      "level": 0,
+      "kbps": 0,
+      "acd_present": false,
+      "acd": 0
+    },
+    {
+      "hz": 220000000,
+      "level": 64,
+      "kbps": 0,
+      "acd_present": false,
+      "acd": 0
+    },
+    {
+      "hz": 550000000,
+      "level": 128,
+      "kbps": 0,
+      "acd_present": false,
+      "acd": 0
+    }
+  ],
+  "bcms": [
+    {
+      "name": "SH0",
+      "buswidth": 16,
+      "fixed": 0,
+      "perfmode": 0,
+      "perfmode_kbps": 0
+    },
+    {
+      "name": "MC0",
+      "buswidth": 4,
+      "fixed": 0,
+      "perfmode": 0,
+      "perfmode_kbps": 0
+    },
+    {
+      "name": "ACV",
+      "buswidth": 0,
+      "fixed": 1,
+      "perfmode": 8,
+      "perfmode_kbps": 16500000
+    }
+  ],
+  "command_db": {
+    "base": 2177236992,
+    "bytes": 131072
+  },
+  "bin_selection": "pending actual SKU/speed-bin binding; compiling bin0 is not proof this is the active bin",
+  "GPU_streams_source": "Samsung kgsl GPU user/secure context bindings require runtime ownership qualification; mainline two-stream protocol retained",
+  "no_hardware_IO": true
+}

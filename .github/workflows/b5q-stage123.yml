@@ -68,8 +68,10 @@ jobs:
       - name: Install upstream macOS host tools
         run: |
           set -euo pipefail
-          brew install llvm lld mtools dtc blacktop/tap/ipsw
+          brew install llvm lld mtools dtc blacktop/tap/ipsw bison ninja glslang pkgconf
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
+          rustup toolchain install 1.98.0 --profile minimal --component rust-src
           if ! command -v unifdef >/dev/null; then
             brew install unifdef
             echo "$(brew --prefix unifdef)/bin" >> "$GITHUB_PATH"

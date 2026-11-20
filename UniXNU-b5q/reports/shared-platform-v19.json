@@ -1,0 +1,227 @@
+{
+  "upstream_commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+  "reference_sha256": {
+    "GpuPowerProbe.cpp": "fdb17ffe29c852cf3c0a53c96e18a0cab5c67ed0a6415141a9532ade66ab2f0a",
+    "GpuPowerBoard.h": "ab9afb03418d055440e67b1e6daa106d180550662efc5636a90c95d350f61b09",
+    "ShengGmuVotes.c": "6d622e688a9aa85fbf7da356432b636925c1701d581ccc2040baa054dfe9df3e"
+  },
+  "Samsung_clock_sha256": "b4e6b5855d7b40b13f687898480198d8882171e8caf0fd2ef26c57fcd7d8bdc7",
+  "runtime_fdt_sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+  "replacements": [
+    {
+      "from": "#include \"BootLatencyTrace.h\"",
+      "to": "#include \"B5qGpuTrace.h\"\n#include \"B5qGpuFirmware.h\"\n#include \"B5qPeripheralHardware.h\"\n#include \"ShengGmuSource.h\"",
+      "occurrences": 1
+    },
+    {
+      "from": "#include \"GpuPowerBoard.h\"",
+      "to": "#include \"B5qGpuPowerBoard.h\"",
+      "occurrences": 1
+    },
+    {
+      "from": "native_adreno_sqe_firmware_image",
+      "to": "b5q_sqe_firmware_image",
+      "occurrences": 6
+    },
+    {
+      "from": "native_adreno_zap_image",
+      "to": "b5q_zap_image",
+      "occurrences": 5
+    },
+    {
+      "from": "native_adreno_firmware_image",
+      "to": "b5q_gmu_firmware_image",
+      "occurrences": 7
+    },
+    {
+      "from": "0x6a000",
+      "to": "SHENG_GMU_CORE_GPU_DELTA",
+      "occurrences": 6
+    },
+    {
+      "from": "constexpr uint64_t kGmuPhys[3] = {0x03d6a000, 0x03d50000, 0x03d9e000};",
+      "to": "constexpr uint64_t kGmuPhys[3] = {B5qHardware::gmuBase, 0x03d50000, 0x03d9e000};",
+      "occurrences": 1
+    },
+    {
+      "from": "constexpr uint64_t kGmuLen[3] = {0x35000, 0x10000, 0x1000};",
+      "to": "constexpr uint64_t kGmuLen[3] = {B5qHardware::gmuBytes, 0x10000, 0x1000};",
+      "occurrences": 1
+    },
+    {
+      "from": "constexpr uint64_t kColdPhys[5] = {0x03d6a000, 0x03d50000, 0x0b280000, 0x03d00000, 0x03d9e000};",
+      "to": "constexpr uint64_t kColdPhys[5] = {B5qHardware::gmuBase, 0x03d50000, 0x0b280000, 0x03d00000, 0x03d9e000};",
+      "occurrences": 1
+    },
+    {
+      "from": "constexpr uint64_t kColdLen[5] = {0x35000, 0x10000, 0x10000, 0x40000, 0x1000};",
+      "to": "constexpr uint64_t kColdLen[5] = {B5qHardware::gmuBytes, 0x10000, 0x10000, 0x40000, 0x1000};",
+      "occurrences": 1
+    },
+    {
+      "from": "constexpr uint32_t kGpuMHz[9] = {0, 220, 295, 348, 401, 475, 550, 615, 680};\nconstexpr unsigned kGpuTop = 8;",
+      "to": "#include \"B5qGpuRates.h\"",
+      "occurrences": 1
+    },
+    {
+      "from": "native_gpu_dcvs[15]",
+      "to": "native_gpu_dcvs[7 + kGpuTop]",
+      "occurrences": 1
+    },
+    {
+      "from": "void setRow(unsigned slot, const char *text) {",
+      "to": "void setRow(unsigned slot, const char *text) {\n    IOLog(\"B5qGpu: stage=%x row=%u %s\\n\", native_gpu_power_stage, slot, text);",
+      "occurrences": 1
+    },
+    {
+      "from": "extern char boot_progress_ext_wide[2][112];",
+      "to": "char b5q_gpu_progress_wide[2][112];",
+      "occurrences": 1
+    },
+    {
+      "from": "boot_progress_ext_wide",
+      "to": "b5q_gpu_progress_wide",
+      "occurrences": 4
+    },
+    {
+      "from": "extern char boot_progress_ext[8][48];",
+      "to": "char b5q_gpu_progress[8][48];",
+      "occurrences": 1
+    },
+    {
+      "from": "boot_progress_ext[slot]",
+      "to": "b5q_gpu_progress[slot]",
+      "occurrences": 3
+    },
+    {
+      "from": "extern \"C\" void sheng_gpu_power_probe(void) {",
+      "to": "extern \"C\" void b5q_gpu_start(void) {",
+      "occurrences": 1
+    },
+    {
+      "from": "void probeThread(void *, wait_result_t) {",
+      "to": "void probeThread(void *, wait_result_t) {\n    if (!b5q_gpu_firmware_bind()) {IOLog(\"B5qGpu: stage=Samsung-firmware-invalid\\n\"); thread_terminate(current_thread()); return;}",
+      "occurrences": 1
+    }
+  ],
+  "OPP_policy": "Exact intersection of both b5q GPU tables; includes 124.8..615MHz,680/719MHz remain bin-specific,not an asserted active SKU",
+  "firmware_transport": "original Samsung bytes from official ADT properties, complete SHA256 validation before GPU MMIO",
+  "GPU_SMMU_ownership": "reference exclusive unused SMR gate; no apps_smmu accesses",
+  "hardware_tested": false,
+  "upstream_heads": [
+    {
+      "repo": "UniXNU/UniXNU-sheng",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+      "date": "2026-11-18T08:21:35Z",
+      "message": "fix(touch): include the recorded Novatek validation"
+    },
+    {
+      "repo": "UniXNU/UniXNU-sm8550-common",
+      "commit": "2dc650ca76ae38715cd0712e60a44b14fe251745",
+      "date": "2026-11-07T13:16:16Z",
+      "message": "fix(smmu): map the whole apps SMMU window"
+    },
+    {
+      "repo": "UniXNU/UniXNU",
+      "commit": "8542980d02b4d2cc5c32ee3542de1760b2562aac",
+      "date": "2026-11-19T06:56:11Z",
+      "message": "docs: refresh device records"
+    }
+  ],
+  "latest_sheng_file_comparison": {
+    "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+    "matches_local": true,
+    "files": [
+      {
+        "path": "scripts/build-adreno740-kits.py",
+        "sha256": "47e4e4b481d7c206bf20b914744f726619454580443272fd5d8089d73bf121a8"
+      },
+      {
+        "path": "scripts/build-gop-legacy-display-27.py",
+        "sha256": "0681663cf1a7c5ffc784aa83d4ccff7972054e0572626f7a5a04f617850914de"
+      },
+      {
+        "path": "package/GpuPowerProbe.cpp",
+        "sha256": "fdb17ffe29c852cf3c0a53c96e18a0cab5c67ed0a6415141a9532ade66ab2f0a"
+      },
+      {
+        "path": "package/GpuPowerBoard.h",
+        "sha256": "ab9afb03418d055440e67b1e6daa106d180550662efc5636a90c95d350f61b09"
+      },
+      {
+        "path": "package/ShengGmuVotes.c",
+        "sha256": "6d622e688a9aa85fbf7da356432b636925c1701d581ccc2040baa054dfe9df3e"
+      },
+      {
+        "path": "package/GpuPowerBoardTests.c",
+        "sha256": "7f298ff710d85842f30c5796ae521d66f6057d734a5e99eea4ea1e453ee2a28e"
+      },
+      {
+        "path": "package/ShengGmuHostTests.c",
+        "sha256": "e54a065cd663620221168757b1dfad4caca2bb77dbb851bb7aca5f42faf46d70"
+      },
+      {
+        "path": "package/ShengGmuVotesHostTests.c",
+        "sha256": "3edf5798ca32e63ae365071b0559bf7f3f90f35b75cb9875c82f97c63afdaef1"
+      }
+    ]
+  },
+  "oneui": {
+    "Banner_script_sha256": "e76968f95a27a303f9d6eb000d579345845d36e2ad7c1483100da6bd7a78371e",
+    "Mesa_commit": "85fda3b36405bcaea8bffc64aa4f2651dc90770d",
+    "old_sha256": "3a343e614b30509a01db4a22380eaa4604abafbb59552cd8b177c5912b29aef6",
+    "new_sha256": "6cad555845e9a6f201f6970bf1afd50b65e906e6322479682c7172254e3e10f9",
+    "patch_sha256": "f0cfdaf054ec594a243461890d9e8e583efac99fb1ba3e5e8049e4b8f12ee6de",
+    "exact_script_applied": true,
+    "idempotence": true,
+    "scope": "A740 entry only; runtime not tested"
+  },
+  "tests": {
+    "local_target": {
+      "passed": true,
+      "XHCI_slots": 427,
+      "objects": {
+        "B5qUsbHost": {
+          "target": "arm64e-ios27",
+          "imports": 496,
+          "unresolved": []
+        },
+        "B5qGpu": {
+          "target": "arm64e-ios27",
+          "imports": 144,
+          "unresolved": []
+        },
+        "B5qGmuVotes": {
+          "target": "arm64e-ios27",
+          "imports": 8,
+          "unresolved": []
+        },
+        "NativeAdrenoService": {
+          "target": "arm64e-ios27",
+          "imports": 381,
+          "unresolved": []
+        },
+        "ShengGmu": {
+          "target": "arm64e-ios27",
+          "imports": 8,
+          "unresolved": []
+        },
+        "ShengGmuCommandDb": {
+          "target": "arm64e-ios27",
+          "imports": 3,
+          "unresolved": []
+        },
+        "ShengGpuSmmu": {
+          "target": "arm64e-ios27",
+          "imports": 14,
+          "unresolved": []
+        }
+      },
+      "all_saved_context_external_helpers_present": true
+    },
+    "host_suite_log_sha256": "0cbfe325cbc39dc34f25e883e872adaddfe29ee23805a2cd4c4a0b13293e2370",
+    "reference_adapter_regeneration": "PASS",
+    "pending": "CI build, actual binary verification, hardware execution"
+  },
+  "GPU_streams_source": "b5q FDT gfx3d_user0, gfx3d_lpac1, gfx3d_secure2, GMU5; nonsecure0/1 only"
+}

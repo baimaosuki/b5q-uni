@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Compile the complete shared Adreno implementation; do not import sheng board tables."""
+"""Compile shared SM8550 operations with generated Samsung b5q inputs."""
 import hashlib,json,subprocess
 from b5q_compile import ROOT,compile,archive,report
 out=ROOT/'build/adreno740';out.mkdir(parents=True,exist_ok=True)
@@ -8,16 +8,21 @@ includes=[]
 for path in ['kits/Sm8550Platform','kits/AdrenoFirmware','kits/AdrenoPM4','kits/ArmSmmu4K','drivers/Adreno740','.cache/xnu-work/osfmk']:
  includes+=['-I',str(ROOT/path)]
 sources=sorted(p for p in (ROOT/'drivers/Adreno740').glob('NativeAdreno*.cpp') if p.name!='NativeAdrenoAccelerator.cpp')
-# Do not compile ShengGmu.c: it requires Xiaomi-generated register rules.
-# Without those headers the shared GPU service excludes cold-start code.
-# All generic C++ implementation and firmware/PM4/SMMU parsers remain real.
+sources += [ROOT/'kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGpuSmmu.c','ShengGmuCommandDb.c']]
+sources += [ROOT/'kits/b5q/B5qGmuVotes.c']
 sources += [ROOT/'kits/AdrenoFirmware'/name for name in ['AdrenoHfi.c','AdrenoHfiStartup.c','AdrenoHfiVotes.c','AdrenoFirmware.c']]
 sources += sorted((ROOT/'kits/ArmSmmu4K').glob('ArmSmmu4K*.c'))+[ROOT/'kits/AdrenoPM4/AdrenoPM4.c']
 sources += [ROOT/'kits/b5q/B5qGpu.cpp']
-includes += ['-I',str(ROOT/'kits/b5q')]
-# No generated board address/rate headers and no Xiaomi signed firmware.
-for forbidden in ['ShengGmuSource.h','ShengGmuVotesSource.h','ShengGmuCommandDbSource.h']:
- if any((ROOT/path/forbidden).exists() for path in ['kits/b5q','build/adreno740']):raise SystemExit('Unexpected board-specific generated header '+forbidden)
+includes += ['-I',str(ROOT/'kits/b5q'),'-I',str(ROOT/'kits/b5q/Sm8550Inputs')]
+# Keep upstream source intact. The service's fence helper must use b5q's GMU
+# register-window origin, matching the generated SM8550 kit input.
+for name in ['NativeAdrenoService.cpp','NativeAdrenoTimer.cpp']:
+ source=ROOT/'drivers/Adreno740'/name;adapted=out/name;text=source.read_text()
+ if name=='NativeAdrenoService.cpp':
+  text=text.replace('0x23b14u*4u-0x6a000u','0x23b14u*4u-SHENG_GMU_CORE_GPU_DELTA').replace('0x23b13u*4u-0x6a000u','0x23b13u*4u-SHENG_GMU_CORE_GPU_DELTA')
+ else:
+  text='#include "ShengGmuSource.h"\n'+text.replace('TimerGmuLow = 0x14220','TimerGmuLow = (0x1f888u*4u)-SHENG_GMU_CORE_GPU_DELTA').replace('TimerGmuHigh = 0x14224','TimerGmuHigh = (0x1f889u*4u)-SHENG_GMU_CORE_GPU_DELTA')
+ adapted.write_text(text);sources=[adapted if p==source else p for p in sources]
 trace=hashlib.sha256()
 for p in sources:trace.update(p.name.encode());trace.update(p.read_bytes())
 trace_id=trace.hexdigest()[:16]
@@ -25,5 +30,5 @@ objects=[compile(p,out/(p.stem+('.kit.o' if p.suffix=='.c' else '.o')),includes,
 path=archive(out/'libAdreno740.a',objects)
 # The original macOS IOAccelerator ABI is bound by the shared audited builder.
 subprocess.run(['python3',str(ROOT/'scripts/build-adreno740-accelerator.py')],check=True)
-report(path,objects,sources,dict(board_power_votes=False,signed_firmware_embedded=False,accelerator_abi='shared audited macOS binder'))
-print('PASS: complete shared Adreno archive; absent board inputs remain explicit runtime refusal')
+report(path,objects,sources,dict(board_power_votes='Samsung common OPP intersection',signed_firmware_embedded=False,firmware_input='validated original Samsung ADT properties',accelerator_abi='shared audited macOS binder'))
+print('Built shared SM8550 GMU/HFI/SMMU/command-db and b5q platform archive')

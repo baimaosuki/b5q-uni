@@ -70,6 +70,7 @@ def bindings(raw,abi):
 
 def main():
  from b5q_compile import ROOT,compile,archive,late,report
+ from kernel_target import TRIPLE
  out=ROOT/'build/b5q-usb';out.mkdir(parents=True,exist_ok=True)
  abi=json.loads(Path(__file__).with_name('usb-xhci-26C5035r.json').read_text())
  (out/'OriginalUsbXhciABI.h').write_text(header(abi));source=ROOT/'kits/b5q/B5qUsbHost.cpp'
@@ -86,7 +87,7 @@ def main():
  objects=[late(source,obj)]
  for stem,text in [('usb-bindings',asm),('usb-addresses',addresses)]:
   path=out/(stem+'.S');path.write_text(text);target=path.with_suffix('.o')
-  subprocess.run(['xcrun','clang','-target','arm64e-apple-macos27.0','-c',str(path),'-o',str(target)],check=True);objects.append(target)
+  subprocess.run(['xcrun','clang','-target',TRIPLE,'-c',str(path),'-o',str(target)],check=True);objects.append(target)
  report(archive(out/'libB5qUsbHost.a',objects),objects,[source],dict(original_XHCI_slots=slots,original_imports=len(bound),apps_smmu_MMIO=False,DMA_handoff_required=True,hardware_tested=False))
  print(json.dumps([str(v)for v in objects]))
 if __name__=='__main__':main()
