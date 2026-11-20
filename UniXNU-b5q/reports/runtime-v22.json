@@ -1,5 +1,5 @@
 {
-  "status": "34 localpreCIchecks PASS; seven-object incrementalCI ready",
+  "status": "CI SUCCESS; actual returned binary and 800MiB4KnESP verified; physicaltest pending",
   "v21_log_sha256": "423da175e22cdff91c8aaba5409ab044cd193f2d36d3d2df368af89f4ce0f387",
   "v21_deploy_kernel_sha256": "821a19d60baee123b230db980d813f0b6c5b4e6858f209504e99fb67418fcefe",
   "actual_fault": {
@@ -11,7 +11,8 @@
     "producer_GeniIo_read_discriminator": "0x50c7",
     "producer_GeniIo_write_discriminator": "0xc120",
     "consumer_discriminator": "0x0000",
-    "classification": "PAC IA function pointer authentication mismatch, not demonstrated SEA"
+    "classification": "PAC IA function pointer authentication mismatch, not demonstrated SEA",
+    "photo_ESR": "0x72000000;EC0x1c(PACfail), not0x96000010SEA"
   },
   "log": {
     "latest_sequence": 1,
@@ -747,5 +748,756 @@
     "UniXNU-b5q/package/GeniI2c.h": "635862b89893eb76cf32f82c092a81d1ea08ccf7b719c413652437777d9c826d",
     "UniXNU-b5q/package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
     "UniXNU-b5q/package/ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d"
+  },
+  "CI": {
+    "run": 44837528408,
+    "url": "https://github.com/baimaosuki/b5q-uni/actions/runs/44837528408",
+    "commit": "1a6f8ee19e5eb8e32a240df9308390be062009fa",
+    "conclusion": "success",
+    "one_v22_run": true
+  },
+  "final_acceptance": {
+    "passed": true,
+    "kernel_core_recompiled": false,
+    "board_objects_compiled": 7,
+    "Data_addon_trust_byte_identical_v21": true,
+    "all_graphics_archives_reused": true,
+    "changed_source_contracts": {
+      "passed": true,
+      "source_contracts": [
+        "touch_default_off",
+        "bounded_real_GCC_branch_check_before_SE",
+        "no_privileged_SE_writes",
+        "thermal_TM_valid_only_no_SROT_GICD",
+        "foreign_arbiter_IRQ_clear",
+        "after_display_async_peripherals",
+        "USB_provider_registered_before_host_start",
+        "typed_C_CPP_PAC",
+        "unchanged_Data_Graphics_core_cache"
+      ],
+      "kernel_args_bytes": 998,
+      "only_arg_change": "touch=1 -> touch=0",
+      "hardware_tested": false
+    },
+    "hardware_tested": false,
+    "changed_native_archive_members": [
+      "B5qTouch.o",
+      "B5qUsbHost.late.o",
+      "ButtonProbe.o",
+      "GeniI2c.o",
+      "LegacyDisplayProbe.o",
+      "ThermalLevel.late.o",
+      "ThermalProbe.o"
+    ],
+    "actual_deployment_geni_typed_callback_calls": [
+      "0x50c7",
+      "0x50c7",
+      "0x50c7",
+      "0x50c7",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0x50c7",
+      "0x50c7",
+      "0xc120",
+      "0xc120",
+      "0x50c7",
+      "0xc120"
+    ],
+    "undefined_symbols": [],
+    "__ZTV14NativeHidInput": {
+      "slots": 334,
+      "all_diversities_match": true
+    },
+    "__ZTV10B5qUsbHost": {
+      "slots": 427,
+      "all_diversities_match": true
+    },
+    "seven_text_fixups_preserved": true,
+    "kernel_args_only_change": "touch=1 -> touch=0",
+    "deployment_kernel_sha256": "92d419bb310d97dbc102576471fb6f27168ab64af13399070c94e50b419342f0",
+    "image": {
+      "bytes": 838860800,
+      "sha256": "4306e11af8dde729ef60b5f30f245c4ee5c4130f853d3b771edcac6bcf67c53f",
+      "FAT_sector_bytes": 4096
+    },
+    "CI_run": 44837528408,
+    "source_commit": "1a6f8ee19e5eb8e32a240df9308390be062009fa"
+  },
+  "actual_Apple_PAC": {
+    "passed": true,
+    "producer_type_discriminators": {
+      "write": "0xc120",
+      "read": "0x50c7"
+    },
+    "consumer_indirect_calls": [
+      {
+        "object_offset": "0x50",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x68",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x98",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xbc",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xd4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xec",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x104",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x11c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x134",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x148",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x15c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x170",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x198",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x1b8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1d0",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1e4",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x1fc",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x27c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x298",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x2ac",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x324",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x344",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x358",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x484",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x4a0",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x4b8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x58c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x5ac",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x5c0",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x62c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x648",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x660",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x7a0",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x7c0",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x7d4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x85c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x870",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x888",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x89c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x8b8",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x950",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x980",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x9cc",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x9fc",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xa78",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xa9c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb40",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb54",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb6c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xb90",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xbac",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xc04",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xc20",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xc68",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xc9c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xd08",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xd3c",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xd60",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xe04",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xe34",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xefc",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0xf18",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xf98",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xfc4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0xff4",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1038",
+        "key": "IA",
+        "discriminator": "0x50c7"
+      },
+      {
+        "object_offset": "0x1050",
+        "key": "IA",
+        "discriminator": "0xc120"
+      },
+      {
+        "object_offset": "0x1068",
+        "key": "IA",
+        "discriminator": "0xc120"
+      }
+    ],
+    "zero_discriminator_calls": 0,
+    "C_CPP_callback_ABI_matches": true,
+    "PAuth_enabled": true,
+    "hardware_PAuth_execution_tested": false,
+    "object_sha256": {
+      "B5qTouch.o": "d9eae014174dd1340d67eb40c8339e2b9223ee28e326d5e56e0751c0e128caab",
+      "GeniI2c.o": "133dc0f52837316b92ab55f2fd6a6d10f6b1661b09bcace6d1ecb5166ea99d7c"
+    }
+  },
+  "actual_APFS_account": {
+    "administrator": "baimao",
+    "uid": 501,
+    "gid": 20,
+    "groups": [
+      "admin",
+      "staff"
+    ],
+    "PBKDF2_password_verified": true,
+    "skip_setup": true,
+    "skipbuddy": true,
+    "autoLoginUser": "baimao",
+    "kcpassword_12_bytes_verified": true,
+    "actual_APFS_inodes": {
+      "private/var/db/.AppleSetupDone": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "private/var/db/dslocal/nodes/Default/users/baimao.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 722
+      },
+      "private/var/db/dslocal/nodes/Default/groups/admin.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 390
+      },
+      "private/var/db/dslocal/nodes/Default/groups/staff.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 370
+      },
+      "Users/baimao": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 16872,
+        "bytes": 0
+      },
+      "Users/baimao/.skipbuddy": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "Library/Preferences/com.apple.loginwindow.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 67
+      },
+      "private/etc/kcpassword": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 12
+      }
+    },
+    "hardware_tested": false,
+    "seed_sha256": "e18547798efd726b0a42dc53cb828888e0772654e29e8c68b3a7c0d083df7948",
+    "logical_bytes": 2147483648,
+    "read_only_APFS_parser": true
+  },
+  "POST_runtime_model": {
+    "kernel_sha256": "e7637c3c2f97122e1baea3b0dbfb9dfadee05a4f5307fae8ab408e84ef8d4460",
+    "code_file_offset": "0x4920000",
+    "code_bytes": 10945892,
+    "hmac_file_offset": "0x34059b",
+    "hmac_sha256": "95f41168a49e8c9ab4ad109ef4f38653d699ed4bf59c6a7e3a1d801fabb3e464",
+    "static_if_sites_prepatched": 69,
+    "static_if_key_sites": {
+      "_sched_debug_preemption_disable_jump_key": 35,
+      "_sched_debug_interrupt_disable_jump_key": 24,
+      "_static_if_test_key_true_to_false_jump_key": 5,
+      "_static_if_test_key_false_to_true_jump_key": 5
+    },
+    "validation_disables": "0x11040",
+    "runtime_selftests_executed": false,
+    "passed": true,
+    "actual_compiled_override_function": true,
+    "actual_ARM64_instruction_patcher_sites": 69,
+    "all_runtime_writes_leave_sealed_text_unchanged": true,
+    "sealing_idempotent": true,
+    "POST_HMAC_recomputed_independently": true,
+    "hardware_tested": false,
+    "emulation_scope": "actual short leaf functions; no QEMU or OS hardware emulation"
+  },
+  "incremental_link": {
+    "source_run": 44831204824,
+    "source_commit": "d38be559238dbde4e0999b423764442e7ac6ddc8",
+    "unchanged_inputs": {
+      "build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.link/mach.development.bcm2837.a": "1fce36d7ee6c79cb2b1aca01b3635cdda568c8dadef6a5c3490007610a3a3d3b",
+      "build/firehose/sym/Release-iphoneos/liblibfirehose_kernel.a": "14edf57551a5f2935656b9e4635ff06162266c7666e271b478d072a4ad481333",
+      "build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a": "4d74783c8cbbb784301878f4bb8a863c396269d9e4dd2ef129f9908ff897bc2e",
+      "build/armdt-platform/libArmDTPlatform.a": "325ae920c90f1958235ec9bb3b8bff798063e2267b610811c69f7dd74d85fc5c",
+      "build/armcpu/libArmCpu.a": "bfbcf0279411190446804f0db629335bfe7b66c7cb09443e53828703fc553585",
+      "build/adreno740/libAdreno740.a": "1e286a38f12ffc7b8832f81f4555f357678f860d4af72734543b110dc40d0d65",
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": "0b1ddb978421d70c92b15e62bba229b0f6c49e1ed1b696eb1387a12e2a35cc0a",
+      "build/libpthread-kernel/libpthread_kernel.a": "f89fd1e65dff95282c2fbd60f86c76e116d4f3df61e893409077c123af1ee341",
+      "build/ram-block/libRamBlock.a": "00c85035da017b25ef12cd121f61d4b86ff6a24d485c378e69a3ca17153e855b",
+      "build/software-aes/libSoftwareAES.a": "d0c2999f6a2c2cc5e6609826d6070d52c0692e148684ee1c238cb14bedc7723e"
+    },
+    "native_reference_sha256": "f0ecb9f4078e286c2c28d1ad260d1e45af92436199e74e3a186385ff20f3d3ab",
+    "source_sha256": {
+      "B5qUsbHost.cpp": "98e43239cfb6781b693cfeb5cd5cd6a06e0b777777a074c58a427f4b7b825b64",
+      "B5qUsbPolicy.h": "ce3970985da5c96b6fb9c5d6cffcbeaa570b12cf8c22b67f22ebebc996b5195e",
+      "LegacyDisplayProbe.cpp": "0a4ab7e2b1ed870af524450d1b6d8a16c0aaf6dd205a409ef42906df6e2d1d53",
+      "B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+      "B5qSpmi.cpp": "d6fc53e19e4e82a48a87c221ce6cc891eda18cdf1f4f4214a748c58bfd9ee914",
+      "CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
+      "ThermalProbe.cpp": "8cbdd96857d9a0b2e295fb276d4e77d3ee159eb756865e6eaa4439898676ac3a",
+      "ThermalLevel.cpp": "8d256c6c898864b35b57dcc588f56c917cf12a3638153c25b057569b5a9b031f",
+      "BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+      "ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d",
+      "DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+      "NativeHidInput.cpp": "4c4ab5b8c4402bb9e5dd3a8db0b0a30e19101a43bde86cd89f13b115286aa3a0",
+      "HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+      "B5qTouch.cpp": "89d5ae3ad1fd80c614ea399f39be06e400eedb49748d0363514416b6d6359710",
+      "GeniI2c.c": "825569be3276ebde2dadd4649bec51cc4f2a345b511f06731f7b3a9f5a83f367"
+    },
+    "core_translation_units_compiled": 0,
+    "board_translation_units_compiled": 7,
+    "aliases_from_same_v19_native": {
+      "_ifnet_resolve_multicast": "_dlil_resolve_multi",
+      "_in_cksum": "_inet_cksum_simple",
+      "_inet_arp_handle_input": "_arp_ip_handle_input",
+      "_inet_arp_init_ifaddr": "_arp_ifinit",
+      "_inet_arp_lookup": "_arp_lookup_ip",
+      "_ubc_create_upl": "_ubc_create_upl_external",
+      "__ZN11OSSerialize18binaryWithCapacityEjPvS0_": "__ZN11OSSerialize18binaryWithCapacityEjPFPK15OSMetaClassBasePvPS_P12OSCollectionPK8OSSymbolS2_ES3_",
+      "_kmod_info": "_invalid_kmod_info",
+      "_os_ref_init_count_external": "_os_ref_init_count_internal",
+      "_os_ref_release_barrier_external": "_os_ref_release_barrier_internal",
+      "_os_ref_release_external": "_os_ref_release_internal",
+      "_os_ref_release_locked_external": "_os_ref_release_locked_internal",
+      "_os_ref_release_relaxed_external": "_os_ref_release_relaxed_internal",
+      "_os_ref_retain_external": "_os_ref_retain_internal",
+      "_os_ref_retain_locked_external": "_os_ref_retain_locked_internal",
+      "_os_ref_retain_try_external": "_os_ref_retain_try_internal",
+      "_sha1_init": "_SHA1Init",
+      "_sha1_loop": "_SHA1Update",
+      "_sha1_result": "_SHA1Final_r",
+      "_sysctlbyname": "_kernel_sysctlbyname",
+      "_convert_port_to_task_suspension_token": "_convert_port_to_task_suspension_token_external",
+      "_convert_task_suspension_token_to_port": "_convert_task_suspension_token_to_port_external",
+      "_convert_task_to_port": "_convert_task_to_port_external",
+      "_convert_task_read_to_port": "_convert_task_read_to_port_external",
+      "_ifnet_notice_master_elected": "_ifnet_notice_primary_elected",
+      "_kalloc_data": "_kalloc_data_external",
+      "_kalloc_shared_data": "_kalloc_shared_data_external",
+      "_kalloc_type_impl": "_kalloc_type_impl_external",
+      "_kalloc_type_var_impl": "_kalloc_type_var_impl_external",
+      "_kfree_data": "_kfree_data_external",
+      "_kfree_shared_data": "_kfree_shared_data_external",
+      "_kfree_data_addr": "_kfree_data_addr_external",
+      "_kfree_shared_data_addr": "_kfree_shared_data_addr_external",
+      "_kfree_type_impl": "_kfree_type_impl_external",
+      "_kfree_type_var_impl": "_kfree_type_var_impl_external",
+      "_kmem_alloc_kobject": "_kmem_alloc_kobject_external",
+      "_kmem_alloc_pageable": "_kmem_alloc_pageable_external",
+      "_m_free": "_mbuf_free",
+      "_m_freem": "_mbuf_freem",
+      "_m_trailingspace": "_mbuf_trailingspace",
+      "_mach_vm_allocate": "_mach_vm_allocate_external",
+      "_mach_vm_deallocate": "_mach_vm_deallocate_external",
+      "_mbuf_get_priority": "_mbuf_get_traffic_class",
+      "_mbuf_is_service_class_privileged": "_mbuf_is_traffic_class_privileged",
+      "_net_add_domain": "_net_add_domain_old",
+      "_net_add_proto": "_net_add_proto_old",
+      "_net_del_domain": "_net_del_domain_old",
+      "_net_del_proto": "_net_del_proto_old",
+      "_pffinddomain": "_pffinddomain_old",
+      "_pffindproto": "_pffindproto_old",
+      "_port_name_to_task": "_port_name_to_task_external",
+      "_vm_fault": "_vm_fault_external",
+      "_vm_map_create": "_vm_map_create_external",
+      "_apfs_smr": "__vfs_smr",
+      "_task_id_token_port_name_to_task": "_task_id_token_port_name_to_task_external",
+      "_mach_vm_map": "_mach_vm_map_external",
+      "_mach_vm_remap": "_mach_vm_remap_external",
+      "_task_deallocate": "_task_deallocate_external",
+      "_task_reference": "_task_reference_external",
+      "_vm_kernel_addrhash": "_vm_kernel_addrhash_external",
+      "_vm_map": "_vm_map_external",
+      "_proc_ucred": "_proc_ucred_unsafe",
+      "_IOLockLock": "_lck_mtx_lock",
+      "_IOLockTryLock": "_lck_mtx_try_lock",
+      "_IOLockUnlock": "_lck_mtx_unlock",
+      "_IOMalloc": "_IOMalloc_external",
+      "_IOMallocAligned": "_IOMallocAligned_external",
+      "_IOMallocData": "_IOMallocData_external",
+      "_IOMallocZero": "_IOMallocZero_external",
+      "_IOMallocZeroData": "_IOMallocZeroData_external",
+      "_IOMallocDataShareable": "_IOMallocDataShareable_external",
+      "_IOMallocZeroDataShareable": "_IOMallocZeroDataShareable_external",
+      "_IORWLockRead": "_lck_rw_lock_shared",
+      "_IORWLockTryRead": "_lck_rw_try_lock_shared",
+      "_IORWLockTryWrite": "_lck_rw_try_lock_exclusive",
+      "_IORWLockUnlock": "_lck_rw_done",
+      "_IORWLockWrite": "_lck_rw_lock_exclusive",
+      "_IOSimpleLockLock": "_lck_spin_lock",
+      "_IOSimpleLockTryLock": "_lck_spin_try_lock",
+      "_IOSimpleLockUnlock": "_lck_spin_unlock",
+      "_PE_cpu_start": "_PE_cpu_start_from_kext",
+      "__ZN22IOInterruptEventSource27getPimaryInterruptTimestampEv": "__ZN22IOInterruptEventSource28getPrimaryInterruptTimestampEv",
+      "__ZN9IOService9resourcesEv": "__ZN9IOService18getResourceServiceEv",
+      "_current_act": "_current_thread",
+      "_kmem_alloc": "_kmem_alloc_external",
+      "_kmem_free": "_kmem_free_external",
+      "_krealloc_data": "_krealloc_data_external",
+      "_krealloc_shared_data": "_krealloc_shared_data_external",
+      "_processor_exit": "_processor_exit_from_kext",
+      "_processor_start": "_processor_start_from_kext",
+      "_task_resume2": "_task_resume2_external",
+      "_task_suspend2": "_task_suspend2_external",
+      "_vm_allocate": "_vm_allocate_external",
+      "_vm_map_wire": "_vm_map_wire_external",
+      "_kpc_set_running": "_kpc_set_running_external",
+      "_kpc_set_config": "_kpc_set_config_external"
+    },
+    "linkflags": [
+      "-nostdlib",
+      "-fapple-kext",
+      "-Wl,-e,__start",
+      "-Wl,-sectalign,__TEXT,__text,0x1000",
+      "-Wl,-sectalign,__DATA,__common,0x1000",
+      "-Wl,-sectalign,__DATA,__bss,0x1000",
+      "-Wl,-sectcreate,__PRELINK_TEXT,__text,/dev/null",
+      "-Wl,-segprot,__PRELINK_TEXT,r-x,r-x",
+      "-Wl,-sectcreate,__PRELINK_INFO,__info,/dev/null",
+      "-Wl,-pagezero_size,0x0",
+      "-Wl,-version_load_command",
+      "-Wl,-function_starts",
+      "-Wl,-headerpad,152",
+      "-Wl,-pie",
+      "-Wl,-static",
+      "-Wl,-segaddr,__PRELINK_TEXT,0xfffffff004004000",
+      "-Wl,-image_base,0xfffffff007004000",
+      "-Wl,-rename_section,__HIB,__text,__TEXT_EXEC,__hib_text",
+      "-Wl,-rename_section,__HIB,__const,__DATA_CONST,__hib_const",
+      "-Wl,-rename_section,__HIB,__cstring,__DATA_CONST,__hib_const",
+      "-Wl,-rename_section,__HIB,__literal8,__DATA_CONST,__hib_const",
+      "-Wl,-rename_section,__HIB,__literal16,__DATA_CONST,__hib_const",
+      "-Wl,-rename_segment,__HIB,__HIBDATA",
+      "-Wl,-sectalign,__DATA,__const,0x4000",
+      "-Wl,-sectalign,__DATA,__percpu,0x4000",
+      "-Wl,-sectalign,__DATA,__data,0x4000",
+      "-Wl,-rename_section,__DATA,__mod_init_func,__DATA_CONST,__mod_init_func",
+      "-Wl,-rename_section,__DATA,__mod_term_func,__DATA_CONST,__mod_term_func",
+      "-Wl,-rename_section,__DATA,__auth_ptr,__DATA_CONST,__auth_ptr",
+      "-Wl,-rename_section,__DATA,__auth_got,__DATA_CONST,__auth_got",
+      "-Wl,-rename_section,__DATA,__const,__DATA_CONST,__const",
+      "-Wl,-segprot,__DATA_CONST,r--,r--",
+      "-Wl,-rename_section,__KLD,__const,__KLDDATA,__const",
+      "-Wl,-rename_section,__KLD,__cstring,__KLDDATA,__cstring",
+      "-Wl,-segprot,__KLDDATA,rw-,rw-",
+      "-Wl,-segprot,__KLD,r-x,r-x",
+      "-Wl,-rename_section,__TEXT,__text,__TEXT_EXEC,__text",
+      "-Wl,-rename_section,__TEXT,__stubs,__TEXT_EXEC,__stubs",
+      "-Wl,-sectcreate,__PLK_TEXT_EXEC,__text,/dev/null",
+      "-Wl,-sectcreate,__PRELINK_DATA,__data,/dev/null",
+      "-Wl,-sectcreate,__PLK_DATA_CONST,__data,/dev/null",
+      "-Wl,-sectcreate,__PLK_LLVM_COV,__llvm_covmap,/dev/null",
+      "-Wl,-sectcreate,__PLK_LINKEDIT,__data,/dev/null",
+      "-Wl,-rename_section,__PPLDATA,__const,__PPLDATA_CONST,__const",
+      "-Wl,-segment_order,__TEXT:__DATA_CONST:__DATA_SPTM:__LINKEDIT:__TEXT_EXEC:__TEXT_BOOT_EXEC:__KLD:__PPLTEXT:__PPLTRAMP:__PPLDATA_CONST:__LASTDATA_CONST:__LAST:__PPLDATA:__KLDDATA:__DATA:__HIBDATA:__BOOTDATA",
+      "-Wl,-segprot,__TEXT,r--,r--",
+      "-Wl,-segprot,__TEXT_EXEC,r-x,r-x",
+      "-Wl,-segprot,__TEXT_BOOT_EXEC,r-x,r-x",
+      "-Wl,-segprot,__PPLTEXT,r-x,r-x",
+      "-Wl,-segprot,__PPLTRAMP,r-x,r-x",
+      "-Wl,-segprot,__PPLDATA_CONST,r--,r--",
+      "-Wl,-segprot,__LASTDATA_CONST,r--,r--",
+      "-Wl,-segprot,__LAST,r-x,r-x"
+    ],
+    "added_objects": {
+      "ThermalProbe.o": "d88499f3e609b42f5274c493dec11c631adab68627a67c17ee24564c26e4ff73",
+      "ThermalLevel.late.o": "97df93c44009e51131bc7ca1e7276077c10682fd306203b601c2ab768a9d77b3",
+      "ButtonProbe.o": "40df81912badfa00296ba3f16b5a897b80619a53fe39fa63c13ddb01e58d7de6",
+      "B5qTouch.o": "d9eae014174dd1340d67eb40c8339e2b9223ee28e326d5e56e0751c0e128caab",
+      "GeniI2c.o": "133dc0f52837316b92ab55f2fd6a6d10f6b1661b09bcace6d1ecb5166ea99d7c"
+    },
+    "optional_cpu_idle_helper_present": false,
+    "unchanged_core_after_link_sha256": "1fce36d7ee6c79cb2b1aca01b3635cdda568c8dadef6a5c3490007610a3a3d3b",
+    "native_output_sha256": "882d2e7862986e2fe0fb476977a7464c716980c89e66c160c699a33dd07396a6",
+    "archive_outputs": {
+      "build/adreno740/libAdreno740.a": "1e286a38f12ffc7b8832f81f4555f357678f860d4af72734543b110dc40d0d65",
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": "6d66eaf79f4d4943fc9a5725e645d1f1c39f764e0b96b718b4f1fb9b61508a0b"
+    },
+    "changed_board_sources": [
+      "B5qTouch.cpp",
+      "B5qUsbHost.cpp",
+      "ButtonProbe.cpp",
+      "GeniI2c.c",
+      "LegacyDisplayProbe.cpp",
+      "ThermalLevel.cpp",
+      "ThermalProbe.cpp"
+    ]
+  },
+  "delivery": {
+    "path": "/home/baimao/zflip5/artifacts/b5q-esp-runtime-v22/esp.img",
+    "bytes": 838860800,
+    "sha256": "4306e11af8dde729ef60b5f30f245c4ee5c4130f853d3b771edcac6bcf67c53f",
+    "deploy_kernel_sha256": "92d419bb310d97dbc102576471fb6f27168ab64af13399070c94e50b419342f0",
+    "raw_kernel": {
+      "bytes": 143147008,
+      "sha256": "b66a658aed26fbfbf706bd3e965bdc4d574b9e9e52eb29a56251fd659bf2b5c7"
+    },
+    "flash_scope": "ESP sda29 only; no device write executed"
   }
 }
