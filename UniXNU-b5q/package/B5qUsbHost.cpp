@@ -10,7 +10,7 @@
 #include <libkern/OSKextLib.h>
 #include <kern/thread.h>
 #include <pexpert/pexpert.h>
-#include <pexpert/arm/boot.h>
+#include <pexpert/arm64/boot.h>
 extern kmod_info_t g_kernel_kmod_info;
 extern "C" {
 int armcpu_spi_attach(uint32_t,bool,void(*)(void*),void*,uint32_t*,uint64_t*);

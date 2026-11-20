@@ -49,6 +49,7 @@ run('log-read', [sys.executable, 'tests/b5q-ufs/test-log-read.py'])
 run('verified-read', [sys.executable, 'tests/b5q-ufs/test-verified-read.py'])
 run('ws-signal', [sys.executable, 'tests/b5q-ufs/test-ws-signal.py'])
 run('peripheral-policy', [sys.executable, 'tests/b5q-ufs/test-peripheral-policy.py'])
+run('peripheral-target', [sys.executable, 'scripts/b5q-install/check-peripheral-target.py'])
 run('installer-errors', [sys.executable, 'tests/b5q-ufs/test-installer.py'])
 flags = ['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-Wno-misleading-indentation', '-fsanitize=address,undefined', '-I', device / 'package/B5qUfs']
 for name in ['root-format', 'smmu', 'protocol']:

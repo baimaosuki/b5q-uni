@@ -78,7 +78,7 @@
   },
   "source_sha256": {
     "UniXNU-b5q/board.toml": "650c0819eed9a17a3614d117a29db98a3e4ab2ed76c38276d840028e3266fbbd",
-    "UniXNU-b5q/package/B5qUsbHost.cpp": "094b670c4f0a7ff73ff3e3d0024a7e0ca03f6f44cbf33b1d791483a60ccd6323",
+    "UniXNU-b5q/package/B5qUsbHost.cpp": "672bcc9dce09008e0bd4a7376067a6665969a21e3500a4afd9176ebb0c67742d",
     "UniXNU-b5q/package/B5qUsbPolicy.h": "3925510f85b5b38e8c7d7df61602c3e79a90bb89ce44cec3b64fbf419d73b9d3",
     "UniXNU-b5q/package/B5qGpu.cpp": "df921228ed231bf632d4a1fad1af04728e31049115b55ceaf0ec817671ed8796",
     "UniXNU-b5q/package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
@@ -92,14 +92,16 @@
     "UniXNU-b5q/scripts/build-b5q-gop-27.py": "a1857f843d5ab11d0074f6b95431d493600a7c121b61418284cd0a26a9bc1174",
     "UniXNU-b5q/scripts/build-b5q-adreno.py": "c1b63ce69e61f649699c160c7d3cba8f5149ae1f6ad4153604d2e6940cc4d2ff",
     "scripts/b5q-install/build-ci-esp.py": "1daa3499f425e67ecea9e50f4fc181a1ba6765f56d425f9372dbeacecbee1db0",
-    "scripts/b5q-install/pre-ci.py": "0e557241959621bcf89779b0ef7892e993422545131fdcb1ca685bfaafd013bc",
+    "scripts/b5q-install/pre-ci.py": "386aef4b369e753ac2a8e98e4f034c49f1c1ff0c815cb0b34fb878ffad6bcf16",
     "tests/b5q-ufs/test-ws-signal.py": "8d347b9964de22375e65813d1dd2f251db53ae001f85fd2bef29cc26befdf9c9",
     "tests/b5q-ufs/test-peripheral-policy.cpp": "c1e7987be6342fea456e057c025f80fadd949db0328bbadff12f0b9e466da4fa",
     "tests/b5q-ufs/test-peripheral-policy.py": "ef897c0b534d44957556b7da0087e7829a3ae4762dc376617e2ec32e053c3be7",
     "UniXNU-b5q/reports/peripheral-inputs-v19.json": "21ffc99dbf2524717b8276dc534414ca947cedcd6281da75887e76899b2d263e",
     "UniXNU-b5q/reports/runtime-v19.md": "e9a6be8c0cda5f6fb9881b9e1356b0c6a7d4aec11d3fed25a2b7f5e999b85a5b",
     "UniXNU-b5q/scripts/usb-host-bindings-26C5035r.json": "7461de4788ea0a6eee2d222928436c1624420d82902a253a42a75caebcdb02a0",
-    "UniXNU-b5q/reports/xnu-patch-application.json": "6757b0d7da70989eb61c6ebd551a580e1827a650f876d23a8a729fa4019ac4da"
+    "UniXNU-b5q/reports/xnu-patch-application.json": "6757b0d7da70989eb61c6ebd551a580e1827a650f876d23a8a729fa4019ac4da",
+    "scripts/b5q-install/check-peripheral-target.py": "d5cbf6045ec4a7d5cb9242d64838bf428e54e991adc7a740c89717cfa7b9e85f",
+    "scripts/b5q-install/verify-peripherals-binary.py": "2c9961cb5fd6ffeab59accca983af61e773b1b472b96be1669a69f5e7a5ca702"
   },
   "local_XHCI_ABI": {
     "slots": 427,
@@ -169,5 +171,145 @@
     "result": "PASS",
     "report_sha256": "8523298dd062e990cd2dc44f47dfecdb90fc25ec6689e212dfc264a4d3bf8344",
     "followup": "Actual final USB target recompiled/rebound and production peripheral policies rerun after bus-number OSData/64-bit capability corrections"
+  },
+  "CI": {
+    "id": 44776745729,
+    "head_sha": "1a1a174d435a72da85f4d5e1a85ae70538f5bbf4",
+    "html_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/44776745729",
+    "status": "in_progress",
+    "conclusion": null,
+    "created_at": "2026-11-20T16:46:39Z",
+    "updated_at": "2026-11-20T16:51:46Z"
+  },
+  "local_binary_verifier": {
+    "path": "scripts/b5q-install/verify-peripherals-binary.py",
+    "sha256": "2c9961cb5fd6ffeab59accca983af61e773b1b472b96be1669a69f5e7a5ca702",
+    "scope": "Will execute actual compiled opt-in/missing-handoff stop paths with registry/threads/logging fixtures; inspect427slotvtable and fatal-context calls. Not a hardware enumeration or GPU execution test."
+  },
+  "local_symbol_closure": {
+    "B5qUsbHost.o": {
+      "undefined": 496,
+      "new_original_bindings": 179,
+      "unresolved": []
+    },
+    "B5qGpu.o": {
+      "undefined": 17,
+      "new_original_bindings": 0,
+      "unresolved": []
+    },
+    "signal_context_external_helpers": "all present in prior actual deployment symbol table; new helper compiled in XNU source"
+  },
+  "private_firmware_ADT_preflight": {
+    "passed": true,
+    "official_generator": true,
+    "ADT_bytes": 171868,
+    "only_added_properties": [
+      "b5q-gmu-fw",
+      "b5q-sqe-fw",
+      "b5q-zap-fw"
+    ],
+    "other_properties_preserved_except_fresh_random_seed": true,
+    "firmware_files_untouched": true,
+    "no_git_blobs": true
+  },
+  "pre_ci_order_correction": "The complete import closure check was run after first CI dispatch this turn; it passed with no input changes. Added check-peripheral-target.py to local pre-ci so subsequent dispatches include actual target compile/427slotABI/all-import closure as a required local check. Do not claim this ordering was met for the already-running source CI.",
+  "failed_attempts": [
+    {
+      "run": 44776745729,
+      "source": "1a1a174d435a72da85f4d5e1a85ae70538f5bbf4",
+      "conclusion": "failure",
+      "first_failure": "B5qUsbHost.cpp explicit pexpert/arm/boot.h conflicts with arm64/boot.h already included by target headers. All other reported bootstrap missing native symbols are expected before external driver archives. Signal source compiled without error.",
+      "log_sha256": "cef2542e960616c1bc994fbb99cc600371b3b2aa15a4c5e25ad65323b9f192d8",
+      "fix": "Include canonical pexpert/arm64/boot.h to match real target ABI; local target compile/427slotABI/allimports then rerun before resubmit."
+    }
+  ],
+  "repair_pre_ci": {
+    "result": "PASS",
+    "checks": [
+      "upstream-package-template",
+      "porting-record",
+      "source-contract",
+      "lockdown-public",
+      "log-startup",
+      "log-writer",
+      "runtime-gates",
+      "ethernet-lifecycle",
+      "ethernet-start",
+      "read-status",
+      "log-read",
+      "verified-read",
+      "ws-signal",
+      "peripheral-policy",
+      "peripheral-target",
+      "installer-errors",
+      "root-format-compile",
+      "root-format-runtime",
+      "smmu-compile",
+      "smmu-runtime",
+      "protocol-compile",
+      "protocol-runtime",
+      "exact-local-root-policies",
+      "full-root-image-sha256",
+      "original-pmgr-fixture",
+      "device-tree-syntax",
+      "python-syntax",
+      "no-added-ci-integrity-gates"
+    ],
+    "report_sha256": "0725996b7f2d54a892699a7719644d7db7e50228fd99f3587e4a69e593ea0613",
+    "before_repair_CI": true
+  },
+  "failed_intermediates": {
+    "index": [
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/apple-key-store-state/libAppleKeyStoreState.a",
+        "bytes": 310168
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/armcpu/libArmCpu.a",
+        "bytes": 331424
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/armdt-platform/libArmDTPlatform.a",
+        "bytes": 244344
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a",
+        "bytes": 966112
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/corecrypto-2023/libcorecrypto_kernel_noasm.a",
+        "bytes": 963224
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/firehose/sym/Release-iphoneos/liblibfirehose_kernel.a",
+        "bytes": 38040
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/libpthread-kernel/libpthread_kernel.a",
+        "bytes": 58048
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/native-gop-presenter/libNativeGOPPresenter.a",
+        "bytes": 313936
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/native-legacy-display/libNativeLegacyDisplay.a",
+        "bytes": 486464
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/native-ram-block/libNativeRamBlock.a",
+        "bytes": 1611920
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/ram-block/libRamBlock.a",
+        "bytes": 1611920
+      },
+      {
+        "path": "macos-27.3-26C5035r/b5q_macos/tree/build/software-aes/libSoftwareAES.a",
+        "bytes": 419120
+      }
+    ],
+    "incremental_XNU_available": false,
+    "reason": "Failed run uploaded only completed native helper archives, no XNU link archive or unstripped kernel. New successful native kernel must be compiled; Data remains reused."
   }
 }

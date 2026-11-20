@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+"""Inspect final peripheral ABI and execute opt-in/missing-handoff stop paths."""
+import argparse,hashlib,json,struct,sys
+from pathlib import Path
+from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
+from unicorn import Uc,UC_ARCH_ARM64,UC_MODE_ARM,UC_HOOK_CODE
+from unicorn.arm64_const import *
+root=Path(__file__).resolve().parents[2];sys.path.insert(0,str(root/'sources/UniXNU/kits/XnuPrelink'))
+from kc_image import Image
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('kernel',type=Path);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
+raw=a.kernel.read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1])if outer.entries else outer
+names={n:v for v,rows in im.symbols().items()for n in rows};md=Cs(CS_ARCH_ARM64,CS_MODE_ARM)
+def one(part):
+ found=[v for n,v in names.items()if part in n];assert len(found)==1,(part,found);return found[0]
+required=['_b5q_usb_start','_b5q_gpu_start','_b5q_usb_state','_b5q_gpu_state','__ZTV10B5qUsbHost'];assert all(n in names for n in required)
+abi=json.loads((root/'UniXNU-b5q/scripts/usb-xhci-26C5035r.json').read_text());words=struct.unpack('<'+str(len(abi['slots']))+'Q',im.read(names['__ZTV10B5qUsbHost']+16,8*len(abi['slots'])))
+assert all((v>>32&0xffff)==int(slot[1],16)for v,slot in zip(words,abi['slots']))
+context=one('b5q_windowserver_signal_context');end=min(v for v in names.values()if v>context);instructions=list(md.disasm(im.read(context,end-context),context))
+call_targets=[int(i.op_str[1:],16)for i in instructions if i.mnemonic=='bl']
+assert names['_backtrace_user']in call_targets and names['_backtrace']in call_targets
+assert sum(i.mnemonic=='mov'and i.op_str=='w1, #0x10'for i in instructions)>=2
+prepare=names['_proc_prepareexit'];end=min(v for v in names.values()if v>prepare)
+assert any(i.mnemonic=='bl'and int(i.op_str[1:],16)==context for i in md.disasm(im.read(prepare,end-prepare),prepare))
+for s in [b'B5Q-WS-SIGNAL: saved pc=',b'cache_slide=0x',b'b5q-usb-handoff\0',b'b5q-gmu-handoff\0',b'b5q-gmu-fw\0',b'no Metal-ready service published'] :assert s in raw,s
+u=Uc(UC_ARCH_ARM64,UC_MODE_ARM);u.ctl_set_cpu_model(UC_CPU_ARM64_MAX)
+lo=min(s['va']for s in im.segments if s['size'])&~4095;hi=(max(s['va']+s['size']for s in im.segments if s['size'])+4095)&~4095;u.mem_map(lo,hi-lo)
+for s in im.segments:
+ if s['filesize']:u.mem_write(s['va'],raw[s['fileoff']:s['fileoff']+s['filesize']])
+base=0xfffffff030000000;u.mem_map(base,0x10000);stop=base;stack=base+0xf000;u.reg_write(UC_ARM64_REG_CPACR_EL1,3<<20)
+workers=[];messages=[];enabled=0;worker_mode=False;map_calls=0
+frompath={v for n,v in names.items()if 'IORegistryEntry' in n and '8fromPath' in n}
+map_targets={v for n,v in names.items()if 'IODeviceMemory' in n and '9withRange' in n}
+def cstr(at):
+ out=bytearray()
+ for j in range(256):
+  b=u.mem_read(at+j,1)[0]
+  if not b:return out.decode(errors='replace')
+  out.append(b)
+ raise AssertionError('unterminated fixture string')
+def ret(value=0):u.reg_write(UC_ARM64_REG_X0,value);u.reg_write(UC_ARM64_REG_PC,u.reg_read(UC_ARM64_REG_X30))
+def hook(e,pc,size,unused):
+ global map_calls
+ if pc==names['_PE_parse_boot_argn']:
+  assert e.reg_read(UC_ARM64_REG_X2)==4;e.mem_write(e.reg_read(UC_ARM64_REG_X1),struct.pack('<I',enabled));ret(1);return
+ if pc==names['_kernel_thread_start']:
+  workers.append(e.reg_read(UC_ARM64_REG_X0));e.mem_write(e.reg_read(UC_ARM64_REG_X2),struct.pack('<Q',base+0x1000));ret(0);return
+ if pc==names['_thread_deallocate']:ret();return
+ if pc in frompath:ret(0);return
+ if pc in map_targets:map_calls+=1;raise AssertionError('missing handoff reached a controller mapping')
+ if pc==names['_IOLog']:
+  messages.append({'format':cstr(e.reg_read(UC_ARM64_REG_X0)),'stage':cstr(e.reg_read(UC_ARM64_REG_X1))});ret();return
+ if pc==names['_thread_terminate']:e.emu_stop();return
+ ins=next(md.disasm(bytes(e.mem_read(pc,4)),pc))
+ if ins.mnemonic.startswith(('pac','aut','xpac')):e.reg_write(UC_ARM64_REG_PC,pc+4)
+ elif ins.mnemonic in ('retab','retaa'):e.reg_write(UC_ARM64_REG_PC,e.reg_read(UC_ARM64_REG_X30))
+ elif ins.mnemonic.startswith(('blraa','blrab')):
+  target=getattr(__import__('unicorn.arm64_const',fromlist=['*']),'UC_ARM64_REG_'+ins.op_str.split(',')[0].upper());pc2=e.reg_read(target);e.reg_write(UC_ARM64_REG_X30,pc+4);e.reg_write(UC_ARM64_REG_PC,pc2)
+u.hook_add(UC_HOOK_CODE,hook);results=[]
+for prefix in ['usb','gpu']:
+ entry=names['_b5q_'+prefix+'_start'];enabled=0;before=len(workers)
+ for on in [0,1]:
+  enabled=on;u.reg_write(UC_ARM64_REG_SP,stack);u.reg_write(UC_ARM64_REG_X30,stop);u.emu_start(entry,stop,count=10000)
+  assert len(workers)==before+on
+ worker=workers[-1];u.reg_write(UC_ARM64_REG_X0,0);u.reg_write(UC_ARM64_REG_X1,0);u.reg_write(UC_ARM64_REG_SP,stack);u.reg_write(UC_ARM64_REG_X30,stop)
+ u.emu_start(worker,stop,count=30000);expected='dma-handoff'if prefix=='usb'else'firmware-inputs';assert messages[-1]['stage']==expected,(prefix,messages)
+ results.append({'worker':prefix,'opt_in_gate_executed':True,'missing_input_stop':expected,'controller_maps':map_calls})
+a.out.write_text(json.dumps(dict(passed=True,kernel_sha256=hashlib.sha256(raw).hexdigest(),XHCI_vtable_slots=len(words),saved_signal_collector_called_before_corpse=True,actual_user_and_kernel_backtrace_calls=True,frame_limits=16,actual_compiled_missing_input_paths=results,boot_parser_threads_registry_and_logging_mocked=True,PAuth_not_tested=True,device_or_GPU_execution_tested=False),indent=2)+'\n')
+print('PASS final427-slot xHCI ABI, fatal-context calls and actual compiled USB/GPU stop paths')
