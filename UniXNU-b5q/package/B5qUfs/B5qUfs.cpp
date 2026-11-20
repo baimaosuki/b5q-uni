@@ -126,7 +126,8 @@ static bool submit() {
 }
 // The only power command is exact START STOP UNIT ACTIVE to Device WLUN D0.
 // TUR/capacity/READ are confined to normal LUNs; there are no block writes.
-static int command(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,void *output) {
+static int command(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,void *output,Status *completion=nullptr) {
+ if(completion)*completion={};
  if(host.poisoned||!allowed(lun,cdb,bytes)||(bytes&&!output))return -1;
  IOLockLock(host.lock);
  if(host.poisoned||read32(host.hc,0x58)||(read32(host.hc,0x20)&fatalStatus)){host.poisoned=true;IOLockUnlock(host.lock);return -1;}
@@ -141,6 +142,7 @@ static int command(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,void *output
  else if(host.status.exact){result=0;if(bytes)memcpy(output,host.dma+dataOffset,bytes);}
  else result=-2; // GOOD with short/overflow data is unusable, never copied.
  if(result)transportDiagnostic(valid?"SCSI command rejected":"invalid SCSI response");
+ if(completion)*completion=host.status;
  write32(host.hc,0x20,1);IOLockUnlock(host.lock);return result;
 }
 static bool control(uint8_t type,uint8_t idn,uint8_t index,uint32_t *value=nullptr) {
@@ -154,7 +156,7 @@ static bool control(uint8_t type,uint8_t idn,uint8_t index,uint32_t *value=nullp
  if(ok){Control result=controlResponse(ucd+responseOffset,type,idn,index,value!=nullptr);if(!result.valid)host.poisoned=true;ok=result.success;if(ok&&value)*value=result.value;}
  if(!ok)transportDiagnostic("NOP/query rejected");write32(host.hc,0x20,1);IOLockUnlock(host.lock);return ok;
 }
-static int readinessCommand(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,Status &status) { int result=command(lun,cdb,bytes,nullptr);status=host.status;return result; }
+static int readinessCommand(uint8_t lun,const uint8_t cdb[16],uint32_t bytes,Status &status) { return command(lun,cdb,bytes,nullptr,&status); }
 static void pauseMs(unsigned ms) { IOSleep(ms); }
 static bool transportHealthy() { return !host.poisoned; }
 static bool wakeDevice() {
@@ -180,7 +182,8 @@ static bool readLba(uint8_t lun,uint64_t lba,uint32_t count,void *out,bool metad
  if(lun>7||!count||count>maxTransfer/4096||!host.capacity[lun]||lba>=host.capacity[lun]||count>host.capacity[lun]-lba)return false;
  if(metadata){if(host.selected||lba<1||lba>264||count>265-lba)return false;}
  else if(!host.selected||lun!=host.lun||lba<firstLba||lba>lastLba||count>lastLba-lba+1)return false;
- uint8_t cdb[16];if(!readCdb(cdb,lba,count))return false;return command(lun,cdb,count*4096,out)==0;
+ uint8_t cdb[16];if(!readCdb(cdb,lba,count))return false;
+ return readRetry([&](Status &status){return command(lun,cdb,count*4096,out,&status);},pauseMs,transportHealthy);
 }
 static bool rootRead(uint64_t offset,uint64_t bytes,void *out) {
  if(offset%4096||bytes%4096||!inside(offset,bytes,partitionBytes))return false;auto *p=static_cast<uint8_t*>(out);

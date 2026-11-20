@@ -1,0 +1,184 @@
+{
+  "scope": "Current source and latest available v14 runtime log audit; preserve v15 software compositor and local TimeSync configuration",
+  "status": "local checks before single combined CI",
+  "latest_device_log": {
+    "path": "logs/b5q-xnu2log-v14/XNU2LOG.BIN",
+    "sha256": "d29670dcadf21fb21c90fc1706ef8632e9ca742c07c1f3e113bda7ac3ded8934",
+    "v15_device_log_available": false,
+    "decode": {
+      "slot": 1,
+      "valid": true,
+      "sequence": 80,
+      "boot_id": "392e2335000000000100000000000000",
+      "committed_total": 96215,
+      "lost_on_contention": 0,
+      "ring_overwritten": 0,
+      "payload_bytes": 96215,
+      "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000",
+      "format": "NABULOG2",
+      "version": 2,
+      "allocation_token": "411839cbaebac4088c251c0ea57579a2",
+      "slots": [
+        {
+          "slot": 0,
+          "valid": true,
+          "sequence": 79,
+          "boot_id": "392e2335000000000100000000000000",
+          "committed_total": 96074,
+          "lost_on_contention": 0,
+          "ring_overwritten": 0,
+          "payload_bytes": 96074,
+          "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+        },
+        {
+          "slot": 1,
+          "valid": true,
+          "sequence": 80,
+          "boot_id": "392e2335000000000100000000000000",
+          "committed_total": 96215,
+          "lost_on_contention": 0,
+          "ring_overwritten": 0,
+          "payload_bytes": 96215,
+          "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+        }
+      ],
+      "selected_slot": 1,
+      "stored_checksum": "crc32_header_and_payload",
+      "stored_checksum_valid": true,
+      "config_checksum_valid": true,
+      "structural_validation": "passed",
+      "ring_capacity": 4194304,
+      "ring_order": "already_linearised",
+      "lost_bytes_exact": 0,
+      "captured_bytes_lower_bound": 96215,
+      "lost_bytes_lower_bound": 0,
+      "capture_complete_through_snapshot": true,
+      "complete_boot_log": false,
+      "freshness": "boot_id_present_requires_run_binding",
+      "snapshot_consistency": "CRC_verified_committed_snapshot",
+      "payload_sha256": "0b9ab1b7eb7ce25c592787cd51583db56e0f87803ee812b6930b7424e805419d",
+      "warnings": [
+        "Bytes after the last completed commit may be missing.",
+        "Only bytes reaching the installed console producers are captured."
+      ],
+      "nul_bytes": 0,
+      "utf8_valid": true,
+      "decoded": true
+    }
+  },
+  "findings": [
+    {
+      "id": "ethernet-start-rollback",
+      "severity": "failure-path resource/PM lifetime defect",
+      "source": "package/B5qEthernet.cpp start: parent start joins PM tree; later media/property/interface failures returned false without parent stop",
+      "reference": "sources/IONetworkingFamily-188/IONetworkController.cpp:283-431; start invokes PMinit/joinPMtree; stop invokes PMstop; free alone does not",
+      "reproduction": "test-ethernet-start.py runs actual start/stop with injected media allocation failure; original source asserts PM still active",
+      "fix": "Every failure after successful parent start calls qualified parent stop; require both properties before interface publication; clear borrowed medium before stop",
+      "validation": "Actual source 10 failure cases plus success/normal stop, ASan/UBSan; final arm64e compile retains400original vtable diversities and135family import closure"
+    },
+    {
+      "id": "read-retry",
+      "severity": "temporary SCSI response incorrectly becomes permanent read error",
+      "source": "package/B5qUfs/B5qUfs.cpp readLba previously returned command==0 without retry; capacity/TUR had retries",
+      "fix": "Only idempotent reads retry at most3 attempts with10ms between; BUSY/TASK SET FULL/NOT READY/UNIT ATTENTION use existing sense predicate; timeout/invalid transport/short GOOD/ILLEGAL REQUEST fail without retry",
+      "validation": "actual readLba+command fixture drives BUSY/TASK SET FULL/UA followed by GOOD, exhaustion, no data copying on failed reads; protocol regression covers NOT READY and hard failures"
+    },
+    {
+      "id": "scsi-status-race",
+      "severity": "cross-command status capture race",
+      "source": "readinessCommand previously copies host.status after command releases host.lock; new read retries must not repeat this pattern with concurrent journal",
+      "fix": "command optional Status completion copied before IOLockUnlock; readiness and read retries consume this immutable command result",
+      "validation": "actual command/read fixture overwrites shared host.status as lock releases to simulate journal completion; captured UA and retries still correct"
+    }
+  ],
+  "unchanged": [
+    "DTS and EFI/DRAM window",
+    "OS profile and all existing patches",
+    "five exact26C5035r software policies and vsync60",
+    "SMP/IPI/no-lc",
+    "root partition bounds and signature/block verification",
+    "journal command whitelist, FUA/SYNC10, allocation bounds and4MiBring",
+    "Data seed and firmware"
+  ],
+  "reviewed_but_not_changed": [
+    {
+      "item": "v14 absent TimeSync/frames",
+      "result": "Already addressed by v15 candidate; no new physical v15 result so no speculative userland/display policy changes"
+    },
+    {
+      "item": "v14 contextstored MACF denials, configd/audiomxd180s CPU statistics and read-only remounts",
+      "result": "Retain as pending runtime observations; no thread stacks establish unique causes and no broad sandbox or signature changes"
+    },
+    {
+      "item": "v14 logger",
+      "result": "96215bytes, zero overwrite/contention loss; no capacity increase needed"
+    },
+    {
+      "item": "auxiliary IODisplay attach warning",
+      "result": "No evidence this prevented primary1080x2640 IOSurface publication; do not replace working primary display path based on warning alone"
+    }
+  ],
+  "before_sha256": {
+    "UniXNU-b5q/package/B5qEthernet.cpp": "e82601c4e240b09cb765cd5be002640b5d3030cae3230b56da251e6d1496d63f",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "043a1a97b3492dae3b80670da8a8fc243d474fd379807d3dd6e60486e5e992a3",
+    "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "ad290e7858a31901468a0ed901d50cf9901e0dc352464e6bc8726c4e978a03dc"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qEthernet.cpp": "d1abd199aaafbd9c6fe84e6dfd105802b7f909fb718c9b6917c22acf3f6f44b6",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "366787f1f6c09c71f695377ac188274fc6d877b50821e1a66f2118d87c4a5c76",
+    "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "93d1eaf948a1c598d7398d40f5c01d0e42bb372ab1fbdc850b3ddaadc7538b9d",
+    "tests/b5q-ufs/test-ethernet-start.py": "a9d48e27ea2a716a58adbfe16a1e12e4bbf84889ea0ab1e9840df562047ae232",
+    "tests/b5q-ufs/test-read-status.py": "66a3241940237b3197b9e641bec98579e456201f91a7a416fb16a6430cb69d16",
+    "tests/b5q-ufs/protocol.cpp": "868dfb46e062f46f5b82c4dd7f6a77623cf7866089c4e8aeb7e6963e04faad04",
+    "scripts/b5q-install/pre-ci.py": "3baf0a06bf5e7c04325f37c0a5ac712f10861536f14b037f6a04725a2f87e48f"
+  },
+  "Ethernet_target_ABI": {
+    "passed": true,
+    "target": "arm64e-apple-macos27.0",
+    "vtable_entries": 400,
+    "authenticated_diversities_match_original": true,
+    "private_type_fixture": "public SDK lacks XNU ifnet_ctl_cmd_t; exact uint32_t typedef only for local host compile; production uses actual XNU compile headers",
+    "compiler": "LLVM21 Linux, final Apple kernel flags in CI",
+    "actual_hardware": false
+  },
+  "new_kernel_code": true,
+  "CI_policy": "Single combined kernel build needed for actual source changes; reuse unchanged Data; no added integrity gates; ordinary artifact; no QEMU or device access",
+  "hardware_tested": false,
+  "local_pre_ci": {
+    "result": "PASS",
+    "count": 23,
+    "checks": [
+      "upstream-package-template",
+      "porting-record",
+      "source-contract",
+      "lockdown-public",
+      "log-startup",
+      "log-writer",
+      "runtime-gates",
+      "ethernet-lifecycle",
+      "ethernet-start",
+      "read-status",
+      "installer-errors",
+      "root-format-compile",
+      "root-format-runtime",
+      "smmu-compile",
+      "smmu-runtime",
+      "protocol-compile",
+      "protocol-runtime",
+      "exact-local-root-policies",
+      "full-root-image-sha256",
+      "original-pmgr-fixture",
+      "device-tree-syntax",
+      "python-syntax",
+      "no-added-ci-integrity-gates"
+    ],
+    "report_sha256": "c1943dabb81ab5bb23316b5c0a94057baa57e0ebe334771636ddf240c921532e"
+  },
+  "old_read_reproduction": {
+    "old_source_actual_functions": true,
+    "first_BUSY_aborts_instead_of_recovery": true,
+    "UA_status_replaced_by_journal_at_unlock": true,
+    "ASan_UBSan": true,
+    "hardware_tested": false
+  }
+}

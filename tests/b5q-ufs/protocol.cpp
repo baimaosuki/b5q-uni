@@ -65,5 +65,28 @@ int main(){
  Device asleep;asleep.stillAsleep=true;Power sp;assert(wake(sp,asleep.no(),asleep.q(),asleep.c(),asleep.wait(),asleep.healthy())==Wake::NotActive);
  Device noPower;noPower.queryFail=true;Power np;assert(wake(np,noPower.no(),noPower.q(),noPower.c(),noPower.wait(),noPower.healthy())==Wake::PowerQuery&&noPower.wakes==0);
  Device bad;bad.nopFail=true;Power bp;assert(wake(bp,bad.no(),bad.q(),bad.c(),bad.wait(),bad.healthy())==Wake::Nop&&bad.queries==0&&bad.wakes==0);
+ // Production read retry, including failures that must never be retried.
+ for(unsigned transient:{8U,0x28U,2U}){
+  unsigned calls=0,delays=0;
+  assert(readRetry([&](Status &s){++calls;s.scsi=uint8_t(transient);s.senseKnown=true;s.sense=0x062900;return calls<3?int(transient):0;},
+    [&](unsigned n){assert(n==10);++delays;},[]{return true;}));
+  assert(calls==3&&delays==2);
+ }
+ for(unsigned key:{2U,6U}){
+  unsigned calls=0;
+  assert(readRetry([&](Status &s){++calls;s.scsi=2;s.senseKnown=true;s.sense=key<<16;return calls==1?2:0;},
+    [](unsigned n){assert(n==10);},[]{return true;}));assert(calls==2);
+ }
+ for(int failure:{-1,-2,2}){
+  unsigned calls=0,delays=0;
+  assert(!readRetry([&](Status &s){++calls;s.scsi=2;s.senseKnown=true;s.sense=0x052000;return failure;},
+    [&](unsigned){++delays;},[]{return true;}));assert(calls==1&&delays==0);
+ }
+ unsigned exhausted=0,delays=0;
+ assert(!readRetry([&](Status &s){++exhausted;s.scsi=8;return 8;},[&](unsigned){++delays;},[]{return true;}));
+ assert(exhausted==3&&delays==2);
+ bool poisoned=false;unsigned attempts=0;
+ assert(!readRetry([&](Status &s){++attempts;s.scsi=8;poisoned=true;return 8;},[](unsigned){assert(false);},[&]{return !poisoned;}));
+ assert(attempts==1);
  puts("PASS: production UFS wire layouts, CHECK CONDITION/sense without poison, zero-data command policy, wake order, power requery and bounded readiness retries");
 }

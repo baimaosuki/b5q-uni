@@ -79,6 +79,19 @@ inline Control controlResponse(const uint8_t *rsp,uint8_t type,uint8_t idn,uint8
 inline bool retryable(const Status &s) {
  return s.scsi==8||s.scsi==0x28||(s.scsi==2&&(!s.senseKnown||(s.sense>>16)==6||(s.sense>>16)==2));
 }
+// Only idempotent reads use this path. Snapshot status in the command's lock:
+// the journal may submit another request as soon as that lock is released.
+template<class Read,class Pause,class Healthy>
+bool readRetry(Read read,Pause pause,Healthy healthy) {
+ for(unsigned attempt=0;attempt<3;++attempt) {
+  if(!healthy())return false;
+  Status status;int result=read(status);
+  if(result==0)return true;
+  if(result<0||!healthy()||!retryable(status))return false;
+  if(attempt<2)pause(10);
+ }
+ return false;
+}
 struct Power { uint32_t before=~0U,after=~0U; };
 enum class Wake { Ready,Nop,PowerQuery,StartStop,PowerAfter,NotActive };
 template<class Nop,class Query,class Scsi,class Pause,class Healthy>

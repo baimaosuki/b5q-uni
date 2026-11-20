@@ -54,15 +54,21 @@ public:
         medium = ok ? IONetworkMedium::getMediumWithType(getMediumDictionary(), automatic->getType()) : nullptr;
         OSSafeReleaseNULL(automatic);
         OSSafeReleaseNULL(media);
-        if (!ok || !medium) return false;
-        setProperty("IOBuiltin", true);
-        setProperty("UniXNULocalClockInterface", true);
-        if (!attachInterface(&interface, false)) return false;
+        // The parent joined its PM tree during start. Once that succeeded,
+        // every failure must undo it before the worker detaches/releases us.
+        if (!ok || !medium || !setProperty("IOBuiltin", true) ||
+            !setProperty("UniXNULocalClockInterface", true) ||
+            !attachInterface(&interface, false)) {
+            medium = nullptr;
+            IOEthernetController::stop(provider);
+            return false;
+        }
         interface->registerService();
         return true;
     }
     void stop(IOService *provider) override {
         if (interface) { detachInterface(interface); OSSafeReleaseNULL(interface); }
+        medium = nullptr;
         IOEthernetController::stop(provider);
     }
     IOReturn getHardwareAddress(IOEthernetAddress *out) override {
