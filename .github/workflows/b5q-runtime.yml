@@ -43,7 +43,7 @@ jobs:
           set -euo pipefail
           brew install llvm lld mtools dtc blacktop/tap/ipsw
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
-      - name: Resolve payload sources and reuse completed v16 kernel and Data
+      - name: Resolve payload sources and reuse completed v17 kernel and Data
         env:
           GITHUB_TOKEN: ${{ github.token }}
           GH_TOKEN: ${{ github.token }}
@@ -51,8 +51,8 @@ jobs:
           set -euo pipefail
           UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
           UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
-          gh run download 44727623787 --repo "$GITHUB_REPOSITORY" --name b5q-build-44727623787 --dir "$RUNNER_TEMP/completed-artifact"
-          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44727623787 --source-commit d8f164a9b0727ec0d9957177c9602f841e1d948e
+          gh run download 44746455235 --repo "$GITHUB_REPOSITORY" --name b5q-build-44746455235 --dir "$RUNNER_TEMP/completed-artifact"
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-artifact" --data-out "$RUNNER_TEMP/b5q-reused-data" --source-run 44746455235 --source-commit 1a3cd004cef7074133a2bb4d5be1720633643b15
           rm -rf "$RUNNER_TEMP/completed-artifact"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:

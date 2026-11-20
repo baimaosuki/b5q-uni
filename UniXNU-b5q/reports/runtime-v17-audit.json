@@ -1,6 +1,6 @@
 {
   "scope": "Audit current source against latest v14 device capture; bounded journal read recovery and authenticated root batching",
-  "status": "25 local pre-CI checks passed; combined target build pending",
+  "status": "Single combined CI succeeded; returned native binary and 800MiB 4Kn ESP verified locally",
   "latest_device_log": {
     "path": "logs/b5q-xnu2log-v14/XNU2LOG.BIN",
     "sha256": "d29670dcadf21fb21c90fc1706ef8632e9ca742c07c1f3e113bda7ac3ded8934",
@@ -18,7 +18,8 @@
     "UniXNU-b5q/package/B5qUfs/B5qVerifiedRead.h": "969e8a14b7132089c00303d8e53bdfac1101add1ad152126056f3e8b7bf3c885",
     "tests/b5q-ufs/test-log-read.py": "349746069de2ab94b7b4dc6c1f66e4d0cb4da95d6dd986b137aef847044f84cf",
     "tests/b5q-ufs/test-verified-read.py": "9c25f5db0190bb67d697725efeb0851ece235568549d577ae084e350215ad0ee",
-    "scripts/b5q-install/pre-ci.py": "01eda66c63a85f4dd944e08f8767ad21476a874a97465fd5fbb811756615eeff"
+    "scripts/b5q-install/pre-ci.py": "01eda66c63a85f4dd944e08f8767ad21476a874a97465fd5fbb811756615eeff",
+    "scripts/b5q-install/verify-batched-read-binary.py": "c4df5d2e45c261bb66c4e43159dd1109e50e1a5c548be2bee16c96e10b00ba0b"
   },
   "fixes": [
     {
@@ -72,5 +73,428 @@
       "no-added-ci-integrity-gates"
     ],
     "report_sha256": "896a273e77b2e0f476bb56aba1e1e283e9d005f524e57339e38e1e4a1ec42320"
-  }
+  },
+  "local_regression_logs": {
+    "read-before.log": "bceaa4fae7b539ee9209dd031c5f7d35edaf7ba1e2651ed36dd0ccbbdc9a0764",
+    "read-after.log": "9d5f8c968c56a7d4328b36ba5c8b3ed0b3df0d6cfcc93e95702c4b164219a85c",
+    "log-read-before.log": "ea9457098eaba5bdc488df1dc39fc585e15dd0c7941e72607ccd8c633df00dae",
+    "log-read-after.log": "ea9457098eaba5bdc488df1dc39fc585e15dd0c7941e72607ccd8c633df00dae"
+  },
+  "retry_budget_note": "50ms is the between-attempt scheduling budget; a single command remains subject to the existing transport timeout, not a new 50ms controller deadline.",
+  "CI": {
+    "id": 44746455235,
+    "head_sha": "1a3cd004cef7074133a2bb4d5be1720633643b15",
+    "html_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/44746455235",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-11-20T13:41:03Z",
+    "updated_at": "2026-11-20T13:51:37Z"
+  },
+  "transfer": {
+    "id": 14634026868,
+    "archive_sha256": "1a6762bcf2cff0d7cf4ca242a9493eb0a344ee5d1676129f9f8ae80190aa0c9a",
+    "github_digest_verified": true
+  },
+  "delivery": {
+    "path": "artifacts/b5q-esp-runtime-v17/esp.img",
+    "output": {
+      "bytes": 838860800,
+      "sha256": "d1ef17bd1eebde4efe8c17a948b50a18c1de093142070a4704d55a296e045371"
+    },
+    "raw_kernel": {
+      "bytes": 143032320,
+      "sha256": "e57f6ffcba05f624bdddb9db17ebc505cac2175f83ce3460d1b38a837b3cd26d"
+    },
+    "ci_payload": {
+      "bytes": 268435456,
+      "sha256": "d9a4fdfa51629750258f4c5a0326dd7e495aa6fa626127e5f3fd8206816f6830"
+    },
+    "deployed_kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+    "proofs": {
+      "fix-binary-verification.json": {
+        "result": "PASS",
+        "scope": "Actual compiled startup record and log I/O function before submission; host/lock/DMA fixtures; no device I/O",
+        "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "startup_symbol": "___startup_OSLOG_entry_b5q_console_capture_init_268",
+        "subsystem": 13,
+        "rank": 0,
+        "startup_phase_during_callback": 12,
+        "sync_requests": [
+          {
+            "cdb": "35000000000000000000000000000000",
+            "lun": 3,
+            "flags": 0,
+            "descriptor": 268435456,
+            "bytes": 0
+          },
+          {
+            "cdb": "35000000000000000000000000000000",
+            "lun": 3,
+            "flags": 0,
+            "descriptor": 268435456,
+            "bytes": 0
+          }
+        ],
+        "readonly_root_and_unvalidated_ranges_rejected": true,
+        "TryLock_busy_emits_nothing": true,
+        "WRITE10_FUA_unchanged": true,
+        "wire_expectation": "zero range CDB verified",
+        "PAuth_not_tested": true,
+        "hardware_tested": false
+      },
+      "mount-verification.json": {
+        "scope": "Actual final ESP extracted kernel, Data, addon and trust cache; local verification only",
+        "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "logical_Data_bytes": 2147483648,
+        "APFS_superblock_checksums_verified": 13,
+        "APFS_volume_UUIDs": [
+          "1552CFEE-78FF-48D8-8A6C-694B867D61AC"
+        ],
+        "watchdogd_seed_policy": {
+          "com.apple.watchdogd": true
+        },
+        "addon_paths": [
+          "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+          "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+          "Library/User Template/Non_localized/.skipbuddy",
+          "bin/unixnu-absentd",
+          "bootshim/apfs_boot_util",
+          "test/share/manual-session"
+        ],
+        "signed_and_trusted_executables": {
+          "bootshim/apfs_boot_util": [
+            "60f17d89f11e23963543d9ca10de23b802e314ad"
+          ],
+          "bin/unixnu-absentd": [
+            "0cef40d0596e9367adb00dfbae1b78389be58d7e"
+          ]
+        },
+        "original_Apple_trust_modules_byte_identical": true,
+        "hardware_tested": false
+      },
+      "read-retry-verification.json": {
+        "passed": true,
+        "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "actual_readLba_instructions": true,
+        "SCSI_and_sleep_mocked": true,
+        "PAuth_not_tested": true,
+        "hardware_tested": false,
+        "cases": [
+          {
+            "case": "good",
+            "attempts": 1,
+            "delays": 0,
+            "success": true
+          },
+          {
+            "case": "busy",
+            "attempts": 3,
+            "delays": 2,
+            "success": true
+          },
+          {
+            "case": "full",
+            "attempts": 3,
+            "delays": 2,
+            "success": true
+          },
+          {
+            "case": "ua",
+            "attempts": 3,
+            "delays": 2,
+            "success": true
+          },
+          {
+            "case": "not-ready",
+            "attempts": 3,
+            "delays": 2,
+            "success": true
+          },
+          {
+            "case": "exhausted",
+            "attempts": 3,
+            "delays": 2,
+            "success": false
+          },
+          {
+            "case": "illegal",
+            "attempts": 1,
+            "delays": 0,
+            "success": false
+          },
+          {
+            "case": "short",
+            "attempts": 1,
+            "delays": 0,
+            "success": false
+          },
+          {
+            "case": "transport",
+            "attempts": 1,
+            "delays": 0,
+            "success": false
+          },
+          {
+            "case": "poisoned",
+            "attempts": 1,
+            "delays": 0,
+            "success": false
+          }
+        ]
+      },
+      "lockdown-verification.json": {
+        "passed": true,
+        "image": "/tmp/b5q-v17-verify-_s3amc3m/kernel.macho",
+        "sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "fileset": true,
+        "public_query": "security.mac.lockdown_mode_state_public",
+        "width": 8,
+        "read_only": true,
+        "native_parent": true,
+        "original_integer_query_preserved": true,
+        "early_registration_present": true,
+        "actual_compiled_handler_executed": true,
+        "locks_and_copyout_mocked": true,
+        "cases": [
+          {
+            "native_state": 0,
+            "returned_bytes": 8,
+            "copyout_error": 0,
+            "handler_result": 0
+          },
+          {
+            "native_state": 1,
+            "returned_bytes": 8,
+            "copyout_error": 0,
+            "handler_result": 0
+          },
+          {
+            "native_state": 0,
+            "returned_bytes": 8,
+            "copyout_error": 0,
+            "handler_result": 0
+          },
+          {
+            "native_state": 1,
+            "returned_bytes": 8,
+            "copyout_error": 12,
+            "handler_result": 12
+          },
+          {
+            "native_state": 1,
+            "returned_bytes": 8,
+            "copyout_error": 14,
+            "handler_result": 14
+          }
+        ],
+        "PAuth_not_tested": true,
+        "device_tested": false
+      },
+      "runtime-verification.json": {
+        "passed": true,
+        "kernel_updated_with_Ethernet": true,
+        "unchanged_Data_seed": true,
+        "menu_runtime_switches": true,
+        "ADT_CPU_affinities_and_PSCI_match_saved_b5q_FDT": true,
+        "actual_deployment_binary_gates_and_logger_verified": true,
+        "hardware_tested": false
+      },
+      "display-network-verification.json": {
+        "passed": true,
+        "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "original_Ethernet_collection_sha256": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9",
+        "actual_final_vtable_entries": 400,
+        "original_vtable_diversities_match": true,
+        "late_start_calls_actual_Ethernet_start": true,
+        "signature_aware_text_fixup_symbols_present": true,
+        "radio_or_hardware_success_claim": false,
+        "hardware_tested": false
+      },
+      "log-binary-verification.json": {
+        "result": "PASS",
+        "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "console_to_capture_calls": {
+          "_console_write": {
+            "mode": "inlined-producer",
+            "memory_refs": {
+              "_nabu_capture_ring": [
+                "0xfffffff00bb55ab8"
+              ],
+              "_nabu_capture_end": [
+                "0xfffffff00bb55ac4",
+                "0xfffffff00bb55af8"
+              ],
+              "_nabu_capture_capacity": [
+                "0xfffffff00bb55abc"
+              ],
+              "_nabu_capture_lock": [
+                "0xfffffff00bb55ab0",
+                "0xfffffff00bb55afc"
+              ],
+              "_nabu_capture_lost": [
+                "0xfffffff00bb55b1c"
+              ]
+            }
+          },
+          "_console_write_unbuffered": {
+            "mode": "inlined-producer",
+            "memory_refs": {
+              "_nabu_capture_ring": [
+                "0xfffffff00bb5605c"
+              ],
+              "_nabu_capture_end": [
+                "0xfffffff00bb5603c",
+                "0xfffffff00bb56070"
+              ],
+              "_nabu_capture_capacity": [
+                "0xfffffff00bb56044"
+              ],
+              "_nabu_capture_lock": [
+                "0xfffffff00bb5602c",
+                "0xfffffff00bb56074"
+              ],
+              "_nabu_capture_lost": [
+                "0xfffffff00bb56088"
+              ]
+            }
+          },
+          "_serial_putc_crlf": {
+            "mode": "direct-call",
+            "sites": [
+              "0xfffffff00c1f3fd4"
+            ]
+          },
+          "_panic": [
+            "0xfffffff00bb965a8"
+          ],
+          "_panic_trap_to_debugger": [
+            "0xfffffff00bb965a8"
+          ]
+        },
+        "capture_symbol": "0xfffffff00bb5525c",
+        "writer": "__ZN12_GLOBAL__N_113nabuLogThreadEPvi",
+        "bounded_io": "__ZN12_GLOBAL__N_19nabuLogIoEbyjPhb",
+        "TryLock_in_actual_binary": true,
+        "write10_and_sync10_present": true,
+        "panic_screen_capture_hook_present": true,
+        "hardware_tested": false
+      },
+      "runtime-gates-verification.json": {
+        "passed": true,
+        "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "actual_compiled_launch_constraint_gate": true,
+        "cases": [
+          {
+            "argument_present": false,
+            "value": 0,
+            "outcome": "original_policy"
+          },
+          {
+            "argument_present": true,
+            "value": 0,
+            "outcome": "original_policy"
+          },
+          {
+            "argument_present": true,
+            "value": 1,
+            "outcome": "return_0"
+          },
+          {
+            "argument_present": true,
+            "value": 2,
+            "outcome": "return_0"
+          }
+        ],
+        "ArmCpu_probe_present": true,
+        "verifier_compiles_kernel": false,
+        "boot_parser_mocked": true,
+        "PAuth_not_tested": true,
+        "hardware_tested": false
+      },
+      "batched-read-verification.json": {
+        "passed": true,
+        "kernel_sha256": "201ab9f5026b4433c19efb9731210b030f8a53e02028edb868e14cd7227fb3f9",
+        "actual_ARM64_dispatch_and_block_verifier": true,
+        "SCSI_locks_descriptor_and_SHA_service_mocked": true,
+        "SHA256_real_hashlib": true,
+        "PAuth_not_tested": true,
+        "hardware_tested": false,
+        "cases": [
+          {
+            "case": "one-MiB",
+            "UFS_commands": 8,
+            "verified_blocks": 256,
+            "completed_bytes": 1048576,
+            "status": 0
+          },
+          {
+            "case": "unaligned",
+            "UFS_commands": 9,
+            "verified_blocks": 257,
+            "completed_bytes": 1048576,
+            "status": 0
+          },
+          {
+            "case": "last-sector",
+            "UFS_commands": 1,
+            "verified_blocks": 1,
+            "completed_bytes": 512,
+            "status": 0
+          },
+          {
+            "case": "bad-hash",
+            "UFS_commands": 1,
+            "verified_blocks": 3,
+            "completed_bytes": 7680,
+            "status": 3758097098
+          },
+          {
+            "case": "second-batch-fails",
+            "UFS_commands": 2,
+            "verified_blocks": 32,
+            "completed_bytes": 131072,
+            "status": 3758097098
+          },
+          {
+            "case": "short-copy",
+            "UFS_commands": 1,
+            "verified_blocks": 1,
+            "completed_bytes": 23,
+            "status": 3758097098
+          }
+        ]
+      }
+    },
+    "log_allocation": {
+      "scope": "Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence",
+      "result": "PASS",
+      "file_bytes": 8400896,
+      "file_sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea",
+      "token": "411839cbaebac4088c251c0ea57579a2",
+      "file_first_lba": 3203664,
+      "clusters": 2051,
+      "contiguous": true,
+      "no_aliases": true,
+      "mirrored_FAT": true,
+      "fat_blocks_each": 200,
+      "config_readonly": true,
+      "write_first_lba": 3203665,
+      "write_last_lba": 3205714,
+      "committed_slots": 0,
+      "source_GPT_entries": 512,
+      "production_volume_checker": true,
+      "hardware_tested": false
+    }
+  },
+  "completed_reuse_test": {
+    "passed": true,
+    "actual_generic_staging_executed": true,
+    "source_run": 44746455235,
+    "source_commit": "1a3cd004cef7074133a2bb4d5be1720633643b15",
+    "raw_kernel_sha256": "e57f6ffcba05f624bdddb9db17ebc505cac2175f83ce3460d1b38a837b3cd26d",
+    "unchanged_Data_sha256": "804692b96d9ba6bfcb64cbb430a627923dfdb4f072da4872ee14674365dc46b8",
+    "no_kernel_or_Data_build_invoked": true,
+    "temporary_files_released": true
+  },
+  "temporary_cleanup": "Temporary Actions ZIP and extraction files released. Remove duplicate raw kernel/payload after all checks; keep one ESP image and useful native archives/small evidence."
 }
