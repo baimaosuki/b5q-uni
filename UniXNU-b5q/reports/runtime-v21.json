@@ -1,0 +1,2885 @@
+{
+  "status": "implementation and local checks in progress; CI not submitted",
+  "reference_sources": {
+    "CpuFreqProbe.cpp": {
+      "source": "sources/UniXNU-sheng/package/CpuFreqProbe.cpp",
+      "source_sha256": "1c54f5279df0144394e5d0fc91a3a19535132cf2787592305f3cc7f509e5d91c",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "ThermalProbe.cpp": {
+      "source": "sources/UniXNU-sheng/package/ThermalProbe.cpp",
+      "source_sha256": "218f79df412db959305c08f3bebd7cbcf806f4474117d6a1a413fdbc4eef2b4b",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "ThermalProbe.h": {
+      "source": "sources/UniXNU-sheng/package/ThermalProbe.h",
+      "source_sha256": "d01a2864bf4cd553d7791fa02941d64d43aa21da92397b4697e17c59e44cf974",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "ThermalLevel.cpp": {
+      "source": "sources/UniXNU-sheng/package/ThermalLevel.cpp",
+      "source_sha256": "7ca106c7f8f94ef7da3c233b1f5353e542897e4be59de02778a361f2d1dbc1b8",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "ThermalLevel.h": {
+      "source": "sources/UniXNU-sheng/package/ThermalLevel.h",
+      "source_sha256": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "BoardClock.cpp": {
+      "source": "sources/UniXNU-sheng/package/BoardClock.cpp",
+      "source_sha256": "13dbe0b72409e47eb4ca5d2019f055dc6f0f8f5cb30c78705982726230b02a3b",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "BoardClock.h": {
+      "source": "sources/UniXNU-sheng/package/BoardClock.h",
+      "source_sha256": "a1eef3c1d5ed1139a07154a9f517875b029273d71ede70827e7acb1b2e755d18",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "ButtonProbe.cpp": {
+      "source": "sources/UniXNU-sheng/package/ButtonProbe.cpp",
+      "source_sha256": "a69d8cc9eca8123ba562bf2fa304ed588bf168a81ba8b19c58914a98da6d3553",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "BootResetCore.h": {
+      "source": "sources/UniXNU-sheng/package/BootResetCore.h",
+      "source_sha256": "fac5201eeafbb52b39b5046cdc6c22a55254b1b33b28d4e4ae237797fa1b08e4",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "HidInputProbe.cpp": {
+      "source": "sources/UniXNU-sheng/package/HidInputProbe.cpp",
+      "source_sha256": "8f5bc71007b4112e9376c044a47a66afbdd827c2ec6f10b7d169a6e8b1041605",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "GeniI2c.c": {
+      "source": "sources/UniXNU-sheng/package/GeniI2c.c",
+      "source_sha256": "c4c38f298f3e0626076ad8829acf9ca38a208ce542ab2055f3a4651ce7babde9",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "GeniI2c.h": {
+      "source": "sources/UniXNU-sheng/package/GeniI2c.h",
+      "source_sha256": "82dbf343157f37a883e0843919f360a298984e2c24a978faab6ba0cec6f5ecbe",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "DisplayTimingProbe.cpp": {
+      "source": "sources/UniXNU-sheng/package/DisplayTimingProbe.cpp",
+      "source_sha256": "f2e09ffd84a0b2402d390c58198ee8032b66aa2cf9063e7b88c2513c74ceee46",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    },
+    "NativeHidInput.cpp": {
+      "source": "sources/UniXNU-sheng/drivers/ShengHidInput/NativeHidInput.cpp",
+      "source_sha256": "c0964bf7faa0332ce8d6334f2b74a271b269eee14112ae89b4453091604a10f6",
+      "commit": "c8f92b208068eeaa4cd2b0f592671f04ee70076e"
+    }
+  },
+  "dt_evidence": {
+    "sources/Mu-Silicium/Resources/DTBs/b5q.dtb": {
+      "sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+      "nodes": {
+        "/soc/qcom,spmi@c42d000": {
+          "compatible": "qcom,spmi-pmic-arb",
+          "reg": [
+            "0xc42d000",
+            "0x4000",
+            "0xc400000",
+            "0x3000",
+            "0xc500000",
+            "0x400000",
+            "0xc440000",
+            "0x80000",
+            "0xc4c0000",
+            "0x10000"
+          ],
+          "reg-names": "cnfg\u0000core\u0000chnls\u0000obsrvr\u0000intr"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x1",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pm8550-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x1",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800": {
+          "compatible": "qcom,pm8550-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/key_vol_up": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/key_vol_up/key_vol_up_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/sd_card_det": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/sd_card_det/sd_card_det_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/display_panel_avdd_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/gpio12_adc": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/gpio12_adc/pm8550_gpio12_adc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/cps_det_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/main_bat_thm": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/main_bat_thm/main_bat_thm_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/s2mpb03_ic_en_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800": {
+          "compatible": "qcom,pwm-lpg",
+          "reg": [
+            "0xe800"
+          ],
+          "reg-names": "lpg-base"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800/lpg@1": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800/lpg@2": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800/lpg@3": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@eb00": {
+          "compatible": "qcom,pwm-lpg",
+          "reg": [
+            "0xeb00"
+          ],
+          "reg-names": "lpg-base"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00": {
+          "compatible": "qcom,tri-led",
+          "reg": [
+            "0xef00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00/red": {
+          "label": "red"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00/green": {
+          "label": "green"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00/blue": {
+          "label": "blue"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/bcl@4700": {
+          "compatible": "qcom,bcl-v5",
+          "reg": [
+            "0x4700",
+            "0x100"
+          ],
+          "interrupts": [
+            "0x1",
+            "0x47",
+            "0x0",
+            "0x0",
+            "0x1",
+            "0x47",
+            "0x1",
+            "0x0",
+            "0x1",
+            "0x47",
+            "0x2",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00": {
+          "compatible": "qcom,pm8350c-flash-led",
+          "reg": [
+            "0xee00"
+          ],
+          "interrupts": [
+            "0x1",
+            "0xee",
+            "0x0",
+            "0x1",
+            "0x1",
+            "0xee",
+            "0x3",
+            "0x1",
+            "0x1",
+            "0xee",
+            "0x4",
+            "0x1"
+          ],
+          "status": "ok",
+          "qcom,hw-strobe-gpios": [
+            "0x525",
+            "0x1",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_0": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_1": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_2": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_3": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_0": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_1": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_2": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_3": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_0": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_1": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_2": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_3": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x7",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/pm8550b-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x7",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/pm8550b-temp-alarm-lite@c00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xc00"
+          ],
+          "interrupts": [
+            "0x7",
+            "0xc",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/pinctrl@8800": {
+          "compatible": "qcom,pm8550b-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000": {
+          "compatible": "qcom,hv-haptics",
+          "reg": [
+            "0xf000",
+            "0xf100",
+            "0xf200"
+          ],
+          "interrupts": [
+            "0x7",
+            "0xf0",
+            "0x1",
+            "0x1"
+          ],
+          "status": "disabled"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/qcom,hap-swr-slave-reg": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_0": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_1": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_2": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_3": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_4": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_5": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_0": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_1": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_2": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_3": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_4": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_5": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_6": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_7": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_8": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/bcl@4700": {
+          "compatible": "qcom,bcl-v5",
+          "reg": [
+            "0x4700",
+            "0x100"
+          ],
+          "interrupts": [
+            "0x7",
+            "0x47",
+            "0x0",
+            "0x0",
+            "0x7",
+            "0x47",
+            "0x1",
+            "0x0",
+            "0x7",
+            "0x47",
+            "0x2",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/bcl-soc": {
+          "compatible": "qcom,msm-bcl-soc"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/eusb2-repeater@fd00": {
+          "compatible": "qcom,pmic-eusb2-repeater",
+          "reg": [
+            "0xfd00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x5",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pm8550ve-f-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x5",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pinctrl@8800": {
+          "compatible": "qcom,pm8550ve-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pinctrl@8800/detect_conn_pm_2_setting": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pinctrl@8800/cps_pdrc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@2": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x2",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@2/pm8550vs-c-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x2",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@2/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x3",
+            "0x0"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pm8550vs-d-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x3",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800/detect_conn_pm_setting": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800/eusb2_reset_ctrl": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800/eusb2_reset_ctrl/eusb2_reset_ctrl_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@4": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x4",
+            "0x0"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@4/pm8550vs-e-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x4",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@4/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@6": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x6",
+            "0x0"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@6/pm8550vs-g-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x6",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@6/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x0",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pon_hlos@1300": {
+          "compatible": "qcom,pm8998-pon",
+          "reg": [
+            "0x1300",
+            "0x800"
+          ],
+          "reg-names": "pon_hlos\u0000pon_pbs"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pon_hlos@1300/pwrkey": {
+          "compatible": "qcom,pmk8350-pwrkey",
+          "interrupts": [
+            "0x0",
+            "0x13",
+            "0x7",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pon_hlos@1300/resin": {
+          "compatible": "qcom,pmk8350-resin_flex",
+          "interrupts": [
+            "0x0",
+            "0x13",
+            "0x6",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7000": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7000"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7000/smb1510_present@5d": {
+          "reg": [
+            "0x5d",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7000/ocp-log@76": {
+          "reg": [
+            "0x76",
+            "0x6"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7100": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7100"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7100/restart@48": {
+          "reg": [
+            "0x48",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7100/pon_reason@69": {
+          "reg": [
+            "0x69",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7400": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7400"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7500": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7500"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7c00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7c00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7d00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7d00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@8400": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x8400"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@8500": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x8500"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9800": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x9800"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9a00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x9a00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9a00/sqm-timer@b8": {
+          "reg": [
+            "0xb8",
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9d00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x9d00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800": {
+          "compatible": "qcom,pmk8550-gpio",
+          "reg": [
+            "0xb800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/alt_sleep_clk": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/alt_sleep_clk/alt_sleep_clk_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio2_adc": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio2_adc/pmk8550_gpio2_adc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio5_adc": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio5_adc/pmk8550_gpio5_adc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/wpc_thm": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/wpc_thm/wpc_thm_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/rtc@6100": {
+          "compatible": "qcom,pmk8350-rtc",
+          "reg": [
+            "0x6100",
+            "0x6200"
+          ],
+          "reg-names": "rtc\u0000alarm",
+          "interrupts": [
+            "0x0",
+            "0x62",
+            "0x1",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000": {
+          "compatible": "qcom,spmi-adc5-gen3",
+          "reg": [
+            "0x9000",
+            "0x9100"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x90",
+            "0x1",
+            "0x1",
+            "0x0",
+            "0x91",
+            "0x1",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_offset_ref": {
+          "reg": [
+            "0x0"
+          ],
+          "label": "pmk8550_offset_ref"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_vref_1p25": {
+          "reg": [
+            "0x1"
+          ],
+          "label": "pmk8550_vref_1p25"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_die_temp": {
+          "reg": [
+            "0x3"
+          ],
+          "label": "pmk8550_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_xo_therm": {
+          "reg": [
+            "0x44"
+          ],
+          "label": "pmk8550_xo_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_offset_ref": {
+          "reg": [
+            "0x100"
+          ],
+          "label": "pm8550_offset_ref"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_vref_1p25": {
+          "reg": [
+            "0x101"
+          ],
+          "label": "pm8550_vref_1p25"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_die_temp": {
+          "reg": [
+            "0x103"
+          ],
+          "label": "pm8550_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_vph_pwr": {
+          "reg": [
+            "0x18e"
+          ],
+          "label": "pm8550_vph_pwr"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_c_die_temp": {
+          "reg": [
+            "0x203"
+          ],
+          "label": "pm8550vs_c_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_d_die_temp": {
+          "reg": [
+            "0x303"
+          ],
+          "label": "pm8550vs_d_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_e_die_temp": {
+          "reg": [
+            "0x403"
+          ],
+          "label": "pm8550vs_e_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_g_die_temp": {
+          "reg": [
+            "0x603"
+          ],
+          "label": "pm8550vs_g_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550ve_die_temp": {
+          "reg": [
+            "0x503"
+          ],
+          "label": "pm8550ve_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/wf_therm": {
+          "reg": [
+            "0x14d"
+          ],
+          "label": "wf_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pa_therm": {
+          "reg": [
+            "0x49"
+          ],
+          "label": "pa_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/lp_therm": {
+          "reg": [
+            "0x46"
+          ],
+          "label": "lp_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/ap_therm": {
+          "reg": [
+            "0x148"
+          ],
+          "label": "ap_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/main_bat_thm": {
+          "label": "main_bat_thm",
+          "reg": [
+            "0x149"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/wpc_thm": {
+          "label": "wpc_thm",
+          "reg": [
+            "0x45"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/usb_thm": {
+          "label": "usb_thm",
+          "reg": [
+            "0x144"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/chg_thm": {
+          "label": "chg_thm",
+          "reg": [
+            "0x145"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@a": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xa",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@a/pmr735d-k-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0xa",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@a/pinctrl@8800": {
+          "compatible": "qcom,pmr735d-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@b": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xb",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@b/pmr735d-l-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0xb",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@b/pinctrl@8800": {
+          "compatible": "qcom,pmr735d-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@c": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xc",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@c/pm8010-m-temp-alarm@2400": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0x2400"
+          ],
+          "interrupts": [
+            "0xc",
+            "0x24",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@d": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xd",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@d/pm8010-n-temp-alarm@2400": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0x2400"
+          ],
+          "interrupts": [
+            "0xd",
+            "0x24",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,qupv3_1_geni_se@ac0000/i2c@a90000": {
+          "compatible": "qcom,i2c-geni",
+          "reg": [
+            "0xa90000",
+            "0x4000"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x165",
+            "0x4"
+          ],
+          "clock-names": "se-clk",
+          "clocks": [
+            "0x3b",
+            "0x65"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,qupv3_1_geni_se@ac0000/i2c@a90000/goodix-berlin@5d": {
+          "compatible": "goodix,gt9916",
+          "reg": [
+            "0x5d"
+          ],
+          "interrupt-parent": [
+            "0x7d"
+          ],
+          "interrupts": [
+            "0x19",
+            "0x2008"
+          ],
+          "goodix,reset-gpio": [
+            "0x7d",
+            "0x18",
+            "0x0"
+          ],
+          "goodix,irq-gpio": [
+            "0x7d",
+            "0x19",
+            "0x2008"
+          ],
+          "qts,trusted-touch-vm-gpio-list": [
+            "0x7d",
+            "0x2c",
+            "0x0",
+            "0x7d",
+            "0x2d",
+            "0x0",
+            "0x7d",
+            "0x2e",
+            "0x0",
+            "0x7d",
+            "0x2f",
+            "0x0",
+            "0x7d",
+            "0x18",
+            "0x0",
+            "0x7d",
+            "0x19",
+            "0x2008"
+          ],
+          "status": "disabled"
+        },
+        "/soc/qcom,qupv3_1_geni_se@ac0000/i2c@a90000/touchscreen@20": {
+          "status": "ok",
+          "compatible": "synaptics,synaptics_ts",
+          "reg": [
+            "0x20"
+          ],
+          "sec,irq_gpio": [
+            "0x7d",
+            "0x13",
+            "0x0"
+          ],
+          "sec,max_coords": [
+            "0x1000",
+            "0x1000"
+          ]
+        },
+        "/soc/tsens0@c271000": {
+          "compatible": "qcom,tsens-v2",
+          "reg": [
+            "0xc271000",
+            "0x1ff",
+            "0xc222000",
+            "0x1ff"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x1fa",
+            "0x4",
+            "0x0",
+            "0x280",
+            "0x4"
+          ]
+        },
+        "/soc/tsens1@c272000": {
+          "compatible": "qcom,tsens-v2",
+          "reg": [
+            "0xc272000",
+            "0x1ff",
+            "0xc223000",
+            "0x1ff"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x1fb",
+            "0x4",
+            "0x0",
+            "0x281",
+            "0x4"
+          ]
+        },
+        "/soc/tsens2@c273000": {
+          "compatible": "qcom,tsens-v2",
+          "reg": [
+            "0xc273000",
+            "0x1ff",
+            "0xc224000",
+            "0x1ff"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x1fc",
+            "0x4",
+            "0x0",
+            "0x282",
+            "0x4"
+          ]
+        },
+        "/soc/gpio_keys/vol_up": {
+          "label": "volume_up",
+          "gpios": [
+            "0x525",
+            "0x6",
+            "0x1"
+          ],
+          "gpio-key,wakeup": []
+        },
+        "/soc/qcom,mdss_mdp@ae00000": {
+          "compatible": "qcom,sde-kms",
+          "reg": [
+            "0xae00000",
+            "0x84000",
+            "0xaeb0000",
+            "0x2008",
+            "0xaeac000",
+            "0x800",
+            "0x400000",
+            "0x1000"
+          ],
+          "reg-names": "mdp_phys\u0000vbif_phys\u0000regdma_phys\u0000ipcc_reg",
+          "interrupts": [
+            "0x0",
+            "0x53",
+            "0x4"
+          ],
+          "clocks": [
+            "0x3b",
+            "0xf",
+            "0x3b",
+            "0x10",
+            "0x32",
+            "0x2",
+            "0x32",
+            "0x3d",
+            "0x32",
+            "0x3e",
+            "0x32",
+            "0x49",
+            "0x32",
+            "0x40"
+          ],
+          "clock-names": "gcc_iface\u0000gcc_bus\u0000iface_clk\u0000branch_clk\u0000core_clk\u0000vsync_clk\u0000lut_clk"
+        },
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-vig-blocks": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-vig-blocks/vcm@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-vig-blocks/vcm@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-dma-blocks": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-dma-blocks/dgm@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-dma-blocks/dgm@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-dspp-blocks": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,platform-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,platform-supply-entries/qcom,platform-supply-entry@0": {
+          "reg": [
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_1080p_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_1080p_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_1080p_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_wqxga_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_wqxga_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_wqxga_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_wqxga_video_truly": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_wqxga_video_truly/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_wqxga_video_truly/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_cphy_144hz_vid": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_cphy_144hz_vid/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_cphy_144hz_vid/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_ext_bridge_1080p": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_ext_bridge_1080p/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_ext_bridge_1080p/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@6": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@7": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@8": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@9": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@10": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@11": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@12": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@13": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@6": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@7": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@8": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@9": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@10": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@11": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@6": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@7": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@8": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@9": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@10": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@11": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@12": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@13": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@14": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@15": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@16": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@17": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_sec_hd_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_sec_hd_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_sec_hd_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_cmd_sim_panel_au": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_cmd_sim_panel_au/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_cmd_sim_panel_au/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_sl_wqxga_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_sl_wqxga_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_sl_wqxga_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_sl_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_sl_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_sl_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_vid": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_vid/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_vid/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD_DSI1": {
+          "label": "ss_dsi_panel_PBA_BOOTING_FHD_DSI1",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-reset-gpio": [
+            "0x7d",
+            "0x2a",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD_DSI1/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD_DSI1/qcom,mdss-dsi-display-timings/fhd60": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD": {
+          "label": "ss_dsi_panel_PBA_BOOTING_FHD",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-reset-gpio": [
+            "0x7d",
+            "0x7d",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD/qcom,mdss-dsi-display-timings/fhd@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD/qcom,panel-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01": {
+          "label": "B5_S6E3FC5_AMB338EH01",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-sec-reset-gpio": [
+            "0x7d",
+            "0x2a",
+            "0x0"
+          ],
+          "qcom,platform-te-gpio": [
+            "0x7d",
+            "0x57",
+            "0x0"
+          ],
+          "samsung,esd-irq-gpio1": [
+            "0x7d",
+            "0xb5",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,mdss-dsi-display-timings/svga60": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries/qcom,panel-supply-entry@0": {
+          "reg": [
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries/qcom,panel-supply-entry@1": {
+          "reg": [
+            "0x1"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries/qcom,panel-supply-entry@2": {
+          "reg": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03": {
+          "label": "B5_S6E3FAC_AMF670BS03",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-reset-gpio": [
+            "0x7d",
+            "0x7d",
+            "0x0"
+          ],
+          "qcom,platform-te-gpio": [
+            "0x7d",
+            "0x56",
+            "0x0"
+          ],
+          "samsung,esd-irq-gpio1": [
+            "0x7d",
+            "0x89",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table1": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table2": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table3": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table4": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd120hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd96hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd60hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd60phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd48hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd30hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd24hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd10hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd30phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd24phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd10phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/regulators": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/regulators/elvss": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@0": {
+          "reg": [
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@1": {
+          "reg": [
+            "0x1"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@2": {
+          "reg": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@3": {
+          "reg": [
+            "0x3"
+          ]
+        }
+      }
+    },
+    "b5q-runtime.fdt": {
+      "sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+      "nodes": {
+        "/soc/qcom,spmi@c42d000": {
+          "compatible": "qcom,spmi-pmic-arb",
+          "reg": [
+            "0xc42d000",
+            "0x4000",
+            "0xc400000",
+            "0x3000",
+            "0xc500000",
+            "0x400000",
+            "0xc440000",
+            "0x80000",
+            "0xc4c0000",
+            "0x10000"
+          ],
+          "reg-names": "cnfg\u0000core\u0000chnls\u0000obsrvr\u0000intr"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x1",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pm8550-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x1",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800": {
+          "compatible": "qcom,pm8550-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/key_vol_up": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/key_vol_up/key_vol_up_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/sd_card_det": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/sd_card_det/sd_card_det_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/display_panel_avdd_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/gpio12_adc": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/gpio12_adc/pm8550_gpio12_adc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/cps_det_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/main_bat_thm": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/main_bat_thm/main_bat_thm_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pinctrl@8800/s2mpb03_ic_en_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800": {
+          "compatible": "qcom,pwm-lpg",
+          "reg": [
+            "0xe800"
+          ],
+          "reg-names": "lpg-base"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800/lpg@1": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800/lpg@2": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@e800/lpg@3": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/pwms@eb00": {
+          "compatible": "qcom,pwm-lpg",
+          "reg": [
+            "0xeb00"
+          ],
+          "reg-names": "lpg-base"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00": {
+          "compatible": "qcom,tri-led",
+          "reg": [
+            "0xef00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00/red": {
+          "label": "red"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00/green": {
+          "label": "green"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,leds@ef00/blue": {
+          "label": "blue"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/bcl@4700": {
+          "compatible": "qcom,bcl-v5",
+          "reg": [
+            "0x4700",
+            "0x100"
+          ],
+          "interrupts": [
+            "0x1",
+            "0x47",
+            "0x0",
+            "0x0",
+            "0x1",
+            "0x47",
+            "0x1",
+            "0x0",
+            "0x1",
+            "0x47",
+            "0x2",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00": {
+          "compatible": "qcom,pm8350c-flash-led",
+          "reg": [
+            "0xee00"
+          ],
+          "interrupts": [
+            "0x1",
+            "0xee",
+            "0x0",
+            "0x1",
+            "0x1",
+            "0xee",
+            "0x3",
+            "0x1",
+            "0x1",
+            "0xee",
+            "0x4",
+            "0x1"
+          ],
+          "status": "ok",
+          "qcom,hw-strobe-gpios": [
+            "0x51a",
+            "0x1",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_0": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_1": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_2": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,flash_3": {
+          "label": "flash"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_0": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_1": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_2": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,torch_3": {
+          "label": "torch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_0": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_1": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_2": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550@1/qcom,flash_led@ee00/qcom,led_switch_3": {
+          "label": "switch"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x7",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/pm8550b-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x7",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/pm8550b-temp-alarm-lite@c00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xc00"
+          ],
+          "interrupts": [
+            "0x7",
+            "0xc",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/pinctrl@8800": {
+          "compatible": "qcom,pm8550b-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000": {
+          "compatible": "qcom,hv-haptics",
+          "reg": [
+            "0xf000",
+            "0xf100",
+            "0xf200"
+          ],
+          "interrupts": [
+            "0x7",
+            "0xf0",
+            "0x1",
+            "0x1"
+          ],
+          "status": "disabled"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/qcom,hap-swr-slave-reg": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_0": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_1": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_2": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_3": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_4": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/effect_5": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_0": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_1": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_2": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_3": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_4": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_5": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_6": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_7": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/qcom,hv-haptics@f000/primitive_8": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/bcl@4700": {
+          "compatible": "qcom,bcl-v5",
+          "reg": [
+            "0x4700",
+            "0x100"
+          ],
+          "interrupts": [
+            "0x7",
+            "0x47",
+            "0x0",
+            "0x0",
+            "0x7",
+            "0x47",
+            "0x1",
+            "0x0",
+            "0x7",
+            "0x47",
+            "0x2",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/bcl-soc": {
+          "compatible": "qcom,msm-bcl-soc"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550b@7/eusb2-repeater@fd00": {
+          "compatible": "qcom,pmic-eusb2-repeater",
+          "reg": [
+            "0xfd00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x5",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pm8550ve-f-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x5",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pinctrl@8800": {
+          "compatible": "qcom,pm8550ve-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pinctrl@8800/detect_conn_pm_2_setting": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550ve_f@5/pinctrl@8800/cps_pdrc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@2": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x2",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@2/pm8550vs-c-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x2",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@2/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x3",
+            "0x0"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pm8550vs-d-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x3",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800/detect_conn_pm_setting": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800/eusb2_reset_ctrl": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@3/pinctrl@8800/eusb2_reset_ctrl/eusb2_reset_ctrl_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@4": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x4",
+            "0x0"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@4/pm8550vs-e-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x4",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@4/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@6": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x6",
+            "0x0"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@6/pm8550vs-g-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0x6",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8550vs@6/pinctrl@8800": {
+          "compatible": "qcom,pm8550vs-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0x0",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pon_hlos@1300": {
+          "compatible": "qcom,pm8998-pon",
+          "reg": [
+            "0x1300",
+            "0x800"
+          ],
+          "reg-names": "pon_hlos\u0000pon_pbs"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pon_hlos@1300/pwrkey": {
+          "compatible": "qcom,pmk8350-pwrkey",
+          "interrupts": [
+            "0x0",
+            "0x13",
+            "0x7",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pon_hlos@1300/resin": {
+          "compatible": "qcom,pmk8350-resin_flex",
+          "interrupts": [
+            "0x0",
+            "0x13",
+            "0x6",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7000": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7000"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7000/smb1510_present@5d": {
+          "reg": [
+            "0x5d",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7000/ocp-log@76": {
+          "reg": [
+            "0x76",
+            "0x6"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7100": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7100"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7100/restart@48": {
+          "reg": [
+            "0x48",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7100/pon_reason@69": {
+          "reg": [
+            "0x69",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7400": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7400"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7500": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7500"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7c00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7c00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@7d00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x7d00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@8400": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x8400"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@8500": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x8500"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9800": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x9800"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9a00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x9a00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9a00/sqm-timer@b8": {
+          "reg": [
+            "0xb8",
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/sdam@9d00": {
+          "compatible": "qcom,spmi-sdam",
+          "reg": [
+            "0x9d00"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800": {
+          "compatible": "qcom,pmk8550-gpio",
+          "reg": [
+            "0xb800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/alt_sleep_clk": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/alt_sleep_clk/alt_sleep_clk_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio2_adc": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio2_adc/pmk8550_gpio2_adc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio5_adc": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/gpio5_adc/pmk8550_gpio5_adc_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/wpc_thm": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/pinctrl@b800/wpc_thm/wpc_thm_default": {},
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/rtc@6100": {
+          "compatible": "qcom,pmk8350-rtc",
+          "reg": [
+            "0x6100",
+            "0x6200"
+          ],
+          "reg-names": "rtc\u0000alarm",
+          "interrupts": [
+            "0x0",
+            "0x62",
+            "0x1",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000": {
+          "compatible": "qcom,spmi-adc5-gen3",
+          "reg": [
+            "0x9000",
+            "0x9100"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x90",
+            "0x1",
+            "0x1",
+            "0x0",
+            "0x91",
+            "0x1",
+            "0x1"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_offset_ref": {
+          "reg": [
+            "0x0"
+          ],
+          "label": "pmk8550_offset_ref"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_vref_1p25": {
+          "reg": [
+            "0x1"
+          ],
+          "label": "pmk8550_vref_1p25"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_die_temp": {
+          "reg": [
+            "0x3"
+          ],
+          "label": "pmk8550_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pmk8550_xo_therm": {
+          "reg": [
+            "0x44"
+          ],
+          "label": "pmk8550_xo_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_offset_ref": {
+          "reg": [
+            "0x100"
+          ],
+          "label": "pm8550_offset_ref"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_vref_1p25": {
+          "reg": [
+            "0x101"
+          ],
+          "label": "pm8550_vref_1p25"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_die_temp": {
+          "reg": [
+            "0x103"
+          ],
+          "label": "pm8550_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550_vph_pwr": {
+          "reg": [
+            "0x18e"
+          ],
+          "label": "pm8550_vph_pwr"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_c_die_temp": {
+          "reg": [
+            "0x203"
+          ],
+          "label": "pm8550vs_c_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_d_die_temp": {
+          "reg": [
+            "0x303"
+          ],
+          "label": "pm8550vs_d_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_e_die_temp": {
+          "reg": [
+            "0x403"
+          ],
+          "label": "pm8550vs_e_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550vs_g_die_temp": {
+          "reg": [
+            "0x603"
+          ],
+          "label": "pm8550vs_g_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pm8550ve_die_temp": {
+          "reg": [
+            "0x503"
+          ],
+          "label": "pm8550ve_die_temp"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/wf_therm": {
+          "reg": [
+            "0x14d"
+          ],
+          "label": "wf_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/pa_therm": {
+          "reg": [
+            "0x49"
+          ],
+          "label": "pa_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/lp_therm": {
+          "reg": [
+            "0x46"
+          ],
+          "label": "lp_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/ap_therm": {
+          "reg": [
+            "0x148"
+          ],
+          "label": "ap_therm"
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/main_bat_thm": {
+          "label": "main_bat_thm",
+          "reg": [
+            "0x149"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/wpc_thm": {
+          "label": "wpc_thm",
+          "reg": [
+            "0x45"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/usb_thm": {
+          "label": "usb_thm",
+          "reg": [
+            "0x144"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmk8550@0/vadc@9000/chg_thm": {
+          "label": "chg_thm",
+          "reg": [
+            "0x145"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@a": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xa",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@a/pmr735d-k-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0xa",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@a/pinctrl@8800": {
+          "compatible": "qcom,pmr735d-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@b": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xb",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@b/pmr735d-l-temp-alarm@a00": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0xa00"
+          ],
+          "interrupts": [
+            "0xb",
+            "0xa",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pmr735d@b/pinctrl@8800": {
+          "compatible": "qcom,pmr735d-gpio",
+          "reg": [
+            "0x8800"
+          ],
+          "gpio-controller": [],
+          "#gpio-cells": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@c": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xc",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@c/pm8010-m-temp-alarm@2400": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0x2400"
+          ],
+          "interrupts": [
+            "0xc",
+            "0x24",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@d": {
+          "compatible": "qcom,spmi-pmic",
+          "reg": [
+            "0xd",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,spmi@c42d000/qcom,pm8010@d/pm8010-n-temp-alarm@2400": {
+          "compatible": "qcom,spmi-temp-alarm",
+          "reg": [
+            "0x2400"
+          ],
+          "interrupts": [
+            "0xd",
+            "0x24",
+            "0x0",
+            "0x3"
+          ]
+        },
+        "/soc/qcom,qupv3_1_geni_se@ac0000/i2c@a90000": {
+          "compatible": "qcom,i2c-geni",
+          "reg": [
+            "0xa90000",
+            "0x4000"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x165",
+            "0x4"
+          ],
+          "clock-names": "se-clk",
+          "clocks": [
+            "0x3b",
+            "0x65"
+          ],
+          "status": "ok"
+        },
+        "/soc/qcom,qupv3_1_geni_se@ac0000/i2c@a90000/goodix-berlin@5d": {
+          "compatible": "goodix,gt9916",
+          "reg": [
+            "0x5d"
+          ],
+          "interrupt-parent": [
+            "0x7d"
+          ],
+          "interrupts": [
+            "0x19",
+            "0x2008"
+          ],
+          "goodix,reset-gpio": [
+            "0x7d",
+            "0x18",
+            "0x0"
+          ],
+          "goodix,irq-gpio": [
+            "0x7d",
+            "0x19",
+            "0x2008"
+          ],
+          "qts,trusted-touch-vm-gpio-list": [
+            "0x7d",
+            "0x2c",
+            "0x0",
+            "0x7d",
+            "0x2d",
+            "0x0",
+            "0x7d",
+            "0x2e",
+            "0x0",
+            "0x7d",
+            "0x2f",
+            "0x0",
+            "0x7d",
+            "0x18",
+            "0x0",
+            "0x7d",
+            "0x19",
+            "0x2008"
+          ],
+          "status": "disabled"
+        },
+        "/soc/qcom,qupv3_1_geni_se@ac0000/i2c@a90000/touchscreen@20": {
+          "status": "ok",
+          "compatible": "synaptics,synaptics_ts",
+          "reg": [
+            "0x20"
+          ],
+          "sec,irq_gpio": [
+            "0x7d",
+            "0x13",
+            "0x0"
+          ],
+          "sec,max_coords": [
+            "0x1000",
+            "0x1000"
+          ]
+        },
+        "/soc/tsens0@c271000": {
+          "compatible": "qcom,tsens-v2",
+          "reg": [
+            "0xc271000",
+            "0x1ff",
+            "0xc222000",
+            "0x1ff"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x1fa",
+            "0x4",
+            "0x0",
+            "0x280",
+            "0x4"
+          ]
+        },
+        "/soc/tsens1@c272000": {
+          "compatible": "qcom,tsens-v2",
+          "reg": [
+            "0xc272000",
+            "0x1ff",
+            "0xc223000",
+            "0x1ff"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x1fb",
+            "0x4",
+            "0x0",
+            "0x281",
+            "0x4"
+          ]
+        },
+        "/soc/tsens2@c273000": {
+          "compatible": "qcom,tsens-v2",
+          "reg": [
+            "0xc273000",
+            "0x1ff",
+            "0xc224000",
+            "0x1ff"
+          ],
+          "interrupts": [
+            "0x0",
+            "0x1fc",
+            "0x4",
+            "0x0",
+            "0x282",
+            "0x4"
+          ]
+        },
+        "/soc/gpio_keys/vol_up": {
+          "label": "volume_up",
+          "gpios": [
+            "0x51a",
+            "0x6",
+            "0x1"
+          ],
+          "gpio-key,wakeup": []
+        },
+        "/soc/qcom,mdss_mdp@ae00000": {
+          "compatible": "qcom,sde-kms",
+          "reg": [
+            "0xae00000",
+            "0x84000",
+            "0xaeb0000",
+            "0x2008",
+            "0xaeac000",
+            "0x800",
+            "0x400000",
+            "0x1000"
+          ],
+          "reg-names": "mdp_phys\u0000vbif_phys\u0000regdma_phys\u0000ipcc_reg",
+          "interrupts": [
+            "0x0",
+            "0x53",
+            "0x4"
+          ],
+          "clocks": [
+            "0x3b",
+            "0xf",
+            "0x3b",
+            "0x10",
+            "0x32",
+            "0x2",
+            "0x32",
+            "0x3d",
+            "0x32",
+            "0x3e",
+            "0x32",
+            "0x49",
+            "0x32",
+            "0x40"
+          ],
+          "clock-names": "gcc_iface\u0000gcc_bus\u0000iface_clk\u0000branch_clk\u0000core_clk\u0000vsync_clk\u0000lut_clk"
+        },
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-vig-blocks": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-vig-blocks/vcm@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-vig-blocks/vcm@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-dma-blocks": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-dma-blocks/dgm@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-sspp-dma-blocks/dgm@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,sde-dspp-blocks": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,platform-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,platform-supply-entries/qcom,platform-supply-entry@0": {
+          "reg": [
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_4k_dsc_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qhd_plus_dsc_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_qsync_wqhd_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_1080p_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_1080p_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sharp_1080p_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_wqxga_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_wqxga_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_wqxga_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_wqxga_video_truly": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_wqxga_video_truly/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_wqxga_video_truly/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_cphy_144hz_vid": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_cphy_144hz_vid/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_cphy_144hz_vid/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_120hz_cphy_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_visionox_r66451_fhd_plus_sync_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_ext_bridge_1080p": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_ext_bridge_1080p/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_ext_bridge_1080p/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@6": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@7": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@8": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@9": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@10": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@11": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@12": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_cmd/qcom,mdss-dsi-display-timings/timing@13": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@6": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@7": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@8": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@9": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@10": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_dsc_10b_cmd/qcom,mdss-dsi-display-timings/timing@11": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@4": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@5": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@6": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@7": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@8": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@9": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@10": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@11": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@12": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@13": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@14": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@15": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@16": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_dual_sim_dsc_375_cmd/qcom,mdss-dsi-display-timings/timing@17": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_sec_hd_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_sec_hd_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_sim_sec_hd_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_cmd_sim_panel_au": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_cmd_sim_panel_au/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_cmd_sim_panel_au/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_sl_wqxga_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_sl_wqxga_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35597_truly_sl_wqxga_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_r66451_fhd_plus_90hz_cphy_nodsc_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_sl_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_sl_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_nt35695b_truly_fhd_sl_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@1": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@2": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_cmd/qcom,mdss-dsi-display-timings/timing@3": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_vid": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_vid/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_fhd_plus_vid/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_cmd": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_cmd/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_video": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_video/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/qcom,mdss_dsi_vtdr6130_qsync_fhd_plus_144hz_video/qcom,mdss-dsi-display-timings/timing@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD_DSI1": {
+          "label": "ss_dsi_panel_PBA_BOOTING_FHD_DSI1",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-reset-gpio": [
+            "0x7d",
+            "0x2a",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD_DSI1/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD_DSI1/qcom,mdss-dsi-display-timings/fhd60": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD": {
+          "label": "ss_dsi_panel_PBA_BOOTING_FHD",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-reset-gpio": [
+            "0x7d",
+            "0x7d",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD/qcom,mdss-dsi-display-timings/fhd@0": {},
+        "/soc/qcom,mdss_mdp@ae00000/ss_dsi_panel_PBA_BOOTING_FHD/qcom,panel-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01": {
+          "label": "B5_S6E3FC5_AMB338EH01",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-sec-reset-gpio": [
+            "0x7d",
+            "0x2a",
+            "0x0"
+          ],
+          "qcom,platform-te-gpio": [
+            "0x7d",
+            "0x57",
+            "0x0"
+          ],
+          "samsung,esd-irq-gpio1": [
+            "0x7d",
+            "0xb5",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,mdss-dsi-display-timings/svga60": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries/qcom,panel-supply-entry@0": {
+          "reg": [
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries/qcom,panel-supply-entry@1": {
+          "reg": [
+            "0x1"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FC5_AMB338EH01/qcom,panel-sec-supply-entries/qcom,panel-supply-entry@2": {
+          "reg": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03": {
+          "label": "B5_S6E3FAC_AMF670BS03",
+          "qcom,mdss-dsi-panel-mode-gpio-state": [
+            "0x696e7661",
+            "0x6c696400"
+          ],
+          "qcom,platform-reset-gpio": [
+            "0x7d",
+            "0x7d",
+            "0x0"
+          ],
+          "qcom,platform-te-gpio": [
+            "0x7d",
+            "0x56",
+            "0x0"
+          ],
+          "samsung,esd-irq-gpio1": [
+            "0x7d",
+            "0x89",
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table1": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table2": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table3": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/samsung,gm2_flash_table/table4": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd120hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd96hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd60hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd60phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd48hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd30hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd24hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd10hs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd30phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd24phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,mdss-dsi-display-timings/fhd10phs": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/regulators": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/regulators/elvss": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries": {},
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@0": {
+          "reg": [
+            "0x0"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@1": {
+          "reg": [
+            "0x1"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@2": {
+          "reg": [
+            "0x2"
+          ]
+        },
+        "/soc/qcom,mdss_mdp@ae00000/B5_S6E3FAC_AMF670BS03/qcom,panel-supply-entries/qcom,panel-supply-entry@3": {
+          "reg": [
+            "0x3"
+          ]
+        }
+      }
+    }
+  },
+  "v20_journal_sha256": "3844486b1334b0877ee417c4609d740ce8540b461df455f6d9454f647e94af34",
+  "source_changes": "P0-P3 integration; no apps_smmu access, no root/GPT writes, no userland GPU rebuild",
+  "kernel_args": "998bytes; remove unuseddisable-watchdogd and optionalexec-log to retain all requested args under official1000byte cap",
+  "hardware_v21": "pending",
+  "target_compile": {
+    "passed": true,
+    "XHCI_slots": 427,
+    "objects": {
+      "B5qUsbHost": {
+        "target": "arm64e-ios27",
+        "imports": 501,
+        "unresolved": []
+      },
+      "B5qSpmi": {
+        "target": "arm64e-ios27",
+        "imports": 2,
+        "unresolved": []
+      },
+      "B5qGpu": {
+        "target": "arm64e-ios27",
+        "imports": 153,
+        "unresolved": []
+      },
+      "LegacyDisplayProbe": {
+        "target": "arm64e-ios27",
+        "imports": 79,
+        "unresolved": []
+      },
+      "B5qGmuVotes": {
+        "target": "arm64e-ios27",
+        "imports": 8,
+        "unresolved": []
+      },
+      "CpuFreqProbe": {
+        "target": "arm64e-ios27",
+        "imports": 6,
+        "unresolved": []
+      },
+      "ThermalProbe": {
+        "target": "arm64e-ios27",
+        "imports": 8,
+        "unresolved": []
+      },
+      "ThermalLevel": {
+        "target": "arm64e-ios27",
+        "imports": 354,
+        "unresolved": []
+      },
+      "BoardClock": {
+        "target": "arm64e-ios27",
+        "imports": 5,
+        "unresolved": []
+      },
+      "ButtonProbe": {
+        "target": "arm64e-ios27",
+        "imports": 14,
+        "unresolved": []
+      },
+      "DisplayTimingProbe": {
+        "target": "arm64e-ios27",
+        "imports": 14,
+        "unresolved": []
+      },
+      "NativeHidInput": {
+        "target": "arm64e-ios27",
+        "imports": 383,
+        "unresolved": []
+      },
+      "HidInputProbe": {
+        "target": "arm64e-ios27",
+        "imports": 34,
+        "unresolved": []
+      },
+      "B5qTouch": {
+        "target": "arm64e-ios27",
+        "imports": 17,
+        "unresolved": []
+      },
+      "GeniI2c": {
+        "target": "arm64e-ios27",
+        "imports": 0,
+        "unresolved": []
+      },
+      "NativeAdrenoService": {
+        "target": "arm64e-ios27",
+        "imports": 381,
+        "unresolved": []
+      },
+      "NativeAdrenoTimer": {
+        "target": "arm64e-ios27",
+        "imports": 0,
+        "unresolved": []
+      },
+      "ShengGmu": {
+        "target": "arm64e-ios27",
+        "imports": 7,
+        "unresolved": []
+      },
+      "ShengGmuCommandDb": {
+        "target": "arm64e-ios27",
+        "imports": 2,
+        "unresolved": []
+      },
+      "ShengGpuSmmu": {
+        "target": "arm64e-ios27",
+        "imports": 13,
+        "unresolved": []
+      }
+    },
+    "all_saved_context_external_helpers_present": true
+  },
+  "integration": {
+    "core_compile": false,
+    "GPU_userspace_compile": false,
+    "new_Data": "official tool --gib2 --user baimao:1234 --auto-login; returned APFS verification pending",
+    "HID_matching": "real OSKextLoadKextWithIdentifier + IOCatalogue::startMatching(OSSymbol); no private SDK layout mix",
+    "optional_idle_helper": "compile-time detection from unchanged core symbols; missing => mode3 and no undefined import",
+    "build_recipe": "same b5q_peripherals.py in normal GOP builder and incremental relinker",
+    "physical_hardware_result": "pending"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/ThermalProbe.h": "d01a2864bf4cd553d7791fa02941d64d43aa21da92397b4697e17c59e44cf974",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "e88213faa1126ba2236e6f81c2055b1161f43903432a7fb83ba3481dcd4982d5",
+    "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "8a5716c35e59e1f3dada42e1051e617a4d843f12a97a0c29e43d4f593db989e1",
+    "UniXNU-b5q/package/BoardClock.h": "47c950b288ffc659a9306c1da79ff8b0fb6968c809508aa74a1a6a4bfb79e59d",
+    "UniXNU-b5q/package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
+    "UniXNU-b5q/package/DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+    "UniXNU-b5q/package/B5qEthernet.cpp": "d1abd199aaafbd9c6fe84e6dfd105802b7f909fb718c9b6917c22acf3f6f44b6",
+    "UniXNU-b5q/package/HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+    "UniXNU-b5q/package/B5qGpuPowerBoard.h": "6138dd87734ca0bf995e50490d1e7f2f8fb0b846d20f0381cc37a1b621b7fb07",
+    "UniXNU-b5q/package/B5qUsbPolicy.h": "ce3970985da5c96b6fb9c5d6cffcbeaa570b12cf8c22b67f22ebebc996b5195e",
+    "UniXNU-b5q/package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+    "UniXNU-b5q/package/B5qSpmi.h": "12177df32a4c17f5ff66a6f5dfd8f31b7f8877a983e3ada79b521c5e075856f2",
+    "UniXNU-b5q/package/GeniI2c.c": "825569be3276ebde2dadd4649bec51cc4f2a345b511f06731f7b3a9f5a83f367",
+    "UniXNU-b5q/package/ThermalProbe.cpp": "e8d87241e31137f3b18a825df1256629053d297ec03d62724c89edbbd929db81",
+    "UniXNU-b5q/package/NativeHidInput.cpp": "4c4ab5b8c4402bb9e5dd3a8db0b0a30e19101a43bde86cd89f13b115286aa3a0",
+    "UniXNU-b5q/package/B5qGpuTrace.h": "a0b2dba23a2a0fa1c356f26244553cd3e1e60413a955b082a9b099d03aaad575",
+    "UniXNU-b5q/package/B5qAbsentBoard.cpp": "643302e0e296ccf1032b473a37b3d151137280b3adee317aaf9af2d91ff20429",
+    "UniXNU-b5q/package/B5qTouch.cpp": "a53a854f5dca6f697859033177092599ab85e7bf02253028163b365d39f1d5d6",
+    "UniXNU-b5q/package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+    "UniXNU-b5q/package/B5qRamStorage.cpp": "ef9fb8763d58331abed767a3e3fb57e1175fda7e95b4cecdf0e17ad7f7e97ebb",
+    "UniXNU-b5q/package/B5qSpmi.cpp": "d6fc53e19e4e82a48a87c221ce6cc891eda18cdf1f4f4214a748c58bfd9ee914",
+    "UniXNU-b5q/package/B5qPeripheralHardware.h": "de7e968148612f5feba3c66141797aba4785564e664016f782d7f8adbc8f7a15",
+    "UniXNU-b5q/package/ThermalLevel.cpp": "7ca106c7f8f94ef7da3c233b1f5353e542897e4be59de02778a361f2d1dbc1b8",
+    "UniXNU-b5q/package/B5qGpuFirmware.h": "b628cfaa795023d7d470d14893248ee8fe8228c6ac3f199253da02b676699494",
+    "UniXNU-b5q/package/ShengSleep.h": "c7469cf97ca66975539cd380698284527a9988331cdbb11f8cfc11cc33791697",
+    "UniXNU-b5q/package/B5qUsbHost.cpp": "efcdb3ee74e028a99462d03f21bcbf386b6cc2cd0ad4740d26542c34582c1723",
+    "UniXNU-b5q/package/B5qGmuVotes.c": "8a259d9d49657ac2c90b1542b39e5726039ecfe72564f20f20eff0fb4178c054",
+    "UniXNU-b5q/package/CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
+    "UniXNU-b5q/package/B5qGpu.cpp": "2085f16ef8c8bc5d59ecb635520b04524bfc140f564871b733f8ee9f6bb81a45",
+    "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+    "UniXNU-b5q/package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+    "UniXNU-b5q/package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
+    "UniXNU-b5q/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+    "UniXNU-b5q/package/GeniI2c.h": "635862b89893eb76cf32f82c092a81d1ea08ccf7b719c413652437777d9c826d",
+    "UniXNU-b5q/package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+    "UniXNU-b5q/package/ButtonProbe.cpp": "423b425c8a31c9f35a8bf5171e8a63136f0a8ca1afb9a2713af5128bade4fd0f"
+  },
+  "local_protocol_checks": {
+    "USB31_USB32_USB3_ID": "PASS",
+    "QSCRATCH_sequence": "PASS",
+    "TouchComm_config_C1_framing_malformed_20000": "PASS_ASAN_UBSAN",
+    "GENI_read_without_address_write_NACK_cancel_abort": "PASS_ASAN_UBSAN",
+    "official_account_autologin_writers": "PASS",
+    "actual_APFS_readonly_reader_on_v20": "PASS; newData verification pending"
+  },
+  "pinctrl_source": {
+    "repository": "LineageOS/android_kernel_samsung_sm8550",
+    "commit": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9",
+    "path": "drivers/pinctrl/qcom/pinctrl-kalama.c",
+    "sha256": "d8d416b79fab46a466f130ea4f61893b93444c736d2d9b916e2678bc8c27ac48",
+    "lines": "2109/2111; gpio44/45 first alternate mux1 are qup1_se4_l0/l1"
+  },
+  "touch_protocol_details": "GET_APPLICATION_INFO0x20 uses actual max_objects+36; transactional report parsing preserves lastgood state on malformed frames; V1A5/03 continuedread/padding and C1deltas from Samsung pinned source. No artificial DT handoff gate."
+}

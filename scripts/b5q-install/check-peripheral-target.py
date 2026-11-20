@@ -7,6 +7,7 @@ DEFAULT=Path('/home/baimao/nabu_macos/out/nabu-27.3-fresh')
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--compiler',type=Path,default=Path(os.environ.get('B5Q_TARGET_CXX',DEFAULT/'p025-m2v/toolchain/llvm21/usr/lib/llvm-21/bin/clang++')))
 p.add_argument('--sdk',type=Path,default=Path(os.environ.get('B5Q_KERNEL_SDK',DEFAULT/'p020-input/local-sdk/macsdk/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk')))
+p.add_argument('--objects-out',type=Path)
 p.add_argument('--reference',type=Path,default=ROOT/'artifacts/b5q-esp-runtime-v18/esp.img');a=p.parse_args()
 sys.path.insert(0,str(ROOT/'UniXNU-b5q/scripts'));sys.path.insert(0,str(ROOT/'sources/UniXNU/kits/XnuPrelink'))
 from importlib.machinery import SourceFileLoader
@@ -24,13 +25,24 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  # actual XNU OSMetaClass.h XNU_TARGET_OS_OSX conditionals so reserved slots
  # match the source-kernel recipe despite its iOS Mach-O deployment target.
  t=Path(t);(t/'libkern/c++').mkdir(parents=True);(t/'libkern/c++/OSMetaClass.h').write_text((a.sdk/'System/Library/Frameworks/Kernel.framework/Headers/libkern/c++/OSMetaClass.h').read_text().replace('#if TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR','#if !XNU_TARGET_OS_OSX').replace('#if TARGET_OS_OSX && defined(__arm64__)','#if XNU_TARGET_OS_OSX && defined(__arm64__)'));(t/'OriginalUsbXhciABI.h').write_text(module.header(abi));kernel=t/'kernel'
+ # LLVM21 lacks Apple's fourth null-authentication qualifier; no affected
+ # private fields are accessed by these helpers. Keep the override local.
+ (t/'os').mkdir();(t/'os/base.h').write_text((a.sdk/'System/Library/Frameworks/Kernel.framework/Headers/os/base.h').read_text().replace(', "authenticates-null-values"',''))
+ # Follow the pinned source-driver header assembly, while retaining the SDK
+ # generated HIDDriverKit declarations and XNU's OSMetaClass definition.
+ hid=next((ROOT/'sources/UniXNU/out/feeds').glob('IOHIDFamily-*'))
+ import shutil
+ for src,rel in [(hid/'IOHIDFamily','IOKit/hid'),(hid/'IOHIDSystem/IOKit/hidsystem','IOKit/hidsystem')]:
+  dest=t/rel;dest.mkdir(parents=True,exist_ok=True)
+  for h in src.glob('*.h'):shutil.copyfile(h,dest/h.name)
+ h=t/'IOKit/hidsystem/IOHIDDescriptorParser.h';h.write_text(h.read_text().replace('#if __has_include(<MacTypes.h>)','#if __has_include(<MacTypes.h>) && !defined(KERNEL)'))
  subprocess.run(['mcopy','-i',str(a.reference),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
  raw=kernel.read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1]);defined={n for rows in im.symbols().values()for n in rows}
  flags=['-target','arm64e-apple-ios27.0','-O2','-isysroot',str(a.sdk),'-fptrauth-calls','-fptrauth-returns','-fptrauth-intrinsics','-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-fno-common','-fapple-kext','-ffreestanding','-mgeneral-regs-only','-nostdinc++','-D__PTRAUTH_INTRINSICS__=1','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-incompatible-sysroot','-Wno-deprecated-declarations','-Wno-unknown-warning-option','-Wno-unused-private-field','-Wno-c++11-narrowing','-Wno-deprecated-enum-enum-conversion']
  flags+=['-D'+v+'=1'for v in ['KERNEL','KERNEL_PRIVATE','DRIVER_PRIVATE','XNU_KERNEL_PRIVATE','XNU_TARGET_OS_OSX','PRIVATE','MACH_KERNEL_PRIVATE','__arm64__','__LP64__','__DARWIN_UNIX03']]
  for d in [t,ROOT/'UniXNU-b5q/package',a.sdk/'System/Library/Frameworks/Kernel.framework/Headers',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert',ROOT/'sources/UniXNU/drivers/Adreno740',ROOT/'sources/UniXNU/kits/AdrenoFirmware',ROOT/'UniXNU-b5q/package/B5qUfs',ROOT/'UniXNU-b5q/package/Sm8550Inputs',ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',ROOT/'UniXNU/kits/ArmSmmu4K',ROOT/'UniXNU/kits/AdrenoPM4',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/libkern',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/EXTERNAL_HEADERS']:flags+=['-I',str(d)]
  results={};objects=[]
- sources=[ROOT/'UniXNU-b5q/package'/name for name in ['B5qUsbHost.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c']]
+ sources=[ROOT/'UniXNU-b5q/package'/name for name in ['B5qUsbHost.cpp','B5qSpmi.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c']]
  # Compile the service with its previously excluded cold-start branches.
  service=ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoService.cpp';adapted=t/service.name
  adapted.write_text(service.read_text().replace('0x23b14u*4u-0x6a000u','0x23b14u*4u-SHENG_GMU_CORE_GPU_DELTA').replace('0x23b13u*4u-0x6a000u','0x23b13u*4u-SHENG_GMU_CORE_GPU_DELTA'))
@@ -39,9 +51,18 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  sources += [ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c','ShengGpuSmmu.c']]
  for source in sources:
   target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11']
+  if source.name=='NativeHidInput.cpp':cflags=cflags+['-DNATIVE_HID_SOURCE_API=1']
   subprocess.run([str(a.compiler),*cflags,'-c',str(source),'-o',str(target)],env=env,check=True)
+  if source.stem=='NativeHidInput':
+   import b5q_hid
+   hid_bindings,hid_result=b5q_hid.bindings(target.read_bytes(),json.loads((ROOT/'UniXNU-b5q/scripts/hid-device-26C5035r.json').read_text()))
+   qualified['bindings'].update({n:hex(v)for n,v in hid_bindings.items()})
+   (ROOT/'artifacts/b5q-runtime-v21-work/hid-bindings.json').write_text(json.dumps(dict(bindings={n:hex(v)for n,v in hid_bindings.items()},**hid_result),indent=2)+'\n')
+  if a.objects_out:
+   import shutil
+   a.objects_out.mkdir(parents=True,exist_ok=True);shutil.copyfile(target,a.objects_out/target.name)
   if source.stem=='B5qUsbHost':
-   bindings,slots=module.bindings(target.read_bytes(),abi);assert {n:hex(v)for n,v in bindings.items()}==qualified['bindings']
+   bindings,slots=module.bindings(target.read_bytes(),abi);assert {n:hex(v)for n,v in bindings.items()}=={k:v for k,v in qualified['bindings'].items()if 'IOHIDDevice'not in k}
   symbols=object_symbols(target.read_bytes());imports={n for n,_,kind in symbols if kind==1};exports={n for n,_,kind in symbols if kind!=1}
   objects.append((source.stem,imports,exports));results[source.stem]=dict(target='arm64e-ios27',imports=len(imports))
   # Match Mach-O LC_BUILD_VERSION against the source-kernel triple. This also
@@ -54,6 +75,6 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
     output=t/(name+'.o');subprocess.run([str(a.compiler),'-target','arm64e-apple-ios27.0','-c',str(assembly),'-o',str(output)],env=env,check=True);kernel_target.check_object(output.read_bytes(),name)
  available=defined|set(qualified['bindings'])|set().union(*(e for _,_,e in objects))
  for stem,imports,exports in objects:
-  missing=imports-available;assert not missing,(stem,sorted(missing));results[stem]['unresolved']=[]
+  missing=imports-available;results[stem]['unresolved']=sorted(missing)
  for n in ['_backtrace_user','_backtrace','_task_get_all_image_info_addr','_copyin','_get_user_regs','_thread_tid','_PE_parse_boot_argn']:assert n in defined,n
-print(json.dumps(dict(passed=True,XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True)))
+print(json.dumps(dict(passed=not any(v['unresolved'] for v in results.values()),XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True)))

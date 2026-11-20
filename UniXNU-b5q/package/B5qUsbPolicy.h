@@ -9,6 +9,22 @@ namespace B5qUsbPolicy {
 inline bool validRam(uint64_t physical,uint64_t bytes) {
  return physical && bytes && !(physical&4095) && !(bytes&4095) && bytes<=UINT64_MAX-physical;
 }
+inline bool validCoreId(uint32_t id) {
+ const uint32_t hi=id&0xffff0000U;
+ return hi==0x55330000U || hi==0x33310000U || hi==0x33320000U;
+}
+template<class Read,class Write,class Delay>
+const char *scratch(Read read,Write write,Delay delay) {
+ uint32_t hs=0,ss=0,cfg=0;
+ if(!read(0x810,hs)||!read(0x830,ss)||!read(0x808,cfg))return "qscratch-read";
+ if(!write(0x810,hs&~((1u<<20)|(1u<<28)))||!write(0x830,ss&~(1u<<24)))return "qscratch-vbus";
+ if(!ss) {
+  if(!write(0x808,cfg|(1u<<8)))return "qscratch-utmi";delay(1000);
+  if(!write(0x808,cfg|(1u<<8)|1u|(1u<<3)))return "qscratch-utmi";delay(1000);
+  if(!write(0x808,(cfg|1u|(1u<<3))&~(1u<<8)))return "qscratch-utmi";
+ }
+ return nullptr;
+}
 // Verified SM8550 GCC RCG/GDSC/branch operations. Does not reset core/PHY or
 // touch a shared SMMU context; all waits are finite.
 template<class Read,class Write,class Delay>
@@ -43,7 +59,7 @@ const char *clocks(Read read,Write write,Delay delay) {
 template<class Read,class Write,class Delay>
 const char *prepare(Read read,Write write,Delay delay) {
  uint32_t id=0,gctl=0,cap=0,status=0,command=0;
- if(!read(0xc120,id) || (id&0xffff0000U)!=0x55330000U)return "core-identity";
+ if(!read(0xc120,id) || !validCoreId(id))return "core-identity";
  if(!read(0xc110,gctl))return "global-control";
  // Stop the previous device-side engine before changing role; its old event
  // buffers must not continue DMA while the native host owns the controller.

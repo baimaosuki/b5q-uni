@@ -632,6 +632,7 @@ void busyReport(void *, wait_result_t) {
 extern "C" void b5q_ethernet_start(void);
 extern "C" void b5q_usb_start(void);
 extern "C" void b5q_gpu_start(void);
+extern "C" void sheng_cpufreq_probe(void),sheng_board_clock_probe(void),sheng_thermal_probe(void),sheng_thermal_level_probe(void),sheng_buttons_probe(void),native_hid_input_probe(void),b5q_touch_probe(void),sheng_dpu_probe(void);
 void native_legacy_display_late_probe(void) {
     {thread_t thread = nullptr; if (kernel_thread_start(busyReport, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);}
     // NativeAES first: AppleImage4 waits for the real IOAESAccelerator service.
@@ -641,7 +642,8 @@ void native_legacy_display_late_probe(void) {
     b5q_ethernet_start();
     b5q_usb_start();
     b5q_gpu_start();
-    // Board peripherals are not emulated by this OS-only display lifecycle.
+    sheng_cpufreq_probe();sheng_board_clock_probe();sheng_thermal_probe();sheng_thermal_level_probe();
+    sheng_buttons_probe();native_hid_input_probe();b5q_touch_probe();sheng_dpu_probe();
     IOService *display=pendingLegacyDisplay;if(!display){native_legacy_display_checkpoint();return;}pendingLegacyDisplay=nullptr;
     native_legacy_surface_status=OSKextLoadKextWithIdentifier("com.apple.iokit.IOSurface");
     // The IOSurface root service: iOS and iPadOS name it IOCoreSurfaceRoot; macOS leaves it unnamed, so its name is its class,
@@ -675,7 +677,9 @@ void native_legacy_display_late_probe(void) {
         if(nub && memory && ranges && parent && nub->init()) {
             ranges->setObject(memory);nub->setDeviceMemory(ranges);nub->setName("NativeGOPFramebuffer");
 // b5q physical panel dimensions/density are not copied from another board.
-            // GOP provides the current pixel geometry; dot-pitch remains unset.
+            // b5q main-panel density; 0 suppresses the optional physical pitch.
+            uint32_t dotsPerInch=425;PE_parse_boot_argn("b5q-dpi",&dotsPerInch,sizeof(dotsPerInch));
+            if(dotsPerInch)if(OSData *pitch=OSData::withBytes(&dotsPerInch,4)){nub->setProperty("dot-pitch",pitch);pitch->release();}
 
             nubAttached=nub->attach(parent);if(nubAttached)nubStarted=nub->start(parent);
             if(nubStarted) {

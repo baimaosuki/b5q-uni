@@ -10,6 +10,19 @@
 #include <string>
 int main(int argc,char **argv) {
  assert(argc==2);
+ for(unsigned id:{0x33310000u,0x33320000u,0x55330000u})assert(B5qUsbPolicy::validCoreId(id));
+ for(unsigned id:{0u,0xffffffffu,0x33300000u})assert(!B5qUsbPolicy::validCoreId(id));
+ for(unsigned ss:{0u,1u<<24}) {
+  std::map<unsigned,unsigned> regs={{0x810,0x10100001},{0x830,ss},{0x808,0x400}};
+  std::vector<std::pair<unsigned,unsigned>> writes;unsigned waits=0;
+  auto rd=[&](unsigned off,unsigned &v){v=regs.at(off);return true;};
+  auto wr=[&](unsigned off,unsigned v){writes.emplace_back(off,v);regs[off]=v;return true;};
+  assert(!B5qUsbPolicy::scratch(rd,wr,[&](unsigned us){assert(us==1000);++waits;}));
+  assert(regs[0x810]==1&&regs[0x830]==0);
+  assert(waits==(ss?0u:2u));assert(writes.size()==(ss?2u:5u));
+  if(!ss){assert(writes[2]==std::make_pair(0x808u,0x500u));assert(writes[3]==std::make_pair(0x808u,0x509u));assert(writes[4]==std::make_pair(0x808u,0x409u));}
+ }
+
  assert(B5qUsbPolicy::validRam(0x8c0004000,0x80000000));
  assert(!B5qUsbPolicy::validRam(0,0x80000000));
  assert(!B5qUsbPolicy::validRam(0x8c0004001,0x80000000));
@@ -29,8 +42,10 @@ int main(int argc,char **argv) {
   assert(std::string(B5qUsbPolicy::clocks(read,stuckWrite,[&](unsigned us){assert(us==100);++delays;}))=="gcc-domain-timeout");
   assert(delays==1000 && writes==1);
  }
- for(std::string mode: {"ok","identity","device-timeout","halt-timeout","reset-timeout","register-fault","32-bit-only"}) {
+ for(std::string mode: {"ok","usb31","usb32","identity","device-timeout","halt-timeout","reset-timeout","register-fault","32-bit-only"}) {
   std::map<unsigned,unsigned> registers={{0xc120,0x55333330},{0xc110,0x2000},{0xc704,0},{0xc70c,1U<<22},{0,0x1000020},{0x10,1},{0x20,0},{0x24,1}};
+  if(mode=="usb31")registers[0xc120]=0x33310000;
+  if(mode=="usb32")registers[0xc120]=0x33320000;
   if(mode=="identity")registers[0xc120]=0;
   if(mode=="device-timeout"){registers[0xc704]=1U<<31;registers[0xc70c]=0;}
   if(mode=="halt-timeout")registers[0x24]=0;
@@ -40,7 +55,7 @@ int main(int argc,char **argv) {
    v=registers[off];if(off==0x20 && reset && mode!="reset-timeout")v&=~2U;return true;};
   auto write=[&](unsigned off,unsigned v){assert(off<B5qHardware::usbBytes);++writes;registers[off]=v;if(off==0x20&&(v&2U))reset=true;return true;};
   const char *why=B5qUsbPolicy::prepare(read,write,[&](unsigned us){assert(us==100);++delays;});
-  assert((why==nullptr)==(mode=="ok"));assert(delays<=500);
+  assert((why==nullptr)==(mode=="ok"||mode=="usb31"||mode=="usb32"));assert(delays<=500);
   if(mode=="identity" || mode=="register-fault")assert(writes==0);
  }
  FILE *f=fopen(argv[1],"rb");assert(f);std::vector<uint8_t> image(66844);assert(fread(image.data(),1,image.size(),f)==image.size());fclose(f);

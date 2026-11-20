@@ -3,6 +3,7 @@
 // No Xiaomi rails/retimer/UCSI/GPIO and no apps_smmu register access.
 #include "OriginalUsbXhciABI.h"
 #include "B5qUsbPolicy.h"
+#include "B5qSpmi.h"
 #include <IOKit/IOLib.h>
 #include <IOKit/IODeviceMemory.h>
 #include <IOKit/IOPlatformExpert.h>
@@ -162,10 +163,21 @@ static void worker(void *,wait_result_t) {
   uint32_t hs=0,ss=0;
   readReg(qScratch.va,0x1000,0x810,hs);readReg(qScratch.va,0x1000,0x830,ss);
   IOLog("B5qUsb: stage=warm-phy scratch-hs=%08x scratch-ss=%08x\n",hs,ss);
+  auto scratchRead=[&](unsigned off,uint32_t &v){return readReg(qScratch.va,0x1000,off,v);};
+  auto scratchWrite=[&](unsigned off,uint32_t v){return writeReg(qScratch.va,0x1000,off,v);};
+  stage=B5qUsbPolicy::scratch(scratchRead,scratchWrite,[](unsigned us){IODelay(us);});if(stage)break;
+  b5q_usb_repeater_host(); // Optional repeater failure is logged; host preparation continues.
+  auto snapshot=[&](const char *phase) {
+   uint32_t v[11]={};const unsigned offsets[]={0xc120,0xc110,0xc704,0xc70c,0xc200,0xc2c0,0,0x10};
+   for(unsigned i=0;i<8;++i)readReg(core.va,kUsbCoreBytes,offsets[i],v[i]);
+   for(unsigned i=0;i<3;++i)readReg(qScratch.va,0x1000,i==0?0x808:i==1?0x810:0x830,v[8+i]);
+   IOLog("B5qUsb: %s gsnpsid=%08x gctl=%08x dctl=%08x dsts=%08x gusb2phycfg=%08x gusb3pipectl=%08x cap=%08x hccparams1=%08x qscratch_cfg=%08x qscratch_hs=%08x qscratch_ss=%08x\n",phase,v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8],v[9],v[10]);
+  };
+  snapshot("before-prepare");
   stage="prepare-host";
   auto read=[&](uint32_t off,uint32_t &v){return readReg(core.va,kUsbCoreBytes,off,v);};
   auto write=[&](uint32_t off,uint32_t v){return writeReg(core.va,kUsbCoreBytes,off,v);};
-  stage=B5qUsbPolicy::prepare(read,write,[](unsigned us){IODelay(us);});if(stage)break;
+  stage=B5qUsbPolicy::prepare(read,write,[](unsigned us){IODelay(us);});snapshot("after-prepare");if(stage)break;
   const char *families[]={"com.apple.iokit.IOUSBHostFamily","com.apple.driver.usb.AppleUSBXHCI"};
   bool familiesLoaded=true;
   for(const char *family:families) {

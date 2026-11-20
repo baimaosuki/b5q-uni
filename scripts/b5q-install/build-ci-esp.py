@@ -78,12 +78,13 @@ def main():
                 assert expected['kernel.macho']!='bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835'
                 assert 'b5q-log=1' in line.split() and 'b5q-log-token=411839cbaebac4088c251c0ea57579a2' in line.split()
             assert seed['watchdogd_disabled_in_seed'] and seed['skip_setup']
+            if a.version>=21:assert seed['account_created'] and seed['auto_login'] and seed['account_name']=='baimao'
             assert sha(files/'kernel.macho.gpuaddon')==report['gpu_addon_sha256']
         nodes=adt_decode((files/'kernel.macho.adt').read_bytes())
         for path,key,fmt,val in [('/chosen','dram-base','<Q',0x80000000),('/chosen','dram-size','<Q',0x80000000),('/chosen','kernel-ctrr-to-be-enabled','<I',0),('/defaults','sleep-disabled','<I',1)]:assert nodes[path][key]==struct.pack(fmt,val),(path,key)
         if a.version>=12:
             assert nodes['/defaults']['vmm-present']==struct.pack('<I',1)
-            assert all(arg in line.split() for arg in ['cs-lazy=1','boot-payload-release=1','exec-log=1'])
+            assert all(arg in line.split() for arg in ['cs-lazy=1','boot-payload-release=1']+(['exec-log=1'] if a.version<21 else []))
         if a.version>=11:
             assert nodes['/chosen']['darwinboot-memory-size']==struct.pack('<Q',0x100000000)
             assert nodes['/defaults']['kern.maxvnodes']==struct.pack('<I',66560)

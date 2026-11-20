@@ -2038,6 +2038,12 @@ void startHeartbeatThread() {
 }
 extern "C" unsigned native_legacy_prepare_report(char *,unsigned);
 extern "C" {extern volatile uint32_t native_legacy_gpu_fallbacks,native_legacy_gpu_last_status;}
+extern "C" {
+void sheng_cpufreq_poll(void);extern char native_cpufreq_row[120];
+unsigned sheng_thermal_row(unsigned,char *,unsigned),sheng_thermal_level_row(char *,unsigned),sheng_board_clock_row(char *,unsigned);
+extern volatile uint32_t native_hid_input_events[8],native_touch_count,native_touch_hid_reports;
+extern volatile int32_t native_buttons_stats[10];
+}
 void heartbeat() {
     // Row 4 from now on: seconds since the run ended, GX state, and (only with GX on) the GPU status words, so a photo
     // tells a live kernel from a hung one and shows whether the GPU stays idle.
@@ -2093,6 +2099,11 @@ void heartbeat() {
         if(t%30==0) {
             char display[512]={};native_legacy_prepare_report(display,sizeof(display));
             IOLog("b5q-fb: %s fallbacks=%u last=%08x\n",display,native_legacy_gpu_fallbacks,native_legacy_gpu_last_status);
+            sheng_cpufreq_poll();IOLog("B5qCpuFreq: %s\n",native_cpufreq_row);
+            char thermal[256]={},level[256]={},clock[256]={};
+            sheng_thermal_row(0,thermal,sizeof(thermal));sheng_thermal_level_row(level,sizeof(level));sheng_board_clock_row(clock,sizeof(clock));
+            IOLog("B5qThermal: %s | %s\n",thermal,level);IOLog("B5qClock: %s\n",clock);
+            IOLog("B5qInput: hid=%u/%u/%u btn=%d/%d/%d/%x touch=%u/%u\n",native_hid_input_events[0],native_hid_input_events[1],native_hid_input_events[6],native_buttons_stats[0],native_buttons_stats[1],native_buttons_stats[2],native_buttons_stats[3],native_touch_count,native_touch_hid_reports);
         }
         metalRows();
         registerExecObserver();
