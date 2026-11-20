@@ -74,7 +74,7 @@ static bool submit(){
  auto*u=dma+commandOffset;assert(u[0]==1&&u[2]==3);auto*c=u+16;auto*utrd=(uint32_t*)dma;
  uint64_t lba=be32(c+2);unsigned blocks=(unsigned(c[7])<<8)|c[8];unsigned bytes=be32(u+12);
  host.lastOcs=0;
- if(c[0]==0x35){assert(!bytes&&!(utrd[0]&(3U<<25))&&!u[1]&&blocks==1025&&(lba==3163314||lba==3164339));++syncs;}
+ if(c[0]==0x35){assert(!bytes&&!(utrd[0]&(3U<<25))&&!u[1]&&!blocks&&!lba);for(unsigned i=1;i<16;++i)assert(!c[i]);++syncs;}
  else {
   assert(bytes==blocks*4096 && blocks<=32);assert(!fseeko(media,lba*4096,SEEK_SET));
   if(c[0]==0x2a){assert(c[1]==8 && u[1]==0x20 && (utrd[0]&(3U<<25))==(1U<<25));++writes;
@@ -122,6 +122,11 @@ int main(int argc,char**argv){
  assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+2050,2));
  assert(nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+1,2050));
  assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,true,true,0,0));
+ // Whole-LUN wire SYNC is still gated by the caller's proven journal extent.
+ for(uint64_t lba:{0ULL,1ULL,3162880ULL,49692663ULL,static_cast<unsigned long long>(nabu_log_volume.file_first)})
+  assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,lba,1025));
+ assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+1,0));
+ assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+2050,2));
  fclose(media);return 0;
 }
 '''
@@ -150,5 +155,5 @@ def main():
    assert TOKEN.hex() not in run.stdout
    results.append(case);image.unlink()
  report={'result':'PASS','production_worker_transport_volume_ring':results,'nonzero_discovered_lun':3,'gpt_entries':512,'metadata_and_config_unchanged':True,'original_decoder_compatible':True,'ASan_UBSan':True,'hardware_tested':False}
- out=ROOT/'artifacts/b5q-log-v12-work';out.mkdir(parents=True,exist_ok=True);(out/'logger-tests.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))
+ out=ROOT/'artifacts/b5q-log-v13-work';out.mkdir(parents=True,exist_ok=True);(out/'logger-tests.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))
 if __name__=='__main__':main()

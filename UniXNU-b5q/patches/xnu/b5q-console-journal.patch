@@ -25,7 +25,7 @@ index 7aae936..e9a69c2 100644
 +		(void)nabu_capture_expand((uint8_t *)address);
 +	}
 +}
-+STARTUP(KMEM, STARTUP_RANK_LAST, b5q_console_capture_init);
++STARTUP(OSLOG, STARTUP_RANK_FIRST, b5q_console_capture_init);
 +
  static inline void
  _cnputc(char c, bool poll)

@@ -13,7 +13,7 @@ static inline bool b5qLogRequest(uint32_t *utrd,uint8_t *ucd,uint64_t dma,
  if(!write && !sync && !((lba>=1 && lba<=264 && blocks<=265-lba) ||
     (lba>=3162880 && lba<3367680 && blocks<=3367680-lba)))return false;
  uint8_t cdb[16]={};uint32_t bytes=sync?0:blocks*4096;
- if(sync) {cdb[0]=0x35;putBe32(cdb+2,(uint32_t)lba);cdb[7]=blocks>>8;cdb[8]=blocks;}
+ if(sync) {cdb[0]=0x35;} // Whole-LUN cache flush; authorization above still requires a validated log-slot extent.
  else {cdb[0]=write?0x2a:0x28;cdb[1]=write?8:0;putBe32(cdb+2,(uint32_t)lba);cdb[7]=blocks>>8;cdb[8]=blocks;}
  descriptor(utrd,dma,bytes);
  if(write)utrd[0]=(utrd[0]&~(3U<<25))|(1U<<25);

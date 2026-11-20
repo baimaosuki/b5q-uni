@@ -1,0 +1,198 @@
+{
+  "scope": "Two production corrections only: log allocator startup stage and SYNC10 wire range; no board/seed/firmware/runtime policy change",
+  "user_photo": {
+    "path": "/tmp/codex-clipboard-53ed0016-0159-48ba-8bf1-3f60867b6af3.png",
+    "sha256": "552433e6572175b0b409aa474d11bb0af6197a8d08b0e180d70d3c49839c70e9",
+    "assertion": "vm_kern.c:475 vmkf_range_id > KMEM_RANGE_ID_NONE",
+    "size_registers": "x22=x27=0x400000",
+    "frames_symbolicated_against_v12": {
+      "0xfffffff00ba7ca4": {
+        "function": [
+          "_kd_early_buffer"
+        ],
+        "offset": "-0xeffffff10ecb835c"
+      },
+      "0xfffffff00c2ee37c": {
+        "function": [
+          "_sleh_synchronous_sp1"
+        ],
+        "offset": "0x0"
+      },
+      "0xfffffff00ba8354": {
+        "function": [
+          "_kd_early_buffer"
+        ],
+        "offset": "-0xeffffff10ecb7cac"
+      }
+    }
+  },
+  "baseline": {
+    "run": 44626576574,
+    "source_commit": "dfe020141aa42aaf03da15c2c89c502e3cb376c5",
+    "deployed_kernel_sha256": "f1faca1ac10ba103a8689516a6862f884c6d8f82ef07ef748a6860930998e5ba",
+    "compiled_startup_record": {
+      "symbol": "___startup_KMEM_entry_b5q_console_capture_init_268",
+      "subsystem": 6,
+      "rank": 4294967295
+    }
+  },
+  "source_root_cause": "startup_phase=cur->subsystem-1 during callback. KMEM callback selects range NONE in kmem_apply_security_policy; permanent slab assertion rejects it. OSLOG executes with phase12 >= KMEM6.",
+  "fixes": {
+    "allocator": "STARTUP(OSLOG, STARTUP_RANK_FIRST, b5q_console_capture_init)",
+    "sync": "opcode0x35; remaining15 CDB bytes zero; no DMA data; discovered root LUN unchanged; internal caller extent proof still required",
+    "block_writes": "Unchanged WRITE10 FUA slot gate; no new writable ranges"
+  },
+  "before_sha256": {
+    "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "94cc79c884f48c9738d50de127b2d8a9821a692d4ef147206ad0bdd3fed662a2",
+    "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "32c07ae59e263097af051aada8445d286be2f472ae5fe11cb180666bfb4d6447",
+    "UniXNU-b5q/board.toml": "fb8a8e221bfdddd29c1591c3c611001bdc17c55f48551199f302774fe334d96a",
+    "UniXNU-b5q/configs/b5q_macos_defconfig": "acfbf5c22cbd7355f936fca197ca50b8d1762875ca8998c85931d9e0d5e50dfd",
+    "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "4c2fa2194b0e9f06d5d72bfd632d59b552a2edd10f4a2aa66c8ba19631e92dd3"
+  },
+  "production_startup_test": {
+    "result": "PASS",
+    "scope": "Production startup dispatcher, security policy, slab assertion and board allocator; allocation/locks/platform types are host stubs, no kernel boot or hardware claim",
+    "old_KMEM_registration_reproduces_assertion": true,
+    "new_OSLOG_registration_selects_DATA_PRIVATE": true,
+    "promotion_after_allocation": true,
+    "inputs_sha256": {
+      "sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk/kern/startup.c": "da7e211b68215dc2ecb33d2bfafea79f878d20019975a44b90065c3b4d61d331",
+      "sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk/kern/startup.h": "7ecdf4816b2ff5c4d0f71e6b1e39d770ce78f72b04f5e5d3cb135422aabe10cc",
+      "sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk/vm/vm_kern.c": "64934aabe377b26f020010b38fb976f4e845b9d0198707a82789e6868c31c531",
+      "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "c36530ec959bcc1ef4220f4726a709ea0dfb69684112eaab5b81763760bc7869"
+    }
+  },
+  "pending": [
+    "target compilation",
+    "actual returned binary startup/SYNC and final ESP verification"
+  ],
+  "hardware_tested": false,
+  "production_log_worker_tests": {
+    "result": "PASS",
+    "production_worker_transport_volume_ring": [
+      "ok",
+      "headerfail",
+      "mirror",
+      "chain",
+      "fatalias",
+      "diralias",
+      "token",
+      "gptcrc",
+      "overlap",
+      "rootbounds",
+      "damagedslots"
+    ],
+    "nonzero_discovered_lun": 3,
+    "gpt_entries": 512,
+    "metadata_and_config_unchanged": true,
+    "original_decoder_compatible": true,
+    "ASan_UBSan": true,
+    "hardware_tested": false
+  },
+  "local_pre_ci": {
+    "scope": "Local source/input checks before submission; target compiler/linker runs in macOS CI",
+    "checks": [
+      "upstream-package-template",
+      "porting-record",
+      "source-contract",
+      "lockdown-public",
+      "log-startup",
+      "log-writer",
+      "installer-errors",
+      "root-format-compile",
+      "root-format-runtime",
+      "smmu-compile",
+      "smmu-runtime",
+      "protocol-compile",
+      "protocol-runtime",
+      "exact-local-root-policies",
+      "full-root-image-sha256",
+      "original-pmgr-fixture",
+      "device-tree-syntax",
+      "python-syntax",
+      "no-added-ci-integrity-gates"
+    ],
+    "result": "PASS",
+    "source_sha256": {
+      ".github/workflows/b5q-stage123.yml": "86fb426147dd464fc03362cdf31a2bdec3a3ec4810851f5631ba48a108006500",
+      "UniXNU-b5q/board.toml": "fb8a8e221bfdddd29c1591c3c611001bdc17c55f48551199f302774fe334d96a",
+      "UniXNU-b5q/configs/b5q_macos_defconfig": "acfbf5c22cbd7355f936fca197ca50b8d1762875ca8998c85931d9e0d5e50dfd",
+      "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
+      "UniXNU-b5q/package/B5qAbsentBoard.cpp": "a07f5f8e460a6600393aee84c6ce971a0e370ddbdbba425f2156434e438a6ab9",
+      "UniXNU-b5q/package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+      "UniXNU-b5q/package/B5qRamStorage.cpp": "ef9fb8763d58331abed767a3e3fb57e1175fda7e95b4cecdf0e17ad7f7e97ebb",
+      "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+      "UniXNU-b5q/package/B5qUfs/B5qLogArgs.h": "a41d505915d4fe13cdce209197bd610e97c56f0ddef1a2bceb12e1280ed3e887",
+      "UniXNU-b5q/package/B5qUfs/B5qLogCore.h": "8d0a834dadea6ca796ece05d9f464157d210e2eb9d5f5d598ea1138aa7144643",
+      "UniXNU-b5q/package/B5qUfs/B5qLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+      "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "c79006e1d20ff9abf71e4d23584dfa82b7f9d19e3a5d5cbf032858f397d36620",
+      "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "4c2fa2194b0e9f06d5d72bfd632d59b552a2edd10f4a2aa66c8ba19631e92dd3",
+      "UniXNU-b5q/package/B5qUfs/B5qLogVolume.h": "ecb267c9adbda425d9c59d0bd6167e22b3036a25599d12f581a48fa693a46cb0",
+      "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
+      "UniXNU-b5q/package/B5qUfs/B5qRootPolicies.h": "9f45e765c1e9466aa0f98cbe8860d342c7733a9b9285dccc453462d69b5e9eb4",
+      "UniXNU-b5q/package/B5qUfs/B5qSmmu.h": "de60642e39d4c15b33b55cfb34d2e4c6a8199d64f68d4c9ccc48885090111d5e",
+      "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "043a1a97b3492dae3b80670da8a8fc243d474fd379807d3dd6e60486e5e992a3",
+      "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "ad290e7858a31901468a0ed901d50cf9901e0dc352464e6bc8726c4e978a03dc",
+      "UniXNU-b5q/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+      "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "101dc9117e173c8a703da740e389ec395df0aec60b52fde79aa247732ad97b1c",
+      "UniXNU-b5q/package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+      "UniXNU-b5q/porting.toml": "292b3004af849ca20f61d460396e011234c0388767f5c73d5c991cfb7eab752e",
+      "UniXNU-b5q/scripts/b5q_compile.py": "acb19e4534fc20a78088f6e2bbd07964f077f99fd45b121a1f9ceb7a4a2e3880",
+      "UniXNU-b5q/scripts/build-b5q-adreno.py": "7660609339b39016076f806e37dd9612f0bb7ef52907f13df5d77e528aba582f",
+      "UniXNU-b5q/scripts/build-b5q-gop-27.py": "ad0cd4f623c4d4110bd1a12cbfd28c189bea397db3d617d0a639e577814343e1",
+      "UniXNU-b5q/scripts/build-b5q-payload.py": "cb9c2176cda6455a3e362fb807adbe555bba5c28d861b5120b13cbe880d1378e",
+      "UniXNU-b5q/scripts/build-b5q-pmgr.py": "7c8f84e9290c4356f2ca3cb61adaf3420eae8938ebd950b8dd19252b14c41944",
+      "UniXNU-b5q/scripts/build-b5q-storage.py": "41f5d8fc65125fb1441a6de8e994652c49d9a8b5d2e3ed53a91c680e1c343d41",
+      "UniXNU-b5q/scripts/check-b5q-inputs.py": "fa0a1e649264bf380767c5d5e6683c8a2f047d50684b70e3a272ecfcabe12dd6",
+      "UniXNU-b5q/scripts/check-b5q-uefi.py": "82e5c6571c09665166ece4c609c2a8fae223457de6cfc0a0abe2beeed3c86a09",
+      "UniXNU-b5q/scripts/check-xnu-patches.py": "8e5dc9477788102d351bb0f149d10834125c6dcfa4cb4cfa659a941f77eed417",
+      "UniXNU-b5q/scripts/ci-transfer.py": "09da81e49dd2a49e8920e6375f689aab67df0abea24307453f91aa305f3c5a83",
+      "UniXNU-b5q/scripts/collect-runtime-fdt.py": "be7ab9f6fe6bb99225c7ede13e89e450541c5843046d0877192f1ec9139c482d",
+      "UniXNU-b5q/scripts/inventory-hardware.py": "075d573306ebc3869be5dcb6d9b92b0b2fe6bed815702ed97f0fce4074932804",
+      "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "6a9ecd77c7c551b7737f51557eb0ee5f05ae3fb7219b8e92aca0ad41da699f40",
+      "UniXNU-b5q/scripts/reuse-v10-kernel.py": "7540dd020d6791c769ac1e7aa3200922b42a19564a942f8270dc007573e1ab11",
+      "UniXNU-b5q/scripts/test-ramblock-host.py": "058a8e2e36310029a65654fe908c9610dabc2839e74049ee98c9f47bda8259f0",
+      "scripts/b5q-install/assemble-firstboot.py": "d5f84e6ef1a28531f26dae4ee48947513f405e7f86efb8f3a5dea1689a6b4e07",
+      "scripts/b5q-install/build-4kn-esp.py": "64ef94b6643df38660d0245c8063257d459b6ef44939f7901ca75e4c6578a82e",
+      "scripts/b5q-install/build-ci-esp.py": "bcf9ce1b3b79ce306bb48d4f9d6f1526f32b643b87cefbf42605a459eab31b06",
+      "scripts/b5q-install/build-data-seed.py": "68379f8fc2c8e33eaaaa647c4ec4faf0b2697fc09fc2814297d307d7457461c8",
+      "scripts/b5q-install/build-earlyboot-diag.py": "53b99ec5d72d45a6e3b14b961638c017739908676582e372a98b054ab94592ab",
+      "scripts/b5q-install/build-lowdram-esp.py": "93fe7efe6c63871cea05807a0dd88920479b183b60b3f2007fbd3eb946bce455",
+      "scripts/b5q-install/build-memory-boot.py": "8a9383fb4ad058c6b39dbb7d4f89c89eb4076043018665777630476d0a73d11f",
+      "scripts/b5q-install/check-lowdram-boot.py": "a07eddb23dea8805cec9c57874b2b44720eadb46a91d3500ae518a0b931cd1d3",
+      "scripts/b5q-install/download-ci-artifact.py": "a856896271be568ced07113eb2f6c3c8a9f53c9c4f395a8fbcbbb69194ff063b",
+      "scripts/b5q-install/install-firstboot.py": "c5892b6452845830829560dbb442b26dd83ca0532e6ff0ef46e0f4680a488d7f",
+      "scripts/b5q-install/make-xnu2log.py": "4778966f97ed7eb547a8edb2eb8b2343edea0c14f98849c84727341f18857445",
+      "scripts/b5q-install/pre-ci.py": "cc778c1dd3d18cadd8ed16685db1741a36a1d5ee1e5833d0992222a3976964c9",
+      "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
+      "scripts/b5q-install/reuse-v11-data.py": "38a0f985b8e8a537c14abcedfd8c097ee8315d36a6d1f66ef262500c87211648",
+      "scripts/b5q-install/test-esp-menu.py": "b07c10a2828d277681e3709d55dc7ab62b9dc231fe5762dc66ace4ebcbea7e5a",
+      "scripts/b5q-install/verify-esp-log.py": "66afae7b746b3b9eaf61f36712b6e423b1595e41811089f8e86100fefec671c5",
+      "scripts/b5q-install/verify-firstboot.py": "5833c7100d44003c8f288c7ec8f75277647b64ba15ba5b77132b992dd33ddeb4",
+      "scripts/b5q-install/verify-lockdown-binary.py": "792ad4cb5642b6afad2829953dcb702c300ef7c730b76ce4302b66801341e76b",
+      "scripts/b5q-install/verify-log-binary.py": "8b079a0a14234cd289d3732aa42a7954573c2dca763f680a8ef2bdc56a472172",
+      "scripts/b5q-install/verify-mount-runtime.py": "7bae04dbac40214069929072d6555eddc55a9b84447e9e54f19aae8ab4906ce3"
+    },
+    "hardware_tested": false
+  },
+  "ordered_patch_replay": {
+    "result": "PASS",
+    "count": 136,
+    "report": "reports/xnu-patch-application.json"
+  },
+  "unchanged_inputs": [
+    "UniXNU-b5q/board.toml",
+    "UniXNU-b5q/configs/b5q_macos_defconfig",
+    "UniXNU-b5q/dts/b5q.dts",
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h"
+  ],
+  "source_sha256": {
+    "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "c36530ec959bcc1ef4220f4726a709ea0dfb69684112eaab5b81763760bc7869",
+    "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "c79006e1d20ff9abf71e4d23584dfa82b7f9d19e3a5d5cbf032858f397d36620",
+    "UniXNU-b5q/board.toml": "fb8a8e221bfdddd29c1591c3c611001bdc17c55f48551199f302774fe334d96a",
+    "UniXNU-b5q/configs/b5q_macos_defconfig": "acfbf5c22cbd7355f936fca197ca50b8d1762875ca8998c85931d9e0d5e50dfd",
+    "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "4c2fa2194b0e9f06d5d72bfd632d59b552a2edd10f4a2aa66c8ba19631e92dd3"
+  }
+}
