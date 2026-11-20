@@ -63,10 +63,7 @@
       "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "c36530ec959bcc1ef4220f4726a709ea0dfb69684112eaab5b81763760bc7869"
     }
   },
-  "pending": [
-    "target compilation",
-    "actual returned binary startup/SYNC and final ESP verification"
-  ],
+  "pending": [],
   "hardware_tested": false,
   "production_log_worker_tests": {
     "result": "PASS",
@@ -194,5 +191,246 @@
     "UniXNU-b5q/configs/b5q_macos_defconfig": "acfbf5c22cbd7355f936fca197ca50b8d1762875ca8998c85931d9e0d5e50dfd",
     "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
     "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "4c2fa2194b0e9f06d5d72bfd632d59b552a2edd10f4a2aa66c8ba19631e92dd3"
+  },
+  "result": "PASS: target build, deployed binary tests and final native4K ESP; hardware outcome pending",
+  "completed_run": {
+    "run": 44688079841,
+    "conclusion": "success",
+    "source_commit": "8cda67dd11db65f04f270f3585c9e4644cad195c",
+    "url": "https://github.com/baimaosuki/b5q-uni/actions/runs/44688079841"
+  },
+  "actual_binary_checks": {
+    "fix-binary-verification.json": {
+      "result": "PASS",
+      "scope": "Actual compiled startup record and log I/O function before submission; host/lock/DMA fixtures; no device I/O",
+      "kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "startup_symbol": "___startup_OSLOG_entry_b5q_console_capture_init_268",
+      "subsystem": 13,
+      "rank": 0,
+      "startup_phase_during_callback": 12,
+      "sync_requests": [
+        {
+          "cdb": "35000000000000000000000000000000",
+          "lun": 3,
+          "flags": 0,
+          "descriptor": 268435456,
+          "bytes": 0
+        },
+        {
+          "cdb": "35000000000000000000000000000000",
+          "lun": 3,
+          "flags": 0,
+          "descriptor": 268435456,
+          "bytes": 0
+        }
+      ],
+      "readonly_root_and_unvalidated_ranges_rejected": true,
+      "TryLock_busy_emits_nothing": true,
+      "WRITE10_FUA_unchanged": true,
+      "wire_expectation": "zero range CDB verified",
+      "PAuth_not_tested": true,
+      "hardware_tested": false
+    },
+    "log-binary-verification.json": {
+      "result": "PASS",
+      "kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "console_to_capture_calls": {
+        "_console_write": {
+          "mode": "inlined-producer",
+          "memory_refs": {
+            "_nabu_capture_ring": [
+              "0xfffffff00bb55ab8"
+            ],
+            "_nabu_capture_end": [
+              "0xfffffff00bb55ac4",
+              "0xfffffff00bb55af8"
+            ],
+            "_nabu_capture_capacity": [
+              "0xfffffff00bb55abc"
+            ],
+            "_nabu_capture_lock": [
+              "0xfffffff00bb55ab0",
+              "0xfffffff00bb55afc"
+            ],
+            "_nabu_capture_lost": [
+              "0xfffffff00bb55b1c"
+            ]
+          }
+        },
+        "_console_write_unbuffered": {
+          "mode": "inlined-producer",
+          "memory_refs": {
+            "_nabu_capture_ring": [
+              "0xfffffff00bb5605c"
+            ],
+            "_nabu_capture_end": [
+              "0xfffffff00bb5603c",
+              "0xfffffff00bb56070"
+            ],
+            "_nabu_capture_capacity": [
+              "0xfffffff00bb56044"
+            ],
+            "_nabu_capture_lock": [
+              "0xfffffff00bb5602c",
+              "0xfffffff00bb56074"
+            ],
+            "_nabu_capture_lost": [
+              "0xfffffff00bb56088"
+            ]
+          }
+        },
+        "_serial_putc_crlf": {
+          "mode": "direct-call",
+          "sites": [
+            "0xfffffff00c1f3fd4"
+          ]
+        },
+        "_panic": [
+          "0xfffffff00bb965a8"
+        ],
+        "_panic_trap_to_debugger": [
+          "0xfffffff00bb965a8"
+        ]
+      },
+      "capture_symbol": "0xfffffff00bb5525c",
+      "writer": "__ZN12_GLOBAL__N_113nabuLogThreadEPvi",
+      "bounded_io": "__ZN12_GLOBAL__N_19nabuLogIoEbyjPhb",
+      "TryLock_in_actual_binary": true,
+      "write10_and_sync10_present": true,
+      "panic_screen_capture_hook_present": true,
+      "hardware_tested": false
+    },
+    "lockdown-verification.json": {
+      "passed": true,
+      "image": "/tmp/b5q-log-v13-24w29pqu/kernel.macho",
+      "sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "fileset": true,
+      "public_query": "security.mac.lockdown_mode_state_public",
+      "width": 8,
+      "read_only": true,
+      "native_parent": true,
+      "original_integer_query_preserved": true,
+      "early_registration_present": true,
+      "actual_compiled_handler_executed": true,
+      "locks_and_copyout_mocked": true,
+      "cases": [
+        {
+          "native_state": 0,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 0,
+          "returned_bytes": 8,
+          "copyout_error": 0,
+          "handler_result": 0
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 12,
+          "handler_result": 12
+        },
+        {
+          "native_state": 1,
+          "returned_bytes": 8,
+          "copyout_error": 14,
+          "handler_result": 14
+        }
+      ],
+      "PAuth_not_tested": true,
+      "device_tested": false
+    },
+    "mount-verification.json": {
+      "scope": "Actual final ESP extracted kernel, Data, addon and trust cache; local verification only",
+      "kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+      "logical_Data_bytes": 2147483648,
+      "APFS_superblock_checksums_verified": 13,
+      "APFS_volume_UUIDs": [
+        "1552CFEE-78FF-48D8-8A6C-694B867D61AC"
+      ],
+      "watchdogd_seed_policy": {
+        "com.apple.watchdogd": true
+      },
+      "addon_paths": [
+        "Library/LaunchDaemons/org.unixnu.icon-cache.generation.plist",
+        "Library/LaunchDaemons/org.unixnu.shader-cache.install.plist",
+        "Library/User Template/Non_localized/.skipbuddy",
+        "bin/unixnu-absentd",
+        "bootshim/apfs_boot_util",
+        "test/share/manual-session"
+      ],
+      "signed_and_trusted_executables": {
+        "bootshim/apfs_boot_util": [
+          "60f17d89f11e23963543d9ca10de23b802e314ad"
+        ],
+        "bin/unixnu-absentd": [
+          "0cef40d0596e9367adb00dfbae1b78389be58d7e"
+        ]
+      },
+      "original_Apple_trust_modules_byte_identical": true,
+      "hardware_tested": false
+    },
+    "log-allocation.json": {
+      "scope": "Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence",
+      "result": "PASS",
+      "file_bytes": 8400896,
+      "file_sha256": "abbecaf0216ed55f4ef71e8a55aefbc9c118dc36d84bd80cf0ad8d74b7234eea",
+      "token": "411839cbaebac4088c251c0ea57579a2",
+      "file_first_lba": 3203656,
+      "clusters": 2051,
+      "contiguous": true,
+      "no_aliases": true,
+      "mirrored_FAT": true,
+      "fat_blocks_each": 200,
+      "config_readonly": true,
+      "write_first_lba": 3203657,
+      "write_last_lba": 3205706,
+      "committed_slots": 0,
+      "source_GPT_entries": 512,
+      "production_volume_checker": true,
+      "hardware_tested": false
+    }
+  },
+  "delivery": {
+    "path": "artifacts/b5q-esp-log-v13/esp.img",
+    "output": {
+      "bytes": 838860800,
+      "sha256": "970c69f27ea8d5d5f1f949973818f8014a4641473864634c6e420f4ac7a88363"
+    },
+    "deploy_kernel_sha256": "70073e91c8913279c317c4af35e95dbc983eb79256014b45cf0081fcb6abb941",
+    "raw_kernel": {
+      "bytes": 142999552,
+      "sha256": "2ffc9610bf9db0b6f58c287b45ef653d9060f763cedac38a7eea2d806a382d19"
+    },
+    "ci_payload": {
+      "bytes": 268435456,
+      "sha256": "317f661ff46ed52cd57d8fcd68ed9507d666b716b039e6a49ba40f61ed41fc5d"
+    },
+    "runtime_base": {
+      "package": "b5q-esp-log-v12",
+      "source_run": 44626576574,
+      "esp_sha256": "226cefe802f13751a62d88aaa9ed7b14104c239e4a59ab4ac4d1607293c7d1a4",
+      "all_members_except_kernel_byte_identical": true
+    },
+    "no_QEMU": true,
+    "no_firmware_build": true,
+    "no_phone_access": true
+  },
+  "assembly": {
+    "script": "artifacts/b5q-log-v13-work/assemble.py",
+    "sha256": "ba0bd5a75e4c64453c11be2552733afa1ddd86697f50bcd26438e1c8701efd5a",
+    "recipe": "Extract official deployment kernel from real returned payload; POST reseal idempotence; replace only kernel member in SHA256-verified v12 native4K ESP; complete file readback; production volume proof and returned binary checks"
+  },
+  "verifier_source": {
+    "path": "scripts/b5q-install/verify-log-fix-binary.py",
+    "sha256": "01c76a1fc4a9092606cf990166cfd72a8be40aa05878905f3fe124ff288fd978"
   }
 }
