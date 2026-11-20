@@ -1837,8 +1837,8 @@ volatile uint32_t native_gpu_dcvs_reasons[9];
 // [7] the span in windows. macOS runs 55 to 61 never counted a wake boost, also not after 10 s without a submission (run61, 181 to
 // 191 s), so some window in every 80 ms shows work there and the GPU never counts as rested; [1] to [3] tell which kind of work.
 volatile uint32_t native_gpu_dcvs_windows[8];
-// No b5q touch observer is linked; the optional governor boost has no events.
-volatile uint32_t native_hid_input_events[8] = {};
+// Owned by the actual HID observer; also drives the GPU touch boost.
+extern volatile uint32_t native_hid_input_events[8];
 }
 uint64_t gpuBusyTicks() {
     ShengGmuIo &io = gColdDevice.io;

@@ -2881,5 +2881,19 @@
     "sha256": "d8d416b79fab46a466f130ea4f61893b93444c736d2d9b916e2678bc8c27ac48",
     "lines": "2109/2111; gpio44/45 first alternate mux1 are qup1_se4_l0/l1"
   },
-  "touch_protocol_details": "GET_APPLICATION_INFO0x20 uses actual max_objects+36; transactional report parsing preserves lastgood state on malformed frames; V1A5/03 continuedread/padding and C1deltas from Samsung pinned source. No artificial DT handoff gate."
+  "touch_protocol_details": "GET_APPLICATION_INFO0x20 uses actual max_objects+36; transactional report parsing preserves lastgood state on malformed frames; V1A5/03 continuedread/padding and C1deltas from Samsung pinned source. No artificial DT handoff gate.",
+  "ci_first_error": {
+    "run": 44828124075,
+    "commit": "95bc756de1e07e4f540c187abc0894e762adac7d",
+    "stage": "native final link",
+    "undefined_symbols": [],
+    "duplicate_symbols": {
+      "_native_hid_input_events": [
+        "B5qGpu.o",
+        "HidInputProbe.o"
+      ]
+    },
+    "fix": "remove old GPU placeholder definition; use actual HID observer storage; add cross-object strong-definition check",
+    "log": "artifacts/b5q-runtime-v21-work/ci-logs-44828124075/9_Compile board objects and relink unchanged v19 XNU core.txt"
+  }
 }

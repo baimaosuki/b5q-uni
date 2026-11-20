@@ -41,7 +41,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  flags=['-target','arm64e-apple-ios27.0','-O2','-isysroot',str(a.sdk),'-fptrauth-calls','-fptrauth-returns','-fptrauth-intrinsics','-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-fno-common','-fapple-kext','-ffreestanding','-mgeneral-regs-only','-nostdinc++','-D__PTRAUTH_INTRINSICS__=1','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-incompatible-sysroot','-Wno-deprecated-declarations','-Wno-unknown-warning-option','-Wno-unused-private-field','-Wno-c++11-narrowing','-Wno-deprecated-enum-enum-conversion']
  flags+=['-D'+v+'=1'for v in ['KERNEL','KERNEL_PRIVATE','DRIVER_PRIVATE','XNU_KERNEL_PRIVATE','XNU_TARGET_OS_OSX','PRIVATE','MACH_KERNEL_PRIVATE','__arm64__','__LP64__','__DARWIN_UNIX03']]
  for d in [t,ROOT/'UniXNU-b5q/package',a.sdk/'System/Library/Frameworks/Kernel.framework/Headers',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert',ROOT/'sources/UniXNU/drivers/Adreno740',ROOT/'sources/UniXNU/kits/AdrenoFirmware',ROOT/'UniXNU-b5q/package/B5qUfs',ROOT/'UniXNU-b5q/package/Sm8550Inputs',ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',ROOT/'UniXNU/kits/ArmSmmu4K',ROOT/'UniXNU/kits/AdrenoPM4',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/libkern',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/EXTERNAL_HEADERS']:flags+=['-I',str(d)]
- results={};objects=[]
+ results={};objects=[];strong_owners={};duplicates={}
  sources=[ROOT/'UniXNU-b5q/package'/name for name in ['B5qUsbHost.cpp','B5qSpmi.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c']]
  # Compile the service with its previously excluded cold-start branches.
  service=ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoService.cpp';adapted=t/service.name
@@ -63,7 +63,20 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
    a.objects_out.mkdir(parents=True,exist_ok=True);shutil.copyfile(target,a.objects_out/target.name)
   if source.stem=='B5qUsbHost':
    bindings,slots=module.bindings(target.read_bytes(),abi);assert {n:hex(v)for n,v in bindings.items()}=={k:v for k,v in qualified['bindings'].items()if 'IOHIDDevice'not in k}
-  symbols=object_symbols(target.read_bytes());imports={n for n,_,kind in symbols if kind==1};exports={n for n,_,kind in symbols if kind!=1}
+  symbols=object_symbols(target.read_bytes());
+  # Duplicate external definitions are as fatal as undefined imports. Ignore
+  # weak/coalesced inline/template definitions (N_WEAK_DEF=0x80).
+  data=target.read_bytes();import struct
+  from b5q_abi import macho
+  st=next(at for cmd,at,_ in macho(data)['commands'] if cmd==2)
+  sy,count,strings,_=struct.unpack_from('<4I',data,st+8)
+  for index in range(count):
+   ix,kind,section,desc,value=struct.unpack_from('<IBBHQ',data,sy+index*16)
+   if kind&1 and kind&0xe and not kind&0xe0 and not desc&0x80:
+    name=data[strings+ix:data.index(b'\0',strings+ix)].decode()
+    if name in strong_owners:duplicates.setdefault(name,[strong_owners[name]]).append(source.stem)
+    else:strong_owners[name]=source.stem
+  imports={n for n,_,kind in symbols if kind==1};exports={n for n,_,kind in symbols if kind!=1}
   objects.append((source.stem,imports,exports));results[source.stem]=dict(target='arm64e-ios27',imports=len(imports))
   # Match Mach-O LC_BUILD_VERSION against the source-kernel triple. This also
   # covers the separately assembled binding/address objects that failed CI.
@@ -77,4 +90,4 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  for stem,imports,exports in objects:
   missing=imports-available;results[stem]['unresolved']=sorted(missing)
  for n in ['_backtrace_user','_backtrace','_task_get_all_image_info_addr','_copyin','_get_user_regs','_thread_tid','_PE_parse_boot_argn']:assert n in defined,n
-print(json.dumps(dict(passed=not any(v['unresolved'] for v in results.values()),XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True)))
+print(json.dumps(dict(passed=not duplicates and not any(v['unresolved'] for v in results.values()),duplicate_external_definitions=duplicates,XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True)))
