@@ -190,7 +190,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -337,7 +337,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -765,7 +765,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -828,7 +828,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -927,7 +927,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -981,7 +981,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -1048,7 +1048,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -1348,7 +1348,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
@@ -1636,7 +1636,7 @@ result = "v21 actualsource provenance,20targetcompile/334HID/427XHCI checks andp
 
 
 [[area.evidence]]
-kind = "test"
+kind = "host"
 reference = "reports/runtime-v21.json"
 result = "v21 actualCI,returnedbinary,APFS,FAT,journal and10itemacceptance PASS; local UFSretry verifier usesexactSCSIoverload afterTouchComm introducedsamename; UFSproductionunchanged; espSHA256=2f115c9dae371d65b9e47b303d7dd5e53712e722c0d7a0aab63629e300a2a23b;physicalresults pending."
 [[area]]
