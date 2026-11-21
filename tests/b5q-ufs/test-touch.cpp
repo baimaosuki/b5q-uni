@@ -13,26 +13,88 @@ struct Bus {
  static unsigned read(void *v,unsigned off){auto &b=*static_cast<Bus *>(v);if(off==GENI_RX_FIFO_STATUS)return b.rx.size();if(off==GENI_RX_FIFO){assert(!b.rx.empty());unsigned n=b.rx.front();b.rx.pop_front();return n;}return b.regs[off];}
  static void write(void *v,unsigned off,unsigned n){auto &b=*static_cast<Bus *>(v);b.writes.push_back(off);b.regs[off]=n;if(off==GENI_M_CMD0)b.commands.push_back(n);if(off==GENI_M_IRQ_CLEAR)b.regs[GENI_M_IRQ_STATUS]&=~n;}
 };
-int main(){
- using namespace B5qTouch;Point points[12]={};
+void testClocks(){
+ const std::vector<unsigned> halts={0x23294,0x23284,0x2327c,0x23280,0x184e4};
+ constexpr uint32_t otherVotes=(1u<<8)|(1u<<28),lateVote=1u<<29;
+ // Only the injected locked update can access the shared vote. A vote from
+ // another client arriving before that RMW must survive alongside SE6's vote.
  for(unsigned stop:{0u,0x23294u,0x23284u,0x2327cu,0x23280u,0x184e4u}) {
-  unsigned failed=0,delays=0,writes=0;uint32_t last=0;
-  auto read=[&](unsigned off){assert(off==B5qTouchClock::vote||off==0x23294||off==0x23284||off==0x2327c||off==0x23280||off==0x184e4);return off==stop?1u<<31:0u;};
-  auto write=[&](unsigned off,uint32_t value){assert(off==0x52008&&value==B5qTouchClock::enables);++writes;};
-  bool ok=B5qTouchClock::enable(read,write,[&](unsigned us){assert(us==10);++delays;},failed,last);
-  assert(ok==!stop&&writes==1&&failed==stop&&delays==(stop?2000u:0u));
+  unsigned failed=0xdead,delays=0,updates=0;uint32_t last=0xdead,votes=otherVotes;
+  std::vector<unsigned> reads;
+  auto read=[&](unsigned off){
+   assert(updates==1);
+   // A timed-out branch is the only one repeatedly read; later branches
+   // (and all SE MMIO) must remain inaccessible after the first failure.
+   reads.push_back(off);return (off==stop?1u<<31:0u)|0x1234u;
+  };
+  auto update=[&](unsigned off,uint32_t clear,uint32_t set){
+   assert(reads.empty()&&off==0x52008&&clear==0&&set==0x043c0000);
+   ++updates;votes|=lateVote;votes=(votes&~clear)|set;return true;
+  };
+  // Track each expected branch without letting repeated polls advance it.
+  unsigned branch=0;
+  auto poll=[&](unsigned off){
+   assert(branch<halts.size()&&off==halts[branch]);
+   const uint32_t value=read(off);if(off!=stop)++branch;return value;
+  };
+  bool ok=B5qTouchClock::enable(poll,update,[&](unsigned us){assert(us==10);++delays;},failed,last);
+  assert(ok==!stop&&updates==1&&failed==stop&&delays==(stop?2000u:0u));
+  assert(votes==(otherVotes|lateVote|0x043c0000)&&last==((stop?1u<<31:0u)|0x1234u));
+  assert(reads.size()==(stop?branch+2000:halts.size()));
  }
- for(unsigned failure=0;failure<4;++failure){
-  std::map<unsigned,unsigned> regs={{0x18504,1},{0x184f4,0xfeed0300},{0x184f0,0}};
-  unsigned waits=0;std::vector<unsigned> writes;
-  auto read=[&](unsigned off){if(off==0x18504&&failure==1)return 1u;return regs[off];};
-  auto write=[&](unsigned off,uint32_t v){writes.push_back(off);if(off==0x184f4&&failure==3)return;regs[off]=v;};
-  auto wait=[&](unsigned us){assert(us==10);++waits;if(failure!=2)regs[0x184f0]&=~1u;};
-  assert(B5qTouchClock::xo(read,write,wait)==(failure==0));
-  if(failure==1)assert((writes==std::vector<unsigned>{0x18504}));
-  if(failure==2)assert(waits==2000);
-  for(unsigned off:writes)assert(off==0x18504||off==0x184f4||off==0x184f0);
+ // Lock acquisition or vote readback failure must stop before any CBCR read.
+ {
+  unsigned failed=0,updates=0;uint32_t last=0xdead;
+  auto update=[&](unsigned off,uint32_t clear,uint32_t set){assert(off==0x52008&&!clear&&set==0x043c0000);++updates;return false;};
+  assert(!B5qTouchClock::enable([](unsigned)->uint32_t{assert(false);return 0;},update,
+   [](unsigned){assert(false);},failed,last));
+  assert(updates==1&&failed==0x52008&&last==0);
  }
+ // Every branch can come up late; bounded polling must also accept it.
+ {
+  unsigned failed=0xdead,delays=0,branch=0,polls=0;uint32_t last=0xdead;
+  auto read=[&](unsigned off){assert(branch<halts.size()&&off==halts[branch]);if(++polls<4)return 1u<<31;polls=0;++branch;return 0u;};
+  assert(B5qTouchClock::enable(read,[](unsigned,uint32_t,uint32_t){return true;},
+   [&](unsigned us){assert(us==10);++delays;},failed,last));
+  assert(branch==halts.size()&&delays==15&&!failed&&!last);
+ }
+ // Real XO helper: sticky DFS, stuck UPDATE, rejected/changed CFG, already
+ // disabled DFS, final-poll completion, and immediate completion. All accesses
+ // are confined to Samsung SE4, leaving SE6 and M/N/D registers untouched.
+ for(unsigned failure=0;failure<8;++failure){
+  constexpr uint32_t initialCfg=0xfeed3300,initialCmd=0x102,dfsOther=0xa5a50002;
+  const bool dfsEnabled=failure!=5;
+  std::map<unsigned,uint32_t> regs={{0x18504,dfsOther|unsigned(dfsEnabled)},{0x184f4,initialCfg},{0x184f0,initialCmd}};
+  unsigned waits=0;std::vector<unsigned> reads,writes;
+  auto read=[&](unsigned off){assert(regs.count(off));reads.push_back(off);return regs.at(off);};
+  auto write=[&](unsigned off,uint32_t v){
+   assert(regs.count(off));writes.push_back(off);
+   if((off==0x18504&&failure==1)||(off==0x184f4&&failure==3))return;
+   regs.at(off)=v;if(off==0x184f0&&failure==7)regs.at(off)&=~1u;
+  };
+  auto wait=[&](unsigned us){
+   assert(us==10);++waits;
+   if(failure!=2&&(failure!=6||waits==1999)){
+    regs.at(0x184f0)&=~1u;if(failure==4)regs.at(0x184f4)^=0x100;
+   }
+  };
+  assert(B5qTouchClock::xo(read,write,wait)==(failure==0||failure>=5));
+  if(failure==1){
+   assert((writes==std::vector<unsigned>{0x18504})&&(reads==std::vector<unsigned>{0x18504,0x18504})&&!waits);
+   assert(regs.at(0x184f4)==initialCfg&&regs.at(0x184f0)==initialCmd);continue;
+  }
+  const std::vector<unsigned> expected=dfsEnabled?std::vector<unsigned>{0x18504,0x184f4,0x184f0}:std::vector<unsigned>{0x184f4,0x184f0};
+  assert(writes==expected&&regs.at(0x18504)==dfsOther);
+  assert((regs.at(0x184f4)&~0x371fu)==(initialCfg&~0x371fu));
+  assert((regs.at(0x184f0)&~1u)==initialCmd);
+  assert(waits==(failure==2?2000u:failure==6?1999u:failure==7?0u:1u));
+  if(failure==3)assert(regs.at(0x184f4)==initialCfg);
+  else assert((regs.at(0x184f4)&0x371fu)==(failure==4?0x101u:1u));
+ }
+ puts("PASS production SE4 clock helper: locked shared vote/preserved peer votes/early failure/all branch timeouts/delayed enable/DFS and RCG faults/offset isolation");
+}
+int main(){
+ using namespace B5qTouch;Point points[12]={};testClocks();
  uint32_t invalid[]={0,0,0};int32_t mc=THERMAL_NONE;assert(!thermal_pick_valid(invalid,3,&mc)&&mc==THERMAL_NONE);
  uint32_t valid[]={0,THERMAL_STATUS_VALID|310u,0};assert(thermal_pick_valid(valid,3,&mc)&&mc==31000);
 

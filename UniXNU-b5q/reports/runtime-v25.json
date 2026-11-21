@@ -1,0 +1,188 @@
+{
+  "version": "v25",
+  "source_runtime": "logs/b5q-xnu2log-v24-client-off/XNU2LOG.txt",
+  "runtime_sha256": "31d8c88d7d849e80aa505d61d9131c30609a7b82e00abeb830be853263c377be",
+  "input_binary_sha256": "3f4eb03ad99f762340bdeb5c42c9bac139d79a7548dc47be0a274d9324dbdc1c",
+  "runtime_observed": {
+    "usb_stage5_external_abort": "ESR96000010 FARfffffff5e6800804",
+    "sent_frames": 0,
+    "rejected_format": "0x62336138 planes2",
+    "journal_seq": 448,
+    "capture_lost_bytes": 2086,
+    "governor_periodic_rows": 0,
+    "governor_silence_cause": "not proven by existing capture"
+  },
+  "changes": {
+    "display": "exact paired BGRA5de1134+5de63cc, no software/backdrop/AppKit rules",
+    "USB": "no EL1 apps_smmu register mapping/scan/diagnostic; stage5 skipped, continue6-9; hardware-only TI/TypeC roles and DMA deferred without verified firmware handoff",
+    "touch": "shared vote52008 uses GCC locked update; SE4DFS18504 retained perSamsungsource, before/after stages",
+    "governor": "threadstart/entry/firsttick/10second sampling logs; policy unchanged"
+  },
+  "build": {
+    "source_core_run": 44910077002,
+    "source_core_sha256": "88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b",
+    "core_compiled": false,
+    "GPU_compiled": false,
+    "Data_regenerated": false,
+    "board_sources": [
+      "QcomDwc3.cpp",
+      "B5qTouch.cpp",
+      "CpuFreqProbe.cpp"
+    ],
+    "CI": "pending",
+    "final_binary_validation": "pending",
+    "new_hardware_tested": false
+  },
+  "local_regressions": [
+    {
+      "name": "USB-hardware-only",
+      "exit_code": 0,
+      "log": "artifacts/b5q-runtime-v25-work/USB-hardware-only.log"
+    },
+    {
+      "name": "Touch-clock",
+      "exit_code": 0,
+      "log": "artifacts/b5q-runtime-v25-work/Touch-clock.log"
+    },
+    {
+      "name": "Touch-IRQ",
+      "exit_code": 0,
+      "log": "artifacts/b5q-runtime-v25-work/Touch-IRQ.log"
+    },
+    {
+      "name": "USB-DT-sequences",
+      "exit_code": 0,
+      "log": "artifacts/b5q-runtime-v25-work/USB-DT-sequences.log"
+    }
+  ],
+  "BGRA_original_sites": {
+    "passed": true,
+    "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/assets/shared-cache/System/Library/dyld/dyld_shared_cache_arm64e.03",
+    "rules": [
+      {
+        "offset": "5de1134",
+        "original": "08060037",
+        "replacement": "1f2003d5",
+        "original_page_sha256": "8870b41a6e8d2ee6fa7db01d83f8425afabfd42dc9b29743d275fc25581bb510",
+        "instructions": {
+          "original": [
+            [
+              "tbnz",
+              "w8, #0, #0x5de11f4"
+            ]
+          ],
+          "replacement": [
+            [
+              "nop",
+              ""
+            ]
+          ]
+        }
+      },
+      {
+        "offset": "5de63cc",
+        "original": "1811981a",
+        "replacement": "f803082a",
+        "original_page_sha256": "534eb22cb60d777d1b8bd1c3bdc2dccae664c7edd5d9172ff7eefb7e72805d90",
+        "instructions": {
+          "original": [
+            [
+              "csel",
+              "w24, w8, w24, ne"
+            ]
+          ],
+          "replacement": [
+            [
+              "mov",
+              "w24, w8"
+            ]
+          ]
+        }
+      }
+    ]
+  },
+  "USB_HAL_feasibility": "reports/usb-hal-handoff-v25.json",
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "13ad7adda64c75b71a3b95f1fdad4f6e5c52d10e17cac21a6c0e6dfdd06adbf4",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "5458e09a0d8f2f871c35fe03a2dc7142dd61a9cf0a61233d890548c7f8a60384",
+    "UniXNU-b5q/package/B5qTouch.cpp": "e60a5e3afb92680fb42538455f1ae6c0f25611c2cec3eed68330fc3ce60f5979",
+    "UniXNU-b5q/package/B5qTouchClock.h": "562dc762a71528f5243cbd7df54a4389660233cdd473a48d1645ea39d3b76d9e",
+    "UniXNU-b5q/package/CpuFreqProbe.cpp": "d2b00b044f36269cb7daa66fff38ebd2159e968c329ca736506c777b6822a39a",
+    "UniXNU-b5q/scripts/build-b5q-usb.py": "3f22c21312723550f0890e7082c097a0e982d577d35aec98b1867cd689dc51a9",
+    "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "76ceb3fa41c58beec3122fbbc50b1a94c61112703bb3864caedaf9be300a2797",
+    ".github/workflows/b5q-v25-incremental.yml": "74aa19315479fb5513532e4ac7d61dc07d998b40067e799ff4184e091591d62f"
+  },
+  "target_compile": {
+    "passed": true,
+    "duplicate_external_definitions": {},
+    "XHCI_slots": 427,
+    "objects": {
+      "QcomDwc3": {
+        "target": "arm64e-ios27",
+        "imports": 628,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      },
+      "CpuFreqProbe": {
+        "target": "arm64e-ios27",
+        "imports": 17,
+        "unresolved": [],
+        "expected_new_core_imports": [
+          "_sheng_cpu_idle_mach"
+        ]
+      },
+      "B5qTouch": {
+        "target": "arm64e-ios27",
+        "imports": 24,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      }
+    },
+    "all_saved_context_external_helpers_present": true,
+    "new_core_linkage_pending": true
+  },
+  "local_portable_relink": {
+    "source_run": 44910077002,
+    "source_commit": "110e027fca0f0a963ff98a692b372aab8fcb495f",
+    "expected_core_sha256": "88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b",
+    "core_translation_units_compiled": 0,
+    "board_translation_units_compiled": 0,
+    "gpu_recompiled": false,
+    "data_regenerated": false,
+    "optional_cpu_idle_helper_present": true,
+    "reference_fileset": true,
+    "changed_board_sources": [
+      "QcomDwc3.cpp",
+      "B5qTouch.cpp",
+      "CpuFreqProbe.cpp"
+    ],
+    "dependency_commits": {
+      "xnu": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+      "IOHIDFamily": "e31e90a24c27ad6cbe981650d12a1a4124065b03",
+      "XnuPrelink": "440589b0c31625f17edf363e24b3c82c51c70bb9"
+    },
+    "local_preparation_passed": true,
+    "linked_archive_count": 10,
+    "tracked_USB_archive": true,
+    "retained_binder_objects": 16,
+    "aliases": 96,
+    "symbolsets_bytes": 287807,
+    "workflow_dispatch_only": true,
+    "workflow_shell_syntax_passed": true,
+    "main_artifact_has_canonical_objects_and_metadata": true
+  },
+  "local_PAC": {
+    "cross_object": "artifacts/b5q-runtime-v25-work/cross-object-PAC.json",
+    "touch_GENI": "artifacts/b5q-runtime-v25-work/touch-GENI-PAC.json",
+    "passed": true
+  },
+  "USB_no_SMMU_object_audit": {
+    "passed": true,
+    "object_sha256": "65c683aa44d297d6ad1568881ac7b324c2215c29a6d3dc7f1c21998255af3c86",
+    "instructions_inspected": 3431,
+    "apps_smmu_addresses_materialized": [],
+    "removed_allocator_symbols_absent": true,
+    "hardware_only_DMA_gate_present": true,
+    "scope": "Actual object instructions plus removed map/allocator symbols; production zero-MMIO regression is separate"
+  }
+}

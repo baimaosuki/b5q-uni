@@ -10,6 +10,7 @@
 #include "B5qTouchIrq.h"
 #include "B5qTouchPower.h"
 extern "C" {
+bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 wait_result_t clear_wait(thread_t,wait_result_t);
 int armcpu_spi_share(uint32_t,void (*)(void *),void *);
 volatile uint32_t native_touch_seq,native_touch_count,native_touch_hid_reports;
@@ -106,18 +107,28 @@ void worker(void *,wait_result_t){
   unsigned failed=0;uint32_t last=0;
   auto clockRead=[](unsigned off){return gcc[off/4];};
   auto clockWrite=[](unsigned off,uint32_t value){gcc[off/4]=value;barrier();};
-  if(!B5qTouchClock::enable(clockRead,clockWrite,[](unsigned us){IODelay(us);},failed,last)) {
-   stage="s4-clk-off";IOLog("B5qTouch: stage=s4-clk-off offset=%08x cbcr=%08x\n",failed,last);break;
+  auto clockUpdate=[](unsigned off,uint32_t clear,uint32_t set){return sm8550_gcc_update32(gcc+off/4,clear,set);};
+  stage="s4-clk-enable";IOLog("B5qTouch: stage=%s phase=before vote=%08x mask=%08x\n",stage,B5qTouchClock::vote,B5qTouchClock::enables);
+  const bool enabled=B5qTouchClock::enable(clockRead,clockUpdate,[](unsigned us){IODelay(us);},failed,last);
+  IOLog("B5qTouch: stage=%s phase=after ok=%u failed=%08x last_cbcr=%08x\n",stage,enabled,failed,last);
+  if(!enabled) {
+   stage=failed==B5qTouchClock::vote?"s4-vote-failed":"s4-clk-off";break;
   }
-  stage="s4-xo";if(!B5qTouchClock::xo(clockRead,clockWrite,[](unsigned us){IODelay(us);}))break;
-  se=map(2,0xa90000,0x4000);if(!se)break;
+  stage="s4-xo";IOLog("B5qTouch: stage=%s phase=before cmd=%08x cfg=%08x dfs=%08x\n",stage,B5qTouchClock::rcg,B5qTouchClock::cfg,B5qTouchClock::dfs);
+  const bool xoReady=B5qTouchClock::xo(clockRead,clockWrite,[](unsigned us){IODelay(us);});
+  IOLog("B5qTouch: stage=%s phase=after ok=%u\n",stage,xoReady);if(!xoReady)break;
+  stage="se-map";IOLog("B5qTouch: stage=%s phase=before base=00a90000 bytes=4000\n",stage);
+  se=map(2,0xa90000,0x4000);
+  IOLog("B5qTouch: stage=%s phase=after ok=%u\n",stage,se!=nullptr);if(!se)break;
   // GPIO mux1 is qup1_se4_l0/l1 in Samsung pinctrl-kalama; preserve drive/pull.
   tlmm[19*0x1000/4]&=~(1u<<9); // ATTN GPIO input, preserve pulls.
   for(unsigned pin=44;pin<=45;++pin)tlmm[pin*0x1000/4]=(tlmm[pin*0x1000/4]&~0x3cu)|(1u<<2);barrier();
   const GeniIo io={rd,wr,nullptr};
   // Firmware protocol and FIFO capability must already permit I2C. An idle
   // engine with a disabled clock receives the Samsung 19.2 MHz XO timing.
-  stage="geni-prepare";int prepared=geni_i2c_prepare_xo(&bus,&io,0x20,&proto);
+  stage="geni-prepare";IOLog("B5qTouch: stage=%s phase=before\n",stage);
+  int prepared=geni_i2c_prepare_xo(&bus,&io,0x20,&proto);
+  IOLog("B5qTouch: stage=%s phase=after rc=%d se_proto=%08x\n",stage,prepared,proto);
   IOLog("B5qTouch: stage=%s se_proto=%08x gpio19=%u clk=%08x scl=%08x rc=%d\n",stage,proto,tlmm[0x13004/4]&1,se[GENI_CLK_CFG/4],se[GENI_SCL_COUNTERS/4],prepared);if(prepared)break;
   stage="identify";if(!command(2,nullptr,0))break;
   stage="application-info";if(!command(0x20,nullptr,0))break;

@@ -46,6 +46,8 @@
 #include <mach/mach_time.h>
 
 extern "C" {
+// Pinned XNU osfmk/arm/cpu_number.h declares this; the Kernel SDK omits that header.
+int cpu_number(void);
 char native_cpufreq_row[120];
 volatile uint32_t native_cpufreq_stage;
 // Mode 4, per domain over the last 10 s: level changes, mean MHz, mean busy % of the busiest CPU
@@ -220,6 +222,7 @@ void setLevel(unsigned d, unsigned at) {
 }
 
 void governorThread(void *, wait_result_t) {
+    IOLog("B5qCpuFreq: governor-enter cpu=%d\n", cpu_number());
     uint64_t lastIdle[kCpus] = {}, lastT = mach_absolute_time();
     for (unsigned c = 0; c < kCpus; ++c) lastIdle[c] = kIdleMach((int)c);
     unsigned cur[3] = {}, down[3] = {}, quiet[3] = {};
@@ -234,6 +237,7 @@ void governorThread(void *, wait_result_t) {
     uint32_t changes[3] = {};
     uint32_t full[3] = {}, late[3] = {};
     uint64_t fullVote[3] = {}, fullState[3] = {};   // sums of MHz over the windows counted in full
+    bool firstTick = true;
     for (;;) {
         IOSleep(16);
         const uint64_t t = mach_absolute_time(), dt = t - lastT;
@@ -330,10 +334,16 @@ void governorThread(void *, wait_result_t) {
             const uint32_t n = __atomic_fetch_add(&native_cpufreq_count, 1u, __ATOMIC_RELAXED);
             ring[n & (kCpuFreqRing - 1)] = rec;
         }
-        if (winNs >= 10000000000ull) {
-            IOLog("B5qCpuFreq: dynamic-recount vote-MHz=%u/%u/%u state-MHz=%u/%u/%u busy-permille=%u/%u/%u\n",
+        // The first nonzero window proves the loop progressed; it must not reset the 10 s statistics.
+        if (firstTick || winNs >= 10000000000ull) {
+            IOLog("B5qCpuFreq: %s cpu=%d vote-MHz=%u/%u/%u state-MHz=%u/%u/%u busy-permille=%u/%u/%u ready=%u/%u/%u\n",
+                firstTick ? "first-tick" : "dynamic-recount", cpu_number(),
                 rec.vote_mhz[0],rec.vote_mhz[1],rec.vote_mhz[2],rec.state_mhz[0],rec.state_mhz[1],rec.state_mhz[2],
-                rec.busy_pm[0],rec.busy_pm[1],rec.busy_pm[2]);
+                rec.busy_pm[0],rec.busy_pm[1],rec.busy_pm[2],
+                (unsigned)(rec.vote_mhz[0] != 0), (unsigned)(rec.vote_mhz[1] != 0), (unsigned)(rec.vote_mhz[2] != 0));
+            firstTick = false;
+        }
+        if (winNs >= 10000000000ull) {
             for (unsigned d = 0; d < 3; ++d) {
                 native_cpufreq_gov[d * 3] = changes[d];
                 native_cpufreq_gov[d * 3 + 1] = (uint32_t)(khzNs[d] / winNs);
@@ -386,9 +396,16 @@ extern "C" void sheng_cpufreq_probe(void) {
     if(mode>=4 && !kIdleMach)mode=3;
     gMode = mode;
     IOLog("B5qCpuFreq: mode=%u recount=%u\n",mode,kIdleMach!=nullptr);
+    // Capture the hardware state before this probe's first vote, including unmapped/disabled domains.
+    IOLockLock(gLock);
+    refreshRow();
+    IOLog("B5qCpuFreq: startup cpu=%d %s\n",cpu_number(),native_cpufreq_row);
+    IOLockUnlock(gLock);
     sheng_cpufreq_poll();
     if (mode >= 4 && kIdleMach) {
         thread_t thread = nullptr;
-        if (kernel_thread_start(governorThread, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);
+        const kern_return_t kr = kernel_thread_start(governorThread, nullptr, &thread);
+        IOLog("B5qCpuFreq: governor-start kr=%d\n", (int)kr);
+        if (kr == KERN_SUCCESS) thread_deallocate(thread);
     }
 }

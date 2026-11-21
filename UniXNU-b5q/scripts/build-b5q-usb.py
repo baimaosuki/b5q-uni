@@ -116,6 +116,6 @@ def main():
  for stem,text in [('usb-bindings',asm),('usb-addresses',addresses)]:
   path=out/(stem+'.S');path.write_text(text);target=path.with_suffix('.o')
   subprocess.run(['xcrun','clang','-target',TRIPLE,'-c',str(path),'-o',str(target)],check=True);objects.append(target)
- report(archive(out/'libQcomDwc3.a',objects),objects,[source],dict(original_XHCI_slots=slots,original_imports=len(bound),apps_smmu_MMIO=True,DMA_environment="dedicated SID40 Stage1 WB-IS via HAL-compatible free CBAR",DMA_handoff_required=False,hardware_tested=False))
+ report(archive(out/'libQcomDwc3.a',objects),objects,[source],dict(original_XHCI_slots=slots,original_imports=len(bound),apps_smmu_MMIO=False,DMA_environment="controller DMA deferred until firmware-proven SID40 WB-IS handoff",DMA_handoff_required=True,hardware_tested=False))
  print(json.dumps([str(v)for v in objects]))
 if __name__=='__main__':main()

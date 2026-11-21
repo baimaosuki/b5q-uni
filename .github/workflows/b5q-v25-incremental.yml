@@ -1,0 +1,139 @@
+name: b5q v25 three-object incremental relink and official payload
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  incremental:
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOMEBREW_NO_INSTALL_CLEANUP: '1'
+      HOMEBREW_NO_ENV_HINTS: '1'
+      UNIXNU_DEVICE: ${{ github.workspace }}/UniXNU-b5q
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/UniXNU
+          ref: 8542980d02b4d2cc5c32ee3542de1760b2562aac
+          path: UniXNU
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: macOS-ARM64-xcode26.6-b5q-brew-v1-44910077002
+          restore-keys: macOS-ARM64-xcode26.6-b5q-brew-v1-
+      - name: Prepare packaging tools
+        run: |
+          set -euo pipefail
+          brew install llvm lld mtools dtc blacktop/tap/ipsw
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
+      - name: Stage completed v24 core, 4GiB Data and unchanged addon
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          B5Q_V24_INPUT_0: ${{ secrets.B5Q_V24_INPUT_0 }}
+          B5Q_V24_INPUT_1: ${{ secrets.B5Q_V24_INPUT_1 }}
+          B5Q_V24_INPUT_2: ${{ secrets.B5Q_V24_INPUT_2 }}
+          B5Q_V24_INPUT_3: ${{ secrets.B5Q_V24_INPUT_3 }}
+          B5Q_V24_INPUT_4: ${{ secrets.B5Q_V24_INPUT_4 }}
+          B5Q_V24_INPUT_5: ${{ secrets.B5Q_V24_INPUT_5 }}
+          B5Q_V24_INPUT_6: ${{ secrets.B5Q_V24_INPUT_6 }}
+          B5Q_V24_INPUT_7: ${{ secrets.B5Q_V24_INPUT_7 }}
+        run: |
+          set -euo pipefail
+          UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
+          gh run download 44910077002 --repo "$GITHUB_REPOSITORY" --name b5q-build-44910077002 --dir "$RUNNER_TEMP/completed-v24"
+          python3 UniXNU-b5q/scripts/stage-v24-inputs.py --unixnu UniXNU --artifact "$RUNNER_TEMP/completed-v24" --inputs "$RUNNER_TEMP/v24-inputs" --data-out "$RUNNER_TEMP/v24-data"
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-v24" --data-out "$RUNNER_TEMP/v24-data-reused" --source-run 44910077002 --source-commit 110e027fca0f0a963ff98a692b372aab8fcb495f
+          echo "V24_DATA=$RUNNER_TEMP/v24-data-reused/data.dbr" >> "$GITHUB_ENV"
+      - name: Prepare official relink and payload dependencies
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Normal payload/prelink module dependencies only; no full kernel,
+          # Mesa/Turnip, Cargo or Data builder is invoked.
+          UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
+          UniXNU/unixnu fetch xnu IOHIDFamily --device UniXNU-b5q --os macos-27.3-26C5035r
+      - name: Compile QcomDwc3, B5qTouch and CpuFreqProbe; relink v24 core and prelink
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/relink-b5q-peripherals.py --unixnu UniXNU --device UniXNU-b5q --cached-tree "$RUNNER_TEMP/completed-v24/macos-27.3-26C5035r/b5q_macos/tree" --source-run 44910077002 --source-commit 110e027fca0f0a963ff98a692b372aab8fcb495f --changed QcomDwc3.cpp,B5qTouch.cpp,CpuFreqProbe.cpp --reused-data "$V24_DATA" --out "$RUNNER_TEMP/v25-relink" 2>&1 | tee "$RUNNER_TEMP/v25-relink.log"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/uefi-sheng
+          ref: b303410c8e401fc9419ae65a024356ed09a438ef
+          path: font-reference
+          sparse-checkout: Silicon/Silicium/SiliciumPkg/Library/FrameBufferSerialPortLib
+          persist-credentials: false
+      - name: Generate official ADT, payload and 4Kn ESP with reused GPU addon and RAM Data
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$V24_DATA" --reuse-addon 2>&1 | tee "$RUNNER_TEMP/v25-payload.log"
+          python3 UniXNU-b5q/scripts/package-v24-esp.py --unixnu UniXNU --inputs "$RUNNER_TEMP/v24-inputs"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: b5q-build-${{ github.run_id }}
+          path: |
+            UniXNU/out/b5q/**/esp.img
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.link/mach.development.bcm2837.a
+            UniXNU/out/b5q/**/tree/build/firehose/sym/Release-iphoneos/liblibfirehose_kernel.a
+            UniXNU/out/b5q/**/tree/build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a
+            UniXNU/out/b5q/**/tree/build/armdt-platform/libArmDTPlatform.a
+            UniXNU/out/b5q/**/tree/build/armcpu/libArmCpu.a
+            UniXNU/out/b5q/**/tree/build/adreno740/libAdreno740.a
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/libNativeLegacyDisplay.late.a
+            UniXNU/out/b5q/**/tree/build/ram-block/libRamBlock.a
+            UniXNU/out/b5q/**/tree/build/libpthread-kernel/libpthread_kernel.a
+            UniXNU/out/b5q/**/tree/build/software-aes/libSoftwareAES.a
+            UniXNU/out/b5q/**/tree/build/qcom-dwc3/libQcomDwc3.a
+            UniXNU/out/b5q/**/kernel/kernel.macho
+            UniXNU/out/b5q/**/kernel/*.json
+            UniXNU/out/b5q/**/kernel/incremental-objects/*.o
+            UniXNU/out/b5q/**/kernel/incremental-objects/*.json
+            UniXNU/out/b5q/**/payload/payload.img
+            UniXNU/out/b5q/**/payload/payload.json
+            UniXNU/out/b5q/**/runtime/data.dbr
+            UniXNU/out/b5q/**/runtime/data-seed.json
+            UniXNU/out/b5q/**/runtime/inputs.json
+            UniXNU/out/b5q/**/package.manifest.json
+            UniXNU/out/b5q/**/kernel-reuse.json
+          compression-level: 1
+          retention-days: 3
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: v25-incremental-logs
+          path: |
+            UniXNU/out/b5q/**/logs/
+            ${{ runner.temp }}/v25-payload.log
+            ${{ runner.temp }}/v25-relink.log
+            ${{ runner.temp }}/v25-relink/*.json
+            ${{ runner.temp }}/v25-relink/*.exp
+            ${{ runner.temp }}/v25-relink/*.plist
+          retention-days: 3
+      - name: Release temporary source artifact and staging inputs
+        if: always()
+        run: |
+          rm -rf "$RUNNER_TEMP/completed-v24" "$RUNNER_TEMP/v24-inputs" "$RUNNER_TEMP/v24-data" "$RUNNER_TEMP/v24-data-reused" "$RUNNER_TEMP/v25-relink"

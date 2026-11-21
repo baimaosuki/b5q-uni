@@ -10,8 +10,10 @@ def run(name,cmd):
  print(('PASS 'if not result.returncode else'FAIL ')+name,flush=True)
  if result.returncode:print(result.stdout[-5000:]);(work/'pre-ci-v24.json').write_text(json.dumps({'passed':False,'checks':checks},indent=2)+'\n');raise SystemExit(result.returncode)
 board=tomllib.loads((root/'UniXNU-b5q/board.toml').read_text());args=board['payload']['kernel_args']
-for v in ['usb=1','buttons=1','touch=1','touch-hid=1','offline-hid-input=1','cpufreq=4','armcpu-edge=1','ci-mps=0','offline-mobile-graphics-client=1']:assert v in args,v
-assert board['payload']['runtime']['data_gib']==4 and len(board['payload']['text_fixups'])==1
+for v in ['usb=1','buttons=1','touch=1','touch-hid=1','offline-hid-input=1','cpufreq=4','armcpu-edge=1','ci-mps=0']:assert v in args,v
+assert not any(x.startswith('offline-mobile-graphics-client=') for x in args)
+assert len(' '.join(args).encode())<=950
+assert board['payload']['runtime']['data_gib']==4 and board['payload']['text_fixups']==['dyld_shared_cache_arm64e.03,5de1134,08060037,1f2003d5','dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a']
 assert not any('cpufreq-cap='in x or'b5q-usb='in x or'b5q-usb-delay'in x for x in args)
 for p in ['B5qUsbHost.cpp','B5qSpmi.cpp','B5qSpmi.h']:assert not(root/'UniXNU-b5q/package'/p).exists()
 assert not any(x in (root/'UniXNU-b5q/package/QcomDwc3.cpp').read_text()for x in ['retimerInit','0x7fd','QcomUcsi'])

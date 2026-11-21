@@ -58,9 +58,10 @@ size_mib = 256
 loader = "firmware"
 title = "UniXNU b5q macOS 27.3"
 panic_screen = true
-# The only Sheng macOS 27.3 hardware-Metal fixup: request BGRA on the scanout path.
+# Paired macOS 27.3 hardware-Metal BGRA choices; no software compositor rules.
 text_fixups = [
   "dyld_shared_cache_arm64e.03,5de1134,08060037,1f2003d5",
+  "dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a",
 ]
 tools = true
 # b5q-root selects authenticated read-only macosroot; Data remains volatile in RAM.

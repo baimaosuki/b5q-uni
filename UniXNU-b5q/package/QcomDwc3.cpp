@@ -8,7 +8,6 @@
 #include "QcomEusb2Phy.h"
 #include "QcomQmpUsb3.h"
 #include "GeniI2c.h"
-#include "B5qUsbSmmu.h"
 #include "B5qUsbInputs.h"
 #include "B5qUsbIrq.h"
 #include <mach/mach_time.h>
@@ -23,7 +22,6 @@ extern "C" bool b5q_usb_otg(bool);
 #include <kern/clock.h>
 #include <pexpert/pexpert.h>
 #include <IOKit/IODeviceMemory.h>
-#include <IOKit/IOBufferMemoryDescriptor.h>
 #include <IOKit/IOPlatformExpert.h>
 extern "C" {
 int armcpu_spi_attach(uint32_t, bool, void (*)(void *), void *, uint32_t *, uint64_t *);
@@ -45,7 +43,7 @@ volatile uint32_t native_usb_stats[54];
 namespace {
 // The DWC3 global, device and OTG registers in the window Apple's class addresses: base + 0xc000.
 constexpr uint64_t kCore = 0x0a600000, kAppleWindow = kCore + 0xc000, kQscratch = kCore + 0xf8800, kGcc = 0x100000, kTcsr = 0x1fd5000,
-    kPhy = 0x088e3000, kSmmu = 0x15000000, kRsc = 0x17a20000, kCmdDb = 0x81c60000;
+    kPhy = 0x088e3000, kRsc = 0x17a20000, kCmdDb = 0x81c60000;
 constexpr uint32_t kCmdDbSize = 0x20000, kIrq = 133 + 32;
 constexpr unsigned kOwnedTcs = 2;   // shared with the microphone rail under the same lock
 struct Region {IOMemoryMap *map; volatile uint32_t *va;};
@@ -210,45 +208,14 @@ bool superSpeedInit() {
     tlmm.map->release();
     return qmpInit(reverse);
 }
-Region gSmmu;
-// Apple's controller driver does no cache maintenance: Apple's fabric is coherent. Here coherence comes from the SMMU's output
-// attributes, as in Linux (dma-coherent, IOMMU_CACHE page tables): a stage 1 context with an identity map of DRAM in 1 GiB blocks,
-// Normal write-back inner shareable. The bypass bank keeps device attributes and leaves this master non-coherent. No IOMapper:
-// IODMACommand hands the physical address to the core, which the identity map turns back into the same address.
-IOBufferMemoryDescriptor *gSmmuTable;
-unsigned gSmmuBank, gSmmuPages;
+// The b5q EL2 XPU rejects even SMR reads at EL1. No mapping, ID register,
+// allocator scan or diagnostic may touch apps_smmu here. A future loader-owned
+// EFI_HAL_IOMMU_PROTOCOL handoff must prove the coherent USB domain first.
+bool gDmaReady, gTypecReady;
 bool smmuIdentity() {
-    if (!mapRegion(gSmmu, kSmmu, 0xd0000)) return false;
-    AppsSmmuLock guard;
-    if (!guard.ready()) return false;
-    const uint32_t idr0 = gSmmu.va[0x20 / 4], idr1 = gSmmu.va[0x24 / 4];
-    unsigned groups = idr0 & 255;
-    if (groups > 128) groups = 128;
-    const unsigned banks = idr1 & 255, pages = 1u << (((idr1 >> 28) & 7) + 1);
-    if ((idr1 >> 31) || !groups || banks < 2 || banks > 128 || pages > 128 || (pages + banks) * 4096u > 0xd0000u) return false;
-    auto read=[&](unsigned off){return gSmmu.va[off/4];};
-    auto write=[&](unsigned off,uint32_t value){gSmmu.va[off/4]=value;barrier();};
-    B5qUsbSmmu::Plan chosen;
-    if(!B5qUsbSmmu::plan(read,chosen))return false;
-    const unsigned slot=chosen.slot,bank=chosen.bank;
-    const uint32_t acr=read(0x10);write(0x10,acr&~(1u<<26));
-    if(read(0x10)&(1u<<26))return false;
-    gSmmuTable = IOBufferMemoryDescriptor::withOptions((IOOptionBits)kIODirectionInOut | (IOOptionBits)kIOMemoryPhysicallyContiguous, 4096, 4096);
-    if (!gSmmuTable || gSmmuTable->prepare() != kIOReturnSuccess) return false;
-    uint64_t *table = static_cast<uint64_t *>(gSmmuTable->getBytesNoCopy());
-    bzero(table, 4096);
-    // T0SZ 28: 64 GiB, the walk starts at level 1. Blocks: AF, inner shareable, AP unprivileged read/write, attribute 0. Below 2 GiB
-    // there is no DRAM, and a stray access should fault.
-    for (uint64_t i = 2; i < 64; ++i) table[i] = i << 30 | 1ull << 10 | 3ull << 8 | 1ull << 6 | 1ull;
-    for (uintptr_t at = reinterpret_cast<uintptr_t>(table); at < reinterpret_cast<uintptr_t>(table) + 4096; at += 64) __asm__ volatile("dc cvac, %0" :: "r"(at) : "memory");
-    barrier();
-    const uint64_t tablePa = gSmmuTable->getPhysicalSegment(0, nullptr, 0);
-    const bool installed=B5qUsbSmmu::install(read,write,barrier,[](unsigned us){IODelay(us);},chosen,tablePa);
-    IOLog("qcom-dwc3: SID=40 slot=%u bank=%u cbar-before=%08x cbar=%08x installed=%u\n",slot,bank,chosen.cbar,read(0x1000+4*bank),installed);
-    if(!installed)return false;
-    native_usb_stats[7] = slot | bank << 16;
-    gSmmuBank = bank; gSmmuPages = pages;
-    return true;
+    native_usb_stats[7] = ~0u;
+    IOLog("qcom-dwc3: stage=5 smmu=skipped-el2-xpu dma=deferred-no-firmware-handoff\n");
+    return false;
 }
 }  // namespace
 
@@ -437,15 +404,17 @@ bool bringUp() {
     stage(4);
     if (!clocksAndResets()) {stage(-4); return false;}
     stage(5);
-    if (!smmuIdentity()) {stage(-5); return false;}
+    gDmaReady = smmuIdentity();
     stage(6);
-    if(!b5q_usb_typec_init()){stage(-6);return false;}
+    gTypecReady = b5q_usb_typec_init();
+    IOLog("qcom-dwc3: stage=6 typec-ready=%u\n",gTypecReady);
     if (!repeater(true, false)) {stage(-6); return false;}
     stage(7);
     phyInit();
     IOSleep(2);
     gSuperSpeed = superSpeedInit();
     if (!gSuperSpeed) selectUtmiClock();
+    IOLog("qcom-dwc3: stage=7 qmp=%u pairs=168 status=%x utmi-fallback=%u\n",gSuperSpeed,native_usb_stats[33],!gSuperSpeed);
     stage(8);
     Region window = {};
     if (!mapRegion(window, kAppleWindow, 0x1000)) {stage(-8); return false;}
@@ -454,6 +423,7 @@ bool bringUp() {
     window.map->release();
     if ((id & 0xffff0000u) != 0x55330000u && (id & 0xffff0000u) != 0x33310000u && (id & 0xffff0000u) != 0x33320000u) {stage(-9); return false;}
     stage(9);
+    IOLog("qcom-dwc3: GSNPSID=%08x hardware-ready dma-ready=%u\n",id,gDmaReady);
     return true;
 }
 }  // namespace
@@ -490,6 +460,7 @@ void forceHostThread(void *seconds, wait_result_t) {
     }
 }
 void leaveRole(int role) {
+    if (!gDmaReady) {if (role == kRoleHost) b5q_usb_otg(false); return;}
     if (role == kRoleDevice) {
         IOService::getResourceService()->removeProperty("AppleUSBCableType");
         // The family stops the bus through XDCI_POWER_OFF; with no description from configd yet the bus was never on and it does not come.
@@ -566,6 +537,14 @@ void enterHost() {
     else if (nub) {QcomDwc3Nub::route(nullptr); nub->terminate(kIOServiceSynchronous); nub->release();}
 }
 bool enterRole(int role) {
+    if (!gDmaReady) {
+        // Test the real TI/Type-C power path without arming any USB DMA ring.
+        if (role == kRoleNone) return b5q_usb_otg(false);
+        if (!repeater(false,role == kRoleHost) || !b5q_usb_otg(role == kRoleHost)) return false;
+        followOrientation();
+        IOLog("qcom-dwc3: hardware-only role=%u dma=deferred-no-firmware-handoff\n",role);
+        return true;
+    }
     if (role == kRoleNone) return true;
     if(role!=kRoleHost && !b5q_usb_otg(false))return false;
     if(role==kRoleHost && !b5q_usb_otg(true)){IOLog("qcom-dwc3: OTG power rejected\n");return false;}
@@ -584,7 +563,7 @@ bool enterRole(int role) {
     return true;
 }
 void hostStats() {
-    if (gCoreRole != kRoleHost) return;
+    if (!gDmaReady || gCoreRole != kRoleHost) return;
     const uint32_t cap = gXhciRegs.va[0];
     const volatile uint32_t *op = gXhciRegs.va + (cap & 0xffu) / 4;
     native_usb_stats[47] = op[0]; native_usb_stats[48] = op[1];
@@ -637,21 +616,20 @@ extern "C" void qcom_dwc3_host_load(int result) {native_usb_stats[46] = (uint32_
 // The hardware, before the classes exist: a failure leaves the system running with USB off.
 extern "C" bool qcom_dwc3_bring_up(void) {return bringUp();}
 // After the module's metaclasses are registered: publish the provider and start the controller.
-// For bring-up (usb=2): what the core and the SMMU see while the system stack runs, sampled about every 5 ms for the link state.
+// For bring-up (usb=2): controller-only link diagnostics; never read apps_smmu.
 // cycle (usb=3) also takes the controller off the bus and back once, the path a cable removal runs, for an unattended host check.
 extern "C" void qcom_dwc3_diag(bool cycle) {
     Region window = {};
-    if (!mapRegion(window, kAppleWindow, 0x1000) || !gSmmu.va) return;
-    const uint32_t pages = gSmmuPages, bank = gSmmuBank;
+    if (!gDmaReady || !mapRegion(window, kAppleWindow, 0x1000)) return;
     for (uint32_t tick = 0;; ++tick) {
         const uint32_t ltssm = window.va[0x164 / 4];
         native_usb_stats[36] = native_usb_stats[36] | 1u << ((ltssm >> 22) & 15u);
         native_usb_stats[37] = ltssm;
         if (!(tick % 400)) {
             native_usb_stats[22] = window.va[0x100 / 4]; native_usb_stats[23] = window.va[0x104 / 4]; native_usb_stats[24] = window.va[0x11c / 4];
-            native_usb_stats[25] = gSmmu.va[0x48 / 4];
+            native_usb_stats[25] = 0; // SMMU diagnostics forbidden at EL1.
             native_usb_stats[26] = window.va[0x70c / 4]; native_usb_stats[27] = window.va[0x720 / 4]; native_usb_stats[28] = window.va[0x40c / 4];
-            native_usb_stats[29] = window.va[0x80c / 4]; native_usb_stats[30] = gSmmu.va[(pages + bank) * 1024 + 0x58 / 4]; native_usb_stats[31] = window.va[0x408 / 4];
+            native_usb_stats[29] = window.va[0x80c / 4]; native_usb_stats[30] = 0; native_usb_stats[31] = window.va[0x408 / 4];
             native_usb_stats[38] = window.va[0x2c0 / 4];
         }
         if (cycle && tick == 16000) {wantRole(kRoleNone); native_usb_stats[39] = 1;}
@@ -660,6 +638,21 @@ extern "C" void qcom_dwc3_diag(bool cycle) {
     }
 }
 extern "C" void qcom_dwc3_publish(void) {
+    if (!gDmaReady) {
+        IOLog("qcom-dwc3: stage=9 controller-DMA=deferred requires=EFI_HAL_IOMMU_PROTOCOL-handoff\n");
+        if (!gTypecReady || !b5q_usb_otg(false)) return;
+        gRoleLock = IOLockAlloc();
+        thread_t thread = nullptr;
+        if (!gRoleLock || kernel_thread_start(roleThread,nullptr,&thread) != KERN_SUCCESS) {
+            IOLog("qcom-dwc3: hardware-role-thread allocation-failed\n"); return;
+        }
+        thread_deallocate(thread);
+        unsigned forced = 0;
+        PE_parse_boot_argn("usb-host",&forced,sizeof forced);
+        if (forced && kernel_thread_start(forceHostThread,reinterpret_cast<void *>((uintptr_t)forced),&thread) == KERN_SUCCESS) thread_deallocate(thread);
+        cableChanged();
+        return;
+    }
     do {
         OSData *zero = OSData::withBytes("\0\0\0\0", 1);
         QcomDwc3Nub *nub = OSTypeAlloc(QcomDwc3Nub);

@@ -1,0 +1,68 @@
+{
+  "scope": "Read-only saved reference firmware disassembly; not current phone firmware attestation",
+  "source_commit": "9f4dbfd7d61acdae69fd5bb48720ce7e53711e25",
+  "protocol_guid": "54b6d3b4-5d33-4f91-8600-6c41d5deb19a",
+  "revision": "0x10002",
+  "init_signature": "void init(HAL_IOMMU_fptable_t **out), no This/EFI_STATUS",
+  "table": {
+    "domain_create": "0x1970",
+    "domain_attach": "0x1ba0",
+    "domain_configure": "0x2db0",
+    "flush_domain": "0x3130",
+    "aspace_init": "0x4840",
+    "map": "0x44f0",
+    "domain_update_aspace": "0x2cd0"
+  },
+  "config_bytes": 48,
+  "config_offsets": {
+    "VMSA": 0,
+    "TTBR0": 8,
+    "TTBR1": 16,
+    "MAIR0": 24,
+    "MAIR1": 28,
+    "SCTLR": 32,
+    "TCR": 36,
+    "TCR2": 40
+  },
+  "stock_usb_attach": {
+    "client": "USB0",
+    "arid": "0x03000000",
+    "mask": 0,
+    "sid40_correspondence": "unverified; passing SID40 as ARID unsupported"
+  },
+  "WB_IS": {
+    "page_bytes": 4096,
+    "flags_low_bits": 0,
+    "descriptor_bits": "0x708",
+    "MAIR0": "0x00ff0400",
+    "SCTLR": "0x00c000e7",
+    "TCR": "0x00802010",
+    "TCR2": "0x0003c071"
+  },
+  "ExitBootServices": {
+    "callback_RVA": "0x1738",
+    "cleanup_RVA": "0x5210",
+    "detach_RVA": "0x5418",
+    "delete_RVA": "0x543c",
+    "domain_survives": "not established; stock cleanup deletes domain"
+  },
+  "unresolved": [
+    "USB0 IORT to SID40 mapping",
+    "exclusive existing stream ownership transfer",
+    "ExitBootServices teardown survival",
+    "EfiBootServicesData page table lifetime/reservations",
+    "bounded physical DMA coverage",
+    "validated loader ADT handoff"
+  ],
+  "current_build": "No UEFI/DarwinBoot change; hardware stage6-9 and FIFO role-power path allowed; controller DMA deferred; zero EL1 apps_smmu MMIO",
+  "inputs": {
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMUDxe.efi": {
+      "bytes": 147456,
+      "sha256": "a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef"
+    },
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.efi": {
+      "bytes": 90112,
+      "sha256": "34df5506ffd34b176e5211dac6c728c5e2cc3a45d101c1657df539ddef1d42f7"
+    }
+  }
+}
