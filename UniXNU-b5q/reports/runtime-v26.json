@@ -1,0 +1,224 @@
+{
+  "version": "v26",
+  "input_log": "logs/b5q-xnu2log-v25/XNU2LOG.BIN",
+  "binary_sha256": "c12c15c5bb682e81621e9214d16e8f0d25b006196f375f1f20b7619c69639711",
+  "text_sha256": "232cb7eb9fbe18afaf0c417f36538ab9371706aa149ec0d2cfaf9d0e5995f450",
+  "text_bytes": 192428,
+  "line_count": 2026,
+  "decoder_double_slot_CRC": "PASS",
+  "evidence": {
+    "clock_failure": [
+      {
+        "line": 390,
+        "text": "qcom-dwc3: stage=-6"
+      },
+      {
+        "line": 391,
+        "text": "B5qTouch: stage=s4-clk-enable phase=after ok=0 failed=00023280 last_cbcr=80000002"
+      }
+    ],
+    "hardware_pass": [
+      {
+        "line": 386,
+        "text": "qcom-dwc3: max77705 PMIC66 id=15 rev=2 CC25=71 ready=1"
+      },
+      {
+        "line": 388,
+        "text": "qcom-dwc3: TI reset SID3 GPIO4 apid=602 subtype=13 released=1"
+      },
+      {
+        "line": 793,
+        "text": "b5q-fb: swap accepted #1 fmt=42475241"
+      },
+      {
+        "line": 1522,
+        "text": "B5qCpuFreq: dynamic-recount cpu=4 vote-MHz=1228/2803/2956 state-MHz=1228/2707/2956 busy-permille=538/1000/1000 ready=1/1/1"
+      },
+      {
+        "line": 1725,
+        "text": "B5qCpuFreq: dynamic-recount cpu=5 vote-MHz=1228/2803/2956 state-MHz=1459/2188/2592 busy-permille=382/1000/1000 ready=1/1/1"
+      },
+      {
+        "line": 1889,
+        "text": "B5qInput: hid=1/1/0 btn=3/78/70/0 touch=0/0"
+      }
+    ],
+    "last_frame": [
+      {
+        "line": 1886,
+        "text": "b5q-fb: prepare calls=630 failures=0 retried=0 max_attempts=0 waited_ms=0 vsync hz=60 sent=0 arms=0 idle=0 late=0 start=1 refresh=0 fmt 630/0/0 no 0:00000000 direct 0 gpu 630/0 cpu 0/0 fallbacks=0 last=00000000"
+      }
+    ],
+    "governor_count": 22,
+    "exceptions": []
+  },
+  "interpretation": {
+    "known_clock_failure": "touch failed23280HW_CTL;USBsame sharedwait inferred but lacks exactregisterlog",
+    "display": "630GPUoffers0failed0rejected;vsyncsent0 not directpixelproof",
+    "temperature_peak_C": 91.9,
+    "P_core_idle_downclock": "not shown;Edownclock1228shown",
+    "HAL_handoff": "pending verifiedownership/EBS lifecycle"
+  },
+  "build": {
+    "core_recompiled": false,
+    "GPU_recompiled": false,
+    "Data_regenerated": false,
+    "CI": "pending",
+    "image": "pending",
+    "hardware_result": "pending",
+    "requested_board_units": [
+      "QcomDwc3.cpp",
+      "B5qTouch.cpp",
+      "B5qUsbBoard.cpp",
+      "GeniI2c.c"
+    ],
+    "retained_CpuFreqProbe": true,
+    "DMA_ready": "false; verifiedownership/EBSmapping blocked"
+  },
+  "local_tests": [
+    {
+      "name": "touch",
+      "passed": true,
+      "log_sha256": "626279b96a1e7101fd551bf9b2a79d7f60f9b7c14e41fc912c0f194fb3a83cb4"
+    },
+    {
+      "name": "touchIRQ",
+      "passed": true,
+      "log_sha256": "d1f1becc51106756a63d01f689bdb97710e74f18db26d0bb65267e75d1ce93a9"
+    },
+    {
+      "name": "USBstages",
+      "passed": true,
+      "log_sha256": "268f7ababbdedc545911b50c8bb1ee68ec999eb6e4cb4497d4ebffee27dcaabf"
+    },
+    {
+      "name": "GENIclockCC",
+      "passed": true,
+      "log_sha256": "e065e69805101c8a7e87380a14d58a8b884006d587d278d2c409825a2252a8ca"
+    },
+    {
+      "name": "USB_DT",
+      "passed": true,
+      "log_sha256": "a416ebfb722028dbb7a2f48ec1931154cf47c38dbafe3865aefa74fced96820d"
+    }
+  ],
+  "target_compile": {
+    "passed": true,
+    "duplicate_external_definitions": {},
+    "XHCI_slots": 427,
+    "objects": {
+      "QcomDwc3": {
+        "target": "arm64e-ios27",
+        "imports": 628,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      },
+      "B5qUsbBoard": {
+        "target": "arm64e-ios27",
+        "imports": 16,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      },
+      "B5qTouch": {
+        "target": "arm64e-ios27",
+        "imports": 25,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      },
+      "GeniI2c": {
+        "target": "arm64e-ios27",
+        "imports": 0,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      }
+    },
+    "all_saved_context_external_helpers_present": true,
+    "new_core_linkage_pending": true
+  },
+  "PAC": {
+    "passed": true,
+    "USB_ArmCpu_GPU_clock_buttons_HID_thermal": "artifacts/b5q-runtime-v26-work/cross-object-PAC.json",
+    "SE4_SE6_SE8_GENI_calls": 85
+  },
+  "source_evidence": {
+    "status": "PASS local host regressions and source/module audit; target/PAC compilation delegated to parent",
+    "api": {
+      "cold_init": "int geni_se_init(const GeniIo *io)",
+      "xo": "existing geni_i2c_prepare_xo and geni_i2c_prepare_hub_xo preserve caller-selected GENI_CLK_SEL",
+      "caller_contract": "Select clock, write/readback SE+0x7c level (0 nonDFS or selected DFS index), cold init, then prepare; reject raw IF_DISABLE_RO != 0 (GSI-only)."
+    },
+    "tests": {
+      "command": "python3 tests/b5q-ufs/test-v26-geni.py",
+      "result": "PASS C11+C++17 -Werror ASan/UBSan",
+      "cases": [
+        "exact six cold writes, preserve prior CGC/DMA-CG/IRQ bits",
+        "reject non-I2C/active/GSI_ONLY without writes; IF_DISABLE_RO 1,2,3,0x80000000,0xffffffff across all prepares",
+        "CLK_SEL levels0..7 retained with both XO APIs and FIFO write completes",
+        "0x80000002 HW_CTL instant skip, gated transition, real nonHW 2000poll timeout",
+        "SE4 andSE6 all8DFSlevels with zero GCCwrites; missingXO failure",
+        "nonDFS CFG/CMD only, failedreadback/stuckUPDATE/changedCFG rejection",
+        "dedicated I2C SE8 has no DFS register/table reads",
+        "all65536 Max77705 CC pairs, physical0x71 Sink/Device and0x72 Source/Host, waterbit suppresses both"
+      ]
+    },
+    "sources": {
+      "samsung_kernel_repo": "LineageOS/android_kernel_samsung_sm8550",
+      "samsung_indexed_commit": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9",
+      "indexed_source_files": [
+        "clk-rcg2.c",
+        "i2c-msm-geni.c",
+        "max77705.h",
+        "max77705_cc.c"
+      ],
+      "gcc_kalama_cached_source_commit": "unknown (content hash recorded; existing cached reference)",
+      "qcom_geni_se_cached_source_commit": "unknown (content hash recorded; existing cached reference)",
+      "sheng_checkout_commit": "6c42e1055ffb3b335fda991190ad221edaa7af3c",
+      "module_origin": "TWRP prebuilt sources/twrp-b5q, not raw original phone extraction",
+      "module_repo_commit": "99d7229242df7885857c2f4c9b95a04f254545ba",
+      "module_evidence": {
+        "max77705_ccstat_irq_handler": {
+          "register_read_text_rva": "0x1bd8: mov w1,#0xa",
+          "mask_text_rva": "0x1bec: and w24,w8,#7",
+          "sink_text_rva": "0x1bf4: cmp w24,#1",
+          "source_text_rva": "0x1ce4: cmp w24,#2"
+        },
+        "max77705_vconnsc_irq": {
+          "register_read_text_rva": "0x1544: mov w1,#0xb",
+          "water_text_rva": "0x1554: tbnz w8,#1"
+        }
+      }
+    },
+    "max77705_decoder": "Existing implementation verified; unchanged. CC0=0x71 returns Device only when CC1 water bit is clear. CC0 alone cannot establish dry state.",
+    "hardware_validation": "pending; no device connection/MMIO or hardware success claimed",
+    "scope": "only shared GENI, USB board, new QUP helper and focused tests; no core/GPU/Data/CI/porting/board/workflow edits",
+    "sha256": {
+      "UniXNU-b5q/package/B5qUsbBoard.cpp": "0eb93c65f3ff62301b359ebd475d68dfb44735efcc7b4963cadb31907ef32b03",
+      "UniXNU-b5q/package/GeniI2c.c": "aba6f4840120cead2210d65fb85e99db89a4ef8d11ea0ed7f47edc4da8247011",
+      "UniXNU-b5q/package/GeniI2c.h": "7d183900e3768bb7342dc3dee142ad7bd6fa51d93948b4a07c5e4bbede4d2e61",
+      "UniXNU-b5q/package/B5qQupClock.h": "a71e4c89ec89d37e74863665521b183087771880cdd4d2f645dd7086c4e44e56",
+      "UniXNU-b5q/package/B5qMax77705.h": "11e7e3a8525529f495a2a706eec88a1023809eb7994ebaf763b50f49f27bad9a",
+      "tests/b5q-ufs/test-v26-geni.py": "15a14b14121a038a99166c7545606754e4f3b6559dabb5c11b3669d5242e246e",
+      "tests/b5q-ufs/test-v26-geni.cpp": "9148d8ae46ee461b1777b8fddad547daf703463cea682e4e68f0deb45dc1a97f",
+      "artifacts/b5q-runtime-v22-work/gcc-kalama.c": "d653b83fcdfdbf9524664c4455eca2d6a460ba97294588ba373c6518e0441a31",
+      "artifacts/b5q-runtime-v24-work/samsung-source/qcom-geni-se.c": "a9f2fe18f94dc3e1aabcc4840d41e5432533feb150f387d96da3e7abd1a32240",
+      "artifacts/b5q-runtime-v24-work/samsung-source/clk-rcg2.c": "7edb223af576a0ed4f68335cf88aafcd8d66c7dea03410f646e8f1f995d8b265",
+      "artifacts/b5q-runtime-v24-work/samsung-source/i2c-msm-geni.c": "b0c2a7caa20c59b0f04bec62ccc3f0d452d442e4ff1e6ba51927a13b2d644e31",
+      "artifacts/b5q-runtime-v24-work/samsung-source/max77705.h": "2ccd9413496884c31bde2326a61d4093e6f6c71b1b448024e6e29f1143877e88",
+      "artifacts/b5q-runtime-v24-work/samsung-source/max77705_cc.c": "b62c987acfba638263e4a2398a45a9ad0daa87e2b13c0d0fa889539d2d2ac5fd",
+      "sources/twrp-b5q/recovery/root/lib/modules/pdic_max77705.ko": "f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca",
+      "sources/UniXNU-sheng/drivers/QcomDwc3/QcomDwc3.cpp": "34e82ac4bb83e0c16fe58992e539bcaee687cfba53e7d75a4a37b759aef4e6db"
+    }
+  },
+  "HAL_handoff": "reports/usb-hal-handoff-v26.json",
+  "source_sha256": {
+    "UniXNU-b5q/package/QcomDwc3.cpp": "dfd36777176038dd5b3b1181bcf46e9ff48975fdd4516acfca813e276dc6cd1c",
+    "UniXNU-b5q/package/B5qTouch.cpp": "8ca7abbd633697081d77659944f423df1b2c078be2683a8b21f7a516c06edd38",
+    "UniXNU-b5q/package/B5qTouchClock.h": "f8945a0803b00bf64a78e2d3d8b938c19e965f33c3c460ac99944e6f54ae6fa1",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp": "0eb93c65f3ff62301b359ebd475d68dfb44735efcc7b4963cadb31907ef32b03",
+    "UniXNU-b5q/package/B5qQupClock.h": "a71e4c89ec89d37e74863665521b183087771880cdd4d2f645dd7086c4e44e56",
+    "UniXNU-b5q/package/GeniI2c.c": "aba6f4840120cead2210d65fb85e99db89a4ef8d11ea0ed7f47edc4da8247011",
+    "UniXNU-b5q/package/GeniI2c.h": "7d183900e3768bb7342dc3dee142ad7bd6fa51d93948b4a07c5e4bbede4d2e61",
+    "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "9d2c422dba7e6570564c10c58918abbd7cdafcf60fa42953dfff706fd533a40b",
+    ".github/workflows/b5q-v26-incremental.yml": "26b5a31ce7a605b9dd754eba4d1d8be24a5fd1f1775aefc875757c5569ffbe7a"
+  }
+}

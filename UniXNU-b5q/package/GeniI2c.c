@@ -4,6 +4,24 @@
 static uint32_t rd(GeniI2c *g, uint32_t reg) {return g->io.read(g->io.ctx, reg);}
 static void wr(GeniI2c *g, uint32_t reg, uint32_t value) {g->io.write(g->io.ctx, reg, value);}
 
+int geni_se_init(const GeniIo *io)
+{
+    if (!io || !io->read || !io->write) return -1;
+    if (((io->read(io->ctx, GENI_FW_REVISION) >> 8) & 0xffu) != GENI_PROTO_I2C ||
+        io->read(io->ctx, GENI_IF_DISABLE) ||
+        (io->read(io->ctx, GENI_STATUS) & GENI_STATUS_M_ACTIVE)) return -1;
+    /* Samsung qcom-geni-se.c geni_se_io_init + FIFO routing, matching the
+     * pinned sheng QcomDwc3 retimer's six cold writes. DMA_GENERAL_CFG only
+     * enables clock gating; GSI events are disabled and prepare selects FIFO. */
+    io->write(io->ctx, GENI_CGC_CTRL, io->read(io->ctx, GENI_CGC_CTRL) | 0x7fu);
+    io->write(io->ctx, GENI_DMA_GENERAL_CFG, io->read(io->ctx, GENI_DMA_GENERAL_CFG) | 0xfu);
+    io->write(io->ctx, GENI_OUTPUT_CTRL, 0x7fu);
+    io->write(io->ctx, GENI_FORCE_DEFAULT, 1u);
+    io->write(io->ctx, GENI_GSI_EVENT_EN, 0);
+    io->write(io->ctx, GENI_SE_IRQ_EN, io->read(io->ctx, GENI_SE_IRQ_EN) | 0xcu);
+    return 0;
+}
+
 /* A FIFO depth field (bits 21:16); a field that reads zero takes the smallest depth these engines have. */
 static uint32_t fifo_words(uint32_t param)
 {
@@ -19,16 +37,15 @@ static int prepare(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *conf
     const uint32_t proto = (rd(g, GENI_FW_REVISION) >> 8) & 0xffu;
     uint32_t clock = rd(g, GENI_CLK_CFG);
     if (config) *config = (proto << 24) | (clock & 0xffffffu);
-    if (proto != GENI_PROTO_I2C || (rd(g, GENI_IF_DISABLE) & 1u) || (rd(g, GENI_STATUS) & GENI_STATUS_M_ACTIVE)) return -1;
+    if (proto != GENI_PROTO_I2C || rd(g, GENI_IF_DISABLE) || (rd(g, GENI_STATUS) & GENI_STATUS_M_ACTIVE)) return -1;
     if (xo || !(clock & 1u) || !rd(g, GENI_SCL_COUNTERS)) {
         if (!xo) return -1;
         /* Samsung i2c-msm-geni.ko 400 kHz entry: divider 2, high 7, low 10, cycle 24. */
-        if (xo != 2) wr(g, GENI_CLK_SEL, 0);
         wr(g, GENI_SCL_COUNTERS, 0x00702818u);
         wr(g, GENI_CLK_CFG, 0x00000021u);
         clock = rd(g, GENI_CLK_CFG);
         if (config) *config = (proto << 24) | (clock & 0xffffffu);
-        if ((clock & 0xff1u) != 0x21u || (xo != 2 && rd(g, GENI_CLK_SEL)) || rd(g, GENI_SCL_COUNTERS) != 0x00702818u) return -1;
+        if ((clock & 0xff1u) != 0x21u || rd(g, GENI_SCL_COUNTERS) != 0x00702818u) return -1;
     }
     wr(g, GENI_DMA_MODE, 0);
     /* 8-bit words, 4 per FIFO word, least significant byte first on the wire. */

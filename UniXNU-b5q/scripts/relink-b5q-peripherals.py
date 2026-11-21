@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Relink the completed v24 core, compiling only the three v25 board sources.
+"""Relink the completed v25 native cache, compiling only four v26 sources.
 
-No XNU, GPU, binder assembly or Data translation unit is compiled. --prepare-only
+The v24 core and v25 CpuFreqProbe, GPU, binders and Data are retained. --prepare-only
 is portable; --reference-image may inspect an existing collection in that mode
 when the local cache omitted the original native executable.
 """
@@ -17,8 +17,8 @@ import shutil
 import subprocess
 import sys
 
-SOURCE_RUN = 44910077002
-SOURCE_COMMIT = '110e027fca0f0a963ff98a692b372aab8fcb495f'
+SOURCE_RUN = 44930613230
+SOURCE_COMMIT = '697902ef16648c0aeacbc2b1e7efe9ee19def41e'
 CORE_SHA256 = '88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b'
 XNU_OBJECT = 'build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837'
 CORE_ARCHIVE = XNU_OBJECT + '/mach.development.bcm2837.link/mach.development.bcm2837.a'
@@ -44,8 +44,15 @@ LINK_INPUTS = [
 REPLACEMENTS = {
     'QcomDwc3.cpp': ('QcomDwc3.late.o', (USB, DISPLAY)),
     'B5qTouch.cpp': ('B5qTouch.o', (DISPLAY,)),
-    'CpuFreqProbe.cpp': ('CpuFreqProbe.o', (DISPLAY,)),
+    'B5qUsbBoard.cpp': ('B5qUsbBoard.o', (DISPLAY,)),
+    'GeniI2c.c': ('GeniI2c.o', (DISPLAY,)),
 }
+
+
+def object_path(out, source):
+    # Match the full build's board-input ownership, keeping QcomDwc3 separate.
+    directory = out if source == 'QcomDwc3.cpp' else out / 'board-input'
+    return directory / (Path(source).stem + '.o')
 
 
 def sha(path):
@@ -118,13 +125,13 @@ def main():
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--reference-image', type=Path, help='Preparation only: native or fileset reference')
     parser.add_argument('--reused-data', type=Path, help='Existing staged data.dbr and paired addon/trust metadata')
-    parser.add_argument('--changed', default=','.join(REPLACEMENTS), help='Exactly the three v25 board sources')
+    parser.add_argument('--changed', default=','.join(REPLACEMENTS), help='Exactly the four v26 sources')
     parser.add_argument('--source-run', type=int, default=SOURCE_RUN)
     parser.add_argument('--source-commit', default=SOURCE_COMMIT)
     args = parser.parse_args()
     selected = args.changed.split(',')
     if len(selected) != len(REPLACEMENTS) or set(selected) != set(REPLACEMENTS):
-        parser.error('--changed must select QcomDwc3.cpp,B5qTouch.cpp,CpuFreqProbe.cpp')
+        parser.error('--changed must select ' + ','.join(REPLACEMENTS))
     if args.reference_image and not args.prepare_only:
         parser.error('--reference-image is only available with --prepare-only')
     core, device, cached, out = map(Path.resolve, [args.unixnu, args.device, args.cached_tree, args.out])
@@ -178,6 +185,9 @@ def main():
                   input_archive_members=archive_members, retained_binders=binders,
                   native_reference_sha256=sha(native), reference_fileset=original.at != 0,
                   changed_board_sources=list(REPLACEMENTS),
+                  compiled_object_paths={name: str(object_path(out, name).relative_to(out))
+                                         for name in REPLACEMENTS},
+                  retained_board_objects={DISPLAY: {'CpuFreqProbe.o': archive_members[DISPLAY]['CpuFreqProbe.o']}},
                   source_sha256={str(p.relative_to(device / 'package')): sha(p) for p in sorted((device / 'package').rglob('*'))
                                  if p.is_file() and p.suffix in ('.cpp', '.c', '.h')},
                   recipe_sha256={name: sha(device / 'scripts' / name) for name in
@@ -186,7 +196,7 @@ def main():
                                       for name, path in [('xnu', xnu), ('IOHIDFamily', hid), ('XnuPrelink', core / 'kits/XnuPrelink')]},
                   core_translation_units_compiled=0, board_translation_units_compiled=0,
                   gpu_recompiled=False, data_regenerated=False, binder_objects_compiled=0,
-                  aliases_from_same_v24_native=aliases, linkflags=linker_flags(xnu),
+                  aliases_from_source_native=aliases, linkflags=linker_flags(xnu),
                   usb_archive_embedded_in=DISPLAY, hardware_tested=False)
     record['optional_cpu_idle_helper_present'] = '_sheng_cpu_idle_mach' in defined
     if args.reused_data:
@@ -198,10 +208,10 @@ def main():
     for name, (member, archives) in REPLACEMENTS.items():
         for relative in archives:
             if member not in archive_members[relative]:
-                raise RuntimeError(f'{relative} has no v24 replacement member {member}')
+                raise RuntimeError(f'{relative} has no v25 replacement member {member}')
     (out / 'incremental-inputs.json').write_text(json.dumps(record, indent=2) + '\n')
     if args.prepare_only:
-        print('Prepared v24 link inputs, aliases, symbolsets and retained binders; no compilation')
+        print('Prepared v25 link inputs, four-object plan, aliases, symbolsets and retained binders; no compilation')
         return
     if sys.platform != 'darwin':
         raise SystemExit('Build requires Xcode; use --prepare-only on other hosts')
@@ -232,17 +242,25 @@ def main():
     objects = {}
     object_metadata = {}
     for name, (_, archives) in REPLACEMENTS.items():
-        obj = compile_object(cxx, cflags, device / 'package' / name, out / (Path(name).stem + '.o'), llvm)
+        compiled = object_path(out, name)
+        compiled.parent.mkdir(parents=True, exist_ok=True)
+        # compile_object selects C/gnu11/-mkernel and removes C++ codegen flags
+        # for GeniI2c.c. Do not pass C++-only diagnostic options to that recipe.
+        options = [flag for flag in cflags if name != 'GeniI2c.c' or flag not in
+                   ('-Wno-unused-private-field', '-Wno-c++11-narrowing',
+                    '-Wno-deprecated-enum-enum-conversion')]
+        obj = compile_object(cxx, options, device / 'package' / name, compiled, llvm)
         objects[obj.name] = sha(obj)
         # Return exactly one object per source, containing the bytes inserted
         # into the archives. QcomDwc3's late transform is recorded explicitly.
         canonical = Path(name).stem + '.o'
         shutil.copyfile(obj, returned / canonical)
-        shutil.copyfile(out / (Path(name).stem + '.command.json'),
+        shutil.copyfile(compiled.with_suffix('.command.json'),
                         returned / (Path(name).stem + '.command.json'))
         object_metadata[canonical] = dict(source=name, sha256=sha(obj), archive_member=obj.name,
                                          archives=list(archives),
-                                         compiled_sha256=sha(out / canonical),
+                                         compiled_object=str(compiled.relative_to(out)),
+                                         compiled_sha256=sha(compiled),
                                          late_transform=obj.name != canonical)
         for relative in archives:
             run(['xcrun', 'ar', 'r', ctx.tree / relative, obj])
@@ -265,7 +283,7 @@ def main():
     os.environ.update(UNIXNU_XNU_ARCH='arm64e', UNIXNU_IOS_VERSION='27.0', UNIXNU_XNU_TARGET='macosx')
     run([sys.executable, ctx.tree / 'scripts/seal-source-crypto-kernel.py', native_out])
     record.update(added_objects=objects,
-                  compiled_objects={Path(name).stem + '.o': sha(out / (Path(name).stem + '.o'))
+                  compiled_objects={Path(name).stem + '.o': sha(object_path(out, name))
                                     for name in REPLACEMENTS},
                   unchanged_core_after_link_sha256=sha(ctx.tree / CORE_ARCHIVE),
                   native_output_sha256=sha(native_out),
@@ -279,7 +297,7 @@ def main():
     reuse = json.loads(reuse_path.read_text()) if reuse_path.is_file() else {}
     reuse.update(source_run=args.source_run, source_commit=args.source_commit,
                  kernel_recompiled=False, kernel_core_recompiled=False, kernel_relinked=True,
-                 source_payload_reused=False, board_objects_recompiled=3,
+                 source_payload_reused=False, board_objects_recompiled=len(REPLACEMENTS),
                  incremental_record='kernel/incremental-relink.json')
     reuse_path.write_text(json.dumps(reuse, indent=2) + '\n')
     kernel.prelink(ctx)

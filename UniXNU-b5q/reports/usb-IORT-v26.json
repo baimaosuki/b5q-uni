@@ -1,0 +1,35 @@
+{
+  "source_archive": "/home/baimao/zflip5/F7310ZCS7EYF3\u7b496\u4e2a\u6587\u4ef6/F7310ZCS7EYF3/BL_F7310ZCS7EYF3_F7310ZCS7EYF3_MQB97237818_REV00_user_low_ship_MULTI_CERT.tar.md5",
+  "archive_SHA256": "911abfb5a4c5b404d445295b31c85bbe0b1181ada7b4ff00558b97860b71c089",
+  "member": "xbl_config.elf.lz4",
+  "tar_data_offset": "0x19da00",
+  "compressed_bytes": 72500,
+  "compressed_SHA256": "b2643e30b135884d0a9bc5f711b215054c05601472f8c0ece2a0fbd7b4c4bd89",
+  "decompressed_SHA256": "aee213b5bcce3ba2d774b6cb18e6c0c26df71d19baee05ab29d02a8832b25835",
+  "FDT_offset": "0x10334",
+  "FDT_bytes": 59571,
+  "FDT_SHA256": "bf54826b5a272ce20f5b0f4a6cfe6eeebb4887c3d4c49b18b8cd863c20d5df4c",
+  "USB0": {
+    "NumberofMappings": "00000001",
+    "CacheCoherency": "00000000",
+    "DevObjectName": "5553423000"
+  },
+  "SID_mapping": {
+    "InputBase": [
+      50331648
+    ],
+    "NumIDs": [
+      1
+    ],
+    "OutputBase": [
+      64
+    ],
+    "Flags": [
+      0
+    ],
+    "OutputReference": [
+      1
+    ]
+  },
+  "scope": "Saved F7310stockinput mapping; not livefirmware identity or privilege/ownership proof"
+}

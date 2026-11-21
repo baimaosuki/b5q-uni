@@ -1,0 +1,54 @@
+{
+  "source": "saved b5q UEFI binaries selected by localINF; not livefirmware capture",
+  "protocol_guid": "54b6d3b4-5d33-4f91-8600-6c41d5deb19a",
+  "revision": "0x10002",
+  "HAL_success": "u32 HAL_IOMMUResult_t==0; notEFI_ERRORtest",
+  "init": "void init(table **out), noThis",
+  "operations": {
+    "create": "0x1970",
+    "attach": "0x1ba0",
+    "configure": "0x2db0",
+    "map": "0x44f0",
+    "aspace_init": "0x4840",
+    "update_aspace": "0x2cd0"
+  },
+  "EL": {
+    "DarwinBoot": "requiresCurrentEL4=EL1",
+    "HAL_register_read_RVA": "0x3470 directldr",
+    "HAL_register_write_RVA": "0x34a0 directstr",
+    "attach_SMR_path": [
+      "0x1ba0",
+      "0x2510",
+      "0x38a0",
+      "0x3470"
+    ],
+    "protocol_call_raises_privilege": false,
+    "preEBS_access_policy": "unknown; cannot infer from protocolavailability"
+  },
+  "ownership": {
+    "StopController": "QCOM_USB_CONFIG_PROTOCOL offset58 ->wrapper1580 ->5470; doesnotdetach/delete domain",
+    "ExitUsbLibServices": "protocoloffset48NULL",
+    "idiom_detach": "lookup1830notpopulating outputdomain",
+    "selected_UsbConfig": "UsbConfigDxe.patched.efi",
+    "selected_EBS": "branch53ecskipsdetach;delete543cmayreturn22domaininuse andthenprivatepointercleared",
+    "prior_report_correction": "v25 report described unpatchedstockcleanup, notselectedpatchedbinary; deletionisnotguaranteed"
+  },
+  "IORT_evidence": "reports/usb-IORT-v26.json verifies stock USB0/ARID03000000 ->SID40, CacheCoherency0",
+  "unresolved": [
+    "exclusive publicUSBdomainownership/adoption/release contract",
+    "preEBSnonsecureSMMUaccess versusXPU hardwarepolicy",
+    "retainedWBISpagetableinventory andcachevisibility",
+    "correctEBSsurvival verifiedhandoff"
+  ],
+  "build_decision": "Do not emit ready1 without establishedmapping; noDarwinBoot/UEFIchanges inthisbuild, XNU retainszeroapps_smmuMMIO andDMAgate",
+  "inputs": {
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMUDxe.efi": {
+      "bytes": 147456,
+      "sha256": "a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef"
+    },
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.patched.efi": {
+      "bytes": 90112,
+      "sha256": "eb6aa6be8e3c7a0b2d0f05f65408a9f29d41a323b6c91f536dc3050697a72c55"
+    }
+  }
+}

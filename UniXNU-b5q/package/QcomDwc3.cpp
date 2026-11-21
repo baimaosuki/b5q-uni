@@ -408,10 +408,14 @@ bool bringUp() {
     stage(6);
     gTypecReady = b5q_usb_typec_init();
     IOLog("qcom-dwc3: stage=6 typec-ready=%u\n",gTypecReady);
-    if (!repeater(true, false)) {stage(-6); return false;}
+    IOLog("qcom-dwc3: stage=6 repeater=before address=3e\n");
+    const bool repeaterReady = repeater(true, false);
+    IOLog("qcom-dwc3: stage=6 repeater=after ready=%u\n",repeaterReady);
+    if (!repeaterReady) {stage(-6); return false;}
     stage(7);
     phyInit();
     IOSleep(2);
+    IOLog("qcom-dwc3: stage=7 eusb2=initialized qmp=before pairs=168\n");
     gSuperSpeed = superSpeedInit();
     if (!gSuperSpeed) selectUtmiClock();
     IOLog("qcom-dwc3: stage=7 qmp=%u pairs=168 status=%x utmi-fallback=%u\n",gSuperSpeed,native_usb_stats[33],!gSuperSpeed);

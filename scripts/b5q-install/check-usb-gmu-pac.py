@@ -58,7 +58,8 @@ if a.extended_dir:
  directory=a.extended_dir
  extra={name:scan(directory/name) for name in ['BoardClock.o','ArmDTPlatform.o','ButtonProbe.o','NativeHidInput.o','B5qTouch.o','ThermalLevel.o','IOUserClient.cpo']}
  def within(obj,part,div):
-  matches=[(n,v)for n,v,k in obj['symbols']if k&0xe and part in n and not n.startswith('l')and '.cold'not in n]
+  parts=part if isinstance(part,tuple) else (part,)
+  matches=[(n,v)for n,v,k in obj['symbols']if k&0xe and any(p in n for p in parts) and not n.startswith('l')and '.cold'not in n]
   assert len(matches)==1,(part,matches)
   n,start=matches[0];end=min((v for nn,v,k in obj['symbols']if k&0xe and v>start),default=1<<64)
   callers=[c for c in obj['calls']if start<=int(c['site'],16)<end and c['diversity']==div]
@@ -74,7 +75,7 @@ if a.extended_dir:
  button=extra['ButtonProbe.o']['signed']['__ZN12_GLOBAL__N_110buttonsIrqEPv']
  assert button and all(x['key']==0 and x['diversity']==0x2abe and not x['address_diversity']for x in button)
  expanded.append({'interface':'ButtonProbe.buttonsIrq -> ArmCpu.interrupt','key':'IA','diversity':'0x2abe','signed_sites':button,'actual_ArmCpu_dispatch_calls':arm_calls,'passed':True})
- expanded.append(interface('NativeHidInput.o','__ZN14NativeHidInput11touchNotifyEPv',0x2abe,'B5qTouch.o','7publishEv','NativeHid.touchNotify -> B5qTouch.sink'))
+ expanded.append(interface('NativeHidInput.o','__ZN14NativeHidInput11touchNotifyEPv',0x2abe,'B5qTouch.o',('7publishEv','7publishEb'),'NativeHid.touchNotify -> B5qTouch.sink'))
  expanded.append(interface('NativeHidInput.o','__ZN14NativeHidInput13buttonsNotifyEPvj',0xd507,'ButtonProbe.o','13buttonsThread','NativeHid.buttonsNotify -> ButtonProbe.gSink'))
  for field in ['sCount','sKeys','sValues','sWrite']:
   names=[n for n in extra['ThermalLevel.o']['signed']if ('UserClient'+str(len(field))+field+'E')in n]

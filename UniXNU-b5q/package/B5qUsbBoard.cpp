@@ -6,6 +6,7 @@
 #include "GeniI2c.h"
 #include "B5qUsbInputs.h"
 #include "B5qMax77705.h"
+#include "B5qQupClock.h"
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 namespace {
 void barrier(){__asm__ volatile("dsb sy":::"memory");}
@@ -14,7 +15,6 @@ struct Map {
  bool open(uint64_t base,uint64_t bytes){auto *d=IODeviceMemory::withRange(base,bytes);map=d?d->map(kIOMapAnywhere|kIOMapInhibitCache):nullptr;OSSafeReleaseNULL(d);va=map?reinterpret_cast<volatile uint32_t*>(map->getVirtualAddress()):nullptr;return va;}
  ~Map(){OSSafeReleaseNULL(map);}
 };
-bool wait(volatile uint32_t *p,uint32_t mask,uint32_t expected){for(unsigned n=0;n<2000;++n){if((*p&mask)==expected)return true;IODelay(10);}return false;}
 uint32_t seRead(void *ctx,uint32_t reg){return static_cast<volatile uint32_t*>(ctx)[reg/4];}
 void seWrite(void *ctx,uint32_t reg,uint32_t value){static_cast<volatile uint32_t*>(ctx)[reg/4]=value;barrier();}
 struct Bus {
@@ -23,22 +23,36 @@ struct Bus {
   if(ready)return true;
   Map gcc,tlmm;
   if(!gcc.open(0x100000,0x1f0000)||!tlmm.open(0xf100000,0x100000))return false;
+  const unsigned se=hub?8:6;
+  auto read=[&](unsigned off){return gcc.va[off/4];};
+  auto write=[&](unsigned off,uint32_t value){gcc.va[off/4]=value;barrier();};
+  auto branch=[&](unsigned off){
+   uint32_t last=0;const bool ok=B5qQupClock::branch(read,[](unsigned us){IODelay(us);},off,last);
+   IOLog("qcom-dwc3: GENI SE%u branch=%08x cbcr=%08x hw_ctl=%u wait_skipped=%u ok=%u\n",se,off,last,!!(last&2u),!!(last&2u),ok);
+   return ok;
+  };
   if(hub){
    if(!sm8550_gcc_update32(gcc.va+0x52008/4,0,1u<<8)||!sm8550_gcc_update32(gcc.va+0x52010/4,0,1u<<14)||
-      !wait(gcc.va+0x23144/4,1u<<31,0)||!wait(gcc.va+0x170e4/4,1u<<31,0))return false;
+      !branch(0x23144)||!branch(0x170e4))return false;
   }else{
    if(!sm8550_gcc_update32(gcc.va+0x52008/4,0,(15u<<18)|(1u<<28)))return false;
    const unsigned halts[]={0x23294,0x23284,0x2327c,0x23280,0x18754};
-   for(unsigned off:halts)if(!wait(gcc.va+off/4,1u<<31,0))return false;
-   gcc.va[0x18774/4]&=~1u;barrier();if(gcc.va[0x18774/4]&1u)return false;
+   for(unsigned off:halts)if(!branch(off))return false;
   }
   const unsigned rcg=hub?0x170e8:0x18760;
-  gcc.va[(rcg+4)/4]=(gcc.va[(rcg+4)/4]&~0x371fu)|1u;barrier();gcc.va[rcg/4]|=1u;barrier();
-  if(!wait(gcc.va+rcg/4,1,0)||(gcc.va[(rcg+4)/4]&0x371f)!=1)return false;
+  unsigned level=8;uint32_t dfs=0;
+  const bool clock=B5qQupClock::xo(read,write,[](unsigned us){IODelay(us);},rcg,level,dfs,!hub);
+  IOLog("qcom-dwc3: GENI SE%u clock rcg=%08x dfs=%08x level=%u xo=%u\n",se,rcg,dfs,level,clock);
+  if(!clock)return false;
   const unsigned first=hub?206:48;
   for(unsigned pin=first;pin<first+2;++pin)tlmm.va[pin*0x1000/4]=(tlmm.va[pin*0x1000/4]&~0x23cu)|(1u<<2);barrier();
   if(!engine.open(hub?0x9a0000:0xa98000,0x4000))return false;
   const GeniIo io={seRead,seWrite,const_cast<uint32_t*>(engine.va)};uint32_t config=0;
+  seWrite(io.ctx,GENI_CLK_SEL,level);
+  if(seRead(io.ctx,GENI_CLK_SEL)!=level){IOLog("qcom-dwc3: GENI SE%u CLK_SEL verify failed level=%u\n",se,level);return false;}
+  const int cold=geni_se_init(&io);
+  IOLog("qcom-dwc3: GENI SE%u cold-init rc=%d level=%u\n",se,cold,level);
+  if(cold)return false;
   const int rc=hub?geni_i2c_prepare_hub_xo(&bus,&io,0x66,&config):geni_i2c_prepare_xo(&bus,&io,0x3e,&config);
   IOLog("qcom-dwc3: GENI SE%u base=%x cfg=%x rc=%d\n",hub?8:6,hub?0x9a0000:0xa98000,config,rc);
   if(rc)return false;

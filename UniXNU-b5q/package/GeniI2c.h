@@ -14,6 +14,9 @@ extern "C" {
 
 /* Serial engine registers (offsets in the engine's 16 KiB window). */
 #define GENI_FW_REVISION 0x68u
+#define GENI_FORCE_DEFAULT 0x20u
+#define GENI_OUTPUT_CTRL 0x24u
+#define GENI_CGC_CTRL 0x28u
 #define GENI_CLK_SEL 0x7cu
 #define GENI_IF_DISABLE 0x64u          /* read-only FIFO interface capability */
 #define GENI_STATUS 0x40u
@@ -41,6 +44,8 @@ extern "C" {
 #define GENI_RX_WATERMARK 0x810u
 #define GENI_RX_RFR_WATERMARK 0x814u
 #define GENI_SE_IRQ_EN 0xe1cu
+#define GENI_GSI_EVENT_EN 0xe18u
+#define GENI_DMA_GENERAL_CFG 0xe30u
 #define GENI_HW_PARAM_0 0xe24u          /* bits 21:16 TX FIFO depth in words */
 #define GENI_HW_PARAM_1 0xe28u          /* bits 21:16 RX FIFO depth in words */
 #define GENI_TX_FIFO_WORDS(status) ((status) & 0x0fffffffu)
@@ -95,7 +100,13 @@ typedef struct {
     uint32_t tx_fifo_words, rx_fifo_words;
 } GeniI2c;
 
-/* Adopt an idle I2C firmware engine with valid timing. The caller may instead opt into the 19.2 MHz XO timing on a cold engine. */
+/* Cold FIFO initialization, after the owner enables clocks and chooses CLK_SEL.
+ * Rejects an active, non-I2C or FIFO-disabled engine without writes. Performs
+ * the six geni_se_init/FIFO-routing writes, never changes CLK_SEL or starts DMA. */
+int geni_se_init(const GeniIo *io);
+/* Adopt an idle I2C firmware engine with valid timing. XO forms program the
+ * Samsung 19.2 MHz timing while preserving CLK_SEL chosen by the clock owner:
+ * write 0 for a non-DFS RCG, or the selected XO level for enabled DFS. */
 int geni_i2c_prepare(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config);
 int geni_i2c_prepare_xo(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config);
 int geni_i2c_prepare_hub_xo(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config);

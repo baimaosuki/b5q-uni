@@ -9,9 +9,9 @@
 #include <vector>
 #include <cstdio>
 struct Bus {
- std::map<unsigned,unsigned> regs;std::deque<unsigned> rx;std::vector<unsigned> commands,writes;
+ std::map<unsigned,unsigned> regs;std::deque<unsigned> rx;std::vector<unsigned> commands,writes;unsigned rejected=~0u;
  static unsigned read(void *v,unsigned off){auto &b=*static_cast<Bus *>(v);if(off==GENI_RX_FIFO_STATUS)return b.rx.size();if(off==GENI_RX_FIFO){assert(!b.rx.empty());unsigned n=b.rx.front();b.rx.pop_front();return n;}return b.regs[off];}
- static void write(void *v,unsigned off,unsigned n){auto &b=*static_cast<Bus *>(v);b.writes.push_back(off);b.regs[off]=n;if(off==GENI_M_CMD0)b.commands.push_back(n);if(off==GENI_M_IRQ_CLEAR)b.regs[GENI_M_IRQ_STATUS]&=~n;}
+ static void write(void *v,unsigned off,unsigned n){auto &b=*static_cast<Bus *>(v);b.writes.push_back(off);if(off==b.rejected)return;b.regs[off]=n;if(off==GENI_M_CMD0)b.commands.push_back(n);if(off==GENI_M_IRQ_CLEAR)b.regs[GENI_M_IRQ_STATUS]&=~n;}
 };
 void testClocks(){
  const std::vector<unsigned> halts={0x23294,0x23284,0x2327c,0x23280,0x184e4};
@@ -58,40 +58,62 @@ void testClocks(){
    [&](unsigned us){assert(us==10);++delays;},failed,last));
   assert(branch==halts.size()&&delays==15&&!failed&&!last);
  }
- // Real XO helper: sticky DFS, stuck UPDATE, rejected/changed CFG, already
- // disabled DFS, final-poll completion, and immediate completion. All accesses
- // are confined to Samsung SE4, leaving SE6 and M/N/D registers untouched.
- for(unsigned failure=0;failure<8;++failure){
+ // Every branch accepts CLK_OFF+HW_CTL immediately, including the exact v25
+ // 0x23280=0x80000002 observation. Observe the production helper's log inputs.
+ for(unsigned gated:halts){
+  unsigned failed=0xdead,branch=0,observed=0;uint32_t last=0xdead;
+  auto read=[&](unsigned off){assert(branch<halts.size()&&off==halts[branch++]);return off==gated?0x80000002u:0u;};
+  assert(B5qTouchClock::enable(read,[](unsigned,uint32_t,uint32_t){return true;},
+   [](unsigned){assert(false);},failed,last,[&](unsigned off,uint32_t value,bool accepted){
+    assert(off==halts[observed++]&&accepted);assert(value==(off==gated?0x80000002u:0u));
+   }));
+  assert(branch==5&&observed==5&&!failed);
+ }
+ // Real XO helper: preserve all DFS bits, scan only SE4's table, choose each
+ // possible first XO level (HID divider 0 or 1), reject an absent XO level.
+ for(unsigned target=0;target<=8;++target)for(unsigned divider:{0u,1u}){
+  constexpr uint32_t originalDfs=0xa5a50003u;
+  unsigned reads=0,level=99;uint32_t dfsState=0,selected=0;
+  auto read=[&](unsigned off){
+   if(!reads++){assert(off==0x18504);return originalDfs;}
+   const unsigned index=reads-2;assert(index<8&&off==0x1850c+4*index);
+   return index>=target?0x80000000u|divider:index%2?0x102u:0x002u;
+  };
+  const bool ok=B5qTouchClock::xo(read,[](unsigned,uint32_t){assert(false);},
+   [](unsigned){assert(false);},dfsState,level,selected);
+  assert(ok==(target<8)&&dfsState==originalDfs&&level==target);
+  assert(reads==(target<8?target+2:9)&&selected==(target<8?0x80000000u|divider:0u));
+ }
+ // Non-DFS alone updates CFG/CMD. Stuck UPDATE, rejected/changed CFG,
+ // final-poll completion and immediate completion remain bounded failures.
+ for(unsigned failure=0;failure<6;++failure){
   constexpr uint32_t initialCfg=0xfeed3300,initialCmd=0x102,dfsOther=0xa5a50002;
-  const bool dfsEnabled=failure!=5;
-  std::map<unsigned,uint32_t> regs={{0x18504,dfsOther|unsigned(dfsEnabled)},{0x184f4,initialCfg},{0x184f0,initialCmd}};
-  unsigned waits=0;std::vector<unsigned> reads,writes;
+  std::map<unsigned,uint32_t> regs={{0x18504,dfsOther},{0x184f4,initialCfg},{0x184f0,initialCmd}};
+  unsigned waits=0,level=99;uint32_t dfsState=0,selected=0;std::vector<unsigned> reads,writes;
   auto read=[&](unsigned off){assert(regs.count(off));reads.push_back(off);return regs.at(off);};
   auto write=[&](unsigned off,uint32_t v){
    assert(regs.count(off));writes.push_back(off);
-   if((off==0x18504&&failure==1)||(off==0x184f4&&failure==3))return;
-   regs.at(off)=v;if(off==0x184f0&&failure==7)regs.at(off)&=~1u;
+   assert(off!=0x18504);
+   if(off==0x184f4&&failure==2)return;
+   regs.at(off)=v;if(off==0x184f0&&failure==5)regs.at(off)&=~1u;
   };
   auto wait=[&](unsigned us){
    assert(us==10);++waits;
-   if(failure!=2&&(failure!=6||waits==1999)){
-    regs.at(0x184f0)&=~1u;if(failure==4)regs.at(0x184f4)^=0x100;
+   if(failure!=1&&(failure!=4||waits==1999)){
+    regs.at(0x184f0)&=~1u;if(failure==3)regs.at(0x184f4)^=0x100;
    }
   };
-  assert(B5qTouchClock::xo(read,write,wait)==(failure==0||failure>=5));
-  if(failure==1){
-   assert((writes==std::vector<unsigned>{0x18504})&&(reads==std::vector<unsigned>{0x18504,0x18504})&&!waits);
-   assert(regs.at(0x184f4)==initialCfg&&regs.at(0x184f0)==initialCmd);continue;
-  }
-  const std::vector<unsigned> expected=dfsEnabled?std::vector<unsigned>{0x18504,0x184f4,0x184f0}:std::vector<unsigned>{0x184f4,0x184f0};
+  const bool ok=B5qTouchClock::xo(read,write,wait,dfsState,level,selected);
+  assert(ok==(failure==0||failure>=4)&&dfsState==dfsOther&&level==(ok?0u:8u));
+  const std::vector<unsigned> expected={0x184f4,0x184f0};
   assert(writes==expected&&regs.at(0x18504)==dfsOther);
   assert((regs.at(0x184f4)&~0x371fu)==(initialCfg&~0x371fu));
   assert((regs.at(0x184f0)&~1u)==initialCmd);
-  assert(waits==(failure==2?2000u:failure==6?1999u:failure==7?0u:1u));
-  if(failure==3)assert(regs.at(0x184f4)==initialCfg);
-  else assert((regs.at(0x184f4)&0x371fu)==(failure==4?0x101u:1u));
+  assert(waits==(failure==1?2000u:failure==4?1999u:failure==5?0u:1u));
+  if(failure==2)assert(regs.at(0x184f4)==initialCfg);
+  else assert((regs.at(0x184f4)&0x371fu)==(failure==3?0x101u:1u));
  }
- puts("PASS production SE4 clock helper: locked shared vote/preserved peer votes/early failure/all branch timeouts/delayed enable/DFS and RCG faults/offset isolation");
+ puts("PASS production SE4 clock helper: locked votes/peer preservation/all branch timeouts/HW_CTL 80000002 skip/DFS levels0..7/no DFS writes/no-XO failure/nonDFS RCG faults/offset isolation");
 }
 int main(){
  using namespace B5qTouch;Point points[12]={};testClocks();
@@ -136,10 +158,54 @@ int main(){
   assert(geni_i2c_prepare_xo(&bus,&cio,0x20,&proto)==(failure?-1:0));
   if(failure)assert(cold.writes.empty());
   else {
-   assert(cold.writes[0]==GENI_CLK_SEL&&cold.writes[1]==GENI_SCL_COUNTERS&&cold.writes[2]==GENI_CLK_CFG);
+   assert(cold.writes[0]==GENI_SCL_COUNTERS&&cold.writes[1]==GENI_CLK_CFG);
    assert(cold.regs[0x278]==0x702818&&cold.regs[0x48]==0x21&&proto==0x03000021);
    for(auto off:cold.writes)assert(off!=GENI_IF_DISABLE&&off!=0x28);
   }
  }
+ // Actual shared cold-init and XO preparation preserve caller-selected DFS
+ // levels across all eight choices, without issuing commands or enabling DMA.
+ for(unsigned level=0;level<8;++level){
+  Bus cold;cold.regs={{GENI_FW_REVISION,3u<<8},{GENI_CLK_SEL,~0u},{GENI_CGC_CTRL,0x800},{GENI_DMA_GENERAL_CFG,0x400},{GENI_SE_IRQ_EN,0x100},{GENI_GSI_EVENT_EN,15}};
+  const GeniIo cio={Bus::read,Bus::write,&cold};
+  assert(!geni_se_init(&cio));
+  assert((cold.writes==std::vector<unsigned>{0x28,0xe30,0x24,0x20,0xe18,0xe1c}));
+  assert(cold.regs[0x28]==0x87f&&cold.regs[0xe30]==0x40f&&cold.regs[0x24]==0x7f&&cold.regs[0x20]==1&&cold.regs[0xe18]==0&&cold.regs[0xe1c]==0x10c);
+  cold.writes.clear();uint32_t readback=0;
+  assert(B5qTouchClock::selectLevel([&](unsigned off){return cio.read(cio.ctx,off);},[&](unsigned off,uint32_t value){cio.write(cio.ctx,off,value);},level,readback));
+  assert(readback==level&&(cold.writes==std::vector<unsigned>{GENI_CLK_SEL}));cold.writes.clear();
+  assert(!geni_i2c_prepare_xo(&bus,&cio,0x20,&proto)&&cold.regs[GENI_CLK_SEL]==level&&cold.regs[GENI_DMA_MODE]==0);
+  assert(cold.commands.empty());for(unsigned off:cold.writes)assert(off!=GENI_CLK_SEL);
+ }
+ // Level selection rejects an invalid index before MMIO and stops on failed
+ // readback, using the same helper called by the touch worker.
+ for(unsigned invalid:{8u,9u,~0u}){
+  uint32_t readback=0;
+  assert(!B5qTouchClock::selectLevel([](unsigned)->uint32_t{assert(false);return 0;},[](unsigned,uint32_t){assert(false);},invalid,readback));
+  assert(readback==~0u);
+ }
+ for(unsigned level=0;level<8;++level){
+  unsigned reads=0,writes=0;uint32_t readback=0;
+  assert(!B5qTouchClock::selectLevel([&](unsigned off){assert(off==GENI_CLK_SEL);++reads;return 8u;},[&](unsigned off,uint32_t value){assert(off==GENI_CLK_SEL&&value==level);++writes;},level,readback));
+  assert(reads==1&&writes==1&&readback==8);
+ }
+ for(unsigned failure=0;failure<3;++failure){
+  Bus cold;cold.regs={{GENI_FW_REVISION,(failure==0?2u:3u)<<8},{GENI_IF_DISABLE,unsigned(failure==1)},{GENI_STATUS,unsigned(failure==2)}};
+  const GeniIo cio={Bus::read,Bus::write,&cold};assert(geni_se_init(&cio)==-1&&cold.writes.empty());
+ }
+ assert(geni_se_init(nullptr)==-1);
+ for(unsigned capability:{1u,2u,3u,0x80000000u,~0u}){
+  Bus cold;cold.regs={{GENI_FW_REVISION,3u<<8},{GENI_IF_DISABLE,capability}};
+  const GeniIo cio={Bus::read,Bus::write,&cold};
+  assert(geni_se_init(&cio)==-1&&cold.writes.empty());
+  assert(geni_i2c_prepare_xo(&bus,&cio,0x20,&proto)==-1&&cold.writes.empty());
+ }
+ for(unsigned fault:{GENI_SCL_COUNTERS,GENI_CLK_CFG}){
+  Bus cold;cold.regs={{GENI_FW_REVISION,3u<<8},{GENI_CLK_SEL,7}};cold.rejected=fault;
+  const GeniIo cio={Bus::read,Bus::write,&cold};
+  assert(geni_i2c_prepare_xo(&bus,&cio,0x20,&proto)==-1&&cold.regs[GENI_CLK_SEL]==7&&cold.commands.empty());
+  assert((cold.writes==std::vector<unsigned>{GENI_SCL_COUNTERS,GENI_CLK_CFG}));
+ }
+ puts("PASS shared GENI production cold-init: six exact writes/preserved RMW bits/FIFO routing/levels0..7 preserved/rejected protocol-active-disabled with no writes/timing readback faults");
  puts("PASS actual TouchComm app-info/config/delta/framing/truncation/fuzz and GENI read-only/NACK/bounded-timeout paths");
 }
