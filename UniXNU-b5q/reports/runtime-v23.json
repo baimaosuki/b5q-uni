@@ -1,0 +1,1348 @@
+{
+  "status": "all36localpreCIchecksPASS;one-object incrementalCI ready",
+  "v22_journal": {
+    "sha256": "6984b30a05ef3aadde68348955d1acbc9769f72ffa6cfa55a90b76d754cc8537",
+    "sequence": 1,
+    "bytes": 9603,
+    "lines": 151,
+    "host": "host-started,USBCMD0/USBSTS1 beforejournalstops;IRQstorm not directlycounted yet"
+  },
+  "scope": "onlyB5qUsbHost.cpp recompiled; kernelcore/GPUarchives/addon/Data/trust reusedv22",
+  "requested_changes": [
+    "publish callbackbeforeSPIattach thenimmediatemask",
+    "maskdisabled/nohandlerIRQ;201unhandledenabledinterruptslatchstorm",
+    "monitorirq/un/storm/powerstate",
+    "cleardeviceeventssafely;correctOTGevent/enableregisters gatedbyGHWPARAMS0",
+    "core soft reset20ms andhostrole",
+    "default15secondworkerdelay withboundedoptionalarg",
+    "actualIRQsource/policy/PACregressions"
+  ],
+  "OTGsource": {
+    "repo": "LineageOS/android_kernel_samsung_sm8550",
+    "commit": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9",
+    "path": "drivers/usb/dwc3/core.h",
+    "sha256": "6f57d63cdfd0fe6f687bfd928ab34b9836e413df9632a2c1739966eb5cd060db",
+    "OEVT": "0xcc08 W1C",
+    "OEVTEN": "0xcc0c",
+    "OSTS": "0xcc10 readonlystatus; notwritten",
+    "DRD": "GHWPARAMS0 &3 ==2"
+  },
+  "hardware_v23": "pending",
+  "target_compile": {
+    "passed": true,
+    "duplicate_external_definitions": {},
+    "XHCI_slots": 427,
+    "objects": {
+      "B5qUsbHost": {
+        "target": "arm64e-ios27",
+        "imports": 502,
+        "unresolved": []
+      }
+    },
+    "all_saved_context_external_helpers_present": true
+  },
+  "callback_PAC": {
+    "passed": true,
+    "USB_to_ArmCpu": {
+      "producer": [
+        {
+          "site": "0x16f4",
+          "key": 0,
+          "diversity": 10942,
+          "address_diversity": 0,
+          "kind": "PACIAinstruction"
+        }
+      ],
+      "actual_ArmCpu_dispatch_calls": [
+        {
+          "site": "0x34b0",
+          "diversity": 10942,
+          "key": 0
+        }
+      ],
+      "key": "IA",
+      "diversity": "0x2abe"
+    },
+    "all_GMU_IO_and_services_fields": [
+      {
+        "field": "read32",
+        "key": "IA",
+        "diversity": "0x54f7",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b20",
+            "key": 0,
+            "diversity": 21751,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x4cd8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d10",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d48",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d80",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4db8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4df0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e28",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e60",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e98",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4ed0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f08",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f40",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f78",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4fbc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x50e4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5188",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5208",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5288",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x52cc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5320",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x538c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x53f0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x545c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5688",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x57c0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5834",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x58a8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x58d0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6984",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x69ac",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x69e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6a08",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6a3c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6bf8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c1c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c44",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c6c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c94",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6cbc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6ce0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6d04",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6d2c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6da4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6dcc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6df4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e1c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e40",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e64",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6f84",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6fa8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6fd0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6ff8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7020",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7cc8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7d04",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7d2c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x859c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x85d0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8630",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x865c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x89f4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8a30",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8b34",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8e50",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9118",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x913c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9160",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9184",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x91a8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9ee8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb268",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb328",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb374",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb39c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xd118",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xda90",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xea60",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xede4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xee80",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeea0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeebc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeeec",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf220",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf240",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf25c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf28c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf470",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf4bc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf4e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf504",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf530",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf554",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf578",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5a4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5c8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5ec",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf6e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf704",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xfaf0",
+            "diversity": 21751,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "write32",
+        "key": "IA",
+        "diversity": "0xb286",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b34",
+            "key": 0,
+            "diversity": 45702,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3cf8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x3d14",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x50c0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5114",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5134",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x51ac",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5238",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5300",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5344",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x53d0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5494",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5638",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5654",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5788",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5800",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x6388",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x63a4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64b8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64d4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64f4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8564",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8600",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x89d4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a10",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a54",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a70",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a90",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8aac",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ad8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8af8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b14",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b68",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b94",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bb4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bd4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bf0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c0c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c44",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c60",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c7c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c98",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cb4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cd0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d24",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d40",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d5c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d78",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8da4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8dd0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8dec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e24",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e74",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e90",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8eb0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ed0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8eec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f0c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f48",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f64",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f80",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f9c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8fbc",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8fe0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ffc",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb290",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb300",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb354",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb424",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb440",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb45c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xd140",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xd1d0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xda64",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xedc0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xee08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xee28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xfa84",
+            "diversity": 45702,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "barrier",
+        "key": "IA",
+        "diversity": "0x307a",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b48",
+            "key": 0,
+            "diversity": 12410,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3d24",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5664",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5798",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5810",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0xee38",
+            "diversity": 12410,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "sha256",
+        "key": "IA",
+        "diversity": "0xe2e",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c74",
+            "key": 0,
+            "diversity": 3630,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3e4",
+            "diversity": 3630,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "now_us",
+        "key": "IA",
+        "diversity": "0xe4fe",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c88",
+            "key": 0,
+            "diversity": 58622,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x11f0",
+            "diversity": 58622,
+            "key": 0
+          },
+          {
+            "site": "0x1260",
+            "diversity": 58622,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "wait_us",
+        "key": "IA",
+        "diversity": "0x50c7",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c9c",
+            "key": 0,
+            "diversity": 20679,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x1358",
+            "diversity": 20679,
+            "key": 0
+          }
+        ]
+      }
+    ],
+    "objects_sha256": {
+      "USB": "f9d0d3ef79fdccf64cc54e0186299c9a5ac3c83eaf84483a6709b9fbaf909684",
+      "ArmCpu": "b9f6ae3d43109dbd799e3483f7a9e824c31a5da2bdae47ce77c2d71294da69a1",
+      "GPU": "377f13a5e93f00ed6b5ce8a7cdbb5ab7c7e8481aa60b1150543bac0c6548b53f",
+      "GMU": "7cd557cb2fa5576f85df6d45524dceda067f1ad8d64ef604428cd6b84339f311"
+    },
+    "PAuth_disabled": false,
+    "hardware_PAuth_execution_tested": false
+  },
+  "input_contract": {
+    "passed": true,
+    "unchanged_board_args_and_ADT_rules": true,
+    "compiled_board_objects": [
+      "B5qUsbHost.cpp"
+    ],
+    "all_other_production_sources_unchanged_v22": true,
+    "IRQ_attach_mask_storm_and_disable_contract": true,
+    "DWC3_Device_OTG_events_and_20ms_reset": true,
+    "delay_default_seconds": 15,
+    "delay_override_max_seconds": 300,
+    "monitor_IRQ_and_power_state": true,
+    "callback_PAC": "USB->ArmCpu andall6GMU_IO_Services fields match actualobjects",
+    "hardware_tested": false
+  },
+  "local_regressions": [
+    "productionnub attachIRQ-race masksbeforecallbackexecution; callbacks publishedbeforeattach",
+    "disabled/noaction masksline;201rejects latchstorm;disableclearscounter;1000accepted-disable/reenablecyclesdonotfuse",
+    "productionDWC3Device/OTG W1Ccorrectedregs,nonDRDnoOTGaccess,20msresetorderingandfail-beforehost",
+    "existing USBclock/resetbounds+SamsungGMUhash/loader testsPASS",
+    "actualworker delayprefix default15s andoverrides0/1/15/300/301/UINT_MAX boundedto300sPASS"
+  ],
+  "production_sha256": {
+    "UniXNU-b5q/package/ThermalProbe.h": "9f8c853ce54b940c066b0b0880f825b050cf6bef3f6c7c603f887866730ea619",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "e88213faa1126ba2236e6f81c2055b1161f43903432a7fb83ba3481dcd4982d5",
+    "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "0a4ab7e2b1ed870af524450d1b6d8a16c0aaf6dd205a409ef42906df6e2d1d53",
+    "UniXNU-b5q/package/BoardClock.h": "47c950b288ffc659a9306c1da79ff8b0fb6968c809508aa74a1a6a4bfb79e59d",
+    "UniXNU-b5q/package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
+    "UniXNU-b5q/package/DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+    "UniXNU-b5q/package/B5qEthernet.cpp": "d1abd199aaafbd9c6fe84e6dfd105802b7f909fb718c9b6917c22acf3f6f44b6",
+    "UniXNU-b5q/package/HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+    "UniXNU-b5q/package/B5qGpuPowerBoard.h": "6138dd87734ca0bf995e50490d1e7f2f8fb0b846d20f0381cc37a1b621b7fb07",
+    "UniXNU-b5q/package/B5qUsbPolicy.h": "68551731bb5b83a73228df5b5bf43f2e18b0fd14adbfcb9a9ac95f3ecddcddc2",
+    "UniXNU-b5q/package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+    "UniXNU-b5q/package/B5qSpmi.h": "12177df32a4c17f5ff66a6f5dfd8f31b7f8877a983e3ada79b521c5e075856f2",
+    "UniXNU-b5q/package/GeniI2c.c": "825569be3276ebde2dadd4649bec51cc4f2a345b511f06731f7b3a9f5a83f367",
+    "UniXNU-b5q/package/ThermalProbe.cpp": "8cbdd96857d9a0b2e295fb276d4e77d3ee159eb756865e6eaa4439898676ac3a",
+    "UniXNU-b5q/package/NativeHidInput.cpp": "4c4ab5b8c4402bb9e5dd3a8db0b0a30e19101a43bde86cd89f13b115286aa3a0",
+    "UniXNU-b5q/package/B5qGpuTrace.h": "a0b2dba23a2a0fa1c356f26244553cd3e1e60413a955b082a9b099d03aaad575",
+    "UniXNU-b5q/package/B5qAbsentBoard.cpp": "643302e0e296ccf1032b473a37b3d151137280b3adee317aaf9af2d91ff20429",
+    "UniXNU-b5q/package/B5qTouch.cpp": "89d5ae3ad1fd80c614ea399f39be06e400eedb49748d0363514416b6d6359710",
+    "UniXNU-b5q/package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+    "UniXNU-b5q/package/B5qRamStorage.cpp": "ef9fb8763d58331abed767a3e3fb57e1175fda7e95b4cecdf0e17ad7f7e97ebb",
+    "UniXNU-b5q/package/B5qSpmi.cpp": "d6fc53e19e4e82a48a87c221ce6cc891eda18cdf1f4f4214a748c58bfd9ee914",
+    "UniXNU-b5q/package/B5qPeripheralHardware.h": "de7e968148612f5feba3c66141797aba4785564e664016f782d7f8adbc8f7a15",
+    "UniXNU-b5q/package/ThermalLevel.cpp": "8d256c6c898864b35b57dcc588f56c917cf12a3638153c25b057569b5a9b031f",
+    "UniXNU-b5q/package/B5qGpuFirmware.h": "b628cfaa795023d7d470d14893248ee8fe8228c6ac3f199253da02b676699494",
+    "UniXNU-b5q/package/ShengSleep.h": "c7469cf97ca66975539cd380698284527a9988331cdbb11f8cfc11cc33791697",
+    "UniXNU-b5q/package/B5qUsbHost.cpp": "20aeebbde6bf5cd8f58361790fa6a7976bd490b23bb68fdb8c02cb2a79d37034",
+    "UniXNU-b5q/package/B5qGmuVotes.c": "8a259d9d49657ac2c90b1542b39e5726039ecfe72564f20f20eff0fb4178c054",
+    "UniXNU-b5q/package/CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
+    "UniXNU-b5q/package/B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+    "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+    "UniXNU-b5q/package/B5qTouchClock.h": "36583a88581c02e734ed07ebbbeabe86d208bd8a05218c9b185c23a233cbabf5",
+    "UniXNU-b5q/package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+    "UniXNU-b5q/package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
+    "UniXNU-b5q/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+    "UniXNU-b5q/package/GeniI2c.h": "635862b89893eb76cf32f82c092a81d1ea08ccf7b719c413652437777d9c826d",
+    "UniXNU-b5q/package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+    "UniXNU-b5q/package/ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d"
+  },
+  "full_local_preCI": {
+    "scope": "Local source/input checks before submission; target compiler/linker runs in macOS CI",
+    "checks": [
+      "upstream-package-template",
+      "porting-record",
+      "source-contract",
+      "lockdown-public",
+      "log-startup",
+      "log-writer",
+      "runtime-gates",
+      "ethernet-lifecycle",
+      "ethernet-start",
+      "read-status",
+      "log-read",
+      "verified-read",
+      "ws-signal",
+      "peripheral-policy",
+      "shared-gpu",
+      "peripheral-target",
+      "touch",
+      "data-account",
+      "usb-irq",
+      "usb-events",
+      "usb-delay",
+      "callback-pac",
+      "v23-inputs",
+      "installer-errors",
+      "root-format-compile",
+      "root-format-runtime",
+      "smmu-compile",
+      "smmu-runtime",
+      "protocol-compile",
+      "protocol-runtime",
+      "exact-local-root-policies",
+      "full-root-image-sha256",
+      "original-pmgr-fixture",
+      "device-tree-syntax",
+      "python-syntax",
+      "no-added-ci-integrity-gates"
+    ],
+    "result": "PASS",
+    "source_sha256": {
+      ".github/workflows/b5q-stage123.yml": "9c28ca3bf210490779dc6dc9064386026b7030a8f66bab406e57a75e7b99b0b7",
+      "UniXNU-b5q/board.toml": "dbdaf216b807fa3e9141ebad8175b17e7ac852ab84d3061908b7365080d5e45f",
+      "UniXNU-b5q/configs/b5q_macos_defconfig": "acfbf5c22cbd7355f936fca197ca50b8d1762875ca8998c85931d9e0d5e50dfd",
+      "UniXNU-b5q/dts/b5q.dts": "7bafa656647f9eac37ff55af2d443f1d4c778ff949820915015e7f638df14ec5",
+      "UniXNU-b5q/package/B5qAbsentBoard.cpp": "643302e0e296ccf1032b473a37b3d151137280b3adee317aaf9af2d91ff20429",
+      "UniXNU-b5q/package/B5qEthernet.cpp": "d1abd199aaafbd9c6fe84e6dfd105802b7f909fb718c9b6917c22acf3f6f44b6",
+      "UniXNU-b5q/package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
+      "UniXNU-b5q/package/B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+      "UniXNU-b5q/package/B5qGpuFirmware.h": "b628cfaa795023d7d470d14893248ee8fe8228c6ac3f199253da02b676699494",
+      "UniXNU-b5q/package/B5qGpuPowerBoard.h": "6138dd87734ca0bf995e50490d1e7f2f8fb0b846d20f0381cc37a1b621b7fb07",
+      "UniXNU-b5q/package/B5qGpuTrace.h": "a0b2dba23a2a0fa1c356f26244553cd3e1e60413a955b082a9b099d03aaad575",
+      "UniXNU-b5q/package/B5qPeripheralHardware.h": "de7e968148612f5feba3c66141797aba4785564e664016f782d7f8adbc8f7a15",
+      "UniXNU-b5q/package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+      "UniXNU-b5q/package/B5qRamStorage.cpp": "ef9fb8763d58331abed767a3e3fb57e1175fda7e95b4cecdf0e17ad7f7e97ebb",
+      "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+      "UniXNU-b5q/package/B5qSpmi.cpp": "d6fc53e19e4e82a48a87c221ce6cc891eda18cdf1f4f4214a748c58bfd9ee914",
+      "UniXNU-b5q/package/B5qSpmi.h": "12177df32a4c17f5ff66a6f5dfd8f31b7f8877a983e3ada79b521c5e075856f2",
+      "UniXNU-b5q/package/B5qTouch.cpp": "89d5ae3ad1fd80c614ea399f39be06e400eedb49748d0363514416b6d6359710",
+      "UniXNU-b5q/package/B5qTouchClock.h": "36583a88581c02e734ed07ebbbeabe86d208bd8a05218c9b185c23a233cbabf5",
+      "UniXNU-b5q/package/B5qTouchProtocol.h": "e88213faa1126ba2236e6f81c2055b1161f43903432a7fb83ba3481dcd4982d5",
+      "UniXNU-b5q/package/B5qUfs/B5qLogArgs.h": "a41d505915d4fe13cdce209197bd610e97c56f0ddef1a2bceb12e1280ed3e887",
+      "UniXNU-b5q/package/B5qUfs/B5qLogCore.h": "8d0a834dadea6ca796ece05d9f464157d210e2eb9d5f5d598ea1138aa7144643",
+      "UniXNU-b5q/package/B5qUfs/B5qLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+      "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "c79006e1d20ff9abf71e4d23584dfa82b7f9d19e3a5d5cbf032858f397d36620",
+      "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "cf64cac11d7b999be2c98b453fb13b4571ceb513d575d8ceb6c256580ba8d599",
+      "UniXNU-b5q/package/B5qUfs/B5qLogVolume.h": "ecb267c9adbda425d9c59d0bd6167e22b3036a25599d12f581a48fa693a46cb0",
+      "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
+      "UniXNU-b5q/package/B5qUfs/B5qRootPolicies.h": "9f45e765c1e9466aa0f98cbe8860d342c7733a9b9285dccc453462d69b5e9eb4",
+      "UniXNU-b5q/package/B5qUfs/B5qSmmu.h": "de60642e39d4c15b33b55cfb34d2e4c6a8199d64f68d4c9ccc48885090111d5e",
+      "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "3c407a0aa2aee5a6da91a0c7ddcb1f7720917318a1ff4bf53b03213754d291f7",
+      "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "93d1eaf948a1c598d7398d40f5c01d0e42bb372ab1fbdc850b3ddaadc7538b9d",
+      "UniXNU-b5q/package/B5qUfs/B5qVerifiedRead.h": "969e8a14b7132089c00303d8e53bdfac1101add1ad152126056f3e8b7bf3c885",
+      "UniXNU-b5q/package/B5qUsbHost.cpp": "20aeebbde6bf5cd8f58361790fa6a7976bd490b23bb68fdb8c02cb2a79d37034",
+      "UniXNU-b5q/package/B5qUsbPolicy.h": "68551731bb5b83a73228df5b5bf43f2e18b0fd14adbfcb9a9ac95f3ecddcddc2",
+      "UniXNU-b5q/package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+      "UniXNU-b5q/package/BoardClock.h": "47c950b288ffc659a9306c1da79ff8b0fb6968c809508aa74a1a6a4bfb79e59d",
+      "UniXNU-b5q/package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
+      "UniXNU-b5q/package/ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d",
+      "UniXNU-b5q/package/CpuFreqProbe.cpp": "2c5240f1fb565bc2a3b9ce7e24fd27d697f14c85d0d927f11990fbc506557e6f",
+      "UniXNU-b5q/package/DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+      "UniXNU-b5q/package/GeniI2c.h": "635862b89893eb76cf32f82c092a81d1ea08ccf7b719c413652437777d9c826d",
+      "UniXNU-b5q/package/HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+      "UniXNU-b5q/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+      "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "0a4ab7e2b1ed870af524450d1b6d8a16c0aaf6dd205a409ef42906df6e2d1d53",
+      "UniXNU-b5q/package/NativeHidInput.cpp": "4c4ab5b8c4402bb9e5dd3a8db0b0a30e19101a43bde86cd89f13b115286aa3a0",
+      "UniXNU-b5q/package/ShengSleep.h": "c7469cf97ca66975539cd380698284527a9988331cdbb11f8cfc11cc33791697",
+      "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-0.h": "c94edd4260e2b73167505d49d103f1c398a50acda722f5ef1f92de7f33598819",
+      "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-1.h": "83273760c59b759217ac1006965dac60a826eec49186e3862b85c8940ab39bca",
+      "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-common.h": "c4aca6e6225cfb862c0f021e882cfdfcff50144f6d9c779d336e68a2b1ab1feb",
+      "UniXNU-b5q/package/Sm8550Inputs/B5qGpuRates.h": "a106b1e2854785b5f13ea5311572efbd621dbd8646825f463029022505a88372",
+      "UniXNU-b5q/package/Sm8550Inputs/ShengGmuCommandDbSource.h": "2ed10058e2bf9147057a73f7a074e01560dd501e0b712df446cb1a88b87c6b35",
+      "UniXNU-b5q/package/Sm8550Inputs/ShengGmuSource.h": "cca9bacf3a1773cffb0ed79b4eed1f01e9b59b018aef28d223d5d7ccdf11dde7",
+      "UniXNU-b5q/package/Sm8550Inputs/ShengGmuVotesSource.h": "83859ce5c2507eb572f66a5e7c1c9f0776e1a346abac7ada5a13bec2fa550b86",
+      "UniXNU-b5q/package/Sm8550Inputs/ShengGpuSmmuSource.h": "bb71466456a4033f1513bd3fca616a6f1e8e4e9c30d9dca0f1703509291669b6",
+      "UniXNU-b5q/package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+      "UniXNU-b5q/package/ThermalLevel.cpp": "8d256c6c898864b35b57dcc588f56c917cf12a3638153c25b057569b5a9b031f",
+      "UniXNU-b5q/package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+      "UniXNU-b5q/package/ThermalProbe.cpp": "8cbdd96857d9a0b2e295fb276d4e77d3ee159eb756865e6eaa4439898676ac3a",
+      "UniXNU-b5q/package/ThermalProbe.h": "9f8c853ce54b940c066b0b0880f825b050cf6bef3f6c7c603f887866730ea619",
+      "UniXNU-b5q/porting.toml": "c7e2bca660508762ab8fce9106ea78838e82bb50df4d6f27d70a15ac8a2cea60",
+      "UniXNU-b5q/scripts/adapt-b5q-platform.py": "84f4d8912ffaebc992eb9d1f3a77ae2768308005ac108ca4f7068c7d6e17377c",
+      "UniXNU-b5q/scripts/b5q_abi.py": "83b6abb2d75e82f4467abe1cb98a551b9c0c5a1f75fdbaaa18a21d2d23e6a7a8",
+      "UniXNU-b5q/scripts/b5q_compile.py": "acb19e4534fc20a78088f6e2bbd07964f077f99fd45b121a1f9ceb7a4a2e3880",
+      "UniXNU-b5q/scripts/b5q_hid.py": "fecddcf106c6c965bf8bf5fbe398fbba9986b5b9576d59516bde2e1586e29c8e",
+      "UniXNU-b5q/scripts/b5q_peripherals.py": "cadf81a95d19583710bea2ad11071da4daa2d50d67761d20a716db27807ddd09",
+      "UniXNU-b5q/scripts/build-b5q-adreno.py": "3c144433e16bb31221fb104bd6f752331700e367230158bdd3ad30997e4b812e",
+      "UniXNU-b5q/scripts/build-b5q-gop-27.py": "a311c64e86f68eddfe4e4601091fa6ec67ea5f9904911721141e9fd8b45fc03e",
+      "UniXNU-b5q/scripts/build-b5q-payload.py": "95edce6dba47278e56b874a0c8a1640a88316e0caa2b2a03b63eb7922ebc4bd2",
+      "UniXNU-b5q/scripts/build-b5q-pmgr.py": "7c8f84e9290c4356f2ca3cb61adaf3420eae8938ebd950b8dd19252b14c41944",
+      "UniXNU-b5q/scripts/build-b5q-storage.py": "41f5d8fc65125fb1441a6de8e994652c49d9a8b5d2e3ed53a91c680e1c343d41",
+      "UniXNU-b5q/scripts/build-b5q-usb.py": "df5bbdf3084ef245b5bc99e5bfb3716f5a53264dd5473bd7d7bdc239a0a677fb",
+      "UniXNU-b5q/scripts/check-b5q-inputs.py": "fa0a1e649264bf380767c5d5e6683c8a2f047d50684b70e3a272ecfcabe12dd6",
+      "UniXNU-b5q/scripts/check-b5q-uefi.py": "82e5c6571c09665166ece4c609c2a8fae223457de6cfc0a0abe2beeed3c86a09",
+      "UniXNU-b5q/scripts/check-xnu-patches.py": "8e5dc9477788102d351bb0f149d10834125c6dcfa4cb4cfa659a941f77eed417",
+      "UniXNU-b5q/scripts/ci-transfer.py": "09da81e49dd2a49e8920e6375f689aab67df0abea24307453f91aa305f3c5a83",
+      "UniXNU-b5q/scripts/collect-runtime-fdt.py": "be7ab9f6fe6bb99225c7ede13e89e450541c5843046d0877192f1ec9139c482d",
+      "UniXNU-b5q/scripts/inventory-hardware.py": "075d573306ebc3869be5dcb6d9b92b0b2fe6bed815702ed97f0fce4074932804",
+      "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "6a9ecd77c7c551b7737f51557eb0ee5f05ae3fb7219b8e92aca0ad41da699f40",
+      "UniXNU-b5q/scripts/prepare-b5q-gmu.py": "f891a756e9ddb23c7dc7bedd93b36ba3db96bac6a0ef0a8f649f871cbd8e5879",
+      "UniXNU-b5q/scripts/prepare-b5q-votes.py": "b80374106669a5ff39a4630ede764fdf82771daea19a1114a433ad83e3f76206",
+      "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "f3d5f48fcb8652ce9bb4b92bbb2dc0bf8ff4236480ed0d7d9bef2c88033e50b1",
+      "UniXNU-b5q/scripts/reuse-completed-build.py": "90dcf2ed973b46a347bfce25ae8f05b1fb435bb3228c456b3ee044a8726653df",
+      "UniXNU-b5q/scripts/reuse-v10-kernel.py": "7540dd020d6791c769ac1e7aa3200922b42a19564a942f8270dc007573e1ab11",
+      "UniXNU-b5q/scripts/reuse-v13-build.py": "4c866dd96ec06f9e160ffd29d8fe7eeec21b58635e733428e15f67cf8a970413",
+      "UniXNU-b5q/scripts/test-ramblock-host.py": "058a8e2e36310029a65654fe908c9610dabc2839e74049ee98c9f47bda8259f0",
+      "scripts/b5q-install/assemble-firstboot.py": "d5f84e6ef1a28531f26dae4ee48947513f405e7f86efb8f3a5dea1689a6b4e07",
+      "scripts/b5q-install/build-4kn-esp.py": "64ef94b6643df38660d0245c8063257d459b6ef44939f7901ca75e4c6578a82e",
+      "scripts/b5q-install/build-ci-esp.py": "7c7e40750ffa8140daffafc8486f9b7b4f9b1bed168618a5c4c08cbd95d61855",
+      "scripts/b5q-install/build-data-seed.py": "bab85b5542467d7628f6483ac3c2fcd4e408f758abad87629c2e744c2e691759",
+      "scripts/b5q-install/build-earlyboot-diag.py": "53b99ec5d72d45a6e3b14b961638c017739908676582e372a98b054ab94592ab",
+      "scripts/b5q-install/build-lowdram-esp.py": "93fe7efe6c63871cea05807a0dd88920479b183b60b3f2007fbd3eb946bce455",
+      "scripts/b5q-install/build-memory-boot.py": "8a9383fb4ad058c6b39dbb7d4f89c89eb4076043018665777630476d0a73d11f",
+      "scripts/b5q-install/check-geni-pac.py": "d9adcbeed727f8798b633ad38387f840f557db8d9a0cd5f7c7460cc8eb5b948c",
+      "scripts/b5q-install/check-lowdram-boot.py": "a07eddb23dea8805cec9c57874b2b44720eadb46a91d3500ae518a0b931cd1d3",
+      "scripts/b5q-install/check-peripheral-target.py": "ccc1d52a6c224f82ab914b62dae349857a7d4d8ba31cc018a5ce46034ce16fd3",
+      "scripts/b5q-install/check-usb-gmu-pac.py": "ec265934fbe3eca70000f6090aa8a0b753805452e5534bc861d1c6c9ba229262",
+      "scripts/b5q-install/download-ci-artifact.py": "a856896271be568ced07113eb2f6c3c8a9f53c9c4f395a8fbcbbb69194ff063b",
+      "scripts/b5q-install/install-firstboot.py": "c5892b6452845830829560dbb442b26dd83ca0532e6ff0ef46e0f4680a488d7f",
+      "scripts/b5q-install/make-xnu2log.py": "4778966f97ed7eb547a8edb2eb8b2343edea0c14f98849c84727341f18857445",
+      "scripts/b5q-install/pre-ci.py": "5347372cd18fa2f1414b9bdc8fff797cb9607f09dd59579e61394ddf72213cc6",
+      "scripts/b5q-install/repack-adt-esp.py": "23a9d43f122d41e37cc1987fccb631a4bd322a0eaafb2dc3173ff007746524f2",
+      "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
+      "scripts/b5q-install/reuse-v11-data.py": "38a0f985b8e8a537c14abcedfd8c097ee8315d36a6d1f66ef262500c87211648",
+      "scripts/b5q-install/test-esp-menu.py": "b07c10a2828d277681e3709d55dc7ab62b9dc231fe5762dc66ace4ebcbea7e5a",
+      "scripts/b5q-install/verify-batched-read-binary.py": "c4df5d2e45c261bb66c4e43159dd1109e50e1a5c548be2bee16c96e10b00ba0b",
+      "scripts/b5q-install/verify-data-account.py": "3fb757a6e92309021c768e3caf53ce739f67b6fe6503f46c27534754338e9da7",
+      "scripts/b5q-install/verify-display-network-binary.py": "8c8544f944715b44d3094a5cc44227d4b304723bef697120e6073e95a9839011",
+      "scripts/b5q-install/verify-esp-log.py": "66afae7b746b3b9eaf61f36712b6e423b1595e41811089f8e86100fefec671c5",
+      "scripts/b5q-install/verify-firstboot.py": "5833c7100d44003c8f288c7ec8f75277647b64ba15ba5b77132b992dd33ddeb4",
+      "scripts/b5q-install/verify-lockdown-binary.py": "792ad4cb5642b6afad2829953dcb702c300ef7c730b76ce4302b66801341e76b",
+      "scripts/b5q-install/verify-log-binary.py": "8b079a0a14234cd289d3732aa42a7954573c2dca763f680a8ef2bdc56a472172",
+      "scripts/b5q-install/verify-log-fix-binary.py": "01c76a1fc4a9092606cf990166cfd72a8be40aa05878905f3fe124ff288fd978",
+      "scripts/b5q-install/verify-mount-runtime.py": "7bae04dbac40214069929072d6555eddc55a9b84447e9e54f19aae8ab4906ce3",
+      "scripts/b5q-install/verify-peripherals-binary.py": "b9eea5dc40f5a76d08d0a1269d22ae6af12d662b83d761967a53c8f677be2cb2",
+      "scripts/b5q-install/verify-read-retry-binary.py": "8c3eb6b3d8656c9183fbc690e37dd08000546866d451e712873ecaf13577dbe1",
+      "scripts/b5q-install/verify-runtime-gates-binary.py": "2e7ad78cf30267c2b8b2bd158744cf08b044351e9232ef2ddcb4b95c77df6fb6",
+      "scripts/b5q-install/verify-v21.py": "441fc341fc15805be8d792e696ac0d37a3e9bfec06b1b8388df762e614b0ae3a",
+      "scripts/b5q-install/verify-v22.py": "935e7a76745f7e8f9701cfcc828650cb8be6ff049e24840d8aa1e29af23577f1"
+    },
+    "hardware_tested": false,
+    "post_build_v21": "python3 scripts/b5q-install/verify-v21.py --package artifacts/b5q-esp-runtime-v21 --ci-dir artifacts/b5q-runtime-v21-work/ci-files --cached-tree artifacts/b5q-runtime-v21-work/cached-tree"
+  }
+}

@@ -54,10 +54,98 @@ bool writeReg(volatile uint8_t *base,uint64_t bytes,uint32_t off,uint32_t value)
  *reinterpret_cast<volatile uint32_t *>(base+off)=value;barrier();return true;
 }
 
+
+}
+class B5qUsbHost : public AppleUSBXHCI {
+ OSDeclareDefaultStructors(B5qUsbHost)
+public:
+ uint32_t XHCI_DESIRED_POWER() override {return 3;}
+ uint64_t XHCI_READ64(void *base,uint32_t offset) override {
+  auto *p=reinterpret_cast<volatile uint32_t*>(static_cast<uint8_t*>(base)+offset);
+  const uint32_t lo=p[0];return lo|(uint64_t(p[1])<<32);
+ }
+ void XHCI_WRITE64(void *base,uint32_t offset,uint64_t value) override {
+  auto *p=reinterpret_cast<volatile uint32_t*>(static_cast<uint8_t*>(base)+offset);
+  p[1]=uint32_t(value>>32);barrier();p[0]=uint32_t(value);barrier();
+ }
+};
+OSDefineMetaClassAndStructors(B5qUsbHost,AppleUSBXHCI)
+class B5qUsbNub : public IOService {
+ OSDeclareDefaultStructors(B5qUsbNub)
+ IOInterruptAction action=nullptr;OSObject *owner=nullptr;void *context=nullptr;
+ bool enabled=false,attachedLine=false,stormed=false;
+ uint32_t irqCount=0,unhandledCount=0;
+ static void interrupt(void *p) {
+  auto *self=static_cast<B5qUsbNub*>(p);
+  __atomic_fetch_add(&self->irqCount,1u,__ATOMIC_RELAXED);
+  if(!__atomic_load_n(&self->enabled,__ATOMIC_ACQUIRE) || !self->action) {
+   armcpu_spi_mask(B5qHardware::usbIrq,true);
+   __atomic_fetch_add(&self->unhandledCount,1u,__ATOMIC_RELAXED);
+   return;
+  }
+  self->action(self->owner,self->context,self,0);
+  if(__atomic_load_n(&self->enabled,__ATOMIC_ACQUIRE)) {
+   if(__atomic_add_fetch(&self->unhandledCount,1u,__ATOMIC_RELAXED)>200) {
+    __atomic_store_n(&self->enabled,false,__ATOMIC_RELEASE);
+    __atomic_store_n(&self->stormed,true,__ATOMIC_RELEASE);
+    armcpu_spi_mask(B5qHardware::usbIrq,true);
+   }
+  }
+ }
+public:
+ void interruptStats(uint32_t &irq,uint32_t &un,uint32_t &storm) const {
+  irq=__atomic_load_n(&irqCount,__ATOMIC_RELAXED);
+  un=__atomic_load_n(&unhandledCount,__ATOMIC_RELAXED);
+  storm=__atomic_load_n(&stormed,__ATOMIC_ACQUIRE);
+ }
+ IOReturn getInterruptType(int source,int *type) override {
+  if(source || !type)return kIOReturnNoInterrupt;*type=kIOInterruptTypeLevel;return 0;
+ }
+ IOReturn registerInterrupt(int source,OSObject *target,IOInterruptAction handler,void *ref) override {
+  if(source || !target || !handler || action)return kIOReturnNoResources;
+  target->retain();owner=target;context=ref;action=handler;
+  __atomic_store_n(&enabled,false,__ATOMIC_RELEASE);barrier();
+  if(!attachedLine) {
+   if(armcpu_spi_attach(B5qHardware::usbIrq,false,interrupt,this,nullptr,nullptr)) {
+    action=nullptr;owner=nullptr;context=nullptr;target->release();return kIOReturnNoResources;
+   }
+   // Attach enables GIC immediately. The callback is already published and
+   // masks any in-flight disabled IRQ; keep the line off until family enable.
+   const int masked=armcpu_spi_mask(B5qHardware::usbIrq,true);
+   retain();attachedLine=true; // ArmCpu has no detach API.
+   if(masked)return masked;
+  } else if(armcpu_spi_mask(B5qHardware::usbIrq,true))return kIOReturnNoResources;
+  return 0;
+ }
+ IOReturn unregisterInterrupt(int source) override {
+  if(source)return kIOReturnNoInterrupt;__atomic_store_n(&enabled,false,__ATOMIC_RELEASE);armcpu_spi_mask(B5qHardware::usbIrq,true);barrier();
+  // The possibly in-flight IRQ retains a stable owner. This one-shot driver
+  // does not release registered callback storage during failed startup.
+  action=nullptr;return 0;
+ }
+ IOReturn enableInterrupt(int source) override {
+  if(source || !action)return kIOReturnNoInterrupt;
+  if(__atomic_load_n(&stormed,__ATOMIC_ACQUIRE))return kIOReturnNotReady;
+  __atomic_store_n(&enabled,true,__ATOMIC_RELEASE);barrier();
+  const int rc=armcpu_spi_mask(B5qHardware::usbIrq,false);
+  if(rc)__atomic_store_n(&enabled,false,__ATOMIC_RELEASE);
+  return rc;
+ }
+ IOReturn disableInterrupt(int source) override {
+  if(source)return kIOReturnNoInterrupt;
+  __atomic_store_n(&enabled,false,__ATOMIC_RELEASE);
+  __atomic_store_n(&unhandledCount,0u,__ATOMIC_RELAXED);barrier();
+  return armcpu_spi_mask(B5qHardware::usbIrq,true);
+ }
+};
+OSDefineMetaClassAndStructors(B5qUsbNub,IOService)
+namespace {
+struct MonitorContext {Mapping mapping;B5qUsbNub *nub=nullptr;B5qUsbHost *host=nullptr;};
 void monitor(void *argument,wait_result_t) {
- Mapping *mapping=static_cast<Mapping *>(argument);
+ auto *context=static_cast<MonitorContext *>(argument);
+ Mapping *mapping=&context->mapping;
  uint32_t cap=0;readReg(mapping->va,kUsbCoreBytes,0,cap);const uint32_t op=cap&255;
- uint32_t last[4]={0,0,0,0};unsigned samples=0,lastDevices=~0u,lastId=~0u;
+ uint32_t last[4]={0,0,0,0},lastIrq=~0u,lastUn=~0u,lastStorm=~0u;unsigned long lastPower=~0ul;unsigned samples=0,lastDevices=~0u,lastId=~0u;
  for(;;) {
   uint32_t values[4]={0,0,0,0};
   readReg(mapping->va,kUsbCoreBytes,op,values[0]);
@@ -82,69 +170,24 @@ void monitor(void *argument,wait_result_t) {
     iterator->release();
    }
   }
-  changed|=devices!=lastDevices || lastIdNow!=lastId;
+  uint32_t irq=0,un=0,storm=0;context->nub->interruptStats(irq,un,storm);
+  const unsigned long power=context->host->getPowerState();
+  changed|=devices!=lastDevices || lastIdNow!=lastId || irq!=lastIrq || un!=lastUn || storm!=lastStorm || power!=lastPower;
   if(changed) {
-   IOLog("B5qUsb: cmd=%08x sts=%08x port1=%08x port2=%08x devs=%u last=%08x\n",
-     values[0],values[1],values[2],values[3],devices,lastIdNow);
+   IOLog("B5qUsb: cmd=%08x sts=%08x port1=%08x port2=%08x devs=%u last=%08x irq=%u un=%u storm=%u pwr=%lu\n",
+     values[0],values[1],values[2],values[3],devices,lastIdNow,irq,un,storm,power);
    for(unsigned i=0;i<4;++i)last[i]=values[i];
-   lastDevices=devices;lastId=lastIdNow;
+   lastDevices=devices;lastId=lastIdNow;lastIrq=irq;lastUn=un;lastStorm=storm;lastPower=power;
   }
   ++samples;
   IOSleep(2000);
  }
 }
-}
-class B5qUsbHost : public AppleUSBXHCI {
- OSDeclareDefaultStructors(B5qUsbHost)
-public:
- uint32_t XHCI_DESIRED_POWER() override {return 3;}
- uint64_t XHCI_READ64(void *base,uint32_t offset) override {
-  auto *p=reinterpret_cast<volatile uint32_t*>(static_cast<uint8_t*>(base)+offset);
-  const uint32_t lo=p[0];return lo|(uint64_t(p[1])<<32);
- }
- void XHCI_WRITE64(void *base,uint32_t offset,uint64_t value) override {
-  auto *p=reinterpret_cast<volatile uint32_t*>(static_cast<uint8_t*>(base)+offset);
-  p[1]=uint32_t(value>>32);barrier();p[0]=uint32_t(value);barrier();
- }
-};
-OSDefineMetaClassAndStructors(B5qUsbHost,AppleUSBXHCI)
-class B5qUsbNub : public IOService {
- OSDeclareDefaultStructors(B5qUsbNub)
- IOInterruptAction action=nullptr;OSObject *owner=nullptr;void *context=nullptr;
- bool enabled=false,attachedLine=false;
- static void interrupt(void *p) {
-  auto *self=static_cast<B5qUsbNub*>(p);
-  if(self->enabled && self->action)self->action(self->owner,self->context,self,0);
- }
-public:
- IOReturn getInterruptType(int source,int *type) override {
-  if(source || !type)return kIOReturnNoInterrupt;*type=kIOInterruptTypeLevel;return 0;
- }
- IOReturn registerInterrupt(int source,OSObject *target,IOInterruptAction handler,void *ref) override {
-  if(source || !target || !handler || action)return kIOReturnNoResources;
-  if(!attachedLine) {
-   if(armcpu_spi_attach(B5qHardware::usbIrq,false,interrupt,this,nullptr,nullptr))return kIOReturnNoResources;
-   // ArmCpu has no detach API. Pin this callback context for the kernel lifetime.
-   retain();attachedLine=true;
-  }
-  target->retain();owner=target;context=ref;action=handler;barrier();return 0;
- }
- IOReturn unregisterInterrupt(int source) override {
-  if(source)return kIOReturnNoInterrupt;enabled=false;armcpu_spi_mask(B5qHardware::usbIrq,true);barrier();
-  // The possibly in-flight IRQ retains a stable owner. This one-shot driver
-  // does not release registered callback storage during failed startup.
-  action=nullptr;return 0;
- }
- IOReturn enableInterrupt(int source) override {
-  if(source || !action)return kIOReturnNoInterrupt;enabled=true;barrier();return armcpu_spi_mask(B5qHardware::usbIrq,false);
- }
- IOReturn disableInterrupt(int source) override {
-  if(source)return kIOReturnNoInterrupt;enabled=false;barrier();return armcpu_spi_mask(B5qHardware::usbIrq,true);
- }
-};
-OSDefineMetaClassAndStructors(B5qUsbNub,IOService)
-namespace {
 static void worker(void *,wait_result_t) {
+ unsigned delaySec=15;PE_parse_boot_argn("b5q-usb-delay",&delaySec,sizeof(delaySec));
+ if(delaySec>300)delaySec=300; // bounded conversion and user override
+ IOLog("B5qUsb: stage=delayed-start seconds=%u\n",delaySec);
+ IOSleep(delaySec*1000);
  const char *stage="boot-ram";Mapping core,qScratch,gcc;B5qUsbNub *nub=nullptr;
  IODeviceMemory *memory=nullptr;OSArray *ranges=nullptr;B5qUsbHost *host=nullptr;
  bool attached=false,hostAttached=false,startAttempted=false;
@@ -168,10 +211,11 @@ static void worker(void *,wait_result_t) {
   stage=B5qUsbPolicy::scratch(scratchRead,scratchWrite,[](unsigned us){IODelay(us);});if(stage)break;
   b5q_usb_repeater_host(); // Optional repeater failure is logged; host preparation continues.
   auto snapshot=[&](const char *phase) {
-   uint32_t v[11]={};const unsigned offsets[]={0xc120,0xc110,0xc704,0xc70c,0xc200,0xc2c0,0,0x10};
+   uint32_t v[13]={};const unsigned offsets[]={0xc120,0xc110,0xc704,0xc70c,0xc200,0xc2c0,0,0x10};
    for(unsigned i=0;i<8;++i)readReg(core.va,kUsbCoreBytes,offsets[i],v[i]);
    for(unsigned i=0;i<3;++i)readReg(qScratch.va,0x1000,i==0?0x808:i==1?0x810:0x830,v[8+i]);
-   IOLog("B5qUsb: %s gsnpsid=%08x gctl=%08x dctl=%08x dsts=%08x gusb2phycfg=%08x gusb3pipectl=%08x cap=%08x hccparams1=%08x qscratch_cfg=%08x qscratch_hs=%08x qscratch_ss=%08x\n",phase,v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8],v[9],v[10]);
+   readReg(core.va,kUsbCoreBytes,0xc40c,v[11]);readReg(core.va,kUsbCoreBytes,0xc708,v[12]);
+   IOLog("B5qUsb: %s gsnpsid=%08x gctl=%08x dctl=%08x dsts=%08x gusb2phycfg=%08x gusb3pipectl=%08x cap=%08x hccparams1=%08x qscratch_cfg=%08x qscratch_hs=%08x qscratch_ss=%08x gevntcnt=%08x devten=%08x\n",phase,v[0],v[1],v[2],v[3],v[4],v[5],v[6],v[7],v[8],v[9],v[10],v[11],v[12]);
   };
   snapshot("before-prepare");
   stage="prepare-host";
@@ -209,8 +253,9 @@ static void worker(void *,wait_result_t) {
   OSKextLoadKextWithIdentifier("com.apple.driver.AppleHIDKeyboard");
   OSReturn hid=OSKextLoadKextWithIdentifier("com.apple.driver.usb.IOUSBHostHIDDevice");
   IOLog("B5qUsb: stage=%s base=0x%llx irq=%llu HID-load=0x%x\n",stage,B5qHardware::usbBase,B5qHardware::usbIrq,hid);
-  Mapping *monitorMapping=new Mapping;
-  if(monitorMapping && monitorMapping->open(B5qHardware::usbBase,kUsbCoreBytes)) {
+  MonitorContext *monitorMapping=new MonitorContext;
+  if(monitorMapping){monitorMapping->nub=nub;monitorMapping->host=host;}
+  if(monitorMapping && monitorMapping->mapping.open(B5qHardware::usbBase,kUsbCoreBytes)) {
    thread_t monitorThread=nullptr;
    if(kernel_thread_start(monitor,monitorMapping,&monitorThread)==KERN_SUCCESS) {
     thread_deallocate(monitorThread);monitorMapping=nullptr;

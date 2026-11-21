@@ -36,7 +36,7 @@ lo=min(s['va']for s in im.segments if s['size'])&~4095;hi=(max(s['va']+s['size']
 for s in im.segments:
  if s['filesize']:u.mem_write(s['va'],raw[s['fileoff']:s['fileoff']+s['filesize']])
 base=0xfffffff030000000;u.mem_map(base,0x10000);stop=base;stack=base+0xf000;u.reg_write(UC_ARM64_REG_CPACR_EL1,3<<20)
-workers=[];messages=[];enabled=0;worker_mode=False;map_calls=0
+workers=[];messages=[];enabled=0;worker_mode=False;map_calls=0;usb_delay_calls=[]
 frompath={v for n,v in names.items()if 'IORegistryEntry' in n and '8fromPath' in n}
 map_targets={v for n,v in names.items()if 'IODeviceMemory' in n and '9withRange' in n}
 def cstr(at):
@@ -50,7 +50,10 @@ def ret(value=0):u.reg_write(UC_ARM64_REG_X0,value);u.reg_write(UC_ARM64_REG_PC,
 def hook(e,pc,size,unused):
  global map_calls
  if pc==names['_PE_parse_boot_argn']:
+  if cstr(e.reg_read(UC_ARM64_REG_X0))=='b5q-usb-delay':ret(0);return
   assert e.reg_read(UC_ARM64_REG_X2)==4;e.mem_write(e.reg_read(UC_ARM64_REG_X1),struct.pack('<I',enabled));ret(1);return
+ if pc==names.get('_IOSleep') and worker_mode:
+  ms=e.reg_read(UC_ARM64_REG_X0);assert ms==15000,ms;usb_delay_calls.append(ms);ret(0);return
  if pc==names['_kernel_thread_start']:
   workers.append(e.reg_read(UC_ARM64_REG_X0));e.mem_write(e.reg_read(UC_ARM64_REG_X2),struct.pack('<Q',base+0x1000));ret(0);return
  if pc==names['_thread_deallocate']:ret();return
@@ -84,9 +87,12 @@ for prefix in ['usb','gpu']:
   # from the pinned pexpert headers. No fabricated firmware handoff property.
   u.mem_write(names['_PE_state']+160,struct.pack('<Q',base+0x2000))
   u.mem_write(base+0x2010,struct.pack('<QQ',0x8c0004000,0x100000000))
+ worker_mode=True
  worker=workers[-1];u.reg_write(UC_ARM64_REG_X0,0);u.reg_write(UC_ARM64_REG_X1,0);u.reg_write(UC_ARM64_REG_SP,stack);u.reg_write(UC_ARM64_REG_X30,stop)
  u.emu_start(worker,stop,count=30000);expected='map-core'if prefix=='usb'else'B5qGpu: stage=Samsung-firmware-invalid\n';assert messages[-1]['stage']==expected,(prefix,messages)
- if prefix=='usb':assert map_calls==1
+ if prefix=='usb':
+  assert map_calls==1
+  if b'b5q-usb-delay\0' in raw:assert usb_delay_calls==[15000]
  results.append({'worker':prefix,'opt_in_gate_executed':True,'mocked_stop':expected,'controller_maps':map_calls})
 a.out.write_text(json.dumps(dict(passed=True,kernel_sha256=hashlib.sha256(raw).hexdigest(),XHCI_vtable_slots=len(words),saved_signal_collector_called_before_corpse=True,actual_user_and_kernel_backtrace_calls=True,frame_limits=16,actual_compiled_missing_input_paths=results,boot_parser_threads_registry_and_logging_mocked=True,PAuth_not_tested=True,device_or_GPU_execution_tested=False,b5q_compiled_timer_offsets_executed=[0x16220,0x16224]),indent=2)+'\n')
 print('PASS final427-slot xHCI ABI, fatal-context calls and compiled USB opt-in reaching actual core mapping')

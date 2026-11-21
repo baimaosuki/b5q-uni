@@ -8,6 +8,7 @@ p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--compiler',type=Path,default=Path(os.environ.get('B5Q_TARGET_CXX',DEFAULT/'p025-m2v/toolchain/llvm21/usr/lib/llvm-21/bin/clang++')))
 p.add_argument('--sdk',type=Path,default=Path(os.environ.get('B5Q_KERNEL_SDK',DEFAULT/'p020-input/local-sdk/macsdk/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk')))
 p.add_argument('--objects-out',type=Path)
+p.add_argument('--sources',help='Comma separated board sources; verify only changed translation units')
 p.add_argument('--reference',type=Path,default=ROOT/'artifacts/b5q-esp-runtime-v18/esp.img');a=p.parse_args()
 sys.path.insert(0,str(ROOT/'UniXNU-b5q/scripts'));sys.path.insert(0,str(ROOT/'sources/UniXNU/kits/XnuPrelink'))
 from importlib.machinery import SourceFileLoader
@@ -49,6 +50,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  sources.append(adapted)
  timer=t/'NativeAdrenoTimer.cpp';timer.write_text('#include "ShengGmuSource.h"\n'+(ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoTimer.cpp').read_text().replace('TimerGmuLow = 0x14220','TimerGmuLow = (0x1f888u*4u)-SHENG_GMU_CORE_GPU_DELTA').replace('TimerGmuHigh = 0x14224','TimerGmuHigh = (0x1f889u*4u)-SHENG_GMU_CORE_GPU_DELTA'));sources.append(timer)
  sources += [ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c','ShengGpuSmmu.c']]
+ if a.sources:sources=[s for s in sources if s.name in set(a.sources.split(','))]
  for source in sources:
   target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11','-fptrauth-function-pointer-type-discrimination']
   if source.name=='NativeHidInput.cpp':cflags=cflags+['-DNATIVE_HID_SOURCE_API=1']

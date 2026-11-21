@@ -72,7 +72,22 @@ const char *prepare(Read read,Write write,Delay delay) {
    if(s&(1U<<22)){stopped=true;break;}delay(100);}
   if(!stopped)return "device-stop-timeout";
  }
- if(!write(0xc110,(gctl&~(3U<<12))|(1U<<12)))return "host-role";
+ // Device/OTG events left by firmware must not hold the shared level IRQ.
+ uint32_t size=0,count=0,hardware=0;
+ if(!write(0xc708,0) || !read(0xc408,size) ||
+    !write(0xc408,size|(1u<<31)) || !read(0xc40c,count))return "device-events-mask";
+ if((count&0xffffu) && !write(0xc40c,count&0xffffu))return "device-events-drain";
+ if(!read(0xc140,hardware))return "hardware-mode";
+ // Samsung/Linux core.h: OEVT=cc08 W1C, OEVTEN=cc0c; OSTS=cc10.
+ // Host-only or gadget-only IP has no OTG event register access here.
+ if((hardware&3u)==2u) {
+  uint32_t pending=0;
+  if(!write(0xcc0c,0) || !read(0xcc08,pending) ||
+     (pending && !write(0xcc08,pending)))return "otg-events-drain";
+ }
+ if(!write(0xc110,gctl|(1u<<11)))return "core-soft-reset";
+ delay(20000);
+ if(!write(0xc110,(gctl&~((1u<<11)|(3U<<12)))|(1U<<12)))return "host-role";
  uint32_t phy2=0,phy3=0;
  if(!read(0xc200,phy2) || !write(0xc200,phy2&~((1u<<6)|(1u<<8))) ||
     !read(0xc2c0,phy3) || !write(0xc2c0,phy3&~(1u<<17)))return "PHY-unsuspend";

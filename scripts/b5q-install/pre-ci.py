@@ -50,12 +50,19 @@ run('verified-read', [sys.executable, 'tests/b5q-ufs/test-verified-read.py'])
 run('ws-signal', [sys.executable, 'tests/b5q-ufs/test-ws-signal.py'])
 run('peripheral-policy', [sys.executable, 'tests/b5q-ufs/test-peripheral-policy.py'])
 run('shared-gpu', [sys.executable, 'tests/b5q-ufs/test-shared-gpu.py'])
+v23=os.environ.get('B5Q_RUNTIME_VERSION')=='23'
 v22='touch=0' in board['payload']['kernel_args']
-work=workspace/('artifacts/b5q-runtime-v22-work' if v22 else 'artifacts/b5q-runtime-v21-work')
-run('peripheral-target', [sys.executable, 'scripts/b5q-install/check-peripheral-target.py', '--reference',workspace/('artifacts/b5q-esp-runtime-v21/esp.img' if v22 else 'artifacts/b5q-esp-runtime-v20/esp.img'),'--objects-out',work/'objects'])
+work=workspace/('artifacts/b5q-runtime-v23-work' if v23 else 'artifacts/b5q-runtime-v22-work' if v22 else 'artifacts/b5q-runtime-v21-work')
+run('peripheral-target', [sys.executable, 'scripts/b5q-install/check-peripheral-target.py', '--reference',workspace/('artifacts/b5q-esp-runtime-v22/esp.img' if v23 else 'artifacts/b5q-esp-runtime-v21/esp.img' if v22 else 'artifacts/b5q-esp-runtime-v20/esp.img'),'--objects-out',work/'objects',*(['--sources','B5qUsbHost.cpp'] if v23 else [])])
 run('touch', [sys.executable, 'tests/b5q-ufs/test-touch.py'])
 run('data-account', [sys.executable, 'tests/b5q-ufs/test-data-account.py'])
-if v22:
+if v23:
+    run('usb-irq', [sys.executable,'tests/b5q-ufs/test-usb-irq.py'])
+    run('usb-events', [sys.executable,'tests/b5q-ufs/test-usb-events.py'])
+    run('usb-delay', [sys.executable,'tests/b5q-ufs/test-usb-delay.py'])
+    run('callback-pac',[sys.executable,'scripts/b5q-install/check-usb-gmu-pac.py','--usb',work/'objects/B5qUsbHost.o','--armcpu',work/'callback-objects/ArmCpu.o','--gpu',work/'callback-objects/B5qGpu.o','--gmu',work/'callback-objects/ShengGmu.kit.o','--out',work/'callback-pac.json'])
+    run('v23-inputs',[sys.executable,'tests/b5q-ufs/test-v23-contract.py'])
+elif v22:
     run('geni-pac', [sys.executable, 'scripts/b5q-install/check-geni-pac.py','--objects',work/'objects','--out',work/'geni-pac.json'])
     run('buttons-irq', [sys.executable, 'tests/b5q-ufs/test-buttons-irq.py'])
     run('v22-inputs', [sys.executable, 'tests/b5q-ufs/test-v22-contract.py'])
