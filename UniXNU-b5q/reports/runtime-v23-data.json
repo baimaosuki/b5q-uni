@@ -1,0 +1,79 @@
+{
+  "watchdogd_disabled_in_actual_plist": true,
+  "watchdogd_plist_path": "private/var/db/com.apple.xpc.launchd/disabled.plist",
+  "watchdogd_policy": {
+    "com.apple.watchdogd": true
+  },
+  "administrator": "baimao",
+  "uid": 501,
+  "gid": 20,
+  "groups": [
+    "admin",
+    "staff"
+  ],
+  "PBKDF2_password_verified": true,
+  "skip_setup": true,
+  "skipbuddy": true,
+  "autoLoginUser": "baimao",
+  "kcpassword_12_bytes_verified": true,
+  "actual_APFS_inodes": {
+    "private/var/db/.AppleSetupDone": {
+      "uid": 0,
+      "gid": 0,
+      "mode": 33188,
+      "bytes": 0
+    },
+    "private/var/db/dslocal/nodes/Default/users/baimao.plist": {
+      "uid": 0,
+      "gid": 0,
+      "mode": 33152,
+      "bytes": 722
+    },
+    "private/var/db/dslocal/nodes/Default/groups/admin.plist": {
+      "uid": 0,
+      "gid": 0,
+      "mode": 33152,
+      "bytes": 390
+    },
+    "private/var/db/dslocal/nodes/Default/groups/staff.plist": {
+      "uid": 0,
+      "gid": 0,
+      "mode": 33152,
+      "bytes": 370
+    },
+    "Users/baimao": {
+      "uid": 501,
+      "gid": 20,
+      "mode": 16872,
+      "bytes": 0
+    },
+    "Users/baimao/.skipbuddy": {
+      "uid": 501,
+      "gid": 20,
+      "mode": 33188,
+      "bytes": 0
+    },
+    "Library/Preferences/com.apple.loginwindow.plist": {
+      "uid": 0,
+      "gid": 0,
+      "mode": 33188,
+      "bytes": 67
+    },
+    "private/etc/kcpassword": {
+      "uid": 0,
+      "gid": 0,
+      "mode": 33152,
+      "bytes": 12
+    },
+    "private/var/db/com.apple.xpc.launchd/disabled.plist": {
+      "uid": 0,
+      "gid": 0,
+      "mode": 33188,
+      "bytes": 229
+    }
+  },
+  "hardware_tested": false,
+  "seed_sha256": "e18547798efd726b0a42dc53cb828888e0772654e29e8c68b3a7c0d083df7948",
+  "logical_bytes": 2147483648,
+  "read_only_APFS_parser": true
+}

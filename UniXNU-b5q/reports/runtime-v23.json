@@ -1,5 +1,5 @@
 {
-  "status": "local39checksPASS; three-object CI pending",
+  "status": "CI SUCCESS; returned actual objects and final IMG verified; physical v23 pending",
   "v22_journal": {
     "sha256": "6984b30a05ef3aadde68348955d1acbc9769f72ffa6cfa55a90b76d754cc8537",
     "sequence": 1,
@@ -29,7 +29,7 @@
     "OSTS": "0xcc10 readonlystatus; notwritten",
     "DRD": "GHWPARAMS0 &3 ==2"
   },
-  "hardware_v23": "pending",
+  "hardware_v23": "pending; no phone connection/flash and no QEMU run",
   "target_compile": {
     "passed": true,
     "duplicate_external_definitions": {},
@@ -380,7 +380,8 @@
     "UniXNU-b5q/package/B5qUsbPolicy.h": "5ff9843f730c876219cb61b5f64d5ed9bbaa7ebe2f3626a2024767f5140cde92",
     "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "2d837fc57ca6885485ae6139bc90cef303d233e319e9dadbc791be4bb1e79ac9",
     "UniXNU-b5q/package/NativeHidInput.cpp": "435372fd3eaae1a32a4c3e604f17b24211f9f617f891ce3006d48ce59eda0d89",
-    "UniXNU-b5q/porting.toml": "702966d41ace25e561f38017aa0988ed383a6eb01e1b225ba1ad53c140176713",
+    "UniXNU-b5q/porting.toml": "9c219482174c4bbfb506f2dfd9163bdc6d81345b5e2c1037744499aa47811a82",
+    "UniXNU-b5q/reports/runtime-v23.json": "3fe77ca3c3ab55f7c52801b25760ee101a9b1b92a623ba464c03c77c47849546",
     "UniXNU-b5q/scripts/b5q_peripherals.py": "e01a4ae24398987f3da14c1d71860322b42c30d917d30540aa9bc55461b5ad5c",
     "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "8479fb52d534655c5093f6cf027d62f1aff4a0555261beb35c3464da589839d2",
     "scripts/b5q-install/check-peripheral-target.py": "7e10660530a8a1b50f04abe43114a90a7ee588fb9e2c8f8093dd42dc7fbbb89e",
@@ -398,5 +399,169 @@
     "tests/b5q-ufs/test-usb-families.py": "edf8375030ac7e66f87259e875722e4562885cf5883af7086803fee221bcd7d0",
     "tests/b5q-ufs/test-usb-irq.py": "c3269301f463e6b3bf5b25ef7d1b1ebdf1e4029f1f1928fa419a4ab826051bd9",
     "tests/b5q-ufs/test-v23-contract.py": "6fab67b2d80e82b79e060a4e7d4d3dfda1583a1693a33a36bb7d480f6183bcd6"
-  }
+  },
+  "ci": {
+    "run": 44881705807,
+    "commit": "6afd3bd9eabca094c3996078ec976d8ab6256ab6",
+    "url": "https://github.com/baimaosuki/b5q-uni/actions/runs/44881705807",
+    "conclusion": "success",
+    "restored_GPU_cache": true,
+    "restored_Homebrew_cache": true,
+    "core_compiled": 0,
+    "board_compiled": 3,
+    "GPU_Mesa_Turnip_or_Data_recompiled": false
+  },
+  "actual_callback_PAC": {
+    "passed": true,
+    "interfaces": 16,
+    "report": "reports/runtime-v23-pac.json",
+    "sha256": "da0e94a66beed7c9efa7ab84696d33f8560e7e2bf4d06790921037b310dce856"
+  },
+  "actual_Data_readonly_APFS": {
+    "report": "reports/runtime-v23-data.json",
+    "sha256": "58803d9b4a8a6dfdadf7f50aa8d80d73146d621de3e1ed0a1c819f9ef8db9a25",
+    "seed_sha256": "e18547798efd726b0a42dc53cb828888e0772654e29e8c68b3a7c0d083df7948",
+    "watchdogd_disabled": true
+  },
+  "final_acceptance": {
+    "passed": true,
+    "kernel_core_recompiled": false,
+    "board_objects_compiled": 3,
+    "Data_addon_trust_byte_identical_v22": true,
+    "all_graphics_archives_reused": true,
+    "changed_source_contracts": {
+      "passed": true,
+      "kernel_args_changes": {
+        "buttons": 0,
+        "touch": 0,
+        "touch-hid": 0,
+        "offline-hid-input": 0
+      },
+      "unchanged_ADT_rules": true,
+      "compiled_board_objects": [
+        "B5qUsbHost.cpp",
+        "LegacyDisplayProbe.cpp",
+        "NativeHidInput.cpp"
+      ],
+      "all_other_production_sources_unchanged_v22": true,
+      "IRQ_attach_mask_storm_and_disable_contract": true,
+      "DWC3_Device_OTG_events_and_ordered_reset_release": true,
+      "delay_default_seconds": 35,
+      "delay_override_max_seconds": 300,
+      "monitor_IRQ_and_power_state": true,
+      "macOS_iPadOS_interposer_absent_from_object": true,
+      "C_recipe_mkernel": true,
+      "full_callback_PAC": "PASS actual object producer/consumer pairs",
+      "actual_readonly_Data_watchdogd_disabled": true,
+      "hardware_tested": false
+    },
+    "hardware_tested": false,
+    "changed_native_archive_members": [
+      "B5qUsbHost.late.o",
+      "LegacyDisplayProbe.o",
+      "NativeHidInput.late.o"
+    ],
+    "actual_deployment_geni_typed_callback_calls": [
+      "0x50c7",
+      "0x50c7",
+      "0x50c7",
+      "0x50c7",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0xc120",
+      "0x50c7",
+      "0x50c7",
+      "0xc120",
+      "0xc120",
+      "0x50c7",
+      "0xc120"
+    ],
+    "undefined_symbols": [],
+    "__ZTV14NativeHidInput": {
+      "slots": 334,
+      "all_diversities_match": true
+    },
+    "__ZTV10B5qUsbHost": {
+      "slots": 427,
+      "all_diversities_match": true
+    },
+    "USB_default_delay_seconds": 35,
+    "USB_interrupt_attach_and_storm_regressions": "PASS productionhelpertests;hardwarecounts pending",
+    "seven_text_fixups_preserved": true,
+    "kernel_args_only_change": "buttons/touch-hid/offline-hid-input1->0;touch0retained;USB35sdefault",
+    "deployment_kernel_sha256": "35443c5d3fd30665dfd2dd52a88ed98006684fca74756b1eefd8071a52df5296",
+    "watchdogd_disabled_plist_verified": {
+      "com.apple.watchdogd": true
+    },
+    "macOS_edge_interposer_absent_in_actual_Xcode_object": true,
+    "all8_peripheral_probe_step_pairs_in_binary": true,
+    "image": {
+      "bytes": 838860800,
+      "sha256": "4f543e4f5c6ef4468971e41eaf7ad3b7e29b4d991070802479bb4d08f5124157",
+      "FAT_sector_bytes": 4096
+    },
+    "CI_run": 44881705807,
+    "source_commit": "6afd3bd9eabca094c3996078ec976d8ab6256ab6"
+  },
+  "checks": {
+    "pre_ci_count": 39,
+    "final_HID_vtable_slots": 334,
+    "final_XHCI_vtable_slots": 427,
+    "undefined_symbols": [],
+    "POST_static_if_sites": 69,
+    "POST_HMAC_independently_verified": true,
+    "FAT_4Kn_roundtrip": true,
+    "XNU2LOG_contiguous_clusters": 2051,
+    "readonly_root_policies_and_signed_addon_verified": true,
+    "Data_addon_trust_byte_identical_v22": true
+  },
+  "evidence_files": {
+    "package.manifest.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/package.manifest.json",
+      "sha256": "96559cfc061283cd8f8b58c4e35dff2c8d8e1941bf2bda7c0027bdecbdac1836"
+    },
+    "v23-acceptance.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/v23-acceptance.json",
+      "sha256": "851aebd3821a36c95db6b76096f795afdad1ed46823917d99e306dfb198e81e7"
+    },
+    "actual-callback-pac.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/actual-callback-pac.json",
+      "sha256": "da0e94a66beed7c9efa7ab84696d33f8560e7e2bf4d06790921037b310dce856"
+    },
+    "data-account-verification.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/data-account-verification.json",
+      "sha256": "58803d9b4a8a6dfdadf7f50aa8d80d73146d621de3e1ed0a1c819f9ef8db9a25"
+    },
+    "POST-runtime-verification.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/POST-runtime-verification.json",
+      "sha256": "b0cc33bd5680c1be89e0bb60e59200ca50c6811bb94b26c2e09f1e1184c885a3"
+    },
+    "mount-verification.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/mount-verification.json",
+      "sha256": "fa6db75c0fb489b1103da32dbddb57e294e54f9de6c33b25ffef4b6fb5f9c738"
+    },
+    "log-allocation.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/log-allocation.json",
+      "sha256": "679d6342994e81c370c8741c42bde59babb4bf7207e9d78f0ba8132a2b55ad16"
+    },
+    "incremental-relink.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/incremental-relink.json",
+      "sha256": "d26f26d8fca2748df855b2dabf105eea9dbd656992767b84e8f51f298f42077e"
+    },
+    "peripheral-binary-verification.json": {
+      "path": "artifacts/b5q-esp-runtime-v23/peripheral-binary-verification.json",
+      "sha256": "41f19c9b74af6604eed86b166d395e9ff4118a0c9a553bac366ac38e19eda10c"
+    }
+  },
+  "delivered_image": {
+    "path": "artifacts/b5q-esp-runtime-v23/esp.img",
+    "bytes": 838860800,
+    "sha256": "4f543e4f5c6ef4468971e41eaf7ad3b7e29b4d991070802479bb4d08f5124157",
+    "FAT_sector_bytes": 4096
+  },
+  "USB_delay_limit": "35s from worker entry; desktop completion or USB DMA ownership cannot be guaranteed by a timer"
 }
