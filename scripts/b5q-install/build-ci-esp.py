@@ -71,7 +71,7 @@ def main():
         seed=json.loads((ci/'runtime/data-seed.json').read_text())
         assert seed['volume_uuid']=='1552CFEE-78FF-48D8-8A6C-694B867D61AC' and seed['template_owners_preserved']
         assert seed['sha256']==sha(files/'scratch-data.img')
-        assert seed['logical_bytes']==(2 if a.version>=11 else 29)*2**30
+        assert seed['logical_bytes']==(4 if a.version>=24 else 2 if a.version>=11 else 29)*2**30
         if a.version>=11:
             if a.version==11:assert expected['kernel.macho']=='bac7ef5ea50ecbb22767755d26b560dd7de220a95998fa09e31e3c4f4f5d5835'
             else:
@@ -166,7 +166,7 @@ def main():
             run([sys.executable,ROOT/'scripts/b5q-install/verify-esp-log.py','--esp',esp,'--out',proof])
             log_proof=json.loads(proof.read_text())
         delivery=dict(log_journal=log_proof,os_profile=manifest['os_profile'],scope=f'v{a.version} payload update on existing memory-v8 boot and macosroot',
-          ci_run=index['run'],source_commit=index['commit'],deploy_kernel_sha256=expected['kernel.macho'],
+          ci_run=index['run'],source_commit=index['commit'],deploy_kernel_sha256=expected['kernel.macho'],data_logical_bytes=seed['logical_bytes'],
           raw_kernel=record(ci/'kernel/kernel.macho'),ci_payload=record(ci/'payload/payload.img'),
           kernel_command_line=line,outputs={'esp.img':record(esp)},esp_files=members,retained_loader_modules=retained,
           build_status=dict(delivery_version=f'b5q-esp-kernel-v{a.version}',flash_candidate_ready=True,esp_install_required=True,root_read_only=True,data_volatile=True,esp_fat_sector_bytes=4096,esp_sectors_per_cluster=1,hardware_boot_verified=False),

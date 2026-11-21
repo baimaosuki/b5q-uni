@@ -68,3 +68,11 @@
 ## XNU2LOG 受限持久日志（2026-11-20，最新明确用户授权）
 
 允许 XNU 控制台 RAM 采集及复用实际发现的根 LUN，将快照用 WRITE(10) FUA + SYNCHRONIZE CACHE(10) 写到经 GPT/FAT32/双 FAT/连续簇/无别名/token+CRC 校验的 ESP XNU2LOG.BIN A/B 槽位（file_first+1..file_first+2050）。config 块、FAT、目录、GPT、macosroot、userdata 和三星受保护分区禁止写入。此例外取代此前完全禁止持久写的约束，仅作用于日志槽位；根盘仍只读，Data 在 RAM。允许必要诊断和同阶段批量修复，先本地完整检查再一次提交构建；不授权直接刷写。
+
+## 编译缓存（2026-11-21，最新用户指令）
+
+必须复用匹配的已完成内核、RAM Data、Mesa/Turnip Ninja 目录与 Rust bridge/Cargo 缓存。payload 失败时保留已完成内核与图形构建进度，仅重跑必要步骤。缓存键包含目标架构、Xcode 和固定源码/补丁输入；保留上游源码身份校验，禁止把缓存命中当成新源码已经编译的证据。失败任务也保存可复用的编译进度；不缓存认证凭据。
+
+## v24 当前授权（2026-11-21，用户附件指令）
+
+本轮允许且要求原生 XNU core 全量重编并接入 recount、AMP/Edge；图形与已有无变化依赖继续复用缓存。USB 移到显示就绪后正常外设流，取消35秒人为延迟。允许独立 USB SID40 Stage1、TI repeater/max77705/QMP 和 GPIO19 IRQ触控实现，禁止修改 ArmCpu.cpp 或用软件 cache/IOMapper 替代硬件一致性。禁止读写 S2CR0、显示handoff槽及对应ContextBank，禁止改写userdata/GPT和既有三星保护分区。仅 s2dos05 LDO2/3按来源RMW。Data目标4GiB易失RAM，持久Data待独立分区名后另行实现。所有本地检查完毕前不推CI、不交付过渡镜像；编译成功不代表硬件验收。

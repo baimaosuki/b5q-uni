@@ -34,7 +34,7 @@ def scan(path):
  return {'signed':signed,'calls':calls,'symbols':symbols,'instructions':instructions,'sha256':hashlib.sha256(data).hexdigest()}
 usb,arm,gpu,gmu=map(scan,[a.usb,a.armcpu,a.gpu,a.gmu])
 # This callback is passed as armcpu_spi_attach's C-linkage callback parameter.
-usb_callback='__ZN9B5qUsbNub9interruptEPv';usb_sites=usb['signed'][usb_callback]
+usb_callback='__ZN11QcomDwc3Nub7primaryEPv';usb_sites=usb['signed'][usb_callback]
 assert usb_sites and all(s['key']==0 and s['diversity']==0x2abe and not s['address_diversity']for s in usb_sites)
 start=next(v for n,v,k in arm['symbols']if n=='__ZN6ArmCpu9interruptEv'and k&0xe)
 end=min(v for n,v,k in arm['symbols']if k&0xe and v>start)
@@ -82,4 +82,8 @@ if a.extended_dir:
   expanded.append(interface('ThermalLevel.o',names[0],0xbcad,'IOUserClient.cpo','__ZN12IOUserClient14externalMethod','ThermalLevel.'+field+' -> IOExternalMethodDispatch.function'))
  result['expanded_interfaces']=expanded;result['expanded_objects_sha256']={name:obj['sha256']for name,obj in extra.items()}
  result['all_requested_cross_object_interfaces_verified']=True
-a.out.write_text(json.dumps(result,indent=2)+'\n');print('PASS actual USB->ArmCpu IA2abe, all6GMU IO/Services fields'+(' and9clock/buttons/HID/Thermal interfaces' if a.extended_dir else '')+'; keys+discriminators match; no core/GPU rebuild')
+ if '__ZN12_GLOBAL__N_18touchIrqEPv' in extra['B5qTouch.o']['signed']:
+  sites=extra['B5qTouch.o']['signed']['__ZN12_GLOBAL__N_18touchIrqEPv']
+  assert sites and all(x['key']==0 and x['diversity']==0x2abe and not x['address_diversity']for x in sites)
+  result['touch_IRQ_to_ArmCpu']={'passed':True,'producer_sites':sites,'consumer_calls':arm_calls,'key':'IA','diversity':'0x2abe'}
+a.out.write_text(json.dumps(result,indent=2)+'\n');print('PASS object USB->ArmCpu IA2abe, all6GMU IO/Services fields'+(' and9clock/buttons/HID/Thermal interfaces' if a.extended_dir else '')+'; keys+discriminators match; hardware PAC execution not tested')

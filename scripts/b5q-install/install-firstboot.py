@@ -38,6 +38,18 @@ blockdev --getsize64 "$p"
 '''
 
 
+def esp_sector_size(image):
+    """Read the FAT BPB; a filesystem cluster is not a device sector."""
+    with image.open('rb') as stream:
+        bpb = stream.read(512)
+    if len(bpb) != 512 or bpb[510:512] != b'\x55\xaa' or bpb[82:90] != b'FAT32   ':
+        raise SystemExit('esp.img: expected a FAT32 boot sector')
+    size = int.from_bytes(bpb[11:13], 'little')
+    if size != 4096 or bpb[13] != 1:
+        raise SystemExit('esp.img: b5q physical ESP requires 4096 bytes per sector and one sector per cluster')
+    return size
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--directory', type=Path, default=Path(__file__).resolve().parent)
@@ -60,12 +72,20 @@ def main():
     writing = args.root or args.boot or args.esp or args.repair or args.all
     if args.repair:
         chosen = ['esp', 'boot']
-    elif args.all or not writing:
+    elif args.all:
         chosen = ['macosroot', 'esp', 'boot']
+    elif not writing:
+        chosen = [name for name, (file, _, _) in PARTITIONS.items() if file in manifest['outputs']]
     else:
         chosen = ['macosroot' if args.root else 'esp' if args.esp else 'boot']
+    for name in chosen:
+        if PARTITIONS[name][0] not in manifest['outputs']:
+            raise SystemExit(f'{name}: image is not included in this package; choose --esp for the ESP-only update')
+    if not chosen:
+        raise SystemExit('No supported partition images in this package')
     if 'esp' in chosen and not status.get('esp_install_required'):
-        raise SystemExit('This installer requires the corrected ESP-v2 package manifest')
+        raise SystemExit('This installer requires a package manifest with explicit ESP delivery')
+    esp_bpb_size = esp_sector_size(directory / 'esp.img') if 'esp' in chosen else None
     adb = ['adb'] + (['-s', args.serial] if args.serial else [])
 
     def shell(text):
@@ -96,6 +116,11 @@ def main():
         if int(rows[1]) * 512 != expected_start or int(rows[2]) * 512 != expected_size or int(rows[3]) != expected_size:
             raise SystemExit(f'{name}: device layout differs from supplied GPT')
         print(f'PASS {name}: offset={expected_start} capacity={expected_size}', flush=True)
+    if 'esp' in chosen:
+        device_sector = int(shell('blockdev --getss /dev/block/by-name/esp'))
+        if device_sector != esp_bpb_size:
+            raise SystemExit(f'esp: device logical block {device_sector} differs from FAT sector {esp_bpb_size}')
+        print(f'PASS esp: device and FAT logical sectors both {device_sector} bytes', flush=True)
     if not writing:
         print('CHECK PASS; no writes performed')
         return

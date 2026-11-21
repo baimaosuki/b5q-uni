@@ -1,8 +1,18 @@
 #!/usr/bin/env python3
 """Compile shared SM8550 operations with generated Samsung b5q inputs."""
-import hashlib,json,subprocess
+import hashlib,json,subprocess,os,shutil
 from b5q_compile import ROOT,compile,archive,report
+from pathlib import Path
 out=ROOT/'build/adreno740';out.mkdir(parents=True,exist_ok=True)
+reuse=os.environ.get('B5Q_REUSE_ADRENO')
+if reuse:
+ # The pinned completed archive and its inputs are qualified locally before
+ # submission. This is archive reuse, not a claim that it was recompiled.
+ source=Path(reuse)
+ shutil.copyfile(source,out/'libAdreno740.a')
+ (out/'reuse.json').write_text(json.dumps({'source_run':44837528408,'archive_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'recompiled':False},indent=2)+'\n')
+ print('Reused unchanged qualified Adreno archive')
+ raise SystemExit(0)
 # These are shared SoC protocol types, not Xiaomi power votes or physical reservations.
 includes=[]
 for path in ['kits/Sm8550Platform','kits/AdrenoFirmware','kits/AdrenoPM4','kits/ArmSmmu4K','drivers/Adreno740','.cache/xnu-work/osfmk']:

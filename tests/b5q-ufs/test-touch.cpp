@@ -9,9 +9,9 @@
 #include <vector>
 #include <cstdio>
 struct Bus {
- std::map<unsigned,unsigned> regs;std::deque<unsigned> rx;std::vector<unsigned> commands;
+ std::map<unsigned,unsigned> regs;std::deque<unsigned> rx;std::vector<unsigned> commands,writes;
  static unsigned read(void *v,unsigned off){auto &b=*static_cast<Bus *>(v);if(off==GENI_RX_FIFO_STATUS)return b.rx.size();if(off==GENI_RX_FIFO){assert(!b.rx.empty());unsigned n=b.rx.front();b.rx.pop_front();return n;}return b.regs[off];}
- static void write(void *v,unsigned off,unsigned n){auto &b=*static_cast<Bus *>(v);b.regs[off]=n;if(off==GENI_M_CMD0)b.commands.push_back(n);if(off==GENI_M_IRQ_CLEAR)b.regs[GENI_M_IRQ_STATUS]&=~n;}
+ static void write(void *v,unsigned off,unsigned n){auto &b=*static_cast<Bus *>(v);b.writes.push_back(off);b.regs[off]=n;if(off==GENI_M_CMD0)b.commands.push_back(n);if(off==GENI_M_IRQ_CLEAR)b.regs[GENI_M_IRQ_STATUS]&=~n;}
 };
 int main(){
  using namespace B5qTouch;Point points[12]={};
@@ -21,6 +21,17 @@ int main(){
   auto write=[&](unsigned off,uint32_t value){assert(off==0x52008&&value==B5qTouchClock::enables);++writes;};
   bool ok=B5qTouchClock::enable(read,write,[&](unsigned us){assert(us==10);++delays;},failed,last);
   assert(ok==!stop&&writes==1&&failed==stop&&delays==(stop?2000u:0u));
+ }
+ for(unsigned failure=0;failure<4;++failure){
+  std::map<unsigned,unsigned> regs={{0x18504,1},{0x184f4,0xfeed0300},{0x184f0,0}};
+  unsigned waits=0;std::vector<unsigned> writes;
+  auto read=[&](unsigned off){if(off==0x18504&&failure==1)return 1u;return regs[off];};
+  auto write=[&](unsigned off,uint32_t v){writes.push_back(off);if(off==0x184f4&&failure==3)return;regs[off]=v;};
+  auto wait=[&](unsigned us){assert(us==10);++waits;if(failure!=2)regs[0x184f0]&=~1u;};
+  assert(B5qTouchClock::xo(read,write,wait)==(failure==0));
+  if(failure==1)assert((writes==std::vector<unsigned>{0x18504}));
+  if(failure==2)assert(waits==2000);
+  for(unsigned off:writes)assert(off==0x18504||off==0x184f4||off==0x184f0);
  }
  uint32_t invalid[]={0,0,0};int32_t mc=THERMAL_NONE;assert(!thermal_pick_valid(invalid,3,&mc)&&mc==THERMAL_NONE);
  uint32_t valid[]={0,THERMAL_STATUS_VALID|310u,0};assert(thermal_pick_valid(valid,3,&mc)&&mc==31000);
@@ -55,5 +66,18 @@ int main(){
  assert(!geni_i2c_start_read_only(&bus,bytes,4));assert(geni_i2c_event(&bus,GENI_M_CMD_DONE|(1u<<9))==GeniFailed&&bus.error==GeniErrBus);
  assert(!geni_i2c_start_read_only(&bus,bytes,4));assert(geni_i2c_timeout(&bus)==GeniPending);assert(geni_i2c_timeout(&bus)==GeniPending);assert(geni_i2c_timeout(&bus)==GeniFailed&&bus.phase==GeniIdle);
  for(unsigned cmd:b.commands)assert(cmd>>27==GENI_OP_READ);
+ for(unsigned failure=0;failure<4;++failure){
+  Bus cold;cold.regs[GENI_FW_REVISION]=(failure==1?2u:3u)<<8;
+  cold.regs[GENI_IF_DISABLE]=failure==2;cold.regs[GENI_STATUS]=failure==3;
+  const GeniIo cio={Bus::read,Bus::write,&cold};
+  assert(geni_i2c_prepare(&bus,&cio,0x20,&proto)==-1&&cold.writes.empty());
+  assert(geni_i2c_prepare_xo(&bus,&cio,0x20,&proto)==(failure?-1:0));
+  if(failure)assert(cold.writes.empty());
+  else {
+   assert(cold.writes[0]==GENI_CLK_SEL&&cold.writes[1]==GENI_SCL_COUNTERS&&cold.writes[2]==GENI_CLK_CFG);
+   assert(cold.regs[0x278]==0x702818&&cold.regs[0x48]==0x21&&proto==0x03000021);
+   for(auto off:cold.writes)assert(off!=GENI_IF_DISABLE&&off!=0x28);
+  }
+ }
  puts("PASS actual TouchComm app-info/config/delta/framing/truncation/fuzz and GENI read-only/NACK/bounded-timeout paths");
 }

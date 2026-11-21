@@ -49,3 +49,4 @@ void native_exit_trace(int,const char *,int) {}
 // The optional UFS diagnostic export must never report an accepted write.
 int boot_log_export_put(uint32_t,uint32_t,uint32_t,const void *,uint32_t) { return -1; }
 }
+

@@ -687,6 +687,21 @@
       "name": "b5q-windowserver-signal.patch",
       "sha256": "8d4328609ecf90066cfbfc520b160fe5fafbb6edd6f4975e3755bbe578607571",
       "result": "PASS"
+    },
+    {
+      "name": "zzye-b5q-cpu-idle.patch",
+      "sha256": "95f57fb9994796c3de2429fe82b6a521620b9f13b83e29eba12185f5ada4da86",
+      "result": "PASS"
+    },
+    {
+      "name": "zzyf-b5q-amp.patch",
+      "sha256": "07abb7ce25c626ddc37069ecc9e168b85a1da8e02b42b19649a10f667aa5a56b",
+      "result": "PASS"
+    },
+    {
+      "name": "zzzzzzzzzzz-b5q-edge-matrix.patch",
+      "sha256": "5048e180f459e860b2fad50f66e2a49231b70081cb32f930e1d92c2c579011e7",
+      "result": "PASS"
     }
   ],
   "result": "PASS"

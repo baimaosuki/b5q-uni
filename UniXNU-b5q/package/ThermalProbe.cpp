@@ -51,11 +51,10 @@ volatile uint32_t native_thermal_lmh[3][8];
 // the limited samples, [5..6] mean and maximum over the busy samples that were not limited (millidegrees, THERMAL_NONE when there is
 // no such sample), [7] the lowest running frequency in a limited sample (kHz).
 volatile int32_t native_thermal_limit[3][8];
+volatile uint32_t native_thermal_cpu_busy[8]; // per mille, only after recount interval
 // Idle time of a CPU since boot in mach units (the kernel helper the governor uses).
-uint64_t sheng_cpu_idle_mach(int cpu) __attribute__((weak_import));
-// The relinker derives this from the unchanged core's actual symbol table.
-// If absent, compile out references rather than create a kernel dyld import.
 #if B5Q_HAVE_CPU_IDLE_MACH
+uint64_t sheng_cpu_idle_mach(int cpu);
 static uint64_t (*const kIdleMach)(int)=sheng_cpu_idle_mach;
 #else
 static uint64_t (*const kIdleMach)(int)=nullptr;
@@ -131,6 +130,7 @@ bool busyShares(unsigned busy[3]) {
             gLastIdle[c] = idle;
             if (!measured) continue;
             const unsigned share = spent >= dt ? 0 : (unsigned)(1000 - spent * 1000 / dt);
+            native_thermal_cpu_busy[c]=share;
             if (share > busy[d]) busy[d] = share;
         }
     }
@@ -187,6 +187,11 @@ extern "C" void sheng_thermal_sample(void) {
     sampleTemperatures();
     sampleDomains();
     native_thermal_info[1] = native_thermal_info[1] + 1;
+    const unsigned samples=native_thermal_info[1];
+    if(samples==2 || !(samples%100))
+        IOLog("B5qThermal: cpu-busy-permille=%u/%u/%u/%u/%u/%u/%u/%u recount=%u\n",
+            native_thermal_cpu_busy[0],native_thermal_cpu_busy[1],native_thermal_cpu_busy[2],native_thermal_cpu_busy[3],
+            native_thermal_cpu_busy[4],native_thermal_cpu_busy[5],native_thermal_cpu_busy[6],native_thermal_cpu_busy[7],kIdleMach!=nullptr);
     native_thermal_info[0] = 2;
     __atomic_clear(&gBusy, __ATOMIC_RELEASE);
 }

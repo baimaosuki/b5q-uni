@@ -14,7 +14,10 @@ extern "C" {
 
 /* Serial engine registers (offsets in the engine's 16 KiB window). */
 #define GENI_FW_REVISION 0x68u
-#define GENI_IF_DISABLE 0x64u
+#define GENI_CLK_SEL 0x7cu
+#define GENI_IF_DISABLE 0x64u          /* read-only FIFO interface capability */
+#define GENI_STATUS 0x40u
+#define GENI_STATUS_M_ACTIVE (1u << 0)
 #define GENI_CLK_CFG 0x48u
 #define GENI_BYTE_GRAN 0x254u
 #define GENI_DMA_MODE 0x258u
@@ -92,9 +95,10 @@ typedef struct {
     uint32_t tx_fifo_words, rx_fifo_words;
 } GeniI2c;
 
-/* Checks the engine runs the I2C firmware with its clock and timing set (the boot loader's), selects FIFO mode with 8-bit packing and
- * enables the interrupts this core needs. Returns 0, or -1 when the engine is not usable. *config: proto << 24 | M_CLK_CFG bits 23:0. */
+/* Adopt an idle I2C firmware engine with valid timing. The caller may instead opt into the 19.2 MHz XO timing on a cold engine. */
 int geni_i2c_prepare(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config);
+int geni_i2c_prepare_xo(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config);
+int geni_i2c_prepare_hub_xo(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config);
 int geni_i2c_start_read_only(GeniI2c *g,uint8_t *buffer,uint32_t length);
 int geni_i2c_start_write(GeniI2c *g, uint8_t reg, uint8_t value);
 int geni_i2c_start_read(GeniI2c *g, uint8_t reg);

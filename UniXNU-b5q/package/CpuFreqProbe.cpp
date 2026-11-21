@@ -67,10 +67,8 @@ struct native_cpufreq_rec *native_cpufreq_ring;
 volatile uint32_t native_cpufreq_count;
 extern volatile uint32_t native_adreno_method_stats[20][4] __attribute__((weak_import));
 extern volatile uint32_t native_hid_input_events[8] __attribute__((weak_import));
-uint64_t sheng_cpu_idle_mach(int cpu) __attribute__((weak_import));
-// The relinker derives this from the unchanged core's actual symbol table.
-// If absent, compile out references rather than create a kernel dyld import.
 #if B5Q_HAVE_CPU_IDLE_MACH
+uint64_t sheng_cpu_idle_mach(int cpu);
 static uint64_t (*const kIdleMach)(int)=sheng_cpu_idle_mach;
 #else
 static uint64_t (*const kIdleMach)(int)=nullptr;
@@ -333,6 +331,9 @@ void governorThread(void *, wait_result_t) {
             ring[n & (kCpuFreqRing - 1)] = rec;
         }
         if (winNs >= 10000000000ull) {
+            IOLog("B5qCpuFreq: dynamic-recount vote-MHz=%u/%u/%u state-MHz=%u/%u/%u busy-permille=%u/%u/%u\n",
+                rec.vote_mhz[0],rec.vote_mhz[1],rec.vote_mhz[2],rec.state_mhz[0],rec.state_mhz[1],rec.state_mhz[2],
+                rec.busy_pm[0],rec.busy_pm[1],rec.busy_pm[2]);
             for (unsigned d = 0; d < 3; ++d) {
                 native_cpufreq_gov[d * 3] = changes[d];
                 native_cpufreq_gov[d * 3 + 1] = (uint32_t)(khzNs[d] / winNs);
@@ -384,6 +385,7 @@ extern "C" void sheng_cpufreq_probe(void) {
     if (mode >= 3) mapWindow(gL3, kL3Base);
     if(mode>=4 && !kIdleMach)mode=3;
     gMode = mode;
+    IOLog("B5qCpuFreq: mode=%u recount=%u\n",mode,kIdleMach!=nullptr);
     sheng_cpufreq_poll();
     if (mode >= 4 && kIdleMach) {
         thread_t thread = nullptr;

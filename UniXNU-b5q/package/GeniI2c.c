@@ -11,27 +11,53 @@ static uint32_t fifo_words(uint32_t param)
     return words ? words : 16u;
 }
 
-int geni_i2c_prepare(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config)
+static int prepare(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config, int xo)
 {
     for (unsigned i = 0; i < sizeof *g; ++i) ((uint8_t *)g)[i] = 0;
     g->io = *io;
     g->address = address;
-    const uint32_t proto = (rd(g, GENI_FW_REVISION) >> 8) & 0xffu, clock = rd(g, GENI_CLK_CFG);
+    const uint32_t proto = (rd(g, GENI_FW_REVISION) >> 8) & 0xffu;
+    uint32_t clock = rd(g, GENI_CLK_CFG);
     if (config) *config = (proto << 24) | (clock & 0xffffffu);
-    if (proto != GENI_PROTO_I2C || (rd(g, GENI_IF_DISABLE) & 1u) || !(clock & 1u) || !rd(g, GENI_SCL_COUNTERS)) return -1;
+    if (proto != GENI_PROTO_I2C || (rd(g, GENI_IF_DISABLE) & 1u) || (rd(g, GENI_STATUS) & GENI_STATUS_M_ACTIVE)) return -1;
+    if (xo || !(clock & 1u) || !rd(g, GENI_SCL_COUNTERS)) {
+        if (!xo) return -1;
+        /* Samsung i2c-msm-geni.ko 400 kHz entry: divider 2, high 7, low 10, cycle 24. */
+        if (xo != 2) wr(g, GENI_CLK_SEL, 0);
+        wr(g, GENI_SCL_COUNTERS, 0x00702818u);
+        wr(g, GENI_CLK_CFG, 0x00000021u);
+        clock = rd(g, GENI_CLK_CFG);
+        if (config) *config = (proto << 24) | (clock & 0xffffffu);
+        if ((clock & 0xff1u) != 0x21u || (xo != 2 && rd(g, GENI_CLK_SEL)) || rd(g, GENI_SCL_COUNTERS) != 0x00702818u) return -1;
+    }
     wr(g, GENI_DMA_MODE, 0);
     /* 8-bit words, 4 per FIFO word, least significant byte first on the wire. */
     wr(g, GENI_TX_PACK0, 0x7f8fe); wr(g, GENI_TX_PACK1, 0xffefe);
     wr(g, GENI_RX_PACK0, 0x7f8fe); wr(g, GENI_RX_PACK1, 0xffefe);
     wr(g, GENI_BYTE_GRAN, 0);
     wr(g, GENI_TX_WATERMARK, 0);
-    g->tx_fifo_words = fifo_words(rd(g, GENI_HW_PARAM_0));
-    g->rx_fifo_words = fifo_words(rd(g, GENI_HW_PARAM_1));
+    g->tx_fifo_words = xo == 2 ? 16u : fifo_words(rd(g, GENI_HW_PARAM_0));
+    g->rx_fifo_words = xo == 2 ? 16u : fifo_words(rd(g, GENI_HW_PARAM_1));
     wr(g, GENI_M_IRQ_CLEAR, 0xffffffffu);
     /* Exactly the bits this core handles: one the boot loader left enabled (RX watermark, RX last) would hold the level line up. */
     wr(g, GENI_M_IRQ_EN, GENI_M_IRQ_WANTED);
     wr(g, GENI_SE_IRQ_EN, rd(g, GENI_SE_IRQ_EN) | GENI_SE_M_IRQ_EN);
     return 0;
+}
+
+int geni_i2c_prepare(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config)
+{
+    return prepare(g, io, address, config, 0);
+}
+
+int geni_i2c_prepare_xo(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config)
+{
+    return prepare(g, io, address, config, 1);
+}
+
+int geni_i2c_prepare_hub_xo(GeniI2c *g, const GeniIo *io, uint8_t address, uint32_t *config)
+{
+    return prepare(g, io, address, config, 2);
 }
 
 /* Starts one write command of length bytes (at most 8); the data goes in when the engine asks for it (TX watermark). */

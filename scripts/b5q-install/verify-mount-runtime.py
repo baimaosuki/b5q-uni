@@ -37,7 +37,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-mount-verify-') as temp:
  for name in ['kernel.macho','kernel.macho.adt','kernel.macho.trustcache','kernel.macho.gpuaddon','scratch-data.img']:
   target=temp/name;subprocess.run(['mcopy','-i',str(package/'esp.img'),'::/EFI/UniXNU/Payloads/'+name,str(target)],check=True);files[name]=target
  assert hashlib.sha256(files['kernel.macho'].read_bytes()).hexdigest()==manifest['deploy_kernel_sha256']
- logical,extents=packed_ramdisk.regions(files['scratch-data.img'].read_bytes());assert logical==2*2**30
+ logical,extents=packed_ramdisk.regions(files['scratch-data.img'].read_bytes());assert logical==manifest.get('data_logical_bytes',2*2**30)
  identities=set();superblocks=0;policy=None
  for offset,chunk in extents:
   for at in range(0,len(chunk),4096):

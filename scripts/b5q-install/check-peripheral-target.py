@@ -9,6 +9,7 @@ p.add_argument('--compiler',type=Path,default=Path(os.environ.get('B5Q_TARGET_CX
 p.add_argument('--sdk',type=Path,default=Path(os.environ.get('B5Q_KERNEL_SDK',DEFAULT/'p020-input/local-sdk/macsdk/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk')))
 p.add_argument('--objects-out',type=Path)
 p.add_argument('--sources',help='Comma separated board sources; verify only changed translation units')
+p.add_argument('--native-recount',action='store_true',help='Compile CPU/thermal with real recount import; final new-core linkage remains a separate check')
 p.add_argument('--reference',type=Path,default=ROOT/'artifacts/b5q-esp-runtime-v18/esp.img');a=p.parse_args()
 sys.path.insert(0,str(ROOT/'UniXNU-b5q/scripts'));sys.path.insert(0,str(ROOT/'sources/UniXNU/kits/XnuPrelink'))
 from importlib.machinery import SourceFileLoader
@@ -25,7 +26,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  # SDK private headers infer the host OS from the triple. Reproduce the
  # actual XNU OSMetaClass.h XNU_TARGET_OS_OSX conditionals so reserved slots
  # match the source-kernel recipe despite its iOS Mach-O deployment target.
- t=Path(t);(t/'libkern/c++').mkdir(parents=True);(t/'libkern/c++/OSMetaClass.h').write_text((a.sdk/'System/Library/Frameworks/Kernel.framework/Headers/libkern/c++/OSMetaClass.h').read_text().replace('#if TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR','#if !XNU_TARGET_OS_OSX').replace('#if TARGET_OS_OSX && defined(__arm64__)','#if XNU_TARGET_OS_OSX && defined(__arm64__)'));(t/'OriginalUsbXhciABI.h').write_text(module.header(abi));kernel=t/'kernel'
+ t=Path(t);(t/'libkern/c++').mkdir(parents=True);(t/'libkern/c++/OSMetaClass.h').write_text((a.sdk/'System/Library/Frameworks/Kernel.framework/Headers/libkern/c++/OSMetaClass.h').read_text().replace('#if TARGET_OS_IPHONE && !TARGET_OS_SIMULATOR','#if !XNU_TARGET_OS_OSX').replace('#if TARGET_OS_OSX && defined(__arm64__)','#if XNU_TARGET_OS_OSX && defined(__arm64__)'));(t/'OriginalUsbXhciABI.h').write_text(module.header(abi));(t/'OriginalUsbXdciABI.h').write_text(module.xdci_header(json.loads((ROOT/'UniXNU-b5q/scripts/usb-xdci-26C5035r.json').read_text())));kernel=t/'kernel'
  # LLVM21 lacks Apple's fourth null-authentication qualifier; no affected
  # private fields are accessed by these helpers. Keep the override local.
  (t/'os').mkdir();(t/'os/base.h').write_text((a.sdk/'System/Library/Frameworks/Kernel.framework/Headers/os/base.h').read_text().replace(', "authenticates-null-values"',''))
@@ -43,7 +44,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  flags+=['-D'+v+'=1'for v in ['KERNEL','KERNEL_PRIVATE','DRIVER_PRIVATE','XNU_KERNEL_PRIVATE','XNU_TARGET_OS_OSX','PRIVATE','MACH_KERNEL_PRIVATE','__arm64__','__LP64__','__DARWIN_UNIX03']]
  for d in [t,ROOT/'UniXNU-b5q/package',a.sdk/'System/Library/Frameworks/Kernel.framework/Headers',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert',ROOT/'sources/UniXNU/drivers/Adreno740',ROOT/'sources/UniXNU/kits/AdrenoFirmware',ROOT/'UniXNU-b5q/package/B5qUfs',ROOT/'UniXNU-b5q/package/Sm8550Inputs',ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',ROOT/'UniXNU/kits/ArmSmmu4K',ROOT/'UniXNU/kits/AdrenoPM4',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/libkern',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/EXTERNAL_HEADERS']:flags+=['-I',str(d)]
  results={};objects=[];strong_owners={};duplicates={}
- sources=[ROOT/'UniXNU-b5q/package'/name for name in ['B5qUsbHost.cpp','B5qSpmi.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c']]
+ sources=[ROOT/'UniXNU-b5q/package'/name for name in ['QcomDwc3.cpp','UsbProbe.cpp','B5qUsbBoard.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c','Sm8550Gcc.c','QcomRpmh.c']]
  # Compile the service with its previously excluded cold-start branches.
  service=ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoService.cpp';adapted=t/service.name
  adapted.write_text(service.read_text().replace('0x23b14u*4u-0x6a000u','0x23b14u*4u-SHENG_GMU_CORE_GPU_DELTA').replace('0x23b13u*4u-0x6a000u','0x23b13u*4u-SHENG_GMU_CORE_GPU_DELTA'))
@@ -54,6 +55,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  for source in sources:
   target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11','-mkernel','-fptrauth-function-pointer-type-discrimination']
   if source.name=='NativeHidInput.cpp':cflags=cflags+['-DNATIVE_HID_SOURCE_API=1']
+  if a.native_recount:cflags=cflags+['-DB5Q_HAVE_CPU_IDLE_MACH=1']
   subprocess.run([str(a.compiler),*cflags,'-c',str(source),'-o',str(target)],env=env,check=True)
   if source.stem=='NativeHidInput':
    import b5q_hid
@@ -63,8 +65,8 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
   if a.objects_out:
    import shutil
    a.objects_out.mkdir(parents=True,exist_ok=True);shutil.copyfile(target,a.objects_out/target.name)
-  if source.stem=='B5qUsbHost':
-   bindings,slots=module.bindings(target.read_bytes(),abi);assert {n:hex(v)for n,v in bindings.items()}=={k:v for k,v in qualified['bindings'].items()if 'IOHIDDevice'not in k}
+  if source.stem=='QcomDwc3':
+   bindings,slots=module.all_bindings(target.read_bytes());qualified['bindings'].update({n:hex(v)for n,v in bindings.items()});(a.objects_out.parent/'usb-dual-bindings.json').write_text(json.dumps({'bindings':{n:hex(v)for n,v in bindings.items()},'slots':slots},indent=2)+'\n') if a.objects_out else None
   symbols=object_symbols(target.read_bytes());
   # Duplicate external definitions are as fatal as undefined imports. Ignore
   # weak/coalesced inline/template definitions (N_WEAK_DEF=0x80).
@@ -84,14 +86,16 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
   # covers the separately assembled binding/address objects that failed CI.
   sys.path.insert(0,str(ROOT/'UniXNU/scripts'));os.environ.update(UNIXNU_XNU_ARCH='arm64e',UNIXNU_IOS_VERSION='27.0');import kernel_target
   kernel_target.check_object(target.read_bytes(),source.name)
-  if source.stem=='B5qUsbHost':
+  if source.stem=='QcomDwc3':
    for name in ['bindings','addresses']:
     assembly=t/(name+'.S');assembly.write_text('.text\n.p2align 2\n.globl _b5q_abi_platform_test\n_b5q_abi_platform_test:\n ret\n')
     output=t/(name+'.o');subprocess.run([str(a.compiler),'-target','arm64e-apple-ios27.0','-c',str(assembly),'-o',str(output)],env=env,check=True);kernel_target.check_object(output.read_bytes(),name)
+ expected_core={'_sheng_cpu_idle_mach'} if a.native_recount else set()
  available=defined|set(qualified['bindings'])|set().union(*(e for _,_,e in objects))
  for stem,imports,exports in objects:
-  missing=imports-available;results[stem]['unresolved']=sorted(missing)
+  missing=imports-available;results[stem]['unresolved']=sorted(missing-expected_core)
+  results[stem]['expected_new_core_imports']=sorted(imports&expected_core)
  for n in ['_backtrace_user','_backtrace','_task_get_all_image_info_addr','_copyin','_get_user_regs','_thread_tid','_PE_parse_boot_argn']:assert n in defined,n
-print(json.dumps(dict(passed=not duplicates and not any(v['unresolved'] for v in results.values()),duplicate_external_definitions=duplicates,XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True)))
+print(json.dumps(dict(passed=not duplicates and not any(v['unresolved'] for v in results.values()),duplicate_external_definitions=duplicates,XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True,new_core_linkage_pending=a.native_recount)))
 
 if duplicates or any(v['unresolved'] for v in results.values()):raise SystemExit(1)

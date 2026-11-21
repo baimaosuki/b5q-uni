@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Build actual macOS IOBlockStorageDevice + RamBlock, with Samsung b5q read-only root transport."""
-import importlib.util,os,subprocess
+import importlib.util,os,shutil,subprocess
 from pathlib import Path
 from b5q_compile import ROOT,compile,archive,late,report
 out=ROOT/'build/ram-block';out.mkdir(parents=True,exist_ok=True)
@@ -23,7 +23,13 @@ OSDefineOperatorMethods(IOBlockStorageDevice)
 osx=out/'macos-target.h';osx.write_text('#include <TargetConditionals.h>\n#undef TARGET_OS_OSX\n#define TARGET_OS_OSX 1\n')
 includes=['-I',str(out/'headers/include'),'-I',str(ROOT/'.cache/xnu-work/osfmk'),'-I',str(ROOT/'kits/VerifiedRoot/include'),'-I',str(ROOT/'kits/b5q/B5qUfs')]
 flags=['-include',str(osx)]
-sources=[base,ROOT/'drivers/RamBlock/NativeRamBlock.cpp',ROOT/'kits/b5q/B5qRamStorage.cpp',ROOT/'kits/b5q/B5qAbsentBoard.cpp',ROOT/'kits/b5q/B5qUfs/B5qUfs.cpp',ROOT/'kits/b5q/B5qRootBinding.cpp',ROOT/'kits/VerifiedRoot/src/verified_root.c',ROOT/'kits/VerifiedRoot/adapters/xnu_crypto.c']
+ramblock=ROOT/'drivers/RamBlock'
+ram_source=out/'NativeRamBlock.cpp'
+ram_patch=Path(__file__).with_name('b5q-volatile-data-4g.patch')
+shutil.copyfile(ramblock/ram_source.name,ram_source)
+subprocess.run(['patch','--batch','--fuzz=0',ram_source],input=ram_patch.read_bytes(),check=True)
+includes+=['-iquote',str(ramblock)]
+sources=[base,ram_source,ROOT/'kits/b5q/B5qRamStorage.cpp',ROOT/'kits/b5q/B5qAbsentBoard.cpp',ROOT/'kits/b5q/B5qUfs/B5qUfs.cpp',ROOT/'kits/b5q/B5qRootBinding.cpp',ROOT/'kits/VerifiedRoot/src/verified_root.c',ROOT/'kits/VerifiedRoot/adapters/xnu_crypto.c']
 objects=[]
 for source in sources:
  obj=compile(source,out/(source.stem+'.o'),includes,flags+(['-Wno-error'] if source==base else []))
@@ -32,5 +38,5 @@ for source in sources:
 import json,sys
 objects += [Path(p) for p in json.loads(subprocess.check_output([sys.executable,str(ROOT/'scripts/build-b5q-pmgr.py')],text=True))]
 path=archive(out/'libRamBlock.a',objects)
-report(path,objects,sources,dict(ufs_controller=True,persistent_block_writes="validated ESP XNU2LOG.BIN slots only",root_partition="macosroot",data_in_ram=True,original_storage_class_size_checked_at_runtime=True))
+report(path,objects,[*sources,ramblock/ram_source.name,ram_patch],dict(ufs_controller=True,persistent_block_writes="validated ESP XNU2LOG.BIN slots only",root_partition="macosroot",data_in_ram=True,original_storage_class_size_checked_at_runtime=True))
 print('PASS: macOS source storage ABI, actual RamBlock and VerifiedRoot; b5q authenticated read-only macosroot driver linked; root read-only; isolated ESP journal writer enabled')

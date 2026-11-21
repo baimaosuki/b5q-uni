@@ -32,9 +32,9 @@ def verify_files(base,stats):
          'actual_APFS_inodes':stats,'hardware_tested':False}
 
 def main():
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--seed',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--apfs-tools',type=Path,default=TOOLS);a=p.parse_args()
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--seed',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--apfs-tools',type=Path,default=TOOLS);p.add_argument('--gib',type=int,choices=[2,4],default=2);a=p.parse_args()
  sys.path.insert(0,str(ROOT/'sources/UniXNU/drivers/DarwinBoot/Test'));import packed_ramdisk
- logical,regions=packed_ramdisk.regions(a.seed.read_bytes());assert logical==2*2**30
+ logical,regions=packed_ramdisk.regions(a.seed.read_bytes());assert logical==a.gib*2**30
  with tempfile.TemporaryDirectory(prefix='b5q-data-account-') as td:
   tmp=Path(td);raw=tmp/'data.raw'
   with raw.open('wb') as f:

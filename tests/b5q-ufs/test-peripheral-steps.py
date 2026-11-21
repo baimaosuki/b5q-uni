@@ -3,7 +3,7 @@ from pathlib import Path
 import subprocess,tempfile
 root=Path(__file__).resolve().parents[2];s=(root/'UniXNU-b5q/package/LegacyDisplayProbe.cpp').read_text()
 a=s.index('void b5qPeripheralWorker(void *,wait_result_t) {');b=s.index('\nvoid startB5qPeripherals()',a);body=s[a:b].replace('void b5qPeripheralWorker(void *,wait_result_t)','void run()')
-functions=['sheng_cpufreq_probe','sheng_board_clock_probe','sheng_thermal_probe','sheng_thermal_level_probe','sheng_buttons_probe','native_hid_input_probe','b5q_touch_probe','sheng_dpu_probe']
+functions=['sheng_cpufreq_probe','sheng_board_clock_probe','sheng_thermal_probe','sheng_thermal_level_probe','sheng_buttons_probe','native_hid_input_probe','b5q_touch_probe','sheng_dpu_probe','sheng_usb_probe']
 stub=r'''
 #include <cassert>
 #include <cstdio>
@@ -21,7 +21,7 @@ expected=['sleep3000','B5qPeripherals: stage=after-display\n']
 for fn in functions:expected += ['B5qPeripherals: step='+fn+':before\n',fn+':called','B5qPeripherals: step='+fn+':after\n']
 expected+=['B5qPeripherals: stage=ready\n','terminated']
 import json
-test='int main(){run();std::vector<std::string> expected={'+','.join(json.dumps(x)for x in expected)+'};assert(events==expected);puts("PASS actual peripheral worker: 3s delay, all8probes with16ordered before/after step logs");}\n'
+test='int main(){run();std::vector<std::string> expected={'+','.join(json.dumps(x)for x in expected)+'};assert(events==expected);puts("PASS actual peripheral worker: 3s delay, 8probes plusUSB with18ordered before/after step logs");}\n'
 with tempfile.TemporaryDirectory(prefix='b5q-peripheral-steps-')as td:
  p=Path(td)/'test.cpp';p.write_text(stub+body+test);out=p.with_suffix('')
  subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-fsanitize=address,undefined',str(p),'-o',str(out)],check=True)

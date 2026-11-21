@@ -97,11 +97,29 @@ jobs:
           brew install llvm lld mtools dtc blacktop/tap/ipsw bison ninja glslang shaderc spirv-tools pkgconf
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
           rustup toolchain install 1.98.0 --profile minimal --component rust-src
           if ! command -v unifdef >/dev/null; then
             brew install unifdef
             echo "$(brew --prefix unifdef)/bin" >> "$GITHUB_PATH"
           fi
+      - name: Stage existing GPU and temporary board binary inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          B5Q_V24_INPUT_0: ${{ secrets.B5Q_V24_INPUT_0 }}
+          B5Q_V24_INPUT_1: ${{ secrets.B5Q_V24_INPUT_1 }}
+          B5Q_V24_INPUT_2: ${{ secrets.B5Q_V24_INPUT_2 }}
+          B5Q_V24_INPUT_3: ${{ secrets.B5Q_V24_INPUT_3 }}
+          B5Q_V24_INPUT_4: ${{ secrets.B5Q_V24_INPUT_4 }}
+          B5Q_V24_INPUT_5: ${{ secrets.B5Q_V24_INPUT_5 }}
+          B5Q_V24_INPUT_6: ${{ secrets.B5Q_V24_INPUT_6 }}
+          B5Q_V24_INPUT_7: ${{ secrets.B5Q_V24_INPUT_7 }}
+        run: |
+          set -euo pipefail
+          gh run download 44837528408 --repo "$GITHUB_REPOSITORY" --name b5q-build-44837528408 --dir "$RUNNER_TEMP/b5q-v22-gpu"
+          python3 UniXNU-b5q/scripts/stage-v24-inputs.py --unixnu UniXNU --artifact "$RUNNER_TEMP/b5q-v22-gpu" --inputs "$RUNNER_TEMP/b5q-v24-inputs" --data-out "$RUNNER_TEMP/b5q-v24-data/runtime"
+          rm -rf "$RUNNER_TEMP/b5q-v22-gpu"
+          echo "B5Q_REUSE_ADRENO=$RUNNER_TEMP/b5q-v24-inputs/libAdreno740.a" >> "$GITHUB_ENV"
       - name: Resolve full b5q target
         working-directory: UniXNU
         env:
@@ -110,15 +128,13 @@ jobs:
           set -euo pipefail
           ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
           ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
-      - name: Reuse completed v11 RAM Data
+      - name: Create fresh 4GiB RAM Data with existing account policy
         env:
-          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh run download 44616733365 --repo "$GITHUB_REPOSITORY" --name b5q-build-44616733365 --dir "$RUNNER_TEMP/b5q-v11"
-          python3 scripts/b5q-install/reuse-v11-data.py --artifact "$RUNNER_TEMP/b5q-v11" --out "$RUNNER_TEMP/b5q-reused-data"
-          rm -rf "$RUNNER_TEMP/b5q-v11"
-          echo "B5Q_DATA_SEED=$RUNNER_TEMP/b5q-reused-data/data.dbr" >> "$GITHUB_ENV"
+          python3 scripts/b5q-install/build-data-seed.py --unixnu UniXNU --out "$RUNNER_TEMP/b5q-v24-data" --gpt scripts/b5q-install/gpt-input.json --ram-gib 4 --skip-setup --disable-watchdogd --user baimao:1234 --real-name baimao --auto-login 2>&1 | tee "$RUNNER_TEMP/b5q-data-seed.log"
+          echo "B5Q_DATA_SEED=$RUNNER_TEMP/b5q-v24-data/runtime/data.dbr" >> "$GITHUB_ENV"
       - name: Build full-component XNU
         id: kernel
         working-directory: UniXNU
@@ -143,7 +159,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$B5Q_DATA_SEED" 2>&1 | tee "$RUNNER_TEMP/b5q-payload-console.log"
+          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$B5Q_DATA_SEED" --reuse-addon 2>&1 | tee "$RUNNER_TEMP/b5q-payload-console.log"
+          python3 UniXNU-b5q/scripts/package-v24-esp.py --unixnu UniXNU --inputs "$RUNNER_TEMP/b5q-v24-inputs"
       - name: Collect text diagnostics
         if: always()
         env:
@@ -226,13 +243,25 @@ jobs:
         with:
           name: b5q-build-${{ github.run_id }}
           path: |
+            UniXNU/out/b5q/**/esp.img
             UniXNU/out/b5q/**/kernel/kernel.macho
             UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
             UniXNU/out/b5q/**/tree/build/**/*.a
+            UniXNU/out/b5q/**/tree/build/**/native-recount-build.json
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.command.json
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.o
+            UniXNU/out/b5q/**/tree/build/qcom-dwc3/**/*.o
+            UniXNU/out/b5q/**/tree/build/qcom-dwc3/**/*.json
+            UniXNU/out/b5q/**/tree/build/**/ArmCpu.o
+            UniXNU/out/b5q/**/tree/build/**/ArmDTPlatform.o
+            UniXNU/out/b5q/**/tree/build/**/processor.cpo
+            UniXNU/out/b5q/**/tree/build/**/processor.o
+            UniXNU/out/b5q/**/tree/build/**/IOUserClient.cpo
             UniXNU/out/b5q/**/kernel/*.json
             UniXNU/out/b5q/**/payload/payload.img
             UniXNU/out/b5q/**/payload/payload.json
             UniXNU/out/b5q/**/runtime/data-seed.json
+            UniXNU/out/b5q/**/runtime/data.dbr
             UniXNU/out/b5q/**/runtime/generated.json
             UniXNU/out/b5q/**/runtime/inputs.json
             UniXNU/out/b5q/**/package.manifest.json

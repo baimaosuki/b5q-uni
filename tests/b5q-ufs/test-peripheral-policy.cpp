@@ -1,5 +1,5 @@
 // Execute actual USB handoff/host sequence and Samsung GMU loader on fixtures.
-#include "B5qUsbPolicy.h"
+#include "B5qPeripheralHardware.h"
 #include "B5qGmuLoad.h"
 #include "NativeAdrenoSha256.h"
 #include <cassert>
@@ -10,54 +10,6 @@
 #include <string>
 int main(int argc,char **argv) {
  assert(argc==2);
- for(unsigned id:{0x33310000u,0x33320000u,0x55330000u})assert(B5qUsbPolicy::validCoreId(id));
- for(unsigned id:{0u,0xffffffffu,0x33300000u})assert(!B5qUsbPolicy::validCoreId(id));
- for(unsigned ss:{0u,1u<<24}) {
-  std::map<unsigned,unsigned> regs={{0x810,0x10100001},{0x830,ss},{0x808,0x400}};
-  std::vector<std::pair<unsigned,unsigned>> writes;unsigned waits=0;
-  auto rd=[&](unsigned off,unsigned &v){v=regs.at(off);return true;};
-  auto wr=[&](unsigned off,unsigned v){writes.emplace_back(off,v);regs[off]=v;return true;};
-  assert(!B5qUsbPolicy::scratch(rd,wr,[&](unsigned us){assert(us==1000);++waits;}));
-  assert(regs[0x810]==1&&regs[0x830]==0);
-  assert(waits==(ss?0u:2u));assert(writes.size()==(ss?2u:5u));
-  if(!ss){assert(writes[2]==std::make_pair(0x808u,0x500u));assert(writes[3]==std::make_pair(0x808u,0x509u));assert(writes[4]==std::make_pair(0x808u,0x409u));}
- }
-
- assert(B5qUsbPolicy::validRam(0x8c0004000,0x80000000));
- assert(!B5qUsbPolicy::validRam(0,0x80000000));
- assert(!B5qUsbPolicy::validRam(0x8c0004001,0x80000000));
- assert(!B5qUsbPolicy::validRam(0x8c0004000,4097));
- assert(!B5qUsbPolicy::validRam(UINT64_MAX-1,8));
- {
-  std::map<unsigned,unsigned> registers={{0x39004,0},{0x50018,0},{0x3902c,0},{0x39030,0},{0x39044,0},{0x39048,0},
-    {0x39088,0},{0x39018,0},{0x3908c,0},{0x39024,0},{0x39028,0}};
-  unsigned delays=0;
-  auto read=[&](unsigned off,unsigned &v){v=registers[off];return true;};
-  auto write=[&](unsigned off,unsigned v){registers[off]=(off==0x3902c||off==0x39044)?(v&~1u):v;if(off==0x39004||off==0x50018)registers[off]|=1u<<31;return true;};
-  assert(!B5qUsbPolicy::clocks(read,write,[&](unsigned us){assert(us==100);++delays;}));
-  assert(delays<=2000);
-  // A domain which never powers on must stop before any PHY/core access.
-  delays=0;registers[0x39004]=0;unsigned writes=0;
-  auto stuckWrite=[&](unsigned off,unsigned v){assert(off==0x39004);registers[off]=v;++writes;return true;};
-  assert(std::string(B5qUsbPolicy::clocks(read,stuckWrite,[&](unsigned us){assert(us==100);++delays;}))=="gcc-domain-timeout");
-  assert(delays==1000 && writes==1);
- }
- for(std::string mode: {"ok","usb31","usb32","identity","device-timeout","halt-timeout","reset-timeout","register-fault","32-bit-only"}) {
-  std::map<unsigned,unsigned> registers={{0xc120,0x55333330},{0xc110,0x2000},{0xc704,0},{0xc70c,1U<<22},{0,0x1000020},{0x10,1},{0x20,0},{0x24,1}};
-  if(mode=="usb31")registers[0xc120]=0x33310000;
-  if(mode=="usb32")registers[0xc120]=0x33320000;
-  if(mode=="identity")registers[0xc120]=0;
-  if(mode=="device-timeout"){registers[0xc704]=1U<<31;registers[0xc70c]=0;}
-  if(mode=="halt-timeout")registers[0x24]=0;
-  if(mode=="32-bit-only")registers[0x10]=0;
-  unsigned writes=0,delays=0;bool reset=false;
-  auto read=[&](unsigned off,unsigned &v){assert(off<B5qHardware::usbBytes);if(mode=="register-fault")return false;
-   v=registers[off];if(off==0x20 && reset && mode!="reset-timeout")v&=~2U;return true;};
-  auto write=[&](unsigned off,unsigned v){assert(off<B5qHardware::usbBytes);++writes;registers[off]=v;if(off==0x20&&(v&2U))reset=true;return true;};
-  const char *why=B5qUsbPolicy::prepare(read,write,[&](unsigned us){assert(us==100||us==20000||us==1000);if(us==100)++delays;});
-  assert((why==nullptr)==(mode=="ok"||mode=="usb31"||mode=="usb32"));assert(delays<=500);
-  if(mode=="identity" || mode=="register-fault")assert(writes==0);
- }
  FILE *f=fopen(argv[1],"rb");assert(f);std::vector<uint8_t> image(66844);assert(fread(image.data(),1,image.size(),f)==image.size());fclose(f);
  uint8_t hash[32];NativeAdrenoSha256::hash(image.data(),image.size(),hash);assert(!memcmp(hash,B5qHardware::gmuFirmwareSha256,32));
  AdrenoFirmwareBlock plan[32];size_t count=0;assert(B5qGmu::plan(image.data(),image.size(),plan,count)&&count==15);
@@ -77,5 +29,5 @@ int main(int argc,char **argv) {
    assert(!memcmp(mmio.data()+off,image.data()+b.payload_offset,b.bytes));}
  }
  image[512]^=1;NativeAdrenoSha256::hash(image.data(),image.size(),hash);assert(memcmp(hash,B5qHardware::gmuFirmwareSha256,32));
- puts("PASS USB RAM input/clock timeouts/host reset bounds and actual Samsung GMU firmware plan/load/hash controls; no device I/O");
+ puts("PASS actual Samsung GMU firmware plan/load/hash controls; USB native tests are separate");
 }

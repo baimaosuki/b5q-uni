@@ -635,7 +635,7 @@ void busyReport(void *, wait_result_t) {
 }  // namespace
 
 extern "C" void b5q_ethernet_start(void);
-extern "C" void b5q_usb_start(void);
+extern "C" void sheng_usb_probe(void);
 extern "C" void b5q_gpu_start(void);
 extern "C" void sheng_cpufreq_probe(void),sheng_board_clock_probe(void),sheng_thermal_probe(void),sheng_thermal_level_probe(void),sheng_buttons_probe(void),native_hid_input_probe(void),b5q_touch_probe(void),sheng_dpu_probe(void);
 namespace {
@@ -666,6 +666,9 @@ void b5qPeripheralWorker(void *,wait_result_t) {
     IOLog("B5qPeripherals: step=%s\n","sheng_dpu_probe:before");
     sheng_dpu_probe();
     IOLog("B5qPeripherals: step=%s\n","sheng_dpu_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","sheng_usb_probe:before");
+    sheng_usb_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_usb_probe:after");
     IOLog("B5qPeripherals: stage=ready\n");
     thread_terminate(current_thread());
 }
@@ -685,7 +688,6 @@ void native_legacy_display_late_probe(void) {
     b5q_ram_storage_start();
     native_keystore_probe();
     b5q_ethernet_start();
-    b5q_usb_start();
     b5q_gpu_start();
     IOService *display=pendingLegacyDisplay;if(!display){native_legacy_display_checkpoint();return;}pendingLegacyDisplay=nullptr;
     native_legacy_surface_status=OSKextLoadKextWithIdentifier("com.apple.iokit.IOSurface");

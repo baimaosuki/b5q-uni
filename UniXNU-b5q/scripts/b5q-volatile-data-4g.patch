@@ -1,0 +1,15 @@
+--- NativeRamBlock.cpp
++++ NativeRamBlock.cpp
+@@ -376,7 +376,11 @@
+   if(packedInput){
+     if(!ramPackedLayout(memory,bytes,&logical))return false;
+     struct ImportOps {uint8_t *allocate(){return static_cast<uint8_t *>(IOMallocZero(4096));}} ops;
+-    if(logical>0x80000000ULL){
++    // The b5q root transport exposes no Data store. Keep 4 GiB Data in the
++    // existing writable sparse RAM path (8 MiB of page pointers on arm64).
++    const bool wantsStore = &native_ufs_store_mode && native_ufs_store_mode() != 0;
++    const uint64_t volatileLimit = wantsStore ? 0x80000000ULL : 0x100000000ULL;
++    if(logical>volatileLimit){
+       uint64_t nonzero=0;
+       if(!seedCountNonzero(memory,bytes,&nonzero))return false;
+       big.bytes=logical;big.capacity=nonzero;

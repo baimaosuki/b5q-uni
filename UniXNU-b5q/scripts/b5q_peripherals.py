@@ -8,10 +8,10 @@ import shutil
 import subprocess
 from pathlib import Path
 
-SOURCES = ['B5qSpmi.cpp', 'CpuFreqProbe.cpp', 'ThermalProbe.cpp',
+SOURCES = ['B5qUsbBoard.cpp', 'UsbProbe.cpp', 'CpuFreqProbe.cpp', 'ThermalProbe.cpp',
            'ThermalLevel.cpp', 'BoardClock.cpp', 'ButtonProbe.cpp',
            'DisplayTimingProbe.cpp', 'NativeHidInput.cpp', 'HidInputProbe.cpp',
-           'B5qTouch.cpp', 'GeniI2c.c']
+           'B5qTouch.cpp', 'GeniI2c.c', 'Sm8550Gcc.c', 'QcomRpmh.c']
 
 
 def prepare_headers(sdk, include, hid):
@@ -67,7 +67,7 @@ def compile_object(cxx, cflags, source, target, llvm):
     command = [str(cxx), *options, '-c', str(source), '-o', str(target)]
     target.with_suffix('.command.json').write_text(json.dumps(command, indent=2) + '\n')
     subprocess.run(command, check=True)
-    if source.name in ['NativeHidInput.cpp', 'ThermalLevel.cpp', 'B5qUsbHost.cpp']:
+    if source.name in ['NativeHidInput.cpp', 'ThermalLevel.cpp', 'QcomDwc3.cpp']:
         late = target.with_suffix('.late.o')
         subprocess.run([str(llvm / 'llvm-objcopy'), '--remove-section=__DATA,__mod_init_func',
                        '--globalize-symbol=__GLOBAL__sub_I_' + source.name, str(target), str(late)], check=True)
@@ -102,5 +102,20 @@ def full_build(tree, package, out, scripts):
     include = out / 'board-include'
     hid = tree / 'refer/IOHIDFamily'
     header = prepare_headers(sdk, include, hid)
-    cflags = flags(sdk, include, header, package, tree, tree / '.cache/xnu-work')
-    return build_added(package, out / 'board-input', cxx, cflags, llvm, scripts)
+    # Read definitions in the bootstrap pass's objects, never a prior image.
+    from xnu_symbols import OBJ, defined_names
+    filelist = tree / OBJ / 'link.filelist'
+    paths = [Path(line) for line in filelist.read_text().splitlines() if line]
+    processors = [path for path in paths if path.name in ('processor.o', 'processor.cpo') and path.is_file()]
+    have_idle = '_sheng_cpu_idle_mach' in defined_names(processors, global_only=True)
+    if not have_idle:
+        raise SystemExit('Current XNU processor object does not define _sheng_cpu_idle_mach; check bootstrap compilation and patch series')
+    cflags = flags(sdk, include, header, package, tree, tree / '.cache/xnu-work', have_idle)
+    objects = build_added(package, out / 'board-input', cxx, cflags, llvm, scripts)
+    import hashlib
+    (out / 'native-recount-build.json').write_text(json.dumps({
+        'B5Q_HAVE_CPU_IDLE_MACH': int(have_idle),
+        'current_XNU_processor_objects': {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in processors},
+        'objects': {p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in objects},
+    }, indent=2) + '\n')
+    return objects

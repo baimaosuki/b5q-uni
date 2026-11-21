@@ -1,0 +1,121 @@
+{
+  "scope": "Static audit of saved files; no device, MMIO, SCM or firmware execution",
+  "inputs": {
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMUDxe.efi": "a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef",
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.efi": "34df5506ffd34b176e5211dac6c728c5e2cc3a45d101c1657df539ddef1d42f7",
+    "artifacts/b5q-runtime-v24-work/firmware-source/BOOT.MXF.2.5.1-HALIOMMU.h": "69cceda4ab807a5eb31db13019eb8db7f1e89a158971de5df6e9bef6fe352d22",
+    "b5q-runtime.fdt": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6"
+  },
+  "saved_runtime_FDT": {
+    "USB_SID": "0x40",
+    "display_handoff_SMR": {
+      "id": "0x1c00",
+      "mask": "0x2"
+    },
+    "apps_smmu_property_names": [
+      "#address-cells",
+      "#global-interrupts",
+      "#iommu-cells",
+      "#size-cells",
+      "compatible",
+      "dma-coherent",
+      "interrupts",
+      "phandle",
+      "qcom,actlr",
+      "qcom,handoff-smrs",
+      "qcom,use-3-lvl-tables",
+      "ranges",
+      "reg",
+      "reg-names"
+    ],
+    "USB_owned_slot": "unknown",
+    "USB_owned_context_bank": "unknown",
+    "protected_context_bank_bitmap": "unknown"
+  },
+  "local_firmware_protocol": {
+    "init_RVA": "0x1700",
+    "function_table_RVA": "0xd0d0",
+    "documented_table": [
+      {
+        "field": "domain_create_func",
+        "RVA": "0x1970"
+      },
+      {
+        "field": "domain_delete_func",
+        "RVA": "0x1a20"
+      },
+      {
+        "field": "domain_attach_func",
+        "RVA": "0x1ba0"
+      },
+      {
+        "field": "domain_detach_func",
+        "RVA": "0x2870"
+      },
+      {
+        "field": "domain_configure_func",
+        "RVA": "0x2db0"
+      },
+      {
+        "field": "flush_domain_func",
+        "RVA": "0x3130"
+      },
+      {
+        "field": "flush_domain_va_list_func",
+        "RVA": "0x31c0"
+      },
+      {
+        "field": "register_fault_handler_func",
+        "RVA": "0x3260"
+      },
+      {
+        "field": "config_bypass_domain_func",
+        "RVA": "0x3020"
+      },
+      {
+        "field": "idiom_detach_func",
+        "RVA": "0x3280"
+      },
+      {
+        "field": "mmu_aspace_init_func",
+        "RVA": "0x4840"
+      },
+      {
+        "field": "mmu_aspace_destroy_func",
+        "RVA": "0x4990"
+      },
+      {
+        "field": "mmu_map_addr_func",
+        "RVA": "0x44f0"
+      },
+      {
+        "field": "mmu_unmap_addr_func",
+        "RVA": "0x4770"
+      },
+      {
+        "field": "domain_update_aspace_func",
+        "RVA": "0x2cd0"
+      }
+    ],
+    "documented_bank_ownership_query": false,
+    "USB_domain_create_attach_strings_present": true,
+    "bank_allocator_RVA": "0x21a0",
+    "CBAR_read_helper_RVA": "0x36c0",
+    "allocation": "Runtime loop reads GR1 CBAR[index]; no fixed USB bank is established",
+    "actual_loaded_phone_firmware_identity_verified": false,
+    "private_domain_handle_or_layout_exported_to_XNU": false
+  },
+  "Linux_source": {
+    "handoff": "arm_smmu_handoff_cbs reads S2CR.CBNDX and reserves that bit in context_map",
+    "allocation": "arm_smmu_alloc_context_bank uses context_map, not SCTLR.M alone",
+    "qsmmuv500_cfg_probe": "Clears sACR CACHE_LOCK; does not grant bank ownership",
+    "wait_safe_toggle": "Examined call is conditional on qcom,sdm845-smmu-500; not a USB bank allocator"
+  },
+  "conclusion": "Superseded: compatible CBAR free metadata found in exactHALbinary; nativeallocator implemented",
+  "unresolved_contract": [],
+  "required_implementation_input": "An ownership map or a verified firmware domain handoff, including lifetime through ExitBootServices",
+  "other_device_bank_numbers_used": false,
+  "new_apps_smmu_MMIO": false,
+  "CI_dispatched": false,
+  "v24_image_created": false
+}

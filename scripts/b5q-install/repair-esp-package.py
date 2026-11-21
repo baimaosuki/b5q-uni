@@ -65,7 +65,7 @@ for suffix in ['.adt', '.trustcache']:
 esp = out / 'esp.img'
 with esp.open('wb') as stream:
     stream.truncate(838860800)
-run(['mkfs.fat', '--invariant', '-F', '32', '-S', '512', '-n', 'B5QMACOS', esp])
+run(['mkfs.fat', '--invariant', '-F', '32', '-S', '4096', '-s', '1', '-n', 'B5QMACOS', esp])
 run(['mcopy', '-s', '-i', esp, stage / 'EFI', '::/'])
 run(['mcopy', '-i', esp, stage / 'startup.nsh', '::/startup.nsh'])
 run(['fsck.fat', '-n', esp])

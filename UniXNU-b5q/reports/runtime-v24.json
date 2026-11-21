@@ -1,0 +1,4274 @@
+{
+  "status": "Native v24 complete local implementation;33preCIchecksPASS;fullnewcore/Data4GiB/ESP CI to dispatch",
+  "task": "v24 native recount/Edge, hardware USB,IRQ touch,4GiB RAM Data",
+  "physical_b5q_v23": {
+    "path": "logs/b5q-xnu2log-v23/XNU2LOG.BIN",
+    "sha256": "025fa33b1a3c616e6a2e8a238b95205efa1dc836d6b49ba013f8d31b3475cc52",
+    "metadata": {
+      "slot": 0,
+      "valid": true,
+      "sequence": 245,
+      "boot_id": "90b1e730000000000100000000000000",
+      "committed_total": 235943,
+      "lost_on_contention": 13,
+      "ring_overwritten": 0,
+      "payload_bytes": 235943,
+      "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000",
+      "format": "NABULOG2",
+      "version": 2,
+      "allocation_token": "411839cbaebac4088c251c0ea57579a2",
+      "slots": [
+        {
+          "slot": 0,
+          "valid": true,
+          "sequence": 245,
+          "boot_id": "90b1e730000000000100000000000000",
+          "committed_total": 235943,
+          "lost_on_contention": 13,
+          "ring_overwritten": 0,
+          "payload_bytes": 235943,
+          "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+        },
+        {
+          "slot": 1,
+          "valid": true,
+          "sequence": 244,
+          "boot_id": "90b1e730000000000100000000000000",
+          "committed_total": 235827,
+          "lost_on_contention": 13,
+          "ring_overwritten": 0,
+          "payload_bytes": 235827,
+          "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+        }
+      ],
+      "selected_slot": 0,
+      "stored_checksum": "crc32_header_and_payload",
+      "stored_checksum_valid": true,
+      "config_checksum_valid": true,
+      "structural_validation": "passed",
+      "ring_capacity": 4194304,
+      "ring_order": "already_linearised",
+      "lost_bytes_exact": 13,
+      "captured_bytes_lower_bound": 235943,
+      "lost_bytes_lower_bound": 13,
+      "capture_complete_through_snapshot": false,
+      "complete_boot_log": false,
+      "freshness": "boot_id_present_requires_run_binding",
+      "snapshot_consistency": "CRC_verified_committed_snapshot",
+      "payload_sha256": "7dec41d42ece40c0e5b6f01a1613e73c82853ce000e7aac3ba320c435ae42be7",
+      "warnings": [
+        "Bytes after the last completed commit may be missing.",
+        "Only bytes reaching the installed console producers are captured."
+      ],
+      "nul_bytes": 0,
+      "utf8_valid": true,
+      "decoded": true
+    },
+    "observed": "irq2088207/un0/storm0/pwr0/devs0;USBSTS8 and repeated abortCommand;mask/unmask resets masked old counter"
+  },
+  "NABU_reference": {
+    "path": "/home/baimao/nabu_macos/logs/p038-20261121/",
+    "sha256": "34ec2ed2089615643d973a5684c80c5a47bdc15c4ec94f96bc1812ae96f76e27",
+    "physical_device": "NABU; not b5q; SID140 and CB55 not transferable"
+  },
+  "runtime_FDT": {
+    "sha256": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+    "parser": "UniXNU read_fdt; skip NOP tokens; fdtget stops early on this input",
+    "verified": {
+      "repeater": "ti,eusb2-repeater;reg0x3e;node name remains@4f",
+      "repeater_overrides": [
+        [
+          112,
+          125
+        ],
+        [
+          113,
+          62
+        ],
+        [
+          115,
+          118
+        ],
+        [
+          121,
+          112
+        ]
+      ],
+      "Synaptics": "S3916A addr20 GPIO19;Goodix disabled",
+      "tlmm": "basef000000;register base+100000",
+      "s2dos05": "addr60;GPIO20/21;LDO2/3",
+      "USB_SID": "40",
+      "display_handoff_SMR": "id1c00 mask2"
+    }
+  },
+  "hardware_source_index": {
+    "repo": "LineageOS/android_kernel_samsung_sm8550",
+    "commit": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9",
+    "files": {
+      "drivers/battery/charger/max77705_charger/max77705_charger.c": {
+        "bytes": 96799,
+        "sha256": "f3c980d9f14548983ce8e97fc0a5b306d7900c6d0e4eab3d6e8d7787e18e9f35"
+      },
+      "drivers/battery/charger/max77705_charger/max77705_charger.h": {
+        "bytes": 14462,
+        "sha256": "181a74c910b0b7819346a215aa4bb2b9c72da152867b160e10af14adb7cd8eb5"
+      },
+      "drivers/regulator/s2dos05/s2dos05.c": {
+        "bytes": 41412,
+        "sha256": "44771b170c65b789b27599113efdabbf412252c29e3ad7ac95e25589a10ec661"
+      },
+      "include/linux/regulator/s2dos05.h": {
+        "bytes": 5571,
+        "sha256": "80df48e06275afadd26df5089ae5a5c8e65e645fc027f73a947d1e56fc50f3c0"
+      },
+      "drivers/usb/repeater/repeater-i2c-eusb2.c": {
+        "bytes": 23234,
+        "sha256": "6da188ac131a6c66dfefdce61a54d1e74a21ea280c69e726663da0fa651a32f0"
+      },
+      "drivers/mfd/maxim/max77705.c": {
+        "bytes": 41263,
+        "sha256": "7c3badd1a9ffe647c09f800fb66dec13735821ecc58c4d6a44ca3ffcad1a8278"
+      },
+      "include/linux/mfd/max77705-private.h": {
+        "bytes": 13063,
+        "sha256": "a205dfc0743d38f7684a046f5aef26d466f5feef3713fe0d19bc58134a7c441e"
+      },
+      "drivers/usb/typec/maxim/max77705_cc.c": {
+        "bytes": 27485,
+        "sha256": "b62c987acfba638263e4a2398a45a9ad0daa87e2b13c0d0fa889539d2d2ac5fd"
+      },
+      "drivers/usb/typec/maxim/max77705_usbc.c": {
+        "bytes": 126359,
+        "sha256": "1c83f65fbfe8000980aceb8571f32e351aefcf14f3e4fb0f135c88eda9bce35a"
+      },
+      "include/linux/usb/typec/maxim/max77705_usbc.h": {
+        "bytes": 10083,
+        "sha256": "b23198b2aa3ebc60cdbbcab503e1767eaa8ee7a59c96ade00d9059751aff204d"
+      },
+      "drivers/pinctrl/qcom/pinctrl-kalama.c": {
+        "bytes": 75921,
+        "sha256": "d8d416b79fab46a466f130ea4f61893b93444c736d2d9b916e2678bc8c27ac48"
+      },
+      "drivers/pinctrl/qcom/pinctrl-msm.c": {
+        "bytes": 58516,
+        "sha256": "f522173e12ebf830d724b026ae2156c41b7b3d2025c0c33aa0b209f6fbdb99ea"
+      },
+      "drivers/i2c/busses/i2c-msm-geni.c": {
+        "bytes": 84261,
+        "sha256": "b0c2a7caa20c59b0f04bec62ccc3f0d452d442e4ff1e6ba51927a13b2d644e31"
+      },
+      "drivers/iommu/arm/arm-smmu/arm-smmu-qcom.c": {
+        "bytes": 92281,
+        "sha256": "4c40a858344faf22b96801cf29d72dcbdead2c3540610c238531d59e57695b8a"
+      },
+      "include/linux/usb/typec/maxim/max77705_cc.h": {
+        "bytes": 1775,
+        "sha256": "f714616e3a52bd06fa24e1d021c21f5a3b8571ef0f65eecddfc052b004ae6302"
+      },
+      "include/linux/usb/typec/maxim/max77705.h": {
+        "bytes": 13710,
+        "sha256": "2ccd9413496884c31bde2326a61d4093e6f6c71b1b448024e6e29f1143877e88"
+      },
+      "drivers/clk/qcom/clk-rcg2.c": {
+        "bytes": 45068,
+        "sha256": "7edb223af576a0ed4f68335cf88aafcd8d66c7dea03410f646e8f1f995d8b265"
+      },
+      "drivers/usb/phy/phy-msm-ssusb-qmp.c": {
+        "bytes": 35600,
+        "sha256": "726f66c17ba3b28af016f8795afe3d097a60a639507022f0cafbcd9ba63ec322"
+      }
+    }
+  },
+  "source_corrections": [
+    "USBSTS08=EINT,04=HSE;previousHSEclaimwithdrawn",
+    "HALa6020ff8 CBARallocator RVAs2210..2290 proves free conditions type0/type2/type1+VMIDff;allocatedtype1VMID0excludedwithoutCB.SCTLR/S2CRreads",
+    "TI revisionB0;charger69 versusparent66;GENIclk48andreadonly64"
+  ],
+  "native_core_patch_application": {
+    "os_profile": "macos-27.3-26C5035r",
+    "xnu_revision": "ac9718fb1af618d5ce8678d0dc6e8a58f252216f",
+    "scope": "Ordered git apply test only; not source generation, compilation or hardware validation",
+    "patches": [
+      {
+        "name": "bcm2837-machine-config.patch",
+        "sha256": "aee609b3a399a34aecd1fdff8a96622ab520b531bc981a9bd8e1f45c458e3adf",
+        "result": "PASS"
+      },
+      {
+        "name": "local-availability.patch",
+        "sha256": "fc43703425115c82a3bdde8621053dd32de1a525e3764b365f5aacfe11897e26",
+        "result": "PASS"
+      },
+      {
+        "name": "cxx-flag-dependencies.patch",
+        "sha256": "020ff181e766c138ec3cf42b7197a4eb2c74f0afc4c077966e3cb3adbf691c59",
+        "result": "PASS"
+      },
+      {
+        "name": "external-archive-dependencies.patch",
+        "sha256": "7f6e2e1971747e59714c580ce245a47d1aa5217d1a8c09293ee034ba0b350f70",
+        "result": "PASS"
+      },
+      {
+        "name": "public-entitlements-header.patch",
+        "sha256": "132dd15ce3fc31dbe175c2fcf1d9cebcd42559cc1d97391ce2bd11122ffb652b",
+        "result": "PASS"
+      },
+      {
+        "name": "apple-only-cpu-tunables.patch",
+        "sha256": "3e639e6549c6fc56599d95c4a84ae5ee6123628108ece5976c30e65c19659dee",
+        "result": "PASS"
+      },
+      {
+        "name": "non-apple-cache-monitor.patch",
+        "sha256": "b0c1dcf6f2763318bb28a5c15bf2bc990bc8aadb6a2a819bdde6bdffec3f55a5",
+        "result": "PASS"
+      },
+      {
+        "name": "native-4k-bootstrap-capacity.patch",
+        "sha256": "0f6e27ff7ffaa6daed425b6a57e2edce981f27cc5326845ee76b7b402531957b",
+        "result": "PASS"
+      },
+      {
+        "name": "native-dt-panic-region.patch",
+        "sha256": "091fdf08b4043b36619fddb4bd580878673889f053b232169585491512a24733",
+        "result": "PASS"
+      },
+      {
+        "name": "armvirt-platform-personality.patch",
+        "sha256": "855da0e94e36ad86b8cec4adb72bd0d608f07e87d8e8945b2c7ad0d7b499d37a",
+        "result": "PASS"
+      },
+      {
+        "name": "native-aes-personality.patch",
+        "sha256": "4c8e5c18b7605c5adfcee8e4ec9e9c7fa1dee39c9db11173aad47dcef7f2ab9f",
+        "result": "PASS"
+      },
+      {
+        "name": "null-root-media.patch",
+        "sha256": "c4bb264feffc582f5e0633a34ac53cbb749f5a3e2cd9b3d898f80cffcedc3739",
+        "result": "PASS"
+      },
+      {
+        "name": "zzx-pmap-sync-64bit-pa.patch",
+        "sha256": "e15821f127754419735cf64bd036d2f88d2d45a303427d1c935b4da6c34c1148",
+        "result": "PASS"
+      },
+      {
+        "name": "native-quiet-managed-page-report.patch",
+        "sha256": "2d4c2d744a954d7de2d905082402682f68dda954586ae280d02f68b0dfe83ad7",
+        "result": "PASS"
+      },
+      {
+        "name": "native-priv-work-interval.patch",
+        "sha256": "784d7b9f444850a5b6e0766771e9d8bb4ca3c1af64a4e861a321ce99ca2f72cb",
+        "result": "PASS"
+      },
+      {
+        "name": "native-work-interval-instance.patch",
+        "sha256": "7a18a6c31e7af0b2fd7b2105fb22c64fab80673f078a41f0469718eb24721c8e",
+        "result": "PASS"
+      },
+      {
+        "name": "native-work-interval-soft-fail.patch",
+        "sha256": "d1ae08cca0a059a20a7c6b5c405dc75487777658203306a829b627cef49d3be7",
+        "result": "PASS"
+      },
+      {
+        "name": "kernel-sdk-root.patch",
+        "sha256": "ce6eb317c60db1a5a4e9411029bd014bdc691364ea5ce57ec205faf00cff61ea",
+        "result": "PASS"
+      },
+      {
+        "name": "source-machine-layer.patch",
+        "sha256": "5aa6607f97c3f823a94dd67df7cf14a0c2a27cfa435513ab29bc7a33f9bda500",
+        "result": "PASS"
+      },
+      {
+        "name": "native-pac-keys.patch",
+        "sha256": "66209d4bb536e1fe557e31ca9f2fb090d66058d8ff469dd86957ecb1ae802528",
+        "result": "PASS"
+      },
+      {
+        "name": "native-pac-arm64-user-jop.patch",
+        "sha256": "09904a9e97a5f5885bb65a7adcb087aea133d1308f5f10da386c729973fef8e2",
+        "result": "PASS"
+      },
+      {
+        "name": "native-at-par-sync.patch",
+        "sha256": "ba976042976864629d65b5e38d661fb4c52f1c5ad2840dc723de52eaf506556d",
+        "result": "PASS"
+      },
+      {
+        "name": "public-entitlements-v2-header.patch",
+        "sha256": "3646aa669c4126b715f5b3504ec6f641a38d15399addbc67ab47308d35245e1c",
+        "result": "PASS"
+      },
+      {
+        "name": "no-apple-cpu-counters.patch",
+        "sha256": "3d1a22541d38519be6fac6e9ef5b795d35bcfba2cfb4181e0dce1d0fa3ec75df",
+        "result": "PASS"
+      },
+      {
+        "name": "apple-only-core-type.patch",
+        "sha256": "78c2bd61a204ae682f878bc498d98cd0b7bec4ff56ef9eb69e3b036fdd1aaf7e",
+        "result": "PASS"
+      },
+      {
+        "name": "public-pmap-sart.patch",
+        "sha256": "c83beaf7f6eeb9aa149e070c5c549ace08020a74414e3beacb3f4db097671d3f",
+        "result": "PASS"
+      },
+      {
+        "name": "public-pmap-without-monitor.patch",
+        "sha256": "4e5fad954cb6b451ff6417da5c9fda708c8176b8caba494e48546ce4a8aa1121",
+        "result": "PASS"
+      },
+      {
+        "name": "optional-kernel-support-archive.patch",
+        "sha256": "f344edb0abb74082aa382ac902e0dec1045b3d501981a0e0aa8776f77fd82786",
+        "result": "PASS"
+      },
+      {
+        "name": "public-missing-definitions.patch",
+        "sha256": "ab0bf398fff722610ecdd8a50db912fb8355d5a7f2775c6a5a715a6e366e2555",
+        "result": "PASS"
+      },
+      {
+        "name": "source-corecrypto14-bootstrap.patch",
+        "sha256": "7f678a620312094e5a31fb98659a01ba0e6e6318658e329feb16e4e006f614dd",
+        "result": "PASS"
+      },
+      {
+        "name": "source-pthread-bootstrap.patch",
+        "sha256": "b97b7e63cf1fa89f1d931e961963d2f91665e13b4a782c421ca63e93b1b901e6",
+        "result": "PASS"
+      },
+      {
+        "name": "native-arm-pan.patch",
+        "sha256": "9d171dd00a8ac07c0ca6374258f4ee6ce6d02667abd0117415585d616b0e08e8",
+        "result": "PASS"
+      },
+      {
+        "name": "mockfs-intermediate-lookup.patch",
+        "sha256": "03680b2105cdf617aee78fd512ad9aba7b2f2a72af0b65f7197110724b6bf35a",
+        "result": "PASS"
+      },
+      {
+        "name": "mockfs-memory-device-width.patch",
+        "sha256": "1fdb181fca7dc57d35cc206b59769f4635174b9e133ed9ee07aeb293c5d572a4",
+        "result": "PASS"
+      },
+      {
+        "name": "mockfs-statfs.patch",
+        "sha256": "c620dc455f8a56700f4b3bd25ffcb2e9b14a9e8e5cf8a57205ff2e22433fab23",
+        "result": "PASS"
+      },
+      {
+        "name": "mockfs-test-file.patch",
+        "sha256": "cc8c6b1c17b11258b438b29b67fcc7db27981eb8d3cf278069f78bf8b341248c",
+        "result": "PASS"
+      },
+      {
+        "name": "mockfs-typed-allocation.patch",
+        "sha256": "2173750f195ab4032f7a8d47276ad3074f6268c2fd68dd33afa0670aaef0aa32",
+        "result": "PASS"
+      },
+      {
+        "name": "native-lookup-trace.patch",
+        "sha256": "056421b3f1b31034d6301f0a17cda78d675f726b3ad02d468ea5c0fddbd6f30d",
+        "result": "PASS"
+      },
+      {
+        "name": "native-union-getattrlistbulk.patch",
+        "sha256": "2908dcc79ebd0cd657c741f8e1de04dab720eeb12f495da97ab09d0416ee10f8",
+        "result": "PASS"
+      },
+      {
+        "name": "native-union-lower-directory.patch",
+        "sha256": "905c52369f6ff5336323dc729f38d238ba735b607de826f433615ec7aba8d927",
+        "result": "PASS"
+      },
+      {
+        "name": "native-union-statfs-fsid.patch",
+        "sha256": "b517214ef32568ad9fa3d0a381c488e028ea8c24c7f562640ac7e66f43048c5b",
+        "result": "PASS"
+      },
+      {
+        "name": "native-work-interval-trace.patch",
+        "sha256": "049b262f6fc24ba10cd0f454a1d7d97a3284d6679430e41af44516cca5ccfbff",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-component-load-probes.patch",
+        "sha256": "2ebb33e36766dd4b8282ca27067173aa0a12567daf69e24facde439ffecf8732",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-legacy-start.patch",
+        "sha256": "1d9922f3b17e28a7f8b67d58ec0f9f4dbfdb5eb1aa4b54b9520f6b8cbe1ff312",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-native-gpu-broker.patch",
+        "sha256": "e8148bfbf2a87238db07a61681a732436e7b28aaf40b7b919429b438b80aa4a0",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-owner-boot-manifest.patch",
+        "sha256": "5eb2a393ca5c3fd3c39fc861330ec4082e8001af5187382e49f911d8103ec4dd",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-owner-cache-carrier.patch",
+        "sha256": "55c588e619f9f54fbfef401b0b9198bfd54f67cdb361c25b1756d8b5efc5b9c3",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-owner-root-binding-audit.patch",
+        "sha256": "3bdd80daa9b76003e414eeb08dfa68284fa6d0757740b7aac8bc9b4533ba228f",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-owner-root-crypto-probe.patch",
+        "sha256": "1b94332c8c8f1287311854fe4d65794322f14d4d7ee7aad871e2e076ae2fd140",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-owner-z-air-init.patch",
+        "sha256": "e32f4224e22628eaa4516467875bc922be555bc112424c1b49551fefef4779f8",
+        "result": "PASS"
+      },
+      {
+        "name": "zzw-native-adreno-sandbox-grant.patch",
+        "sha256": "88edfd3614b05635c75ee721d623b4f4bcb8e3b46e26f6c528dcedb069192cbe",
+        "result": "PASS"
+      },
+      {
+        "name": "zzwb-native-sandbox-grant-set-properties.patch",
+        "sha256": "17d14e224d62616a88ab802b111c327f8c6ec9835404981b5f6b8a0df62f21d7",
+        "result": "PASS"
+      },
+      {
+        "name": "zzyc-owner-skip-launch-constraints.patch",
+        "sha256": "0b23e9bb5a3e58e26a12d567660129b1cb7d0fac031e5c94849012cd36e766f2",
+        "result": "PASS"
+      },
+      {
+        "name": "native-4k-user-abi.patch",
+        "sha256": "878c05a48cf1d1579e87630897fbb74814f9aef1e6974ba16879f171c147ec59",
+        "result": "PASS"
+      },
+      {
+        "name": "native-4k-signature-hash-cache.patch",
+        "sha256": "de977185c493e2c5398a1c0a279c192cb8bba07f2d38ad09f4a84e9e50621cb8",
+        "result": "PASS"
+      },
+      {
+        "name": "native-4k-shared-region-slide.patch",
+        "sha256": "076be2859a0a7cf31574995c4a985da13f7b914ec55724eb82ae11a19b800b13",
+        "result": "PASS"
+      },
+      {
+        "name": "native-text-fixup.patch",
+        "sha256": "49571672a1f864c0004107de638ae76c1afb34eec6f04d324df8846989b694fd",
+        "result": "PASS"
+      },
+      {
+        "name": "non-apple-iommu-bootstrap.patch",
+        "sha256": "9eb174b826c07fac68b5c2a50ff060846f6667bd7bf9161d7ec94b55a49097e3",
+        "result": "PASS"
+      },
+      {
+        "name": "offline-owner-systemos-mount.patch",
+        "sha256": "aa56b25d0daa730c5e1d3da8eb42cd3f76da32366a9c5a32b51c0e3a7a68f64f",
+        "result": "PASS"
+      },
+      {
+        "name": "zzy-native-gpu-addon-mount.patch",
+        "sha256": "1483202946d5e5b4e8d4e7e5f96f25a84ddf6ed5c385930a3792e4e50b3b21bf",
+        "result": "PASS"
+      },
+      {
+        "name": "zzy-staged-system-apps.patch",
+        "sha256": "835082c443b4497d625ca0b3006df898232c81780c232fb3ec1c1e2b0d69f381",
+        "result": "PASS"
+      },
+      {
+        "name": "zzyb-native-cryptex-os-view.patch",
+        "sha256": "650d5b6da6f20445c9da632e0ab16525de4882728b2274acd1c10dc5f1e7cdd7",
+        "result": "PASS"
+      },
+      {
+        "name": "arm64e-threaded-starts.patch",
+        "sha256": "cbeac2e43c63f726a97bb754b3d48e8305c9aada907cc1ad64d91d773965dc53",
+        "result": "PASS"
+      },
+      {
+        "name": "native-security-init.patch",
+        "sha256": "03f8feda7480bd915ca19d1f040ed590c8474847de89b237914de3f6673b2943",
+        "result": "PASS"
+      },
+      {
+        "name": "trustcache-runtime-layout.patch",
+        "sha256": "389238acb4e12e5ecdd11295aeb46ade69923439e76483250569e4155046432b",
+        "result": "PASS"
+      },
+      {
+        "name": "fileset-unmapped-call.patch",
+        "sha256": "ba41d37493e0fcf2557c5ec57eff2d5790c768b27af63debfe69d5d3e9695f77",
+        "result": "PASS"
+      },
+      {
+        "name": "native-4k-block-split.patch",
+        "sha256": "411acef69d746d3bf33e38ad0b835debd2658fa0c0e25dcaa61a718bed7fca06",
+        "result": "PASS"
+      },
+      {
+        "name": "native-modload-lock-order.patch",
+        "sha256": "3e0ab6401a83d43599d6b35abd211da2bc7d988834cd9e6521dd46ebe1c1bfe5",
+        "result": "PASS"
+      },
+      {
+        "name": "native-union-readdir-eof.patch",
+        "sha256": "764075e4cb2d9905e6e9488cf1ad9d3bb9c958eca06bd454d7de2afc4354e136",
+        "result": "PASS"
+      },
+      {
+        "name": "sheng-platform-power.patch",
+        "sha256": "c29aa89c9ace1bcbb9d6820686b6ef1dd231f408273b7f76e3c15c47d79a5e86",
+        "result": "PASS"
+      },
+      {
+        "name": "native-smp-secondary.patch",
+        "sha256": "8b190e11b30dfdf40cc89482903f68029d985f961af6a2c571da75888a83f83a",
+        "result": "PASS"
+      },
+      {
+        "name": "zzz-boot-progress.patch",
+        "sha256": "2e765b4416bab549027a7024c4777b003ca833b80addcc29daafbbcf65241e28",
+        "result": "PASS"
+      },
+      {
+        "name": "darwin26-syscalls.patch",
+        "sha256": "dfe21bb568b995aa2074b1a7db0c7dcc290cc7459d2b7a1814e2ab06996fab85",
+        "result": "PASS"
+      },
+      {
+        "name": "darwin26-kpi.patch",
+        "sha256": "ff00540665aadcf36caa3a42c81f6b2456d710171caf49a43146ceb42dd609a3",
+        "result": "PASS"
+      },
+      {
+        "name": "darwin26-shared-region.patch",
+        "sha256": "2f936e9d87d2724f569e43e1847c13a3cd4859eb0ec0f8fbb6956ae1bd779723",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-machine-config.patch",
+        "sha256": "742dcded530a5ea7fa73e74959b5d0e42186c94776312cec90872a334a7c7362",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-target-kernel.patch",
+        "sha256": "f182317b88d22160938c605582655a4b396a29064cb8e0eebf806c94881c0f64",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-darwin26-kpi.patch",
+        "sha256": "329377813816cefb7546b7e3f79933dffe24ea5e75a4f4df569453137ee01781",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-owner-data-firmlinks.patch",
+        "sha256": "b286c46973a87a78ca297fae195ea173ce707bb38290993d385c76c733f7abda",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-shared-region-size.patch",
+        "sha256": "8aa1567d533273ffc9eb8bbaa803a328c6bc1569434cecba25a2468aa6558ffc",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-verbose-text-console.patch",
+        "sha256": "5c92f574d1e6b5458a61ea9335a5cc44a6b6627a017a8b56c603aec7533dc8b2",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-user-address-space.patch",
+        "sha256": "f28a535b4bd10accaa2e7d58d137e41a04e6d78619854112dd21c08bc55d5c53",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-union-one-volume.patch",
+        "sha256": "a399d5b712a9aa383d539f9ad116a86c7a8e93922c1bb230c4c0d2690c288cec",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-union-shutdown.patch",
+        "sha256": "77c5478988842db076e3229be30e3cc408b8162eda32c6aa14803d4f665eb688",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-kqworkloop-limits.patch",
+        "sha256": "06e696b92c8b61e0a16854059becc7a2cc95954970d49ce453e377e0eaf0d3c9",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-exec-log.patch",
+        "sha256": "a9b871d73df01e6a345465d7df4dd8e0854c0a47e33f4bd1ef65d7f32d06c571",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-apfs-boot-shim.patch",
+        "sha256": "6e86844257f7671812627e1f42c6653177a798457909b2e68e9f61eb770108c0",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-read-only-system-volume.patch",
+        "sha256": "e902f4eccd55e174674ba19accafe06680d8456d75ed2a160b61d0e022f65867",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-rw-held-report.patch",
+        "sha256": "645bf6477c424e91ac8e6584e944c8e2a14303eb73c6928036f08e3aea18c5ac",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-end-rename-swap.patch",
+        "sha256": "0128a7357f9cb9a5c7ae8e047d7bb2284e2f3d4c82be2d7a1346dbaae6833d2b",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-service-port-derive-check.patch",
+        "sha256": "cb5699ea7b2147154e2226ed25a215e913dded24ef833e43eed35d8b09196e3f",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-gpu-bundles.patch",
+        "sha256": "4ee8429db41ce56fb2f71628fd08a581749f0fbe53ca418960970e6aaa80ec4f",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-owner-root-authenticated-open.patch",
+        "sha256": "957d750a135537a82efbce283f5e6c6ef08105b3e4e371ce8663283820a56b5b",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-hardware-volume.patch",
+        "sha256": "2045ddb651ac999851f54cb590b2e3cadd4d260a9d93d7faca11b4de8a8a8d6a",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-droidvm-k27-parity.patch",
+        "sha256": "f73fa8d4f32a7283fcdc54e2338c4cb46c7f5ccc7e74e77c1120af99b1b61212",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-app-cryptex.patch",
+        "sha256": "9d7d516c15e06ff9674ef2a840333f96136eef0bc4abe54cb050e85face9c343",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-vm-volume.patch",
+        "sha256": "57f4a4a0660486c4475f9588ee1375726fad3f87e4ce4e40db870eb1f7a40d67",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-addon-sbin.patch",
+        "sha256": "93e8d35a59f0944e77ff58326321d23d4b8a0d5f13f33e8d52852bf8ab6c37b4",
+        "result": "PASS"
+      },
+      {
+        "name": "window-memory-excluded-ranges.patch",
+        "sha256": "a53fdc0d23cdac9d8764e81e64a37cbfa8cb46967ea1151ca7eedd20467fb9e0",
+        "result": "PASS"
+      },
+      {
+        "name": "xnuconfig-macos-memorystatus-policy.patch",
+        "sha256": "d0cb7dc1b0f26253bfd4ab3b7db178456588e1f1436f2704e8568c3568dee74b",
+        "result": "PASS"
+      },
+      {
+        "name": "xnuconfig-work-interval-counters.patch",
+        "sha256": "32ca7ef7a42211019b0241933decda97f087e359806b8b426438710615d60e44",
+        "result": "PASS"
+      },
+      {
+        "name": "xnuconfig-timebase-trap-count.patch",
+        "sha256": "dd508b13e5c42999d083fee3ca8b473d81e106ac3ba486ce16989098a118d96c",
+        "result": "PASS"
+      },
+      {
+        "name": "vfs-union-readdir-report.patch",
+        "sha256": "5b2e6c608c0ec541eef22cbbb0bd6e4f3294dd2e97f6134995902429f6126021",
+        "result": "PASS"
+      },
+      {
+        "name": "vfs-union-below-walk.patch",
+        "sha256": "3927500afda98a2891e343fedf55da36880706327a0d98853c44b4912bfd2973",
+        "result": "PASS"
+      },
+      {
+        "name": "vmwait-vnode-pager-peek-name.patch",
+        "sha256": "34ed2da324eedf57ee7d8ae905a0d325fe33c463380ee9ac2e04a2d4c2ee8b93",
+        "result": "PASS"
+      },
+      {
+        "name": "kperf-timebase-scale-no-division.patch",
+        "sha256": "370fc00a276422d1af727f54e248d03d6bd58a320e29cc86d379afe0852de771",
+        "result": "PASS"
+      },
+      {
+        "name": "kperf-static-if-builtin-args.patch",
+        "sha256": "a49f70ab09698d189b110542b1c3ce926c3377b9ab5b2da6cd71fe486910bc77",
+        "result": "PASS"
+      },
+      {
+        "name": "cshash-native4k-stats.patch",
+        "sha256": "8c58ab81d9a03a729e351fda3657602c6270ff872183abff7f8afaf2f46d730c",
+        "result": "PASS"
+      },
+      {
+        "name": "payload-boot-memory-report.patch",
+        "sha256": "57e4e44e4b68796e9b42a97d6bffd264e687b3c0e92956fd961118a7f76f9a1f",
+        "result": "PASS"
+      },
+      {
+        "name": "payload-addon-release.patch",
+        "sha256": "727ecd908d5f7657e7bdd5fb64e4849035010c4d396714c4ed94d1f8534132fa",
+        "result": "PASS"
+      },
+      {
+        "name": "cshash-native4k-parallel.patch",
+        "sha256": "009aca233c9a39043bd8bd49d5e29eb843bc9c8187d3d6cd6c1c11c29db39090",
+        "result": "PASS"
+      },
+      {
+        "name": "gpubundle-system-extensions-view.patch",
+        "sha256": "0a39e206c61fb1640a8fe24f8b193c521b64a686e5d08d65e96a6907003beebe",
+        "result": "PASS"
+      },
+      {
+        "name": "timebase-user-scaled-read.patch",
+        "sha256": "15e12fbef76af69ec2db486d471d9bc2e87c4f2469b4f4132795cadc3c9e154b",
+        "result": "PASS"
+      },
+      {
+        "name": "cshash-native4k-lazy.patch",
+        "sha256": "8ba554c3de727b89ab52dd937ea154582ac2e8c512d2b52987d378512ac724af",
+        "result": "PASS"
+      },
+      {
+        "name": "gpucache-system-shader-cache-view.patch",
+        "sha256": "821c08e837cee037c5fd6b7c6280d6a24695abb42e907facbef0c0c033361e53",
+        "result": "PASS"
+      },
+      {
+        "name": "payload-radix-root-at-startup.patch",
+        "sha256": "9cdc7cd087396d2329a889ccfd2e72ebafc87be46d5184fff115ed094b5e0daa",
+        "result": "PASS"
+      },
+      {
+        "name": "cssha-digest-time.patch",
+        "sha256": "35c566f43145e86dca35b1e3de1bf4489afc341bab08219fea5ef57731af8959",
+        "result": "PASS"
+      },
+      {
+        "name": "gpupool-device-pager-close.patch",
+        "sha256": "cc7b0fc02cf2a4a4c417c3c1e219b36e178cdee63d5ebac92ab6978ded8203a9",
+        "result": "PASS"
+      },
+      {
+        "name": "memwired-kc-segment-release.patch",
+        "sha256": "c2fa78ec97d6c0cd812d781ef9b8a95f356ca728c9ba86834c494aaffd0b69c0",
+        "result": "PASS"
+      },
+      {
+        "name": "memwired-booter-size-accounting.patch",
+        "sha256": "77290ec06193538cbb4d3d552abaff4a2dffd19a4fd72e13597edabed97a24c1",
+        "result": "PASS"
+      },
+      {
+        "name": "memwired-cs-lazy-page-chunks.patch",
+        "sha256": "1dfedaa1b2bcd50d267ac123af6690965f0404f731ed80a02ffbe6431a2b2ded",
+        "result": "PASS"
+      },
+      {
+        "name": "platform-error-name-address.patch",
+        "sha256": "2e50174296dfba7ad9c3d2bad55c1e95adffba83abd5545b52e08b7a1c576899",
+        "result": "PASS"
+      },
+      {
+        "name": "window-outside-memory-adoption.patch",
+        "sha256": "32d338a8a9fa4ea4fb7dc26b2c0dd060f88f5cb231e2fe3f7b6487124a94ffe9",
+        "result": "PASS"
+      },
+      {
+        "name": "contig-search-report.patch",
+        "sha256": "611141ba904a2022017a75c008a2dfe7051e3a9b3dbfaa8cdd130e9c4ef7d5b1",
+        "result": "PASS"
+      },
+      {
+        "name": "kmem-alloc-failure-report.patch",
+        "sha256": "c4d20883a56d7cd8df2a85e5eebe8d96407be746fbe2f67fd98202da3c3e562b",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-4k-zone-va-budget.patch",
+        "sha256": "8f81d764410b4b4844edb67c6d919eedf23d7117bc06fbacb7536774d0fd1aac",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-swapin-io-priority.patch",
+        "sha256": "223c955fdc6317d204a982ad6c9a58dd7a0622ea6eb468dae26cab1a9d9e659e",
+        "result": "PASS"
+      },
+      {
+        "name": "cshash-signed-text-revalidation.patch",
+        "sha256": "8fc6592e05813419170406dc409ae3bc478a3b836811c0e3edebee6cdf636323",
+        "result": "PASS"
+      },
+      {
+        "name": "cshash-compressed-text-revalidation.patch",
+        "sha256": "931540e1283de1aaac3178166a7d6e0f632faacb5f3f75abe4023a145dfca5e0",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-addon-applications.patch",
+        "sha256": "0724f6849d7522118b0bcb2b32d0b54d6cb60421e84ea6bc1f1cf01ba180dc2d",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-kernel-stack-alignment.patch",
+        "sha256": "a1b4caf6c1bbc087b405a5813753c404617a69f32b876aeaf4a9ac2534c5e3d5",
+        "result": "PASS"
+      },
+      {
+        "name": "native-arm64e-user-memory.patch",
+        "sha256": "647b87ca4ea8a8d218dcf2b12edbce9b4cbdfb7aa633a4434986a62b7dbdf022",
+        "result": "PASS"
+      },
+      {
+        "name": "native-text-console-retain.patch",
+        "sha256": "bd28f4bc96939cdf0db10036b750f3a7a11d6e86e3ada0b02271eddf486761c2",
+        "result": "PASS"
+      },
+      {
+        "name": "b5q-console-journal.patch",
+        "sha256": "c36530ec959bcc1ef4220f4726a709ea0dfb69684112eaab5b81763760bc7869",
+        "result": "PASS"
+      },
+      {
+        "name": "macos-lockdown-public-state.patch",
+        "sha256": "21506dd452543f8466ccc01b7997ef3c56738cf506f0bc9ed48027650b8dc8c8",
+        "result": "PASS"
+      },
+      {
+        "name": "sheng-macos27-generic-runtime.patch",
+        "sha256": "36d8a14270c7beb07452c76cb3856be9a302e3d211e8c10fe643d8124cd605bb",
+        "result": "PASS"
+      },
+      {
+        "name": "b5q-windowserver-signal.patch",
+        "sha256": "8d4328609ecf90066cfbfc520b160fe5fafbb6edd6f4975e3755bbe578607571",
+        "result": "PASS"
+      },
+      {
+        "name": "zzye-b5q-cpu-idle.patch",
+        "sha256": "95f57fb9994796c3de2429fe82b6a521620b9f13b83e29eba12185f5ada4da86",
+        "result": "PASS"
+      },
+      {
+        "name": "zzyf-b5q-amp.patch",
+        "sha256": "07abb7ce25c626ddc37069ecc9e168b85a1da8e02b42b19649a10f667aa5a56b",
+        "result": "PASS"
+      },
+      {
+        "name": "zzzzzzzzzzz-b5q-edge-matrix.patch",
+        "sha256": "5048e180f459e860b2fad50f66e2a49231b70081cb32f930e1d92c2c579011e7",
+        "result": "PASS"
+      }
+    ],
+    "result": "PASS"
+  },
+  "checks": {
+    "Edge_and_recount_helper": "PASS actual functions,2x2x6edges and negativecontrols",
+    "IRQrate": "PASS8193IRQwindow1s;mask/unmask cannot erase count",
+    "GENI_cold": "PASS: real production protocol/FIFO/active guards, clock48/readonly64; target arm64e compilation and75typedPACcalls",
+    "s2dos05": {
+      "result": "PASS",
+      "log_sha256": "3386ecfe31076c82288e12ae978dcbfb7338f3444e1de4bd74a2a72fc878ae72",
+      "ASan_UBSan": true,
+      "scope": "production bitbang bus and regulator RMW; not hardware"
+    },
+    "GPIO19wait": "PASS actual assert_wait/recheck/clear_wait/thread_block races",
+    "4GiB_Data": "PASS patchedRAM sparsehighoffsetlastpage/OOM/bounds",
+    "host_regressions": [
+      {
+        "test": "test-v24-core.py",
+        "exit_code": 0,
+        "seconds": 2.85,
+        "log": "artifacts/b5q-runtime-v24-work/test-v24-core.log"
+      },
+      {
+        "test": "test-usb-irq.py",
+        "exit_code": 0,
+        "seconds": 0.16,
+        "log": "artifacts/b5q-runtime-v24-work/test-usb-irq.log"
+      },
+      {
+        "test": "test-usb-events.py",
+        "exit_code": 0,
+        "seconds": 0.47,
+        "log": "artifacts/b5q-runtime-v24-work/test-usb-events.log"
+      },
+      {
+        "test": "test-usb-delay.py",
+        "exit_code": 0,
+        "seconds": 0.02,
+        "log": "artifacts/b5q-runtime-v24-work/test-usb-delay.log"
+      },
+      {
+        "test": "test-peripheral-steps.py",
+        "exit_code": 0,
+        "seconds": 0.4,
+        "log": "artifacts/b5q-runtime-v24-work/test-peripheral-steps.log"
+      },
+      {
+        "test": "test-touch.py",
+        "exit_code": 0,
+        "seconds": 2.56,
+        "log": "artifacts/b5q-runtime-v24-work/test-touch.log"
+      },
+      {
+        "test": "test-touch-wait.py",
+        "exit_code": 0,
+        "seconds": 0.22,
+        "log": "artifacts/b5q-runtime-v24-work/test-touch-wait.log"
+      },
+      {
+        "test": "test-volatile-data-4g.py",
+        "exit_code": 0,
+        "seconds": 0.94,
+        "log": "artifacts/b5q-runtime-v24-work/test-volatile-data-4g.log"
+      },
+      {
+        "test": "test-usb-inputs-v24.py",
+        "exit_code": 0,
+        "seconds": 0.54,
+        "log": "artifacts/b5q-runtime-v24-work/test-usb-inputs-v24.log"
+      }
+    ],
+    "target_compile": {
+      "passed": true,
+      "duplicate_external_definitions": {},
+      "XHCI_slots": 427,
+      "objects": {
+        "QcomDwc3": {
+          "target": "arm64e-ios27",
+          "imports": 638,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "UsbProbe": {
+          "target": "arm64e-ios27",
+          "imports": 19,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "B5qUsbBoard": {
+          "target": "arm64e-ios27",
+          "imports": 15,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "B5qGpu": {
+          "target": "arm64e-ios27",
+          "imports": 154,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "LegacyDisplayProbe": {
+          "target": "arm64e-ios27",
+          "imports": 79,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "B5qGmuVotes": {
+          "target": "arm64e-ios27",
+          "imports": 8,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "CpuFreqProbe": {
+          "target": "arm64e-ios27",
+          "imports": 16,
+          "unresolved": [],
+          "expected_new_core_imports": [
+            "_sheng_cpu_idle_mach"
+          ]
+        },
+        "ThermalProbe": {
+          "target": "arm64e-ios27",
+          "imports": 11,
+          "unresolved": [],
+          "expected_new_core_imports": [
+            "_sheng_cpu_idle_mach"
+          ]
+        },
+        "ThermalLevel": {
+          "target": "arm64e-ios27",
+          "imports": 355,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "BoardClock": {
+          "target": "arm64e-ios27",
+          "imports": 5,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "ButtonProbe": {
+          "target": "arm64e-ios27",
+          "imports": 14,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "DisplayTimingProbe": {
+          "target": "arm64e-ios27",
+          "imports": 14,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "NativeHidInput": {
+          "target": "arm64e-ios27",
+          "imports": 378,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "HidInputProbe": {
+          "target": "arm64e-ios27",
+          "imports": 34,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "B5qTouch": {
+          "target": "arm64e-ios27",
+          "imports": 23,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "GeniI2c": {
+          "target": "arm64e-ios27",
+          "imports": 0,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "Sm8550Gcc": {
+          "target": "arm64e-ios27",
+          "imports": 4,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "QcomRpmh": {
+          "target": "arm64e-ios27",
+          "imports": 0,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "NativeAdrenoService": {
+          "target": "arm64e-ios27",
+          "imports": 381,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "NativeAdrenoTimer": {
+          "target": "arm64e-ios27",
+          "imports": 0,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "ShengGmu": {
+          "target": "arm64e-ios27",
+          "imports": 7,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "ShengGmuCommandDb": {
+          "target": "arm64e-ios27",
+          "imports": 2,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        },
+        "ShengGpuSmmu": {
+          "target": "arm64e-ios27",
+          "imports": 13,
+          "unresolved": [],
+          "expected_new_core_imports": []
+        }
+      },
+      "all_saved_context_external_helpers_present": true,
+      "new_core_linkage_pending": true
+    },
+    "cross_object_PAC": {
+      "passed": true,
+      "USB_to_ArmCpu": {
+        "producer": [
+          {
+            "site": "0x3780",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_ArmCpu_dispatch_calls": [
+          {
+            "site": "0x34b0",
+            "diversity": 10942,
+            "key": 0
+          }
+        ],
+        "key": "IA",
+        "diversity": "0x2abe"
+      },
+      "all_GMU_IO_and_services_fields": [
+        {
+          "field": "read32",
+          "key": "IA",
+          "diversity": "0x54f7",
+          "actual_signed_targets": [
+            {
+              "site": "0x1b20",
+              "key": 0,
+              "diversity": 21751,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "actual_matching_consumer_calls": [
+            {
+              "site": "0x5074",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x50ac",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x50e4",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x511c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5154",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x518c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x51c4",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x51fc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5234",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x526c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x52a4",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x52dc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5314",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5358",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5478",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x551c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x559c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x561c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5660",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x56b4",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5720",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5784",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x57f0",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x59ec",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5b14",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5b88",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5bf8",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x5c20",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6c80",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6ca8",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6cdc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6d04",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6d3c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6eac",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6ee0",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6f18",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6f50",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6f84",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6fbc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x6ff0",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7024",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x705c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x70c0",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x70f4",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7128",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x715c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7190",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x71bc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x72f8",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7320",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7348",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7370",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7398",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7698",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x76bc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x76fc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x7720",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x8370",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x83a4",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x83cc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x8bec",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x8c28",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x8d2c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x9048",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x9250",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x92ec",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x9310",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x9334",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x9358",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0x937c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xa0d4",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xb350",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xb410",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xb45c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xb484",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xd11c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xda54",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xeb00",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xee54",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xeef0",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xef10",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xef2c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xef5c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf290",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf2b0",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf2cc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf2fc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf4d8",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf524",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf548",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf56c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf598",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf5bc",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf5e0",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf60c",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf630",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf654",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf744",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xf768",
+              "diversity": 21751,
+              "key": 0
+            },
+            {
+              "site": "0xfb54",
+              "diversity": 21751,
+              "key": 0
+            }
+          ]
+        },
+        {
+          "field": "write32",
+          "key": "IA",
+          "diversity": "0xb286",
+          "actual_signed_targets": [
+            {
+              "site": "0x1b34",
+              "key": 0,
+              "diversity": 45702,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "actual_matching_consumer_calls": [
+            {
+              "site": "0x3e30",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x3e4c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x5454",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x54a8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x54c8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x5540",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x55cc",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x5694",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x56d8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x5764",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x5828",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x599c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x59b8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x5adc",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x5b54",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x669c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x66b8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x67d8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x67f4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x6814",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x7670",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x76dc",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8bcc",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8c08",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8c4c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8c68",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8c88",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8ca4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8cd0",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8cf0",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8d0c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8d60",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8d8c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8dac",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8dcc",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8de8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8e04",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8e20",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8e3c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8e58",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8e74",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8e90",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8eac",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8ec8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8ee4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8f00",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8f1c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8f38",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8f54",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8f70",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8f9c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8fc8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x8fe4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x9000",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x901c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x906c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x9088",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x90a8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x90c8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x90e4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x9104",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x9120",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x9140",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x915c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x9178",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x9194",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x91b4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x91d8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x91f4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0x922c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xb378",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xb3e8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xb43c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xb50c",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xb528",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xb544",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xd144",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xd1d4",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xda28",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xdab8",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xee30",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xee78",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xee98",
+              "diversity": 45702,
+              "key": 0
+            },
+            {
+              "site": "0xfae8",
+              "diversity": 45702,
+              "key": 0
+            }
+          ]
+        },
+        {
+          "field": "barrier",
+          "key": "IA",
+          "diversity": "0x307a",
+          "actual_signed_targets": [
+            {
+              "site": "0x1b48",
+              "key": 0,
+              "diversity": 12410,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "actual_matching_consumer_calls": [
+            {
+              "site": "0x3e5c",
+              "diversity": 12410,
+              "key": 0
+            },
+            {
+              "site": "0x59c8",
+              "diversity": 12410,
+              "key": 0
+            },
+            {
+              "site": "0x5aec",
+              "diversity": 12410,
+              "key": 0
+            },
+            {
+              "site": "0x5b64",
+              "diversity": 12410,
+              "key": 0
+            },
+            {
+              "site": "0xeea8",
+              "diversity": 12410,
+              "key": 0
+            }
+          ]
+        },
+        {
+          "field": "sha256",
+          "key": "IA",
+          "diversity": "0xe2e",
+          "actual_signed_targets": [
+            {
+              "site": "0x3dac",
+              "key": 0,
+              "diversity": 3630,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "actual_matching_consumer_calls": [
+            {
+              "site": "0x3e4",
+              "diversity": 3630,
+              "key": 0
+            }
+          ]
+        },
+        {
+          "field": "now_us",
+          "key": "IA",
+          "diversity": "0xe4fe",
+          "actual_signed_targets": [
+            {
+              "site": "0x3dc0",
+              "key": 0,
+              "diversity": 58622,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "actual_matching_consumer_calls": [
+            {
+              "site": "0x11f0",
+              "diversity": 58622,
+              "key": 0
+            },
+            {
+              "site": "0x1260",
+              "diversity": 58622,
+              "key": 0
+            },
+            {
+              "site": "0x164c",
+              "diversity": 58622,
+              "key": 0
+            }
+          ]
+        },
+        {
+          "field": "wait_us",
+          "key": "IA",
+          "diversity": "0x50c7",
+          "actual_signed_targets": [
+            {
+              "site": "0x3dd4",
+              "key": 0,
+              "diversity": 20679,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "actual_matching_consumer_calls": [
+            {
+              "site": "0x1358",
+              "diversity": 20679,
+              "key": 0
+            },
+            {
+              "site": "0x1664",
+              "diversity": 20679,
+              "key": 0
+            }
+          ]
+        }
+      ],
+      "objects_sha256": {
+        "USB": "6eccf18ad68705d74b4376ca9a8705a107fc0a530ec1bf909f9feaf2c5ee2b28",
+        "ArmCpu": "b9f6ae3d43109dbd799e3483f7a9e824c31a5da2bdae47ce77c2d71294da69a1",
+        "GPU": "69cfc2bfdbaeb04bd63dce2562cde12342e36696041d9e140eaaf3c63e2fe9c0",
+        "GMU": "7cd557cb2fa5576f85df6d45524dceda067f1ad8d64ef604428cd6b84339f311"
+      },
+      "PAuth_disabled": false,
+      "hardware_PAuth_execution_tested": false,
+      "expanded_interfaces": [
+        {
+          "interface": "BoardClock.read -> gClockRead",
+          "producer_object": "BoardClock.o",
+          "producer_symbol": "__ZN12_GLOBAL__N_14readEPy",
+          "signed_sites": [
+            {
+              "site": "0x760",
+              "key": 0,
+              "diversity": 12410,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0x307a",
+          "consumer_object": "ArmDTPlatform.o",
+          "consumer_function": "__ZN13ArmDTPlatform15getGMTTimeOfDayEv",
+          "call_sites": [
+            {
+              "site": "0x338",
+              "diversity": 12410,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "BoardClock.set -> gClockSet",
+          "producer_object": "BoardClock.o",
+          "producer_symbol": "__ZN12_GLOBAL__N_13setEy",
+          "signed_sites": [
+            {
+              "site": "0x774",
+              "key": 0,
+              "diversity": 2712,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0xa98",
+          "consumer_object": "ArmDTPlatform.o",
+          "consumer_function": "__ZN13ArmDTPlatform15setGMTTimeOfDayEl",
+          "call_sites": [
+            {
+              "site": "0x8b8",
+              "diversity": 2712,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "ButtonProbe.buttonsIrq -> ArmCpu.interrupt",
+          "key": "IA",
+          "diversity": "0x2abe",
+          "signed_sites": [
+            {
+              "site": "0x9a0",
+              "key": 0,
+              "diversity": 10942,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            },
+            {
+              "site": "0x9e0",
+              "key": 0,
+              "diversity": 10942,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "actual_ArmCpu_dispatch_calls": [
+            {
+              "site": "0x34b0",
+              "diversity": 10942,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "NativeHid.touchNotify -> B5qTouch.sink",
+          "producer_object": "NativeHidInput.o",
+          "producer_symbol": "__ZN14NativeHidInput11touchNotifyEPv",
+          "signed_sites": [
+            {
+              "site": "0xe4c",
+              "key": 0,
+              "diversity": 10942,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0x2abe",
+          "consumer_object": "B5qTouch.o",
+          "consumer_function": "__ZN12_GLOBAL__N_17publishEv",
+          "call_sites": [
+            {
+              "site": "0x1b2c",
+              "diversity": 10942,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "NativeHid.buttonsNotify -> ButtonProbe.gSink",
+          "producer_object": "NativeHidInput.o",
+          "producer_symbol": "__ZN14NativeHidInput13buttonsNotifyEPvj",
+          "signed_sites": [
+            {
+              "site": "0xe7c",
+              "key": 0,
+              "diversity": 54535,
+              "address_diversity": 0,
+              "kind": "PACIAinstruction"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0xd507",
+          "consumer_object": "ButtonProbe.o",
+          "consumer_function": "__ZN12_GLOBAL__N_113buttonsThreadEPvi",
+          "call_sites": [
+            {
+              "site": "0xb60",
+              "diversity": 54535,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "ThermalLevel.sCount -> IOExternalMethodDispatch.function",
+          "producer_object": "ThermalLevel.o",
+          "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient6sCountEP8OSObjectPvP25IOExternalMethodArguments",
+          "signed_sites": [
+            {
+              "site": "0x2e00",
+              "key": 0,
+              "diversity": 48301,
+              "address_diversity": 0,
+              "kind": "relocation"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0xbcad",
+          "consumer_object": "IOUserClient.cpo",
+          "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+          "call_sites": [
+            {
+              "site": "0xfbac",
+              "diversity": 48301,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "ThermalLevel.sKeys -> IOExternalMethodDispatch.function",
+          "producer_object": "ThermalLevel.o",
+          "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient5sKeysEP8OSObjectPvP25IOExternalMethodArguments",
+          "signed_sites": [
+            {
+              "site": "0x2e18",
+              "key": 0,
+              "diversity": 48301,
+              "address_diversity": 0,
+              "kind": "relocation"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0xbcad",
+          "consumer_object": "IOUserClient.cpo",
+          "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+          "call_sites": [
+            {
+              "site": "0xfbac",
+              "diversity": 48301,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "ThermalLevel.sValues -> IOExternalMethodDispatch.function",
+          "producer_object": "ThermalLevel.o",
+          "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient7sValuesEP8OSObjectPvP25IOExternalMethodArguments",
+          "signed_sites": [
+            {
+              "site": "0x2e30",
+              "key": 0,
+              "diversity": 48301,
+              "address_diversity": 0,
+              "kind": "relocation"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0xbcad",
+          "consumer_object": "IOUserClient.cpo",
+          "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+          "call_sites": [
+            {
+              "site": "0xfbac",
+              "diversity": 48301,
+              "key": 0
+            }
+          ],
+          "passed": true
+        },
+        {
+          "interface": "ThermalLevel.sWrite -> IOExternalMethodDispatch.function",
+          "producer_object": "ThermalLevel.o",
+          "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient6sWriteEP8OSObjectPvP25IOExternalMethodArguments",
+          "signed_sites": [
+            {
+              "site": "0x2e48",
+              "key": 0,
+              "diversity": 48301,
+              "address_diversity": 0,
+              "kind": "relocation"
+            }
+          ],
+          "key": "IA",
+          "diversity": "0xbcad",
+          "consumer_object": "IOUserClient.cpo",
+          "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+          "call_sites": [
+            {
+              "site": "0xfbac",
+              "diversity": 48301,
+              "key": 0
+            }
+          ],
+          "passed": true
+        }
+      ],
+      "expanded_objects_sha256": {
+        "BoardClock.o": "774527c978f2488d5df3afa64b2071dafb8cfca79e440095c23afb73313a343b",
+        "ArmDTPlatform.o": "d6286777eabec7cdc4c64ca82fd4f16719106be3d26b9d8b7116ddaa4a6d7fbb",
+        "ButtonProbe.o": "a068d4cbe89a14f4c8d3cdd531ac57ad961e20436a5723aa7e662221cac4fa99",
+        "NativeHidInput.o": "18a811e5c5627577760f35d53b86cde8c728c6943f3dbb8c0b48230a8493a8eb",
+        "B5qTouch.o": "c3ac534f30083a0515d5cbb344973f8c93c4345ce8f8b4c306990a673099c086",
+        "ThermalLevel.o": "394474ad3a6085fa782836a68bfb2bba69afae9d6796c6c52d3c9543b27815b8",
+        "IOUserClient.cpo": "b97381261b0e4ff6575c85f8c147aa6b0334c64cddcef89bc69d733395d09508"
+      },
+      "all_requested_cross_object_interfaces_verified": true,
+      "touch_IRQ_to_ArmCpu": {
+        "passed": true,
+        "producer_sites": [
+          {
+            "site": "0xb50",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "consumer_calls": [
+          {
+            "site": "0x34b0",
+            "diversity": 10942,
+            "key": 0
+          }
+        ],
+        "key": "IA",
+        "diversity": "0x2abe"
+      }
+    },
+    "GENI_PAC": {
+      "passed": true,
+      "producer_type_discriminators": {
+        "write": "0xc120",
+        "read": "0x50c7"
+      },
+      "consumer_indirect_calls": [
+        {
+          "object_offset": "0x58",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x70",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xa0",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xb8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xd8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xf0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x108",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x120",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x138",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x150",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x164",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x178",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x18c",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x1b4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x1d4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1ec",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x200",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x218",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x240",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x258",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x26c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x280",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x2b4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x2cc",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x354",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x370",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x384",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x3f8",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x418",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x42c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x554",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x570",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x588",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x654",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x674",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x688",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x6f0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x70c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x724",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x864",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x884",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x898",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x920",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x934",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x94c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x960",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x97c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xa14",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xa44",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xa90",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xac0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xb38",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xb5c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc00",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc14",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc2c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc50",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xc6c",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xcc4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xce0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd28",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd5c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xdc8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xdfc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xe20",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xec0",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xef0",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xfa8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xfc4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1044",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1070",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x10a0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x10e4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x10fc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1114",
+          "key": "IA",
+          "discriminator": "0xc120"
+        }
+      ],
+      "zero_discriminator_calls": 0,
+      "C_CPP_callback_ABI_matches": true,
+      "PAuth_enabled": true,
+      "hardware_PAuth_execution_tested": false,
+      "object_sha256": {
+        "B5qTouch.o": "df75dc56cf20076033b221e97541319c5a12d8b1eff2a606f436ef6486a12ac9",
+        "GeniI2c.o": "0af9b9a8c02a53e5e2922f872f52a6ffb006950f52c883aa0b3474b99859ac7c"
+      }
+    },
+    "POST_baseline_replay": {
+      "result": {
+        "kernel_sha256": "53416c231756ed35c3ef5cd9373c4ba7395024ff3b489f49782d33ef5fa625cb",
+        "code_file_offset": "0x4920000",
+        "code_bytes": 10946200,
+        "hmac_file_offset": "0x3406fd",
+        "hmac_sha256": "2c5215a4c49fe137be6d9aaba9fc43f5a4c0533975f3440a4112195d4cfd4110",
+        "static_if_sites_prepatched": 69,
+        "static_if_key_sites": {
+          "_sched_debug_preemption_disable_jump_key": 35,
+          "_sched_debug_interrupt_disable_jump_key": 24,
+          "_static_if_test_key_true_to_false_jump_key": 5,
+          "_static_if_test_key_false_to_true_jump_key": 5
+        },
+        "validation_disables": "0x11040",
+        "runtime_selftests_executed": false,
+        "passed": true,
+        "actual_compiled_override_function": true,
+        "actual_ARM64_instruction_patcher_sites": 69,
+        "all_runtime_writes_leave_sealed_text_unchanged": true,
+        "sealing_idempotent": true,
+        "POST_HMAC_recomputed_independently": true,
+        "hardware_tested": false,
+        "emulation_scope": "actual short leaf functions; no QEMU or OS hardware emulation"
+      },
+      "scope": "Existing v23 kernel with current boot arguments; new v24 core not yet compiled"
+    },
+    "account_writers": "PASS pinned official PBKDF2/groups/autologin/kcpassword/watchdogd writers; actual new4GiBAPFS remains pending",
+    "workflow_YAML": "PASS local YAML parse; no dispatch and no new CI integrity gates",
+    "porting_record": "PASS official schema check14areas; rerun after synchronizing this batch",
+    "pre_ci": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "records",
+          "exit_code": 0,
+          "log_sha256": "048914548be506e63ca18eeeeb7bea16efdad65e36f852fa9723c2a77ef4a90c"
+        },
+        {
+          "name": "full-patch-sequence",
+          "exit_code": 0,
+          "log_sha256": "49e8d94a686daac0f9ba7826e3aff8a807c659d905ef0a09e8d0110508723eac"
+        },
+        {
+          "name": "source-contract",
+          "exit_code": 0,
+          "log_sha256": "73a44dd433c84e25b854130c7d390c7f675ce01d1a47fd6cc5abe2bf6564507d"
+        },
+        {
+          "name": "lockdown-public",
+          "exit_code": 0,
+          "log_sha256": "41dd0eee51bf058c7db21a39129b00b218eebf3d2242a34a5f1a41175eb5eec9"
+        },
+        {
+          "name": "log-startup",
+          "exit_code": 0,
+          "log_sha256": "e2e4e74c9e377c2a2bdb78bacd20f7f311defbe7479d6a136e7f67736669c956"
+        },
+        {
+          "name": "log-writer",
+          "exit_code": 0,
+          "log_sha256": "671d0a26df82050a6e4d4625a6b16f0c82d985e4df9eb51663088552b183d822"
+        },
+        {
+          "name": "runtime-gates",
+          "exit_code": 0,
+          "log_sha256": "839be22ca5da956809c903f4692612053e9d0da0520194514d91f3ea8bec3086"
+        },
+        {
+          "name": "ethernet-lifecycle",
+          "exit_code": 0,
+          "log_sha256": "dce2b35142be5f4347529c848d3f021d45bc716535788a50f89055f3dcbe01f3"
+        },
+        {
+          "name": "ethernet-start",
+          "exit_code": 0,
+          "log_sha256": "652a5a7804096ecf587cb1c85e35d3a9184cddf45cb6d31222d386f3e5344b48"
+        },
+        {
+          "name": "read-status",
+          "exit_code": 0,
+          "log_sha256": "96b01f4031e9ff9658bd4c21bbaca7446429a0df7640100e2440139c43f2b2c4"
+        },
+        {
+          "name": "log-read",
+          "exit_code": 0,
+          "log_sha256": "ea9457098eaba5bdc488df1dc39fc585e15dd0c7941e72607ccd8c633df00dae"
+        },
+        {
+          "name": "verified-read",
+          "exit_code": 0,
+          "log_sha256": "9d5f8c968c56a7d4328b36ba5c8b3ed0b3df0d6cfcc93e95702c4b164219a85c"
+        },
+        {
+          "name": "ws-signal",
+          "exit_code": 0,
+          "log_sha256": "86c96d714793db409569eb174b047118ab1b48368643b5d56a10991098563b90"
+        },
+        {
+          "name": "peripheral-policy",
+          "exit_code": 0,
+          "log_sha256": "e6847c38023c5a7caa9cb7384cf8826f040ad9fea6c65b4666e51f424efde1db"
+        },
+        {
+          "name": "shared-gpu",
+          "exit_code": 0,
+          "log_sha256": "0cbfe325cbc39dc34f25e883e872adaddfe29ee23805a2cd4c4a0b13293e2370"
+        },
+        {
+          "name": "v24-core",
+          "exit_code": 0,
+          "log_sha256": "4feee947a40fad18f55bd0cbe0e7ebc4949929be8ce4911daa3cd1e08f83b261"
+        },
+        {
+          "name": "usb-irq",
+          "exit_code": 0,
+          "log_sha256": "3e8ee7575cc942486cbe128ca672be59d4f344e94b917f196f7e942674e61920"
+        },
+        {
+          "name": "usb-delay",
+          "exit_code": 0,
+          "log_sha256": "94a256758db44020af1bd9e1a762ea2136bdfd81a928e2c24693717627c76612"
+        },
+        {
+          "name": "peripheral-steps",
+          "exit_code": 0,
+          "log_sha256": "089539d68830691627d1eb4dd8f0517b7aeeffa9024a7ab775fd7c892a5e8145"
+        },
+        {
+          "name": "touch",
+          "exit_code": 0,
+          "log_sha256": "5e3cb62c6bf7a77dadb003161ec4e358c93605a0f60fe57f9e3a564423b1322a"
+        },
+        {
+          "name": "touch-wait",
+          "exit_code": 0,
+          "log_sha256": "d1f1becc51106756a63d01f689bdb97710e74f18db26d0bb65267e75d1ce93a9"
+        },
+        {
+          "name": "volatile-data-4g",
+          "exit_code": 0,
+          "log_sha256": "4da1cc8e04586e161c10edc41ede556e9af7c5853dcd7bfe3584b7cd899e1cbc"
+        },
+        {
+          "name": "usb-inputs-v24",
+          "exit_code": 0,
+          "log_sha256": "a416ebfb722028dbb7a2f48ec1931154cf47c38dbafe3865aefa74fced96820d"
+        },
+        {
+          "name": "data-account",
+          "exit_code": 0,
+          "log_sha256": "d8e4547ae14c8c7fe7bf34095dac9c0a5733bcc2da40613b2672b404ded200e9"
+        },
+        {
+          "name": "test-v24-usb-compile",
+          "exit_code": 0,
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "test-v24-usb",
+          "exit_code": 0,
+          "log_sha256": "2e90ab3ce9d13fb4d4c31498b6ba85973208a855595a409bf4639b424a3fd658"
+        },
+        {
+          "name": "test-touch-power-compile",
+          "exit_code": 0,
+          "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "name": "test-touch-power",
+          "exit_code": 0,
+          "log_sha256": "3386ecfe31076c82288e12ae978dcbfb7338f3444e1de4bd74a2a72fc878ae72"
+        },
+        {
+          "name": "target-objects",
+          "exit_code": 0,
+          "log_sha256": "31b23c6d511331d4302a56b94031ef26c5718e9163912c3972d45d8a9699c595"
+        },
+        {
+          "name": "all-cross-object-PAC",
+          "exit_code": 0,
+          "log_sha256": "1d8af8bba146cb3cc7233002cdace6bd1cc6d10278d4d68c6eba723c51cc1d60"
+        },
+        {
+          "name": "touch-geni-PAC",
+          "exit_code": 0,
+          "log_sha256": "2d23333f90e2c9d29d20068a350abb5f7784b6aaa197a3d5bcecb7b824a04edf"
+        },
+        {
+          "name": "SE6-SE8-geni-PAC",
+          "exit_code": 0,
+          "log_sha256": "2d23333f90e2c9d29d20068a350abb5f7784b6aaa197a3d5bcecb7b824a04edf"
+        },
+        {
+          "name": "POST-existing-binary",
+          "exit_code": 0,
+          "log_sha256": "961b548e964d8b9e7600b01263da2adf049d09f5527dab48c7d04f70053ad6f4"
+        }
+      ],
+      "new_core_final_link_and_device_validation_pending": true,
+      "target_objects": {
+        "passed": true,
+        "duplicate_external_definitions": {},
+        "XHCI_slots": 427,
+        "objects": {
+          "QcomDwc3": {
+            "target": "arm64e-ios27",
+            "imports": 638,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "UsbProbe": {
+            "target": "arm64e-ios27",
+            "imports": 19,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "B5qUsbBoard": {
+            "target": "arm64e-ios27",
+            "imports": 15,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "B5qGpu": {
+            "target": "arm64e-ios27",
+            "imports": 154,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "LegacyDisplayProbe": {
+            "target": "arm64e-ios27",
+            "imports": 79,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "B5qGmuVotes": {
+            "target": "arm64e-ios27",
+            "imports": 8,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "CpuFreqProbe": {
+            "target": "arm64e-ios27",
+            "imports": 16,
+            "unresolved": [],
+            "expected_new_core_imports": [
+              "_sheng_cpu_idle_mach"
+            ]
+          },
+          "ThermalProbe": {
+            "target": "arm64e-ios27",
+            "imports": 11,
+            "unresolved": [],
+            "expected_new_core_imports": [
+              "_sheng_cpu_idle_mach"
+            ]
+          },
+          "ThermalLevel": {
+            "target": "arm64e-ios27",
+            "imports": 355,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "BoardClock": {
+            "target": "arm64e-ios27",
+            "imports": 5,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "ButtonProbe": {
+            "target": "arm64e-ios27",
+            "imports": 14,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "DisplayTimingProbe": {
+            "target": "arm64e-ios27",
+            "imports": 14,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "NativeHidInput": {
+            "target": "arm64e-ios27",
+            "imports": 378,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "HidInputProbe": {
+            "target": "arm64e-ios27",
+            "imports": 34,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "B5qTouch": {
+            "target": "arm64e-ios27",
+            "imports": 23,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "GeniI2c": {
+            "target": "arm64e-ios27",
+            "imports": 0,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "Sm8550Gcc": {
+            "target": "arm64e-ios27",
+            "imports": 4,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "QcomRpmh": {
+            "target": "arm64e-ios27",
+            "imports": 0,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "NativeAdrenoService": {
+            "target": "arm64e-ios27",
+            "imports": 381,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "NativeAdrenoTimer": {
+            "target": "arm64e-ios27",
+            "imports": 0,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "ShengGmu": {
+            "target": "arm64e-ios27",
+            "imports": 7,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "ShengGmuCommandDb": {
+            "target": "arm64e-ios27",
+            "imports": 2,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          },
+          "ShengGpuSmmu": {
+            "target": "arm64e-ios27",
+            "imports": 13,
+            "unresolved": [],
+            "expected_new_core_imports": []
+          }
+        },
+        "all_saved_context_external_helpers_present": true,
+        "new_core_linkage_pending": true
+      },
+      "ci_started": false
+    },
+    "SE6_SE8_GENI_PAC": {
+      "passed": true,
+      "producer_type_discriminators": {
+        "read": "0x50c7",
+        "write": "0xc120"
+      },
+      "consumer_indirect_calls": [
+        {
+          "object_offset": "0x58",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x70",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xa0",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xb8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xd8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xf0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x108",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x120",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x138",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x150",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x164",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x178",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1ac",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1cc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1e0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1f4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x230",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x248",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x278",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x2a0",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x2c0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x2d8",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x2ec",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x304",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x380",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x39c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x3b0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x424",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x444",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x458",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x580",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x59c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x5b4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x680",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x6a0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x6b4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x71c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x738",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x750",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x890",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x8b0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x8c4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x94c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x960",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x978",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x98c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x9a8",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xa40",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xa70",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xabc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xaec",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xb64",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xb88",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc2c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc40",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc58",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc7c",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xc98",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xcf0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd0c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd54",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd88",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xdf4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xe28",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xe4c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xeec",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xf1c",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xfd4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xff0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1070",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x109c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x10cc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1110",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x1128",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1140",
+          "key": "IA",
+          "discriminator": "0xc120"
+        }
+      ],
+      "zero_discriminator_calls": 0,
+      "C_CPP_callback_ABI_matches": true,
+      "PAuth_enabled": true,
+      "hardware_PAuth_execution_tested": false,
+      "object_sha256": {
+        "B5qUsbBoard.o": "0805dca7681f19a48e4fe094d0a4e0825d5dd5b0db58a935bb018a21734e9c94",
+        "GeniI2c.o": "39bc4f2a9fa84f3aeb1868a49a686348975f3520ef5ba5fc333d7daec78a4b6f"
+      }
+    },
+    "touch_GENI_PAC": {
+      "passed": true,
+      "producer_type_discriminators": {
+        "write": "0xc120",
+        "read": "0x50c7"
+      },
+      "consumer_indirect_calls": [
+        {
+          "object_offset": "0x58",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x70",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xa0",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xb8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xd8",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xf0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x108",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x120",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x138",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x150",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x164",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x178",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1ac",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1cc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1e0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1f4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x230",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x248",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x278",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x2a0",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x2c0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x2d8",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x2ec",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x304",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x380",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x39c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x3b0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x424",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x444",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x458",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x580",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x59c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x5b4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x680",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x6a0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x6b4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x71c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x738",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x750",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x890",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x8b0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x8c4",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x94c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x960",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x978",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x98c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x9a8",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xa40",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xa70",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xabc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xaec",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xb64",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xb88",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc2c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc40",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc58",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xc7c",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xc98",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xcf0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd0c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd54",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xd88",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xdf4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xe28",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xe4c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0xeec",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xf1c",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xfd4",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0xff0",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1070",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x109c",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x10cc",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1110",
+          "key": "IA",
+          "discriminator": "0x50c7"
+        },
+        {
+          "object_offset": "0x1128",
+          "key": "IA",
+          "discriminator": "0xc120"
+        },
+        {
+          "object_offset": "0x1140",
+          "key": "IA",
+          "discriminator": "0xc120"
+        }
+      ],
+      "zero_discriminator_calls": 0,
+      "C_CPP_callback_ABI_matches": true,
+      "PAuth_enabled": true,
+      "hardware_PAuth_execution_tested": false,
+      "object_sha256": {
+        "B5qTouch.o": "c3ac534f30083a0515d5cbb344973f8c93c4345ce8f8b4c306990a673099c086",
+        "GeniI2c.o": "39bc4f2a9fa84f3aeb1868a49a686348975f3520ef5ba5fc333d7daec78a4b6f"
+      }
+    },
+    "boot_args_bytes": 982
+  },
+  "pending": [
+    "CIactualfullXNUcore,strongrecountsymbol/finalPAC",
+    "Fresh4GiBAPFSactualaccount/owner/watchdogdverification",
+    "ReturnedESP800MiB4Kn/symbols/bootargs/root/journal/signatures/hashes"
+  ],
+  "hardware_executed": false,
+  "phone_connected": false,
+  "firmware_interface_source_index": [
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/Include/Protocol/EFIHALIOMMUProtocol.h",
+      "sha256": "ae6d5f3ad82513c86c1f1214366bcb27f0b83ba3e120096e47defd7342e9b010",
+      "bytes": 1151
+    },
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/Include/api/kernel/HALIOMMU/HALIOMMULib.h",
+      "sha256": "c5b91920ab481e66aca5983e470a9d26dacf4d1ce59b5354e913180503649659",
+      "bytes": 4135
+    },
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMU.c",
+      "sha256": "e8d31447f0eae999c9f12ffcb54d2d02670ff5905d8a463f04d1c307cdf47563",
+      "bytes": 35374
+    },
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/Include/api/kernel/HALIOMMU/HALIOMMUTypes.h",
+      "sha256": "16eb1e7427afd42d7f33b9c3059e6928ff72e0a4d99c6bdc036ec6f67c76c42c",
+      "bytes": 8681
+    },
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMUDxe.c",
+      "sha256": "9ea9d7eecdab1d99a8705afb80ccac0535aef14ac0e8317803f6f7ce538e3796",
+      "bytes": 5242
+    },
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMUImplDef.h",
+      "sha256": "076792891aeb3a7d0372fa9a2673d2710e2240c0148dd88eb82572cc20e359b8",
+      "bytes": 11240
+    },
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMUReg.c",
+      "sha256": "1384b735c8c858ada7cd61e7bab8bee7bfdb3ef7408c7b3ceba0bab0537083d4",
+      "bytes": 46867
+    },
+    {
+      "repo": "Rivko/android-firmware-qti-sdm670",
+      "rev": "20bb8ae36c93fc16bbadda0e0a83f930c0c8a271",
+      "path": "boot_images/QcomPkg/SDM670Pkg/Library/UsbConfigLib/UsbConfigLib.c",
+      "sha256": "591b5dfd12b7f2604b1a4110fe564e37ee1fffb6338263878220883980b22283",
+      "bytes": 46807
+    },
+    {
+      "path": "boot_images/QcomPkg/Library/UsbConfigLib/UsbConfigLib.c",
+      "error": "HTTPError 404"
+    },
+    {
+      "repo": "SwedMlite/BOOT.XF.3.3",
+      "rev": "55ff7c1920ccf084951b2770d46ffcbe8917864f",
+      "path": "QcomPkg/Include/api/kernel/HALIOMMU/HALIOMMUTypes.h",
+      "local_file": "BOOT.XF.3.3-HALIOMMUTypes.h",
+      "sha256": "58cbab5f479bbfaef31c1c669b43ca9152150681783b109b14380c943016a2de",
+      "bytes": 8609
+    },
+    {
+      "repo": "mobstyle10-arch/BOOT.MXF.2.5.1",
+      "rev": "c60ac2f1da8da430f246da52f375e1d986e77349",
+      "path": "buildpath0/boot_images/sdk/QcomSdkPkg/Include/Protocol/prot_inc/HALIOMMU.h",
+      "local_file": "BOOT.MXF.2.5.1-HALIOMMU.h",
+      "sha256": "69cceda4ab807a5eb31db13019eb8db7f1e89a158971de5df6e9bef6fe352d22",
+      "bytes": 7464
+    }
+  ],
+  "USB_handoff_audit": {
+    "superseded": true,
+    "correction": "Prior inability claim was incomplete;HALCBARallocator provides free metadata withoutoccupiedS2CR/SCTLR. Nativeproductionplanner implemented andnegative-tested."
+  },
+  "fresh_Data_seed": {
+    "target_logical_bytes": 4294967296,
+    "actual_new_seed_generated": false,
+    "prior_seed_logical_bytes": 2147483648,
+    "CI_recipe": "fresh official OS template; baimao admin+autologin and watchdogd disabled",
+    "volatile_4GiB_storage_helper_regression": "PASS; actual new APFS pending"
+  },
+  "CI": {
+    "dispatched": false,
+    "local_batch_passed": true,
+    "GPU_reuse_run": 44837528408,
+    "full_XNU_core_requested": true,
+    "fresh_APFS_Data_requested_GiB": 4,
+    "ESP_packaging_in_CI": true,
+    "temporary_binary_inputs_in_Git": false,
+    "ordinary_artifacts": true
+  },
+  "current_board_input_sha256": {
+    "board.toml": "9de6a63399c08693ebcd64f257ea7fafafaf384c7696478a573cca2cd195cc97",
+    "feeds.toml": "83545e9a9bcb3ed754624644a3a69fc617d42a7c7901870f117d519eed97427f",
+    "scripts/xnu-panic-screen.c": "2f8e98d46b03c2f00ac079d9900a2b17c5fa1d75fc5def0ff6abc081b448558d",
+    "scripts/extract-b5q-usb-inputs.py": "c4f3134d17cd5b5e067e325214c6d58867701f903bbd059e53303d0cfe7ede8c",
+    "scripts/b5q_hid.py": "fecddcf106c6c965bf8bf5fbe398fbba9986b5b9576d59516bde2e1586e29c8e",
+    "scripts/reuse-v13-build.py": "4c866dd96ec06f9e160ffd29d8fe7eeec21b58635e733428e15f67cf8a970413",
+    "scripts/check-b5q-uefi.py": "82e5c6571c09665166ece4c609c2a8fae223457de6cfc0a0abe2beeed3c86a09",
+    "scripts/build-b5q-adreno.py": "b2829b4960b5716d8bffc235ae25ec2cb1d0f7f2a0435159ed9240795dfb9e99",
+    "scripts/collect-runtime-fdt.py": "be7ab9f6fe6bb99225c7ede13e89e450541c5843046d0877192f1ec9139c482d",
+    "scripts/build-b5q-storage.py": "c75ff9e0a5931628e2f160c2735cf745db83b17f01a1ec9057dc0491a7d4deed",
+    "scripts/check-xnu-patches.py": "8e5dc9477788102d351bb0f149d10834125c6dcfa4cb4cfa659a941f77eed417",
+    "scripts/b5q-volatile-data-4g.patch": "7eea96459e05cd47efdf1edd8fcabbf824d0c75755ce016259dab81e260f8582",
+    "scripts/patch-xnu-entry-probe.py": "6a9ecd77c7c551b7737f51557eb0ee5f05ae3fb7219b8e92aca0ad41da699f40",
+    "scripts/check-b5q-inputs.py": "fa0a1e649264bf380767c5d5e6683c8a2f047d50684b70e3a272ecfcabe12dd6",
+    "scripts/ci-transfer.py": "09da81e49dd2a49e8920e6375f689aab67df0abea24307453f91aa305f3c5a83",
+    "scripts/stage-v24-inputs.py": "50056dbcc75f3228d44ff7876bdbea449d22fa8ea642d2c7bceb0da3e82d9f1a",
+    "scripts/b5q_abi.py": "83b6abb2d75e82f4467abe1cb98a551b9c0c5a1f75fdbaaa18a21d2d23e6a7a8",
+    "scripts/reuse-v10-kernel.py": "7540dd020d6791c769ac1e7aa3200922b42a19564a942f8270dc007573e1ab11",
+    "scripts/prepare-b5q-gmu.py": "f891a756e9ddb23c7dc7bedd93b36ba3db96bac6a0ef0a8f649f871cbd8e5879",
+    "scripts/build-b5q-gop-27.py": "a311c64e86f68eddfe4e4601091fa6ec67ea5f9904911721141e9fd8b45fc03e",
+    "scripts/build-b5q-payload.py": "95edce6dba47278e56b874a0c8a1640a88316e0caa2b2a03b63eb7922ebc4bd2",
+    "scripts/inventory-hardware.py": "075d573306ebc3869be5dcb6d9b92b0b2fe6bed815702ed97f0fce4074932804",
+    "scripts/relink-b5q-peripherals.py": "8479fb52d534655c5093f6cf027d62f1aff4a0555261beb35c3464da589839d2",
+    "scripts/build-b5q-pmgr.py": "7c8f84e9290c4356f2ca3cb61adaf3420eae8938ebd950b8dd19252b14c41944",
+    "scripts/b5q_peripherals.py": "4d6e9e0565651bff41f2be53b0f3eaf984702b5a3c893fd97e6ac4400ed79c2c",
+    "scripts/build-b5q-usb.py": "61c7b528b0fb4d72f60457d07b53663a1dcd4c89472b6eb6b568370ea5e19806",
+    "scripts/prepare-b5q-votes.py": "b80374106669a5ff39a4630ede764fdf82771daea19a1114a433ad83e3f76206",
+    "scripts/b5q_compile.py": "acb19e4534fc20a78088f6e2bbd07964f077f99fd45b121a1f9ceb7a4a2e3880",
+    "scripts/test-ramblock-host.py": "058a8e2e36310029a65654fe908c9610dabc2839e74049ee98c9f47bda8259f0",
+    "scripts/reuse-completed-build.py": "90dcf2ed973b46a347bfce25ae8f05b1fb435bb3228c456b3ee044a8726653df",
+    "scripts/adapt-b5q-platform.py": "84f4d8912ffaebc992eb9d1f3a77ae2768308005ac108ca4f7068c7d6e17377c",
+    "scripts/audit-usb-handoff.py": "e3ea662ff14e202cfdceb556020eabc419ddcf67b38f996971e80751b86957ed",
+    "scripts/package-v24-esp.py": "d2109e52274ad9550f4569f835873b8ec9c96327e79db67b32d83004f7fff860",
+    "package/QcomQmpUsb3.h": "3bd87d90186142942398b1f41e96dfd838bf8bfae370b0cbda2b3cefb8522a4e",
+    "package/ThermalProbe.h": "9f8c853ce54b940c066b0b0880f825b050cf6bef3f6c7c603f887866730ea619",
+    "package/QcomRpmh.c": "679a55467e6ed4c7e75a8191f1d6da48637377088ef5e27879b1c99bc4a62314",
+    "package/B5qTouchProtocol.h": "e88213faa1126ba2236e6f81c2055b1161f43903432a7fb83ba3481dcd4982d5",
+    "package/B5qUsbSmmu.h": "af5ff7c49470b8c6c7577b07e4fc5795c73140250f4a8059315d77c02eb802a1",
+    "package/LegacyDisplayProbe.cpp": "8d7b212050356c893c703b35b376a9ef4b5dfa6c79ca958af9667e1e670b103f",
+    "package/BoardClock.h": "47c950b288ffc659a9306c1da79ff8b0fb6968c809508aa74a1a6a4bfb79e59d",
+    "package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
+    "package/DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+    "package/B5qEthernet.cpp": "d1abd199aaafbd9c6fe84e6dfd105802b7f909fb718c9b6917c22acf3f6f44b6",
+    "package/HidInputProbe.cpp": "ae37e383a0e643261e353526b103610dcca8d3c1c1e37ed3296539bc17289221",
+    "package/B5qTouchPower.h": "1d4a07f2ba3f57ba175ff7562dd83b265d208b37a5bc0ab22f4428bde51fac75",
+    "package/B5qGpuPowerBoard.h": "6138dd87734ca0bf995e50490d1e7f2f8fb0b846d20f0381cc37a1b621b7fb07",
+    "package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+    "package/GeniI2c.c": "fcc31cca2f14ee5bcc253f8d08e48dd733c6348011b7c4ea5e4a29831488e656",
+    "package/B5qTouchIrq.h": "82068375f2cb5f145630d8da2708d70c4c3445e28d01516f0403892e3d4e0eb1",
+    "package/ThermalProbe.cpp": "185eed43bfb75f8dd5e5524a35c115f3039126c4781e978a9d2cb34e639cdf22",
+    "package/NativeHidInput.cpp": "435372fd3eaae1a32a4c3e604f17b24211f9f617f891ce3006d48ce59eda0d89",
+    "package/B5qGpuTrace.h": "a0b2dba23a2a0fa1c356f26244553cd3e1e60413a955b082a9b099d03aaad575",
+    "package/B5qMax77705.h": "11e7e3a8525529f495a2a706eec88a1023809eb7994ebaf763b50f49f27bad9a",
+    "package/B5qAbsentBoard.cpp": "643302e0e296ccf1032b473a37b3d151137280b3adee317aaf9af2d91ff20429",
+    "package/B5qTouch.cpp": "65e94322c315466fd1abffa79b3868d2338383f6799bf24b460e969f7706920e",
+    "package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+    "package/QcomRpmh.h": "47e299744ff83989449d262f74f5dfd2ba1cdbf921b2886643735f2febb6ee21",
+    "package/Sm8550GeniUart.h": "1549ec51d15bb74133ca9d2190a7cbc87643605e64eb85466c7bb612801f9882",
+    "package/B5qRamStorage.cpp": "ef9fb8763d58331abed767a3e3fb57e1175fda7e95b4cecdf0e17ad7f7e97ebb",
+    "package/B5qUsbIrq.h": "5eac2e2cbf5f983c1d0a2f5d8711d8df941f460332549612c2bd3bfeec2b8831",
+    "package/Sm8550QupDma.h": "bf28dfd47f38a4d041d4dc892317f52ce1b812a7b69731ac3d32dc2b44fa5abe",
+    "package/B5qUsbBoard.cpp": "f4da993a89d2b7f5e23be98543dc959f6ae6dd16a2b76d2938ca2694d0c409f5",
+    "package/B5qPeripheralHardware.h": "de7e968148612f5feba3c66141797aba4785564e664016f782d7f8adbc8f7a15",
+    "package/ThermalLevel.cpp": "8d256c6c898864b35b57dcc588f56c917cf12a3638153c25b057569b5a9b031f",
+    "package/B5qGpuFirmware.h": "b628cfaa795023d7d470d14893248ee8fe8228c6ac3f199253da02b676699494",
+    "package/ShengSleep.h": "c7469cf97ca66975539cd380698284527a9988331cdbb11f8cfc11cc33791697",
+    "package/QcomEusb2Phy.h": "e0355b0c802de08eaad183a17ccfdd1afc3c4e3ec5f5f6c4a71788a8aa23038d",
+    "package/B5qGmuVotes.c": "8a259d9d49657ac2c90b1542b39e5726039ecfe72564f20f20eff0fb4178c054",
+    "package/CpuFreqProbe.cpp": "4fa9d7f1211bfeb47fa1d71f88a0735fbd02e311d03c604904fdd24ec46558d2",
+    "package/UsbProbe.cpp": "6fc03496fbd56ccdb4b784bef9a52fb71361d42d886ea241c1e0320261206d4f",
+    "package/Sm8550Gcc.c": "59a4963d0f2ef78b25c9a2cc775ead513c8e04856215db4c707e1a4dea4ce044",
+    "package/B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+    "package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+    "package/B5qTouchClock.h": "10d3141e34e7e5b123720f0c7e5661d9f9d647d22f3ec2cc3970ab586946ba9d",
+    "package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+    "package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
+    "package/AppsSmmuLock.h": "52028e6d9d0627c1df954914860a2dfd18d300572aab0ac1c5c84264d312875d",
+    "package/B5qUsbInputs.h": "676e88f1b5cb9e0af19e6e819b5ea0d438c2e01d7ce3542769936b0c50503c89",
+    "package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+    "package/GeniI2c.h": "86cf0558e12e53b27653da33106c898f0470966ef06cca0b241cd12edb37fa15",
+    "package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+    "package/QcomDwc3.cpp": "f51566433a7da9f9cddaf05564597cf5a23e01517efe900e200f104c8738d5a0",
+    "package/ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d",
+    "patches/xnu/b5q-windowserver-signal.patch": "8d4328609ecf90066cfbfc520b160fe5fafbb6edd6f4975e3755bbe578607571",
+    "patches/xnu/macos-kernel-stack-alignment.patch": "a1b4caf6c1bbc087b405a5813753c404617a69f32b876aeaf4a9ac2534c5e3d5",
+    "patches/xnu/native-arm64e-user-memory.patch": "647b87ca4ea8a8d218dcf2b12edbce9b4cbdfb7aa633a4434986a62b7dbdf022",
+    "patches/xnu/zzye-b5q-cpu-idle.patch": "95f57fb9994796c3de2429fe82b6a521620b9f13b83e29eba12185f5ada4da86",
+    "patches/xnu/zzyf-b5q-amp.patch": "07abb7ce25c626ddc37069ecc9e168b85a1da8e02b42b19649a10f667aa5a56b",
+    "patches/xnu/b5q-console-journal.patch": "c36530ec959bcc1ef4220f4726a709ea0dfb69684112eaab5b81763760bc7869",
+    "patches/xnu/macos-lockdown-public-state.patch": "21506dd452543f8466ccc01b7997ef3c56738cf506f0bc9ed48027650b8dc8c8",
+    "patches/xnu/zzzzzzzzzzz-b5q-edge-matrix.patch": "5048e180f459e860b2fad50f66e2a49231b70081cb32f930e1d92c2c579011e7",
+    "patches/xnu/prelinked-corecrypto-hooks.patch": "14b51f6bdc5037d89f8a2664c1b5ed2c96b383dca6f9cea28f88b3a6f12b9800",
+    "patches/xnu/native-text-console-retain.patch": "bd28f4bc96939cdf0db10036b750f3a7a11d6e86e3ada0b02271eddf486761c2",
+    "patches/xnu/sheng-macos27-generic-runtime.patch": "36d8a14270c7beb07452c76cb3856be9a302e3d211e8c10fe643d8124cd605bb",
+    "patches/tools/b5q-turnip-oneui.patch": "3dd4558e2cbc3bda34149c26d547e96673dc2f3c22589d163c8943db3bdacbec",
+    "patches/tools/macos-2g-ram-data.patch": "d72219d4385243318d5434cf4dd99e3c988aa22fe76fb154b63a919f7cef7c36",
+    "patches/tools/b5q-validation-post-seal.patch": "1c9fdd2a2d102708ffb6ad9775de33f9cbed64862d0b011ad8246c2cf856ace1",
+    "package/B5qUfs/B5qLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+    "package/B5qUfs/B5qVerifiedRead.h": "969e8a14b7132089c00303d8e53bdfac1101add1ad152126056f3e8b7bf3c885",
+    "package/B5qUfs/B5qRootPolicies.h": "9f45e765c1e9466aa0f98cbe8860d342c7733a9b9285dccc453462d69b5e9eb4",
+    "package/B5qUfs/B5qLogCore.h": "8d0a834dadea6ca796ece05d9f464157d210e2eb9d5f5d598ea1138aa7144643",
+    "package/B5qUfs/B5qLogVolume.h": "ecb267c9adbda425d9c59d0bd6167e22b3036a25599d12f581a48fa693a46cb0",
+    "package/B5qUfs/B5qLogArgs.h": "a41d505915d4fe13cdce209197bd610e97c56f0ddef1a2bceb12e1280ed3e887",
+    "package/B5qUfs/B5qLogProtocol.h": "c79006e1d20ff9abf71e4d23584dfa82b7f9d19e3a5d5cbf032858f397d36620",
+    "package/B5qUfs/B5qLogUfs.h": "cf64cac11d7b999be2c98b453fb13b4571ceb513d575d8ceb6c256580ba8d599",
+    "package/B5qUfs/B5qUfsProtocol.h": "93d1eaf948a1c598d7398d40f5c01d0e42bb372ab1fbdc850b3ddaadc7538b9d",
+    "package/B5qUfs/B5qUfs.cpp": "3c407a0aa2aee5a6da91a0c7ddcb1f7720917318a1ff4bf53b03213754d291f7",
+    "package/B5qUfs/B5qSmmu.h": "de60642e39d4c15b33b55cfb34d2e4c6a8199d64f68d4c9ccc48885090111d5e",
+    "package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
+    "package/Sm8550Inputs/ShengGmuCommandDbSource.h": "2ed10058e2bf9147057a73f7a074e01560dd501e0b712df446cb1a88b87c6b35",
+    "package/Sm8550Inputs/B5qGmuVotes-1.h": "83273760c59b759217ac1006965dac60a826eec49186e3862b85c8940ab39bca",
+    "package/Sm8550Inputs/B5qGmuVotes-0.h": "c94edd4260e2b73167505d49d103f1c398a50acda722f5ef1f92de7f33598819",
+    "package/Sm8550Inputs/ShengGmuVotesSource.h": "83859ce5c2507eb572f66a5e7c1c9f0776e1a346abac7ada5a13bec2fa550b86",
+    "package/Sm8550Inputs/ShengGmuSource.h": "cca9bacf3a1773cffb0ed79b4eed1f01e9b59b018aef28d223d5d7ccdf11dde7",
+    "package/Sm8550Inputs/B5qGpuRates.h": "a106b1e2854785b5f13ea5311572efbd621dbd8646825f463029022505a88372",
+    "package/Sm8550Inputs/ShengGpuSmmuSource.h": "bb71466456a4033f1513bd3fca616a6f1e8e4e9c30d9dca0f1703509291669b6",
+    "package/Sm8550Inputs/B5qGmuVotes-common.h": "c4aca6e6225cfb862c0f021e882cfdfcff50144f6d9c779d336e68a2b1ab1feb"
+  },
+  "current_build_input_sha256": {
+    ".github/workflows/b5q-stage123.yml": "5359d54b38a730d3fe9a957f7f8777ec74fece83c09f8f2049043b552bccfe76",
+    "scripts/b5q-install/build-data-seed.py": "7b21a1efe4c8d7b83a2cadc34a5aa952d5fa29feec8237b3cc6aacc7ed29f134",
+    "scripts/b5q-install/check-peripheral-target.py": "7882a77433af81d3401e1dc2ae684014535e4d3b01f29fe3767b79993bd0e98e",
+    "scripts/b5q-install/pre-ci-v24.py": "4df2f40a770c49f1dedc1925c6b05de0117fc82568764fd483f10a2d1c94add5"
+  },
+  "native_USB": {
+    "reference": {
+      "sheng": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+      "QcomDwc3": "d4e96f322ed9cbf32845d08db6da24e09bb77ca8",
+      "files": {
+        "QcomQmpUsb3.h": "5df10871c8e3ce90d3c38c2e54d6624630452ef510729d9548a49bbfd8ac67d3",
+        "usb-xdci-26C5035r.json": "387aec6667edefd3aecf93627a97f689cb54c9421b30f04e7b4d9f922526e74e",
+        "QcomUcsi.h": "f7b8d4cbb1de73537a578c8b9e67126a8edce62914a616c4f2f0fdcfcc640a10",
+        "usb-xhci-26C5035r.json": "c6d7ad3855b213b794b11f5a6efc4922cc957cf6285e000ad69dac7ab661946b",
+        "QcomEusb2Phy.h": "d061febf49f6548cec0ff8ae1cd2f79295c5a9fc75fd97c6e2bcddb3641a6191",
+        "UsbProbe.cpp": "c8b7f630a33c67deee481d21033756dd1a533cb32dd1161f0939a8f16df223bd",
+        "QcomDwc3.cpp": "34e82ac4bb83e0c16fe58992e539bcaee687cfba53e7d75a4a37b759aef4e6db"
+      }
+    },
+    "replaced_warm_implementation": true,
+    "old_PM8550B_implementation_removed": true,
+    "CBAR_allocation": "descending banks-2;type0/type2/type1vmidff;SMRexistingSIDreject;neverS2CR0;newbankStage1WB-IS",
+    "TI": "SE6a98000/3e revisionB0;PM8550VS SID3GPIO4reset;4DTpairsbothroles",
+    "TypeC": "SE8Hub9a0000/PMIC66/Charger69/MUIC25;OTG900mA5Vconfig/B7-B9-C3state andreadback;normalcable/usb-hostrolethread",
+    "QMP": "b5q168orderedpairs;GPIO11orientation;noretrimer;UTMIfallback",
+    "IRQ": "1stimewindow;attachpublishedcallbackthenimmediatemask;stormlatched",
+    "device_and_host_vtables": "384XDCI/427XHCI matchedactualfixtures",
+    "hardware_executed": false
+  }
+}
