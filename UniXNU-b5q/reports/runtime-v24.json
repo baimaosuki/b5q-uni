@@ -1,5 +1,5 @@
 {
-  "status": "CoreCI44910077002SUCCESS;actualbinary/APFS/PACverified;DTSomissioninpublicationrequirespayloadonlyrepack",
+  "status": "COMPLETE: fullnativecoreCI44910077002SUCCESS;correctedofficialpayload/ESP44916314508SUCCESS;finalactualESP/kernel/APFS/PACacceptancePASS;hardwareuntested",
   "task": "v24 native recount/Edge, hardware USB,IRQ touch,4GiB RAM Data",
   "physical_b5q_v23": {
     "path": "logs/b5q-xnu2log-v23/XNU2LOG.BIN",
@@ -4069,13 +4069,114 @@
         "bytes": 838860800,
         "sha256": "13035ca9afab1785f8a85c2143bcf8f1646c05f6b8c2506628e31a628faa52e0"
       }
+    },
+    "final_actual_delivery": {
+      "checks": {
+        "FAT32_4Kn_800MiB": true,
+        "boot_args_ADT_two_clusters_firmware": true,
+        "actual_prelinked_USB_HID_MassStorage_families": [
+          "com.apple.driver.AppleUSBXDCI",
+          "com.apple.driver.usb.AppleUSBXHCI",
+          "com.apple.iokit.IOUSBDeviceFamily",
+          "com.apple.iokit.IOUSBHostFamily",
+          "com.apple.driver.usb.AppleUSBHub",
+          "com.apple.driver.usb.AppleUSBHostCompositeDevice",
+          "com.apple.driver.usb.IOUSBHostHIDDevice",
+          "com.apple.driver.AppleHIDKeyboard",
+          "com.apple.iokit.IOUSBMassStorageDriver"
+        ],
+        "strong_recount_and_native_USB_symbols": true,
+        "real_recount_call_and_Edge_counters": true,
+        "xdci_vtable_PAC_slots": 384,
+        "xhci_vtable_PAC_slots": 427,
+        "QMP168_linked_and_old_warm_removed": true,
+        "actual_4GiB_APFS_account_watchdogd": true,
+        "bootshim_signatures_trust_APFS_checksums": true,
+        "actual_Xcode_ABI_all_callbacks_PAC": true,
+        "native_core_object_detection": {
+          "B5Q_HAVE_CPU_IDLE_MACH": 1,
+          "current_XNU_processor_objects": {
+            "/Users/runner/work/b5q-uni/b5q-uni/UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/osfmk/DEVELOPMENT/processor.o": "1d1c1d3089a991aefb7a817903402a74969c6808544d05e85618a33ed68305c7"
+          },
+          "objects": {
+            "B5qUsbBoard.o": "b3e3d495518f6d7fe9580dc0f3f1fe461214b7834700b834df4d507a90614c70",
+            "UsbProbe.o": "f5011df8af7e6d44999c6a99fdbb58af1606904cfdee646c56054a94a60f2700",
+            "CpuFreqProbe.o": "c4d772f3ca852f3ac272381d0d6e348cc867439ba18bfad4b4ba040b0455a6ed",
+            "ThermalProbe.o": "d06a1d4e4e8bbba10cad2b1d7d74b8deceb8a5063a561c6c6d5ca8556643345e",
+            "ThermalLevel.late.o": "97df93c44009e51131bc7ca1e7276077c10682fd306203b601c2ab768a9d77b3",
+            "BoardClock.o": "6bf6caeff7e8f9b82c8f8e621617fcb505cfb797c3bbed3c5c9948316a322daa",
+            "ButtonProbe.o": "40df81912badfa00296ba3f16b5a897b80619a53fe39fa63c13ddb01e58d7de6",
+            "DisplayTimingProbe.o": "47876e9e998b37cc07e41026a3f6d92acc95ab5d7860ac06a030abb3ccc24928",
+            "NativeHidInput.late.o": "a34655e107e1f3991688f1bb5398092d51889595628278dc04c86b2efb283eb4",
+            "HidInputProbe.o": "3da1aa69e584ac8bac51ebf38baa1d7ddfe03ae5da657b209cffe13de04a70ae",
+            "B5qTouch.o": "4609f8a9b6ffa10649cef61878f815d30d2757004a96811dc3c802bd82335b46",
+            "GeniI2c.o": "23100268f16879af428fff6e5cc16ac4d6f5dbdceb8172e209a28cf0ae67379c",
+            "Sm8550Gcc.o": "1965b18c69123e4814e2bcc30c430a7b18c4a89bbf68c5bfb4f88d1945178712",
+            "QcomRpmh.o": "38e738b4a5c8e2b46b05272dba4671abbcf460fcbe1a330a5c4732033cc60507",
+            "hid-bindings.o": "2b6363bbdf5bb1f74f9548d0453ec26057098f06a91c8927c3e4167d390bacc7",
+            "hid-addresses.o": "8a468772cb9f5d8d69703c215998de72c2a09a9a138cdc9bec28ac6fbbb1d31e"
+          }
+        },
+        "retained_menu_and_DarwinBoot_exact_hashes": true
+      },
+      "hardware_executed": false,
+      "run": 44916314508,
+      "commit": "89d82ce965ebb6ee85fc99c8d126f4746c50848b",
+      "boot_args_bytes": 982,
+      "kernel": {
+        "bytes": 143212544,
+        "sha256": "3554c5945555403794e29d33fb797101687b4473df9dfe716056f350b154c3c7"
+      },
+      "core_archive": {
+        "bytes": 150729536,
+        "sha256": "88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b"
+      },
+      "passed": true,
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "22cd6ea6bc920b67a71b42e977fe76e718696e198c6f479f38009d1032edb197"
+      },
+      "ESP_members": {
+        "EFI/UniXNU/unixnu.toml": {
+          "bytes": 1469,
+          "sha256": "54744ccd8909878bee00585ddcdd2b1788c0dc6a1663a7d31491bd614e8bf557"
+        },
+        "EFI/BOOT/BOOTAA64.EFI": {
+          "bytes": 104448,
+          "sha256": "4d98df62d3825b3fc1a088e0d2d5ba9b66b1575669863488669f74d8a6e0448b"
+        },
+        "EFI/UniXNU/Drivers/DarwinBoot.efi": {
+          "bytes": 43520,
+          "sha256": "95578b1fba1f7d18bc7cb95b77ec839707b2282804be886dbbafbafde60ace76"
+        },
+        "EFI/UniXNU/Payloads/kernel.macho.gpuaddon": {
+          "bytes": 15500312,
+          "sha256": "b68e1164f7dd0ff822f20e116e97adc4606926a4204fc25eaa5241c2a966d82d"
+        },
+        "EFI/UniXNU/Payloads/scratch-data.img": {
+          "bytes": 21680272,
+          "sha256": "aa624655fd41db6af03ddf0bcb46ed0b5a333f307912f74ac471c7b1b3bfa82b"
+        },
+        "EFI/UniXNU/Payloads/kernel.macho.trustcache": {
+          "bytes": 451460,
+          "sha256": "bf6b7c190aa65df40e3907b9aae749d7706d75dfedc7f603b30084c59c137f14"
+        },
+        "EFI/UniXNU/Payloads/kernel.macho.adt": {
+          "bytes": 171576,
+          "sha256": "db5a8630542f19c6467d0f4f3eaafc07f31f313740f40be0d0f77d0cbc4aa146"
+        },
+        "EFI/UniXNU/Payloads/kernel.macho": {
+          "bytes": 143212544,
+          "sha256": "3554c5945555403794e29d33fb797101687b4473df9dfe716056f350b154c3c7"
+        },
+        "EFI/UniXNU/Payloads/kernel.macho.crypto-hmac.json": {
+          "bytes": 621,
+          "sha256": "398e4d1b8b9c51188cab20191a2aaa4e15db717de23e7d67e829e65f5bc40d56"
+        }
+      }
     }
   },
-  "pending": [
-    "CIactualfullXNUcore,strongrecountsymbol/finalPAC",
-    "Fresh4GiBAPFSactualaccount/owner/watchdogdverification",
-    "ReturnedESP800MiB4Kn/symbols/bootargs/root/journal/signatures/hashes"
-  ],
+  "pending": [],
   "hardware_executed": false,
   "phone_connected": false,
   "firmware_interface_source_index": [
@@ -4186,7 +4287,13 @@
     "core_rebuilt": true,
     "fresh_APFS_Data_generated_GiB": 4,
     "ESP_packaged": true,
-    "actual_local_acceptance_pending": true
+    "actual_local_acceptance_pending": false,
+    "packaging_run": 44916314508,
+    "packaging_commit": "89d82ce965ebb6ee85fc99c8d126f4746c50848b",
+    "packaging_conclusion": "success",
+    "kernel_rebuilt_on_packaging_retry": false,
+    "GPU_rebuilt_on_packaging_retry": false,
+    "Data_rebuilt_on_packaging_retry": false
   },
   "current_board_input_sha256": {
     "board.toml": "9de6a63399c08693ebcd64f257ea7fafafaf384c7696478a573cca2cd195cc97",
@@ -4218,10 +4325,11 @@
     "scripts/prepare-b5q-votes.py": "b80374106669a5ff39a4630ede764fdf82771daea19a1114a433ad83e3f76206",
     "scripts/b5q_compile.py": "acb19e4534fc20a78088f6e2bbd07964f077f99fd45b121a1f9ceb7a4a2e3880",
     "scripts/test-ramblock-host.py": "058a8e2e36310029a65654fe908c9610dabc2839e74049ee98c9f47bda8259f0",
-    "scripts/reuse-completed-build.py": "90dcf2ed973b46a347bfce25ae8f05b1fb435bb3228c456b3ee044a8726653df",
+    "scripts/reuse-completed-build.py": "e09cffcdf06a5ca1fca554f5138c7b402502508793a3cde34b428bd0b5451fc8",
     "scripts/adapt-b5q-platform.py": "84f4d8912ffaebc992eb9d1f3a77ae2768308005ac108ca4f7068c7d6e17377c",
-    "scripts/audit-usb-handoff.py": "e3ea662ff14e202cfdceb556020eabc419ddcf67b38f996971e80751b86957ed",
+    "scripts/audit-usb-handoff.py": "e6da93601d76eaf43f2463e248663e641182c9e1641b22a935f784d31b0f0411",
     "scripts/package-v24-esp.py": "d2109e52274ad9550f4569f835873b8ec9c96327e79db67b32d83004f7fff860",
+    "dts/b5q.dts": "1206ae60171eb8c3b2b3fae49892250f1070956dea10c2090b148000b87c0bc1",
     "package/QcomQmpUsb3.h": "3bd87d90186142942398b1f41e96dfd838bf8bfae370b0cbda2b3cefb8522a4e",
     "package/ThermalProbe.h": "9f8c853ce54b940c066b0b0880f825b050cf6bef3f6c7c603f887866730ea619",
     "package/QcomRpmh.c": "679a55467e6ed4c7e75a8191f1d6da48637377088ef5e27879b1c99bc4a62314",
@@ -4309,9 +4417,13 @@
   },
   "current_build_input_sha256": {
     ".github/workflows/b5q-stage123.yml": "5359d54b38a730d3fe9a957f7f8777ec74fece83c09f8f2049043b552bccfe76",
+    ".github/workflows/b5q-v24-package.yml": "7309aeefd35c6eba7ea43eaa5f5fe9f8ae8d9e50014de35d9701f6f39f162c8b",
+    "scripts/b5q-install/verify-v24.py": "e3378d9d6c41e20b1b2d536345c071efd82487bc91fac33c037741d83bfb05b7",
+    "scripts/b5q-install/pre-ci-v24.py": "4df2f40a770c49f1dedc1925c6b05de0117fc82568764fd483f10a2d1c94add5",
     "scripts/b5q-install/build-data-seed.py": "7b21a1efe4c8d7b83a2cadc34a5aa952d5fa29feec8237b3cc6aacc7ed29f134",
     "scripts/b5q-install/check-peripheral-target.py": "7882a77433af81d3401e1dc2ae684014535e4d3b01f29fe3767b79993bd0e98e",
-    "scripts/b5q-install/pre-ci-v24.py": "4df2f40a770c49f1dedc1925c6b05de0117fc82568764fd483f10a2d1c94add5"
+    "scripts/b5q-install/check-geni-pac.py": "4bca1c8eac9b992c42c93634f223508592ce4b2d32ff608ca33af270e5186479",
+    "scripts/b5q-install/check-usb-gmu-pac.py": "15e0394604e35a7fe17939970d743aaa28c1c810ba9e623b573767775b3eb709"
   },
   "native_USB": {
     "reference": {
@@ -4356,6 +4468,26 @@
       "result": "failure",
       "first_error": "unixnu: no configuration: run unixnu defconfig NAME first",
       "fix": "officialdefconfig before reuse andpayload; no core/Data changes"
-    }
+    },
+    "resolved": true,
+    "successful_repack_run": 44916314508
+  },
+  "hardware_milestones_not_claimed": [
+    "USBHID/MassStorageenumeration",
+    "touchandbuttonphysicalinput",
+    "DVFS/Edgehardwarebehavior",
+    "wallpaper/iconservicesbehavior"
+  ],
+  "delivery": {
+    "IMG": "/home/baimao/zflip5/artifacts/b5q-esp-runtime-v24/esp.img",
+    "IMG_bytes": 838860800,
+    "IMG_sha256": "22cd6ea6bc920b67a71b42e977fe76e718696e198c6f479f38009d1032edb197",
+    "kernel": "/home/baimao/zflip5/artifacts/b5q-runtime-v24-work/completed-cache/deployment/kernel.macho",
+    "kernel_bytes": 143212544,
+    "kernel_sha256": "3554c5945555403794e29d33fb797101687b4473df9dfe716056f350b154c3c7",
+    "Data_logical_bytes": 4294967296,
+    "Data_seed_sha256": "aa624655fd41db6af03ddf0bcb46ed0b5a333f307912f74ac471c7b1b3bfa82b",
+    "flash_performed": false,
+    "only_one_flash_IMG": true
   }
 }

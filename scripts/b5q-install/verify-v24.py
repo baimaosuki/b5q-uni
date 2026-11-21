@@ -10,6 +10,8 @@ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--ci',type=Path,r
 def sha(p):
  with p.open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
 def invoke(args):subprocess.run([str(x)for x in args],check=True)
+assert sha(ci/'kernel/kernel.macho')==sha(objects_ci/'kernel/kernel.macho'),'Nativecorechangedonpackagingonlyrun'
+assert sha(ci/'runtime/data.dbr')==sha(objects_ci/'runtime/data.dbr'),'Fresh4GiBDatawasnotreusedunchanged'
 board=tomllib.loads((ROOT/'UniXNU-b5q/board.toml').read_text());index=json.loads((ci/'transfer-index.json').read_text());report={'checks':{},'hardware_executed':False,'run':index['run'],'commit':index['commit']}
 esp=ci/'esp.img' if (ci/'esp.img').exists() else out/'esp.img'
 with esp.open('rb')as f:b=f.read(4096)
@@ -36,7 +38,11 @@ with tempfile.TemporaryDirectory(prefix='b5q-v24-accept-')as td:
  report['checks']['boot_args_ADT_two_clusters_firmware']=True;report['boot_args_bytes']=len(entry['args'].encode())
  payload=json.loads((ci/'payload/payload.json').read_text())
  for name,key in [('kernel.macho','payload_kernel_sha256'),('kernel.macho.adt','adt_sha256'),('scratch-data.img','data_ramdisk_sha256'),('kernel.macho.gpuaddon','gpu_addon_sha256'),('kernel.macho.trustcache','trust_cache_sha256')]:assert sha(temp/name)==payload[key],name
- raw=(temp/'kernel.macho').read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1]);names={n:v for v,rows in im.symbols().items()for n in rows}
+ raw=(temp/'kernel.macho').read_bytes();outer=Image(raw)
+ required_families=['com.apple.driver.AppleUSBXDCI','com.apple.driver.usb.AppleUSBXHCI','com.apple.iokit.IOUSBDeviceFamily','com.apple.iokit.IOUSBHostFamily','com.apple.driver.usb.AppleUSBHub','com.apple.driver.usb.AppleUSBHostCompositeDevice','com.apple.driver.usb.IOUSBHostHIDDevice','com.apple.driver.AppleHIDKeyboard','com.apple.iokit.IOUSBMassStorageDriver']
+ assert set(required_families)<=set(outer.entries),set(required_families)-set(outer.entries)
+ report['checks']['actual_prelinked_USB_HID_MassStorage_families']=required_families
+ im=Image(raw,outer.entries['com.apple.kernel'][1]);names={n:v for v,rows in im.symbols().items()for n in rows}
  for name in ['_sheng_cpu_idle_mach','_sheng_edge_cross_type_steals','_sheng_edge_idle_beside_excess','_sheng_edge_idle_beside_queued','_qcom_dwc3_bring_up','_qcom_dwc3_publish','_sheng_usb_probe','_b5q_usb_repeater','_b5q_usb_typec_init','_b5q_usb_otg','_b5q_usb_cable_role','__ZTV12QcomDwc3Xdci','__ZTV12QcomDwc3Xhci']:
   assert name in names,name
  assert '__ZTV10B5qUsbHost'not in names
