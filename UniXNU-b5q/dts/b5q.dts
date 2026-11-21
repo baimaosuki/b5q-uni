@@ -45,6 +45,16 @@
     };
 };
 
+// Scheduler classes follow the b5q CPU compatibles, not the three EPSS domains.
+&cpu0 { unixnu,cluster-type = "E"; };
+&cpu1 { unixnu,cluster-type = "E"; };
+&cpu2 { unixnu,cluster-type = "E"; };
+&cpu3 { unixnu,cluster-type = "P"; };
+&cpu4 { unixnu,cluster-type = "P"; };
+&cpu5 { unixnu,cluster-type = "P"; };
+&cpu6 { unixnu,cluster-type = "P"; };
+&cpu7 { unixnu,cluster-type = "P"; };
+
 // The rest of the live reservation set (including UH/RKP) must be enforced
 // by b5q firmware from its incoming FDT/EFI map. This subset never defines
 // the extent of allocatable RAM.

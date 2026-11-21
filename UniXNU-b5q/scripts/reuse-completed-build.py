@@ -67,6 +67,6 @@ trust.write_bytes(struct.pack('<4I', 3, 16, 16 + len(mods[0]),
                              16 + len(mods[0]) + len(mods[1])) + b''.join(mods))
 shutil.copyfile(source / 'runtime/data-seed.json', out / 'data-seed.json')
 (out / 'reuse.json').write_text(json.dumps(dict(source_run=a.source_run,
-    data_regenerated=False, original_data_run=44616733365,
+    data_regenerated=False, original_data_run=json.loads((out / 'data-seed.json').read_text()).get('ci_run', a.source_run),
     source_seed_metadata=json.loads((out / 'data-seed.json').read_text())), indent=2) + '\n')
-print('Staged pinned completed kernel and unchanged 2GiB sparse RAM Data; payload only')
+print('Staged pinned completed kernel and unchanged sparse RAM Data; logical bytes:', json.loads((out / 'data-seed.json').read_text())['logical_bytes'])

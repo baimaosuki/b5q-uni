@@ -88,21 +88,17 @@ def main():
             'qsmmuv500_cfg_probe': 'Clears sACR CACHE_LOCK; does not grant bank ownership',
             'wait_safe_toggle': 'Examined call is conditional on qcom,sdm845-smmu-500; not a USB bank allocator',
         },
-        'conclusion': 'No usable bank handoff found in the examined saved inputs or documented firmware interface',
-        'unresolved_contract': [
-            'SMR contains stream ID/mask/valid, not the associated context-bank index',
-            'Reading occupied S2CR to discover that index is explicitly prohibited',
-            'Scanning all SCTLR can access an unidentified protected display bank',
-            'SCTLR.M=0 does not prove that no other live stream references the bank',
-        ],
-        'required_implementation_input': 'An ownership map or a verified firmware domain handoff, including lifetime through ExitBootServices',
+        'conclusion': 'HAL compatible free CBAR metadata supports native USB allocation without occupied S2CR or bank SCTLR reads',
+        'CBAR_allocator_rule': 'type=(CBAR>>16)&3,vmid=CBAR&255; free if type0/type2/type1+VMID255; allocatedtype1VMID0 is excluded',
+        'native_implementation': 'package/B5qUsbSmmu.h; validates free SMR/nonzero slot, rejects existing USB SID, excludes last bypass bank',
+        'S2CR0_or_occupied_SCTLR_access_required': False,
         'other_device_bank_numbers_used': False,
         'new_apps_smmu_MMIO': False,
         'CI_dispatched': False,
         'v24_image_created': False,
     }
     args.out.write_text(json.dumps(report, indent=2) + '\n')
-    print('Static b5q audit complete: 15-entry HAL interface verified; USB bank ownership remains unknown')
+    print('Static b5q audit complete: exact HAL CBAR metadata supports native USB free-bank allocation')
 
 
 if __name__ == '__main__':
