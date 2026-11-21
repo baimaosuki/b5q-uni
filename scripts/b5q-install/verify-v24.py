@@ -37,7 +37,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-v24-accept-')as td:
  payload=json.loads((ci/'payload/payload.json').read_text())
  for name,key in [('kernel.macho','payload_kernel_sha256'),('kernel.macho.adt','adt_sha256'),('scratch-data.img','data_ramdisk_sha256'),('kernel.macho.gpuaddon','gpu_addon_sha256'),('kernel.macho.trustcache','trust_cache_sha256')]:assert sha(temp/name)==payload[key],name
  raw=(temp/'kernel.macho').read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1]);names={n:v for v,rows in im.symbols().items()for n in rows}
- for name in ['_sheng_cpu_idle_mach','_qcom_dwc3_bring_up','_qcom_dwc3_publish','_sheng_usb_probe','_b5q_usb_repeater','_b5q_usb_typec_init','_b5q_usb_otg','_b5q_usb_cable_role','__ZTV12QcomDwc3Xdci','__ZTV12QcomDwc3Xhci']:
+ for name in ['_sheng_cpu_idle_mach','_sheng_edge_cross_type_steals','_sheng_edge_idle_beside_excess','_sheng_edge_idle_beside_queued','_qcom_dwc3_bring_up','_qcom_dwc3_publish','_sheng_usb_probe','_b5q_usb_repeater','_b5q_usb_typec_init','_b5q_usb_otg','_b5q_usb_cable_role','__ZTV12QcomDwc3Xdci','__ZTV12QcomDwc3Xhci']:
   assert name in names,name
  assert '__ZTV10B5qUsbHost'not in names
  # Inspect actual N_SECT/global/nonweak flags on the new core helper.
@@ -46,7 +46,12 @@ with tempfile.TemporaryDirectory(prefix='b5q-v24-accept-')as td:
   sx,kind,section,desc,value=struct.unpack_from('<IBBHQ',raw,symoff+16*i)
   if not kind&0xe0 and raw[strings+sx:raw.index(b'\0',strings+sx)]==b'_sheng_cpu_idle_mach':helper.append((kind,desc))
  assert helper and all(kind&0xe==0xe and kind&1 and not desc&0x80 for kind,desc in helper),helper
+ from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
+ helper_va=names['_sheng_cpu_idle_mach'];helper_end=min(v for v in names.values()if v>helper_va)
+ instructions=list(Cs(CS_ARCH_ARM64,CS_MODE_ARM).disasm(im.read(helper_va,helper_end-helper_va),helper_va))
+ assert any(i.mnemonic=='bl'and int(i.op_str[1:],16)==names['_recount_processor_usage']for i in instructions)
  report['checks']['strong_recount_and_native_USB_symbols']=True
+ report['checks']['real_recount_call_and_Edge_counters']=True
  for kind,cls in [('xdci','QcomDwc3Xdci'),('xhci','QcomDwc3Xhci')]:
   abi=json.loads((ROOT/'UniXNU-b5q/scripts'/('usb-'+kind+'-26C5035r.json')).read_text());words=struct.unpack('<'+str(len(abi['slots']))+'Q',im.read(names['__ZTV'+str(len(cls))+cls]+16,8*len(abi['slots'])))
   assert all(v>>32&0xffff==int(slot[1],16)for v,slot in zip(words,abi['slots']));report['checks'][kind+'_vtable_PAC_slots']=len(words)
@@ -63,7 +68,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-v24-accept-')as td:
  # Keep a single small deployment manifest for established signature/root validators.
  delivery={'deploy_kernel_sha256':sha(temp/'kernel.macho'),'data_logical_bytes':logical,'kernel_command_line':entry['args'],'esp_files':{},'outputs':{'esp.img':{'bytes':esp.stat().st_size,'sha256':sha(esp)}},'ci_run':index['run'],'source_commit':index['commit']}
  (out/'package.manifest.json').write_text(json.dumps(delivery,indent=2)+'\n')
- if not(out/'esp.img').exists():esp.replace(out/'esp.img')
+ if esp.resolve()!=(out/'esp.img').resolve():esp.replace(out/'esp.img')
  invoke([sys.executable,ROOT/'scripts/b5q-install/verify-mount-runtime.py','--package',out])
  report['checks']['bootshim_signatures_trust_APFS_checksums']=True
  report['kernel']={'bytes':len(raw),'sha256':sha(temp/'kernel.macho')}

@@ -57,6 +57,7 @@ jobs:
           B5Q_V24_INPUT_7: ${{ secrets.B5Q_V24_INPUT_7 }}
         run: |
           set -euo pipefail
+          UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
           gh run download 44910077002 --repo "$GITHUB_REPOSITORY" --name b5q-build-44910077002 --dir "$RUNNER_TEMP/completed-v24"
           python3 UniXNU-b5q/scripts/stage-v24-inputs.py --unixnu UniXNU --artifact "$RUNNER_TEMP/completed-v24" --inputs "$RUNNER_TEMP/v24-inputs" --data-out "$RUNNER_TEMP/v24-data"
           python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/completed-v24" --data-out "$RUNNER_TEMP/v24-data-reused" --source-run 44910077002 --source-commit 110e027fca0f0a963ff98a692b372aab8fcb495f
