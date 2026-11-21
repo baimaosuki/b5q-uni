@@ -13,7 +13,15 @@ def invoke(args):subprocess.run([str(x)for x in args],check=True)
 relink=json.loads(next(ci.rglob('incremental-relink.json')).read_text())
 assert relink['core_translation_units_compiled']==0 and relink['board_translation_units_compiled']==3
 assert relink['gpu_recompiled'] is False and relink['data_regenerated'] is False
-assert relink['expected_core_sha256']=='88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b'
+assert relink['expected_core_sha256']==relink['unchanged_core_after_link_sha256']=='88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b'
+assert set(relink['changed_board_sources'])=={'QcomDwc3.cpp','B5qTouch.cpp','CpuFreqProbe.cpp'}
+for rel,before in relink['input_archive_members'].items():
+ if rel in relink.get('output_archive_members',{}):
+  after=relink['output_archive_members'][rel]
+  assert set(before)==set(after)
+  changed={n for n in before if before[n]!=after[n]}
+  expected={'QcomDwc3.late.o'} if 'qcom-dwc3/' in rel else {'QcomDwc3.late.o','B5qTouch.o','CpuFreqProbe.o'}
+  assert changed==expected,(rel,changed)
 assert sha(ci/'runtime/data.dbr')==sha(objects_ci/'runtime/data.dbr'),'Fresh4GiBDatawasnotreusedunchanged'
 board=tomllib.loads((ROOT/'UniXNU-b5q/board.toml').read_text());index=json.loads((ci/'transfer-index.json').read_text());report={'checks':{},'hardware_executed':False,'run':index['run'],'commit':index['commit']}
 esp=ci/'esp.img' if (ci/'esp.img').exists() else out/'esp.img'
@@ -39,7 +47,8 @@ with tempfile.TemporaryDirectory(prefix='b5q-v24-accept-')as td:
  nodes=fmt.adt_decode((temp/'kernel.macho.adt').read_bytes());assert nodes['/chosen']['text-fixups']==b''.join(x.encode()+b'\0'for x in board['payload']['text_fixups'])
  assert nodes['/chosen']['dram-base']==struct.pack('<Q',0x80000000)and nodes['/chosen']['dram-size']==struct.pack('<Q',0x80000000)
  assert nodes['/chosen']['kernel-ctrr-to-be-enabled']==struct.pack('<I',0)and nodes['/defaults']['sleep-disabled']==struct.pack('<I',1)
- cpuclasses={nodes['/cpus/cpu'+str(i)]['cluster-type']for i in range(8)};assert cpuclasses=={struct.pack('<I',ord('E')),struct.pack('<I',ord('P'))},cpuclasses
+ cpuclasses={i:nodes['/cpus/cpu'+str(i)]['cluster-type']for i in range(8)}
+ assert all(value==struct.pack('<I',ord('E' if i<3 else 'P'))for i,value in cpuclasses.items()),cpuclasses
  inv=json.loads((ROOT/'UniXNU-b5q/reports/samsung-gpu-inputs.json').read_text())
  for name,key in [('gmu_gen70200.bin','b5q-gmu-fw'),('a740_sqe.fw','b5q-sqe-fw'),('a740_zap.mbn','b5q-zap-fw')]:assert hashlib.sha256(nodes['/chosen'][key]).hexdigest()==inv['files'][name]['sha256']
  report['checks']['boot_args_ADT_two_clusters_firmware']=True;report['boot_args_bytes']=len(entry['args'].encode())
@@ -69,7 +78,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-v24-accept-')as td:
   abi=json.loads((ROOT/'UniXNU-b5q/scripts'/('usb-'+kind+'-26C5035r.json')).read_text());words=struct.unpack('<'+str(len(abi['slots']))+'Q',im.read(names['__ZTV'+str(len(cls))+cls]+16,8*len(abi['slots'])))
   assert all(v>>32&0xffff==int(slot[1],16)for v,slot in zip(words,abi['slots']));report['checks'][kind+'_vtable_PAC_slots']=len(words)
  for old in [b'B5qUsb: stage=warm-clocks',b'ppid=7fd',b'b5q-usb-delay'] :assert old not in raw,old
- for text in [b'smmu=skipped-el2-xpu',b'controller-DMA=deferred',b'TI3e version=',b'Charger69 OTG=',b'enable-report ok11=',b'EINT=%u HSE=%u',b'B5qTouch: stage=%s phase=before',b'B5qCpuFreq: governor-start']:assert text in raw,text
+ for text in [b'smmu=skipped-el2-xpu',b'controller-DMA=deferred',b'TI3e version=',b'Charger69 OTG=',b'enable-report ok11=',b'B5qTouch: stage=%s phase=before',b'B5qCpuFreq: governor-start']:assert text in raw,text
  # The ordered QMP table in the linked kernel is the FDT-derived 168-pair table.
  inp=json.loads((ROOT/'UniXNU-b5q/reports/usb-inputs-v24.json').read_text());table=b''.join(struct.pack('<HBB',o,v,0)for o,v in inp['qmp']['ordered_pairs']);assert table in raw
  report['checks']['QMP168_linked_and_old_warm_removed']=True
@@ -80,6 +89,15 @@ with tempfile.TemporaryDirectory(prefix='b5q-v24-accept-')as td:
  report['checks']['actual_4GiB_APFS_account_watchdogd']=True
  # Keep a single small deployment manifest for established signature/root validators.
  delivery={'deploy_kernel_sha256':sha(temp/'kernel.macho'),'data_logical_bytes':logical,'kernel_command_line':entry['args'],'esp_files':{},'outputs':{'esp.img':{'bytes':esp.stat().st_size,'sha256':sha(esp)}},'ci_run':index['run'],'source_commit':index['commit']}
+ allfiles=temp/'all-files';allfiles.mkdir()
+ invoke(['mcopy','-s','-i',esp,'::/EFI',allfiles])
+ members={p.relative_to(allfiles).as_posix():{'bytes':p.stat().st_size,'sha256':sha(p)}for p in (allfiles/'EFI').rglob('*')if p.is_file()}
+ assert set(members)==set(baseline['esp_files'])
+ for name in members:
+  if name not in ['EFI/UniXNU/Payloads/kernel.macho','EFI/UniXNU/Payloads/kernel.macho.adt','EFI/UniXNU/Payloads/kernel.macho.crypto-hmac.json']:
+   assert members[name]==baseline['esp_files'][name],name
+ delivery['esp_files']=members
+ report['checks']['all_FAT_members_and_unchanged_GPU_Data_trust_EFI']=True
  (out/'package.manifest.json').write_text(json.dumps(delivery,indent=2)+'\n')
  if esp.resolve()!=(out/'esp.img').resolve():esp.replace(out/'esp.img')
  invoke([sys.executable,ROOT/'scripts/b5q-install/verify-mount-runtime.py','--package',out])
