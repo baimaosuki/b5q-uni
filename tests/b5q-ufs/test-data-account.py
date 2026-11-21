@@ -15,6 +15,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-account-writers-') as td:
  for name in ['admin','staff']:(dslocal/f'groups/{name}.plist').write_bytes(plistlib.dumps({'users':[],'groupmembers':[]}))
  with patch.object(os,'chown'):
   seed.add_user(dslocal,'baimao','1234',real_name='baimao');seed.add_auto_login(base,'baimao','1234')
+  seed.write_root(base/'private/var/db/com.apple.xpc.launchd/disabled.plist',plistlib.dumps({'com.apple.watchdogd':True}),0o644)
  (base/'Users/baimao').mkdir(parents=True);(base/'Users/baimao/.skipbuddy').touch();(base/'private/var/db/.AppleSetupDone').touch()
  stats={path:dict(uid=uid,gid=gid,mode=mode,bytes=(base/path).stat().st_size) for path,(uid,gid,mode) in check.PATHS.items()}
  check.verify_files(base,stats)

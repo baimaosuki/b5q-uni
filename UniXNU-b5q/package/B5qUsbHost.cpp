@@ -5,6 +5,8 @@
 #include "B5qUsbPolicy.h"
 #include "B5qSpmi.h"
 #include <IOKit/IOLib.h>
+#include <IOKit/IOCatalogue.h>
+#include <libkern/c++/OSSymbol.h>
 #include <IOKit/IODeviceMemory.h>
 #include <IOKit/IOPlatformExpert.h>
 #include <IOKit/IODeviceTreeSupport.h>
@@ -184,7 +186,7 @@ void monitor(void *argument,wait_result_t) {
  }
 }
 static void worker(void *,wait_result_t) {
- unsigned delaySec=15;PE_parse_boot_argn("b5q-usb-delay",&delaySec,sizeof(delaySec));
+ unsigned delaySec=35;PE_parse_boot_argn("b5q-usb-delay",&delaySec,sizeof(delaySec));
  if(delaySec>300)delaySec=300; // bounded conversion and user override
  IOLog("B5qUsb: stage=delayed-start seconds=%u\n",delaySec);
  IOSleep(delaySec*1000);
@@ -248,10 +250,20 @@ static void worker(void *,wait_result_t) {
   if(!host->start(nub)){host->retain();nub->retain();break;}
   host->registerService();host->retain();nub->retain();
   b5q_usb_state=1;stage="host-started";
-  OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBHub");
-  OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBHostCompositeDevice");
-  OSKextLoadKextWithIdentifier("com.apple.driver.AppleHIDKeyboard");
-  OSReturn hid=OSKextLoadKextWithIdentifier("com.apple.driver.usb.IOUSBHostHIDDevice");
+  const char *hidFamilies[]={"com.apple.driver.usb.AppleUSBHub",
+    "com.apple.driver.usb.AppleUSBHostCompositeDevice","com.apple.driver.AppleHIDKeyboard",
+    "com.apple.driver.usb.IOUSBHostHIDDevice"};
+  OSReturn hid=kIOReturnError;
+  for(const char *identifier:hidFamilies) {
+   OSReturn loaded=OSKextLoadKextWithIdentifier(identifier);
+   bool matched=false;
+   if(loaded==kOSReturnSuccess) {
+    const OSSymbol *name=OSSymbol::withCString(identifier);
+    if(name){matched=gIOCatalogue&&gIOCatalogue->startMatching(name);name->release();}
+   }
+   IOLog("B5qUsb: family=%s load=%08x matching=%u\n",identifier,loaded,matched);
+   if(identifier==hidFamilies[3])hid=loaded;
+  }
   IOLog("B5qUsb: stage=%s base=0x%llx irq=%llu HID-load=0x%x\n",stage,B5qHardware::usbBase,B5qHardware::usbIrq,hid);
   MonitorContext *monitorMapping=new MonitorContext;
   if(monitorMapping){monitorMapping->nub=nub;monitorMapping->host=host;}

@@ -75,8 +75,9 @@ static const unsigned char touchDescriptor[]={
 // calls); _children at +24 (IOHIDEvent.h; appendChild stores into it and free releases it). _parent is never set (appendChild only
 // stores the child, int-163 skipped every finger by comparing it), so each child is an IOHIDEvent by its class instead.
 namespace edge {
-#if defined(NATIVE_HID_SOURCE_API) && NATIVE_HID_SOURCE_API && !__has_feature(ptrauth_calls)
-// Source-only bring-up without pointer authentication emits ordinary digitizer reports: a copied vtable of another family's ABI is never used.
+#if (defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX) || (defined(NATIVE_HID_SOURCE_API) && NATIVE_HID_SOURCE_API && !__has_feature(ptrauth_calls))
+// macOS never enters the iPadOS 24A446 edge-event vtable interposer.
+// Keep ordinary typed HID reports; do not read or replace a foreign vptr.
 extern "C" {volatile uint32_t native_touch_hid_multi[3];}
 extern "C" {volatile uint32_t native_touch_edge_stats[4];} // installed stays zero
 static void install(IORegistryEntry *) {}

@@ -14,19 +14,19 @@ int main(){
   auto write=[&](unsigned off,unsigned v){assert(regs.count(off));assert(hardware==2||off<0xcc00);events.push_back({'w',off,v});
    if(off==0xc40c||off==0xcc08)regs[off]&=~v;else regs[off]=v;
    if(off==0x20&&(v&2))reset=true;return true;};
-  auto delay=[&](unsigned us){assert(us==20000||us==100);events.push_back({'d',0,us});};
+  auto delay=[&](unsigned us){assert(us==20000||us==1000||us==100);events.push_back({'d',0,us});};
   assert(!B5qUsbPolicy::prepare(read,write,delay));
   assert(!regs[0xc708]&&(regs[0xc408]>>31)&&!regs[0xc40c]);assert((regs[0xc110]&(3u<<12))==(1u<<12)&&!(regs[0xc110]&(1u<<11)));
   if(hardware==2)assert(!regs[0xcc0c]&&!regs[0xcc08]);else assert(regs[0xcc0c]==0x456&&regs[0xcc08]==0x123);
-  unsigned mask=0,drain=0,soft=0,role=0,hold=0,stop=0;
+  unsigned mask=0,drain=0,soft=0,release=0,role=0,hold=0,gap=0,stop=0;
   for(unsigned i=0;i<events.size();++i){auto e=events[i];if(e.kind=='w'){
    if(e.off==0xc704)stop=i;
    if(e.off==0xc708)mask=i;
    if(e.off==0xc40c)drain=i;
    if(e.off==0xc110&&(e.value&(1u<<11)))soft=i;
-   if(e.off==0xc110&&!(e.value&(1u<<11)))role=i;
-  }if(e.kind=='d'&&e.value==20000)hold=i;}
-  assert(stop<mask&&mask<soft&&soft<hold&&hold<role);if(pending)assert(mask<drain&&drain<soft);
+   if(e.off==0xc110&&!(e.value&(1u<<11))){if(!release)release=i;else role=i;}
+  }if(e.kind=='d'&&e.value==20000)hold=i;if(e.kind=='d'&&e.value==1000)gap=i;}
+  assert(stop<mask&&mask<soft&&soft<hold&&hold<release&&release<gap&&gap<role);if(pending)assert(mask<drain&&drain<soft);
   // Any failed event access returns before releasing core reset/starting Host.
   for(unsigned fault:{0xc708u,0xc408u,0xc40cu,0xc140u}){
    bool host=false;auto faultRead=[&](unsigned off,unsigned &v){if(off==fault)return false;v=regs[off];return true;};
@@ -34,5 +34,5 @@ int main(){
    assert(B5qUsbPolicy::prepare(faultRead,faultWrite,[](unsigned){})!=nullptr&&!host);
   }
  }
- puts("PASS actual DWC3 policy: Device/DRD IRQ mask+W1C drain, no OTG access on non-DRD, ordered 20ms core reset and fail-before-host");
+ puts("PASS actual DWC3 policy: Device/DRD IRQ mask+W1C drain, no OTG access on non-DRD, ordered 20ms reset + separate1ms release + Hostrole and fail-before-host");
 }

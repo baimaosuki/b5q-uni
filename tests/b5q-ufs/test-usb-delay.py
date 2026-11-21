@@ -17,10 +17,10 @@ void IOSleep(unsigned ms){slept=ms;}
 '''
 main=r'''
 int main(){
- worker();assert(logged==15&&slept==15000);
+ worker();assert(logged==35&&slept==35000);
  supplied=true;
- for(unsigned input:{0u,1u,15u,300u,301u,0xffffffffu}){requested=input;worker();assert(logged==(input>300?300:input)&&slept==logged*1000);}
- puts("PASS production USB worker delay: default15s, zero/explicit override and300s overflow bound before MMIO");
+ for(unsigned input:{0u,1u,35u,300u,301u,0xffffffffu}){requested=input;worker();assert(logged==(input>300?300:input)&&slept==logged*1000);}
+ puts("PASS production USB worker delay: default35s, zero/explicit override and300s overflow bound before MMIO");
 }
 '''
 with tempfile.TemporaryDirectory(prefix='b5q-usb-delay-')as td:

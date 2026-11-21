@@ -87,6 +87,8 @@ const char *prepare(Read read,Write write,Delay delay) {
  }
  if(!write(0xc110,gctl|(1u<<11)))return "core-soft-reset";
  delay(20000);
+ if(!write(0xc110,gctl&~(1u<<11)))return "core-soft-reset-release";
+ delay(1000);
  if(!write(0xc110,(gctl&~((1u<<11)|(3U<<12)))|(1U<<12)))return "host-role";
  uint32_t phy2=0,phy3=0;
  if(!read(0xc200,phy2) || !write(0xc200,phy2&~((1u<<6)|(1u<<8))) ||

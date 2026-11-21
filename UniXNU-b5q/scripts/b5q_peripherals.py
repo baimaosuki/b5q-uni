@@ -61,7 +61,7 @@ def compile_object(cxx, cflags, source, target, llvm):
     if source.suffix == '.c':
         options = [v for v in options if v not in ['-std=gnu++17', '-fno-c++-static-destructors',
                    '-fno-exceptions', '-fno-rtti', '-fapple-kext', '-nostdinc++']]
-        options += ['-x', 'c', '-std=gnu11', '-fptrauth-function-pointer-type-discrimination']
+        options += ['-x', 'c', '-std=gnu11', '-mkernel', '-fptrauth-function-pointer-type-discrimination']
     if source.name == 'NativeHidInput.cpp':
         options += ['-DNATIVE_HID_SOURCE_API=1']
     command = [str(cxx), *options, '-c', str(source), '-o', str(target)]

@@ -52,7 +52,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  sources += [ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c','ShengGpuSmmu.c']]
  if a.sources:sources=[s for s in sources if s.name in set(a.sources.split(','))]
  for source in sources:
-  target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11','-fptrauth-function-pointer-type-discrimination']
+  target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11','-mkernel','-fptrauth-function-pointer-type-discrimination']
   if source.name=='NativeHidInput.cpp':cflags=cflags+['-DNATIVE_HID_SOURCE_API=1']
   subprocess.run([str(a.compiler),*cflags,'-c',str(source),'-o',str(target)],env=env,check=True)
   if source.stem=='NativeHidInput':

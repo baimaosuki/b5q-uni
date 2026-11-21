@@ -54,7 +54,7 @@ int main(int argc,char **argv) {
   auto read=[&](unsigned off,unsigned &v){assert(off<B5qHardware::usbBytes);if(mode=="register-fault")return false;
    v=registers[off];if(off==0x20 && reset && mode!="reset-timeout")v&=~2U;return true;};
   auto write=[&](unsigned off,unsigned v){assert(off<B5qHardware::usbBytes);++writes;registers[off]=v;if(off==0x20&&(v&2U))reset=true;return true;};
-  const char *why=B5qUsbPolicy::prepare(read,write,[&](unsigned us){assert(us==100||us==20000);if(us==100)++delays;});
+  const char *why=B5qUsbPolicy::prepare(read,write,[&](unsigned us){assert(us==100||us==20000||us==1000);if(us==100)++delays;});
   assert((why==nullptr)==(mode=="ok"||mode=="usb31"||mode=="usb32"));assert(delays<=500);
   if(mode=="identity" || mode=="register-fault")assert(writes==0);
  }

@@ -53,14 +53,19 @@ run('shared-gpu', [sys.executable, 'tests/b5q-ufs/test-shared-gpu.py'])
 v23=os.environ.get('B5Q_RUNTIME_VERSION')=='23'
 v22='touch=0' in board['payload']['kernel_args']
 work=workspace/('artifacts/b5q-runtime-v23-work' if v23 else 'artifacts/b5q-runtime-v22-work' if v22 else 'artifacts/b5q-runtime-v21-work')
-run('peripheral-target', [sys.executable, 'scripts/b5q-install/check-peripheral-target.py', '--reference',workspace/('artifacts/b5q-esp-runtime-v22/esp.img' if v23 else 'artifacts/b5q-esp-runtime-v21/esp.img' if v22 else 'artifacts/b5q-esp-runtime-v20/esp.img'),'--objects-out',work/'objects',*(['--sources','B5qUsbHost.cpp'] if v23 else [])])
+run('peripheral-target', [sys.executable, 'scripts/b5q-install/check-peripheral-target.py', '--reference',workspace/('artifacts/b5q-esp-runtime-v22/esp.img' if v23 else 'artifacts/b5q-esp-runtime-v21/esp.img' if v22 else 'artifacts/b5q-esp-runtime-v20/esp.img'),'--objects-out',work/'objects',*(['--sources','B5qUsbHost.cpp,LegacyDisplayProbe.cpp,NativeHidInput.cpp'] if v23 else [])])
 run('touch', [sys.executable, 'tests/b5q-ufs/test-touch.py'])
 run('data-account', [sys.executable, 'tests/b5q-ufs/test-data-account.py'])
 if v23:
+    import shutil
+    shutil.copyfile(work/'objects/NativeHidInput.o',work/'callback-objects/NativeHidInput.o')
     run('usb-irq', [sys.executable,'tests/b5q-ufs/test-usb-irq.py'])
     run('usb-events', [sys.executable,'tests/b5q-ufs/test-usb-events.py'])
     run('usb-delay', [sys.executable,'tests/b5q-ufs/test-usb-delay.py'])
-    run('callback-pac',[sys.executable,'scripts/b5q-install/check-usb-gmu-pac.py','--usb',work/'objects/B5qUsbHost.o','--armcpu',work/'callback-objects/ArmCpu.o','--gpu',work/'callback-objects/B5qGpu.o','--gmu',work/'callback-objects/ShengGmu.kit.o','--out',work/'callback-pac.json'])
+    run('callback-pac',[sys.executable,'scripts/b5q-install/check-usb-gmu-pac.py','--usb',work/'objects/B5qUsbHost.o','--armcpu',work/'callback-objects/ArmCpu.o','--gpu',work/'callback-objects/B5qGpu.o','--gmu',work/'callback-objects/ShengGmu.kit.o','--extended-dir',work/'callback-objects','--out',work/'full-cross-object-pac.json'])
+    run('usb-families',[sys.executable,'tests/b5q-ufs/test-usb-families.py'])
+    run('peripheral-steps',[sys.executable,'tests/b5q-ufs/test-peripheral-steps.py'])
+    run('watchdog-data',[sys.executable,'scripts/b5q-install/verify-data-account.py','--seed',work/'v22-data.dbr','--out',work/'actual-data-account.json'])
     run('v23-inputs',[sys.executable,'tests/b5q-ufs/test-v23-contract.py'])
 elif v22:
     run('geni-pac', [sys.executable, 'scripts/b5q-install/check-geni-pac.py','--objects',work/'objects','--out',work/'geni-pac.json'])

@@ -86,10 +86,10 @@ jobs:
           gh run download 44789459847 --repo "$GITHUB_REPOSITORY" --name b5q-build-44789459847 --dir "$RUNNER_TEMP/cached-kernel"
           cp -R "$RUNNER_TEMP/completed-artifact/macos-27.3-26C5035r/b5q_macos/tree/build/." "$RUNNER_TEMP/cached-kernel/macos-27.3-26C5035r/b5q_macos/tree/build/"
           rm -rf "$RUNNER_TEMP/completed-artifact"
-      - name: Recompile one USB object and relink cached core
+      - name: Recompile three isolated board objects and relink cached core
         run: |
           set -euo pipefail
-          python3 UniXNU-b5q/scripts/relink-b5q-peripherals.py --unixnu UniXNU --device UniXNU-b5q --cached-tree "$RUNNER_TEMP/cached-kernel/macos-27.3-26C5035r/b5q_macos/tree" --source-run 44837528408 --source-commit 1a6f8ee19e5eb8e32a240df9308390be062009fa --changed B5qUsbHost.cpp --out "$RUNNER_TEMP/board-relink" 2>&1 | tee "$RUNNER_TEMP/board-relink.log"
+          python3 UniXNU-b5q/scripts/relink-b5q-peripherals.py --unixnu UniXNU --device UniXNU-b5q --cached-tree "$RUNNER_TEMP/cached-kernel/macos-27.3-26C5035r/b5q_macos/tree" --source-run 44837528408 --source-commit 1a6f8ee19e5eb8e32a240df9308390be062009fa --changed B5qUsbHost.cpp,LegacyDisplayProbe.cpp,NativeHidInput.cpp --out "$RUNNER_TEMP/board-relink" 2>&1 | tee "$RUNNER_TEMP/board-relink.log"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/uefi-sheng

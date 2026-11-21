@@ -101,7 +101,7 @@ def main():
   obj=compile_object(cxx,cflags,device/'package'/name,out/(Path(name).stem+'.o'),llvm)
   run(['xcrun','ar','r',ctx.tree/rel,obj]);record['board_translation_units_compiled']+=1
  added=build_added(device/'package',out/'input',cxx,cflags,llvm,device/'scripts',selected)
- run(['xcrun','ar','r',ctx.tree/inputs[6],*added])
+ if added:run(['xcrun','ar','r',ctx.tree/inputs[6],*added])
  record['board_translation_units_compiled']+=len(SOURCES if selected is None else [n for n in SOURCES if n in selected])
  record['added_objects']={p.name:sha(p) for p in added}
  record['optional_cpu_idle_helper_present']='_sheng_cpu_idle_mach' in defined

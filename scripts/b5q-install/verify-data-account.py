@@ -10,7 +10,8 @@ PATHS={'private/var/db/.AppleSetupDone':(0,0,0o644),
  'private/var/db/dslocal/nodes/Default/groups/staff.plist':(0,0,0o600),
  'Users/baimao':(501,20,0o750),'Users/baimao/.skipbuddy':(501,20,0o644),
  'Library/Preferences/com.apple.loginwindow.plist':(0,0,0o644),
- 'private/etc/kcpassword':(0,0,0o600)}
+ 'private/etc/kcpassword':(0,0,0o600),
+ 'private/var/db/com.apple.xpc.launchd/disabled.plist':(0,0,0o644)}
 
 def verify_files(base,stats):
  for path,expected in PATHS.items():
@@ -25,7 +26,8 @@ def verify_files(base,stats):
  login=plistlib.loads((base/'Library/Preferences/com.apple.loginwindow.plist').read_bytes());assert login['autoLoginUser']=='baimao'
  key=bytes.fromhex('7d895223d2bcddeaa3b91f');expected=bytes(c^key[i%len(key)] for i,c in enumerate(b'1234'+bytes(8)))
  assert (base/'private/etc/kcpassword').read_bytes()==expected and len(expected)==12
- return {'administrator':'baimao','uid':501,'gid':20,'groups':['admin','staff'],'PBKDF2_password_verified':True,
+ watchdog=plistlib.loads((base/'private/var/db/com.apple.xpc.launchd/disabled.plist').read_bytes());assert watchdog.get('com.apple.watchdogd')is True
+ return {'watchdogd_disabled_in_actual_plist':True,'watchdogd_plist_path':'private/var/db/com.apple.xpc.launchd/disabled.plist','watchdogd_policy':watchdog,'administrator':'baimao','uid':501,'gid':20,'groups':['admin','staff'],'PBKDF2_password_verified':True,
          'skip_setup':True,'skipbuddy':True,'autoLoginUser':'baimao','kcpassword_12_bytes_verified':True,
          'actual_APFS_inodes':stats,'hardware_tested':False}
 

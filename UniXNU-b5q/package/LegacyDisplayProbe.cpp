@@ -495,25 +495,30 @@ __attribute__((noinline)) bool native_legacy_gop_mapping_observed(IOService *obj
     // only the published display-scale; the scanout copy still moves one actual pixel per pixel.
     if(enabled<1 || enabled>3 || phase!=4 || unitScaleChosen || PE_current_console(&video) ||
        video.v_width!=width || video.v_height!=height || video.v_rotate ||
-       mapping->getPhysicalAddress()!=video.v_baseAddr)return false;
+       mapping->getPhysicalAddress()!=video.v_baseAddr) {
+        IOLog("B5qDisplay: mapping-failed unit-scale-status=%d stage=preconditions\n",native_legacy_unit_scale_status);return false;
+    }
     // Explicit offline UI policy: `enabled` actual GOP scanout pixels per logical
     // point in each direction (1 = native pixels). This is not physical pixel density,
     // panel timing, an Apple device identity or a synthesized mode list.
     unitScaleChosen=IORegistryEntry::fromPath("/chosen",gIODTPlane);
     if(!unitScaleChosen || !publishOrMatchWord(unitScaleChosen,"display-scale",enabled,unitScaleAdded) ||
        !publishOrMatchWord(unitScaleChosen,"display-rotation",video.v_rotate,unitRotationAdded)) {
+        IOLog("B5qDisplay: mapping-failed unit-scale-status=%d\n",native_legacy_unit_scale_status);
         finishUnitScalePolicy(false);return false;
     }
     OSData *scale=OSDynamicCast(OSData,unitScaleChosen->getProperty("display-scale"));
     OSData *rotation=OSDynamicCast(OSData,unitScaleChosen->getProperty("display-rotation"));
     uint32_t actualScale=0,actualRotation=0;
     if(!scale || !rotation || scale->getLength()!=4 || rotation->getLength()!=4) {
+        IOLog("B5qDisplay: mapping-failed unit-scale-status=%d\n",native_legacy_unit_scale_status);
         finishUnitScalePolicy(false);return false;
     }
     memcpy(&actualScale,scale->getBytesNoCopy(),4);memcpy(&actualRotation,rotation->getBytesNoCopy(),4);
     native_legacy_chosen_scale=actualScale;native_legacy_chosen_rotation=actualRotation;
     native_legacy_unit_scale_status=actualScale==enabled && actualRotation==video.v_rotate?0:2;
-    if(native_legacy_unit_scale_status){finishUnitScalePolicy(false);return false;}
+    if(native_legacy_unit_scale_status){IOLog("B5qDisplay: mapping-failed unit-scale-status=%d\n",native_legacy_unit_scale_status);
+        finishUnitScalePolicy(false);return false;}
     return true;
 }
 __attribute__((noreturn,noinline)) void native_legacy_backend_guard(unsigned slot,void *object,void *caller) {
@@ -635,10 +640,32 @@ extern "C" void b5q_gpu_start(void);
 extern "C" void sheng_cpufreq_probe(void),sheng_board_clock_probe(void),sheng_thermal_probe(void),sheng_thermal_level_probe(void),sheng_buttons_probe(void),native_hid_input_probe(void),b5q_touch_probe(void),sheng_dpu_probe(void);
 namespace {
 void b5qPeripheralWorker(void *,wait_result_t) {
+    IOSleep(3000);
     IOLog("B5qPeripherals: stage=after-display\n");
-    sheng_cpufreq_probe();sheng_board_clock_probe();
-    sheng_thermal_probe();sheng_thermal_level_probe();
-    sheng_buttons_probe();native_hid_input_probe();b5q_touch_probe();sheng_dpu_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_cpufreq_probe:before");
+    sheng_cpufreq_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_cpufreq_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","sheng_board_clock_probe:before");
+    sheng_board_clock_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_board_clock_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","sheng_thermal_probe:before");
+    sheng_thermal_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_thermal_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","sheng_thermal_level_probe:before");
+    sheng_thermal_level_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_thermal_level_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","sheng_buttons_probe:before");
+    sheng_buttons_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_buttons_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","native_hid_input_probe:before");
+    native_hid_input_probe();
+    IOLog("B5qPeripherals: step=%s\n","native_hid_input_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","b5q_touch_probe:before");
+    b5q_touch_probe();
+    IOLog("B5qPeripherals: step=%s\n","b5q_touch_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","sheng_dpu_probe:before");
+    sheng_dpu_probe();
+    IOLog("B5qPeripherals: step=%s\n","sheng_dpu_probe:after");
     IOLog("B5qPeripherals: stage=ready\n");
     thread_terminate(current_thread());
 }
