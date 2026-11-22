@@ -35,6 +35,18 @@ harness = r'''
 #include <cassert>
 #include <vector>
 #include <cstdio>
+#include <cstring>
+#include "B5qUsbDmaHandoff.h"
+const int gIODTPlane = 0;
+struct IORegistryEntry {
+ static IORegistryEntry *fromPath(const char *name,int){assert(!strcmp(name,"/chosen"));static IORegistryEntry entry;return &entry;}
+};
+#define OSSafeReleaseNULL(p) ((p)=nullptr)
+uint32_t flag = 0;
+B5qUsbDmaHandoff::State firmware = {};
+bool flagPresent = false, statePresent = false;
+bool readChosen(IORegistryEntry *,const char *name,uint32_t &out){assert(!strcmp(name,"b5q-usb-dma-ready"));out=flag;return flagPresent;}
+bool readChosen(IORegistryEntry *,const char *name,B5qUsbDmaHandoff::State &out){assert(!strcmp(name,"b5q-usb-dma-state"));out=firmware;return statePresent;}
 struct Map {void release(){}};
 struct Region {Map *map=nullptr;volatile uint32_t *va=nullptr;};
 uint32_t regs[1024]={};Map mapping;
@@ -61,10 +73,21 @@ int main(){
  regs[0x120/4]=0x55333301;
  assert(bringUp() && !gDmaReady && native_usb_stats[7]==~0u);
  assert((stages==std::vector<int>{1,2,3,4,5,6,7,8,9}));
+ flagPresent=true;flag=1;
+ assert(!smmuIdentity()); // Ready alone is insufficient.
+ statePresent=true;
+ firmware={1,0x40,0,0,0,0,0,0x80000000,0x100000000};
+ assert(smmuIdentity() && native_usb_stats[7]==0x40);
+ firmware.attach=22;assert(!smmuIdentity());firmware.attach=0;
+ firmware.locate=1ull<<63;assert(!smmuIdentity());firmware.locate=0;
+ firmware.sid=0x60;assert(!smmuIdentity());firmware.sid=0x40;
+ firmware.ownedBytes=UINT64_MAX&~0xfffull;assert(!smmuIdentity());
+ firmware.ownedBytes=4095;assert(!smmuIdentity());
+ flag=0;
  stages.clear();ss=false;assert(bringUp() && utmi==1);
  stages.clear();typec=false;assert(bringUp()); // TI/QMP remain independently testable.
  stages.clear();rep=false;assert(!bringUp() && stages.back()==-6);
- rep=true;typec=true;assert(enterRole(kRoleHost) && otgOn);
+ rep=true;typec=true;assert(enterRole(kRoleHost) && !otgOn);
  leaveRole(kRoleHost);assert(!otgOn);
  assert(enterRole(kRoleDevice) && !otgOn);
  assert(enterRole(kRoleNone) && !otgOn);
@@ -76,5 +99,5 @@ with tempfile.TemporaryDirectory(prefix='b5q-usb-no-smmu-') as td:
     cpp = Path(td) / 'test.cpp'
     cpp.write_text(harness)
     exe = Path(td) / 'test'
-    subprocess.run(['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', str(cpp), '-o', str(exe)], check=True)
+    subprocess.run(['c++', '-std=c++17', '-Wall', '-Wextra', '-Werror', '-I', str(root / 'UniXNU-b5q/package'), str(cpp), '-o', str(exe)], check=True)
     subprocess.run([str(exe)], check=True)

@@ -10,6 +10,7 @@
 #include "GeniI2c.h"
 #include "B5qUsbInputs.h"
 #include "B5qUsbIrq.h"
+#include "B5qUsbDmaHandoff.h"
 #include <mach/mach_time.h>
 extern "C" bool b5q_usb_repeater(bool,bool);
 extern "C" bool b5q_usb_typec_init(void);
@@ -22,13 +23,15 @@ extern "C" bool b5q_usb_otg(bool);
 #include <kern/clock.h>
 #include <pexpert/pexpert.h>
 #include <IOKit/IODeviceMemory.h>
+#include <IOKit/IODeviceTreeSupport.h>
 #include <IOKit/IOPlatformExpert.h>
+#include <libkern/c++/OSData.h>
 extern "C" {
 int armcpu_spi_attach(uint32_t, bool, void (*)(void *), void *, uint32_t *, uint64_t *);
 int armcpu_spi_mask(uint32_t, bool);
 bool sm8550_gcc_update32(volatile uint32_t *, uint32_t, uint32_t);
 // [0] stage (negative: the step that failed), [1] GSNPSID, [2] GUID-free hardware parameter 0, [3] parameter 3, [4] parameter 7,
-// [5] GDSC USB30, [6] GDSC PHY, [7] SMMU slot | bank << 16, [8] repeater status, [9] RPMh rails found, [10] VBUS override state,
+// [5] GDSC USB30, [6] GDSC PHY, [7] firmware DMA stream ID or ~0u, [8] repeater status, [9] RPMh rails found, [10] VBUS override state,
 // [11] interrupts, [12] powerOn calls, [13] powerOff calls, [14] controllerReset result, [15] DSTS at power on, [16] DCFG after
 // reset, [17] GCTL after reset, [18] GUSB2PHYCFG after reset, [19] start result, [20] power state request result, [21] kext load result,
 // with usb=2, every 2 s: [22] GSBUSCFG0, [23] GSBUSCFG1, [24] GUCTL1, [25] SMMU global fault, [26] DSTS, [27] DALEPENA,
@@ -212,10 +215,31 @@ bool superSpeedInit() {
 // allocator scan or diagnostic may touch apps_smmu here. A future loader-owned
 // EFI_HAL_IOMMU_PROTOCOL handoff must prove the coherent USB domain first.
 bool gDmaReady, gTypecReady;
+template<typename T>
+bool readChosen(IORegistryEntry *chosen, const char *name, T &value) {
+    OSData *data = chosen ? OSDynamicCast(OSData, chosen->getProperty(name)) : nullptr;
+    if (!data || data->getLength() != sizeof(value)) return false;
+    memcpy(&value, data->getBytesNoCopy(), sizeof(value));
+    return true;
+}
+
 bool smmuIdentity() {
-    native_usb_stats[7] = ~0u;
-    IOLog("qcom-dwc3: stage=5 smmu=skipped-el2-xpu dma=deferred-no-firmware-handoff\n");
-    return false;
+    IORegistryEntry *chosen = IORegistryEntry::fromPath("/chosen", gIODTPlane);
+    uint32_t flag = 0;
+    B5qUsbDmaHandoff::State state = {};
+    const bool hasFlag = readChosen(chosen, "b5q-usb-dma-ready", flag);
+    const bool hasState = readChosen(chosen, "b5q-usb-dma-state", state);
+    OSSafeReleaseNULL(chosen);
+    if (hasState) {
+        IOLog("qcom-dwc3: firmware-dma v=%u sid=%x locate=%llx create=%x configure=%x attach=%x map=%x owned=%llx+%llx\n",
+              state.version, state.sid, state.locate, state.create, state.configure,
+              state.attach, state.map, state.ownedBase, state.ownedBytes);
+    }
+    const bool ready = hasFlag && hasState && B5qUsbDmaHandoff::ready(flag, state);
+    native_usb_stats[7] = ready ? state.sid : ~0u;
+    IOLog("qcom-dwc3: stage=5 smmu=skipped-el2-xpu firmware-dma-ready=%u flag=%u state-present=%u\n",
+          ready, flag, hasState);
+    return ready;
 }
 }  // namespace
 
@@ -542,9 +566,9 @@ void enterHost() {
 }
 bool enterRole(int role) {
     if (!gDmaReady) {
-        // Test the real TI/Type-C power path without arming any USB DMA ring.
+        // PHY and Type-C diagnostics can run without sourcing VBUS or starting DMA.
         if (role == kRoleNone) return b5q_usb_otg(false);
-        if (!repeater(false,role == kRoleHost) || !b5q_usb_otg(role == kRoleHost)) return false;
+        if (!b5q_usb_otg(false) || !repeater(false,role == kRoleHost)) return false;
         followOrientation();
         IOLog("qcom-dwc3: hardware-only role=%u dma=deferred-no-firmware-handoff\n",role);
         return true;

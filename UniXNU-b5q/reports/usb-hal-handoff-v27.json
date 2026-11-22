@@ -1,0 +1,137 @@
+{
+  "inputs": {
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/HALIOMMUDxe/HALIOMMUDxe.efi": {
+      "bytes": 147456,
+      "sha256": "a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef"
+    },
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.efi": {
+      "bytes": 90112,
+      "sha256": "34df5506ffd34b176e5211dac6c728c5e2cc3a45d101c1657df539ddef1d42f7"
+    },
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.patched.efi": {
+      "bytes": 90112,
+      "sha256": "eb6aa6be8e3c7a0b2d0f05f65408a9f29d41a323b6c91f536dc3050697a72c55"
+    }
+  },
+  "selected_usbconfig": "UsbConfigDxe.patched.efi per UsbConfigDxe.inf and saved FV PE32 payload",
+  "protocol": {
+    "GUID": "54b6d3b4-5d33-4f91-8600-6c41d5deb19a",
+    "revision": "0x10002",
+    "init": "0x1700: void init(table **out)",
+    "deinit": "0x1720: return",
+    "function_table_RVA": "0xd0d0",
+    "result": "32-bit HAL_IOMMUResult_t; success == 0. LocateProtocol returns EFI_STATUS.",
+    "slots": [
+      {
+        "rva": "0x1970",
+        "signature": "domain_create(void **out)"
+      },
+      {
+        "rva": "0x1a20",
+        "signature": "domain_delete(void *domain)"
+      },
+      {
+        "rva": "0x1ba0",
+        "signature": "domain_attach(void *domain, void *client, uint32_t arid, uint32_t mask)"
+      },
+      {
+        "rva": "0x2870",
+        "signature": "domain_detach(void *domain, void *client, uint32_t arid, uint32_t mask)"
+      },
+      {
+        "rva": "0x2db0",
+        "signature": "domain_configure(void *domain, struct hal_iommu_domain_config *cfg)"
+      },
+      {
+        "rva": "0x3130",
+        "signature": "flush_domain(void *domain)"
+      },
+      {
+        "rva": "0x31c0",
+        "signature": "flush_domain_va_list(void *domain, BOOLEAN last_level, uint32_t count, uint64_t *va_list)"
+      },
+      {
+        "rva": "0x3260",
+        "signature": "register_fault_handler(void *domain, void (*handler)(void *, struct hal_iommu_fault_info *), void *context)"
+      },
+      {
+        "rva": "0x3020",
+        "signature": "configure_bypass_domain(void *domain, enum hal_iommu_bypass_domain_type type)"
+      },
+      {
+        "rva": "0x3280",
+        "signature": "idiom_detach(void *client, uint32_t arid, uint32_t mask)"
+      },
+      {
+        "rva": "0x4840",
+        "signature": "mmu_aspace_init(void **out, uint64_t base, size_t size)"
+      },
+      {
+        "rva": "0x4990",
+        "signature": "mmu_aspace_destroy(void *aspace)"
+      },
+      {
+        "rva": "0x44f0",
+        "signature": "mmu_map(void *aspace, uint64_t va, uint64_t pa, uint32_t count, uint32_t flags)"
+      },
+      {
+        "rva": "0x4770",
+        "signature": "mmu_unmap(void *aspace, uint64_t va, uint32_t count)"
+      },
+      {
+        "rva": "0x2cd0",
+        "signature": "domain_update_aspace(struct hal_iommu_domain_config *cfg, void *aspace)"
+      }
+    ],
+    "domain_config_layout": {
+      "size": 48,
+      "vmsa": 0,
+      "TTBR0": 8,
+      "TTBR1": 16,
+      "MAIR0": 24,
+      "MAIR1": 28,
+      "SCTLR": 32,
+      "TCR": 36,
+      "TCR2": 40
+    }
+  },
+  "stock_sequence": [
+    "0x3ff8 LocateProtocol",
+    "0x4060 HAL init",
+    "0x4078 create",
+    "0x4104 configure_bypass(domain,0)",
+    "0x41a0 attach(domain,\"USB0\",0x03000000,0)"
+  ],
+  "stock_map": "No translated configure, aspace init, or Map call on this chain; IORT input maps USB0 ARID 0x03000000 to SID 0x40 with CacheCoherency=0. See usb-IORT-v26.json.",
+  "translated_configuration": {
+    "map_count_unit": 4096,
+    "flags_mask": 3,
+    "flags_WB_IS": 0,
+    "PTE_attr_bits": "0x708",
+    "MAIR0": "0x00ff0400",
+    "SCTLR": "0x00c000e7",
+    "TCR": "0x00802010",
+    "TCR2": "0x0003c071"
+  },
+  "ExitBootServices": {
+    "HAL": "No callback identified in entry/constructors/IORT init or protocol init/deinit. No EFI EBS event-group GUID or identified CreateEventEx/CreateEvent call. This alone does not guarantee domain lifetime.",
+    "UsbConfig": "CreateEventEx call 0x1940 -> callback 0x1738 -> cleanup 0x5210. Stock detach at 0x5418 then delete at 0x543c. Selected 0x53ec branches past detach, delete can return 22 DOMAIN_IN_USE; handle cleared at 0x5448.",
+    "StopController": "0x5470 does not release domain",
+    "idiom_detach": "0x3280 calls 0x1830, which does not return a usable existing domain handle"
+  },
+  "address_references": {
+    "HAL_attach_free_SMR_scan": [
+      "0x2510",
+      "0x38a0",
+      "0x3470"
+    ],
+    "direct_read": "0x3494 ldr w0,[x8]",
+    "selected_usbconfig_patch_RVA": "0x53ec"
+  },
+  "treatment": [
+    "Replace the selected USB configuration module with a source-owned b5q integration that quiesces firmware USB and releases the old domain via its own handle.",
+    "Holding exclusive ownership, create a translated domain and identity-map the allocator usable regions and source-proven low USB DMA buffers. Check all HAL results, page visibility, DMA coverage and table retention. Attach USB0 exactly once with the verified tuple.",
+    "Have the USB owner preserve the committed mapping across its ExitBootServices callback and prove the HAL access path before enabling it. DarwinBoot relays verified state into the ADT. In absence of a qualified producer leave the ready flag absent and keep USB controller DMA and VBUS source disabled."
+  ],
+  "current": "Consumer only. Matching source-owned retire/adopt and table lifetime unavailable; no DarwinBoot or firmware build."
+}

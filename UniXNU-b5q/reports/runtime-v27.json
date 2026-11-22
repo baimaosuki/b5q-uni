@@ -1,0 +1,105 @@
+{
+  "observed_v26": {
+    "source": "logs/b5q-xnu2log-v26/XNU2LOG.txt",
+    "text_sha256": "cc71440866f5c45b6522bc58183476619129f040ad6ad7c358c3c0980af59871",
+    "binary_sha256": "c067e07f642de9fa86502c804c07c3193ee9b68f8ca6480cf3d3a02ed95ed462",
+    "sequence": 228,
+    "lost": 0,
+    "lines": 2051,
+    "v26_esp_sha256": "1cc8e24241b05aa91d1bfc7d9580453e0e3f32f645123f2f2d0105e4afcf5dbd",
+    "observations": {
+      "touch": {
+        "lines": "399\u2013413",
+        "fifo_if_disable": 1,
+        "fw_revision": "0x303"
+      },
+      "usb": {
+        "lines": "385\u2013398",
+        "SE6_FIFO_prepare": 0,
+        "TI_transaction_result": "unknown in old log: version=00, overrides=0"
+      },
+      "display": {
+        "line": 2009,
+        "GPU_preparations": 428,
+        "failures": 0
+      },
+      "keys": {
+        "line": 2012,
+        "hardware_events": 28,
+        "deliveries": 26
+      },
+      "governor": "mode 4 telemetry and frequency changes observed"
+    }
+  },
+  "v27_changes": {
+    "touch": "GPIO44/45 open drain, 0x20 TouchComm V1, 2 us phase, 1 ms bounded stretch, up to 9 recovery clocks, GPIO19/INTID240 hardware IRQ and native HID retained",
+    "repeater": "GPIO48 mux2 and GPIO49 mux1 in Samsung pinctrl-kalama.c, pull-up 2mA, GENI IOS gate. PMIC low/high 2/5 ms and readbacks. Initial transfer plus 3 retries at 500 us, single 0x4f diagnostic read after exhausted NACK, non-fatal override readbacks.",
+    "dma": "XNU ADT handoff consumer only. Matching firmware owner needs supported retire/adopt, mapping privilege and EBS lifetime. Physical validation pending."
+  },
+  "HAL_evidence": "reports/usb-hal-handoff-v27.json",
+  "local_tests_sha256": {
+    "test-touch-bus-build": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test-touch-bus": "f6451cd985308ea848070ab2c2e61f7acfbbc864b81b513585ae38b0d00f277c",
+    "test-v27-usb-board-build": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test-v27-usb-board": "a3aadc2c8f46072606156763910d3d03a9896b9bfe81dba836e5f398c694504c",
+    "test-touch-power-build": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "test-touch-power": "3386ecfe31076c82288e12ae978dcbfb7338f3444e1de4bd74a2a72fc878ae72",
+    "test-touch": "626279b96a1e7101fd551bf9b2a79d7f60f9b7c14e41fc912c0f194fb3a83cb4",
+    "test-touch-wait": "d1f1becc51106756a63d01f689bdb97710e74f18db26d0bb65267e75d1ce93a9",
+    "test-v25-usb": "268f7ababbdedc545911b50c8bb1ee68ec999eb6e4cb4497d4ebffee27dcaabf",
+    "test-v26-geni": "e065e69805101c8a7e87380a14d58a8b884006d587d278d2c409825a2252a8ca",
+    "test-usb-inputs-v24": "a416ebfb722028dbb7a2f48ec1931154cf47c38dbafe3865aefa74fced96820d",
+    "target-objects": "69aebf8848d57b63e9d919504646fc33e885206e25bf7517579dc002bfebda84",
+    "PAC": "1d8af8bba146cb3cc7233002cdace6bd1cc6d10278d4d68c6eba723c51cc1d60",
+    "USB-GENI-PAC": "9ef7362af1859c0a14909c2ae0f773bed82d036dda48f63175bec8aad16d9330",
+    "USB-no-SMMU": "065644432737e758ad05ada6699d367d89affb25fb31ba9b99298a974d0ca446",
+    "relink-plan": "bec73fb12e00fed9323ad04be1f9d0312aab3c37a61bab570c59de19be35bcea",
+    "record": "048914548be506e63ca18eeeeb7bea16efdad65e36f852fa9723c2a77ef4a90c"
+  },
+  "target_compile": {
+    "passed": true,
+    "duplicate_external_definitions": {},
+    "XHCI_slots": 427,
+    "objects": {
+      "QcomDwc3": {
+        "target": "arm64e-ios27",
+        "imports": 639,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      },
+      "B5qUsbBoard": {
+        "target": "arm64e-ios27",
+        "imports": 17,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      },
+      "B5qTouch": {
+        "target": "arm64e-ios27",
+        "imports": 18,
+        "unresolved": [],
+        "expected_new_core_imports": []
+      }
+    },
+    "all_saved_context_external_helpers_present": true,
+    "new_core_linkage_pending": true
+  },
+  "source_sha256": {
+    "B5qTouch.cpp": "bc3ea87eaf5315adecb1cc4920fa85742639502db8dba506a5d599d730119a34",
+    "B5qTouchBus.h": "57efea31d69dfaf878b31f6eb40700a8d87da322d3181a4dde47912a02fe1a83",
+    "B5qUsbBoard.cpp": "d346cf6ed4eeb0f87fee6fe733a3015ebd720a613472bd9923a567321b2e0280",
+    "B5qUsbBoardCore.h": "381bff31be85799874d8dce6212f5ab8948847c6c91876a77b725e8fc6cc5b26",
+    "B5qUsbDmaHandoff.h": "6ac989dbc054c3823d3e66910b72234a10c94a0c858b66f46bed02d56347d3fe",
+    "QcomDwc3.cpp": "b0a5177b87134fd2cc603734fde3ebf31a291f800d3c806f96c4fed99ba1a2bb"
+  },
+  "build": {
+    "upstream_run": 44937931538,
+    "compile_units": [
+      "B5qTouch.cpp",
+      "B5qUsbBoard.cpp",
+      "QcomDwc3.cpp"
+    ],
+    "CI": "pending",
+    "device": "pending",
+    "firmware": "unmodified"
+  }
+}

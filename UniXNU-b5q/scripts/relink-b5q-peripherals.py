@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-"""Relink the completed v25 native cache, compiling only four v26 sources.
+"""Relink a completed native cache with the selected release's board objects.
 
-The v24 core and v25 CpuFreqProbe, GPU, binders and Data are retained. --prepare-only
-is portable; --reference-image may inspect an existing collection in that mode
-when the local cache omitted the original native executable.
+The v26 recipe uses v25 inputs and compiles four sources. The v27 recipe uses
+v26 inputs and retains GeniI2c. Use --prepare-only to inspect inputs locally.
 """
 import argparse
 import hashlib
@@ -17,8 +16,6 @@ import shutil
 import subprocess
 import sys
 
-SOURCE_RUN = 44930613230
-SOURCE_COMMIT = '697902ef16648c0aeacbc2b1e7efe9ee19def41e'
 CORE_SHA256 = '88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b'
 XNU_OBJECT = 'build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837'
 CORE_ARCHIVE = XNU_OBJECT + '/mach.development.bcm2837.link/mach.development.bcm2837.a'
@@ -46,6 +43,11 @@ REPLACEMENTS = {
     'B5qTouch.cpp': ('B5qTouch.o', (DISPLAY,)),
     'B5qUsbBoard.cpp': ('B5qUsbBoard.o', (DISPLAY,)),
     'GeniI2c.c': ('GeniI2c.o', (DISPLAY,)),
+}
+RECIPES = {
+    'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', tuple(REPLACEMENTS)),
+    'v27': (44937931538, '85a328d1956a7216892569a034decf049f889d16',
+            ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp')),
 }
 
 
@@ -125,13 +127,19 @@ def main():
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--reference-image', type=Path, help='Preparation only: native or fileset reference')
     parser.add_argument('--reused-data', type=Path, help='Existing staged data.dbr and paired addon/trust metadata')
-    parser.add_argument('--changed', default=','.join(REPLACEMENTS), help='Exactly the four v26 sources')
-    parser.add_argument('--source-run', type=int, default=SOURCE_RUN)
-    parser.add_argument('--source-commit', default=SOURCE_COMMIT)
+    parser.add_argument('--version', choices=RECIPES, default='v26')
+    parser.add_argument('--changed', help='Comma-separated sources matching the selected recipe')
+    parser.add_argument('--source-run', type=int)
+    parser.add_argument('--source-commit')
     args = parser.parse_args()
-    selected = args.changed.split(',')
-    if len(selected) != len(REPLACEMENTS) or set(selected) != set(REPLACEMENTS):
-        parser.error('--changed must select ' + ','.join(REPLACEMENTS))
+    default_run, default_commit, selected = RECIPES[args.version]
+    if args.changed is not None:
+        requested = args.changed.split(',')
+        if len(requested) != len(selected) or set(requested) != set(selected):
+            parser.error(f'--changed for {args.version} must select ' + ','.join(selected))
+    replacements = {name: REPLACEMENTS[name] for name in selected}
+    source_run = args.source_run if args.source_run is not None else default_run
+    source_commit = args.source_commit if args.source_commit is not None else default_commit
     if args.reference_image and not args.prepare_only:
         parser.error('--reference-image is only available with --prepare-only')
     core, device, cached, out = map(Path.resolve, [args.unixnu, args.device, args.cached_tree, args.out])
@@ -179,15 +187,19 @@ def main():
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(body)
                 binders[str(target.relative_to(out))] = hashlib.sha256(body).hexdigest()
-    record = dict(source_run=args.source_run, source_commit=args.source_commit,
+    retained = ['CpuFreqProbe.o']
+    if 'GeniI2c.c' not in replacements:
+        retained.append('GeniI2c.o')
+    record = dict(relink_version=args.version, source_run=source_run, source_commit=source_commit,
                   expected_core_sha256=CORE_SHA256,
                   input_archives={rel: sha(cached / rel) for rel in [*LINK_INPUTS, USB]},
                   input_archive_members=archive_members, retained_binders=binders,
                   native_reference_sha256=sha(native), reference_fileset=original.at != 0,
-                  changed_board_sources=list(REPLACEMENTS),
+                  changed_board_sources=list(replacements),
                   compiled_object_paths={name: str(object_path(out, name).relative_to(out))
-                                         for name in REPLACEMENTS},
-                  retained_board_objects={DISPLAY: {'CpuFreqProbe.o': archive_members[DISPLAY]['CpuFreqProbe.o']}},
+                                         for name in replacements},
+                  retained_board_objects={DISPLAY: {member: archive_members[DISPLAY][member]
+                                                    for member in retained}},
                   source_sha256={str(p.relative_to(device / 'package')): sha(p) for p in sorted((device / 'package').rglob('*'))
                                  if p.is_file() and p.suffix in ('.cpp', '.c', '.h')},
                   recipe_sha256={name: sha(device / 'scripts' / name) for name in
@@ -205,13 +217,13 @@ def main():
                                           ['data.dbr', 'data-seed.json', 'gpu-addon.bin', 'owner-trust.bundle']}
     # Source inputs are records for local pre-CI / returned-byte auditing; no new
     # integrity acceptance step is inserted into the upstream CI build.
-    for name, (member, archives) in REPLACEMENTS.items():
+    for member, archives in replacements.values():
         for relative in archives:
             if member not in archive_members[relative]:
-                raise RuntimeError(f'{relative} has no v25 replacement member {member}')
+                raise RuntimeError(f'{relative} has no cached replacement member {member}')
     (out / 'incremental-inputs.json').write_text(json.dumps(record, indent=2) + '\n')
     if args.prepare_only:
-        print('Prepared v25 link inputs, four-object plan, aliases, symbolsets and retained binders; no compilation')
+        print(f'Prepared {args.version} relink from run {source_run}: {", ".join(replacements)}')
         return
     if sys.platform != 'darwin':
         raise SystemExit('Build requires Xcode; use --prepare-only on other hosts')
@@ -241,7 +253,7 @@ def main():
     returned.mkdir(parents=True, exist_ok=True)
     objects = {}
     object_metadata = {}
-    for name, (_, archives) in REPLACEMENTS.items():
+    for name, (_, archives) in replacements.items():
         compiled = object_path(out, name)
         compiled.parent.mkdir(parents=True, exist_ok=True)
         # compile_object selects C/gnu11/-mkernel and removes C++ codegen flags
@@ -284,7 +296,7 @@ def main():
     run([sys.executable, ctx.tree / 'scripts/seal-source-crypto-kernel.py', native_out])
     record.update(added_objects=objects,
                   compiled_objects={Path(name).stem + '.o': sha(object_path(out, name))
-                                    for name in REPLACEMENTS},
+                                    for name in replacements},
                   unchanged_core_after_link_sha256=sha(ctx.tree / CORE_ARCHIVE),
                   native_output_sha256=sha(native_out),
                   archive_outputs={rel: sha(ctx.tree / rel) for rel in [*LINK_INPUTS, USB]})
@@ -295,9 +307,9 @@ def main():
         path.write_text(json.dumps(record, indent=2) + '\n')
     reuse_path = ctx.work / 'kernel-reuse.json'
     reuse = json.loads(reuse_path.read_text()) if reuse_path.is_file() else {}
-    reuse.update(source_run=args.source_run, source_commit=args.source_commit,
+    reuse.update(source_run=source_run, source_commit=source_commit,
                  kernel_recompiled=False, kernel_core_recompiled=False, kernel_relinked=True,
-                 source_payload_reused=False, board_objects_recompiled=len(REPLACEMENTS),
+                 source_payload_reused=False, board_objects_recompiled=len(replacements),
                  incremental_record='kernel/incremental-relink.json')
     reuse_path.write_text(json.dumps(reuse, indent=2) + '\n')
     kernel.prelink(ctx)

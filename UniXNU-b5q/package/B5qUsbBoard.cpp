@@ -4,7 +4,7 @@
 #include <IOKit/IODeviceMemory.h>
 #include "BootResetCore.h"
 #include "GeniI2c.h"
-#include "B5qUsbInputs.h"
+#include "B5qUsbBoardCore.h"
 #include "B5qMax77705.h"
 #include "B5qQupClock.h"
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
@@ -44,8 +44,18 @@ struct Bus {
   const bool clock=B5qQupClock::xo(read,write,[](unsigned us){IODelay(us);},rcg,level,dfs,!hub);
   IOLog("qcom-dwc3: GENI SE%u clock rcg=%08x dfs=%08x level=%u xo=%u\n",se,rcg,dfs,level,clock);
   if(!clock)return false;
-  const unsigned first=hub?206:48;
-  for(unsigned pin=first;pin<first+2;++pin)tlmm.va[pin*0x1000/4]=(tlmm.va[pin*0x1000/4]&~0x23cu)|(1u<<2);barrier();
+  if(hub){
+   for(unsigned pin=206;pin<208;++pin)tlmm.va[pin*0x1000/4]=(tlmm.va[pin*0x1000/4]&~0x23cu)|(1u<<2);
+   barrier();
+  }else{
+   uint32_t sda=0,scl=0;
+   const bool ok=B5qUsbBoardCore::configureSe6Pads(
+       [&](unsigned pin){return tlmm.va[pin*0x1000/4];},
+       [&](unsigned pin,uint32_t value){tlmm.va[pin*0x1000/4]=value;barrier();},
+       sda,scl);
+   IOLog("qcom-dwc3: SE6 TLMM gpio48=%08x gpio49=%08x verified=%u\n",sda,scl,ok);
+   if(!ok)return false;
+  }
   if(!engine.open(hub?0x9a0000:0xa98000,0x4000))return false;
   const GeniIo io={seRead,seWrite,const_cast<uint32_t*>(engine.va)};uint32_t config=0;
   seWrite(io.ctx,GENI_CLK_SEL,level);
@@ -66,6 +76,20 @@ struct Bus {
  }
  bool read(uint8_t address,uint8_t reg,uint8_t &value){bus.address=address;if(geni_i2c_start_read(&bus,reg)||!finish())return false;value=bus.data;return true;}
  bool write(uint8_t address,uint8_t reg,uint8_t value){bus.address=address;return !geni_i2c_start_write(&bus,reg,value)&&finish();}
+ uint32_t ios() const {return seRead(bus.io.ctx,B5qUsbBoardCore::geniIos);}
+ B5qUsbBoardCore::Transfer tiTransfer(bool reading,uint8_t address,uint8_t reg,uint8_t value=0){
+  // The shared FIFO code can retire an error before the hardware goes idle.
+  // A retry must not reprogram M_CMD0 while the previous command is active.
+  if(geni_i2c_busy(&bus)||(seRead(bus.io.ctx,GENI_STATUS)&GENI_STATUS_M_ACTIVE)){
+   return {false,0,GeniErrBusy,seRead(bus.io.ctx,GENI_M_IRQ_STATUS),ios()};
+  }
+  const uint32_t stale=seRead(bus.io.ctx,GENI_M_IRQ_STATUS);
+  if(stale)seWrite(bus.io.ctx,GENI_M_IRQ_CLEAR,stale);
+  bus.error_status=0; // Never report a previous attempt's status with this result.
+  const bool ok=reading?read(address,reg,value):write(address,reg,value);
+  const uint8_t error=ok?uint8_t(GeniOk):bus.error?bus.error:uint8_t(GeniErrState);
+  return {ok,uint8_t(ok?value:0),error,bus.error_status,ios()};
+ }
 };
 Bus *ti,*maxim;bool maximReady=false;bool otgOn=false;
 // PM8550VS SID3 GPIO4 => PPID38b. Select only an APPS-owned channel.
@@ -76,30 +100,75 @@ bool releaseTiReset(){
  int apid=-1;
  for(unsigned i=0;i<count;++i)if(((core.va[(0x2000+4*i)/4]>>8)&0xfff)==0x38b&&(cnfg.va[i]&7)==0){if(apid>=0)return false;apid=int(i);}
  if(apid<0||!obs.open(0xc440000+uint64_t(apid)*0x20,0x20)||!channel.open(0xc500000+uint64_t(apid)*0x1000,0x1000))return false;
- auto read=[&](uint8_t reg,uint8_t &v){obs.va[0]=br_cmd(BR_OP_EXT_READL,reg,0);barrier();if(br_wait(obs.va))return false;v=uint8_t(obs.va[BR_RDATA0/4]);return true;};
- auto write=[&](uint8_t reg,uint8_t v){channel.va[BR_WDATA0/4]=v;barrier();channel.va[0]=br_cmd(BR_OP_EXT_WRITEL,reg,0);barrier();return !br_wait(channel.va);};
- uint8_t type=0,sub=0,mode=0,source=0,en=0,check=0;
- if(!read(4,type)||!read(5,sub)||type!=0x10||!read(0x40,mode)||!read(0x46,en))return false;
- bool ok=false;
- if(sub>=0x10&&sub<=0x13){
-  if(!read(0x44,source))return false;
-  const uint8_t nextMode=(mode&~3u)|1u,nextSource=(source&~0x8fu)|0x80;
-  ok=write(0x40,nextMode)&&write(0x44,nextSource)&&write(0x46,en|0x80)&&read(0x40,check)&&check==nextMode&&read(0x44,check)&&check==nextSource;
- }else if(sub==1||sub==5||sub==9||sub==13){
-  const uint8_t value=(mode&~0x7fu)|0x11;
-  ok=write(0x40,value)&&write(0x46,en|0x80)&&read(0x40,check)&&check==value;
- }
- ok=ok&&read(0x46,check)&&(check&0x80);
- IOLog("qcom-dwc3: TI reset SID3 GPIO4 apid=%d subtype=%x released=%u\n",apid,sub,ok);
- if(ok)IOSleep(20);return ok;
+ auto read=[&](uint8_t reg,uint8_t &value){
+  obs.va[BR_CMD/4]=br_cmd(BR_OP_EXT_READL,reg,0);
+  barrier();
+  const int rc=br_wait(obs.va);
+  if(rc){
+   IOLog("qcom-dwc3: TI reset SID3 GPIO4 apid=%d read reg=%02x rc=%d\n",apid,reg,rc);
+   return false;
+  }
+  value=uint8_t(obs.va[BR_RDATA0/4]);
+  return true;
+ };
+ auto write=[&](uint8_t reg,uint8_t value){
+  channel.va[BR_WDATA0/4]=value;
+  barrier();
+  channel.va[BR_CMD/4]=br_cmd(BR_OP_EXT_WRITEL,reg,0);
+  barrier();
+  const int rc=br_wait(channel.va);
+  if(rc)IOLog("qcom-dwc3: TI reset SID3 GPIO4 apid=%d write reg=%02x rc=%d\n",apid,reg,rc);
+  return rc==0;
+ };
+ auto report=[&](const char *phase,uint8_t type,uint8_t subtype,
+                 const B5qUsbBoardCore::ResetRegisters &r,bool readOk,bool ok){
+  IOLog("qcom-dwc3: TI reset SID3 GPIO4 apid=%d type=%02x subtype=%02x phase=%s 40=%02x 41=%02x 42=%02x 44=%02x 45=%02x 46=%02x readback=%u verified=%u\n",
+        apid,type,subtype,phase,r.mode,r.vin,r.pull,r.source,r.drive,r.enable,readOk,ok);
+ };
+ return B5qUsbBoardCore::resetTi(read,write,[](unsigned ms){IOSleep(ms);},report);
 }
 }
 extern "C" bool b5q_usb_repeater(bool init,bool host){
- if(init){if(!releaseTiReset())return false;ti=new Bus;if(!ti||!ti->open(false))return false;}
+ if(init){
+  if(!releaseTiReset())return false;
+  if(!ti){
+   auto *candidate=new Bus;
+   if(!candidate)return false;
+   if(!candidate->open(false)){delete candidate;return false;}
+   ti=candidate;
+  }
+ }
  if(!ti||!ti->ready)return false;
- IOLockLock(ti->lock);uint8_t version=0;bool ok=ti->read(0x3e,0xb0,version)&&version!=0xff;
- for(const auto &pair:B5qUsbInputs::tiHost){uint8_t value=0;ok=ok&&ti->write(0x3e,pair.reg,pair.value)&&ti->read(0x3e,pair.reg,value)&&value==pair.value;}
- IOLockUnlock(ti->lock);IOLog("qcom-dwc3: TI3e version=%02x role=%s overrides=%u\n",version,host?"host":"device",ok);return ok;
+ using namespace B5qUsbBoardCore;
+ IOLockLock(ti->lock);
+ const uint32_t lines=ti->ios();
+ const bool sda=lines&sdaHigh,scl=lines&sclHigh;
+ IOLog("qcom-dwc3: TI SE6 before transfer GENI_IOS=%08x SDA=%u SCL=%u role=%s\n",
+       lines,sda,scl,host?"host":"device");
+ const bool ok=sda&&scl&&configureTi(
+     [](uint8_t address,uint8_t reg){return ti->tiTransfer(true,address,reg);},
+     [](uint8_t address,uint8_t reg,uint8_t value){return ti->tiTransfer(false,address,reg,value);},
+     [](unsigned us){IODelay(us);},
+     [](TiOperation operation,uint8_t address,uint8_t reg,const Transfer &result,unsigned attempts){
+      switch(operation){
+      case TiOperation::Revision:
+       IOLog("qcom-dwc3: TI3e revision read=%u version=%02x bus.error=%u bus.error_status=%08x GENI_IOS=%08x attempts=%u\n",
+             result.ok,result.value,result.error,result.errorStatus,result.ios,attempts);
+       break;
+      case TiOperation::AlternateRevision:
+       IOLog("qcom-dwc3: TI4f diagnostic revision read=%u version=%02x bus.error=%u bus.error_status=%08x GENI_IOS=%08x attempts=%u\n",
+             result.ok,result.value,result.error,result.errorStatus,result.ios,attempts);
+       break;
+      case TiOperation::OverrideWrite:
+      case TiOperation::OverrideRead:
+       IOLog("qcom-dwc3: TI%02x override %s reg=%02x ok=%u value=%02x bus.error=%u bus.error_status=%08x GENI_IOS=%08x attempts=%u\n",
+             address,operation==TiOperation::OverrideWrite?"write":"readback",reg,result.ok,
+             result.value,result.error,result.errorStatus,result.ios,attempts);
+       break;
+      }
+     });
+ IOLockUnlock(ti->lock);
+ return ok;
 }
 extern "C" bool b5q_usb_typec_init(void){
  maxim=new Bus;if(!maxim||!maxim->open(true))return false;
