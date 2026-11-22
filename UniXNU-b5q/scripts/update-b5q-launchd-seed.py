@@ -11,6 +11,7 @@ import sys
 import tempfile
 
 SEED_HASH = "aa624655fd41db6af03ddf0bcb46ed0b5a333f307912f74ac471c7b1b3bfa82b"
+V29_SEED_HASH = "f1f6afe508b4c7c57254780c82018f039ae2b3cd691222a287d9d3a37bb3749b"
 POLICY = Path(__file__).resolve().parents[1] / "package/b5q-launchd-lite.json"
 DIRECTORY = "private/var/db/com.apple.xpc.launchd"
 
@@ -20,7 +21,7 @@ def policies():
     assert all(re.fullmatch(r"com\.apple\.[\w.-]+", job) for group in policy.values() for job in group)
     return {
         "disabled.plist": sorted(set(policy["sheng_lite"] + policy["system"] + policy["gui"])),
-        "disabled.501.plist": sorted(set(policy["gui"])),
+        "disabled.501.plist": sorted(set(policy["sheng_lite"] + policy["gui"])),
     }
 
 
@@ -36,6 +37,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("darwinboot", "seed", "out"):
         p.add_argument("--" + name, type=Path, required=True)
+    p.add_argument("--baseline", choices=("v27", "v29"), default="v27")
+    p.add_argument("--stand-in", type=Path, help="Ad hoc signed board absentd, installed under its own name")
     args = p.parse_args()
     sys.path.insert(0, str(args.darwinboot.resolve() / "Test"))
     import packed_ramdisk
@@ -44,7 +47,8 @@ def main():
     out = args.out.resolve()
     metadata = json.loads(seed.with_name("data-seed.json").read_text())
     body = seed.read_bytes()
-    assert metadata["sha256"] == hashlib.sha256(body).hexdigest() == SEED_HASH
+    expected = V29_SEED_HASH if args.baseline == "v29" else SEED_HASH
+    assert metadata["sha256"] == hashlib.sha256(body).hexdigest() == expected
     logical, extents = packed_ramdisk.regions(body)
     assert logical == metadata["logical_bytes"] == 4 * 2**30
     out.mkdir(parents=True, exist_ok=True)
@@ -82,13 +86,25 @@ def main():
                 subprocess.run(["sudo", "install", "-o", "root", "-g", "wheel", "-m", "0644",
                                 str(stage), str(target)], check=True)
                 assert target.read_bytes() == payload and target.stat().st_uid == target.stat().st_gid == 0
+            if args.stand_in:
+                target = mount / "private/var/ngpu/bin/b5q-absentd"
+                assert target.parent.is_dir() and target.parent.resolve() == target.parent and not target.is_symlink()
+                subprocess.run(["sudo", "install", "-o", "root", "-g", "wheel", "-m", "0755",
+                                str(args.stand_in.resolve()), str(target)], check=True)
+                assert target.read_bytes() == args.stand_in.read_bytes()
+                assert target.stat().st_uid == target.stat().st_gid == 0
         finally:
             subprocess.run(["hdiutil", "detach", device], check=True)
         result = packed_ramdisk.pack(raw, out / "data.dbr")
     assert result["bytes"] == logical
     metadata.update(bytes=result["encoded_bytes"], sha256=result["encoded_sha256"],
-                    launchd_policy=updates, launchd_policy_source_seed_sha256=SEED_HASH,
+                    launchd_policy=updates, launchd_policy_source_seed_sha256=expected,
                     launchd_policy_migrated=True)
+    if args.stand_in:
+        metadata["board_stand_in"] = {
+            "path": "/private/var/ngpu/bin/b5q-absentd",
+            "sha256": hashlib.sha256(args.stand_in.read_bytes()).hexdigest(),
+        }
     (out / "data-seed.json").write_text(json.dumps(metadata, indent=2) + "\n")
     print(f"Updated {len(updates['disabled.plist'])} system overrides and {len(updates['disabled.501.plist'])} GUI overrides")
 

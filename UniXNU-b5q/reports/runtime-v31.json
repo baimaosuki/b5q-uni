@@ -1,0 +1,61 @@
+{
+  "baseline_log": {
+    "path": "logs/b5q-xnu2log-v30/XNU2LOG.txt",
+    "sha256": "581a3b06c9a81422a7c0a0e08d88a2f5a5a11200eedf26826f4a01aa354f8dad",
+    "sequence": 294,
+    "lost_on_contention": 248,
+    "ring_overwritten": 0,
+    "usb_dma_ready": true,
+    "usb_hardware_ready": true,
+    "temperature_peak_c": 91.9,
+    "process_claim": "Repeated logged PIDs establish restarts; PID deltas do not count executions or establish a unique CPU cause."
+  },
+  "input_hashes": {
+    "UniXNU-b5q/package/B5qTouchPointer.h": "17c6e3836a76febba7b4d3d84ec92ca81181e88f4f22cddf6aac9aa04f83d27d",
+    "UniXNU-b5q/package/NativeHidInput.cpp": "c9bce3a2f011dd5f91badb864005d24b225d7861d0557e811ed03373a8848042",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp": "cfb9aeb9f21dcc9076f8aa133036913339fafac2fc23ddb6f2bd72b7342074df",
+    "UniXNU-b5q/package/B5qMax77705.h": "14a7cc103210cad2cf3a3a84b508f84bb0fd697d577f86e72fed77eab3c33bf5",
+    "UniXNU-b5q/package/B5qBootPolicy.c": "badd2824ff56577383c571a01fbf2c4203978b7f65316b76af35a17c475563c9",
+    "UniXNU-b5q/package/b5q-launchd-lite.json": "8d9506c1b3138ce15a4409b2359449b12371d36ec5d567684036b2905cb510c6",
+    "UniXNU-b5q/scripts/update-b5q-launchd-seed.py": "669e02ed4b89e46b274c87a8eb5255609816674f620621c96efd0b9419d9d783",
+    "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "e3efaa2e969684179bb8a409a076ad348a025b7e652577184c00a479ae1bb8a3",
+    "UniXNU-b5q/scripts/b5q_peripherals.py": "40c26c1ba635ae3d3ae3c0677f546bedafeb08bf3268d639ccaa261d183c8b78",
+    "UniXNU-b5q/patches/tools/b5q-absentd-user-domains.patch": "2d24029a8e15489adf0c263fada23b9634b11ed596e5010f3e8fe338e45d9dca",
+    ".github/workflows/b5q-v31-incremental.yml": "7e5706ed5bb4e8396cd48178c53bb39c3c9557d47ae75f69c343612387433b1d"
+  },
+  "firmware_evidence": {
+    "ccic_sha256": "5388db26dd4d8c1b10ee6f3e2190b476dbb19ff306ceece7f9f3cd61a8af787d",
+    "ccic_rvas": [
+      "0x22bc..0x22c0: conditional set_sink(0)",
+      "0x2410..0x2454: opcode5e",
+      "0x259c..0x275c: trigger41 and fresh UIC_INT bit7/response51"
+    ],
+    "pdic_sha256": "f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca",
+    "pdic_rvas": [
+      "0x8c90..0x8d84: opcode37 data04",
+      "0x8944..0x8a9c: AP_DATAOUT21/AP_END41"
+    ]
+  },
+  "implementation": {
+    "pointer": "Exclusive HID collection/report; track interior contact by ID across grip contacts and reorder; 600-unit tap tolerance.",
+    "typec": "Allowlist 5e/01 then37/04, zero unused output bytes, fresh bit7 completion and matching response, bounded 100 polls and explicit failures.",
+    "launchd": "Merge sheng_lite into GUI501 and system policy. Verify exact native executable paths from read-only OS.raw.dmg plist extraction.",
+    "absentd": "Reuse source with LaunchAgents fallback, install one newly signed board executable in RAM Data and append its CDHash to existing trust. GPU addon files remain unchanged.",
+    "native_policy": "Override existing weak PE_builtin_boot_args in one board C object; retain loader boot args. No core translation unit changes."
+  },
+  "pre_ci_checks": [
+    "touch-production-ASan-UBSan",
+    "MAX77705-production-ASan-UBSan",
+    "HID-production-descriptor-four-modes",
+    "three-arm64e-target-objects-symbol-closure",
+    "USB/GMU/HID/clock/thermal-cross-object-PAC",
+    "85-GENI-authenticated-C-callbacks",
+    "v27-USB-board-and-v24-USB-regressions",
+    "cached-core-weak-builtin-contract",
+    "patch-source-match",
+    "Python/YAML-and-launchd-merge",
+    "cached-relink-prepare-only"
+  ],
+  "build_status": "local checks passed; CI pending",
+  "hardware_tested": false
+}

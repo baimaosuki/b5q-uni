@@ -45,6 +45,7 @@ REPLACEMENTS = {
     'GeniI2c.c': ('GeniI2c.o', (DISPLAY,)),
     'NativeHidInput.cpp': ('NativeHidInput.late.o', (DISPLAY,)),
     'HidInputProbe.cpp': ('HidInputProbe.o', (DISPLAY,)),
+    'B5qBootPolicy.c': ('B5qBootPolicy.o', (DISPLAY,)),
 }
 RECIPES = {
     'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp', 'GeniI2c.c')),
@@ -52,6 +53,8 @@ RECIPES = {
             ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp')),
     'v29': (44980608285, '0fdff5f7cbb3af37dbee56119c482c766083b7d9',
             ('B5qTouch.cpp', 'NativeHidInput.cpp', 'HidInputProbe.cpp')),
+    'v31': (44985774704, 'e94593ae5aa7e6111a20a0515dcef33c0cc316cc',
+            ('B5qUsbBoard.cpp', 'NativeHidInput.cpp', 'B5qBootPolicy.c')),
 }
 
 
@@ -225,7 +228,7 @@ def main():
     # integrity acceptance step is inserted into the upstream CI build.
     for member, archives in replacements.values():
         for relative in archives:
-            if member not in archive_members[relative]:
+            if member not in archive_members[relative] and member != 'B5qBootPolicy.o':
                 raise RuntimeError(f'{relative} has no cached replacement member {member}')
     (out / 'incremental-inputs.json').write_text(json.dumps(record, indent=2) + '\n')
     if args.prepare_only:
@@ -264,7 +267,7 @@ def main():
         compiled.parent.mkdir(parents=True, exist_ok=True)
         # compile_object selects C/gnu11/-mkernel and removes C++ codegen flags
         # for GeniI2c.c. Do not pass C++-only diagnostic options to that recipe.
-        options = [flag for flag in cflags if name != 'GeniI2c.c' or flag not in
+        options = [flag for flag in cflags if not name.endswith('.c') or flag not in
                    ('-Wno-unused-private-field', '-Wno-c++11-narrowing',
                     '-Wno-deprecated-enum-enum-conversion')]
         obj = compile_object(cxx, options, device / 'package' / name, compiled, llvm)

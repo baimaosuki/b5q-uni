@@ -38,13 +38,18 @@
     "com.apple.ReportCrash.Root",
     "com.apple.spindump",
     "com.apple.tailspind",
-    "com.apple.coresymbolicationd"
+    "com.apple.coresymbolicationd",
+    "com.apple.endpointsecurity.endpointsecurityd",
+    "com.apple.rtcreportingd",
+    "com.apple.PerfPowerTelemetryClientRegistrationService"
   ],
   "gui": [
     "com.apple.ReportCrash",
     "com.apple.spindump",
     "com.apple.tailspind",
     "com.apple.coresymbolicationd",
-    "com.apple.iconservices.iconservicesagent"
+    "com.apple.iconservices.iconservicesagent",
+    "com.apple.talagent",
+    "com.apple.rtcreportingd"
   ]
 }

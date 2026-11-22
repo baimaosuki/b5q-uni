@@ -326,6 +326,8 @@ class NativeHidInput : public IOHIDDevice {
             const auto movement=pointer.update(count,ids,xs,ys,mach_absolute_time(),tapLimit,recovered);
             if(movement.dx || movement.dy)sendPointer(0,movement.dx,movement.dy);
             if(movement.click){sendPointer(1,0,0);sendPointer(0,0,0);}
+            native_touch_hid_reports=native_touch_hid_reports+1;
+            return; // One input mode per service; never also submit digitizer report 3.
         }
 #endif
         // Sizes follow the axis maxima of the touch core: 32767 on both axes (b5q producer normalises4095counts), mapped to the same 0..32767 range.
@@ -439,13 +441,17 @@ public:
                                +sizeof(mouseDescriptor)
 #endif
         ];
-        size_t size;
-        if(touchOnly){size=sizeof(touchDescriptor);memcpy(combined,touchDescriptor,size);}
+        bool absolute=true;
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+        absolute=!mouseEnabled;
+#endif
+        size_t size=0;
+        if(touchOnly){if(absolute){size=sizeof(touchDescriptor);memcpy(combined,touchDescriptor,size);}}
         else{
             size=sizeof(descriptor);memcpy(combined,descriptor,size);
             // Default: one device, keyboard collection first, digitizer second (the arrangement whose event driver
             // and user client attach on hardware); the separate digitizer device is the opt-in touch-split.
-            if(touchEnabled){memcpy(combined+size,touchDescriptor,sizeof(touchDescriptor));size+=sizeof(touchDescriptor);}
+            if(touchEnabled && absolute){memcpy(combined+size,touchDescriptor,sizeof(touchDescriptor));size+=sizeof(touchDescriptor);}
         }
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         if(mouseEnabled){memcpy(combined+size,mouseDescriptor,sizeof(mouseDescriptor));size+=sizeof(mouseDescriptor);}
@@ -493,18 +499,25 @@ public:
         // report's fingers as one digitizer collection with a child per finger. Without it a touch screen gets one event per finger,
         // and backboardd takes each as the whole touch set, so no two fingers are ever down together for UIKit (no pinch, no
         // multi-finger or system gestures).
-        if(touchOnly||touchEnabled){setProperty("Built-In",true);setProperty("DisplayIntegrated",true);setProperty("DigitizerCollectionDispatch",true);}
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         // macOS: WindowServer ties a digitizer to the display whose container ID equals the digitizer's kUSBContainerID (a UUID string,
         // read up the service plane as from a USB device); the built-in display publishes that ID in its EDID (NativeLegacyDisplay.cpp).
         if(touchOnly||touchEnabled){
-            publishContainerID();
             unsigned enabled=1;
             PE_parse_boot_argn("touch-mouse",&enabled,sizeof(enabled));
             mouseEnabled=enabled==1;
+            IOLog("B5qTouch: HID mode=%s\n",mouseEnabled?"relative-pointer":"absolute-digitizer");
+            if(!mouseEnabled)publishContainerID();
             nanoseconds_to_absolutetime(250000000,&tapLimit);
         }
 #endif
+        if(touchOnly||touchEnabled){
+            setProperty("Built-In",true);
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+            if(!mouseEnabled)
+#endif
+            {setProperty("DisplayIntegrated",true);setProperty("DigitizerCollectionDispatch",true);}
+        }
         if(!IOHIDDevice::start(provider))return false;
         timer=IOTimerEventSource::timerEventSource(this,tick);
         if(!timer || inputLoop->addEventSource(timer)!=kIOReturnSuccess) {

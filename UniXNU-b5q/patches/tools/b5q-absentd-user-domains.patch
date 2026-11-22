@@ -1,0 +1,42 @@
+diff --git a/absentd.c b/absentd.c
+--- a/absentd.c
++++ b/absentd.c
+@@ -9,6 +9,7 @@
+ #include <dispatch/dispatch.h>
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include <xpc/xpc.h>
+ 
+ static void refuse(const char *name)
+@@ -35,17 +36,21 @@
+ {
+     // launchd gives every job its label; the job's own description names its services.
+     const char *label = getenv("XPC_SERVICE_NAME");
+-    char path[512];
+-    if (!label || snprintf(path, sizeof path, "/System/Library/LaunchDaemons/%s.plist", label) >= (int)sizeof path) return 78;
+-    CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), false);
+-    CFReadStreamRef stream = url ? CFReadStreamCreateWithFile(NULL, url) : NULL;
++    if (!label || strchr(label, '/') || strstr(label, "..")) return 78;
+     CFPropertyListRef job = NULL;
+-    if (stream && CFReadStreamOpen(stream)) {
+-        job = CFPropertyListCreateWithStream(NULL, stream, 0, kCFPropertyListImmutable, NULL, NULL);
+-        CFReadStreamClose(stream);
++    const char *domains[] = {"LaunchDaemons", "LaunchAgents"};
++    for (unsigned i = 0; i < sizeof(domains) / sizeof(domains[0]) && !job; ++i) {
++        char path[512];
++        if (snprintf(path, sizeof path, "/System/Library/%s/%s.plist", domains[i], label) >= (int)sizeof path) return 78;
++        CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), false);
++        CFReadStreamRef stream = url ? CFReadStreamCreateWithFile(NULL, url) : NULL;
++        if (stream && CFReadStreamOpen(stream)) {
++            job = CFPropertyListCreateWithStream(NULL, stream, 0, kCFPropertyListImmutable, NULL, NULL);
++            CFReadStreamClose(stream);
++        }
++        if (stream) CFRelease(stream);
++        if (url) CFRelease(url);
+     }
+-    if (stream) CFRelease(stream);
+-    if (url) CFRelease(url);
+     if (job && CFGetTypeID(job) == CFDictionaryGetTypeID()) {
+         CFTypeRef services = CFDictionaryGetValue(job, CFSTR("MachServices"));
+         if (services && CFGetTypeID(services) == CFDictionaryGetTypeID()) CFDictionaryApplyFunction(services, refuse_each, NULL);

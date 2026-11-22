@@ -11,7 +11,7 @@ from pathlib import Path
 SOURCES = ['B5qUsbBoard.cpp', 'UsbProbe.cpp', 'CpuFreqProbe.cpp', 'ThermalProbe.cpp',
            'ThermalLevel.cpp', 'BoardClock.cpp', 'ButtonProbe.cpp',
            'DisplayTimingProbe.cpp', 'NativeHidInput.cpp', 'HidInputProbe.cpp',
-           'B5qTouch.cpp', 'GeniI2c.c', 'Sm8550Gcc.c', 'QcomRpmh.c']
+           'B5qTouch.cpp', 'GeniI2c.c', 'Sm8550Gcc.c', 'QcomRpmh.c', 'B5qBootPolicy.c']
 
 
 def prepare_headers(sdk, include, hid):
