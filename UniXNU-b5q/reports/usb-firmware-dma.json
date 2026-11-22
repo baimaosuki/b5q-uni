@@ -32,8 +32,9 @@
   },
   "boot_transport": {
     "deployed_v8": "FV includes Qualcomm UFSDxe (0d35cd8e-97ea-4f9a-96af-0f0d89f76567), and the bare FAT ramdisk contains only the bootstrap, without kernel or ADT.",
-    "new_CI_FD": "Existing firmware CI source excludes the vendor UFS provider by policy. The paired ESP needs a boot path able to read the physical ESP. No boot.img delivery from this FD.",
-    "hardware_tested": false
+    "new_CI_FD": "The FD keeps vendor UFSDxe out of dispatch. A packed 512-byte RAM FAT in boot.img supplies the same EFI files as the 4Kn ESP, preserving the v8 BootShim and Samsung DTB. The physical ESP remains available for the existing XNU log journal.",
+    "hardware_tested": false,
+    "pending": "The new RAM transport and handshake need a device boot. Warm UFS root link readiness, TI stage 6\u20139, ready=1 and USB host/device enumeration have not been checked on a phone."
   },
   "source_sha256": {
     "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
@@ -46,5 +47,110 @@
     "scripts/b5q-install/package-usb-dma-esp.py": "ced9acdf1113081ad2816fc5295daa3c7d67b779235134d51eee150b7b6fbbf6",
     "tests/b5q-ufs/test-usb-firmware-dma.c": "a3d6d3db7233b53fe5a59696938472d4b96d822c2ba4e1f3f3a81c7485321eac",
     ".github/workflows/b5q-firmware.yml": "560fa3884ed0613a8bc4d18fac2c47e64a628c4c89edcb832d21b4d24e955d2b"
+  },
+  "ci": {
+    "run": 44983031320,
+    "conclusion": "success",
+    "source_commit": "217d311278b77518d8df83cec65705512795dad7",
+    "firmware": {
+      "result": "PASS",
+      "firmware_sha256": "ccc6e8da9a9b0210d746865f6baf4979956d76e4c8c11c159a9d797e27b18cf8",
+      "handoff_sha256": "8468c8b2160f3d6abbb5a08a194f64c1e2dd2e1cfec6434adb317dc8c8b47792",
+      "darwinboot_sha256": "9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f",
+      "retained": [
+        "B5qHandoffDxe",
+        "ButtonsDxe",
+        "CmdDbDxe",
+        "DarwinBoot",
+        "DisplayDxe",
+        "HALIOMMU",
+        "RamManagerDxe",
+        "RpmhDxe"
+      ],
+      "excluded": [
+        "PILDxe",
+        "PILProxyDxe",
+        "SPSSDxe",
+        "SdccDxe",
+        "UFSDxe",
+        "UsbBusDxe",
+        "UsbConfigDxe",
+        "UsbDeviceDxe",
+        "UsbInitDxe",
+        "UsbKbDxe",
+        "UsbMassStorageDxe",
+        "UsbMsdDxe",
+        "UsbPwrCtrlDxe",
+        "UsbfnDwc3Dxe",
+        "XhciDxe",
+        "XhciPciEmulation"
+      ],
+      "firmware_module_count": 94,
+      "compiled_depex_checked": 54
+    },
+    "paths": {
+      "boot.img": {
+        "bytes": 71450624,
+        "sha256": "1614f35dd9f66175f770aa46dbd0264b5f72cab73f02873fb0facbdca662cad2"
+      },
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "07898ffcbaf4e29a8fdfcb313b2cab9ca6d913825a4cf1ab2bc9510cc647041c"
+      }
+    },
+    "artifacts": {
+      "b5q-uefi-fd-217d311278b77518d8df83cec65705512795dad7": {
+        "id": 14738925555,
+        "zip_sha256": "090d51b4961ec3f3be3efcbfb2afc228dcd1e46d01a1dc7e0a1969abbe1b5900",
+        "files": {
+          "SILICIUM_UEFI.fd": "ccc6e8da9a9b0210d746865f6baf4979956d76e4c8c11c159a9d797e27b18cf8",
+          "b5q-firmware.sha256": "f26bd3976d5af0536aac7df7c834ed46074c53132f4b174ac96a4abbcafd4562"
+        }
+      },
+      "b5q-usb-dma-esp-217d311278b77518d8df83cec65705512795dad7": {
+        "id": 14738646333,
+        "zip_sha256": "74aa5b76b9fa13fca605d031da86ca16a224d232979e74d8bec9c43627eb6066",
+        "files": {
+          "esp.img": "07898ffcbaf4e29a8fdfcb313b2cab9ca6d913825a4cf1ab2bc9510cc647041c",
+          "esp-manifest.json": "761b7918fccc16745f54ac61e3659adfd803cd471d8868603897401e363c2267"
+        }
+      }
+    },
+    "installed_kernel": {
+      "bytes": 143245312,
+      "sha256": "53799c74c57785c8b2cb56288ab5381f279a81a246585c7ff9eb6ab4c205f887"
+    },
+    "boot_transport": {
+      "boot": {
+        "bytes": 71450624,
+        "sha256": "1614f35dd9f66175f770aa46dbd0264b5f72cab73f02873fb0facbdca662cad2"
+      },
+      "source_boot": {
+        "bytes": 19275776,
+        "sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1"
+      },
+      "firmware": {
+        "bytes": 3145728,
+        "sha256": "ccc6e8da9a9b0210d746865f6baf4979956d76e4c8c11c159a9d797e27b18cf8"
+      },
+      "esp": {
+        "bytes": 838860800,
+        "sha256": "07898ffcbaf4e29a8fdfcb313b2cab9ca6d913825a4cf1ab2bc9510cc647041c"
+      },
+      "boot_partition_bytes": 100663296,
+      "ram_fat_logical_bytes": 268435456,
+      "ram_fat_packed_bytes": 69140952,
+      "ram_fat_packed_sha256": "2ff186ec5407b30342f8e434956cacf5b5f2c6b214046952b93550e8354426cb",
+      "samsung_dtb_sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+      "bootshim_sha256": "9346a527441b242c69414fd7e3d6fa17813f281d562fef13d9ba8373d39007a9",
+      "bootshim_and_dtb_match_v8": true,
+      "all_efi_files_match_esp": true,
+      "hardware_tested": false
+    },
+    "esp_log_allocation": "PASS",
+    "packager": {
+      "bytes": 5236,
+      "sha256": "3c48fee410e9a1f662dc45028e2de7949168f026d00880b4371b9bb9bfe24d4a"
+    }
   }
 }
