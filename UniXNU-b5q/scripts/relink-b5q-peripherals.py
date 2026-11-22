@@ -43,11 +43,15 @@ REPLACEMENTS = {
     'B5qTouch.cpp': ('B5qTouch.o', (DISPLAY,)),
     'B5qUsbBoard.cpp': ('B5qUsbBoard.o', (DISPLAY,)),
     'GeniI2c.c': ('GeniI2c.o', (DISPLAY,)),
+    'NativeHidInput.cpp': ('NativeHidInput.late.o', (DISPLAY,)),
+    'HidInputProbe.cpp': ('HidInputProbe.o', (DISPLAY,)),
 }
 RECIPES = {
-    'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', tuple(REPLACEMENTS)),
+    'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp', 'GeniI2c.c')),
     'v27': (44937931538, '85a328d1956a7216892569a034decf049f889d16',
             ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp')),
+    'v29': (44980608285, '0fdff5f7cbb3af37dbee56119c482c766083b7d9',
+            ('B5qTouch.cpp', 'NativeHidInput.cpp', 'HidInputProbe.cpp')),
 }
 
 
@@ -188,6 +192,8 @@ def main():
                 target.write_bytes(body)
                 binders[str(target.relative_to(out))] = hashlib.sha256(body).hexdigest()
     retained = ['CpuFreqProbe.o']
+    if 'QcomDwc3.cpp' not in replacements:
+        retained.append('QcomDwc3.late.o')
     if 'GeniI2c.c' not in replacements:
         retained.append('GeniI2c.o')
     record = dict(relink_version=args.version, source_run=source_run, source_commit=source_commit,

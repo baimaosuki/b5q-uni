@@ -1,0 +1,34 @@
+{
+  "v27": {
+    "decoded_log_sha256": "02ced26238d4de1f4344d088ad0cb7d8d50601a504df88f76db12836239db835",
+    "raw_log_sha256": "f5208e6273da938b1927aa7e549d80f3616ab6f59e4a62a7cd00751c39f10ad1",
+    "sequence": 457,
+    "lost_on_contention": 351,
+    "touch": "512 reports by L3542. One contact remains across repeated samples L1591\u20133478.",
+    "thermal": "92.3 C peak, repeated aggregate busy/recount, usermanagerd crashes and iconservicesagent 150 MB resource events. PID 71786 is a process identifier, not a count of crashes.",
+    "absentd": "Four observed process IDs; no exit status or responsible launchd job at those lines. No XPC trust or launch constraints change.",
+    "usb": "TI revision 03; GSNPSID 33313130; USB DMA deferred by old loader."
+  },
+  "inputs": {
+    "synaptics_module_sha256": "42933f1b8d51c8caa89755472d264456417734837c46ffa7f8ffd5025c99a7c0",
+    "sheng_lite_source_sha256": "b8a8b3eb6fa3877df534dfacb1957d15efd9be689266a7bfd1fe321fe6b563d1",
+    "uefi_ci": 44983031320,
+    "v27_kernel_ci": 44980608285,
+    "source_sha256": {
+      "package/B5qTouch.cpp": "b434c4c2cfb097bbe3bdf2c27f7f2bab2fdad64d280d065c7f2ed59f1def3e44",
+      "package/B5qTouchProtocol.h": "31127faef1337ac387272619e74b1c8af5ba97f25a5ff03141aa2d8d105e8eb8",
+      "package/B5qTouchPointer.h": "8f6ee2f262abaeb8ce44f83f249803a93f47e234370f5e4a967261b438c3f80e",
+      "package/NativeHidInput.cpp": "242c59061d7502d2912ba257eaaf5490a9eea71aeda2bbf4e5363abcbd9ad615",
+      "package/HidInputProbe.cpp": "a4eff8f7d7cc8767e4a0f1d0c803391f4f417289ff2b0458cdbb076c256e3a50",
+      "package/b5q-launchd-lite.json": "626169c9cf277597a4be36a9cd50ae153b3f74213e02bdb11a32eaf4c69ce267",
+      "scripts/update-b5q-launchd-seed.py": "4f342e8096eb5eb90979e30fd20f81321e3d28dc92d4bfba5d0d376906120212",
+      "scripts/stage-v24-inputs.py": "14c9a14276b2dd933e86cf44215befaf4886dd92774af33c046e0fdc3fb25a9a",
+      "scripts/relink-b5q-peripherals.py": "ccce412f79730288a20417c5b77921d703233af96323faab247b04fc566438cb"
+    }
+  },
+  "touch": "Disable 0x11 and select C1 with fallback, release before type filtering and bounded retry. macOS publishes matching UUIDs and a relative pointer with tap-to-click.",
+  "launchd_policy": "Merge the pinned sheng lite labels and b5q service overrides into the existing 4 GiB Data seed. User 501 gets the GUI overrides. Usermanagerd is disabled through launchd with no replacement executable. Login and thermal effects remain unverified.",
+  "usb": "Reuse the v28 FD, newly build images around its DarwinBoot and retain the v27 QcomDwc3 object.",
+  "local_verification": "Touch/GENI ASan/UBSan regression, GPIO19 wait, arm64e objects, all HID binder addresses identical, relink plan, and policy merge passed.",
+  "hardware_tested": false
+}

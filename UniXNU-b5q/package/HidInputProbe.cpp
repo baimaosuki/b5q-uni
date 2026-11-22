@@ -121,7 +121,16 @@ static bool hasDigitizerPair(IORegistryEntry *driver) {
     OSSafeReleaseNULL(pageValue);
     return paired;
 }
-static void publishDigitizer(IORegistryEntry *driver) {
+static void publishDigitizer(IORegistryEntry *device,IORegistryEntry *driver) {
+    IORegistryEntry *interface=driver->getParentEntry(gIOServicePlane);
+    const char *const names[]={"displayUUID","kUSBContainerID"};
+    for(const char *name:names) {
+        if(OSObject *value=device->copyProperty(name)) {
+            driver->setProperty(name,value);
+            if(interface)interface->setProperty(name,value);
+            value->release();
+        }
+    }
     driver->setProperty("Built-In",kOSBooleanTrue);driver->setProperty("DisplayIntegrated",kOSBooleanTrue);
     // backboardd (-[BKHIDDirectTouchEventProcessor processEvent:sender:dispatcher:], decoded from the target) drops a
     // digitizer event unless the sending service has PrimaryUsagePage 0x0D and PrimaryUsage 1, 4 or 0x20
@@ -131,7 +140,7 @@ static void publishDigitizer(IORegistryEntry *driver) {
     driver->setProperty("PrimaryUsagePage",(unsigned long long)0x0d,32);driver->setProperty("PrimaryUsage",(unsigned long long)4,32);
     // backboardd's digitizer filter is {DeviceUsagePage, DeviceUsage, Built-In}; make the flag visible on the
     // interface (the event service's provider) as well, not only on the device two levels down.
-    if(IORegistryEntry *interface=driver->getParentEntry(gIOServicePlane)) {
+    if(interface) {
         interface->setProperty("Built-In",kOSBooleanTrue);interface->setProperty("DisplayIntegrated",kOSBooleanTrue);
         interface->setProperty("PrimaryUsagePage",(unsigned long long)0x0d,32);interface->setProperty("PrimaryUsage",(unsigned long long)4,32);
     }
@@ -145,7 +154,7 @@ static void digitizerPairGuard(void *context,wait_result_t) {
     for(unsigned ms=0;ms<stopAt;ms+=2) {
         if(IORegistryEntry *driver=findEventDriver(device,4)) {
             if(device->getProperty("Built-In") && !hasDigitizerPair(driver)) {
-                publishDigitizer(driver);
+                publishDigitizer(device,driver);
                 IOLog("[hid] digitizer usage pair published at +%u ms\n",ms);
             }
             IOService *service=OSDynamicCast(IOService,driver);
@@ -167,7 +176,7 @@ __attribute__((noinline)) void native_hid_live_checkpoint(IOService *device) {
         static IORegistryEntry *publishedFor;
         if(device->getProperty("Built-In") && (publishedFor!=driver || !hasDigitizerPair(driver))) {
             publishedFor=driver;
-            publishDigitizer(driver);
+            publishDigitizer(device,driver);
         }
         // The Digitizer/DebugState dumps (appendProperty) are not read on hardware runs without a photograph and walk
         // driver-internal state from a foreign thread; only the cheap Built-In readback stays.

@@ -17,6 +17,9 @@
 #include <pexpert/pexpert.h>
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
 #include <IOKit/IODeviceTreeSupport.h>
+#include <mach/mach_time.h>
+#include <kern/clock.h>
+#include "B5qTouchPointer.h"
 #include <libkern/c++/OSData.h>
 #endif
 #if __has_feature(ptrauth_calls)
@@ -31,6 +34,7 @@ extern "C" void native_buttons_set_sink(void (*)(void *, uint32_t), void *) __at
 // Optional touch digitizer fed by the board touch probe (kits/sheng/TouchProbe.cpp): finger set published with a seqlock.
 extern "C" {
 extern volatile uint32_t native_touch_seq, native_touch_count, native_touch_hid_reports;
+extern volatile uint32_t native_touch_recovered;
 extern volatile int native_touch_xs[12], native_touch_ys[12], native_touch_ids[12];
 }
 // Keyboard Application collection ensures the original generic keyboard
@@ -62,6 +66,16 @@ static const unsigned char touchDescriptor[]={
     FINGER_DESC FINGER_DESC FINGER_DESC FINGER_DESC FINGER_DESC
     0x09,0x54,0x75,0x08,0x95,0x01,0x15,0x00,0x26,0xff,0x00,0x81,0x02,0xc0
 };
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+// Report 0x1a uses the relative Mouse/Pointer collection used by the sheng cover.
+static constexpr unsigned char mouseDescriptor[]={
+    0x05,0x01,0x09,0x02,0xa1,0x01,0x85,0x1a,0x09,0x01,0xa1,0x00,
+    0x05,0x09,0x09,0x01,0x15,0x00,0x25,0x01,0x75,0x01,0x95,0x01,0x81,0x02,
+    0x75,0x07,0x95,0x01,0x81,0x03,
+    0x05,0x01,0x09,0x30,0x09,0x31,0x16,0x01,0x80,0x26,0xff,0x7f,
+    0x75,0x10,0x95,0x02,0x81,0x06,0xc0,0xc0
+};
+#endif
 #define TOUCH_FINGERS 10
 // Edge contacts (int-163). A contact that starts within ~3 mm of a panel edge carries kIOHIDDigitizerEventFromEdgeTip (0x800) in its
 // finger events' event mask for its whole life, as Apple's multitouch stack reports it (MultitouchHID). UIKit derives UITouch's edge
@@ -262,6 +276,17 @@ class NativeHidInput : public IOHIDDevice {
         return handleReport(report,0,0);
 #endif
     }
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+    bool mouseEnabled=false;
+    B5qTouchPointer::Pointer pointer;
+    uint64_t tapLimit=0;
+    void sendPointer(uint8_t buttons,int dx,int dy) {
+        const unsigned x=uint16_t(dx),y=uint16_t(dy);
+        const unsigned char report[]={0x1a,buttons,uint8_t(x),uint8_t(x>>8),uint8_t(y),uint8_t(y>>8)};
+        IOBufferMemoryDescriptor *buffer=IOBufferMemoryDescriptor::withBytes(report,sizeof(report),kIODirectionNone);
+        if(buffer){submitReport(buffer);buffer->release();}
+    }
+#endif
     uint32_t lastSeq=0;
     // Fingers sent as down in the previous report; a vanished identifier gets one explicit tip-up report.
     int prevIds[TOUCH_FINGERS]={-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
@@ -290,9 +315,19 @@ class NativeHidInput : public IOHIDDevice {
         unsigned count=native_touch_count;if(count>TOUCH_FINGERS)count=TOUCH_FINGERS;
         int ids[TOUCH_FINGERS],xs[TOUCH_FINGERS],ys[TOUCH_FINGERS];
         for(unsigned i=0;i<count;++i){ids[i]=native_touch_ids[i];xs[i]=native_touch_xs[i];ys[i]=native_touch_ys[i];}
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+        const bool recovered=native_touch_recovered!=0;
+#endif
         __asm__ volatile("dmb ish":::"memory");
         if(native_touch_seq!=before)return;      // torn read: retry on the next tick
         self->lastSeq=before;
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+        if(mouseEnabled) {
+            const auto movement=pointer.update(count,ids,xs,ys,mach_absolute_time(),tapLimit,recovered);
+            if(movement.dx || movement.dy)sendPointer(0,movement.dx,movement.dy);
+            if(movement.click){sendPointer(1,0,0);sendPointer(0,0,0);}
+        }
+#endif
         // Sizes follow the axis maxima of the touch core: 32767 on both axes (b5q producer normalises4095counts), mapped to the same 0..32767 range.
         unsigned char report[1+TOUCH_FINGERS*6+1]={3};
         unsigned slot=0;
@@ -399,7 +434,11 @@ public:
     OSString *newProductString() const override {return OSString::withCString(touchOnly?"Offline touch digitizer":"Offline HID input probe");}
     IOReturn newReportDescriptor(IOMemoryDescriptor **out) const override {
         if(!out)return kIOReturnBadArgument;
-        unsigned char combined[sizeof(descriptor)+sizeof(touchDescriptor)];
+        unsigned char combined[sizeof(descriptor)+sizeof(touchDescriptor)
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+                               +sizeof(mouseDescriptor)
+#endif
+        ];
         size_t size;
         if(touchOnly){size=sizeof(touchDescriptor);memcpy(combined,touchDescriptor,size);}
         else{
@@ -408,6 +447,9 @@ public:
             // and user client attach on hardware); the separate digitizer device is the opt-in touch-split.
             if(touchEnabled){memcpy(combined+size,touchDescriptor,sizeof(touchDescriptor));size+=sizeof(touchDescriptor);}
         }
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+        if(mouseEnabled){memcpy(combined+size,mouseDescriptor,sizeof(mouseDescriptor));size+=sizeof(mouseDescriptor);}
+#endif
         *out=IOBufferMemoryDescriptor::withBytes(combined,size,kIODirectionNone);
         return *out?kIOReturnSuccess:kIOReturnNoMemory;
     }
@@ -455,7 +497,13 @@ public:
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         // macOS: WindowServer ties a digitizer to the display whose container ID equals the digitizer's kUSBContainerID (a UUID string,
         // read up the service plane as from a USB device); the built-in display publishes that ID in its EDID (NativeLegacyDisplay.cpp).
-        if(touchOnly||touchEnabled)publishContainerID();
+        if(touchOnly||touchEnabled){
+            publishContainerID();
+            unsigned enabled=1;
+            PE_parse_boot_argn("touch-mouse",&enabled,sizeof(enabled));
+            mouseEnabled=enabled==1;
+            nanoseconds_to_absolutetime(250000000,&tapLimit);
+        }
 #endif
         if(!IOHIDDevice::start(provider))return false;
         timer=IOTimerEventSource::timerEventSource(this,tick);

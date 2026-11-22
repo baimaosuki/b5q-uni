@@ -48,10 +48,18 @@ inline bool parse(const uint8_t *cfg,size_t cn,const uint8_t *data,size_t n,Poin
 inline bool sec(const uint8_t *data,size_t n,Point out[12]) {
  if(!data||!out||!n||n>4096||n%16)return false;
  Point pending[12];for(unsigned i=0;i<12;++i)pending[i]=out[i];
- for(size_t at=0;at<n;at+=16){const uint8_t *p=data+at;if(p[0]&3)continue;
-  unsigned id=(p[0]>>2)&15,action=p[0]>>6;if(!action)continue;if(id>=12)return false;
-  if(action==3){pending[id]={};continue;}unsigned type=(p[6]>>6)*4+(p[7]>>6);
-  pending[id]={uint16_t((p[1]<<4)|(p[3]>>4)),uint16_t((p[2]<<4)|(p[3]&15)),uint8_t(type==5?6:1)};
+ for (size_t at = 0; at < n; at += 16) {
+  const uint8_t *p = data + at;
+  const unsigned id = (p[0] >> 2) & 15;
+  const unsigned action = p[0] >> 6;
+  if (id >= 10 || action == 0) continue;
+  if (action == 3) {
+   pending[id] = {};
+   continue;
+  }
+  const unsigned type = ((p[6] >> 6) << 2) | (p[7] >> 6);
+  if ((0x69u & (1u << type)) == 0) continue;
+  pending[id] = {uint16_t((p[1] << 4) | (p[3] >> 4)), uint16_t((p[2] << 4) | (p[3] & 15)), 1};
  }
  for(unsigned i=0;i<12;++i)out[i]=pending[i];
  return true;

@@ -14,6 +14,7 @@ int armcpu_spi_share(uint32_t,void (*)(void *),void *);
 volatile uint32_t native_touch_seq,native_touch_count,native_touch_hid_reports;
 volatile int native_touch_xs[12],native_touch_ys[12],native_touch_ids[12];
 }
+extern "C" { __attribute__((visibility("default"))) volatile uint32_t native_touch_recovered; }
 namespace {
 IOMemoryMap *tlmmMapping;volatile uint32_t *tlmm;B5qTouch::Point points[12];
 void (*sink)(void *);void *sinkContext;uint8_t message[4096],config[512];size_t configBytes;unsigned frames,maxObjects;
@@ -69,10 +70,12 @@ bool powerTouch(){
 bool packet(TouchBus &bus,uint8_t &code,unsigned &length){
  uint8_t h[4];if(!bus.read(h,4))return false;code=h[1];length=unsigned(h[2])|(unsigned(h[3])<<8);
  if(h[0]!=0xa5||length>4096){IOLog("B5qTouch: stage=header hdr=%02x/%02x/%02x/%02x\n",h[0],h[1],h[2],h[3]);return false;}
+ if(length)IODelay(100);
  return B5qTouch::continuation([&bus](uint8_t *p,unsigned n){return bus.read(p,n);},message,length);
 }
 void publish(bool fromReport=true){
  __atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);unsigned count=0;
+ native_touch_recovered=!fromReport;
  for(unsigned i=0;i<12;++i)if(points[i].kind==1||points[i].kind==2){native_touch_xs[count]=int(B5qTouch::hid(points[i].x));native_touch_ys[count]=int(B5qTouch::hid(points[i].y));native_touch_ids[count]=int(i);++count;}
  native_touch_count=count;__asm__ volatile("dmb ish":::"memory");__atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
  if(auto callback=__atomic_load_n(&sink,__ATOMIC_ACQUIRE))callback(sinkContext);
@@ -80,7 +83,9 @@ void publish(bool fromReport=true){
   if(++frames<=8||!(frames%256))IOLog("B5qTouch: stage=report frames=%u contacts=%u seq=%u irq=%u hid_reports=%u\n",frames,count,native_touch_seq,__atomic_load_n(&irqEvents,__ATOMIC_RELAXED),native_touch_hid_reports);
  }else IOLog("B5qTouch: stage=release-contacts seq=%u hid_reports=%u\n",native_touch_seq,native_touch_hid_reports);
 }
+uint8_t reportMode;
 void report(uint8_t code,unsigned n){
+ if(code!=reportMode)return;
  static unsigned sampled=0;
  if((code==0x11 || code==0xc1) && sampled++<5){
   char hex[97]={};const unsigned count=n<32?n:32;
@@ -138,10 +143,14 @@ void worker(void *,wait_result_t){
   stage="application-info";IOLog("B5qTouch: stage=%s phase=before\n",stage);
   const bool appReady=command(bus,0x20,nullptr,0);IOLog("B5qTouch: stage=%s phase=after ok=%u max_objects=%u\n",stage,appReady,maxObjects);if(!appReady)break;
   stage="report-config";IOLog("B5qTouch: stage=%s phase=before\n",stage);
-  bool got=command(bus,0x25,nullptr,0,true);IOLog("B5qTouch: stage=report-config phase=after available=%u bytes=%lu\n",got,(unsigned long)configBytes);
+  const bool got=command(bus,0x25,nullptr,0,true);IOLog("B5qTouch: stage=report-config phase=after available=%u bytes=%lu\n",got,(unsigned long)configBytes);
   stage="enable-report";IOLog("B5qTouch: stage=%s phase=before\n",stage);const uint8_t touch=0x11,samsung=0xc1;
-  const bool ok11=command(bus,5,&touch,1),okC1=command(bus,5,&samsung,1);
-  IOLog("B5qTouch: stage=enable-report phase=after ok11=%u okC1=%u\n",ok11,okC1);
+  const bool disabled11=command(bus,6,&touch,1);
+  const bool okC1=command(bus,5,&samsung,1);
+  const bool ok11=!okC1 && got && command(bus,5,&touch,1);
+  reportMode=okC1?samsung:ok11?touch:0;
+  IOLog("B5qTouch: stage=enable-report phase=after disabled11=%u selected=%02x ok11=%u okC1=%u\n",
+        disabled11,reportMode,ok11,okC1);
   if(!(ok11||okC1))break;
   stage="attach-irq";
   IOLog("B5qTouch: stage=%s phase=before gpio=%u intid=%u\n",stage,B5qTouchIrq::gpio,B5qTouchIrq::intid);
@@ -156,8 +165,17 @@ void worker(void *,wait_result_t){
   for(unsigned consecutive=0;;){
    if(!lowAttention()){consecutive=0;waitAttention();continue;}
    uint8_t code=0;unsigned n=0;stage="read-report";
-   if(++consecutive>128 || !packet(bus,code,n))break;
+   if(!packet(bus,code,n)){
+    bool hadContacts=false;
+    for(auto &p:points){hadContacts|=p.kind!=0;p={};}
+    if(hadContacts)publish(false);
+    consecutive=0;
+    IOSleep(5);
+    continue;
+   }
    report(code,n);
+   // Drain a sustained interrupt in batches so another thread can run.
+   if(++consecutive==128){consecutive=0;IOSleep(1);}
   }
  }while(false);
  if(irqAttached){
@@ -165,7 +183,7 @@ void worker(void *,wait_result_t){
   tlmmWrite(B5qTouchIrq::status,0);
   __atomic_store_n(&irqOnline,false,__ATOMIC_RELEASE);
  }
- // Always release active contacts on a terminal bus error.
+ // Release active contacts on initialization failure.
  for(auto &p:points)p={};
  publish(false);
  IOLog("B5qTouch: stage=%s stopped error=%s stop=%s\n",stage,B5qTouchBus::name(bus.error()),B5qTouchBus::name(bus.stopError()));

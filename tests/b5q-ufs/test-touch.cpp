@@ -1,4 +1,5 @@
 #include "B5qTouchProtocol.h"
+#include "B5qTouchPointer.h"
 #include "GeniI2c.h"
 #include "B5qTouchClock.h"
 #include "ThermalProbe.h"
@@ -116,6 +117,20 @@ void testClocks(){
  puts("PASS production SE4 clock helper: locked votes/peer preservation/all branch timeouts/HW_CTL 80000002 skip/DFS levels0..7/no DFS writes/no-XO failure/nonDFS RCG faults/offset isolation");
 }
 int main(){
+ {
+  B5qTouchPointer::Pointer pointer;
+  const int id[]={1,2},zero[]={0,0},move[]={2048,2048};
+  assert(!pointer.update(1,id,zero,zero,1,250).click);
+  assert(pointer.update(0,nullptr,nullptr,nullptr,10,250).click);
+  pointer.update(1,id,zero,zero,20,250);
+  assert(pointer.update(1,id,move,move,25,250).dx>0);
+  assert(!pointer.update(0,nullptr,nullptr,nullptr,30,250).click);
+  pointer.update(1,id,zero,zero,31,250);
+  pointer.update(2,id,zero,zero,32,250);
+  assert(!pointer.update(0,nullptr,nullptr,nullptr,33,250).click);
+  pointer.update(1,id,zero,zero,34,250);
+  assert(!pointer.update(0,nullptr,nullptr,nullptr,35,250,true).click);
+ }
  using namespace B5qTouch;Point points[12]={};testClocks();
  uint32_t invalid[]={0,0,0};int32_t mc=THERMAL_NONE;assert(!thermal_pick_valid(invalid,3,&mc)&&mc==THERMAL_NONE);
  uint32_t valid[]={0,THERMAL_STATUS_VALID|310u,0};assert(thermal_pick_valid(valid,3,&mc)&&mc==31000);
@@ -133,8 +148,10 @@ int main(){
  uint8_t secPacket[32]={};secPacket[0]=0x40|8;secPacket[1]=0xff;secPacket[2]=8;secPacket[3]=0xf0;
  assert(sec(secPacket,16,points)&&points[2].kind==1&&points[2].x==4095&&points[2].y==128);
  secPacket[0]=0x80|8;secPacket[1]=1;assert(sec(secPacket,16,points)&&points[2].x==31);
- secPacket[16]=0x40|60;memcpy(saved,points,sizeof saved);assert(!sec(secPacket,32,points)&&!memcmp(saved,points,sizeof saved));
- secPacket[0]=0xc0|8;assert(sec(secPacket,16,points)&&!points[2].kind);
+ secPacket[16]=0x40|60;memcpy(saved,points,sizeof saved);
+ assert(sec(secPacket,32,points)&&!memcmp(saved,points,sizeof saved));
+ secPacket[6]=0xc0;assert(sec(secPacket,16,points)&&points[2].x==31);
+ secPacket[0]=0xc0|8|3;assert(sec(secPacket,16,points)&&!points[2].kind);
  for(unsigned length:{1u,255u,256u,257u,511u,4096u}){
   std::vector<uint8_t> out(length),expected(length);for(unsigned i=0;i<length;++i)expected[i]=i;
   unsigned at=0;auto read=[&](uint8_t *p,unsigned n){p[0]=0xa5;p[1]=3;for(unsigned i=2;i<n;++i)p[i]=at<length?expected[at++]:0x5a;return true;};
