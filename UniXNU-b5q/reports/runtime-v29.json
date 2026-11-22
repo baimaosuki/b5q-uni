@@ -30,5 +30,42 @@
   "launchd_policy": "Merge the pinned sheng lite labels and b5q service overrides into the existing 4 GiB Data seed. User 501 gets the GUI overrides. Usermanagerd is disabled through launchd with no replacement executable. Login and thermal effects remain unverified.",
   "usb": "Reuse the v28 FD, newly build images around its DarwinBoot and retain the v27 QcomDwc3 object.",
   "local_verification": "Touch/GENI ASan/UBSan regression, GPIO19 wait, arm64e objects, all HID binder addresses identical, relink plan, and policy merge passed.",
-  "hardware_tested": false
+  "hardware_tested": false,
+  "delivery": {
+    "run": 44985774704,
+    "source_commit": "e94593ae5aa7e6111a20a0515dcef33c0cc316cc",
+    "firmware_run": 44983031320,
+    "artifact_transfer_verified": true,
+    "outputs": {
+      "boot.img": {
+        "bytes": 71467008,
+        "sha256": "b5dfcd0bfadb6a34f31f84d4c3ce1c733568b6fa99c89712143940fb0ae40e2c"
+      },
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "441607e5f864935e2000ba5dea04e90c9b2fbdb11c4df10bd6ba672cef191134"
+      }
+    },
+    "apfs_4GiB_policy": {
+      "disabled.plist": 38,
+      "disabled.501.plist": 5
+    },
+    "data_sha256": "f1f6afe508b4c7c57254780c82018f039ae2b3cd691222a287d9d3a37bb3749b",
+    "kernel_sha256": "b9493392c6dd55130841124a1fa084f6572dc66a62d50fef40c24492db543878",
+    "pac_passed": true,
+    "checks": [
+      "FAT32 4Kn",
+      "XNU2LOG allocation",
+      "v28 loader",
+      "USB DMA ADT placeholders",
+      "4 GiB APFS Data and launchd policy",
+      "unchanged boot args and GPU addon",
+      "POST seal"
+    ],
+    "hardware_tested": false,
+    "first_run": {
+      "run": 44985470605,
+      "first_failure": "Read permission on root-owned Data account plist, corrected using sudo without changing inode ownership"
+    }
+  }
 }
