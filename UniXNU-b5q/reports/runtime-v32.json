@@ -10,6 +10,64 @@
       "5e reply5e/irq80 in1poll; subsequent37 timedout in100polls;typec-ready0",
       "CC25=b1 was sampled before the command in typec_init, not a post-command measurement",
       "relative-pointer selected; no WindowServer or Early boot complete"
+    ],
+    "panic_stack": [
+      {
+        "address": "0xfffffff00c2e3928",
+        "symbols": [
+          "_panic_with_options_and_initiator"
+        ],
+        "offset": "0x0"
+      },
+      {
+        "address": "0xfffffff00c34d1f0",
+        "symbols": [
+          "_proc_prepareexit.cold.3"
+        ],
+        "offset": "0x0"
+      },
+      {
+        "address": "0xfffffff00befc278",
+        "symbols": [
+          "_proc_prepareexit"
+        ],
+        "offset": "0xa14"
+      },
+      {
+        "address": "0xfffffff00befb7b4",
+        "symbols": [
+          "_exit_with_reason"
+        ],
+        "offset": "0x1d0"
+      },
+      {
+        "address": "0xfffffff00befb5bc",
+        "symbols": [
+          "_exit"
+        ],
+        "offset": "0x5c"
+      },
+      {
+        "address": "0xfffffff00c07ef14",
+        "symbols": [
+          "_unix_syscall"
+        ],
+        "offset": "0x324"
+      },
+      {
+        "address": "0xfffffff00c324484",
+        "symbols": [
+          "_sleh_synchronous"
+        ],
+        "offset": "0x4b0"
+      },
+      {
+        "address": "0xfffffff00bb9a874",
+        "symbols": [
+          "_fleh_synchronous"
+        ],
+        "offset": "0x18"
+      }
     ]
   },
   "inputs_sha256": {
@@ -39,7 +97,7 @@
     "Workflow/Python syntax and source-matched absentd patch"
   ],
   "build": {
-    "status": "pre-CI checks passed; CI pending",
+    "status": "CI45016691051 success; ordinary artifact digest and actual image verification pass",
     "core_translation_units_compiled": 0,
     "planned_board_sources": [
       "B5qUsbBoard.cpp",
@@ -48,7 +106,43 @@
     "source_cache_run": 45010859513,
     "source_cache_commit": "3044fe6e9bceadc0c3d5bbc63f4cd63d64535731",
     "seed_updated_in_place_from_v31": true,
-    "core_or_gpu_rebuild": false
+    "core_or_gpu_rebuild": false,
+    "ci_run": 45016691051,
+    "source_commit": "2f74ab3b3850711cd4f2bc61c75bdbe187a1f586"
   },
-  "hardware_tested": false
+  "hardware_tested": false,
+  "delivery": {
+    "ci_run": 45016691051,
+    "source_commit": "2f74ab3b3850711cd4f2bc61c75bdbe187a1f586",
+    "outputs": {
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "9277a7c8e0e29f1ace6225d3e8cc201cbc8fdf80a9d5bdcd307d93f1bb12853e"
+      }
+    },
+    "core_translation_units_compiled": 0,
+    "board_translation_units_compiled": 2,
+    "core_archive_sha256": "88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b",
+    "retained_pointer_object_sha256": "4aa18187b0d7229d05908df2bb96767267ac993a4a7251ab480aa38e2fbf6da3",
+    "kernel_sha256": "24ddee88b7d46e5bd0ad2e8c7c0c8c0926073815b3c5bfdc00ac99fe9256fb51",
+    "seed_sha256": "f84207df2076b9eec9f1ba5bec3e2a4e97e8eff1f10ee460967c2dcb91288e2f",
+    "gpu_addon_sha256": "b68e1164f7dd0ff822f20e116e97adc4606926a4204fc25eaa5241c2a966d82d",
+    "required_boot_sha256": "d7124d060a25d623e356cabd3d28c1af61ed38b902f47e78f82a73a6f192dbf6",
+    "boot_args_bytes": 949,
+    "original_trust_modules_preserved": true,
+    "actual_signature_pages_and_trust_passed": true,
+    "returned_GENI_and_cross_object_PAC_passed": true,
+    "FAT_and_journal_allocation_passed": true,
+    "absentd_one_shot_actual_binary": {
+      "absentd_sha256": "12436e821911d0702ef1e63eab2e8493567680f963da4ee2e3c3001cfa7513d8",
+      "actual_main": "0x1000005c0",
+      "no_label_branch": "0x100000740",
+      "empty_label_return_zero": "0x10000073c",
+      "one_shot_returns_without_dispatch": true,
+      "stack_canary_check_retained": true,
+      "code_signature_and_trust_checked_separately": true
+    },
+    "hardware_tested": false
+  },
+  "returned_verifier_sha256": "e9632cb17c23aea5bc89398cb79b9dec363b6d4d216f34c739becd21128dbeea"
 }
