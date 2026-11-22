@@ -98,8 +98,75 @@
       "B5qUsbBoard.cpp",
       "QcomDwc3.cpp"
     ],
-    "CI": "pending",
+    "CI": 44980608285,
     "device": "pending",
-    "firmware": "unmodified"
+    "firmware": "unmodified",
+    "source_commit": "0fdff5f7cbb3af37dbee56119c482c766083b7d9",
+    "CI_conclusion": "success",
+    "image": {
+      "bytes": 838860800,
+      "sha256": "f7cacbc026f765514262d62d634a49af6526167350e16a15bcf966f7604c446a"
+    },
+    "kernel": {
+      "bytes": 143245312,
+      "sha256": "53799c74c57785c8b2cb56288ab5381f279a81a246585c7ff9eb6ab4c205f887"
+    },
+    "checks": {
+      "FAT32_4Kn_800MiB": true,
+      "boot_args_ADT_two_clusters_firmware": true,
+      "actual_prelinked_USB_HID_MassStorage_families": [
+        "com.apple.driver.AppleUSBXDCI",
+        "com.apple.driver.usb.AppleUSBXHCI",
+        "com.apple.iokit.IOUSBDeviceFamily",
+        "com.apple.iokit.IOUSBHostFamily",
+        "com.apple.driver.usb.AppleUSBHub",
+        "com.apple.driver.usb.AppleUSBHostCompositeDevice",
+        "com.apple.driver.usb.IOUSBHostHIDDevice",
+        "com.apple.driver.AppleHIDKeyboard",
+        "com.apple.iokit.IOUSBMassStorageDriver"
+      ],
+      "strong_recount_and_native_USB_symbols": true,
+      "real_recount_call_and_Edge_counters": true,
+      "xdci_vtable_PAC_slots": 384,
+      "xhci_vtable_PAC_slots": 427,
+      "QMP168_linked_and_old_warm_removed": true,
+      "actual_4GiB_APFS_account_watchdogd": true,
+      "all_FAT_members_and_unchanged_GPU_Data_trust_EFI": true,
+      "bootshim_signatures_trust_APFS_checksums": true,
+      "GPIO_touch_no_GENI_and_unmodified_GeniI2c": true,
+      "USB_DMA_requires_firmware_handoff": true,
+      "CpuFreqProbe_retained_byte_identical": true,
+      "actual_Xcode_ABI_all_callbacks_PAC": true,
+      "EL1_USB_apps_smmu_removed": true,
+      "native_core_object_detection": {
+        "B5Q_HAVE_CPU_IDLE_MACH": 1,
+        "current_XNU_processor_objects": {
+          "/Users/runner/work/b5q-uni/b5q-uni/UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/osfmk/DEVELOPMENT/processor.o": "1d1c1d3089a991aefb7a817903402a74969c6808544d05e85618a33ed68305c7"
+        },
+        "objects": {
+          "B5qUsbBoard.o": "b3e3d495518f6d7fe9580dc0f3f1fe461214b7834700b834df4d507a90614c70",
+          "UsbProbe.o": "f5011df8af7e6d44999c6a99fdbb58af1606904cfdee646c56054a94a60f2700",
+          "CpuFreqProbe.o": "c4d772f3ca852f3ac272381d0d6e348cc867439ba18bfad4b4ba040b0455a6ed",
+          "ThermalProbe.o": "d06a1d4e4e8bbba10cad2b1d7d74b8deceb8a5063a561c6c6d5ca8556643345e",
+          "ThermalLevel.late.o": "97df93c44009e51131bc7ca1e7276077c10682fd306203b601c2ab768a9d77b3",
+          "BoardClock.o": "6bf6caeff7e8f9b82c8f8e621617fcb505cfb797c3bbed3c5c9948316a322daa",
+          "ButtonProbe.o": "40df81912badfa00296ba3f16b5a897b80619a53fe39fa63c13ddb01e58d7de6",
+          "DisplayTimingProbe.o": "47876e9e998b37cc07e41026a3f6d92acc95ab5d7860ac06a030abb3ccc24928",
+          "NativeHidInput.late.o": "a34655e107e1f3991688f1bb5398092d51889595628278dc04c86b2efb283eb4",
+          "HidInputProbe.o": "3da1aa69e584ac8bac51ebf38baa1d7ddfe03ae5da657b209cffe13de04a70ae",
+          "B5qTouch.o": "4609f8a9b6ffa10649cef61878f815d30d2757004a96811dc3c802bd82335b46",
+          "GeniI2c.o": "23100268f16879af428fff6e5cc16ac4d6f5dbdceb8172e209a28cf0ae67379c",
+          "Sm8550Gcc.o": "1965b18c69123e4814e2bcc30c430a7b18c4a89bbf68c5bfb4f88d1945178712",
+          "QcomRpmh.o": "38e738b4a5c8e2b46b05272dba4671abbcf460fcbe1a330a5c4732033cc60507",
+          "hid-bindings.o": "2b6363bbdf5bb1f74f9548d0453ec26057098f06a91c8927c3e4167d390bacc7",
+          "hid-addresses.o": "8a468772cb9f5d8d69703c215998de72c2a09a9a138cdc9bec28ac6fbbb1d31e"
+        }
+      }
+    },
+    "core_archive": {
+      "bytes": 150729536,
+      "sha256": "88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b"
+    },
+    "verification_sha256": "3d5a8c06978f7f5d7cda4c2ec687ac3726cf0457914426915b3c9d447c12c6b0"
   }
 }
