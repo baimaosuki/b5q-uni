@@ -82,7 +82,10 @@ def main():
         assert all(adt[key] == bytes(size) for key, size in filesystem.PLACEHOLDERS.items())
         nodes = filesystem.adt_nodes((files / filesystem.ADT).read_bytes())
         assert nodes["/chosen/asmb"][2]["lp-sip0"] == struct.pack("<Q", 2)
-        assert {k for k in nodes["/chosen/asmb"][2] if k != "name"} == {"lp-sip0"}
+        baseline_adt = subprocess.check_output(["mtype", "-i", str(ROOT / "artifacts/b5q-esp-runtime-v32/esp.img"), "::/" + filesystem.ADT])
+        baseline_asmb = filesystem.adt_nodes(baseline_adt)["/chosen/asmb"][2]
+        assert set(nodes["/chosen/asmb"][2]) == set(baseline_asmb)
+        assert {k for k, v in nodes["/chosen/asmb"][2].items() if baseline_asmb[k] != v} == {"lp-sip0"}
         menu = tomllib.loads((files / "EFI/UniXNU/unixnu.toml").read_text())
         entry = next(item for item in menu["entry"] if item["type"] == "xnu")
         assert entry["args"] == " ".join(tomllib.loads((ROOT/"UniXNU-b5q/board.toml").read_text())["payload"]["kernel_args"])
