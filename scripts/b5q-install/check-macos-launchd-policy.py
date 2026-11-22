@@ -102,6 +102,12 @@ class Machine:
         elif pc in (0x10005F624, 0x10005F594):  # xpc_dictionary_get_value/bool
             value = self.objects[self.reg("x0")].get(self.string(self.reg("x1")))
             self.ret(int(value is True) if pc == 0x10005F594 else self.object(value))
+        elif pc == 0x10005F3A4:  # xpc_bool_get_value
+            assert self.reg("x0") in (TRUE, FALSE)
+            self.ret(int(self.reg("x0") == TRUE))
+        elif pc == 0x10005F644:  # xpc_dictionary_set_bool
+            self.objects[self.reg("x0")][self.string(self.reg("x1"))] = bool(self.reg("x2"))
+            self.ret()
         elif pc in (0x10005E024, 0x10003D380):  # free, close wrapper
             self.ret()
         elif pc == 0x10002EDE0:  # override removal when SIP ignores the file
@@ -110,6 +116,9 @@ class Machine:
         elif pc == 0x100015120:  # diagnostic logger
             self.events.append(["log", self.string(self.reg("x2"))])
             self.ret()
+        elif pc == 0x10005CFB4:  # per-UID override record, filesystem already validated
+            assert self.reg("w0") == 501
+            self.ret(MEM + 0x17000)
         elif word in (0xD503237F, 0xD50323FF):  # PACIBSP/AUTIBSP: PAC tested separately.
             self.reg("pc", pc + 4)
         elif word == 0xD65F0FFF:  # RETAB
@@ -127,7 +136,7 @@ class Machine:
         self.run(0x10005BCF8)
         return self.reg("x0")
 
-    def gate(self, loaded, label, sip, system, removable, default=False, protected=False):
+    def gate(self, loaded, label, sip, system, removable, default=False, protected=False, flags=None):
         self.reg("sp", STACK)
         self.reg("lr", STOP)
         self.q(MEM + 0x103A0, loaded)
@@ -140,12 +149,32 @@ class Machine:
         self.reg("x22", MEM + 0x10000)
         self.reg("x24", MEM + 0x11000)
         self.reg("x20", int(default))
-        self.reg("x25", 0x100 if system else 0)
+        self.reg("x25", (0x100 if system else 0) if flags is None else flags)
         self.u.mem_write(STACK + 0x24, struct.pack("<II", 0, int(protected)))
         self.u.mem_write(0x100089AB8, bytes([sip]))
         self.q(0x10008AFA8, self.object(removable))
         self.run(0x100003E60, 0x100003F74)
         return bool(struct.unpack("<I", bytes(self.u.mem_read(STACK + 0x2C, 4)))[0])
+
+    def uid_domain(self, loaded):
+        """Execute the real UID-domain override assignment, not a guessed offset."""
+        self.q(MEM + 0x10068, MEM + 0x18000)
+        self.u.mem_write(MEM + 0x18080, b"\2")  # real type supports per-UID overrides
+        self.q(MEM + 0x17018, loaded)
+        self.reg("x19", MEM + 0x10000)
+        self.reg("x21", 501)
+        self.run(0x10002D74C, 0x10002D774)
+        assert struct.unpack("<Q", bytes(self.u.mem_read(MEM + 0x103A0, 8)))[0] == loaded
+
+    def disabled_rejection(self):
+        # Default DisableAllowed bit is set by native object construction.
+        self.reg("x22", MEM + 0x24000)
+        self.run(0x1000052EC, 0x1000052F8)
+        flags = self.u.mem_read(MEM + 0x24588, 4)
+        assert int.from_bytes(flags, "little") & 2
+        self.reg("x23", MEM + 0x24000)
+        self.reg("w20", 1)
+        self.run(0x1000043B0, 0x10000449C)
 
 
 def main():
@@ -153,6 +182,7 @@ def main():
     p.add_argument("--launchd", type=Path, required=True)
     p.add_argument("--rootless", type=Path, required=True)
     p.add_argument("--report", type=Path, required=True)
+    p.add_argument("--policy", type=Path, help="Validate all actual final board labels, including nested bundles")
     a = p.parse_args()
     fat = a.launchd.read_bytes()
     assert hashlib.sha256(fat).hexdigest() == SHA, "Requires actual macOS 26C5035r launchd"
@@ -188,6 +218,40 @@ def main():
         m.reg("w0", rc & 0xFFFFFFFF)
         m.run(0x1000488D4, end)
         cases.append(dict(case="migration marker stat branch", stat=rc, next_pc=hex(end), current_policy_still_loaded=True))
+    if a.policy:
+        policy = json.loads(a.policy.read_text())
+        for group in ("system", "gui", "bundled"):
+            for label in policy[group]:
+                m = Machine(raw, {label: True})
+                filename = "disabled.plist" if group == "system" else "disabled.501.plist"
+                loaded = m.load("/private/var/db/com.apple.xpc.launchd/" + filename)
+                if group != "system":
+                    m.uid_domain(loaded)
+                flags = 0x100 if group == "system" else 0x280
+                assert m.gate(loaded, label, 0, group == "system", removable, flags=flags)
+                m.disabled_rejection()
+                cases.append(dict(case="actual board policy", group=group, label=label, file=filename,
+                    import_flags=hex(flags), disabled=True, DisableAllowed_default=True,
+                    native_disabled_rejection="0x10000449c", uid_domain_assignment=group != "system"))
+        for label in ("com.apple.WindowServer", "com.apple.loginwindow", "com.apple.Dock.agent", "com.apple.Finder"):
+            merged = dict.fromkeys(sum(policy.values(), []), True)
+            m = Machine(raw, merged)
+            loaded = m.load("/private/var/db/com.apple.xpc.launchd/disabled.plist")
+            assert not m.gate(loaded, label, 0, True, removable)
+            cases.append(dict(case="protected desktop exclusion", label=label, disabled=False))
+        root = a.launchd.parent.parent
+        for domain, label in [("LaunchDaemons", "com.apple.mobileactivationd"), ("LaunchDaemons", "com.apple.security.cryptexd"),
+                              ("LaunchDaemons", "com.apple.AirPlayXPCHelper"), ("LaunchDaemons", "com.apple.rtcreportingd"),
+                              ("LaunchAgents", "com.apple.talagent")]:
+            job = plistlib.loads((root / "System/Library" / domain / (label + ".plist")).read_bytes())
+            m = Machine(raw, {})
+            obj = m.object(job.copy())
+            m.reg("x19", obj); m.reg("x24", obj); m.reg("w21", 0)
+            m.run(0x100005A18, 0x100005B74)
+            assert m.objects[obj]["EnablePressuredExit"] is True and m.reg("w2") == 1
+            cases.append(dict(case="real job transaction normalization", label=label,
+                input_EnableTransactions=job.get("EnableTransactions"), effective_EnableTransactions=True,
+                effective_EnablePressuredExit=True, native_function="0x100005a18..0x100005b74"))
     a.report.parent.mkdir(parents=True, exist_ok=True)
     a.report.write_text(json.dumps(dict(launchd_sha256=SHA, thin_sha256=hashlib.sha256(raw).hexdigest(),
         rootless_sha256=hashlib.sha256(a.rootless.read_bytes()).hexdigest(), cases=cases,

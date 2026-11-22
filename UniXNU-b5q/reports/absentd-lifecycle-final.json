@@ -1,0 +1,261 @@
+{
+  "passed": true,
+  "jobs": [
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.mobileactivationd.plist",
+      "sha256": "041b26c87c3a564784551457397fd037f74007548562b870305ce8819ebbb3b8",
+      "label": "com.apple.mobileactivationd",
+      "binary": "/usr/libexec/mobileactivationd",
+      "binary_sha256": "f845d60931c126f739881b2f1eb854b8b2478a6a03d0aa8c1a345e5aebb4bc15",
+      "KeepAlive": null,
+      "MachServices": {
+        "com.apple.mobileactivationd": true
+      },
+      "EnableTransactions": true,
+      "effective_transactions": true,
+      "effective_transactions_evidence": "native launchd normalization 0x100005a18..0x100005b74",
+      "EnablePressuredExit": true,
+      "launchd_enforced_sandbox_keys": [],
+      "replacement_runtime_plist_reads": 0,
+      "replacement_profile": "No app-sandbox entitlement or explicit sandbox installation"
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.security.cryptexd.plist",
+      "sha256": "be55dca3723fcf70ad80d4dfa426a5fcee4e59361ae139d759cf0552b6bae788",
+      "label": "com.apple.security.cryptexd",
+      "binary": "/usr/libexec/cryptexd",
+      "binary_sha256": "8be9e055b70db3e74e520fea1900a2742cf9c414940006599944e972ecb83198",
+      "KeepAlive": {
+        "PathState": {
+          "/private/var/run/com.apple.security.cryptexd/init": false
+        }
+      },
+      "MachServices": {
+        "com.apple.security.cryptex.xpc": true,
+        "com.apple.security.cryptexd": true
+      },
+      "EnableTransactions": true,
+      "effective_transactions": true,
+      "effective_transactions_evidence": "native launchd normalization 0x100005a18..0x100005b74",
+      "EnablePressuredExit": true,
+      "launchd_enforced_sandbox_keys": [],
+      "replacement_runtime_plist_reads": 0,
+      "replacement_profile": "No app-sandbox entitlement or explicit sandbox installation"
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.AirPlayXPCHelper.plist",
+      "sha256": "fe20cfda0dfe0c53312355277b33af37de9b86c0a8de657c1aaea20f019c49c9",
+      "label": "com.apple.AirPlayXPCHelper",
+      "binary": "/usr/libexec/AirPlayXPCHelper",
+      "binary_sha256": "728e32e6e34db1bda4fed4c273ba974e22ae573c07e566ffb31f3e679c95ceb0",
+      "KeepAlive": false,
+      "MachServices": {
+        "com.apple.AirPlayXPCHelper": true,
+        "com.apple.coremedia.endpointmanager.xpc": true,
+        "com.apple.coremedia.endpoint.xpc": true,
+        "com.apple.coremedia.endpointstream.xpc": true,
+        "com.apple.coremedia.endpointstreamaudioengine.xpc": true,
+        "com.apple.coremedia.samplebufferconsumer.xpc": true,
+        "com.apple.coremedia.bufferedairplayglobalroutingregistry.xpc": true,
+        "com.apple.coremedia.endpointplaybacksession.xpc": true,
+        "com.apple.coremedia.endpointpicker.xpc": true,
+        "com.apple.coremedia.endpointuiagent.xpc": {
+          "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+          "#Then": true
+        },
+        "com.apple.coremedia.routediscoverer.xpc": {
+          "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+          "#Then": true
+        },
+        "com.apple.coremedia.routingcontext.xpc": {
+          "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+          "#Then": true
+        },
+        "com.apple.coremedia.volumecontroller.xpc": {
+          "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+          "#Then": true
+        },
+        "com.apple.coremedia.endpointremotecontrolsession.xpc": true
+      },
+      "EnableTransactions": true,
+      "effective_transactions": true,
+      "effective_transactions_evidence": "native launchd normalization 0x100005a18..0x100005b74",
+      "EnablePressuredExit": true,
+      "launchd_enforced_sandbox_keys": [],
+      "replacement_runtime_plist_reads": 0,
+      "replacement_profile": "No app-sandbox entitlement or explicit sandbox installation"
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.rtcreportingd.plist",
+      "sha256": "b8e1e543cec0b078b6d1a91877a5249322a1e8df734f877de1e166b006840409",
+      "label": "com.apple.rtcreportingd",
+      "binary": "/usr/libexec/rtcreportingd",
+      "binary_sha256": "3c2ac34629e6c1f6e74f17a260cb181f65ace0711f4f053abe33c3dfa34f4a04",
+      "KeepAlive": null,
+      "MachServices": {
+        "com.apple.rtcreportingd": true
+      },
+      "EnableTransactions": true,
+      "effective_transactions": true,
+      "effective_transactions_evidence": "native launchd normalization 0x100005a18..0x100005b74",
+      "EnablePressuredExit": true,
+      "launchd_enforced_sandbox_keys": [],
+      "replacement_runtime_plist_reads": 0,
+      "replacement_profile": "No app-sandbox entitlement or explicit sandbox installation"
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.talagent.plist",
+      "sha256": "2ceac3d0ac83162523daa8fabd3fc97f6a6525d6167465f486372571611ef3e8",
+      "label": "com.apple.talagent",
+      "binary": "/System/Library/CoreServices/talagentd",
+      "binary_sha256": "0182a4e3a42f5ae3d1dd3f78019e90753cc6c1b20654cf53c23476abb2e46df4",
+      "KeepAlive": null,
+      "MachServices": {
+        "com.apple.window_proxies": true,
+        "com.apple.appkit.restoration_storage": true,
+        "com.apple.window_proxies.startup": true
+      },
+      "EnableTransactions": null,
+      "effective_transactions": true,
+      "effective_transactions_evidence": "native launchd normalization 0x100005a18..0x100005b74",
+      "EnablePressuredExit": true,
+      "launchd_enforced_sandbox_keys": [],
+      "replacement_runtime_plist_reads": 0,
+      "replacement_profile": "No app-sandbox entitlement or explicit sandbox installation"
+    }
+  ],
+  "native_transaction_replay": [
+    {
+      "previous": 0,
+      "transaction_count": 1,
+      "proc_set_dirty_calls": [
+        [
+          123,
+          1
+        ]
+      ]
+    },
+    {
+      "previous": 1,
+      "transaction_count": 2,
+      "proc_set_dirty_calls": []
+    },
+    {
+      "previous": 5,
+      "transaction_count": 6,
+      "proc_set_dirty_calls": []
+    }
+  ],
+  "cache_main_sha256": "f4aefea64cb86bf2f82a0af1e0f6fde7f56b2ef67eaeba9ff3ae0cdfc1e1c36f",
+  "cache_sub01_sha256": "b954fa0249bb2c9ab5b3d7207bb05f4767bb70d3c675b3cab6a37aafc9c6c890",
+  "code_address": "0x184bce5c8",
+  "code_file_offset": "0x47ce5c8",
+  "instruction_bytes": "7f2303d5f657bda9f44f01a9fd7b02a9fd83009116ac40b9c806003108ac00b922080054f30300aa950380521520a572147d4093397ad294017c4093800380520020a572e20314aa030080d2040080d2d2e4d29460ae40b91f2003d508aa2ef008a540f9880300b4546c34908822553928030034917ad294e00200349f2215398001009000002991010080d2c77ad294e30300aa486c349000a902f9e0af2db0000c46f9e1018052020080d2d77ad294546c349080ae02f9d000009010523f91f023c1dae10310aad87ad29480ae42f9be7ad294df020071ec01005468a242391f050071810100540c7ad294210080523ae5d294097ad294017c4093a0220011020080d2030080d2040080d2a3e4d2941f2003d5fd7b42a9f44f41a9f657c3a8ff0f5fd68001009000802891429eff97",
+  "native_zero_to_one_marks_process_dirty_at": "0x184bce6b8 -> j__proc_set_dirty at 0x188087ba0",
+  "substituted_APIs": "getpid, kdebug, proc_set_dirty; PAC prologue/return control-flow shims",
+  "guaranteed_scope": "Fix pressured idle-exit eligibility, known-job no-label early exit, and sandbox-sensitive plist reads; no immunity to arbitrary SIGKILL/OOM",
+  "v32_seven_individual_exit_reasons": "not recorded by v32; seven instances are not a complete per-instance exit trace",
+  "hardware_verified": false,
+  "original_sandbox_profiles": [
+    {
+      "path": "/System/Library/Sandbox/Profiles/com.apple.AirPlayXPCHelper.sb",
+      "sha256": "810d0ba5dd8e7bb8922416dc19e6629a321ada9180229eb7303ac6186ed3a981",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": true,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    },
+    {
+      "path": "/System/Library/Sandbox/Profiles/com.apple.corefoundation.sb",
+      "sha256": "92beb4173cbf0c90bb689d38899af0bd283d2ba013bad2369f99de2747fc0b30",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": false,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    },
+    {
+      "path": "/System/Library/Sandbox/Profiles/com.apple.rtcreportingd.sb",
+      "sha256": "dc9f2748d3d4fdb78082026bb5a66832a021403a58b9bd124c7626ad761ab549",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": true,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    },
+    {
+      "path": "/System/Library/Sandbox/Profiles/cryptex-session-base.sb",
+      "sha256": "3a51442cfb983cb52de0ddec63d5c649244367daff91f4b0a6339b99c4376c03",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": false,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    },
+    {
+      "path": "/System/Library/Sandbox/Profiles/cryptex-session-template.sb",
+      "sha256": "bce51fcf57ee869ba21c43d2a89dc40237dcbf519f6619d0dcd0ea678dfa39e3",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": true,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    },
+    {
+      "path": "/System/Library/Sandbox/Profiles/mobileactivationd.sb",
+      "sha256": "6cb1bd713630a777d06c737c8435c3ac4d3ee69b63e08973a127ddea372dec0b",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": true,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    },
+    {
+      "path": "/System/Library/Sandbox/Profiles/system.sb",
+      "sha256": "4624ea2cc126c7ab595ce241989cc0719327b245bdbc521d11b26d6547082774",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": false,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    },
+    {
+      "path": "/System/Library/Sandbox/Profiles/talagentd.sb",
+      "sha256": "d7e3b000f49c75e200dc846b835c74ea7ab595a992226884bf57c7ae4525e0e4",
+      "explicit_LaunchDaemons_or_LaunchAgents_allow": false,
+      "explicit_stand_in_allow": false,
+      "default_deny": true,
+      "runtime_relevance": "No target Launch plist names a sandbox; replacement has no app-sandbox entitlement or sandbox_init call; no runtime plist reads. These original self-installed profiles are not silently inherited by path name."
+    }
+  ],
+  "original_self_sandbox_calls": {
+    "mobileactivationd": {
+      "call": "0x10002b038",
+      "symbol": "sandbox_init_with_parameters"
+    },
+    "AirPlayXPCHelper": {
+      "call": "0x100000f04",
+      "symbol": "sandbox_init_with_parameters"
+    },
+    "talagentd": {
+      "call": "0x100001288",
+      "symbol": "sandbox_init_with_parameters"
+    },
+    "cryptexd": {
+      "call": "0x100031fb4",
+      "symbol": "sandbox_register_profile",
+      "scope": "session subprocess profile registration; not launchd-imposed daemon profile"
+    },
+    "rtcreportingd": {
+      "scope": "No launchd SandboxProfile key or app-sandbox entitlement; replacement never invokes the original executable or installs its profile"
+    }
+  },
+  "runtime_v33": {
+    "log_sha256": "cd646f02468e971aad11c278ef017e7fc49829020e23c9940561834d33bcb82d",
+    "sequence": 269,
+    "lost": 0,
+    "overwritten": 0,
+    "cryptexd_pids": [
+      181,
+      710,
+      817
+    ],
+    "all_read_plist_and_resident": true,
+    "b5q_absentd_exit_signal_in_top10": 9,
+    "source_of_pressure_exit": "native transaction API and kernel clean/idle predicate; explicit SIGKILL reason namespace not in v32 log"
+  }
+}

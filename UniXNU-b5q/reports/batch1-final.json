@@ -1,0 +1,172 @@
+{
+  "scope": "All locally verifiable Req-1..Req-6 of updated Batch1; no later HID/USB/GPU changes",
+  "source_preflight": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "records",
+        "command": [
+          "/bin/python3",
+          "UniXNU/scripts/porting-record.py",
+          "check",
+          "--device",
+          "UniXNU-b5q"
+        ],
+        "passed": true
+      },
+      {
+        "name": "native-launchd",
+        "command": [
+          "/bin/python3",
+          "scripts/b5q-install/check-macos-launchd-policy.py",
+          "--launchd",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/root/sbin/launchd",
+          "--rootless",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/root/System/Library/Sandbox/com.apple.xpc.launchd.rootless.plist",
+          "--policy",
+          "/home/baimao/zflip5/UniXNU-b5q/package/b5q-launchd-lite.json",
+          "--report",
+          "/home/baimao/zflip5/artifacts/b5q-batch1-final-work/native-launchd.json"
+        ],
+        "passed": true
+      },
+      {
+        "name": "native-XPC-and-five-job-audit",
+        "command": [
+          "/bin/python3",
+          "scripts/b5q-install/check-absentd-lifecycle.py",
+          "--root",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/root",
+          "--cache",
+          "/home/baimao/nabu_macos/out/nabu-27.3-fresh/assets/shared-cache/System/Library/dyld/dyld_shared_cache_arm64e",
+          "--report",
+          "/home/baimao/zflip5/artifacts/b5q-batch1-final-work/absent-lifecycle.json"
+        ],
+        "passed": true
+      },
+      {
+        "name": "absentd-ASan-UBSan",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-absentd-v33.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "proctop-compile",
+        "command": [
+          "c++",
+          "-std=c++17",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-pthread",
+          "-fsanitize=address,undefined",
+          "-I",
+          "/home/baimao/zflip5/UniXNU-b5q/package",
+          "/home/baimao/zflip5/tests/b5q-ufs/test-proctop.cpp",
+          "-o",
+          "/tmp/b5q-proctop-final-preci-b1awqo95/proctop"
+        ],
+        "passed": true
+      },
+      {
+        "name": "proctop-ASan-UBSan",
+        "command": [
+          "/tmp/b5q-proctop-final-preci-b1awqo95/proctop"
+        ],
+        "passed": true
+      },
+      {
+        "name": "reused-proctop-PAC",
+        "command": [
+          "/bin/python3",
+          "scripts/b5q-install/check-proctop-pac.py",
+          "--object",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/ci-files/kernel/incremental-objects/B5qProcTop.o",
+          "--core-objects",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/pac",
+          "--out",
+          "/home/baimao/zflip5/artifacts/b5q-batch1-final-work/proctop-pac.json"
+        ],
+        "passed": true
+      },
+      {
+        "name": "data-account",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-data-account.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "log-startup",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-log-startup.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "log-writer",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-log-writer.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "installer",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-installer.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "ADT-binary-plist-desktop-exclusions-cache-only-workflow",
+        "passed": true
+      }
+    ],
+    "hardware_verified": false,
+    "core_and_board_objects_recompiled": 0,
+    "existing_v33_kernel_and_4GiB_volume_reused": true,
+    "native_launchd_instruction_cases": 89,
+    "actual_libxpc_transaction_cases": 3,
+    "source_jobs_audited": 5,
+    "production_absentd_cases": 21,
+    "concurrency": "160000 events plus signal/status/reset/overflow"
+  },
+  "required": [
+    "Req-1",
+    "Req-2",
+    "Req-3",
+    "Req-4",
+    "Req-5",
+    "Req-6"
+  ],
+  "requirement_status": {
+    "Req-1": "source-verified",
+    "Req-2": "source-verified; final image readback pending",
+    "Req-3": "five jobs/source sandbox/real XPC lifecycle and production tests verified; no invented per-PID v32 exit reason",
+    "Req-4": "all labels and native gate verified; final image readback pending",
+    "Req-5": "existing v33 observer already target/PAC/image/device-log verified; reused",
+    "Req-6": "source/tests complete; final artifact verification pending"
+  },
+  "evidence": {
+    "launchd": "reports/launchd-26C5035r-policy.json",
+    "census": "reports/launchd-26C5035r-census.json",
+    "lifecycle": "reports/absentd-lifecycle-final.json",
+    "v33_device": "reports/runtime-v33-device.json"
+  },
+  "build": {
+    "source_cache_run": 45041019820,
+    "source_cache_commit": "ac082c9d53049323fd701cec5d6ba5bd7621bc1f",
+    "kernel_and_board_objects_compiled": 0,
+    "gpu_recompiled": false,
+    "UEFI_recompiled": false,
+    "new_Data_volume_created": false,
+    "state": "local preflight PASS, package CI pending"
+  },
+  "hardware_tested_final_image": false
+}

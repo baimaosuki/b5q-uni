@@ -1,24 +1,38 @@
 diff --git a/absentd.c b/absentd.c
 --- a/absentd.c
 +++ b/absentd.c
-@@ -8,48 +8,99 @@
- #include <CoreFoundation/CoreFoundation.h>
+@@ -1,55 +1,91 @@
+ // SPDX-License-Identifier: BSD-2-Clause-Patent
+-// The stand-in for a system daemon that cannot run on a board (the kernel's deny-exec list; macOS: mobileactivationd, which needs the
+-// Secure Enclave's device identity, and cryptexd, which needs grafted cryptex volumes). The kernel executes this program in the
+-// daemon's place, so it runs as that launchd job: it takes the job's Mach services and closes every connection made to them. A client
+-// then gets "connection invalid" at once, as it does from a daemon that is not there. Without a process behind the services launchd
+-// keeps each request queued for the next start of the job, and a client that waits for its reply never returns (macOS run41/run42:
+-// mdmclient in -[MobileActivationMacOS getUCRTDEPEnrollmentState:], so the login never finished).
+-#include <CoreFoundation/CoreFoundation.h>
++// Board stand-ins use source-qualified MachServices, no runtime plist reads.
  #include <dispatch/dispatch.h>
++#include <xpc/xpc.h>
  #include <stdio.h>
-+#include <stdarg.h>
+ #include <stdlib.h>
+-#include <xpc/xpc.h>
 +#include <string.h>
 +#include <unistd.h>
 +#include <fcntl.h>
 +#include <errno.h>
- #include <stdlib.h>
- #include <xpc/xpc.h>
  
 -static void refuse(const char *name)
-+// The seven v32 unnest messages identify distinct process instances, not their
-+// job labels or exit reasons. Log identity/branches here rather than claiming
-+// they prove seven restarts of one service.
++struct board_job { const char *label; const char *path; const char *services[20]; };
++static const struct board_job jobs[] = {
++    {"com.apple.mobileactivationd", "/usr/libexec/mobileactivationd", {"com.apple.mobileactivationd", NULL}},
++    {"com.apple.security.cryptexd", "/usr/libexec/cryptexd", {"com.apple.security.cryptex.xpc", "com.apple.security.cryptexd", NULL}},
++    {"com.apple.AirPlayXPCHelper", "/usr/libexec/AirPlayXPCHelper", {"com.apple.AirPlayXPCHelper", "com.apple.coremedia.endpointmanager.xpc", "com.apple.coremedia.endpoint.xpc", "com.apple.coremedia.endpointstream.xpc", "com.apple.coremedia.endpointstreamaudioengine.xpc", "com.apple.coremedia.samplebufferconsumer.xpc", "com.apple.coremedia.bufferedairplayglobalroutingregistry.xpc", "com.apple.coremedia.endpointplaybacksession.xpc", "com.apple.coremedia.endpointpicker.xpc", "com.apple.coremedia.endpointremotecontrolsession.xpc", NULL}},
++    {"com.apple.rtcreportingd", "/usr/libexec/rtcreportingd", {"com.apple.rtcreportingd", NULL}},
++    {"com.apple.talagent", "/System/Library/CoreServices/talagentd", {"com.apple.window_proxies", "com.apple.appkit.restoration_storage", "com.apple.window_proxies.startup", NULL}},
++};
++
 +static void diagnostic(const char *label, const char *stage, int detail)
- {
++{
 +    char line[512];
 +    int n = snprintf(line, sizeof line, "B5qAbsent: pid=%ld label=%.160s stage=%s detail=%d\n",
 +                     (long)getpid(), label && label[0] ? label : "<boot-task>", stage, detail);
@@ -29,14 +43,26 @@ diff --git a/absentd.c b/absentd.c
 +    else (void)write(STDERR_FILENO, line, bytes);
 +}
 +
-+struct listener_context { const char *label; unsigned listeners; };
-+
-+static void refuse(const char *name, struct listener_context *context)
++static const struct board_job *resolve_job(const char *label, int argc, char **argv)
 +{
-+    const char *label = context->label;
++    for (unsigned i = 0; i < sizeof jobs / sizeof jobs[0]; ++i)
++        if (label && !strcmp(label, jobs[i].label)) return &jobs[i];
++    // exec replacement retains the original argv. Match only the five exact
++    // source-qualified paths/basenames, never arbitrary paths or boot tasks.
++    if ((!label || !label[0]) && argc > 0 && argv && argv[0]) {
++        for (unsigned i = 0; i < sizeof jobs / sizeof jobs[0]; ++i) {
++            const char *base = strrchr(jobs[i].path, '/');
++            if (!strcmp(argv[0], jobs[i].path) || (base && !strcmp(argv[0], base + 1))) return &jobs[i];
++        }
++    }
++    return NULL;
++}
++
++static int refuse(const char *name, const char *label)
+ {
      xpc_connection_t listener = xpc_connection_create_mach_service(name, dispatch_get_main_queue(), XPC_CONNECTION_MACH_SERVICE_LISTENER);
 -    if (!listener) return;
-+    if (!listener) { diagnostic(label, "listener-create-failed", errno); return; }
++    if (!listener) { diagnostic(label, "listener-create-failed", errno); return 0; }
      xpc_connection_set_event_handler(listener, ^(xpc_object_t peer) {
 +        if (xpc_get_type(peer) == XPC_TYPE_ERROR) {
 +            diagnostic(label, "listener-error", peer == XPC_ERROR_CONNECTION_INVALID ? 1 : 2);
@@ -48,74 +74,56 @@ diff --git a/absentd.c b/absentd.c
          xpc_connection_cancel((xpc_connection_t)peer);
      });
      xpc_connection_activate(listener);
-+    ++context->listeners;
++    return 1;
  }
  
 -static void refuse_each(const void *key, const void *value, void *context)
-+static void refuse_each(const void *key, const void *value, void *opaque)
++int main(int argc, char **argv)
  {
 -    (void)value; (void)context;
-+    (void)value;
-+    struct listener_context *context = opaque;
-     char name[256];
+-    char name[256];
 -    if (CFGetTypeID(key) == CFStringGetTypeID() && CFStringGetCString(key, name, sizeof name, kCFStringEncodingUTF8)) refuse(name);
-+    if (CFGetTypeID(key) == CFStringGetTypeID() && CFStringGetCString(key, name, sizeof name, kCFStringEncodingUTF8)) refuse(name, context);
-+    else diagnostic(context->label, "invalid-service-name", 0);
- }
- 
- int main(void)
- {
+-}
+-
+-int main(void)
+-{
 -    // launchd gives every job its label; the job's own description names its services.
      const char *label = getenv("XPC_SERVICE_NAME");
 -    char path[512];
 -    if (!label || snprintf(path, sizeof path, "/System/Library/LaunchDaemons/%s.plist", label) >= (int)sizeof path) return 78;
 -    CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), false);
 -    CFReadStreamRef stream = url ? CFReadStreamCreateWithFile(NULL, url) : NULL;
-+    if (!label || !label[0]) {
-+        diagnostic(label, "boot-task-exit", 0);
-+        return 0; // Preserve EndpointSecurity/other synchronous one-shot tasks.
-+    }
-+    if (strlen(label) > 255 || strchr(label, '/') || strstr(label, "..")) {
-+        diagnostic("<invalid-label>", "invalid-label-exit", 78);
-+        return 78;
-+    }
-+    diagnostic(label, "start", 0);
-     CFPropertyListRef job = NULL;
+-    CFPropertyListRef job = NULL;
 -    if (stream && CFReadStreamOpen(stream)) {
 -        job = CFPropertyListCreateWithStream(NULL, stream, 0, kCFPropertyListImmutable, NULL, NULL);
 -        CFReadStreamClose(stream);
-+    const char *domains[] = {"LaunchDaemons", "LaunchAgents"};
-+    for (unsigned i = 0; i < sizeof(domains) / sizeof(domains[0]) && !job; ++i) {
-+        char path[512];
-+        int n = snprintf(path, sizeof path, "/System/Library/%s/%s.plist", domains[i], label);
-+        if (n < 0 || n >= (int)sizeof path) {
-+            diagnostic(label, "path-too-long-exit", 78);
-+            return 78;
++    const struct board_job *job = resolve_job(label, argc, argv);
++    if (!job) {
++        if (!label || !label[0]) {
++            diagnostic(label, "boot-task-exit", 0);
++            return 0; // Unknown no-label synchronous task: preserve success.
 +        }
-+        CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), false);
-+        CFReadStreamRef stream = url ? CFReadStreamCreateWithFile(NULL, url) : NULL;
-+        if (stream && CFReadStreamOpen(stream)) {
-+            job = CFPropertyListCreateWithStream(NULL, stream, 0, kCFPropertyListImmutable, NULL, NULL);
-+            CFReadStreamClose(stream);
-+        }
-+        if (stream) CFRelease(stream);
-+        if (url) CFRelease(url);
-+        if (job) diagnostic(label, i ? "agent-plist" : "daemon-plist", 0);
++        diagnostic("<unrecognized-label>", "invalid-label-exit", 78);
++        return 78;
      }
 -    if (stream) CFRelease(stream);
 -    if (url) CFRelease(url);
-+    struct listener_context context = {label, 0};
-     if (job && CFGetTypeID(job) == CFDictionaryGetTypeID()) {
-         CFTypeRef services = CFDictionaryGetValue(job, CFSTR("MachServices"));
+-    if (job && CFGetTypeID(job) == CFDictionaryGetTypeID()) {
+-        CFTypeRef services = CFDictionaryGetValue(job, CFSTR("MachServices"));
 -        if (services && CFGetTypeID(services) == CFDictionaryGetTypeID()) CFDictionaryApplyFunction(services, refuse_each, NULL);
 -    }
 -    // Launch events (cryptexd is started by one) stay with launchd; this process keeps running, so they start nothing again.
-+        if (services && CFGetTypeID(services) == CFDictionaryGetTypeID()) CFDictionaryApplyFunction(services, refuse_each, &context);
-+        else diagnostic(label, "no-mach-services", 0);
-+    } else diagnostic(label, "plist-unavailable", 0);
-+    if (job) CFRelease(job);
-+    diagnostic(label, "resident", (int)context.listeners);
-+    // Even a missing plist/failed listener stays resident, avoiding respawn
-+    // loops. Only genuine early one-shot boot tasks return success immediately.
++    diagnostic(job->label, "start", 0);
++    // Every original job enables pressured exit. A main-queue run loop alone
++    // leaves it clean and eligible for idle SIGKILL; cryptexd's PathState then
++    // launches it again. Keep one lifetime transaction for this stand-in.
++    xpc_transaction_begin();
++    diagnostic(job->label, "transaction-held", 1);
++    unsigned listeners = 0;
++    for (unsigned i = 0; i < sizeof job->services / sizeof job->services[0] && job->services[i]; ++i)
++        listeners += (unsigned)refuse(job->services[i], job->label);
++    diagnostic(job->label, "resident", (int)listeners);
++    // Intentional lifetime transaction: no idle exit, no balanced end while
++    // the replacement must continue to drain and cancel service requests.
      dispatch_main();
  }

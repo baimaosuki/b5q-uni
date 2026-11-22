@@ -59,6 +59,12 @@
     "com.apple.siriactionsd",
     "com.apple.siriinferenced",
     "com.apple.siriknowledged",
-    "com.apple.talagent"
+    "com.apple.talagent",
+    "com.apple.wallpaper.agent"
+  ],
+  "bundled": [
+    "com.apple.ReportCrashService",
+    "com.apple.geod",
+    "com.apple.wallpaper.extension.aerials"
   ]
 }

@@ -1,0 +1,134 @@
+{
+  "log_sha256": "cd646f02468e971aad11c278ef017e7fc49829020e23c9940561834d33bcb82d",
+  "decode": {
+    "slot": 0,
+    "valid": true,
+    "sequence": 269,
+    "boot_id": "cfa6f93a000000000100000000000000",
+    "committed_total": 196649,
+    "lost_on_contention": 0,
+    "ring_overwritten": 0,
+    "payload_bytes": 196649,
+    "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000",
+    "format": "NABULOG2",
+    "version": 2,
+    "allocation_token": "411839cbaebac4088c251c0ea57579a2",
+    "slots": [
+      {
+        "slot": 0,
+        "valid": true,
+        "sequence": 269,
+        "boot_id": "cfa6f93a000000000100000000000000",
+        "committed_total": 196649,
+        "lost_on_contention": 0,
+        "ring_overwritten": 0,
+        "payload_bytes": 196649,
+        "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+      },
+      {
+        "slot": 1,
+        "valid": true,
+        "sequence": 268,
+        "boot_id": "cfa6f93a000000000100000000000000",
+        "committed_total": 195259,
+        "lost_on_contention": 0,
+        "ring_overwritten": 0,
+        "payload_bytes": 195259,
+        "build_id": "6235712d6c6f672d7631322d3236433530333572000000000000000000000000"
+      }
+    ],
+    "selected_slot": 0,
+    "stored_checksum": "crc32_header_and_payload",
+    "stored_checksum_valid": true,
+    "config_checksum_valid": true,
+    "structural_validation": "passed",
+    "ring_capacity": 4194304,
+    "ring_order": "already_linearised",
+    "lost_bytes_exact": 0,
+    "captured_bytes_lower_bound": 196649,
+    "lost_bytes_lower_bound": 0,
+    "capture_complete_through_snapshot": true,
+    "complete_boot_log": false,
+    "freshness": "boot_id_present_requires_run_binding",
+    "snapshot_consistency": "CRC_verified_committed_snapshot",
+    "payload_sha256": "edfff0f1e0d42f90e86ba6b9c2033014de1e57603c491a2bb0bfa790f5084930",
+    "warnings": [
+      "Bytes after the last completed commit may be missing.",
+      "Only bytes reaching the installed console producers are captured."
+    ],
+    "nul_bytes": 0,
+    "utf8_valid": true,
+    "decoded": true
+  },
+  "lines": 2082,
+  "proc_top_windows": [
+    {
+      "line": 768,
+      "spawns": 252,
+      "exits": 97,
+      "line_interleaved_with_other_console_output": true
+    },
+    {
+      "line": 983,
+      "spawns": 275,
+      "exits": 104,
+      "line_interleaved_with_other_console_output": true
+    },
+    {
+      "line": 1163,
+      "spawns": 83,
+      "exits": 23,
+      "line_interleaved_with_other_console_output": true
+    },
+    {
+      "line": 1284,
+      "spawns": 43,
+      "exits": 11,
+      "line_interleaved_with_other_console_output": true
+    },
+    {
+      "line": 1441,
+      "spawns": 90,
+      "exits": 109,
+      "line_interleaved_with_other_console_output": true
+    },
+    {
+      "line": 1587,
+      "spawns": 52,
+      "exits": 49,
+      "line_interleaved_with_other_console_output": true
+    },
+    {
+      "line": 1703,
+      "spawns": 16,
+      "exits": 4,
+      "line_interleaved_with_other_console_output": false
+    },
+    {
+      "line": 1839,
+      "spawns": 22,
+      "exits": 163,
+      "line_interleaved_with_other_console_output": true
+    },
+    {
+      "line": 1958,
+      "spawns": 17,
+      "exits": 12,
+      "line_interleaved_with_other_console_output": true
+    }
+  ],
+  "max_observed_bracket_pid": 876,
+  "cryptexd_resident_pids": [
+    181,
+    710,
+    817
+  ],
+  "mobileactivationd_resident_pid": 171,
+  "pressure_exit_proof_limit": "Wait-status signal9 observed; original per-process os_reason not recorded. No claim every historical v32 instance had the same cause.",
+  "nested_services_still_present": [
+    "com.apple.geod",
+    "ReportCrashService",
+    "WallpaperSequoia"
+  ],
+  "batch1_hardware_accepted": false
+}

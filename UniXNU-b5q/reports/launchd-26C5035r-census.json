@@ -3980,5 +3980,244 @@
         "_CFBundleUseAppleLocalizations": true
       }
     }
+  ],
+  "final_policy": {
+    "sheng_lite": [],
+    "system": [
+      "com.apple.AirPlayXPCHelper",
+      "com.apple.AssetCache.builtin",
+      "com.apple.AssetCacheLocatorService",
+      "com.apple.AssetCacheManagerService",
+      "com.apple.AssetCacheTetheratorService",
+      "com.apple.PerfPowerServices",
+      "com.apple.PerfPowerServicesExtended",
+      "com.apple.ReportCrash.Root",
+      "com.apple.adid",
+      "com.apple.analyticsd",
+      "com.apple.appleh13camerad",
+      "com.apple.audioanalyticsd",
+      "com.apple.contextstored",
+      "com.apple.coreduetd",
+      "com.apple.coresymbolicationd",
+      "com.apple.findmy.findmybeaconingd",
+      "com.apple.icloud.searchpartyd",
+      "com.apple.iconservices.iconservicesagent",
+      "com.apple.locationd",
+      "com.apple.metadata.mds",
+      "com.apple.metadata.mds.index",
+      "com.apple.metadata.mds.index.readonly",
+      "com.apple.metadata.mds.scan",
+      "com.apple.metadata.mds.spindump",
+      "com.apple.mobile.obliteration",
+      "com.apple.mobile.softwareupdated",
+      "com.apple.mobile.usermanagerd",
+      "com.apple.modelcatalogd",
+      "com.apple.modelmanagerd",
+      "com.apple.perfpowermetricd",
+      "com.apple.rtcreportingd",
+      "com.apple.softwareupdated",
+      "com.apple.spindump",
+      "com.apple.tailspind",
+      "com.apple.watchdogd"
+    ],
+    "gui": [
+      "com.apple.AssetCache.agent",
+      "com.apple.AssetCacheLocatorService",
+      "com.apple.CommCenter",
+      "com.apple.ContextStoreAgent",
+      "com.apple.ReportCrash",
+      "com.apple.amsengagementd",
+      "com.apple.biomesyncd",
+      "com.apple.duetexpertd",
+      "com.apple.email.maild",
+      "com.apple.financed",
+      "com.apple.geodMachServiceBridge",
+      "com.apple.iconservices.iconservicesagent",
+      "com.apple.identityservicesd",
+      "com.apple.mediaanalysisd",
+      "com.apple.mediastream.mstreamd",
+      "com.apple.ndoagent",
+      "com.apple.passd",
+      "com.apple.photoanalysisd",
+      "com.apple.siriactionsd",
+      "com.apple.siriinferenced",
+      "com.apple.siriknowledged",
+      "com.apple.talagent",
+      "com.apple.wallpaper.agent"
+    ],
+    "bundled": [
+      "com.apple.ReportCrashService",
+      "com.apple.geod",
+      "com.apple.wallpaper.extension.aerials"
+    ]
+  },
+  "nested_policy_evidence": {
+    "uid_override_assignment": "0x10002d74c..0x10002d774; 0x100028994..0x1000289a8",
+    "nested_import_flags": "0x10003f7f4..0x10003f820:0x200/0x280, copied to x5 by0x10002f5a8",
+    "default_DisableAllowed_true": "0x1000052ec..0x1000052f4 sets bit1 of+0x588",
+    "disabled_rejection": "0x1000043b0..0x10000449c",
+    "wallpaper_parent": "com.apple.wallpaper.agent from System/Library/LaunchAgents/com.apple.wallpaper.plist; prevents dynamic extension launches; Dock/Finder/loginwindow/WindowServer untouched"
+  },
+  "eleven_services": [
+    {
+      "service": "usermanagerd",
+      "matches": [
+        {
+          "path": "System/Library/LaunchDaemons/com.apple.mobile.usermanagerd.plist",
+          "sha256": "31aee709db0c889ea19ee5a662c8b1478b986381166febddb340f08a82547b15",
+          "Label": "com.apple.mobile.usermanagerd",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "ReportCrash",
+      "matches": [
+        {
+          "path": "System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist",
+          "sha256": "0fbeddc9ac719c1389b0628682035e5c8e51a57898c510c829760bee32135466",
+          "Label": "com.apple.ReportCrash.Root",
+          "ForceEnableHack": false,
+          "_Protected": false
+        },
+        {
+          "path": "System/Library/LaunchAgents/com.apple.ReportCrash.plist",
+          "sha256": "03beb6fb1b1bf1e839924990339154c67024c237796aacbfc5807db7de6b6705",
+          "Label": "com.apple.ReportCrash",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "coresymbolicationd",
+      "matches": [
+        {
+          "path": "System/Library/LaunchDaemons/com.apple.coresymbolicationd.plist",
+          "sha256": "8660cbc9eeff6dae498eb3475785c88de63984b95d7eca6cd92e6a88a7d181eb",
+          "Label": "com.apple.coresymbolicationd",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "spindump",
+      "matches": [
+        {
+          "path": "System/Library/LaunchDaemons/com.apple.metadata.mds.spindump.plist",
+          "sha256": "9b49e62b2322ee3b1b59653a08c8e1a252ea6e02536a278742572d2ff5f3d323",
+          "Label": "com.apple.metadata.mds.spindump",
+          "ForceEnableHack": false,
+          "_Protected": false
+        },
+        {
+          "path": "System/Library/LaunchDaemons/com.apple.spindump.plist",
+          "sha256": "7aa9bb1e420b23431f1dfea3c277647030b1324d56fc900e4dd4b9c3ff484ea8",
+          "Label": "com.apple.spindump",
+          "ForceEnableHack": false,
+          "_Protected": false
+        },
+        {
+          "path": "System/Library/LaunchAgents/com.apple.spindump_agent.plist",
+          "sha256": "05fd0caa1e65ca1de5b958fd06d7919c2c89df67f988ec311397f59b8bde04c3",
+          "Label": "com.apple.spindump_agent",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "iconservicesagent",
+      "matches": [
+        {
+          "path": "System/Library/LaunchDaemons/com.apple.iconservices.iconservicesagent.plist",
+          "sha256": "b6947a97dd8b9cc240e36a45d3739d2463e49220d1f05c7ca06ef53afd4227df",
+          "Label": "com.apple.iconservices.iconservicesagent",
+          "ForceEnableHack": false,
+          "_Protected": false
+        },
+        {
+          "path": "System/Library/LaunchAgents/com.apple.iconservices.iconservicesagent.plist",
+          "sha256": "d428ea0a01c0ccfd388686f4df4ceb35449d842d3aec37657eaa1c0404fe2d0e",
+          "Label": "com.apple.iconservices.iconservicesagent",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "CommCenter",
+      "matches": [
+        {
+          "path": "System/Library/LaunchAgents/com.apple.CommCenter-osx.plist",
+          "sha256": "e4816264cd350e73fdf62143624da5a0521209f82fb92daeb5e048eb36a0aba1",
+          "Label": "com.apple.CommCenter",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "photoanalysisd",
+      "matches": [
+        {
+          "path": "System/Library/LaunchAgents/com.apple.photoanalysisd.plist",
+          "sha256": "f67659edef702587f7d7dfc47391c8e34652a88ca978b0752d9460a6c7dc865a",
+          "Label": "com.apple.photoanalysisd",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "siriknowledged",
+      "matches": [
+        {
+          "path": "System/Library/LaunchAgents/com.apple.siriknowledged.plist",
+          "sha256": "2b41c47279a03804ac6fd1646603678cbc1692f25807b1fca230f0065782185f",
+          "Label": "com.apple.siriknowledged",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "biomesyncd",
+      "matches": [
+        {
+          "path": "System/Library/LaunchAgents/com.apple.biomesyncd.plist",
+          "sha256": "f87ae17c0f838288eba85d3a340ca9a8bf96ab8c4b0f1038c44d94c7b5a9b67f",
+          "Label": "com.apple.biomesyncd",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "siriactionsd",
+      "matches": [
+        {
+          "path": "System/Library/LaunchAgents/com.apple.siriactionsd.plist",
+          "sha256": "714478852b8850446aeb4ff03c82408d2e11bb9e4506a1b5fa60c9a35ad88bbb",
+          "Label": "com.apple.siriactionsd",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    },
+    {
+      "service": "duetexpertd",
+      "matches": [
+        {
+          "path": "System/Library/LaunchAgents/com.apple.duetexpertd.plist",
+          "sha256": "2aa499fe0b835e66d108b3cab3fcf0894b626d0cd3e35afcf0c767040d5a5e19",
+          "Label": "com.apple.duetexpertd",
+          "ForceEnableHack": false,
+          "_Protected": false
+        }
+      ]
+    }
   ]
 }
