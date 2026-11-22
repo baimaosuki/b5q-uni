@@ -34,17 +34,17 @@ struct Bus {
 int main() {
     Bus good;auto result=good.run();
     assert(result.ok&&result.reply==0x5e&&result.polls==3&&good.replies==1);
-    assert(good.writes.size()==33);
-    for(unsigned i=0;i<good.writes.size();++i) {
-        assert(good.writes[i].reg==0x21+i);
-        assert(good.writes[i].value==(i==0?0x5e:i==1?1:0));
-    }
-    Bus drp;drp.reply=0x37;assert(drp.run(0x37,4).ok&&drp.writes[1].value==4);
+    assert(good.writes.size()==3);
+    assert(good.writes[0].reg==0x21&&good.writes[0].value==0x5e);
+    assert(good.writes[1].reg==0x22&&good.writes[1].value==1);
+    assert(good.writes[2].reg==0x41&&good.writes[2].value==0);
+    Bus swap;assert(!swap.run(0x37,4).ok&&swap.writes.empty());
     // A stale matching reply without a fresh APCMDRES event never succeeds.
     Bus timeout;timeout.readyAt=101;
     result=timeout.run();assert(!result.ok&&result.triggered&&result.polls==100&&timeout.replies==0);
     Bus wrong;wrong.reply=0x37;assert(!wrong.run().ok&&wrong.polls==100);
     for(unsigned reg=0x21;reg<=0x41;++reg) {
+        if(reg!=0x21&&reg!=0x22&&reg!=0x41)continue;
         Bus failed;failed.failWrite=reg;result=failed.run();
         assert(!result.ok&&result.failedReg==reg&&!failed.triggered&&failed.writes.back().reg==reg);
     }
@@ -60,5 +60,8 @@ int main() {
     Bus failedSequence;failedSequence.readyAt=101;
     assert(!B5qMax77705::drp(failedSequence,[](unsigned){},[&](const auto &r){assert(!r.ok);++calls;}));
     assert(calls==1); // Failed first command must not issue the role command.
-    puts("PASS MAX77705 DRP: native opcodes, fresh completion, stale/wrong replies, timeouts and all I2C write failures");
+    Bus single;calls=0;
+    assert(B5qMax77705::drp(single,[](unsigned){},[&](const auto &r){assert(r.ok);++calls;}));
+    assert(calls==1&&single.writes.size()==3&&single.writes[0].value==0x5e);
+    puts("PASS MAX77705: only5e/01, three writes, no swap request; fresh completion, stale/wrong replies, timeouts and I2C failures");
 }

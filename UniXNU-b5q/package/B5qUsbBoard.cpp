@@ -175,12 +175,16 @@ extern "C" bool b5q_usb_typec_init(void){
  uint8_t id=0,rev=0,cc=0,water=0;IOLockLock(maxim->lock);
  maximReady=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&maxim->read(0x25,0x0a,cc)&&
             maxim->read(0x25,0x0b,water)&&id!=0xff&&!(water&2);
- if(maximReady)maximReady=B5qMax77705::drp(*maxim,[](unsigned us){IODelay(us);},
+ bool roleCommandOk=false;
+ if(maximReady)roleCommandOk=B5qMax77705::drp(*maxim,[](unsigned us){IODelay(us);},
   [](const B5qMax77705::OpcodeResult &r){
    IOLog("qcom-dwc3: max77705 DRP opcode=%02x reply=%02x irq=%02x polls=%u triggered=%u reg=%02x ok=%u\n",
          r.opcode,r.reply,r.interrupt,r.polls,r.triggered,r.failedReg,r.ok);
   });
- IOLockUnlock(maxim->lock);IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x water=%u drp-ready=%u\n",id,rev,cc,!!(water&2),maximReady);return maximReady;
+ IOLockUnlock(maxim->lock);
+ IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x water=%u bus-ready=%u role-command-ok=%u\n",
+       id,rev,cc,!!(water&2),maximReady,roleCommandOk);
+ return maximReady;
 }
 extern "C" int b5q_usb_cable_role(void){
  if(!maximReady)return 0;uint8_t cc0=0,cc1=0;IOLockLock(maxim->lock);

@@ -9,7 +9,7 @@ diff --git a/absentd.c b/absentd.c
  #include <xpc/xpc.h>
  
  static void refuse(const char *name)
-@@ -35,17 +36,21 @@
+@@ -35,17 +36,22 @@
  {
      // launchd gives every job its label; the job's own description names its services.
      const char *label = getenv("XPC_SERVICE_NAME");
@@ -17,7 +17,8 @@ diff --git a/absentd.c b/absentd.c
 -    if (!label || snprintf(path, sizeof path, "/System/Library/LaunchDaemons/%s.plist", label) >= (int)sizeof path) return 78;
 -    CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), false);
 -    CFReadStreamRef stream = url ? CFReadStreamCreateWithFile(NULL, url) : NULL;
-+    if (!label || strchr(label, '/') || strstr(label, "..")) return 78;
++    if (!label || !label[0]) return 0; // One-shot boot tasks have no XPC service.
++    if (strchr(label, '/') || strstr(label, "..")) return 78;
      CFPropertyListRef job = NULL;
 -    if (stream && CFReadStreamOpen(stream)) {
 -        job = CFPropertyListCreateWithStream(NULL, stream, 0, kCFPropertyListImmutable, NULL, NULL);

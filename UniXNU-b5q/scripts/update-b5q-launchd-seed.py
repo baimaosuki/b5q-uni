@@ -12,6 +12,7 @@ import tempfile
 
 SEED_HASH = "aa624655fd41db6af03ddf0bcb46ed0b5a333f307912f74ac471c7b1b3bfa82b"
 V29_SEED_HASH = "f1f6afe508b4c7c57254780c82018f039ae2b3cd691222a287d9d3a37bb3749b"
+V31_SEED_HASH = "10223429847dd0a2d2db4a080cea37847db9d92a0499d9c998f53458ae1d6603"
 POLICY = Path(__file__).resolve().parents[1] / "package/b5q-launchd-lite.json"
 DIRECTORY = "private/var/db/com.apple.xpc.launchd"
 
@@ -37,7 +38,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("darwinboot", "seed", "out"):
         p.add_argument("--" + name, type=Path, required=True)
-    p.add_argument("--baseline", choices=("v27", "v29"), default="v27")
+    p.add_argument("--baseline", choices=("v27", "v29", "v31"), default="v27")
     p.add_argument("--stand-in", type=Path, help="Ad hoc signed board absentd, installed under its own name")
     args = p.parse_args()
     sys.path.insert(0, str(args.darwinboot.resolve() / "Test"))
@@ -47,7 +48,7 @@ def main():
     out = args.out.resolve()
     metadata = json.loads(seed.with_name("data-seed.json").read_text())
     body = seed.read_bytes()
-    expected = V29_SEED_HASH if args.baseline == "v29" else SEED_HASH
+    expected = {"v27": SEED_HASH, "v29": V29_SEED_HASH, "v31": V31_SEED_HASH}[args.baseline]
     assert metadata["sha256"] == hashlib.sha256(body).hexdigest() == expected
     logical, extents = packed_ramdisk.regions(body)
     assert logical == metadata["logical_bytes"] == 4 * 2**30

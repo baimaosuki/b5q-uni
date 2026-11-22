@@ -3,4 +3,4 @@
 // interface. Keep the loader command line unchanged; explicit arguments win.
 // Exact daemon paths come from 26C5035r's LaunchDaemons/LaunchAgents.
 char PE_builtin_boot_args[] =
-"exec-stand-in=/private/var/ngpu/bin/b5q-absentd deny-exec=/usr/libexec/mobileactivationd,/usr/libexec/cryptexd,/usr/libexec/AirPlayXPCHelper,/usr/libexec/endpointsecurityd,/usr/libexec/rtcreportingd,/System/Library/CoreServices/talagentd";
+"exec-stand-in=/private/var/ngpu/bin/b5q-absentd deny-exec=/usr/libexec/mobileactivationd,/usr/libexec/cryptexd,/usr/libexec/AirPlayXPCHelper,/usr/libexec/rtcreportingd,/System/Library/CoreServices/talagentd";

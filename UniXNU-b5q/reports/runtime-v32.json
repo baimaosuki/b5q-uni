@@ -1,0 +1,54 @@
+{
+  "baseline_log": {
+    "path": "logs/b5q-xnu2log-v31/XNU2LOG.txt",
+    "sha256": "33857b84c57f04ec694c52be066fca7ce43b220b97a612cde7f81ef585738c16",
+    "raw_sha256": "6fb23add6a9c5e9e5c68ee2da79f777c11cc37e805c51a226ae9ce0573d6de78",
+    "sequence": 190,
+    "lost_on_contention": 0,
+    "observations": [
+      "EndpointSecurity boot task ran b5q-absentd[19], exited78 and reached panic renderer",
+      "5e reply5e/irq80 in1poll; subsequent37 timedout in100polls;typec-ready0",
+      "CC25=b1 was sampled before the command in typec_init, not a post-command measurement",
+      "relative-pointer selected; no WindowServer or Early boot complete"
+    ]
+  },
+  "inputs_sha256": {
+    "UniXNU-b5q/package/B5qBootPolicy.c": "8b6d906f926d3ef88f3b5072c49fae592db440f0ad0e2fd4f85fa20372132a5d",
+    "UniXNU-b5q/package/B5qMax77705.h": "d8f8fadbcbe6bbbac50eb51c7b7496fee124b583f5ec06e3d7cb00452e3b83d5",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp": "e4e71ec977fa30f3b726768c39304667caaaaf8760b3e83dc4fb65eeff32edd4",
+    "UniXNU-b5q/patches/tools/b5q-absentd-user-domains.patch": "5ec881b6859bead29e45c7508581c49e0664d3f578d305c6758581fb02bf7ce3",
+    "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "05444b7f31700bafcd1a0b0fe77bf52fd0a7734c1d4cc71c62fce552ded1abd6",
+    "UniXNU-b5q/scripts/update-b5q-launchd-seed.py": "041b0efe9341473ac1a05edcf5cf26d68991b26ce93b4934bcb4fff7e948e2ac",
+    ".github/workflows/b5q-v32-incremental.yml": "b5276607d5f8c56a46b85bd6e77ef20be9d20ce0f95d8d755901846354ae9489",
+    "tests/b5q-ufs/test-max77705-drp.cpp": "6e87b24c06f475beb75dd64db29b84fcb8f80ba0b9aeecfa9a863d6d03dba5d7",
+    "tests/b5q-ufs/test-v32-boot-typec.py": "d443f4a74956bf23f7138481257faf184a214e649d1cb3f37bb52d5b306c7bf4",
+    "scripts/b5q-install/verify-v32.py": "e9632cb17c23aea5bc89398cb79b9dec363b6d4d216f34c739becd21128dbeea"
+  },
+  "fixes": [
+    "Remove endpointsecurityd from exec substitution; retain its regular launchd disabled label",
+    "No/empty XPC_SERVICE_NAME returns0 without entering dispatch_main",
+    "Only send5e/01 using writes21,22,41; reject37; retain fresh-interrupt/echo validation",
+    "Preserve identity/water-based bus readiness if the role command fails, with separate diagnostics"
+  ],
+  "local_checks": [
+    "Production boot/TypeC extracted-function regression under host compiler",
+    "Production opcode ASan/UBSan negatives and exact3writes",
+    "Both changed arm64e board objects compile and have complete symbol closure",
+    "GENI85typedPACcalls match",
+    "Existing core/GPU/HID retained in v32 prepare-only relink",
+    "Workflow/Python syntax and source-matched absentd patch"
+  ],
+  "build": {
+    "status": "pre-CI checks passed; CI pending",
+    "core_translation_units_compiled": 0,
+    "planned_board_sources": [
+      "B5qUsbBoard.cpp",
+      "B5qBootPolicy.c"
+    ],
+    "source_cache_run": 45010859513,
+    "source_cache_commit": "3044fe6e9bceadc0c3d5bbc63f4cd63d64535731",
+    "seed_updated_in_place_from_v31": true,
+    "core_or_gpu_rebuild": false
+  },
+  "hardware_tested": false
+}

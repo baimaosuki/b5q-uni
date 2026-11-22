@@ -55,6 +55,8 @@ RECIPES = {
             ('B5qTouch.cpp', 'NativeHidInput.cpp', 'HidInputProbe.cpp')),
     'v31': (44985774704, 'e94593ae5aa7e6111a20a0515dcef33c0cc316cc',
             ('B5qUsbBoard.cpp', 'NativeHidInput.cpp', 'B5qBootPolicy.c')),
+    'v32': (45010859513, '3044fe6e9bceadc0c3d5bbc63f4cd63d64535731',
+            ('B5qUsbBoard.cpp', 'B5qBootPolicy.c')),
 }
 
 

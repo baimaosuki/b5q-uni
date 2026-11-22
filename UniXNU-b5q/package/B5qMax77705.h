@@ -12,15 +12,14 @@ struct OpcodeResult {
 };
 // CcicDxe 0x259c: drain UIC_INT, fill AP_DATAOUT, trigger at 0x41,
 // then require a fresh APCMDRES interrupt before accepting the echoed opcode.
-// Only the two board role commands are allowed; never retry an ambiguous
-// trigger or accept a stale response left by firmware.
+// Only undo firmware's set_sink(0). Opcode 0x37 is a swap request, not port
+// initialization. Never retry an ambiguous trigger or accept a stale reply.
 template<class Io,class Delay> OpcodeResult opcode(Io &io,uint8_t command,uint8_t value,Delay delay){
  OpcodeResult result;result.opcode=command;
- if(!((command==0x5e && value==1)||(command==0x37 && value==4)))return result;
+ if(command!=0x5e || value!=1)return result;
  auto read=[&](uint8_t reg,uint8_t &data){result.failedReg=reg;return io.read(muic,reg,data);};
  auto write=[&](uint8_t reg,uint8_t data){result.failedReg=reg;return io.write(muic,reg,data);};
  if(!read(0x02,result.interrupt)||!write(0x21,command)||!write(0x22,value))return result;
- for(unsigned reg=0x23;reg<=0x40;++reg)if(!write(uint8_t(reg),0))return result;
  if(!write(0x41,0))return result;
  result.triggered=true;
  for(unsigned poll=0;poll<100;++poll){
@@ -33,13 +32,9 @@ template<class Io,class Delay> OpcodeResult opcode(Io &io,uint8_t command,uint8_
  return result;
 }
 template<class Io,class Delay,class Report> bool drp(Io &io,Delay delay,Report report){
- for(unsigned index=0;index<2;++index){
-  const uint8_t command=index==0?0x5e:0x37;
-  const auto result=opcode(io,command,command==0x5e?1:4,delay);
-  report(result);
-  if(!result.ok)return false;
- }
- return true;
+ const auto result=opcode(io,0x5e,1,delay);
+ report(result);
+ return result.ok;
 }
 template<class Io> bool update(Io &io,uint8_t reg,uint8_t mask,uint8_t value){
  uint8_t old=0,check=0;if(!io.read(charger,reg,old))return false;
