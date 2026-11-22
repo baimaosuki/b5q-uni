@@ -21,7 +21,7 @@
       "package/NativeHidInput.cpp": "242c59061d7502d2912ba257eaaf5490a9eea71aeda2bbf4e5363abcbd9ad615",
       "package/HidInputProbe.cpp": "a4eff8f7d7cc8767e4a0f1d0c803391f4f417289ff2b0458cdbb076c256e3a50",
       "package/b5q-launchd-lite.json": "626169c9cf277597a4be36a9cd50ae153b3f74213e02bdb11a32eaf4c69ce267",
-      "scripts/update-b5q-launchd-seed.py": "4f342e8096eb5eb90979e30fd20f81321e3d28dc92d4bfba5d0d376906120212",
+      "scripts/update-b5q-launchd-seed.py": "727b01c0c0a47688f28d06855aa8e66bbca5b6a272a5b7f2a939da6171994b71",
       "scripts/stage-v24-inputs.py": "14c9a14276b2dd933e86cf44215befaf4886dd92774af33c046e0fdc3fb25a9a",
       "scripts/relink-b5q-peripherals.py": "ccce412f79730288a20417c5b77921d703233af96323faab247b04fc566438cb"
     }

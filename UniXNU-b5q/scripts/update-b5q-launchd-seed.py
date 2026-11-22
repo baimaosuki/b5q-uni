@@ -67,7 +67,7 @@ def main():
             info = plistlib.loads(subprocess.check_output(["diskutil", "info", "-plist", str(mount)]))
             assert info["VolumeUUID"].upper() == metadata["volume_uuid"]
             account = mount / "private/var/db/dslocal/nodes/Default/users/baimao.plist"
-            user = plistlib.loads(account.read_bytes())
+            user = plistlib.loads(subprocess.check_output(["sudo", "cat", str(account)]))
             assert user["uid"] == ["501"]
             directory = mount / DIRECTORY
             assert directory.is_dir() and directory.resolve() == directory
