@@ -56,6 +56,12 @@
     "Python/YAML-and-launchd-merge",
     "cached-relink-prepare-only"
   ],
-  "build_status": "local checks passed; CI pending",
-  "hardware_tested": false
+  "build_status": "seed-directory repair passed local source checks; retry pending",
+  "hardware_tested": false,
+  "first_ci_failure": {
+    "run": 45010359451,
+    "stage": "APFS seed update",
+    "cause": "The preserved seed has no ngpu/bin until the addon is materialized. Create the board stand-in parent with root ownership before install.",
+    "core_or_gpu_compiled": false
+  }
 }

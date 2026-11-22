@@ -88,7 +88,10 @@ def main():
                 assert target.read_bytes() == payload and target.stat().st_uid == target.stat().st_gid == 0
             if args.stand_in:
                 target = mount / "private/var/ngpu/bin/b5q-absentd"
-                assert target.parent.is_dir() and target.parent.resolve() == target.parent and not target.is_symlink()
+                assert target.parent.resolve() == target.parent and not target.is_symlink()
+                subprocess.run(["sudo", "install", "-d", "-o", "root", "-g", "wheel", "-m", "0755",
+                                str(target.parent)], check=True)
+                assert target.parent.is_dir() and target.parent.resolve() == target.parent
                 subprocess.run(["sudo", "install", "-o", "root", "-g", "wheel", "-m", "0755",
                                 str(args.stand_in.resolve()), str(target)], check=True)
                 assert target.read_bytes() == args.stand_in.read_bytes()
