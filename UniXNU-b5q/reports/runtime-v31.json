@@ -17,7 +17,7 @@
     "UniXNU-b5q/package/B5qMax77705.h": "14a7cc103210cad2cf3a3a84b508f84bb0fd697d577f86e72fed77eab3c33bf5",
     "UniXNU-b5q/package/B5qBootPolicy.c": "badd2824ff56577383c571a01fbf2c4203978b7f65316b76af35a17c475563c9",
     "UniXNU-b5q/package/b5q-launchd-lite.json": "8d9506c1b3138ce15a4409b2359449b12371d36ec5d567684036b2905cb510c6",
-    "UniXNU-b5q/scripts/update-b5q-launchd-seed.py": "669e02ed4b89e46b274c87a8eb5255609816674f620621c96efd0b9419d9d783",
+    "UniXNU-b5q/scripts/update-b5q-launchd-seed.py": "03c96effce1a04aad840446c2add11327c71225e5b532e63863089c3a4030a46",
     "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "e3efaa2e969684179bb8a409a076ad348a025b7e652577184c00a479ae1bb8a3",
     "UniXNU-b5q/scripts/b5q_peripherals.py": "40c26c1ba635ae3d3ae3c0677f546bedafeb08bf3268d639ccaa261d183c8b78",
     "UniXNU-b5q/patches/tools/b5q-absentd-user-domains.patch": "2d24029a8e15489adf0c263fada23b9634b11ed596e5010f3e8fe338e45d9dca",
@@ -56,12 +56,43 @@
     "Python/YAML-and-launchd-merge",
     "cached-relink-prepare-only"
   ],
-  "build_status": "seed-directory repair passed local source checks; retry pending",
+  "build_status": "CI45010859513 success; actual returned object PAC, source/core archive identity, final ESP, Data, code signatures, trust and FAT checks passed",
   "hardware_tested": false,
   "first_ci_failure": {
     "run": 45010359451,
     "stage": "APFS seed update",
     "cause": "The preserved seed has no ngpu/bin until the addon is materialized. Create the board stand-in parent with root ownership before install.",
     "core_or_gpu_compiled": false
-  }
+  },
+  "ci_run": 45010859513,
+  "source_commit": "3044fe6e9bceadc0c3d5bbc63f4cd63d64535731",
+  "delivery": {
+    "ci_run": 45010859513,
+    "source_commit": "3044fe6e9bceadc0c3d5bbc63f4cd63d64535731",
+    "outputs": {
+      "esp.img": {
+        "bytes": 838860800,
+        "sha256": "9dc3114dd81891a40f5a99a94e6f45232f3955768238a480b4fceb74e909c529"
+      }
+    },
+    "retained_v30_boot_sha256": "d7124d060a25d623e356cabd3d28c1af61ed38b902f47e78f82a73a6f192dbf6",
+    "kernel_sha256": "7dfe6e4316b2ee9a074d7207dae978b0a25c56b56e91f8b830815840f8fe6740",
+    "seed_sha256": "10223429847dd0a2d2db4a080cea37847db9d92a0499d9c998f53458ae1d6603",
+    "gpu_addon_sha256": "b68e1164f7dd0ff822f20e116e97adc4606926a4204fc25eaa5241c2a966d82d",
+    "core_archive_sha256": "88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b",
+    "core_translation_units_compiled": 0,
+    "board_translation_units_compiled": 3,
+    "boot_args_bytes": 949,
+    "system_policy_entries": 42,
+    "gui_policy_entries": 36,
+    "absentd_cdhashes": [
+      "e72e245308f83d6a8577b8a85062b62d4fb3aea1"
+    ],
+    "all_original_trust_modules_unchanged": true,
+    "code_signature_page_size": 4096,
+    "real_returned_object_PAC_passed": true,
+    "artifact_digest_verified": true,
+    "hardware_tested": false
+  },
+  "returned_image_verifier_sha256": "f6d7cdca6a40506adbba3dd1963ab3784093164fce66dcd7a2c2f793ed11e351"
 }
