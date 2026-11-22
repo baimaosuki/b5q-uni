@@ -1,0 +1,19 @@
+diff --git a/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c b/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c
+index 8e78aca..2692238 100644
+--- a/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c
++++ b/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c
+@@ -35,6 +35,14 @@ gMemoryDescriptor[] = {
+   {"QTEE",               0xD8300000, 0x00500000, AddMem, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
+   {"TZApps Reserved",    0xD8800000, 0x07400000, AddMem, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
+ 
++  // Captured b5q/SM-F731B FDT, 2026-11-20: high-bank gaps and Samsung
++  // reserved-memory nodes. Resource HOBs keep RamManagerDxe from remapping
++  // these ranges, without touching them while creating the PEI MMU map.
++  {"b5q high reserved 0",  0x880100000ULL, 0xa02000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q high reserved 1",  0x880c00000ULL, 0xad00000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q high reserved 2",  0x8b9a00000ULL, 0x200000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q high reserved 3",  0x8bba00000ULL, 0x4600000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++
+   // Other Memory Regions
+   {"IMEM Base",          0x14680000, 0x0002A000, NoHob,  MMAP_IO, INITIALIZED, Conv,   NS_DEVICE},
+   {"IMEM Cookie Base",   0x146AA000, 0x00016000, AddDev, MMAP_IO, INITIALIZED, Conv,   NS_DEVICE},

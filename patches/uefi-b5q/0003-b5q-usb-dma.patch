@@ -1,0 +1,502 @@
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+index 5feba71..024d834 100644
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+@@ -16,6 +16,8 @@ STATIC CONST EFI_GUID mEntryArgGuid = {
+ };
+ STATIC EFI_EVENT mReadyEvent;
+ 
++EFI_STATUS InstallB5qUsbDma (EFI_HANDLE ImageHandle);
++
+ STATIC VOID
+ LogReg (CONST VOID *Fdt, INT32 Node, CONST CHAR8 *Kind)
+ {
+@@ -126,8 +128,9 @@ LogHandoff (EFI_EVENT Event, VOID *Context)
+ EFI_STATUS EFIAPI
+ B5qHandoffDxeEntry (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable)
+ {
+-  (VOID)ImageHandle;
+   (VOID)SystemTable;
++  EFI_STATUS UsbStatus = InstallB5qUsbDma (ImageHandle);
++  DEBUG ((DEBUG_ERROR, "B5Q-USBDMA: handoff protocol %r\n", UsbStatus));
+   DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: runtime evidence armed; no controller or partition I/O\n"));
+   return gBS->CreateEventEx (EVT_NOTIFY_SIGNAL, TPL_CALLBACK, LogHandoff, NULL,
+                              &gEfiEventReadyToBootGuid, &mReadyEvent);
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+index 7b8c8df..22a2e93 100644
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+@@ -7,11 +7,13 @@
+   ENTRY_POINT = B5qHandoffDxeEntry
+ [Sources]
+   B5qHandoffDxe.c
++  UsbDma.c
+ [Packages]
+   MdePkg/MdePkg.dec
+ [LibraryClasses]
+   BaseLib
+   BaseMemoryLib
++  CacheMaintenanceLib
+   DebugLib
+   FdtLib
+   HobLib
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+new file mode 100644
+index 0000000..1d5dd08
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+@@ -0,0 +1,241 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#include <Uefi.h>
++#include <Library/BaseMemoryLib.h>
++#include <Library/CacheMaintenanceLib.h>
++#include <Library/DebugLib.h>
++#include <Library/MemoryAllocationLib.h>
++#include <Library/UefiBootServicesTableLib.h>
++#include "../../Include/B5qUsbDma.h"
++#include "UsbDmaTables.h"
++
++#define HAL_REVISION 0x10002
++#define USB0_ARID 0x03000000U
++
++typedef struct {
++  UINT32 Vmsa;
++  UINT32 Reserved;
++  UINT64 Ttbr0;
++  UINT64 Ttbr1;
++  UINT32 Mair0;
++  UINT32 Mair1;
++  UINT32 Sctlr;
++  UINT32 Tcr;
++  UINT32 Tcr2;
++  UINT32 Padding;
++} HAL_DOMAIN_CONFIG;
++
++typedef UINT32 (EFIAPI *HAL_CREATE)(VOID **);
++typedef UINT32 (EFIAPI *HAL_DELETE)(VOID *);
++typedef UINT32 (EFIAPI *HAL_ATTACH)(VOID *, CONST CHAR8 *, UINT32, UINT32);
++typedef UINT32 (EFIAPI *HAL_CONFIGURE)(VOID *, HAL_DOMAIN_CONFIG *);
++
++typedef struct {
++  HAL_CREATE Create;
++  HAL_DELETE Delete;
++  HAL_ATTACH Attach;
++  HAL_ATTACH Detach;
++  HAL_CONFIGURE Configure;
++} HAL_TABLE;
++
++typedef struct {
++  UINT64 Revision;
++  VOID (EFIAPI *Init)(CONST HAL_TABLE **);
++  VOID (EFIAPI *Deinit)(VOID);
++} HAL_PROTOCOL;
++
++STATIC_ASSERT (sizeof (HAL_DOMAIN_CONFIG) == 48, "HAL configure size");
++STATIC_ASSERT (OFFSET_OF (HAL_DOMAIN_CONFIG, Ttbr0) == 8, "HAL TTBR0 offset");
++STATIC_ASSERT (OFFSET_OF (HAL_DOMAIN_CONFIG, Tcr2) == 40, "HAL TCR2 offset");
++STATIC_ASSERT (OFFSET_OF (HAL_PROTOCOL, Init) == 8, "HAL init offset");
++STATIC_ASSERT (OFFSET_OF (HAL_TABLE, Configure) == 32, "HAL configure slot");
++
++STATIC EFI_GUID mHalGuid = {
++  0x54b6d3b4, 0x5d33, 0x4f91, { 0x86, 0x00, 0x6c, 0x41, 0xd5, 0xde, 0xb1, 0x9a }
++};
++STATIC EFI_GUID mUsbDmaGuid = B5Q_USB_DMA_PROTOCOL_GUID;
++STATIC CONST CHAR8 mUsb0[] = "USB0";
++STATIC BOOLEAN mAttempted;
++STATIC B5Q_USB_DMA_RESULT mResult;
++
++STATIC EFI_STATUS
++BuildUsbTables (USB_DMA_TABLES *Tables, UINT64 OwnedBase, UINT64 OwnedBytes, UINT64 *MappedBytes)
++{
++  EFI_MEMORY_DESCRIPTOR *Map = NULL;
++  UINTN Size = 0, Key, Stride;
++  UINT32 Version;
++  EFI_STATUS Status = gBS->GetMemoryMap (&Size, NULL, &Key, &Stride, &Version);
++  if ((Status != EFI_BUFFER_TOO_SMALL) || (Stride < sizeof (*Map)) ||
++      (Stride > MAX_UINTN / 16) || (Size > MAX_UINTN - 16 * Stride)) {
++    return EFI_DEVICE_ERROR;
++  }
++  Size += 16 * Stride;
++  Map = AllocatePool (Size);
++  if (Map == NULL) {
++    return EFI_OUT_OF_RESOURCES;
++  }
++  Status = gBS->GetMemoryMap (&Size, Map, &Key, &Stride, &Version);
++  if (EFI_ERROR (Status)) {
++    goto Done;
++  }
++  if ((Stride < sizeof (*Map)) || (Size % Stride != 0) ||
++      (UsbDmaNewTable (Tables) == NULL)) {
++    Status = EFI_COMPROMISED_DATA;
++    goto Done;
++  }
++
++  BOOLEAN OwnsHead = FALSE;
++  BOOLEAN Retained = FALSE;
++  for (UINTN Offset = 0; Offset < Size; Offset += Stride) {
++    CONST EFI_MEMORY_DESCRIPTOR *Desc = (CONST VOID *)((CONST UINT8 *)Map + Offset);
++    UINT64 Start = Desc->PhysicalStart;
++    if ((Desc->NumberOfPages == 0) ||
++        (Desc->NumberOfPages > (MAX_UINT64 - Start) / EFI_PAGE_SIZE)) {
++      continue;
++    }
++    UINT64 End = Start + Desc->NumberOfPages * EFI_PAGE_SIZE;
++    if ((Desc->Type == EfiReservedMemoryType) && (Start <= Tables->PhysicalBase) &&
++        (End >= Tables->PhysicalBase + USB_DMA_RESERVED_BYTES)) {
++      Retained = TRUE;
++    }
++    // DarwinBoot marks its allocated window or sparse head as loader code.
++    // Conventional RAM below the window also covers the low-address DMA pool.
++    if ((Desc->Type == EfiLoaderCode) || (Desc->Type == EfiLoaderData)) {
++      Start = MAX (Start, OwnedBase);
++      End = MIN (End, OwnedBase + OwnedBytes);
++      OwnsHead |= (Start == OwnedBase) && (End > Start);
++    } else if (Desc->Type != EfiConventionalMemory) {
++      continue;
++    }
++    Start = MAX (Start, B5Q_USB_DMA_BASE);
++    End = MIN (End, B5Q_USB_DMA_LIMIT);
++    if (Start >= End) {
++      continue;
++    }
++    if ((Start < Tables->PhysicalBase + USB_DMA_RESERVED_BYTES && Tables->PhysicalBase < End) ||
++        !UsbDmaMapRange (Tables, Start, End)) {
++      Status = EFI_COMPROMISED_DATA;
++      goto Done;
++    }
++    *MappedBytes += End - Start;
++  }
++  Status = (OwnsHead && Retained) ? EFI_SUCCESS : EFI_COMPROMISED_DATA;
++Done:
++  FreePool (Map);
++  return Status;
++}
++
++STATIC EFI_STATUS
++ConfigureUsbDma (B5Q_USB_DMA_RESULT *Result)
++{
++  B5Q_USB_DMA_STATE *State = &Result->State;
++  B5Q_USB_DMA_DIAGNOSTICS *Diag = &Result->Diagnostics;
++  CONST HAL_PROTOCOL *Protocol = NULL;
++  CONST HAL_TABLE *Hal = NULL;
++  VOID *Domain = NULL;
++  EFI_PHYSICAL_ADDRESS Table = B5Q_USB_DMA_LIMIT - 1;
++  EFI_STATUS Status;
++
++  Status = gBS->LocateProtocol (&mHalGuid, NULL, (VOID **)&Protocol);
++  State->Locate = Status;
++  if (EFI_ERROR (Status)) {
++    return Status;
++  }
++  if (Protocol == NULL) {
++    return EFI_COMPROMISED_DATA;
++  }
++  Diag->HalRevision = (UINT32)Protocol->Revision;
++  if ((Protocol->Revision != HAL_REVISION) || (Protocol->Init == NULL)) {
++    return EFI_INCOMPATIBLE_VERSION;
++  }
++  Protocol->Init (&Hal);
++  if ((Hal == NULL) || (Hal->Create == NULL) || (Hal->Delete == NULL) ||
++      (Hal->Configure == NULL) || (Hal->Attach == NULL)) {
++    return EFI_COMPROMISED_DATA;
++  }
++
++  Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType,
++                               USB_DMA_TABLE_PAGES, &Table);
++  if (EFI_ERROR (Status)) {
++    return Status;
++  }
++  Diag->TableBase = Table;
++  Diag->TableBytes = USB_DMA_RESERVED_BYTES;
++  State->Create = Hal->Create (&Domain);
++  if ((State->Create != 0) || (Domain == NULL)) {
++    Status = EFI_DEVICE_ERROR;
++    goto Fail;
++  }
++  if ((Table < B5Q_USB_DMA_BASE) || (Table > B5Q_USB_DMA_LIMIT - USB_DMA_RESERVED_BYTES)) {
++    Status = EFI_UNSUPPORTED;
++    goto Fail;
++  }
++  USB_DMA_TABLES Tables = {
++    (VOID *)(UINTN)Table, Table, 0, USB_DMA_TABLE_PAGES
++  };
++  ZeroMem (Tables.Pages, USB_DMA_RESERVED_BYTES);
++  Status = BuildUsbTables (&Tables, State->OwnedBase, State->OwnedBytes, &Diag->MappedBytes);
++  State->Map = EFI_ERROR (Status) ? (UINT32)(Status & MAX_UINT32) : 0;
++  if (EFI_ERROR (Status)) {
++    goto Fail;
++  }
++  WriteBackDataCacheRange (Tables.Pages, Tables.Used * USB_DMA_PAGE);
++  __asm__ volatile ("dsb sy" ::: "memory");
++
++  // 0x2cd0 defaults for AArch64 VMSA. TCR uses a 4 KiB granule and L0 root.
++  HAL_DOMAIN_CONFIG Config = { 0, 0, Table, 0, 0x00ff0400, 0, 0x00c000e7, 0x00802010, 0x0003c071, 0 };
++  State->Configure = Hal->Configure (Domain, &Config);
++  if (State->Configure != 0) {
++    Status = EFI_DEVICE_ERROR;
++    goto Fail;
++  }
++  State->Attach = Hal->Attach (Domain, mUsb0, USB0_ARID, 0);
++  if (State->Attach == 0) {
++    return EFI_SUCCESS;
++  }
++  Status = EFI_DEVICE_ERROR;
++Fail:
++  if ((State->Create == 0) && (Domain != NULL)) {
++    Diag->Delete = Hal->Delete (Domain);
++  }
++  // A failed attach may have installed a hardware reference before reporting failure.
++  if (State->Attach == B5Q_USB_DMA_NOT_RUN) {
++    gBS->FreePages (Table, USB_DMA_TABLE_PAGES);
++  }
++  return Status;
++}
++
++STATIC VOID EFIAPI
++PrepareUsbDma (UINT64 OwnedBase, UINT64 OwnedBytes, B5Q_USB_DMA_RESULT *Result)
++{
++  if (!mAttempted) {
++    mAttempted = TRUE;
++    mResult.State = (B5Q_USB_DMA_STATE){
++      1, B5Q_USB_DMA_SID, EFI_NOT_STARTED, B5Q_USB_DMA_NOT_RUN, B5Q_USB_DMA_NOT_RUN,
++      B5Q_USB_DMA_NOT_RUN, B5Q_USB_DMA_NOT_RUN, OwnedBase, OwnedBytes
++    };
++    mResult.Diagnostics.Delete = B5Q_USB_DMA_NOT_RUN;
++    mResult.Diagnostics.RetentionStatus = EFI_NOT_STARTED;
++    if ((OwnedBase < B5Q_USB_DMA_BASE) || (OwnedBase >= B5Q_USB_DMA_LIMIT) || (OwnedBytes == 0) ||
++        (OwnedBytes > B5Q_USB_DMA_LIMIT - OwnedBase) || (((OwnedBase | OwnedBytes) & (EFI_PAGE_SIZE - 1)) != 0)) {
++      mResult.Diagnostics.PrepareStatus = EFI_INVALID_PARAMETER;
++    } else {
++      mResult.Diagnostics.PrepareStatus = ConfigureUsbDma (&mResult);
++    }
++    DEBUG ((DEBUG_ERROR, "B5Q-USBDMA: locate=%r create=%x configure=%x attach=%x map=%x result=%r table=0x%lx+0x%lx\n",
++            (EFI_STATUS)mResult.State.Locate, mResult.State.Create, mResult.State.Configure,
++            mResult.State.Attach, mResult.State.Map, (EFI_STATUS)mResult.Diagnostics.PrepareStatus,
++            mResult.Diagnostics.TableBase, mResult.Diagnostics.TableBytes));
++  }
++  *Result = mResult;
++  if ((OwnedBase != Result->State.OwnedBase) || (OwnedBytes != Result->State.OwnedBytes)) {
++    Result->Diagnostics.PrepareStatus = EFI_ALREADY_STARTED;
++  }
++}
++
++STATIC B5Q_USB_DMA_PROTOCOL mUsbDma = { B5Q_USB_DMA_PROTOCOL_REVISION, PrepareUsbDma };
++
++EFI_STATUS
++InstallB5qUsbDma (EFI_HANDLE ImageHandle)
++{
++  return gBS->InstallMultipleProtocolInterfaces (&ImageHandle, &mUsbDmaGuid, &mUsbDma, NULL);
++}
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+new file mode 100644
+index 0000000..7a4e9b8
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+@@ -0,0 +1,87 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_USB_DMA_TABLES_H
++#define B5Q_USB_DMA_TABLES_H
++
++#define USB_DMA_PAGE 4096U
++#define USB_DMA_TABLE_PAGES 256U
++#define USB_DMA_RESERVED_BYTES (USB_DMA_PAGE * USB_DMA_TABLE_PAGES)
++#define USB_DMA_GIB (1ULL << 30)
++#define USB_DMA_PA_MASK 0x0000000ffffff000ULL
++#define USB_DMA_PAGE_TYPE 3ULL
++#define USB_DMA_BLOCK_TYPE 1ULL
++// PXN and UXN, access flag, inner shareable, privileged RW, AttrIndx 2 (0xff).
++#define USB_DMA_LEAF_ATTR ((3ULL << 53) | 0x708ULL)
++
++typedef struct {
++  UINT64 *Pages;
++  UINT64 PhysicalBase;
++  UINTN Used;
++  UINTN Capacity;
++} USB_DMA_TABLES;
++
++STATIC UINT64 *
++UsbDmaNewTable (USB_DMA_TABLES *Tables)
++{
++  if (Tables->Used == Tables->Capacity) {
++    return NULL;
++  }
++  return Tables->Pages + (Tables->Used++ * (USB_DMA_PAGE / sizeof (UINT64)));
++}
++
++STATIC UINT64 *
++UsbDmaChild (USB_DMA_TABLES *Tables, UINT64 *Entry)
++{
++  if (*Entry == 0) {
++    UINT64 *Child = UsbDmaNewTable (Tables);
++    if (Child == NULL) {
++      return NULL;
++    }
++    *Entry = (Tables->PhysicalBase + (UINT64)((UINT8 *)Child - (UINT8 *)Tables->Pages)) | USB_DMA_PAGE_TYPE;
++    return Child;
++  }
++  if ((*Entry & 3) != USB_DMA_PAGE_TYPE) {
++    return NULL;
++  }
++  return (UINT64 *)((UINT8 *)Tables->Pages + ((*Entry & USB_DMA_PA_MASK) - Tables->PhysicalBase));
++}
++
++// HAL's 48-bit input TCR starts at L0. This aperture fits in L0[0].
++STATIC BOOLEAN
++UsbDmaMapRange (USB_DMA_TABLES *Tables, UINT64 Start, UINT64 End)
++{
++  UINT64 *Level1 = UsbDmaChild (Tables, &Tables->Pages[0]);
++  if ((Level1 == NULL) || (Start >= End) || (Start < B5Q_USB_DMA_BASE) ||
++      (End > B5Q_USB_DMA_LIMIT) || (((Start | End) & (USB_DMA_PAGE - 1)) != 0)) {
++    return FALSE;
++  }
++  while (Start < End) {
++    UINT64 *Entry = &Level1[Start >> 30];
++    UINT64 Chunk = USB_DMA_GIB;
++    UINT64 Type = USB_DMA_BLOCK_TYPE;
++    if (((Start & (Chunk - 1)) != 0) || (End - Start < Chunk)) {
++      UINT64 *Level2 = UsbDmaChild (Tables, Entry);
++      if (Level2 == NULL) {
++        return FALSE;
++      }
++      Entry = &Level2[(Start >> 21) & 511];
++      Chunk = 1ULL << 21;
++      if (((Start & (Chunk - 1)) != 0) || (End - Start < Chunk)) {
++        UINT64 *Level3 = UsbDmaChild (Tables, Entry);
++        if (Level3 == NULL) {
++          return FALSE;
++        }
++        Entry = &Level3[(Start >> 12) & 511];
++        Chunk = USB_DMA_PAGE;
++        Type = USB_DMA_PAGE_TYPE;
++      }
++    }
++    if (*Entry != 0) {
++      return FALSE;
++    }
++    *Entry = Start | USB_DMA_LEAF_ATTR | Type;
++    Start += Chunk;
++  }
++  return TRUE;
++}
++
++#endif
+diff --git a/Platforms/Samsung/b5qPkg/Include/APRIORI.inc b/Platforms/Samsung/b5qPkg/Include/APRIORI.inc
+index 63d2e82..b98e80c 100644
+--- a/Platforms/Samsung/b5qPkg/Include/APRIORI.inc
++++ b/Platforms/Samsung/b5qPkg/Include/APRIORI.inc
+@@ -76,17 +76,8 @@ APRIORI DXE {
+   INF MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
+ 
+   INF Binaries/b5q/QcomPkg/Drivers/SPIDxe/SPIDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbPwrCtrlDxe/UsbPwrCtrlDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbfnDwc3Dxe/UsbfnDwc3Dxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/XhciPciEmulationDxe/XhciPciEmulationDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/XhciDxe/XhciDxe.inf
+ 
+-  INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
+-  INF MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
+-  INF MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+ 
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbDeviceDxe/UsbDeviceDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/ButtonsDxe/ButtonsDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/TsensDxe/TsensDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/LimitsDxe/LimitsDxe.inf
+diff --git a/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h b/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h
+new file mode 100644
+index 0000000..b341100
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h
+@@ -0,0 +1,54 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_USB_DMA_H
++#define B5Q_USB_DMA_H
++
++#define B5Q_USB_DMA_PROTOCOL_GUID \
++  { 0x16470a49, 0x4aa3, 0x42f0, { 0x85, 0xeb, 0xca, 0x49, 0x3b, 0xb5, 0x8a, 0x08 } }
++#define B5Q_USB_DMA_PROTOCOL_REVISION 1
++#define B5Q_USB_DMA_SID 0x40
++#define B5Q_USB_DMA_BASE 0x80000000ULL
++#define B5Q_USB_DMA_LIMIT 0x1000000000ULL
++#define B5Q_USB_DMA_NOT_RUN MAX_UINT32
++
++// v27 XNU wire layout. The map result represents the firmware table builder.
++typedef struct {
++  UINT32 Version;
++  UINT32 Sid;
++  UINT64 Locate;
++  UINT32 Create;
++  UINT32 Configure;
++  UINT32 Attach;
++  UINT32 Map;
++  UINT64 OwnedBase;
++  UINT64 OwnedBytes;
++} B5Q_USB_DMA_STATE;
++
++typedef struct {
++  UINT64 PrepareStatus;
++  UINT64 TableBase;
++  UINT64 TableBytes;
++  UINT64 MappedBytes;
++  UINT64 RetentionStatus;
++  UINT32 Delete;
++  UINT32 HalRevision;
++} B5Q_USB_DMA_DIAGNOSTICS;
++
++typedef struct {
++  B5Q_USB_DMA_STATE State;
++  B5Q_USB_DMA_DIAGNOSTICS Diagnostics;
++} B5Q_USB_DMA_RESULT;
++
++typedef VOID (EFIAPI *B5Q_USB_DMA_PREPARE) (
++  IN UINT64 OwnedBase, IN UINT64 OwnedBytes, OUT B5Q_USB_DMA_RESULT *Result
++  );
++
++typedef struct {
++  UINT64 Revision;
++  B5Q_USB_DMA_PREPARE Prepare;
++} B5Q_USB_DMA_PROTOCOL;
++
++STATIC_ASSERT (sizeof (B5Q_USB_DMA_STATE) == 48, "XNU USB DMA state ABI");
++STATIC_ASSERT (OFFSET_OF (B5Q_USB_DMA_STATE, OwnedBase) == 32, "XNU USB DMA range ABI");
++STATIC_ASSERT (sizeof (B5Q_USB_DMA_DIAGNOSTICS) == 48, "USB DMA diagnostics ABI");
++
++#endif
+diff --git a/Platforms/Samsung/b5qPkg/Include/DXE.inc b/Platforms/Samsung/b5qPkg/Include/DXE.inc
+index 693bad7..66bfbe2 100644
+--- a/Platforms/Samsung/b5qPkg/Include/DXE.inc
++++ b/Platforms/Samsung/b5qPkg/Include/DXE.inc
+@@ -82,20 +82,10 @@
+ !endif
+ 
+   INF Binaries/b5q/QcomPkg/Drivers/ButtonsDxe/ButtonsDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbPwrCtrlDxe/UsbPwrCtrlDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/TsensDxe/TsensDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/LimitsDxe/LimitsDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbfnDwc3Dxe/UsbfnDwc3Dxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/XhciPciEmulationDxe/XhciPciEmulationDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/XhciDxe/XhciDxe.inf
+ 
+-  INF MdeModulePkg/Bus/Usb/UsbBusDxe/UsbBusDxe.inf
+-  INF MdeModulePkg/Bus/Usb/UsbKbDxe/UsbKbDxe.inf
+-  INF MdeModulePkg/Bus/Usb/UsbMassStorageDxe/UsbMassStorageDxe.inf
+ 
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbDeviceDxe/UsbDeviceDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbConfigDxe/UsbConfigDxe.inf
+-  INF Binaries/b5q/QcomPkg/Drivers/UsbInitDxe/UsbInitDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/UCDxe/UCDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/RNGDxe/RngDxe.inf
+ 
+diff --git a/Platforms/Samsung/b5qPkg/b5q.fdf b/Platforms/Samsung/b5qPkg/b5q.fdf
+index 184efbd..931293b 100644
+--- a/Platforms/Samsung/b5qPkg/b5q.fdf
++++ b/Platforms/Samsung/b5qPkg/b5q.fdf
+@@ -84,7 +84,7 @@ READ_LOCK_STATUS   = TRUE
+   !include Include/RAW.inc
+ 
+   # RAM Manager
+-  # RamManagerDxe disabled: runtime RAM expansion requires b5q reservation audit.
++  INF SiliciumPkg/Drivers/RamManagerDxe/RamManagerDxe.inf
+ 
+   # SmBios
+   INF MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf

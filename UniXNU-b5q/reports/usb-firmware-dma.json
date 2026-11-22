@@ -1,0 +1,50 @@
+{
+  "inputs": {
+    "uefi": "b303410c8e401fc9419ae65a024356ed09a438ef",
+    "binaries": "a1501e0c2e642d6ac0d8f52c85af2a67b75a7799",
+    "DarwinBoot": "5243c68ec332a227fe3680cd5da6d5a0e127035c",
+    "HALIOMMUDxe_sha256": "a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef",
+    "deployed_v8_boot_sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1",
+    "baseline_esp_ci": 44980608285,
+    "baseline_esp_sha256": "f7cacbc026f765514262d62d634a49af6526167350e16a15bcf966f7604c446a"
+  },
+  "HAL": {
+    "configure_0x2db0": "Rejects null at 0x2de4 with 3 and non-AArch64 VMSA at 0x2e84 with 21. Copies fields at 0x2e10\u20130x2e7c. Does not validate TCR/table geometry. Attach 0x1e54\u20130x1ee4 programs the copied config for the newly allocated bank.",
+    "aspace_0x4840": "Validates nonzero size and 4 KiB-aligned base and size. Root allocation 0x4918 calls 0x1730 then 0x8a5c, which sets w0=4 (EfiBootServicesData). AllocatePages call is reached at 0x88c8 or 0x88e8.",
+    "layout": "HAL AArch64 defaults at 0x2cd0: TCR 0x00802010, 48-bit input, 4KiB L0 walk, TTBR1 disabled. TCR2 0x0003c071, 36-bit output. MAIR0 0x00ff0400, AttrIndx 2 is 0xff. SCTLR 0x00c000e7. Stage 1 leaves use AF, inner shareable, RW and XN.",
+    "handoff": "B5qHandoffDxe configures USB0 ARID 0x03000000 only with HAL. Reserved table pool, cache clean and dsb sy. Largest aligned 1 GiB blocks, 2 MiB and 4 KiB for descriptor edges. Only conventional RAM and the allocated XNU window head between 2 GiB and 64 GiB, excluding reserved holes and the table pool. DarwinBoot verifies retention against the map accepted by ExitBootServices.",
+    "status": "v27 XNU reads the unchanged 48-byte status ABI and gates host/device/VBUS. Firmware publishes per-step codes and a separate table diagnostics property. Runtime validation pending."
+  },
+  "tests": {
+    "host_ASan_UBSan": "PASS actual table builder and loader retention helpers",
+    "b5q_source_check": "PASS",
+    "local_firmware_build": "PASS",
+    "QcomDwc3": {
+      "passed": true,
+      "object_sha256": "4abfb27db2ae02118f0cbe97358b3752b578d0f31d4cf4d12eb474c47a7f1536",
+      "instructions_inspected": 4343,
+      "apps_smmu_addresses_materialized": [],
+      "removed_allocator_symbols_absent": true,
+      "hardware_only_DMA_gate_present": true,
+      "scope": "Actual object instructions plus removed map/allocator symbols; production zero-MMIO regression is separate"
+    },
+    "UsbConfig_DXE_DEPEX": "Install at 0x3dcc, GUID e722b03f-b250-42ce-8ebd-5bd51812d037. Only UsbInitDxe references it in b5q vendor DEPEX, removed together."
+  },
+  "boot_transport": {
+    "deployed_v8": "FV includes Qualcomm UFSDxe (0d35cd8e-97ea-4f9a-96af-0f0d89f76567), and the bare FAT ramdisk contains only the bootstrap, without kernel or ADT.",
+    "new_CI_FD": "Existing firmware CI source excludes the vendor UFS provider by policy. The paired ESP needs a boot path able to read the physical ESP. No boot.img delivery from this FD.",
+    "hardware_tested": false
+  },
+  "source_sha256": {
+    "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
+    "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+    "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
+    "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29",
+    "UniXNU-b5q/board.toml": "0bebcad2351021738333401dd8300fa8e43cc1ac192984b15dcfaeecdef0b022",
+    "UniXNU-b5q/scripts/check-b5q-uefi.py": "ce318dc03b89cee13f5fb169abb26351e5fcadea4a86e446008bf9b8ddade951",
+    "scripts/b5q-install/check-usb-dma-fv.py": "8ef2d6b2c8310a5b07fd405f1954da6b5125bec082ea3c6f7b7125db2f5ef4e7",
+    "scripts/b5q-install/package-usb-dma-esp.py": "ced9acdf1113081ad2816fc5295daa3c7d67b779235134d51eee150b7b6fbbf6",
+    "tests/b5q-ufs/test-usb-firmware-dma.c": "a3d6d3db7233b53fe5a59696938472d4b96d822c2ba4e1f3f3a81c7485321eac",
+    ".github/workflows/b5q-firmware.yml": "560fa3884ed0613a8bc4d18fac2c47e64a628c4c89edcb832d21b4d24e955d2b"
+  }
+}

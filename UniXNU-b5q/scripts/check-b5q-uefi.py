@@ -21,10 +21,19 @@ if not report['errors']:
   if name not in dsc or 'INF '+name not in dxe:report['errors'].append('Required DSC/FDF wiring missing: '+name)
  for name in ['MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf','FatPkg/EnhancedFatDxe/Fat.inf']:
   if name not in dxe:report['errors'].append('Required filesystem missing: '+name)
+ reserved=(board/'Library/MemoryMapLib/MemoryMapLib.c').read_text()
+ if ('/RamManagerDxe/' in fdf) and not all(row in reserved for row in
+      ('0x880100000ULL, 0xa02000ULL', '0x880c00000ULL, 0xad00000ULL',
+       '0x8b9a00000ULL, 0x200000ULL', '0x8bba00000ULL, 0x4600000ULL')):
+  report['errors'].append('RamManager requires all four b5q live high-memory reservations')
+ for name in ('ButtonsDxe', 'DisplayDxe', 'HALIOMMUDxe', 'CmdDbDxe', 'RpmhDxe'):
+  if f'/{name}/' not in dxe:report['errors'].append('Required firmware module missing: '+name)
  for line in (dxe+'\n'+apriori+'\n'+fdf).splitlines():
   line=line.strip()
   if line.startswith('#'):continue
-  if any(x in line for x in ['/UFSDxe/','/SdccDxe/','/UsbMsdDxe/','/PILDxe/','/PILProxyDxe/','/SPSSDxe/','/RamManagerDxe/']):report['errors'].append('Forbidden default dispatch: '+line)
+  if any(x in line for x in ['/UFSDxe/','/SdccDxe/','/UsbMsdDxe/','/PILDxe/','/PILProxyDxe/','/SPSSDxe/',
+      '/UsbConfigDxe/','/UsbDeviceDxe/','/UsbInitDxe/','/XhciPciEmulationDxe/','/XhciDxe/',
+      '/UsbfnDwc3Dxe/','/UsbPwrCtrlDxe/','/UsbBusDxe/','/UsbKbDxe/','/UsbMassStorageDxe/']):report['errors'].append('Forbidden default dispatch: '+line)
  if 'Binaries/sheng/' in dsc+dxe+apriori+fdf:report['errors'].append('Xiaomi binary input in b5q firmware')
 report['result']='FAIL' if report['errors'] else 'PASS'
 target=device/'reports/uefi-source-preflight.json';target.parent.mkdir(parents=True,exist_ok=True);target.write_text(json.dumps(report,indent=2)+'\n')

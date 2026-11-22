@@ -1,0 +1,282 @@
+diff --git a/DarwinBootPkg/Driver/B5qUsbDma.h b/DarwinBootPkg/Driver/B5qUsbDma.h
+new file mode 100644
+index 0000000..b341100
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qUsbDma.h
+@@ -0,0 +1,54 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_USB_DMA_H
++#define B5Q_USB_DMA_H
++
++#define B5Q_USB_DMA_PROTOCOL_GUID \
++  { 0x16470a49, 0x4aa3, 0x42f0, { 0x85, 0xeb, 0xca, 0x49, 0x3b, 0xb5, 0x8a, 0x08 } }
++#define B5Q_USB_DMA_PROTOCOL_REVISION 1
++#define B5Q_USB_DMA_SID 0x40
++#define B5Q_USB_DMA_BASE 0x80000000ULL
++#define B5Q_USB_DMA_LIMIT 0x1000000000ULL
++#define B5Q_USB_DMA_NOT_RUN MAX_UINT32
++
++// v27 XNU wire layout. The map result represents the firmware table builder.
++typedef struct {
++  UINT32 Version;
++  UINT32 Sid;
++  UINT64 Locate;
++  UINT32 Create;
++  UINT32 Configure;
++  UINT32 Attach;
++  UINT32 Map;
++  UINT64 OwnedBase;
++  UINT64 OwnedBytes;
++} B5Q_USB_DMA_STATE;
++
++typedef struct {
++  UINT64 PrepareStatus;
++  UINT64 TableBase;
++  UINT64 TableBytes;
++  UINT64 MappedBytes;
++  UINT64 RetentionStatus;
++  UINT32 Delete;
++  UINT32 HalRevision;
++} B5Q_USB_DMA_DIAGNOSTICS;
++
++typedef struct {
++  B5Q_USB_DMA_STATE State;
++  B5Q_USB_DMA_DIAGNOSTICS Diagnostics;
++} B5Q_USB_DMA_RESULT;
++
++typedef VOID (EFIAPI *B5Q_USB_DMA_PREPARE) (
++  IN UINT64 OwnedBase, IN UINT64 OwnedBytes, OUT B5Q_USB_DMA_RESULT *Result
++  );
++
++typedef struct {
++  UINT64 Revision;
++  B5Q_USB_DMA_PREPARE Prepare;
++} B5Q_USB_DMA_PROTOCOL;
++
++STATIC_ASSERT (sizeof (B5Q_USB_DMA_STATE) == 48, "XNU USB DMA state ABI");
++STATIC_ASSERT (OFFSET_OF (B5Q_USB_DMA_STATE, OwnedBase) == 32, "XNU USB DMA range ABI");
++STATIC_ASSERT (sizeof (B5Q_USB_DMA_DIAGNOSTICS) == 48, "USB DMA diagnostics ABI");
++
++#endif
+diff --git a/DarwinBootPkg/Driver/B5qUsbDmaLoader.h b/DarwinBootPkg/Driver/B5qUsbDmaLoader.h
+new file mode 100644
+index 0000000..7b237b2
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qUsbDmaLoader.h
+@@ -0,0 +1,116 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_USB_DMA_LOADER_H
++#define B5Q_USB_DMA_LOADER_H
++
++#include "B5qUsbDma.h"
++
++typedef struct {
++  UINTN Ready;
++  UINTN State;
++  UINTN Diagnostics;
++} B5Q_USB_DMA_ADT;
++
++STATIC BOOLEAN
++FindUsbDmaProperty (
++  CONST CHAR8 *Name, CONST UINT8 *Value, UINTN Offset, UINT32 Length, B5Q_USB_DMA_ADT *Adt
++  )
++{
++  UINTN *Property;
++  UINTN Expected;
++  if (AsciiStrCmp (Name, "b5q-usb-dma-ready") == 0) {
++    Property = &Adt->Ready;
++    Expected = sizeof (UINT32);
++  } else if (AsciiStrCmp (Name, "b5q-usb-dma-state") == 0) {
++    Property = &Adt->State;
++    Expected = sizeof (B5Q_USB_DMA_STATE);
++  } else if (AsciiStrCmp (Name, "b5q-usb-dma-diagnostics") == 0) {
++    Property = &Adt->Diagnostics;
++    Expected = sizeof (B5Q_USB_DMA_DIAGNOSTICS);
++  } else {
++    return TRUE;
++  }
++  if ((*Property != MAX_UINTN) || (Length != Expected) || !IsZeroBuffer (Value, Length)) {
++    return FALSE;
++  }
++  *Property = Offset;
++  return TRUE;
++}
++
++STATIC VOID
++GetUsbDmaResult (UINT64 Address, UINT64 WindowSize, B5Q_USB_DMA_RESULT *Result)
++{
++  EFI_GUID Guid = B5Q_USB_DMA_PROTOCOL_GUID;
++  B5Q_USB_DMA_PROTOCOL *Protocol = NULL;
++  ZeroMem (Result, sizeof (*Result));
++  Result->State = (B5Q_USB_DMA_STATE){
++    1, B5Q_USB_DMA_SID, EFI_NOT_STARTED, B5Q_USB_DMA_NOT_RUN, B5Q_USB_DMA_NOT_RUN,
++    B5Q_USB_DMA_NOT_RUN, B5Q_USB_DMA_NOT_RUN, Address, WindowSize
++  };
++  Result->Diagnostics.RetentionStatus = EFI_NOT_STARTED;
++  Result->Diagnostics.Delete = B5Q_USB_DMA_NOT_RUN;
++  EFI_STATUS Status = gBS->LocateProtocol (&Guid, NULL, (VOID **)&Protocol);
++  if (Status == EFI_SUCCESS) {
++    if ((Protocol == NULL) || (Protocol->Revision != B5Q_USB_DMA_PROTOCOL_REVISION) ||
++        (Protocol->Prepare == NULL)) {
++      Status = EFI_INCOMPATIBLE_VERSION;
++    } else {
++      Protocol->Prepare (Address, WindowSize, Result);
++      return;
++    }
++  }
++  Result->Diagnostics.PrepareStatus = Status;
++}
++
++STATIC BOOLEAN
++UsbDmaPagesRetained (
++  CONST EFI_MEMORY_DESCRIPTOR *Map, UINTN MapSize, UINTN Stride, UINT64 Base, UINT64 Bytes
++  )
++{
++  if ((Base < B5Q_USB_DMA_BASE) || (Base >= B5Q_USB_DMA_LIMIT) || (Bytes == 0) ||
++      (Bytes > B5Q_USB_DMA_LIMIT - Base) || (((Base | Bytes) & (EFI_PAGE_SIZE - 1)) != 0) ||
++      (Stride < sizeof (*Map)) || (MapSize % Stride != 0)) {
++    return FALSE;
++  }
++  for (UINTN Offset = 0; Offset < MapSize; Offset += Stride) {
++    CONST EFI_MEMORY_DESCRIPTOR *Entry = (CONST VOID *)((CONST UINT8 *)Map + Offset);
++    if ((Entry->Type == EfiReservedMemoryType) && (Base >= Entry->PhysicalStart) &&
++        (Entry->NumberOfPages <= (MAX_UINT64 - Entry->PhysicalStart) / EFI_PAGE_SIZE) &&
++        (Base + Bytes <= Entry->PhysicalStart + Entry->NumberOfPages * EFI_PAGE_SIZE)) {
++      return TRUE;
++    }
++  }
++  return FALSE;
++}
++
++STATIC VOID
++WriteUsbDmaResult (
++  UINT8 *Tree, CONST B5Q_USB_DMA_ADT *Adt, CONST B5Q_USB_DMA_RESULT *Result,
++  CONST EFI_MEMORY_DESCRIPTOR *Map, UINTN MapSize, UINTN Stride,
++  UINT64 Address, UINT64 WindowSize, BOOLEAN HasExclusions
++  )
++{
++  B5Q_USB_DMA_STATE StateValue = Result->State;
++  B5Q_USB_DMA_DIAGNOSTICS DiagValue = Result->Diagnostics;
++  B5Q_USB_DMA_STATE *State = &StateValue;
++  B5Q_USB_DMA_DIAGNOSTICS *Diag = &DiagValue;
++  UINT32 Ready = 0;
++  if ((Diag->PrepareStatus == EFI_SUCCESS) &&
++      (State->Version == 1) && (State->Sid == B5Q_USB_DMA_SID) && (State->Locate == EFI_SUCCESS) &&
++      (State->Create == 0) && (State->Configure == 0) && (State->Attach == 0) && (State->Map == 0) &&
++      (State->OwnedBase == Address) && (State->OwnedBytes == WindowSize)) {
++    BOOLEAN Retained = UsbDmaPagesRetained (Map, MapSize, Stride, Diag->TableBase, Diag->TableBytes);
++    if (Retained && !HasExclusions) {
++      Retained = (Diag->TableBase + Diag->TableBytes <= Address) || (Address + WindowSize <= Diag->TableBase);
++    }
++    Diag->RetentionStatus = Retained ? EFI_SUCCESS : EFI_COMPROMISED_DATA;
++    if (!Retained) {
++      State->Map = (UINT32)(EFI_COMPROMISED_DATA & MAX_UINT32);
++    }
++    Ready = Retained ? 1 : 0;
++  }
++  CopyMem (Tree + Adt->Ready, &Ready, sizeof (Ready));
++  CopyMem (Tree + Adt->State, State, sizeof (*State));
++  CopyMem (Tree + Adt->Diagnostics, Diag, sizeof (*Diag));
++}
++
++#endif
+diff --git a/DarwinBootPkg/Driver/DarwinBoot.c b/DarwinBootPkg/Driver/DarwinBoot.c
+index f0f7650..c84594c 100644
+--- a/DarwinBootPkg/Driver/DarwinBoot.c
++++ b/DarwinBootPkg/Driver/DarwinBoot.c
+@@ -20,6 +20,7 @@
+ #include "WindowSize.h"
+ #include "MemoryWindow.h"
+ #include "LoaderInputs.h"
++#include "B5qUsbDmaLoader.h"
+ 
+ #define WINDOW_SIZE  SIZE_256MB
+ #define BLOCK_SIZE   SIZE_2MB
+@@ -286,7 +287,7 @@ ParseKernel (CONST UINT8 *Data, UINTN Size, KERNEL *Kernel)
+ 
+ STATIC
+ BOOLEAN
+-AdtNode (CONST UINT8 *Data, UINTN Size, UINTN *Offset, UINTN Depth, UINTN ParentPath, UINTN *RamdiskOffset, UINTN *TrustCacheOffset, UINTN *AddonOffset, UINTN *PolicyOffset, UINT64 *WindowSize, BOOLEAN *KeepPacked, UINTN *ExcludedOffset, UINTN *ExcludedCapacity, UINTN *InputsOffset)
++AdtNode (CONST UINT8 *Data, UINTN Size, UINTN *Offset, UINTN Depth, UINTN ParentPath, UINTN *RamdiskOffset, UINTN *TrustCacheOffset, UINTN *AddonOffset, UINTN *PolicyOffset, UINT64 *WindowSize, BOOLEAN *KeepPacked, UINTN *ExcludedOffset, UINTN *ExcludedCapacity, UINTN *InputsOffset, B5Q_USB_DMA_ADT *UsbAdt)
+ {
+   UINT32 Properties;
+   UINT32 Children;
+@@ -303,6 +304,7 @@ AdtNode (CONST UINT8 *Data, UINTN Size, UINTN *Offset, UINTN Depth, UINTN Parent
+   UINTN  InputsCandidate;
+   CONST UINT8 *Name;
+   UINTN  NameLength;
++  B5Q_USB_DMA_ADT UsbCandidate = { MAX_UINTN, MAX_UINTN, MAX_UINTN };
+ 
+   Name = NULL;
+   NameLength = 0;
+@@ -368,6 +370,9 @@ AdtNode (CONST UINT8 *Data, UINTN Size, UINTN *Offset, UINTN Depth, UINTN Parent
+           !IsZeroBuffer (Data + *Offset, Length)) { return FALSE; }
+       InputsCandidate = *Offset;
+     }
++    if (!FindUsbDmaProperty ((CONST CHAR8 *)(Data + *Offset - 36), Data + *Offset, *Offset, Length, &UsbCandidate)) {
++      return FALSE;
++    }
+     *Offset += Length;
+     if (ALIGN_VALUE (*Offset, 4) > Size) { return FALSE; }
+     *Offset = ALIGN_VALUE (*Offset, 4);
+@@ -406,9 +411,17 @@ AdtNode (CONST UINT8 *Data, UINTN Size, UINTN *Offset, UINTN Depth, UINTN Parent
+     if ((Path != 1) || (*InputsOffset != MAX_UINTN)) { return FALSE; }
+     *InputsOffset = InputsCandidate;
+   }
++  if ((UsbCandidate.Ready != MAX_UINTN) || (UsbCandidate.State != MAX_UINTN) ||
++      (UsbCandidate.Diagnostics != MAX_UINTN)) {
++    if ((Path != 1) || (UsbAdt->Ready != MAX_UINTN) || (UsbCandidate.Ready == MAX_UINTN) ||
++        (UsbCandidate.State == MAX_UINTN) || (UsbCandidate.Diagnostics == MAX_UINTN)) {
++      return FALSE;
++    }
++    *UsbAdt = UsbCandidate;
++  }
+   if (Children > (Size - *Offset) / 8) { return FALSE; }
+   for (Index = 0; Index < Children; Index++) {
+-    if (!AdtNode (Data, Size, Offset, Depth + 1, Path, RamdiskOffset, TrustCacheOffset, AddonOffset, PolicyOffset, WindowSize, KeepPacked, ExcludedOffset, ExcludedCapacity, InputsOffset)) { return FALSE; }
++    if (!AdtNode (Data, Size, Offset, Depth + 1, Path, RamdiskOffset, TrustCacheOffset, AddonOffset, PolicyOffset, WindowSize, KeepPacked, ExcludedOffset, ExcludedCapacity, InputsOffset, UsbAdt)) { return FALSE; }
+   }
+   return TRUE;
+ }
+@@ -814,6 +827,8 @@ Boot (
+   UINT64                          Video[6];
+   LAYOUT                          Layout;
+   UINTN                           ExcludedOffset;
++  B5Q_USB_DMA_ADT                  UsbAdt = { MAX_UINTN, MAX_UINTN, MAX_UINTN };
++  B5Q_USB_DMA_RESULT               UsbResult;
+   UINTN                           ExcludedCapacity;
+   UINTN                           ExcludedCount;
+   UINT8                           *Excluded;
+@@ -892,7 +907,7 @@ Boot (
+   OutsideOffset = MAX_UINTN;
+   OutsideCapacity = 0;
+   if (!FindOutsideTable (Tree, TreeSize, &OutsideOffset, &OutsideCapacity)) { OutsideOffset = MAX_UINTN; }
+-  if (!AdtNode (Tree, TreeSize, &Offset, 0, 3, &RamdiskOffset, &TrustCacheOffset, &AddonOffset, &PolicyOffset, &WindowSize, &KeepPacked, &ExcludedOffset, &ExcludedCapacity, &InputsOffset) || (Offset != TreeSize)) { Status = EFI_COMPROMISED_DATA; goto Fail; }
++  if (!AdtNode (Tree, TreeSize, &Offset, 0, 3, &RamdiskOffset, &TrustCacheOffset, &AddonOffset, &PolicyOffset, &WindowSize, &KeepPacked, &ExcludedOffset, &ExcludedCapacity, &InputsOffset, &UsbAdt) || (Offset != TreeSize)) { Status = EFI_COMPROMISED_DATA; goto Fail; }
+   if (KeepPacked && (!RamdiskPacked || (RamdiskOffset == MAX_UINTN))) { Status = EFI_COMPROMISED_DATA; goto Fail; }
+   if (WindowSize == 0) { WindowSize = WINDOW_SIZE; }
+   if (Kernel.Base > MAX_UINT64 - WindowSize) { Status = EFI_LOAD_ERROR; goto Fail; }
+@@ -1028,6 +1043,12 @@ Boot (
+   Root->Close (Root); Root = NULL;
+   // Every file is read; the block device is asked once more, and only for a tree that wants the record.
+   if (InputsOffset != MAX_UINTN) { LocateInputs (Request, Inputs); }
++  if (UsbAdt.Ready != MAX_UINTN) {
++    GetUsbDmaResult (Address, WindowSize, &UsbResult);
++    DEBUG ((DEBUG_ERROR, "DARWINBOOT: USB DMA prepare=%r table=0x%lx+0x%lx mapped=0x%lx\n",
++            (EFI_STATUS)UsbResult.Diagnostics.PrepareStatus, UsbResult.Diagnostics.TableBase,
++            UsbResult.Diagnostics.TableBytes, UsbResult.Diagnostics.MappedBytes));
++  }
+   Status = GetMap (&Map, &Capacity, &MapSize, &Key, &Stride);
+   if (EFI_ERROR (Status)) { goto Fail; }
+   Print (L"DARWINBOOT: ARM64 va=0x%lx pa=0x%lx args=0x%lx entry=0x%lx owned=0x%lx\n",
+@@ -1124,6 +1145,10 @@ Boot (
+       if (Attempt == 0) { Status = EFI_LOAD_ERROR; goto Fail; }
+       CpuDeadLoop ();
+     }
++    if (UsbAdt.Ready != MAX_UINTN) {
++      WriteUsbDmaResult ((UINT8 *)(UINTN)TreeAddress, &UsbAdt, &UsbResult, Map, MapSize, Stride,
++                         Address, WindowSize, Excluded != NULL);
++    }
+     Status = gBS->ExitBootServices (mImage, Key);
+     if (!EFI_ERROR (Status)) {
+       if (Excluded == NULL) {
