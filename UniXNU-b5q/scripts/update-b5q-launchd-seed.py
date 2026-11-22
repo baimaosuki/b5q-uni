@@ -13,6 +13,7 @@ import tempfile
 SEED_HASH = "aa624655fd41db6af03ddf0bcb46ed0b5a333f307912f74ac471c7b1b3bfa82b"
 V29_SEED_HASH = "f1f6afe508b4c7c57254780c82018f039ae2b3cd691222a287d9d3a37bb3749b"
 V31_SEED_HASH = "10223429847dd0a2d2db4a080cea37847db9d92a0499d9c998f53458ae1d6603"
+V32_SEED_HASH = "f84207df2076b9eec9f1ba5bec3e2a4e97e8eff1f10ee460967c2dcb91288e2f"
 POLICY = Path(__file__).resolve().parents[1] / "package/b5q-launchd-lite.json"
 DIRECTORY = "private/var/db/com.apple.xpc.launchd"
 
@@ -30,15 +31,17 @@ def merge(original, disabled):
     options = plistlib.loads(original) if original else {}
     if not isinstance(options, dict):
         raise ValueError("Launchd overrides must be a plist dictionary")
-    options.update(dict.fromkeys(disabled, True))
-    return plistlib.dumps(options, sort_keys=True)
+    # These are board-owned files in the hash-qualified RAM seed. Replace the
+    # old policy completely so wrong/iOS-only Labels and EndpointSecurity do
+    # not survive a merge. Account and all other seed files are unchanged.
+    return plistlib.dumps(dict.fromkeys(disabled, True), sort_keys=True)
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("darwinboot", "seed", "out"):
         p.add_argument("--" + name, type=Path, required=True)
-    p.add_argument("--baseline", choices=("v27", "v29", "v31"), default="v27")
+    p.add_argument("--baseline", choices=("v27", "v29", "v31", "v32"), default="v27")
     p.add_argument("--stand-in", type=Path, help="Ad hoc signed board absentd, installed under its own name")
     args = p.parse_args()
     sys.path.insert(0, str(args.darwinboot.resolve() / "Test"))
@@ -48,7 +51,7 @@ def main():
     out = args.out.resolve()
     metadata = json.loads(seed.with_name("data-seed.json").read_text())
     body = seed.read_bytes()
-    expected = {"v27": SEED_HASH, "v29": V29_SEED_HASH, "v31": V31_SEED_HASH}[args.baseline]
+    expected = {"v27": SEED_HASH, "v29": V29_SEED_HASH, "v31": V31_SEED_HASH, "v32": V32_SEED_HASH}[args.baseline]
     assert metadata["sha256"] == hashlib.sha256(body).hexdigest() == expected
     logical, extents = packed_ramdisk.regions(body)
     assert logical == metadata["logical_bytes"] == 4 * 2**30
@@ -87,6 +90,7 @@ def main():
                 subprocess.run(["sudo", "install", "-o", "root", "-g", "wheel", "-m", "0644",
                                 str(stage), str(target)], check=True)
                 assert target.read_bytes() == payload and target.stat().st_uid == target.stat().st_gid == 0
+                assert target.stat().st_mode & 0o7777 == 0o644
             if args.stand_in:
                 target = mount / "private/var/ngpu/bin/b5q-absentd"
                 assert target.parent.resolve() == target.parent and not target.is_symlink()

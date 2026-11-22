@@ -1,0 +1,273 @@
+{
+  "baseline_log": {
+    "path": "logs/b5q-xnu2log-v32/XNU2LOG.txt",
+    "sha256": "0738de6db6c6027c04cc413fbada198e7c585c4630b2965c64aaeda5a10c634d"
+  },
+  "launchd_evidence": "reports/launchd-26C5035r-policy.json",
+  "launchd_census": "reports/launchd-26C5035r-census.json",
+  "authorized_ADT": {
+    "path": "/chosen/asmb/lp-sip0",
+    "type": "u64-le",
+    "value": 2,
+    "other_SIP_bits": 0
+  },
+  "changes": [
+    "MAC observation-only fork/spawn + actual final exit wait status, fixed storage and 30s TOP10",
+    "Correct native Labels and remove stale/mistyped/iOS policies",
+    "Limit stand-in to upstream mobileactivationd/cryptexd; early EndpointSecurity is not replaced or disabled",
+    "Log absentd job/pid/load/listener/cancellation branches; preserve success for no-label one-shot tasks"
+  ],
+  "absentd_v32_causality": {
+    "observed_instances": 7,
+    "same_job_restart_count": "unknown; v32 lacks Labels and exit statuses",
+    "confirmed_source_contributors": [
+      "SIP ignored disabled overrides of AirPlayXPCHelper/rtcreportingd/talagent, while old deny-exec unnecessarily redirected them",
+      "No-label/empty-label paths return success immediately; persistent jobs with valid Labels remain in dispatch_main"
+    ],
+    "diagnostic_followup_required": true
+  },
+  "build": {
+    "status": "12 local pre-CI checks PASS; CI dispatch pending",
+    "source_cache_run": 45016691051,
+    "source_cache_commit": "2f74ab3b3850711cd4f2bc61c75bdbe187a1f586",
+    "core_translation_units_compiled": 0,
+    "board_sources": [
+      "B5qBootPolicy.c",
+      "B5qProcTop.c"
+    ],
+    "GPU_recompiled": false,
+    "UEFI_recompiled": false,
+    "new_seed_created": false,
+    "existing_4GiB_seed_updated": true
+  },
+  "hardware_tested": false,
+  "local_checks": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "records",
+        "command": [
+          "/bin/python3",
+          "UniXNU/scripts/porting-record.py",
+          "check",
+          "--device",
+          "UniXNU-b5q"
+        ],
+        "passed": true
+      },
+      {
+        "name": "native-launchd",
+        "command": [
+          "/bin/python3",
+          "scripts/b5q-install/check-macos-launchd-policy.py",
+          "--launchd",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/root/sbin/launchd",
+          "--rootless",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/root/System/Library/Sandbox/com.apple.xpc.launchd.rootless.plist",
+          "--report",
+          "/home/baimao/zflip5/UniXNU-b5q/reports/launchd-26C5035r-policy.json"
+        ],
+        "passed": true
+      },
+      {
+        "name": "absentd-ASan-UBSan",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-absentd-v33.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "proctop-compile",
+        "command": [
+          "c++",
+          "-std=c++17",
+          "-Wall",
+          "-Wextra",
+          "-Werror",
+          "-pthread",
+          "-fsanitize=address,undefined",
+          "-I",
+          "/home/baimao/zflip5/UniXNU-b5q/package",
+          "/home/baimao/zflip5/tests/b5q-ufs/test-proctop.cpp",
+          "-o",
+          "/tmp/b5q-proctop-preci-ymq4gwnn/proctop"
+        ],
+        "passed": true
+      },
+      {
+        "name": "proctop-ASan-UBSan",
+        "command": [
+          "/tmp/b5q-proctop-preci-ymq4gwnn/proctop"
+        ],
+        "passed": true
+      },
+      {
+        "name": "target",
+        "command": [
+          "/bin/python3",
+          "scripts/b5q-install/check-peripheral-target.py",
+          "--sources",
+          "B5qProcTop.c,B5qBootPolicy.c",
+          "--objects-out",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/objects",
+          "--reference",
+          "/home/baimao/zflip5/artifacts/b5q-esp-runtime-v32/esp.img"
+        ],
+        "passed": true
+      },
+      {
+        "name": "proctop-PAC",
+        "command": [
+          "/bin/python3",
+          "scripts/b5q-install/check-proctop-pac.py",
+          "--object",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/objects/B5qProcTop.o",
+          "--core-objects",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/pac",
+          "--out",
+          "/home/baimao/zflip5/artifacts/b5q-runtime-v33-work/proctop-pac.json"
+        ],
+        "passed": true
+      },
+      {
+        "name": "data-account",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-data-account.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "log-startup",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-log-startup.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "log-writer",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-log-writer.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "installer",
+        "command": [
+          "/bin/python3",
+          "tests/b5q-ufs/test-installer.py"
+        ],
+        "passed": true
+      },
+      {
+        "name": "ADT-codec-cache-workflow-template",
+        "passed": true
+      }
+    ],
+    "hardware_verified": false,
+    "core_translation_units_compiled": 0,
+    "source_cache_run": 45016691051,
+    "statistical_cases": "160000 concurrent exits plus signal/status/full-table/reset cases",
+    "absentd_cases": 8,
+    "launchd_instruction_cases": 19,
+    "actual_absentd_arm64e_target_compile": true
+  },
+  "local_PAC": {
+    "passed": true,
+    "contracts": [
+      {
+        "callback": "_created",
+        "caller": "_mac_cred_label_associate_fork",
+        "diversity": "0x73d8",
+        "signed": [
+          {
+            "site": "0x28",
+            "key": 0,
+            "diversity": 29656,
+            "address_diversity": 0
+          }
+        ],
+        "calls": [
+          {
+            "site": 1344,
+            "diversity": 29656
+          },
+          {
+            "site": 1528,
+            "diversity": 29656
+          }
+        ]
+      },
+      {
+        "callback": "_exited",
+        "caller": "_mac_proc_notify_exit",
+        "diversity": "0x2abe",
+        "signed": [
+          {
+            "site": "0x3c",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0
+          }
+        ],
+        "calls": [
+          {
+            "site": 11380,
+            "diversity": 10942
+          },
+          {
+            "site": 11552,
+            "diversity": 10942
+          }
+        ]
+      },
+      {
+        "callback": "_b5q_proc_top_init",
+        "caller": "kernel_startup_initialize_upto",
+        "signed": [
+          {
+            "site": "0x6d8",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0
+          }
+        ],
+        "calls": [
+          {
+            "site": 592,
+            "diversity": 10942
+          }
+        ]
+      }
+    ],
+    "sha256": {
+      "observer": "0cfd7397a76c4557d45cc624beaa3ba8a1413fcf74e895b7c4c42b443262a643",
+      "mac_process": "2c5fd9fde0c3d9f2899b42a1e7e3231c84550e11f1df27bdde2c7dcb34cb06bc",
+      "startup": "5d20583fe9bbc1d2c974777a54a648ea5bebf269b07f4103b55d8e45cf83aff8"
+    },
+    "imports": [
+      "_IOLog",
+      "_IOSleep",
+      "___stack_chk_fail",
+      "___stack_chk_guard",
+      "_kernel_thread_start",
+      "_mac_policy_register",
+      "_proc_best_name",
+      "_proc_exitstatus",
+      "_snprintf",
+      "_thread_deallocate"
+    ],
+    "apps_smmu_MMIO_references": 0,
+    "hardware_PAC_execution_tested": false
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qProcTop.c": "0c02ec7a85a264b50a2a1c67f4bc880e8a9ef41ea22ea2a8321b398883c4cc4c",
+    "UniXNU-b5q/package/B5qProcTop.h": "1bfe9ad2062abfc331ce5df7b96bcbd13e45005015bb2c0aaeb81d3822f09307",
+    "UniXNU-b5q/package/B5qBootPolicy.c": "337bd5a5217b87b467f66cf7121e6f8b0ac4e08b2b376061e5a0eadd31b4f039",
+    "UniXNU-b5q/patches/tools/b5q-absentd-user-domains.patch": "158a44f46006a701ea8e898d8baf5decedfbba743c3dd12c74cd209a051d3c86",
+    "UniXNU-b5q/board.toml": "a309596e51394262d7a39b6017cf528b06bca717a9dff1877166e4679f5af385"
+  }
+}

@@ -86,6 +86,11 @@ b5q-usb-dma-ready = 0
 b5q-usb-dma-state = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 b5q-usb-dma-diagnostics = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 
+# Native ARM64 local boot policy: only CSR_ALLOW_UNRESTRICTED_FS (user authorized).
+# launchd's disabled-service overrides remain ignored without this one SIP bit.
+[adt.chosen.asmb.u64]
+lp-sip0 = 2
+
 # The device has no implemented suspend path (official device-tree guide).
 [adt.defaults.u32]
 sleep-disabled = 1

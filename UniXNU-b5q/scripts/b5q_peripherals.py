@@ -11,7 +11,7 @@ from pathlib import Path
 SOURCES = ['B5qUsbBoard.cpp', 'UsbProbe.cpp', 'CpuFreqProbe.cpp', 'ThermalProbe.cpp',
            'ThermalLevel.cpp', 'BoardClock.cpp', 'ButtonProbe.cpp',
            'DisplayTimingProbe.cpp', 'NativeHidInput.cpp', 'HidInputProbe.cpp',
-           'B5qTouch.cpp', 'GeniI2c.c', 'Sm8550Gcc.c', 'QcomRpmh.c', 'B5qBootPolicy.c']
+           'B5qTouch.cpp', 'GeniI2c.c', 'Sm8550Gcc.c', 'QcomRpmh.c', 'B5qBootPolicy.c', 'B5qProcTop.c']
 
 
 def prepare_headers(sdk, include, hid):
@@ -58,6 +58,11 @@ def flags(sdk, include, header, package, tree, xnu, have_idle=False):
 
 def compile_object(cxx, cflags, source, target, llvm):
     options = list(cflags)
+    if source.name == 'B5qProcTop.c':
+        # Use the pinned source MAC/startup ABI, never an SDK approximation.
+        xnu = next(Path(options[i + 1]).parent for i, v in enumerate(options[:-1])
+                   if v == '-I' and Path(options[i + 1]).name == 'pexpert')
+        options += ['-I', str(xnu), '-I', str(xnu / 'osfmk')]
     if source.suffix == '.c':
         options = [v for v in options if v not in ['-std=gnu++17', '-fno-c++-static-destructors',
                    '-fno-exceptions', '-fno-rtti', '-fapple-kext', '-nostdinc++']]

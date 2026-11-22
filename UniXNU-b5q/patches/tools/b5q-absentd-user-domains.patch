@@ -1,24 +1,85 @@
 diff --git a/absentd.c b/absentd.c
 --- a/absentd.c
 +++ b/absentd.c
-@@ -9,6 +9,7 @@
+@@ -8,48 +8,99 @@
+ #include <CoreFoundation/CoreFoundation.h>
  #include <dispatch/dispatch.h>
  #include <stdio.h>
- #include <stdlib.h>
++#include <stdarg.h>
 +#include <string.h>
++#include <unistd.h>
++#include <fcntl.h>
++#include <errno.h>
+ #include <stdlib.h>
  #include <xpc/xpc.h>
  
- static void refuse(const char *name)
-@@ -35,17 +36,22 @@
+-static void refuse(const char *name)
++// The seven v32 unnest messages identify distinct process instances, not their
++// job labels or exit reasons. Log identity/branches here rather than claiming
++// they prove seven restarts of one service.
++static void diagnostic(const char *label, const char *stage, int detail)
  {
-     // launchd gives every job its label; the job's own description names its services.
++    char line[512];
++    int n = snprintf(line, sizeof line, "B5qAbsent: pid=%ld label=%.160s stage=%s detail=%d\n",
++                     (long)getpid(), label && label[0] ? label : "<boot-task>", stage, detail);
++    if (n <= 0) return;
++    size_t bytes = (size_t)n < sizeof line ? (size_t)n : sizeof line - 1;
++    int fd = open("/dev/console", O_WRONLY | O_NOCTTY | O_NONBLOCK);
++    if (fd >= 0) { (void)write(fd, line, bytes); (void)close(fd); }
++    else (void)write(STDERR_FILENO, line, bytes);
++}
++
++struct listener_context { const char *label; unsigned listeners; };
++
++static void refuse(const char *name, struct listener_context *context)
++{
++    const char *label = context->label;
+     xpc_connection_t listener = xpc_connection_create_mach_service(name, dispatch_get_main_queue(), XPC_CONNECTION_MACH_SERVICE_LISTENER);
+-    if (!listener) return;
++    if (!listener) { diagnostic(label, "listener-create-failed", errno); return; }
+     xpc_connection_set_event_handler(listener, ^(xpc_object_t peer) {
++        if (xpc_get_type(peer) == XPC_TYPE_ERROR) {
++            diagnostic(label, "listener-error", peer == XPC_ERROR_CONNECTION_INVALID ? 1 : 2);
++            return;
++        }
+         if (xpc_get_type(peer) != XPC_TYPE_CONNECTION) return;
+         xpc_connection_set_event_handler((xpc_connection_t)peer, ^(xpc_object_t event) { (void)event; });
+         xpc_connection_activate((xpc_connection_t)peer);
+         xpc_connection_cancel((xpc_connection_t)peer);
+     });
+     xpc_connection_activate(listener);
++    ++context->listeners;
+ }
+ 
+-static void refuse_each(const void *key, const void *value, void *context)
++static void refuse_each(const void *key, const void *value, void *opaque)
+ {
+-    (void)value; (void)context;
++    (void)value;
++    struct listener_context *context = opaque;
+     char name[256];
+-    if (CFGetTypeID(key) == CFStringGetTypeID() && CFStringGetCString(key, name, sizeof name, kCFStringEncodingUTF8)) refuse(name);
++    if (CFGetTypeID(key) == CFStringGetTypeID() && CFStringGetCString(key, name, sizeof name, kCFStringEncodingUTF8)) refuse(name, context);
++    else diagnostic(context->label, "invalid-service-name", 0);
+ }
+ 
+ int main(void)
+ {
+-    // launchd gives every job its label; the job's own description names its services.
      const char *label = getenv("XPC_SERVICE_NAME");
 -    char path[512];
 -    if (!label || snprintf(path, sizeof path, "/System/Library/LaunchDaemons/%s.plist", label) >= (int)sizeof path) return 78;
 -    CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), false);
 -    CFReadStreamRef stream = url ? CFReadStreamCreateWithFile(NULL, url) : NULL;
-+    if (!label || !label[0]) return 0; // One-shot boot tasks have no XPC service.
-+    if (strchr(label, '/') || strstr(label, "..")) return 78;
++    if (!label || !label[0]) {
++        diagnostic(label, "boot-task-exit", 0);
++        return 0; // Preserve EndpointSecurity/other synchronous one-shot tasks.
++    }
++    if (strlen(label) > 255 || strchr(label, '/') || strstr(label, "..")) {
++        diagnostic("<invalid-label>", "invalid-label-exit", 78);
++        return 78;
++    }
++    diagnostic(label, "start", 0);
      CFPropertyListRef job = NULL;
 -    if (stream && CFReadStreamOpen(stream)) {
 -        job = CFPropertyListCreateWithStream(NULL, stream, 0, kCFPropertyListImmutable, NULL, NULL);
@@ -26,7 +87,11 @@ diff --git a/absentd.c b/absentd.c
 +    const char *domains[] = {"LaunchDaemons", "LaunchAgents"};
 +    for (unsigned i = 0; i < sizeof(domains) / sizeof(domains[0]) && !job; ++i) {
 +        char path[512];
-+        if (snprintf(path, sizeof path, "/System/Library/%s/%s.plist", domains[i], label) >= (int)sizeof path) return 78;
++        int n = snprintf(path, sizeof path, "/System/Library/%s/%s.plist", domains[i], label);
++        if (n < 0 || n >= (int)sizeof path) {
++            diagnostic(label, "path-too-long-exit", 78);
++            return 78;
++        }
 +        CFURLRef url = CFURLCreateFromFileSystemRepresentation(NULL, (const UInt8 *)path, (CFIndex)strlen(path), false);
 +        CFReadStreamRef stream = url ? CFReadStreamCreateWithFile(NULL, url) : NULL;
 +        if (stream && CFReadStreamOpen(stream)) {
@@ -35,9 +100,22 @@ diff --git a/absentd.c b/absentd.c
 +        }
 +        if (stream) CFRelease(stream);
 +        if (url) CFRelease(url);
++        if (job) diagnostic(label, i ? "agent-plist" : "daemon-plist", 0);
      }
 -    if (stream) CFRelease(stream);
 -    if (url) CFRelease(url);
++    struct listener_context context = {label, 0};
      if (job && CFGetTypeID(job) == CFDictionaryGetTypeID()) {
          CFTypeRef services = CFDictionaryGetValue(job, CFSTR("MachServices"));
-         if (services && CFGetTypeID(services) == CFDictionaryGetTypeID()) CFDictionaryApplyFunction(services, refuse_each, NULL);
+-        if (services && CFGetTypeID(services) == CFDictionaryGetTypeID()) CFDictionaryApplyFunction(services, refuse_each, NULL);
+-    }
+-    // Launch events (cryptexd is started by one) stay with launchd; this process keeps running, so they start nothing again.
++        if (services && CFGetTypeID(services) == CFDictionaryGetTypeID()) CFDictionaryApplyFunction(services, refuse_each, &context);
++        else diagnostic(label, "no-mach-services", 0);
++    } else diagnostic(label, "plist-unavailable", 0);
++    if (job) CFRelease(job);
++    diagnostic(label, "resident", (int)context.listeners);
++    // Even a missing plist/failed listener stays resident, avoiding respawn
++    // loops. Only genuine early one-shot boot tasks return success immediately.
+     dispatch_main();
+ }

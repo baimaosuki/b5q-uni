@@ -1,0 +1,202 @@
+{
+  "launchd_sha256": "33cb5981d59aa60db3c27fd309a9aa95bf77ae1bef8369beffa3e9ba37f926bc",
+  "thin_sha256": "d35f01f9669f314a1058e17acca27d3141ba8be1b0ca0d9e9d5edbb787607243",
+  "rootless_sha256": "4167fc3591f4f4519351c8dc9293fa398cdb55c233d43748af63f7aa8f7a5a9d",
+  "cases": [
+    {
+      "case": "secure reader",
+      "path": "disabled.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100644",
+      "fstat": 0,
+      "accepted": true
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.plist",
+      "uid": 501,
+      "gid": 0,
+      "mode": "0o100644",
+      "fstat": 0,
+      "accepted": false
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100664",
+      "fstat": 0,
+      "accepted": false
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100646",
+      "fstat": 0,
+      "accepted": false
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.plist",
+      "uid": 0,
+      "gid": 501,
+      "mode": "0o100600",
+      "fstat": 0,
+      "accepted": true
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100644",
+      "fstat": -1,
+      "accepted": false
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.501.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100644",
+      "fstat": 0,
+      "accepted": true
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.501.plist",
+      "uid": 501,
+      "gid": 0,
+      "mode": "0o100644",
+      "fstat": 0,
+      "accepted": false
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.501.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100664",
+      "fstat": 0,
+      "accepted": false
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.501.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100646",
+      "fstat": 0,
+      "accepted": false
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.501.plist",
+      "uid": 0,
+      "gid": 501,
+      "mode": "0o100600",
+      "fstat": 0,
+      "accepted": true
+    },
+    {
+      "case": "secure reader",
+      "path": "disabled.501.plist",
+      "uid": 0,
+      "gid": 0,
+      "mode": "0o100644",
+      "fstat": -1,
+      "accepted": false
+    },
+    {
+      "case": "job gate",
+      "sip": 1,
+      "system_import": true,
+      "label": "com.apple.watchdogd",
+      "disabled": false,
+      "events": [
+        [
+          "open",
+          "/private/var/db/com.apple.xpc.launchd/disabled.plist"
+        ],
+        [
+          "ignored override",
+          "com.apple.watchdogd"
+        ],
+        [
+          "log",
+          "Ignoring %s state due to rootless restrictions"
+        ]
+      ]
+    },
+    {
+      "case": "job gate",
+      "sip": 0,
+      "system_import": true,
+      "label": "com.apple.watchdogd",
+      "disabled": true,
+      "events": [
+        [
+          "open",
+          "/private/var/db/com.apple.xpc.launchd/disabled.plist"
+        ]
+      ]
+    },
+    {
+      "case": "job gate",
+      "sip": 1,
+      "system_import": true,
+      "label": "com.apple.ReportCrash",
+      "disabled": true,
+      "events": [
+        [
+          "open",
+          "/private/var/db/com.apple.xpc.launchd/disabled.plist"
+        ]
+      ]
+    },
+    {
+      "case": "job gate",
+      "sip": 1,
+      "system_import": false,
+      "label": "com.apple.watchdogd",
+      "disabled": true,
+      "events": [
+        [
+          "open",
+          "/private/var/db/com.apple.xpc.launchd/disabled.plist"
+        ]
+      ]
+    },
+    {
+      "case": "job gate",
+      "sip": 0,
+      "system_import": true,
+      "label": "com.apple.untargeted",
+      "disabled": false,
+      "events": [
+        [
+          "open",
+          "/private/var/db/com.apple.xpc.launchd/disabled.plist"
+        ]
+      ]
+    },
+    {
+      "case": "migration marker stat branch",
+      "stat": 0,
+      "next_pc": "0x100048b10",
+      "current_policy_still_loaded": true
+    },
+    {
+      "case": "migration marker stat branch",
+      "stat": -1,
+      "next_pc": "0x1000488d8",
+      "current_policy_still_loaded": true
+    }
+  ],
+  "substituted": "Filesystem, allocator and libxpc import APIs; PAC prologues/returns are control-flow shims",
+  "hardware_verified": false
+}

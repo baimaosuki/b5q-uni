@@ -46,6 +46,7 @@ REPLACEMENTS = {
     'NativeHidInput.cpp': ('NativeHidInput.late.o', (DISPLAY,)),
     'HidInputProbe.cpp': ('HidInputProbe.o', (DISPLAY,)),
     'B5qBootPolicy.c': ('B5qBootPolicy.o', (DISPLAY,)),
+    'B5qProcTop.c': ('B5qProcTop.o', (DISPLAY,)),
 }
 RECIPES = {
     'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp', 'GeniI2c.c')),
@@ -57,6 +58,8 @@ RECIPES = {
             ('B5qUsbBoard.cpp', 'NativeHidInput.cpp', 'B5qBootPolicy.c')),
     'v32': (45010859513, '3044fe6e9bceadc0c3d5bbc63f4cd63d64535731',
             ('B5qUsbBoard.cpp', 'B5qBootPolicy.c')),
+    'v33': (45016691051, '2f74ab3b3850711cd4f2bc61c75bdbe187a1f586',
+            ('B5qBootPolicy.c', 'B5qProcTop.c')),
 }
 
 
@@ -230,7 +233,7 @@ def main():
     # integrity acceptance step is inserted into the upstream CI build.
     for member, archives in replacements.values():
         for relative in archives:
-            if member not in archive_members[relative] and member != 'B5qBootPolicy.o':
+            if member not in archive_members[relative] and member not in ('B5qBootPolicy.o', 'B5qProcTop.o'):
                 raise RuntimeError(f'{relative} has no cached replacement member {member}')
     (out / 'incremental-inputs.json').write_text(json.dumps(record, indent=2) + '\n')
     if args.prepare_only:

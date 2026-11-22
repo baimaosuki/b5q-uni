@@ -44,7 +44,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  flags+=['-D'+v+'=1'for v in ['KERNEL','KERNEL_PRIVATE','DRIVER_PRIVATE','XNU_KERNEL_PRIVATE','XNU_TARGET_OS_OSX','PRIVATE','MACH_KERNEL_PRIVATE','__arm64__','__LP64__','__DARWIN_UNIX03']]
  for d in [t,ROOT/'UniXNU-b5q/package',a.sdk/'System/Library/Frameworks/Kernel.framework/Headers',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert',ROOT/'sources/UniXNU/drivers/Adreno740',ROOT/'sources/UniXNU/kits/AdrenoFirmware',ROOT/'UniXNU-b5q/package/B5qUfs',ROOT/'UniXNU-b5q/package/Sm8550Inputs',ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',ROOT/'UniXNU/kits/ArmSmmu4K',ROOT/'UniXNU/kits/AdrenoPM4',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/libkern',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/EXTERNAL_HEADERS']:flags+=['-I',str(d)]
  results={};objects=[];strong_owners={};duplicates={}
- sources=[ROOT/'UniXNU-b5q/package'/name for name in ['QcomDwc3.cpp','UsbProbe.cpp','B5qUsbBoard.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c','Sm8550Gcc.c','QcomRpmh.c','B5qBootPolicy.c']]
+ sources=[ROOT/'UniXNU-b5q/package'/name for name in ['QcomDwc3.cpp','UsbProbe.cpp','B5qUsbBoard.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c','Sm8550Gcc.c','QcomRpmh.c','B5qBootPolicy.c','B5qProcTop.c']]
  # Compile the service with its previously excluded cold-start branches.
  service=ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoService.cpp';adapted=t/service.name
  adapted.write_text(service.read_text().replace('0x23b14u*4u-0x6a000u','0x23b14u*4u-SHENG_GMU_CORE_GPU_DELTA').replace('0x23b13u*4u-0x6a000u','0x23b13u*4u-SHENG_GMU_CORE_GPU_DELTA'))
@@ -54,6 +54,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  if a.sources:sources=[s for s in sources if s.name in set(a.sources.split(','))]
  for source in sources:
   target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11','-mkernel','-fptrauth-function-pointer-type-discrimination']
+  if source.name=='B5qProcTop.c':cflags=cflags+['-I',str(ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc'),'-I',str(ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk')]
   if source.name=='NativeHidInput.cpp':cflags=cflags+['-DNATIVE_HID_SOURCE_API=1']
   if a.native_recount:cflags=cflags+['-DB5Q_HAVE_CPU_IDLE_MACH=1']
   subprocess.run([str(a.compiler),*cflags,'-c',str(source),'-o',str(target)],env=env,check=True)

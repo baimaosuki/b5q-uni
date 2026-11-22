@@ -1,0 +1,206 @@
+name: b5q v33 launchd policy and process lifecycle diagnostics
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  incremental:
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
+      HOMEBREW_NO_AUTO_UPDATE: '1'
+      HOMEBREW_NO_INSTALL_CLEANUP: '1'
+      HOMEBREW_NO_ENV_HINTS: '1'
+      UNIXNU_DEVICE: ${{ github.workspace }}/UniXNU-b5q
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/UniXNU
+          ref: 8542980d02b4d2cc5c32ee3542de1760b2562aac
+          path: UniXNU
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: macOS-ARM64-xcode26.6-b5q-brew-v1-44930613230
+          restore-keys: macOS-ARM64-xcode26.6-b5q-brew-v1-
+      - name: Prepare packaging tools
+        run: |
+          set -euo pipefail
+          brew install llvm lld mtools dtc blacktop/tap/ipsw
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
+      - name: Stage completed v32 native cache, Data and addon
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          B5Q_V24_INPUT_0: ${{ secrets.B5Q_V24_INPUT_0 }}
+          B5Q_V24_INPUT_1: ${{ secrets.B5Q_V24_INPUT_1 }}
+          B5Q_V24_INPUT_2: ${{ secrets.B5Q_V24_INPUT_2 }}
+          B5Q_V24_INPUT_3: ${{ secrets.B5Q_V24_INPUT_3 }}
+          B5Q_V24_INPUT_4: ${{ secrets.B5Q_V24_INPUT_4 }}
+          B5Q_V24_INPUT_5: ${{ secrets.B5Q_V24_INPUT_5 }}
+          B5Q_V24_INPUT_6: ${{ secrets.B5Q_V24_INPUT_6 }}
+          B5Q_V24_INPUT_7: ${{ secrets.B5Q_V24_INPUT_7 }}
+        run: |
+          set -euo pipefail
+          UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
+          gh run download 45016691051 --repo "$GITHUB_REPOSITORY" \
+            --name b5q-build-45016691051 --dir "$RUNNER_TEMP/completed-cache"
+          # Reuse Samsung GPU inputs and the menu application.
+          # Existing firmware inputs are reused; no firmware compiler is run.
+          python3 UniXNU-b5q/scripts/stage-v24-inputs.py --unixnu UniXNU \
+            --artifact "$RUNNER_TEMP/completed-cache" --inputs "$RUNNER_TEMP/v33-inputs" \
+            --data-out "$RUNNER_TEMP/v32-data"
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q \
+            --artifact "$RUNNER_TEMP/completed-cache" --data-out "$RUNNER_TEMP/v32-data-reused" \
+            --source-run 45016691051 --source-commit 2f74ab3b3850711cd4f2bc61c75bdbe187a1f586
+          echo "V32_DATA=$RUNNER_TEMP/v32-data-reused/data.dbr" >> "$GITHUB_ENV"
+      - name: Check out the pinned RAM seed codec
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/DarwinBoot
+          ref: 5243c68ec332a227fe3680cd5da6d5a0e127035c
+          path: seed-codec
+          persist-credentials: false
+      - name: Update the existing APFS seed and reuse existing firmware inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/b5q-absent-source"
+          cp UniXNU/scripts/absent-service/{absentd.c,build.py} "$RUNNER_TEMP/b5q-absent-source/"
+          patch --batch --fuzz=0 -d "$RUNNER_TEMP/b5q-absent-source" -p1 < UniXNU-b5q/patches/tools/b5q-absentd-user-domains.patch
+          python3 "$RUNNER_TEMP/b5q-absent-source/build.py" "$RUNNER_TEMP/b5q-absent-service" macos27
+          python3 UniXNU-b5q/scripts/update-b5q-launchd-seed.py --darwinboot seed-codec \
+            --baseline v32 --seed "$V32_DATA" --out "$RUNNER_TEMP/v33-data" \
+            --stand-in "$RUNNER_TEMP/b5q-absent-service/bin/unixnu-absentd"
+          cp "$(dirname "$V32_DATA")"/{gpu-addon.bin,owner-trust.bundle,original-ipsw-trust.bundle} "$RUNNER_TEMP/v33-data/"
+          python3 - "$RUNNER_TEMP/b5q-absent-service/report.json" "$RUNNER_TEMP/v33-data" <<'PYTRUST'
+          import json, subprocess, sys
+          from pathlib import Path
+          report = json.loads(Path(sys.argv[1]).read_text())
+          root = Path(sys.argv[2])
+          output = root / "owner-trust-updated.bundle"
+          subprocess.run([sys.executable, "UniXNU/scripts/trust-append-module.py",
+                          str(root / "owner-trust.bundle"), str(output), report["cdhash"]], check=True)
+          output.replace(root / "owner-trust.bundle")
+          PYTRUST
+          gh run download 44983031320 --repo "$GITHUB_REPOSITORY" \
+            --name b5q-uefi-fd-217d311278b77518d8df83cec65705512795dad7 --dir "$RUNNER_TEMP/v28-fd"
+          python3 - "$RUNNER_TEMP/v28-fd" "$RUNNER_TEMP/v33-inputs" <<'PYCI'
+          from hashlib import sha256
+          from pathlib import Path
+          import sys
+          sys.path.insert(0, "UniXNU/scripts")
+          from unixnu.boot_template import loader_pe
+          fd, = Path(sys.argv[1]).rglob("SILICIUM_UEFI.fd")
+          data = fd.read_bytes()
+          assert sha256(data).hexdigest() == "ccc6e8da9a9b0210d746865f6baf4979956d76e4c8c11c159a9d797e27b18cf8"
+          (Path(sys.argv[2]) / "DarwinBoot.efi").write_bytes(
+              loader_pe(data, "1b64af87-8415-4b57-9b16-680d70913b9f"))
+          PYCI
+          echo "V33_DATA=$RUNNER_TEMP/v33-data/data.dbr" >> "$GITHUB_ENV"
+      - name: Prepare official relink and payload dependencies
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          # Normal payload/prelink module dependencies only; no full kernel,
+          # Mesa/Turnip, Cargo or Data builder is invoked.
+          UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
+          UniXNU/unixnu fetch xnu IOHIDFamily --device UniXNU-b5q --os macos-27.3-26C5035r
+      - name: Compile two board objects and relink the cached core
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/relink-b5q-peripherals.py --version v33 --unixnu UniXNU --device UniXNU-b5q \
+            --cached-tree "$RUNNER_TEMP/completed-cache/macos-27.3-26C5035r/b5q_macos/tree" \
+            --source-run 45016691051 --source-commit 2f74ab3b3850711cd4f2bc61c75bdbe187a1f586 \
+            --changed B5qBootPolicy.c,B5qProcTop.c \
+            --reused-data "$V32_DATA" --out "$RUNNER_TEMP/v33-relink" 2>&1 | tee "$RUNNER_TEMP/v33-relink.log"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/uefi-sheng
+          ref: b303410c8e401fc9419ae65a024356ed09a438ef
+          path: font-reference
+          sparse-checkout: Silicon/Silicium/SiliciumPkg/Library/FrameBufferSerialPortLib
+          persist-credentials: false
+      - name: Generate official ADT, payload and 4Kn ESP
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q \
+            --font-source font-reference --data-ramdisk "$V33_DATA" --reuse-addon 2>&1 | tee "$RUNNER_TEMP/v33-payload.log"
+          python3 UniXNU-b5q/scripts/package-v24-esp.py --unixnu UniXNU --inputs "$RUNNER_TEMP/v33-inputs"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: b5q-build-${{ github.run_id }}
+          path: |
+            UniXNU/out/b5q/**/esp.img
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.link/mach.development.bcm2837.a
+            UniXNU/out/b5q/**/tree/build/firehose/sym/Release-iphoneos/liblibfirehose_kernel.a
+            UniXNU/out/b5q/**/tree/build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a
+            UniXNU/out/b5q/**/tree/build/armdt-platform/libArmDTPlatform.a
+            UniXNU/out/b5q/**/tree/build/armcpu/libArmCpu.a
+            UniXNU/out/b5q/**/tree/build/adreno740/libAdreno740.a
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/libNativeLegacyDisplay.late.a
+            UniXNU/out/b5q/**/tree/build/ram-block/libRamBlock.a
+            UniXNU/out/b5q/**/tree/build/libpthread-kernel/libpthread_kernel.a
+            UniXNU/out/b5q/**/tree/build/software-aes/libSoftwareAES.a
+            UniXNU/out/b5q/**/tree/build/qcom-dwc3/libQcomDwc3.a
+            UniXNU/out/b5q/**/kernel/kernel.macho
+            UniXNU/out/b5q/**/kernel/*.json
+            UniXNU/out/b5q/**/kernel/incremental-objects/B5qProcTop.o
+            UniXNU/out/b5q/**/kernel/incremental-objects/B5qBootPolicy.o
+            UniXNU/out/b5q/**/kernel/incremental-objects/*.json
+            UniXNU/out/b5q/**/payload/payload.img
+            UniXNU/out/b5q/**/payload/payload.json
+            UniXNU/out/b5q/**/runtime/data.dbr
+            UniXNU/out/b5q/**/runtime/data-seed.json
+            UniXNU/out/b5q/**/runtime/inputs.json
+            UniXNU/out/b5q/**/package.manifest.json
+            UniXNU/out/b5q/**/kernel-reuse.json
+          compression-level: 1
+          retention-days: 3
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: v33-incremental-logs
+          path: |
+            UniXNU/out/b5q/**/logs/
+            ${{ runner.temp }}/v33-payload.log
+            ${{ runner.temp }}/v33-relink.log
+            ${{ runner.temp }}/v33-relink/*.json
+            ${{ runner.temp }}/v33-relink/*.exp
+            ${{ runner.temp }}/v33-relink/*.plist
+            ${{ runner.temp }}/v33-relink/board-input/*.command.json
+          retention-days: 3
+      - name: Release temporary source artifact and staging inputs
+        if: always()
+        run: |
+          python3 - <<'PYCLEAN'
+          import os, shutil
+          from pathlib import Path
+          root = Path(os.environ["RUNNER_TEMP"]).resolve()
+          for name in ("completed-cache", "v33-inputs", "v32-data", "v32-data-reused", "v33-data", "v28-fd", "v33-relink"):
+              target = root / name
+              if target.is_dir() and target.resolve().parent == root:
+                  shutil.rmtree(target)
+          PYCLEAN

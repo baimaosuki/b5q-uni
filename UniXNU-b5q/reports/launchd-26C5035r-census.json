@@ -1,0 +1,3984 @@
+{
+  "launchd_sha256": "33cb5981d59aa60db3c27fd309a9aa95bf77ae1bef8369beffa3e9ba37f926bc",
+  "system_image_sha256": "40d8282eb8650da9b4d7437a981764c48d47ee4bdc5b8b362248f25ecbce0e70",
+  "rootless_sha256": "4167fc3591f4f4519351c8dc9293fa398cdb55c233d43748af63f7aa8f7a5a9d",
+  "regular_plists": 907,
+  "selected": [
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.mobile.softwareupdated.plist",
+      "sha256": "9696bf176405ec29674f30a30ef67085824221dcc7d491b13b4e2407595a3a11",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.mobile.softwareupdated",
+        "LaunchEvents": {
+          "com.apple.xpc.activity": {
+            "com.apple.softwareupdated.logs-cleanup": {
+              "Delay": 604800,
+              "GracePeriod": 86400,
+              "Interval": 604800,
+              "Priority": "Maintenance",
+              "Repeating": true
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.mobile.softwareupdated": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/MobileSoftwareUpdate.framework/Support/softwareupdated"
+        ],
+        "RunAtLoad": true,
+        "UserName": "_softwareupdate"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.AssetCache.builtin.plist",
+      "sha256": "3d050849827b1602f8377d57e0fcb1fcb7d954e5d16454ca77189660f8c46bea",
+      "plist": {
+        "MachServices": {
+          "com.apple.AssetCache.builtin": true,
+          "com.apple.AssetCacheC.builtin": true,
+          "com.apple.AssetCache.builtin.CacheDelete": true
+        },
+        "Disabled": false,
+        "Label": "com.apple.AssetCache.builtin",
+        "ProgramArguments": [
+          "/usr/libexec/AssetCache/AssetCache"
+        ],
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "ProcessType": "Adaptive",
+        "KeepAlive": {
+          "PathState": {
+            "/Library/Application Support/Apple/AssetCache/.activated": true
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.softwareupdated.plist",
+      "sha256": "89db6b3c47fa6d9f8cc12ff149dc5e025bd0c316fb39d0047e05a43c1c54505d",
+      "plist": {
+        "Label": "com.apple.softwareupdated",
+        "ProgramArguments": [
+          "/System/Library/CoreServices/Software Update.app/Contents/Resources/softwareupdated"
+        ],
+        "UserName": "_softwareupdate",
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "POSIXSpawnType": "Adaptive",
+        "MachServices": {
+          "com.apple.softwareupdated": true,
+          "com.apple.softwareupdated.OSUpdate": true,
+          "com.apple.sumaccontroller": true
+        },
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "ManualBackgroundTrigger": {
+              "Notification": "com.apple.SoftwareUpdate.TriggerBackgroundCheck"
+            },
+            "CheckForCatalogChange": {
+              "Notification": "com.apple.SoftwareUpdate.CheckForCatalogChange"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.SoftwareUpdate.Activity": {
+              "Repeating": true,
+              "Interval": 21600.0,
+              "Priority": "Maintenance",
+              "PowerNap": true,
+              "RequireNetworkConnectivity": true
+            }
+          }
+        },
+        "EnvironmentVariables": {}
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.adid.plist",
+      "sha256": "5225d16aac1aed18c58912acc5ca8176b86c04d97d6fb698564cb9888de7124d",
+      "plist": {
+        "CFBundleIdentifier": "com.apple.adid",
+        "EnableTransactions": true,
+        "GroupName": "_fpsd",
+        "Label": "com.apple.adid",
+        "MachServices": {
+          "com.apple.adid": true
+        },
+        "KeepAlive": {
+          "Crashed": true
+        },
+        "POSIXSpawnType": "Adaptive",
+        "Program": "/System/Library/PrivateFrameworks/CoreADI.framework/adid",
+        "RunAtLoad": false,
+        "UserName": "_fpsd",
+        "EnablePressuredExit": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.wifianalyticsd.plist",
+      "sha256": "600ce49b78075a5dd8b746287f3f86a792de1c4d5ca8ce4d21efca3ed10d7f77",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.wifianalyticsd",
+        "LaunchEvents": {
+          "com.apple.bg.system.task": {
+            "com.apple.wifi.analytics.daily-bg-tasks": {
+              "Priority": "Utility",
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "RequiresUserInactivity": true
+            },
+            "com.apple.wifi.analytics.daily-bg-tasks-ui": {
+              "Priority": "Utility",
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresExternalPower": false,
+              "RequiresNetworkConnectivity": false
+            }
+          },
+          "com.apple.notifyd.matching": {
+            "com.apple.ManagedConfiguration.profileListChanged": {
+              "Notification": "com.apple.ManagedConfiguration.profileListChanged"
+            },
+            "com.apple.awd.launch.wifi": {
+              "Notification": "com.apple.awd.launch.wifi"
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.wifianalyticsd": true,
+          "com.apple.wifianalyticsd.devicestore": true
+        },
+        "ProcessType": "Adaptive",
+        "Program": "/usr/libexec/wifianalyticsd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.contextstored.plist",
+      "sha256": "4b21aef13a69a5060ef366c2002cc281e64866f49c4880d835f3e5b55d8d63b7",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.contextstored",
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "SignificantTimeChangeNotification": {
+              "Notification": "SignificantTimeChangeNotification"
+            },
+            "com.apple.MediaRemote.nowPlayingApplicationIsPlayingDidChange": {
+              "Notification": "com.apple.MediaRemote.nowPlayingApplicationIsPlayingDidChange"
+            },
+            "com.apple.MediaRemote.nowPlayingInfoDidChange": {
+              "Notification": "com.apple.MediaRemote.nowPlayingInfoDidChange"
+            },
+            "com.apple.bluetooth.connection": {
+              "Notification": "com.apple.bluetooth.connection"
+            },
+            "com.apple.bluetooth.pairing": {
+              "Notification": "com.apple.bluetooth.pairing"
+            },
+            "com.apple.mobile.keybagd.lock_status": {
+              "Notification": "com.apple.mobile.keybagd.lock_status"
+            },
+            "com.apple.powermanagement.idlesleeppreventers": {
+              "Notification": "com.apple.powermanagement.idlesleeppreventers"
+            },
+            "com.apple.powermanagement.restartpreventers": {
+              "Notification": "com.apple.powermanagement.restartpreventers"
+            },
+            "com.apple.powermanagement.systemsleeppreventers": {
+              "Notification": "com.apple.powermanagement.systemsleeppreventers"
+            },
+            "com.apple.sessionagent.screenIsLocked": {
+              "Notification": "com.apple.sessionagent.screenIsLocked"
+            },
+            "com.apple.sessionagent.screenIsUnlocked": {
+              "Notification": "com.apple.sessionagent.screenIsUnlocked"
+            },
+            "com.apple.symptoms.materialLinkQualityChange": {
+              "Notification": "com.apple.symptoms.materialLinkQualityChange"
+            },
+            "com.apple.system.config.network_change": {
+              "Notification": "com.apple.system.config.network_change"
+            },
+            "com.apple.system.powermanagement.poweradapter": {
+              "Notification": "com.apple.system.powermanagement.poweradapter"
+            },
+            "com.apple.system.powermanagement.useractivity2": {
+              "Notification": "com.apple.system.powermanagement.useractivity2"
+            },
+            "com.apple.system.powermanagement.uservisiblepowerevent": {
+              "Notification": "com.apple.system.powermanagement.uservisiblepowerevent"
+            },
+            "com.apple.system.powersources.percent": {
+              "Notification": "com.apple.system.powersources.percent"
+            },
+            "com.apple.system.thermalpressurelevel": {
+              "Notification": "com.apple.system.thermalpressurelevel"
+            },
+            "com.apple.timezone.prefschanged": {
+              "Notification": "com.apple.timezone.prefschanged"
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.coreduetd.context": true
+        },
+        "ProcessType": "Adaptive",
+        "Program": "/System/Library/PrivateFrameworks/CoreDuetContext.framework/Resources/contextstored",
+        "PublishesEvents": {
+          "com.apple.coreduetcontext.client_event_stream": {
+            "RequireTrusted": true
+          },
+          "com.apple.coreduetcontext.mdcs_events": {
+            "RequireTrusted": true
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.security.cryptexd.plist",
+      "sha256": "be55dca3723fcf70ad80d4dfa426a5fcee4e59361ae139d759cf0552b6bae788",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "HardResourceLimits": {
+          "NumberOfFiles": 8192
+        },
+        "KeepAlive": {
+          "PathState": {
+            "/private/var/run/com.apple.security.cryptexd/init": false
+          }
+        },
+        "Label": "com.apple.security.cryptexd",
+        "MachServices": {
+          "com.apple.security.cryptex.xpc": true,
+          "com.apple.security.cryptexd": true
+        },
+        "ProcessType": "Interactive",
+        "Program": "/usr/libexec/cryptexd",
+        "PublishesEvents": "com.apple.security.cryptex.events",
+        "RemoteServices": {
+          "com.apple.security.cryptexd.remote": {
+            "ExposedToUntrustedDevices": [
+              "PreSetup",
+              "HasInternalSecurityPolicies"
+            ],
+            "LimitExposedFromDeviceType": [
+              "compute-node"
+            ],
+            "RequireEntitlement": "com.apple.private.security.cryptexd.remote",
+            "ServiceProperties": {
+              "Features": [
+                "CryptexInstall",
+                "Cryptex1",
+                "ReadIdentifiers",
+                "Cryptex1,UseProductClass",
+                "InstallEvents"
+              ],
+              "ServiceVersion": 3,
+              "UsesRemoteXPC": true
+            }
+          }
+        },
+        "SoftResourceLimits": {
+          "NumberOfFiles": 8192
+        },
+        "_LimitLoadFromBootMode": [
+          "rem"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.mobileactivationd.plist",
+      "sha256": "041b26c87c3a564784551457397fd037f74007548562b870305ce8819ebbb3b8",
+      "plist": {
+        "POSIXSpawnType": "Adaptive",
+        "MachServices": {
+          "com.apple.mobileactivationd": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/libexec/mobileactivationd"
+        ],
+        "LaunchEvents": {
+          "com.apple.xpc.activity": {
+            "com.apple.mobileactivationd.SDCRT.OOB": {
+              "RequireNetworkConnectivity": true,
+              "PowerNap": true,
+              "NetworkTransferDirection": "Bidirectional",
+              "Repeating": true,
+              "Priority": "Utility",
+              "Interval": 86400.0
+            },
+            "com.apple.mobileactivationd.DCRT.OOB": {
+              "RequireNetworkConnectivity": true,
+              "PowerNap": true,
+              "NetworkTransferDirection": "Bidirectional",
+              "Repeating": true,
+              "Priority": "Utility",
+              "Interval": 86400.0
+            },
+            "com.apple.mobileactivationd.SDCRT.OOB.LoadSpreading": {
+              "Priority": "Utility",
+              "RequireNetworkConnectivity": false,
+              "Interval": 2246400,
+              "RandomInitialDelay": 2246400,
+              "Repeating": true,
+              "Delay": 0,
+              "PowerNap": true
+            },
+            "com.apple.mobileactivationd.UCRT.OOB": {
+              "Priority": "Utility",
+              "RequireNetworkConnectivity": true,
+              "Interval": 86400.0,
+              "Repeating": true,
+              "NetworkTransferDirection": "Bidirectional",
+              "PostInstall": true,
+              "PowerNap": true
+            },
+            "com.apple.mobileactivationd.splunklogging.rollidentifier": {
+              "RequireNetworkConnectivity": false,
+              "PowerNap": true,
+              "Priority": "Utility",
+              "Repeating": true,
+              "Interval": 1209600
+            },
+            "com.apple.mobileactivationd.splunklogging": {
+              "RequireNetworkConnectivity": true,
+              "PowerNap": true,
+              "NetworkTransferDirection": "Bidirectional",
+              "Repeating": true,
+              "Priority": "Utility",
+              "Interval": 86400.0
+            },
+            "com.apple.mobileactivationd.splunklogging.daily": {
+              "RequireNetworkConnectivity": true,
+              "PowerNap": true,
+              "NetworkTransferDirection": "Bidirectional",
+              "Repeating": true,
+              "Priority": "Utility",
+              "Interval": 86400.0
+            },
+            "com.apple.mobileactivationd.DCRT.OOB.LoadSpreading": {
+              "Priority": "Utility",
+              "RequireNetworkConnectivity": false,
+              "Interval": 2246400,
+              "RandomInitialDelay": 2246400,
+              "Repeating": true,
+              "Delay": 0,
+              "PowerNap": true
+            }
+          }
+        },
+        "EnablePressuredExit": true,
+        "Label": "com.apple.mobileactivationd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.modelmanagerd.plist",
+      "sha256": "29f4ad8fd1f82dbed5fde398f40241046aa8d9b0af12f99ce463a31a80c35baf",
+      "plist": {
+        "EnablePressuredExit": {
+          "#Then": true,
+          "#IfFeatureFlagEnabled": "ModelManager/idle_exit",
+          "#Else": false
+        },
+        "Program": "/usr/libexec/modelmanagerd",
+        "ThrottleInterval": 1,
+        "ProcessType": "Adaptive",
+        "RemoteServices": {
+          "#Then": {
+            "com.apple.modelmanager.remote": {
+              "ServiceProperties": {
+                "UsesRemoteXPC": true
+              },
+              "RequireEntitlement": "AppleInternal"
+            }
+          },
+          "#IfFeatureFlagEnabled": "ModelManager/virtualization"
+        },
+        "MachServices": {
+          "com.apple.modelmanager": true,
+          "com.apple.modelmanager.simulator": {
+            "#Then": true,
+            "#IfFeatureFlagEnabled": "ModelManager/simulator",
+            "#Else": false
+          }
+        },
+        "UserName": "_modelmanagerd",
+        "GroupName": "_modelmanagerd",
+        "Label": "com.apple.modelmanagerd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.AssetCacheManagerService.plist",
+      "sha256": "c50ed35c38e2d5364f7f328dd9147d1caf8aca8b09c87b7d4784704d43d1b2fd",
+      "plist": {
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/AssetCacheServicesExtensions.framework/XPCServices/AssetCacheManagerService.xpc/Contents/MacOS/AssetCacheManagerService"
+        ],
+        "EnableTransactions": true,
+        "Label": "com.apple.AssetCacheManagerService",
+        "MachServices": {
+          "com.apple.AssetCacheManagerService": true
+        },
+        "ProcessType": "Adaptive",
+        "EnablePressuredExit": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.mobile.obliteration.plist",
+      "sha256": "6ca3027d60d1f8622aed4c67296343adedb606f2ee6b1118d6e4fa5792579f84",
+      "plist": {
+        "ProgramArguments": [
+          "/usr/libexec/mobile_obliterator"
+        ],
+        "EnablePressuredExit": false,
+        "Label": "com.apple.mobile.obliteration",
+        "MachServices": {
+          "com.apple.mobile.obliteration": true
+        },
+        "POSIXSpawnType": "Interactive",
+        "EnableTransactions": false
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.coresymbolicationd.plist",
+      "sha256": "8660cbc9eeff6dae498eb3475785c88de63984b95d7eca6cd92e6a88a7d181eb",
+      "plist": {
+        "LimitLoadFromHardware": {
+          "osenvironment": [
+            "device-recovery"
+          ]
+        },
+        "Label": "com.apple.coresymbolicationd",
+        "MachServices": {
+          "com.apple.coresymbolicationd": true
+        },
+        "POSIXSpawnType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/CoreSymbolication.framework/coresymbolicationd"
+        ],
+        "EnablePressuredExit": true,
+        "LimitLoadToSessionType": {
+          "#IfFeatureFlagEnabled": "UserManagement/SystemSessionD1",
+          "#Then": "System"
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.appleh16camerad.plist",
+      "sha256": "774bb6a7578a465f10968ba702c3a6b66fa7e9506d3bb0f7de42b746869c7238",
+      "plist": {
+        "GroupName": "_cmiodalassistants",
+        "Label": "com.apple.appleh16camerad",
+        "ThrottleInterval": 5,
+        "ProcessType": "Interactive",
+        "MachServices": {
+          "com.apple.appleh16camerad": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/sbin/appleh16camerad"
+        ],
+        "UserName": "_cmiodalassistants",
+        "EnablePressuredExit": true,
+        "LaunchEvents": {
+          "com.apple.iokit.matching": {
+            "com.apple.appleh16camerad.destroy": {
+              "IOPropertyMatch": {
+                "appleh16camerad": false
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            },
+            "com.apple.appleh16camerad.launch - 2": {
+              "IOPropertyMatch": {
+                "appleh16camerad": true
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            }
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.metadata.mds.plist",
+      "sha256": "cf7fd8784f4e452cd7af009b3c9af862ca38bd73d7dbfa0293e9672c22af4952",
+      "plist": {
+        "Label": "com.apple.metadata.mds",
+        "ProgramArguments": [
+          "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mds"
+        ],
+        "CFBundleIdentifier": "com.apple.Spotlight",
+        "ProcessType": "Interactive",
+        "_ExponentialThrottling": true,
+        "LowPriorityBackgroundIO": false,
+        "KeepAlive": true,
+        "RunAtLoad": true,
+        "EnvironmentVariables": {},
+        "HardResourceLimits": {
+          "NumberOfFiles": 2048
+        },
+        "SoftResourceLimits": {
+          "NumberOfFiles": 2048
+        },
+        "MachServices": {
+          "com.apple.metadata.mds": true,
+          "com.apple.metadata.mds.cachedelete": true,
+          "com.apple.metadata.mds.legacy": true,
+          "com.apple.metadata.mds.xpcs": true
+        },
+        "LaunchEvents": {
+          "com.apple.xpc.activity": {
+            "com.apple.mds.repeatingHealthCheck": {
+              "Delay": 518400,
+              "GracePeriod": 259200,
+              "Interval": 518400,
+              "Priority": "Maintenance",
+              "Repeating": true
+            },
+            "com.apple.mds.abandonedIndexDeletion": {
+              "Delay": 518400,
+              "GracePeriod": 259200,
+              "Interval": 518400,
+              "Priority": "Maintenance",
+              "Repeating": true
+            }
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.findmy.findmybeaconingd.plist",
+      "sha256": "7303926d8e3d4118369178cf8f85272501d2b23d695cc3350ca09d490d1bc32c",
+      "plist": {
+        "Umask": 23,
+        "Program": "/usr/libexec/findmybeaconingd",
+        "ProcessType": "Adaptive",
+        "MachServices": {
+          "com.apple.findmy.LocalBeaconing": true,
+          "com.apple.findmy.findmybeaconingd.push": true
+        },
+        "EnableTransactions": true,
+        "LaunchEvents": {
+          "com.apple.xpc.activity": {},
+          "com.apple.notifyd.matching": {}
+        },
+        "EnablePressuredExit": true,
+        "Label": "com.apple.findmy.findmybeaconingd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.icloud.searchpartyd.plist",
+      "sha256": "c2153b148abf5a0c779ce94cf1c8e498bbaf4fe09a23707d2fbbeaf2e6d91238",
+      "plist": {
+        "Umask": 23,
+        "Program": "/usr/libexec/searchpartyd",
+        "POSIXSpawnType": "Adaptive",
+        "MachServices": {
+          "com.apple.searchparty.DeviceCategoryContext": true,
+          "com.apple.icloud.searchpartyd.scheduler": true,
+          "com.apple.icloud.searchpartyd.advertisementcache": true,
+          "com.apple.icloud.searchpartyd.beaconmanager.agentdaemoninternal": true,
+          "com.apple.searchparty.BeaconScanningSession": true,
+          "com.apple.icloud.searchpartyd.pairingmanager": true,
+          "com.apple.searchparty.GeoAnalyticsContext": true,
+          "com.apple.searchparty.managedperipheral": true,
+          "com.apple.searchparty.MotionStateContext": true,
+          "com.apple.searchparty.FinderDensityContext": true,
+          "com.apple.searchparty.BeaconKeyService": true,
+          "com.apple.icloud.searchpartyd.beaconmanager": true,
+          "com.apple.searchparty.DirectScannerActivationContext": true,
+          "com.apple.searchparty.ObservationStoreService": true,
+          "com.apple.searchparty.BeaconObservationStoreService": true,
+          "com.apple.icloud.searchpartyd.finderstatemanager": true,
+          "com.apple.searchparty.RoutineContext": true,
+          "com.apple.icloud.searchpartyd.aps": true,
+          "com.apple.searchparty.LocationQualityMonitor": true,
+          "com.apple.icloud.searchpartyd.accessorydiscoverymanager": true,
+          "com.apple.searchparty.FinderReconnectContext": true,
+          "com.apple.searchparty.DirectScannerMonitor": true,
+          "com.apple.searchparty.AutomationPublishContext": true
+        },
+        "EnableTransactions": true,
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "com.apple.AOSNotification.FMIPStateDidChange": {
+              "Notification": "com.apple.AOSNotification.FMIPStateDidChange"
+            }
+          },
+          "com.apple.distnoted.matching": {
+            "com.apple.UserWasRemovedNotification": {
+              "Name": "com.apple.UserWasRemovedNotification"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.icloud.searchpartyuseragent.post-install": {
+              "RequireNetworkConnectivity": true,
+              "Priority": "Utility",
+              "AllowBattery": true,
+              "Repeating": false,
+              "PostInstall": true
+            }
+          }
+        },
+        "EnablePressuredExit": true,
+        "Label": "com.apple.icloud.searchpartyd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.AssetCacheLocatorService.plist",
+      "sha256": "7fb76f76ed9c295e1026a2c8e86283cc755fc26edac8623a621f627058375298",
+      "plist": {
+        "ProcessType": "Adaptive",
+        "MachServices": {
+          "com.apple.AssetCacheLocatorService": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/AssetCacheServices.framework/Versions/A/XPCServices/AssetCacheLocatorService.xpc/Contents/MacOS/AssetCacheLocatorService",
+          "-d"
+        ],
+        "UserName": "_assetcache",
+        "EnablePressuredExit": true,
+        "Label": "com.apple.AssetCacheLocatorService"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.audioanalyticsd.plist",
+      "sha256": "3eff48c8d060e2a1cf9f7219b69f793412d581ac5390df09d61cec27aa034af2",
+      "plist": {
+        "Label": "com.apple.audioanalyticsd",
+        "ProcessType": "Adaptive",
+        "MachServices": {
+          "com.apple.audioanalyticsd": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/libexec/audioanalyticsd"
+        ],
+        "LaunchEvents": {
+          "com.apple.bg.system.task": {
+            "com.apple.audioanalyticsd.assets.refresh": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": true,
+              "RepeatingTask": {
+                "Interval": 604800
+              }
+            }
+          }
+        },
+        "UserName": "root",
+        "EnablePressuredExit": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.perfpowermetricd.plist",
+      "sha256": "568b6bd1ff8e8043a59f72291a5828f3a66304277a043914392b43b3586a72fa",
+      "plist": {
+        "ProgramArguments": [
+          "/usr/libexec/perfpowermetricd"
+        ],
+        "EnableTransactions": true,
+        "Label": "com.apple.perfpowermetricd",
+        "MachServices": {
+          "com.apple.PerfPowerMetricMonitor.xpc": true
+        },
+        "ProcessType": "Interactive",
+        "EnablePressuredExit": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.AssetCacheTetheratorService.plist",
+      "sha256": "09590eb6986a67705f58591e2b13761af399cb252f8b00f1396581e4f3689e45",
+      "plist": {
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/AssetCacheServicesExtensions.framework/XPCServices/AssetCacheTetheratorService.xpc/Contents/MacOS/AssetCacheTetheratorService"
+        ],
+        "EnableTransactions": true,
+        "Label": "com.apple.AssetCacheTetheratorService",
+        "MachServices": {
+          "com.apple.AssetCacheTetheratorService": true
+        },
+        "ProcessType": "Adaptive",
+        "EnablePressuredExit": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.AirPlayXPCHelper.plist",
+      "sha256": "fe20cfda0dfe0c53312355277b33af37de9b86c0a8de657c1aaea20f019c49c9",
+      "plist": {
+        "Label": "com.apple.AirPlayXPCHelper",
+        "POSIXSpawnType": "Interactive",
+        "ProgramArguments": [
+          "/usr/libexec/AirPlayXPCHelper"
+        ],
+        "MachServices": {
+          "com.apple.AirPlayXPCHelper": true,
+          "com.apple.coremedia.endpointmanager.xpc": true,
+          "com.apple.coremedia.endpoint.xpc": true,
+          "com.apple.coremedia.endpointstream.xpc": true,
+          "com.apple.coremedia.endpointstreamaudioengine.xpc": true,
+          "com.apple.coremedia.samplebufferconsumer.xpc": true,
+          "com.apple.coremedia.bufferedairplayglobalroutingregistry.xpc": true,
+          "com.apple.coremedia.endpointplaybacksession.xpc": true,
+          "com.apple.coremedia.endpointpicker.xpc": true,
+          "com.apple.coremedia.endpointuiagent.xpc": {
+            "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+            "#Then": true
+          },
+          "com.apple.coremedia.routediscoverer.xpc": {
+            "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+            "#Then": true
+          },
+          "com.apple.coremedia.routingcontext.xpc": {
+            "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+            "#Then": true
+          },
+          "com.apple.coremedia.volumecontroller.xpc": {
+            "#IfFeatureFlagDisabled": "MediaExperience/MoveMXRoutingToAudiomxdOnMac",
+            "#Then": true
+          },
+          "com.apple.coremedia.endpointremotecontrolsession.xpc": true
+        },
+        "KeepAlive": false,
+        "EnablePressuredExit": true,
+        "EnableTransactions": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.metadata.mds.index.plist",
+      "sha256": "1bfa3fb038441a25ff463615237ff692aba2ac9d5c7d9d87243fd773b75c1ec7",
+      "plist": {
+        "Label": "com.apple.metadata.mds.index",
+        "UserName": {
+          "#IfFeatureFlagEnabled": "Spotlight/RoleUserIndexDaemon",
+          "#Then": "_mds_stores"
+        },
+        "GroupName": {
+          "#IfFeatureFlagEnabled": "Spotlight/RoleUserIndexDaemon",
+          "#Then": "_mds_stores"
+        },
+        "ProgramArguments": [
+          "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mds_stores"
+        ],
+        "CFBundleIdentifier": "com.apple.Spotlight",
+        "ProcessType": "Interactive",
+        "_ExponentialThrottling": true,
+        "EnableTransactions": true,
+        "EnvironmentVariables": {},
+        "LowPriorityBackgroundIO": true,
+        "MultipleInstances": {
+          "#IfFeatureFlagEnabled": "Spotlight/PerSpindleIndexDaemon",
+          "#Then": true
+        },
+        "HardResourceLimits": {
+          "NumberOfFiles": 2048
+        },
+        "SoftResourceLimits": {
+          "NumberOfFiles": 2048
+        },
+        "MachServices": {
+          "com.apple.metadata.mds.index": true,
+          "com.apple.metadata.mds.index.xpc": true
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.PerfPowerServicesExtended.plist",
+      "sha256": "0eeb36fdff31317026241cc6dcf738ac6997190cfb89ee15d61e2531c80f7f09",
+      "plist": {
+        "EnvironmentVariables": {
+          "OS_ACTIVITY_MODE": "enable"
+        },
+        "ProcessType": "Adaptive",
+        "MachServices": {
+          "com.apple.powerlogd.XPCService.xpc": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/libexec/PerfPowerServicesExtended"
+        ],
+        "KeepAlive": {
+          "PathState": {
+            "/var/db/powerlog/powerlogd.launchd": true
+          }
+        },
+        "EnablePressuredExit": false,
+        "Label": "com.apple.PerfPowerServicesExtended"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.PerfPowerServices.plist",
+      "sha256": "fedddce9506d5dc35fc856c45f40c905ce50a4ef333ebb341590974a91cfd874",
+      "plist": {
+        "ProcessType": "Adaptive",
+        "MachServices": {
+          "com.apple.powerlog.plxpclogger.xpc": true,
+          "com.apple.powerlog_mover": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/libexec/PerfPowerServices"
+        ],
+        "KeepAlive": true,
+        "EnablePressuredExit": false,
+        "Label": "com.apple.PerfPowerServices"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.coreduetd.plist",
+      "sha256": "f3ebb10d5985f61f15bd38af3f1ab7280e655cc459f16ceba59bdc5bb2f8e1f5",
+      "plist": {
+        "PublishesEvents": {
+          "com.apple.coreduetinteraction.interaction-recorded": {
+            "RequireTrusted": true
+          },
+          "com.apple.coreduetinteraction.interaction-deleted": {
+            "RequireTrusted": true
+          },
+          "com.apple.coreduet.xpc.receiver": {
+            "RequireTrusted": true
+          }
+        },
+        "EnablePressuredExit": true,
+        "Program": "/usr/libexec/coreduetd",
+        "ProcessType": "Adaptive",
+        "MachServices": {
+          "com.apple.coreduetd.knowledge": true,
+          "com.apple.proactive.SuggestionRequest.ps_unstructured_reminder_interaction_suggestions": true,
+          "com.apple.proactive.SuggestionRequest.ps_facetime_fallback_interaction_model": true,
+          "com.apple.proactive.SuggestionRequest.ps_unstructured_calendar_interaction_suggestions": true,
+          "com.apple.corespotlight.receiver.coreduet": true,
+          "com.apple.coreduetd.people": true,
+          "com.apple.proactive.SuggestionRequest.cd_calendar_interaction_suggestions": true,
+          "com.apple.proactive.SuggestionRequest.ps_facetime_interaction_model": true
+        },
+        "EnableTransactions": true,
+        "RunAtLoad": true,
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "com.apple.coreduet.client-needs-help.coreduetd": {
+              "Notification": "com.apple.coreduet.client-needs-help.coreduetd"
+            },
+            "__ABDataBaseChangedByOtherProcessNotification": {
+              "Notification": "__ABDataBaseChangedByOtherProcessNotification"
+            },
+            "com.apple.suggestions.settingsChanged": {
+              "Notification": "com.apple.suggestions.settingsChanged"
+            },
+            "com.apple.rapport.CompanionLinkDeviceAdded": {
+              "Notification": "com.apple.rapport.CompanionLinkDeviceAdded"
+            }
+          }
+        },
+        "KeepAlive": false,
+        "Label": "com.apple.coreduetd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.metadata.mds.index.readonly.plist",
+      "sha256": "9b16475b41d6d4a144cc611b2f104df9b9aca8cd27fe42c6c6c5f4317a021e7c",
+      "plist": {
+        "Label": "com.apple.metadata.mds.index.readonly",
+        "ProgramArguments": [
+          "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mds_stores"
+        ],
+        "CFBundleIdentifier": "com.apple.Spotlight",
+        "ProcessType": "Interactive",
+        "_ExponentialThrottling": true,
+        "Disabled": {
+          "#IfFeatureFlagDisabled": "Spotlight/ReadOnlyIndexDaemon",
+          "#Then": true
+        },
+        "EnableTransactions": true,
+        "EnvironmentVariables": {},
+        "LowPriorityBackgroundIO": true,
+        "MultipleInstances": {
+          "#IfFeatureFlagEnabled": "Spotlight/PerSpindleIndexDaemon",
+          "#Then": true
+        },
+        "HardResourceLimits": {
+          "NumberOfFiles": 2048
+        },
+        "SoftResourceLimits": {
+          "NumberOfFiles": 2048
+        },
+        "MachServices": {
+          "com.apple.metadata.mds.index.readonly": true,
+          "com.apple.metadata.mds.index.readonly.xpc": true
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.memoryanalyticsd.plist",
+      "sha256": "fc5d247bd381da751ea293b2a43ed6d56de983cf927841cd528fe6e438efc07c",
+      "plist": {
+        "ProgramArguments": [
+          "/usr/libexec/memoryanalyticsd",
+          "-xlatSf"
+        ],
+        "EnablePressuredExit": true,
+        "Label": "com.apple.memoryanalyticsd",
+        "ProcessType": "Background",
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "com.apple.da.tasking_changed": {
+              "Notification": "com.apple.da.tasking_changed"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.memoryanalyticsd.MTRandomMemgraphActivity": {
+              "Priority": "Utility",
+              "ExpectedDuration": 600,
+              "AllowBattery": true,
+              "Repeating": true,
+              "Interval": 3600
+            }
+          }
+        },
+        "EnableTransactions": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.tailspind.plist",
+      "sha256": "c07a8d05fe04d219838b6a42687389be663e3b82e4d93f8f7db776d23d7e1189",
+      "plist": {
+        "EnablePressuredExit": true,
+        "Label": "com.apple.tailspind",
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "com.apple.tailspin.game_mode_state_changed": {
+              "Notification": "com.apple.system.console_mode_changed"
+            },
+            "com.apple.tailspin.profile_changed": {
+              "Notification": "com.apple.ManagedConfiguration.profileListChanged"
+            },
+            "com.apple.tailspin.tasking_changed": {
+              "Notification": "com.apple.da.tasking_changed"
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.tailspind": true,
+          "com.apple.tailspind.ktrace_background": {
+            "HostSpecialPort": 13
+          }
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/usr/libexec/tailspind"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.rtcreportingd.plist",
+      "sha256": "b8e1e543cec0b078b6d1a91877a5249322a1e8df734f877de1e166b006840409",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.rtcreportingd",
+        "MachServices": {
+          "com.apple.rtcreportingd": true
+        },
+        "ProgramArguments": [
+          "/usr/libexec/rtcreportingd"
+        ],
+        "UserName": "root"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.watchdogd.plist",
+      "sha256": "cd32924e1fd7ed58dd4698751714135b2d3a03a055e654768bb4c5e3293742ae",
+      "plist": {
+        "Label": "com.apple.watchdogd",
+        "ProgramArguments": [
+          "/usr/libexec/watchdogd"
+        ],
+        "EnablePressuredExit": false,
+        "EnableTransactions": true,
+        "KeepAlive": {
+          "SuccessfulExit": false
+        },
+        "POSIXSpawnType": "Interactive",
+        "_PanicOnCrash": {
+          "PanicOnConsecutiveCrash": true
+        },
+        "LaunchEvents": {
+          "com.apple.iokit.matching": {
+            "com.apple.driver.watchdog": {
+              "IOProviderClass": "IOWatchdog",
+              "IOMatchLaunchStream": true
+            }
+          }
+        },
+        "AlwaysSIGTERMOnShutdown": true,
+        "ExitTimeOut": 15,
+        "MachServices": {
+          "com.apple.watchdogd.optin.registration": true,
+          "com.apple.unblock": true
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.locationd.plist",
+      "sha256": "4716e18824feaada00c4fbed57e3763f805fdd628103c5305cf9d90b3778d0cf",
+      "plist": {
+        "GroupName": "_locationd",
+        "EnvironmentVariables": {
+          "OS_ACTIVITY_ENABLE_DYNAMIC": "1"
+        },
+        "KeepAlive": {
+          "SuccessfulExit": false
+        },
+        "LaunchEvents": {
+          "com.apple.xpc.activity": {
+            "com.apple.locationd.CLClientManager.usersrecencycheck": {
+              "Priority": "Maintenance",
+              "GracePeriod": 86400.0,
+              "Repeating": true,
+              "AllowBattery": true,
+              "Interval": 16070400.0
+            }
+          }
+        },
+        "StartInterval": 86400,
+        "UserName": "_locationd",
+        "EnableTransactions": true,
+        "Label": "com.apple.locationd",
+        "EnablePressuredExit": false,
+        "ProgramArguments": [
+          "/usr/libexec/locationd"
+        ],
+        "RunAtLoad": false,
+        "POSIXSpawnType": "Adaptive",
+        "ThrottleInterval": 3,
+        "MachServices": {
+          "com.apple.locationd.simulation": true,
+          "com.apple.StatusKit.local.client-com.apple.locationd": true,
+          "com.apple.locationd.desktop.spi": true,
+          "com.apple.locationd.routine": true,
+          "com.apple.locationd.desktop.registration": true,
+          "com.apple.locationd.desktop.synchronous": true,
+          "com.apple.locationd.desktop.agent": true
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.cameraispdarwinsimd.plist",
+      "sha256": "2f0f844f2ddfab35df2b92a8dd6c1f14f6c79ec9de58b60f969e9ab8e9b0e4a8",
+      "plist": {
+        "Label": "com.apple.cameraispdarwinsimd",
+        "_LimitLoadToVariant": "IsDarwinOS",
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "LaunchEvents": {
+          "com.apple.iokit.matching": {
+            "com.apple.cameraispdarwinsimd.launch - 2": {
+              "IOPropertyMatch": {
+                "cameraispdarwinsimd": true
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            },
+            "com.apple.cameraispdarwinsimd.destroy": {
+              "IOPropertyMatch": {
+                "cameraispdarwinsimd": false
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            }
+          }
+        },
+        "ThrottleInterval": 5,
+        "MachServices": {
+          "com.apple.cameraispdarwinsimd": true
+        },
+        "ProcessType": "Interactive",
+        "ProgramArguments": [
+          "/usr/libexec/cameraispdarwinsimd"
+        ],
+        "UserName": "_cmiodalassistants",
+        "GroupName": "_cmiodalassistants"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.cameracaptured.plist",
+      "sha256": "16f09de1f5c124ae078d5d10972a2664737f296d2ffc06457eb729ddb27d43a8",
+      "plist": {
+        "EnablePressuredExit": true,
+        "GroupName": "_cmiodalassistants",
+        "Label": "com.apple.cameracaptured",
+        "LaunchEvents": {
+          "com.apple.cmio.registerassistantservice.system-extensions.matching": {
+            "com.apple.cameracaptured": {
+              "CMIOExtensionBundleIdentifier": "com.apple.cameracaptured"
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.cameracaptured": true
+        },
+        "POSIXSpawnType": "Interactive",
+        "ProgramArguments": [
+          "/usr/libexec/cameracaptured"
+        ],
+        "UserName": "_cmiodalassistants",
+        "_Conclave": "com.apple.cameracaptured.conclave"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.appleh13camerad.plist",
+      "sha256": "5b4c2124852229388f7fb30d4653f57d7912881e51ee3ef8c395d8505adda705",
+      "plist": {
+        "GroupName": "_cmiodalassistants",
+        "Label": "com.apple.appleh13camerad",
+        "ThrottleInterval": 5,
+        "ProcessType": "Interactive",
+        "MachServices": {
+          "com.apple.appleh13camerad": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/sbin/appleh13camerad"
+        ],
+        "UserName": "_cmiodalassistants",
+        "EnablePressuredExit": true,
+        "LaunchEvents": {
+          "com.apple.cmio.registerassistantservice.system-extensions.matching": {
+            "com.apple.appleh13camerad": {
+              "CMIOExtensionBundleIdentifier": "com.apple.appleh13camerad"
+            }
+          },
+          "com.apple.iokit.matching": {
+            "com.apple.appleh13camerad.destroy": {
+              "IOPropertyMatch": {
+                "appleh13camerad": false
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            },
+            "com.apple.appleh13camerad.launch - 2": {
+              "IOPropertyMatch": {
+                "appleh13camerad": true
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            }
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.metadata.mds.scan.plist",
+      "sha256": "877e4a414df884987b5f0d4cbe15e2a2842782748201d1eb744efcb3393c1740",
+      "plist": {
+        "POSIXSpawnType": "Interactive",
+        "Label": "com.apple.metadata.mds.scan",
+        "MachServices": {
+          "com.apple.metadata.mds.scan": {
+            "ResetAtClose": true
+          }
+        },
+        "ProgramArguments": [
+          "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdsync",
+          "-s",
+          "mdworker-scan",
+          "-c",
+          "MDSSyncScanWorker",
+          "-m",
+          "com.apple.metadata.mds.scan"
+        ],
+        "CFBundleIdentifier": "com.apple.Spotlight",
+        "LowPriorityBackgroundIO": false
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.metadata.mds.spindump.plist",
+      "sha256": "9b49e62b2322ee3b1b59653a08c8e1a252ea6e02536a278742572d2ff5f3d323",
+      "plist": {
+        "POSIXSpawnType": "Interactive",
+        "ProgramArguments": [
+          "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/Metadata.framework/Versions/A/Support/mdworker",
+          "-s",
+          "none",
+          "-c",
+          "MDSSpinDumpWorker",
+          "-m",
+          "com.apple.metadata.mds.spindump"
+        ],
+        "MachServices": {
+          "com.apple.metadata.mds.spindump": {
+            "ResetAtClose": true
+          }
+        },
+        "Label": "com.apple.metadata.mds.spindump",
+        "LowPriorityBackgroundIO": false
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.iconservices.iconservicesagent.plist",
+      "sha256": "b6947a97dd8b9cc240e36a45d3739d2463e49220d1f05c7ca06ef53afd4227df",
+      "plist": {
+        "EnvironmentVariables": {},
+        "POSIXSpawnType": "Adaptive",
+        "MachServices": {
+          "com.apple.iconservices": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/System/Library/CoreServices/iconservicesagent",
+          "runAsRoot"
+        ],
+        "RunAtLoad": false,
+        "EnablePressuredExit": true,
+        "Label": "com.apple.iconservices.iconservicesagent"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.analyticsd.plist",
+      "sha256": "0eef4822ef49f157518efe6bbf4b9f8c50b796d781c430e45a09c2ca09ce65d5",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.analyticsd",
+        "LaunchEvents": {
+          "com.apple.iokit.matching": {
+            "com.apple.analyticsd": {
+              "IOProviderClass": "CoreAnalyticsMessenger"
+            }
+          }
+        },
+        "LimitLoadToSessionType": {
+          "#IfFeatureFlagEnabled": "UserManagement/SystemSessionD1",
+          "#Then": "System"
+        },
+        "MachServices": {
+          "com.apple.analyticsd": true,
+          "com.apple.analyticsd.agent": true,
+          "com.apple.analyticsd.messagetracer": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/CoreAnalytics.framework/Support/analyticsd"
+        ],
+        "UserName": "_analyticsd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.modelcatalogd.plist",
+      "sha256": "d16e71ce1370606a854cc6ade2be4d1daa74d7e44649e1fe20b3b6f1a9849645",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "EnvironmentVariables": {},
+        "Label": "com.apple.modelcatalogd",
+        "LaunchEvents": {
+          "com.apple.bg.system.task": {},
+          "com.apple.notifyd.matching": {
+            "com.apple.MobileAsset.AutoAssetAtomicNotification^RELINQUISH_RESUMING": {
+              "Notification": "com.apple.MobileAsset.AutoAssetAtomicNotification^RELINQUISH_RESUMING"
+            },
+            "com.apple.MobileAsset.AutoAssetNotification^com.apple.MobileAsset.MAAutoAsset^STARTUP_ACTIVATED": {
+              "Notification": "com.apple.MobileAsset.AutoAssetNotification^com.apple.MobileAsset.MAAutoAsset^STARTUP_ACTIVATED"
+            },
+            "com.apple.MobileSMS.CKNanoCannedRepliesArray.changed": {
+              "Notification": "com.apple.MobileSMS.CKNanoCannedRepliesArray.changed"
+            },
+            "com.apple.ModelCatalog.SpotlightKnowledge.AEMModelVersionChanged": {
+              "Notification": "com.apple.ModelCatalog.SpotlightKnowledge.AEMModelVersionChanged"
+            },
+            "com.apple.UnifiedAssetFramework.AssetDeliveryReady": {
+              "Notification": "com.apple.UnifiedAssetFramework.AssetDeliveryReady"
+            },
+            "com.apple.mobile.keybagd.first_unlock": {
+              "Notification": "com.apple.mobile.keybagd.first_unlock"
+            },
+            "com.apple.os-eligibility-domain.change.copernicium": {
+              "Notification": "com.apple.os-eligibility-domain.change.copernicium"
+            },
+            "com.apple.purplebuddy.setupdone": {
+              "Notification": "com.apple.purplebuddy.setupdone"
+            },
+            "com.apple.siri.uaf.com.apple.MobileAsset.UAF.FM.Overrides": {
+              "Notification": "com.apple.siri.uaf.com.apple.MobileAsset.UAF.FM.Overrides"
+            },
+            "com.apple.siri.uaf.com.apple.MobileAsset.UAF.FM.Overrides.root": {
+              "Notification": "com.apple.siri.uaf.com.apple.MobileAsset.UAF.FM.Overrides.root"
+            },
+            "com.apple.siri.uaf.com.apple.MobileAsset.UAF.FM.Visual": {
+              "Notification": "com.apple.siri.uaf.com.apple.MobileAsset.UAF.FM.Visual"
+            },
+            "com.apple.siri.uaf.com.apple.modelcatalog": {
+              "Notification": "com.apple.siri.uaf.com.apple.modelcatalog"
+            },
+            "com.apple.siri.uaf.com.apple.modelcatalog.root": {
+              "Notification": "com.apple.siri.uaf.com.apple.modelcatalog.root"
+            },
+            "com.apple.spatialphotosrelive.enablement.changed": {
+              "Notification": "com.apple.spatialphotosrelive.enablement.changed"
+            }
+          },
+          "com.apple.xpc.activity": {}
+        },
+        "MachServices": {
+          "com.apple.modelcatalog.catalog": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/ModelCatalogRuntime.framework/Versions/A/modelcatalogd"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.iconservices.iconservicesd.plist",
+      "sha256": "04a107a2dee70016ec5d49a5abffc84d70e04dba115f5289e4e35216be6bd1b5",
+      "plist": {
+        "Label": "com.apple.iconservices.iconservicesd",
+        "MachServices": {
+          "com.apple.iconservices.store": true
+        },
+        "POSIXSpawnType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/CoreServices/iconservicesd"
+        ],
+        "RunAtLoad": true,
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "com.apple.iconservicesd.lowdiskspaceNotification": {
+              "Notification": "com.apple.system.lowdiskspace.system"
+            },
+            "com.apple.iconservicesd.verylowdiskspaceNotification": {
+              "Notification": "com.apple.system.verylowdiskspace.system"
+            },
+            "com.apple.iconservicesd.clearCacheNotification": {
+              "Notification": "com.apple.iconservicesd.clearCache.immediately"
+            }
+          }
+        },
+        "UserName": "_iconservices"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.msrpc.mdssvc.plist",
+      "sha256": "6fdba3d5e1689445261760516543847bbe98a450f4da40b5b4ba5950dc50a272",
+      "plist": {
+        "Label": "com.apple.msrpc.mdssvc",
+        "ProgramArguments": [
+          "/usr/libexec/rpcsvchost",
+          "-launchd",
+          "-sandbox",
+          "mdssvc.bundle"
+        ],
+        "EnableTransactions": false,
+        "EnablePressuredExit": false,
+        "Sockets": {
+          "ncacn_np": {
+            "Bonjour": false,
+            "SockPathMode": 438,
+            "SockPathName": "/var/rpc/ncacn_np/mdssvc"
+          }
+        },
+        "EnvironmentVariables": {
+          "RPC_DEBUG": "0"
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.mobile.usermanagerd.plist",
+      "sha256": "31aee709db0c889ea19ee5a662c8b1478b986381166febddb340f08a82547b15",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "EnvironmentVariables": {
+          "__CFPREFERENCES_AVOID_DAEMON": "1",
+          "__CF_USER_TEXT_ENCODING": "0x0:0:0"
+        },
+        "Label": "com.apple.mobile.usermanagerd",
+        "MachServices": {
+          "com.apple.mobile.usermanagerd.xpc": true,
+          "com.apple.mobile.keybagd.UserManager.xpc": true,
+          "com.apple.system.libinfo.muser": true
+        },
+        "RunAtLoad": true,
+        "OnDemand": true,
+        "ProgramArguments": [
+          "/usr/libexec/usermanagerd",
+          "-t",
+          "15"
+        ],
+        "POSIXSpawnType": "Adaptive",
+        "LimitLoadToSessionType": "System",
+        "_PanicOnCrash": {
+          "InternalOnly": true,
+          "PanicOnConsecutiveCrash": true,
+          "PanicOnCrashDeadline": 60
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.ReportCrash.Root.plist",
+      "sha256": "0fbeddc9ac719c1389b0628682035e5c8e51a57898c510c829760bee32135466",
+      "plist": {
+        "Label": "com.apple.ReportCrash.Root",
+        "MachServices": {
+          "com.apple.ReportCrash.DirectoryService": {
+            "DrainMessagesOnCrash": "All",
+            "ExceptionServer": {}
+          }
+        },
+        "ProgramArguments": [
+          "/System/Library/CoreServices/ReportCrash",
+          "daemon"
+        ],
+        "ProcessType": "Standard",
+        "EnableTransactions": true,
+        "EnablePressuredExit": true
+      },
+      "sip_removable": true
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.ecosystemanalyticsd.plist",
+      "sha256": "f990354c428f041bfd9fc61b4b5d94e59bb161bee7a0be873e7cc7a303da0b83",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.ecosystemanalyticsd",
+        "LaunchEvents": {
+          "com.apple.xpc.activity": {
+            "com.apple.ecosystem_analytics.runtime_analysis": {
+              "AllowBattery": true,
+              "Delay": 82800,
+              "GracePeriod": 28800,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "Repeating": true
+            },
+            "com.apple.ecosystem_analytics.static_analysis": {
+              "AllowBattery": true,
+              "Delay": 82800,
+              "GracePeriod": 28800,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "Repeating": true
+            }
+          }
+        },
+        "LowPriorityIO": true,
+        "MachServices": {
+          "com.apple.ecosystem_analytics.rosetta_analysis": true
+        },
+        "ProcessType": "Background",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/EcosystemAnalytics.framework/Support/ecosystemanalyticsd"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.spindump.plist",
+      "sha256": "7aa9bb1e420b23431f1dfea3c277647030b1324d56fc900e4dd4b9c3ff484ea8",
+      "plist": {
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "_Cryptex": "com.apple.system.nextos",
+        "Label": "com.apple.spindump",
+        "POSIXSpawnType": "Interactive",
+        "MachServices": {
+          "com.apple.libquitd": true,
+          "com.apple.spinreporterd": true,
+          "com.apple.spindump": true
+        },
+        "ProgramArguments": [
+          "/usr/sbin/spindump"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.endpointsecurity.endpointsecurityd.plist",
+      "sha256": "4f05fc8b6bc07119a942c17b4149ef4c10229e73e2d0fa2a4c112fb5521d475b",
+      "plist": {
+        "ProgramArguments": [
+          "endpointsecurityd"
+        ],
+        "Program": "/usr/libexec/endpointsecurityd",
+        "ProcessType": "Adaptive",
+        "EnablePressuredExit": true,
+        "RunAtLoad": false,
+        "Label": "com.apple.endpointsecurity.endpointsecurityd",
+        "KeepAlive": {
+          "SuccessfulExit": false,
+          "PathState": {
+            "/Library/SystemExtensions/EndpointSecurity/.launch_esd": true
+          }
+        },
+        "MachServices": {
+          "com.apple.endpointsecurity.endpointsecurityd.xpc": true,
+          "com.apple.endpointsecurity.system-extensions": true,
+          "com.apple.endpointsecurity.endpointsecurityd.mig": true
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchDaemons/com.apple.cameraispd.plist",
+      "sha256": "e5f6d55e6f1f338aa142bf507a3ca0f0a40df990550e97df3602bc73309bba87",
+      "plist": {
+        "GroupName": "_cmiodalassistants",
+        "Label": "com.apple.cameraispd",
+        "ThrottleInterval": 5,
+        "ProcessType": "Interactive",
+        "MachServices": {
+          "com.apple.cameraispd": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/libexec/cameraispd"
+        ],
+        "UserName": "_cmiodalassistants",
+        "EnablePressuredExit": true,
+        "LaunchEvents": {
+          "com.apple.iokit.matching": {
+            "com.apple.cameraispd.destroy": {
+              "IOPropertyMatch": {
+                "cameraispd": false
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            },
+            "com.apple.cameraispd.launch - 2": {
+              "IOPropertyMatch": {
+                "cameraispd": true
+              },
+              "IOProviderClass": "IOResources",
+              "IOMatchLaunchStream": true,
+              "IOMatchAll": true
+            }
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.siriknowledged.plist",
+      "sha256": "2b41c47279a03804ac6fd1646603678cbc1692f25807b1fca230f0065782185f",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.siriknowledged",
+        "LaunchEvents": {
+          "com.apple.cascade.xpc_event.setChange": {
+            "com.apple.siri.inference.EntityMatcher": {}
+          },
+          "com.apple.distnoted.matching": {
+            "ABDatabaseChangedExternallyNotificationPriv": {
+              "Name": "ABDatabaseChangedExternallyNotificationPriv"
+            },
+            "ABDistributedDatabaseChangedNotificationPriv": {
+              "Name": "ABDistributedDatabaseChangedNotificationPriv"
+            },
+            "com.apple.LaunchServices.applicationRegistered": {
+              "Name": "com.apple.LaunchServices.applicationRegistered"
+            },
+            "com.apple.LaunchServices.applicationUnregistered": {
+              "Name": "com.apple.LaunchServices.applicationUnregistered"
+            }
+          },
+          "com.apple.coreduetcontext.client_event_stream": {
+            "notification": {
+              "client-identifier": "com.apple.siriknowledge"
+            }
+          },
+          "com.apple.notifyd.matching": {
+            "com.apple.icloud.fmip.siri_data_changed": {
+              "Notification": "com.apple.icloud.fmip.siri_data_changed"
+            },
+            "com.apple.sysdiagnose.sysdiagnoseStarted": {
+              "Notification": "com.apple.sysdiagnose.sysdiagnoseStarted"
+            },
+            "com.apple.homekit.sync-data-cache-updated": {
+              "Notification": "com.apple.homekit.sync-data-cache-updated"
+            },
+            "INVoocabularyChangedNotification": {
+              "Notification": "INVoocabularyChangedNotification"
+            },
+            "com.apple.assistant.siri_settings_did_change": {
+              "Notification": "com.apple.assistant.siri_settings_did_change"
+            },
+            "kAFPreferencesDidChangeDarwinNotification": {
+              "Notification": "kAFPreferencesDidChangeDarwinNotification"
+            },
+            "com.apple.siri.orchestration.capabilities.didChange": {
+              "Notification": "com.apple.siri.orchestration.capabilities.didChange"
+            },
+            "AFLanguageCodeDidChangeDarwinNotification": {
+              "Notification": "AFLanguageCodeDidChangeDarwinNotification"
+            },
+            "com.apple.language.changed": {
+              "Notification": "com.apple.language.changed"
+            },
+            "com.apple.MobileAsset.AutoAssetAtomicNotification^ATOMIC_INSTANCE_DOWNLOADED": {
+              "Notification": "com.apple.MobileAsset.AutoAssetAtomicNotification^ATOMIC_INSTANCE_DOWNLOADED"
+            },
+            "com.apple.MobileAsset.AutoAssetAtomicNotification^ATOMIC_INSTANCE_NO_ENTRIES": {
+              "Notification": "com.apple.MobileAsset.AutoAssetAtomicNotification^ATOMIC_INSTANCE_NO_ENTRIES"
+            },
+            "com.apple.MobileAsset.AutoAssetAtomicNotification^ATOMIC_INSTANCE_ELIMINATED": {
+              "Notification": "com.apple.MobileAsset.AutoAssetAtomicNotification^ATOMIC_INSTANCE_ELIMINATED"
+            },
+            "com.apple.gms.availability.notification": {
+              "Notification": "com.apple.gms.availability.notification"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.siri.xpc_activity.uaf-subscription-maintenance": {
+              "Interval": 86400,
+              "GracePeriod": 14400,
+              "Priority": "Maintenance",
+              "AllowBattery": false,
+              "Repeating": true
+            },
+            "com.apple.siri.xpc_activity.uaf-post-upgrade": {
+              "GracePeriod": 300,
+              "Priority": "Utility",
+              "AllowBattery": true,
+              "Repeating": false,
+              "PostInstall": true
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.siri.inference.EntityMatcher.admin": true,
+          "com.apple.siri.reference_resolution_module": true,
+          "com.apple.siriknowledged.koa.donate": true,
+          "com.apple.siriknowledged.vocabulary.admin": true,
+          "com.apple.siriknowledged": true,
+          "com.apple.siriknowledged.aps": true,
+          "com.apple.siri.conversation_context_module": true,
+          "com.apple.siri.uaf.service": true
+        },
+        "ProcessType": "Adaptive",
+        "Program": "/usr/libexec/siriknowledged",
+        "ProgramArguments": [
+          "/usr/libexec/siriknowledged"
+        ],
+        "RunAtLoad": false
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.email.maild.plist",
+      "sha256": "ab2cbbec69c93921789b185d80f120d4433d8993e20fb914bb5635164d136375",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.email.maild",
+        "LaunchEvents": {
+          "com.apple.alarm": true,
+          "com.apple.bg.system.task": {},
+          "com.apple.email.ProcessSQLQueryPerformanceData": {
+            "AllowBattery": true,
+            "Interval": 86400,
+            "Priority": "Maintainance",
+            "Repeating": true
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.email.maild.sendlaterdelivery.alarmrestart": {
+              "AllowBattery": true,
+              "Delay": 1,
+              "GracePeriod": 1,
+              "Priority": "Utility",
+              "Repeating": false
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.email.maild": true
+        },
+        "POSIXSpawnType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/EmailDaemon.framework/Versions/A/maild"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.ContextStoreAgent.plist",
+      "sha256": "d7027a94828bc03140ec8363cf6d56cefd780bca384394e0a7b78a6ec0025b51",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "KeepAlive": {
+          "PathState": {
+            "~/Library/Application Support/com.apple.ContextStoreAgent/screenTimeEnabled": true,
+            "~/Library/Caches/com.apple.appstoreagent/arcadeEnabled": true,
+            "~/Library/Caches/com.apple.appstoreagent/crossfireEnabled": true
+          }
+        },
+        "Label": "com.apple.ContextStoreAgent",
+        "LaunchEvents": {
+          "com.apple.GameController.events.controllers-changed": {
+            "com.apple.GameController.events.controllers-changed": {}
+          },
+          "com.apple.notifyd.matching": {
+            "com.apple.ScreenTimeAgent.SettingsDidChangeNotification": {
+              "Notification": "com.apple.ScreenTimeAgent.SettingsDidChangeNotification"
+            },
+            "com.apple.iokit.hid.displayStatus": {
+              "Notification": "com.apple.iokit.hid.displayStatus"
+            }
+          }
+        },
+        "MachServices": {},
+        "ProcessType": "Adaptive",
+        "Program": "/System/Library/PrivateFrameworks/CoreDuetContext.framework/Resources/ContextStoreAgent",
+        "RunAtLoad": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.spindump_agent.plist",
+      "sha256": "05fd0caa1e65ca1de5b958fd06d7919c2c89df67f988ec311397f59b8bde04c3",
+      "plist": {
+        "LimitLoadToSessionType": "Aqua",
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "Label": "com.apple.spindump_agent",
+        "MachServices": {
+          "com.apple.spinreporteragent": true
+        },
+        "ProgramArguments": [
+          "/usr/libexec/spindump_agent"
+        ],
+        "POSIXSpawnType": "Adaptive"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.ptpcamerad.plist",
+      "sha256": "194e480d362416afe5fbd941a2aa2eb78f15651c0e724dfc2749177b2df0e68b",
+      "plist": {
+        "EnvironmentVariables": {},
+        "Disabled": false,
+        "RunAtLoad": false,
+        "Label": "com.apple.ptpcamerad",
+        "EnablePressuredExit": true,
+        "ProcessType": "Adaptive",
+        "MachServices": {
+          "com.apple.ptpcamerad": true
+        },
+        "ProgramArguments": [
+          "/usr/libexec/ptpcamerad"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.geoanalyticsd.plist",
+      "sha256": "28f9205e420d50c64d0c5eb52c5e6f0796d42159ac3d6a5e32265c72fcdf60b6",
+      "plist": {
+        "Label": "com.apple.geoanalyticsd",
+        "LaunchEvents": {
+          "com.apple.bg.system.task": {
+            "com.apple.geo.analytics": {
+              "Priority": "Utility",
+              "RequiresExternalPower": false,
+              "RequiresNetworkConnectivity": false,
+              "RequiresProtectionClass": "C",
+              "RepeatingTask": {
+                "Interval": 21600
+              }
+            }
+          }
+        },
+        "Program": "/System/Library/PrivateFrameworks/GeoAnalytics.framework/geoanalyticsd",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/GeoAnalytics.framework/geoanalyticsd"
+        ],
+        "RunAtLoad": false,
+        "EnableTransactions": true,
+        "MachServices": {
+          "com.apple.geoanalyticsd": true
+        },
+        "POSIXSpawnType": "Adaptive",
+        "EnablePressuredExit": true,
+        "StartInterval": 432000
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.ndoagent.plist",
+      "sha256": "7f5eefefd4ca973977ccc0edffc442b9fbbc8615df83fdf0e9ae22db0b3022c1",
+      "plist": {
+        "ThrottleInterval": 3,
+        "POSIXSpawnType": "Adaptive",
+        "MachServices": {
+          "com.apple.aps.applecare.push.handler": true,
+          "com.apple.ndoagent": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/NewDeviceOutreach.framework/ndoagent"
+        ],
+        "LaunchEvents": {
+          "com.apple.accounts.changes": {
+            "AppleAccountAdded": {
+              "com.apple.account.AppleAccount": {
+                "ChangeTypes": [
+                  1
+                ]
+              }
+            }
+          },
+          "com.apple.notifyd.matching": {
+            "com.apple.bluetooth.pairing": {
+              "Notification": "com.apple.bluetooth.pairing"
+            },
+            "com.apple.language.changed": {
+              "Notification": "com.apple.language.changed"
+            }
+          },
+          "com.apple.bg.system.task": {
+            "com.apple.NewDeviceOutreach.plistConfiguredCheckIn": {
+              "Priority": "Utility",
+              "RequiresNetworkConnectivity": true
+            }
+          }
+        },
+        "EnablePressuredExit": true,
+        "Label": "com.apple.ndoagent"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.AssetCache.agent.plist",
+      "sha256": "9d21781e8980094cffd473a9297569c62a5c763fb5c459f9563451adbeffb0b4",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.AssetCache.agent",
+        "LaunchEvents": {
+          "com.apple.distnoted.matching": {
+            "com.apple.AssetCache.alert": {
+              "Name": "com.apple.AssetCache.alert"
+            }
+          }
+        },
+        "ProcessType": "Background",
+        "Program": "/usr/libexec/AssetCacheAgent/AssetCacheAgent"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.AssetCacheLocatorService.plist",
+      "sha256": "539fd8a803f04772d286b03d30a4a213af461ff00cc7a7ee9a8631d16cb15e1c",
+      "plist": {
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/AssetCacheServices.framework/Versions/A/XPCServices/AssetCacheLocatorService.xpc/Contents/MacOS/AssetCacheLocatorService",
+          "-a"
+        ],
+        "EnableTransactions": true,
+        "Label": "com.apple.AssetCacheLocatorService",
+        "MachServices": {
+          "com.apple.AssetCacheLocatorService": true
+        },
+        "ProcessType": "Adaptive",
+        "EnablePressuredExit": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.usermanagerhelper.plist",
+      "sha256": "58761a9e3791f943f4cc442e43fe2caeddd1f59101925046077b685e88e76add",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "LimitLoadToSessionType": "Background",
+        "ProcessType": "Adaptive",
+        "Label": "com.apple.usermanagerhelper",
+        "ProgramArguments": [
+          "/usr/libexec/usermanagerhelper"
+        ],
+        "MachServices": {
+          "com.apple.usermanagerhelper": true
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.CommCenter-osx.plist",
+      "sha256": "e4816264cd350e73fdf62143624da5a0521209f82fb92daeb5e048eb36a0aba1",
+      "plist": {
+        "POSIXSpawnType": "Interactive",
+        "Label": "com.apple.CommCenter",
+        "LimitLoadFromHardware": {
+          "model": [
+            "iMac7,1",
+            "iMac8,1",
+            "iMac9,1",
+            "iMac10,1",
+            "iMac11,1",
+            "iMac11,2",
+            "iMac11,3",
+            "iMac12,1",
+            "iMac12,2",
+            "MacBook5,1",
+            "MacBook5,2",
+            "MacBook6,1",
+            "MacBook7,1",
+            "MacBookAir2,1",
+            "MacBookAir3,1",
+            "MacBookAir3,2",
+            "MacBookAir4,1",
+            "MacBookAir4,2",
+            "MacBookPro3,1",
+            "MacBookPro4,1",
+            "MacBookPro5,1",
+            "MacBookPro5,2",
+            "MacBookPro5,3",
+            "MacBookPro5,4",
+            "MacBookPro5,5",
+            "MacBookPro6,1",
+            "MacBookPro6,2",
+            "MacBookPro7,1",
+            "MacBookPro8,1",
+            "MacBookPro8,2",
+            "MacBookPro8,3",
+            "Macmini3,1",
+            "Macmini4,1",
+            "Macmini5,1",
+            "Macmini5,2",
+            "Macmini5,3",
+            "MacPro3,1",
+            "MacPro4,1",
+            "MacPro5,1"
+          ]
+        },
+        "MachServices": {
+          "com.apple.aps.CommCenter": true,
+          "com.apple.commcenter.xpc": true,
+          "com.apple.commcenter.coretelephony.xpc": true,
+          "com.apple.commcenter.atcs.xpc": true,
+          "com.apple.private.alloy.thumper.keys-idswake": true,
+          "com.apple.commcenter.oswatchdog": true
+        },
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "com.apple.coretelephony.kvstorechange": {
+              "Notification": "com.apple.coretelephony.kvstorechange"
+            }
+          }
+        },
+        "KeepAlive": {
+          "Crashed": true,
+          "PathState": {
+            "/tmp/CommCenter.KeepAlive.Enabled": true
+          }
+        },
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "ProgramArguments": [
+          "/System/Library/Frameworks/CoreTelephony.framework/Support/CommCenter",
+          "-L"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.talagent.plist",
+      "sha256": "2ceac3d0ac83162523daa8fabd3fc97f6a6525d6167465f486372571611ef3e8",
+      "plist": {
+        "ProcessType": "App",
+        "EnvironmentVariables": {
+          "NSRunningFromLaunchd": "1"
+        },
+        "Label": "com.apple.talagent",
+        "MachServices": {
+          "com.apple.window_proxies": true,
+          "com.apple.appkit.restoration_storage": true,
+          "com.apple.window_proxies.startup": true
+        },
+        "Program": "/System/Library/CoreServices/talagentd",
+        "LimitLoadToSessionType": "Aqua",
+        "EnablePressuredExit": true,
+        "StartCalendarInterval": [
+          {
+            "Weekday": 1,
+            "Hour": 3
+          },
+          {
+            "Weekday": 4,
+            "Hour": 3
+          }
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.ReportCrash.plist",
+      "sha256": "03beb6fb1b1bf1e839924990339154c67024c237796aacbfc5807db7de6b6705",
+      "plist": {
+        "Label": "com.apple.ReportCrash",
+        "MachServices": {
+          "com.apple.ReportCrash": {
+            "DrainMessagesOnCrash": "All",
+            "ExceptionServer": {}
+          }
+        },
+        "ProgramArguments": [
+          "/System/Library/CoreServices/ReportCrash",
+          "agent"
+        ],
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "ProcessType": "Standard"
+      },
+      "sip_removable": true
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.passd.plist",
+      "sha256": "02f6fe0844f55e22287003b890191a137a72d3681c18da30a9630922c9ebc2d6",
+      "plist": {
+        "POSIXSpawnType": "Adaptive",
+        "LimitLoadToSessionType": [
+          "Aqua"
+        ],
+        "MachServices": {
+          "com.apple.passd.sharing-channel": true,
+          "com.apple.usernotifications.delegate.com.apple.Passbook": true,
+          "com.apple.passd.usage": {
+            "_ExperimentalNonLaunching": true
+          },
+          "com.apple.passd.cloud-store": true,
+          "com.apple.passd.library": true,
+          "com.apple.passd.account": true,
+          "com.apple.passd.payment-continuity": true,
+          "com.apple.passd.in-app-payment": true,
+          "com.apple.passd.aps": true,
+          "com.apple.private.alloy.applepay-idswake": true,
+          "com.apple.passd.bulletins": true,
+          "com.apple.passd.device-registration": true,
+          "com.apple.passd.trusted-device-enrollment-info-provider": true,
+          "com.apple.passd.assertions": true,
+          "com.apple.passd.payment": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/PassKitCore.framework/passd"
+        ],
+        "LaunchEvents": {
+          "com.apple.nsurlsessiond-events": {
+            "LaunchOnDemand": {
+              "ClientIdentifier": "com.apple.passd"
+            }
+          },
+          "com.apple.usernotificationcenter.matching": {
+            "com.apple.passd": {
+              "centerType": 6,
+              "events": [
+                "didDeliverNotification",
+                "didActivateNotification",
+                "didRemoveDeliveredNotifications"
+              ]
+            }
+          },
+          "com.apple.iokit.matching": {
+            "com.apple.eos.support-host": {
+              "IOProviderClass": "AppleEmbeddedOSSupportHost",
+              "IONotificationType": "IOServiceFirstMatch",
+              "IOMatchLaunchStream": true
+            }
+          }
+        },
+        "Label": "com.apple.passd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.mediaanalysisd.plist",
+      "sha256": "f3be72b960f18d60107b603b23381b3a0228e1703c11bdf7c264dbf42a58d9a8",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.mediaanalysisd",
+        "LaunchEvents": {
+          "com.apple.bg.system.task": {
+            "com.apple.mediaanalysisd.background.scheduler": {
+              "RepeatingTask": {
+                "MinDurationBetweenInstances": 2900,
+                "Interval": 3600
+              },
+              "Priority": "Maintenance",
+              "RequiresBuddyComplete": true,
+              "RequiresExternalPower": false,
+              "ResourceIntensive": false,
+              "RequiresUserInactivity": true,
+              "GroupName": "com.apple.mediaanalysisd",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.mediaanalysisd.photos.face.fastpass": {
+              "Dependencies": [
+                {
+                  "DependencyIdentifier": "com.apple.mediaanalysisd.photos.maintenance.fastpass",
+                  "DependencyType": "DependencyTypeCompletion"
+                }
+              ],
+              "FeatureCodes": [
+                200
+              ],
+              "GroupConcurrencyLimit": 1,
+              "GroupName": "com.apple.mediaanalysisd",
+              "NonRepeatingTask": {
+                "FastPassTask": {
+                  "ProcessingTaskIdentifiers": [
+                    "com.apple.mediaanalysisd.photos.face"
+                  ]
+                }
+              },
+              "Priority": "Utility",
+              "ProducedResultIdentifiers": [
+                "com.apple.mediaanalysisd.photos.face.results"
+              ],
+              "RequiresBuddyComplete": true,
+              "RequiresExternalPower": false,
+              "RequiresUserInactivity": false,
+              "ResourceIntensive": true,
+              "InvolvedProcesses": [
+                "mediaanalysisd",
+                "mediaanalysisd-service",
+                "assetsd",
+                "aned",
+                "cloudphotod"
+              ]
+            },
+            "com.apple.mediaanalysisd.photos.maintenance.fastpass": {
+              "Dependencies": [
+                {
+                  "DependencyIdentifier": "com.apple.cloudphotod.initialdownload.fastpass",
+                  "DependencyType": "DependencyTypeCompletion"
+                }
+              ],
+              "FeatureCodes": [
+                106
+              ],
+              "GroupConcurrencyLimit": 1,
+              "GroupName": "com.apple.mediaanalysisd",
+              "NonRepeatingTask": {
+                "FastPassTask": {
+                  "ProcessingTaskIdentifiers": [
+                    "com.apple.mediaanalysisd.photos.maintenance"
+                  ]
+                }
+              },
+              "Priority": "Utility",
+              "RequiresBuddyComplete": true,
+              "RequiresExternalPower": false,
+              "RequiresUserInactivity": false,
+              "ResourceIntensive": true,
+              "InvolvedProcesses": [
+                "mediaanalysisd",
+                "mediaanalysisd-service"
+              ]
+            },
+            "com.apple.mediaanalysisd.photos.scene.fastpass": {
+              "Dependencies": [
+                {
+                  "DependencyIdentifier": "com.apple.mediaanalysisd.photos.maintenance.fastpass",
+                  "DependencyType": "DependencyTypeCompletion"
+                }
+              ],
+              "FeatureCodes": [
+                100
+              ],
+              "GroupConcurrencyLimit": 1,
+              "GroupName": "com.apple.mediaanalysisd",
+              "NonRepeatingTask": {
+                "FastPassTask": {
+                  "ProcessingTaskIdentifiers": [
+                    "com.apple.mediaanalysisd.photos.scene"
+                  ]
+                }
+              },
+              "Priority": "Utility",
+              "ProducedResultIdentifiers": [
+                "com.apple.mediaanalysisd.photos.scene.results"
+              ],
+              "RequiresBuddyComplete": true,
+              "RequiresExternalPower": false,
+              "RequiresUserInactivity": false,
+              "ResourceIntensive": true,
+              "InvolvedProcesses": [
+                "mediaanalysisd",
+                "assetsd",
+                "aned",
+                "cloudphotod"
+              ]
+            },
+            "com.apple.mediaanalysisd.photos.textunderstanding.fastpass": {
+              "Dependencies": [
+                {
+                  "DependencyIdentifier": "com.apple.mediaanalysisd.photos.maintenance.fastpass",
+                  "DependencyType": "DependencyTypeCompletion"
+                }
+              ],
+              "FeatureCodes": [
+                202
+              ],
+              "GroupConcurrencyLimit": 1,
+              "GroupName": "com.apple.mediaanalysisd",
+              "NonRepeatingTask": {
+                "FastPassTask": {
+                  "ProcessingTaskIdentifiers": [
+                    "com.apple.mediaanalysisd.photos.textunderstanding"
+                  ]
+                }
+              },
+              "Priority": "Utility",
+              "ProducedResultIdentifiers": [
+                "com.apple.mediaanalysisd.photos.textunderstanding.results"
+              ],
+              "RequiresBuddyComplete": true,
+              "RequiresExternalPower": false,
+              "RequiresUserInactivity": false,
+              "ResourceIntensive": true,
+              "InvolvedProcesses": [
+                "mediaanalysisd",
+                "mediaanalysisd-service",
+                "assetsd",
+                "aned",
+                "cloudphotod"
+              ]
+            },
+            "com.apple.mediaanalysisd.preheat": {
+              "GroupConcurrencyLimit": 1,
+              "GroupName": "com.apple.mediaanalysisd",
+              "NonRepeatingTask": {
+                "ScheduleAfter": 0,
+                "TrySchedulingBefore": 60
+              },
+              "PowerNap": true,
+              "Priority": "Utility",
+              "RequiresBuddyComplete": true,
+              "RequiresExternalPower": false,
+              "RequiresUserInactivity": false,
+              "ResourceIntensive": false
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.mediaanalysisd.xpcstore.spl.vuindex": true,
+          "com.apple.mediaanalysisd.computeservice": true,
+          "com.apple.mediaanalysisd.videosession.public": true,
+          "com.apple.mediaanalysisd.analysis": true,
+          "com.apple.mediaanalysisd.embeddingstore": true,
+          "com.apple.mediaanalysisd.homekit": true,
+          "com.apple.mediaanalysisd.homekitsession": true,
+          "com.apple.mediaanalysisd.photos": true,
+          "com.apple.mediaanalysisd.realtime": true,
+          "com.apple.mediaanalysisd.service.public": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/MediaAnalysis.framework/Versions/A/mediaanalysisd"
+        ],
+        "RunAtLoad": false
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.siriinferenced.plist",
+      "sha256": "3e801614151bc2877f058a41aee4a590a83e52710813b9b98cd8e6494148fab3",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "EnvironmentVariables": {},
+        "Label": "com.apple.siriinferenced",
+        "LaunchEvents": {
+          "com.apple.biome.compute.publisher.user": {
+            "com.apple.siriinferenced.AppIntent": {
+              "client": "com.apple.siriinferenced",
+              "graph": {
+                "name": "streamPublisher",
+                "streamIdentifier": "AppIntent",
+                "streamType": 1,
+                "version": 1
+              },
+              "identifier": "com.apple.siriinferenced.AppIntent"
+            }
+          },
+          "com.apple.notifyd.matching": {
+            "kAFPreferencesDidChangeDarwinNotification": {
+              "Notification": "kAFPreferencesDidChangeDarwinNotification"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.siri.inference.FirstBoot": {
+              "Delay": 0,
+              "GracePeriod": 120,
+              "Priority": "Utility",
+              "Repeating": false
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.siriinferenced": true,
+          "com.apple.siriinferenced.remembers": true,
+          "com.apple.siriinferenced.signals": true,
+          "com.apple.sirisuggestions": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/SiriInference.framework/Versions/A/siriinferenced"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.duetexpertd.plist",
+      "sha256": "2aa499fe0b835e66d108b3cab3fcf0894b626d0cd3e35afcf0c767040d5a5e19",
+      "plist": {
+        "LaunchEvents": {
+          "com.apple.distnoted.matching": {
+            "com.apple.LaunchServices.applicationRegistered": {
+              "Name": "com.apple.LaunchServices.applicationRegistered"
+            },
+            "com.apple.LaunchServices.applicationUnregistered": {
+              "Name": "com.apple.LaunchServices.applicationUnregistered"
+            },
+            "com.apple.LaunchServices.applicationStateChanged": {
+              "Name": "com.apple.LaunchServices.applicationStateChanged"
+            },
+            "_DKKnowledgeStorageDidInsertEventsNotification:RelevantShortcuts": {
+              "Name": "_DKKnowledgeStorageDidInsertEventsNotification",
+              "Object": "/app/relevantShortcuts"
+            },
+            "_DKKnowledgeStorageDidTombstoneEventsNotification:RelevantShortcuts": {
+              "Name": "_DKKnowledgeStorageDidTombstoneEventsNotification",
+              "Object": "/app/relevantShortcuts"
+            },
+            "APSRemotePlaceholderApplicationInstalledNotification": {
+              "Name": "APSRemotePlaceholderApplicationInstalledNotification"
+            },
+            "APSRemotePlaceholderApplicationRemovedNotification": {
+              "Name": "APSRemotePlaceholderApplicationRemovedNotification"
+            }
+          },
+          "com.apple.notifyd.matching": {
+            "com.apple.MediaRemote.lockScreenControlsDidChange": {
+              "Notification": "com.apple.MediaRemote.lockScreenControlsDidChange"
+            },
+            "com.apple.managedconfiguration.managedorginfochanged": {
+              "Notification": "com.apple.managedconfiguration.managedorginfochanged"
+            },
+            "com.apple.ManagedConfiguration.managedAppsChanged": {
+              "Notification": "com.apple.ManagedConfiguration.managedAppsChanged"
+            },
+            "com.apple.managedconfiguration.restrictionchanged": {
+              "Notification": "com.apple.managedconfiguration.restrictionchanged"
+            },
+            "com.apple.duetexpertd.ATXScreenUnlockUpdateSource": {
+              "Notification": "com.apple.duetexpertd.ATXScreenUnlockUpdateSource"
+            },
+            "com.apple.duetexpertd.feedbackavailable": {
+              "Notification": "com.apple.duetexpertd.feedbackavailable"
+            },
+            "com.apple.siri.cloud.synch.changed": {
+              "Notification": "com.apple.siri.cloud.synch.changed"
+            },
+            "com.apple.siri.cloud.storage.deleted": {
+              "Notification": "com.apple.siri.cloud.storage.deleted"
+            },
+            "com.apple.duetexpertd.mm.bluetoothconnected": {
+              "Notification": "com.apple.duetexpertd.mm.bluetoothconnected"
+            },
+            "com.apple.CallHistoryPluginHelper.launchnotification": {
+              "Notification": "com.apple.CallHistoryPluginHelper.launchnotification"
+            },
+            "CNFavoritesChangedExternallyNotification": {
+              "Notification": "CNFavoritesChangedExternallyNotification"
+            },
+            "com.apple.pasteboard.notify.changed": {
+              "Notification": "com.apple.pasteboard.notify.changed"
+            },
+            "SignificantTimeChangeNotification": {
+              "Notification": "SignificantTimeChangeNotification"
+            },
+            "_CalDatabaseChangedNotification": {
+              "Notification": "_CalDatabaseChangedNotification"
+            },
+            "com.apple.duet.expertcenter.appRefresh": {
+              "Notification": "com.apple.duet.expertcenter.appRefresh"
+            },
+            "com.apple.proactive.queries.databaseChange": {
+              "Notification": "com.apple.proactive.queries.databaseChange"
+            },
+            "com.apple.duetexpertd.mm.bluetoothdisconnect": {
+              "Notification": "com.apple.duetexpertd.mm.bluetoothdisconnect"
+            },
+            "com.apple.duetexpertd.ms.nowplayingpause": {
+              "Notification": "com.apple.duetexpertd.ms.nowplayingpause"
+            },
+            "com.apple.duetexpertd.ms.nowplayingplay": {
+              "Notification": "com.apple.duetexpertd.ms.nowplayingplay"
+            },
+            "com.apple.duetexpertd.ms.carplaydisconnect": {
+              "Notification": "com.apple.duetexpertd.ms.carplaydisconnect"
+            },
+            "com.apple.duetexpertd.ms.carplayconnect": {
+              "Notification": "com.apple.duetexpertd.ms.carplayconnect"
+            },
+            "com.apple.pex.connections.focalappchanged": {
+              "Notification": "com.apple.pex.connections.focalappchanged"
+            },
+            "com.apple.duetexpertd.appclipprediction": {
+              "Notification": "com.apple.duetexpertd.appclipprediction"
+            },
+            "com.apple.duetexpertd.appchangeprediction": {
+              "Notification": "com.apple.duetexpertd.appchangeprediction"
+            },
+            "com.apple.duetexpertd.mm.audiodisconnect": {
+              "Notification": "com.apple.duetexpertd.mm.audiodisconnect"
+            },
+            "com.apple.coreduetd.knowledgebase.launch.duetexpertd": {
+              "Notification": "com.apple.coreduetd.knowledgebase.launch.duetexpertd"
+            },
+            "com.apple.Preferences.ResetPrivacyWarningsNotification": {
+              "Notification": "com.apple.Preferences.ResetPrivacyWarningsNotification"
+            },
+            "com.apple.spotlightui.prefschanged": {
+              "Notification": "com.apple.spotlightui.prefschanged"
+            },
+            "com.apple.duetexpertd.prefschanged": {
+              "Notification": "com.apple.duetexpertd.prefschanged"
+            },
+            "dmf.policy.monitor.app": {
+              "Notification": "dmf.policy.monitor.app"
+            },
+            "com.apple.duetexpertd.donationmonitor.intent": {
+              "Notification": "com.apple.duetexpertd.donationmonitor.intent"
+            },
+            "com.apple.duetexpertd.donationmonitor.activity": {
+              "Notification": "com.apple.duetexpertd.donationmonitor.activity"
+            },
+            "com.apple.duetexpertd.ATXMMAppPredictor.BluetoothConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXMMAppPredictor.BluetoothConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXMMAppPredictor.BluetoothDisconnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXMMAppPredictor.BluetoothDisconnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXMMAppPredictor.CarPlayConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXMMAppPredictor.CarPlayConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXMMAppPredictor.CarPlayDisconnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXMMAppPredictor.CarPlayDisconnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXMMAppPredictor.WiredAudioDeviceConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXMMAppPredictor.WiredAudioDeviceConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXMMAppPredictor.WiredAudioDeviceDisconnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXMMAppPredictor.WiredAudioDeviceDisconnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXMMAppPredictor.IdleTimeEndAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXMMAppPredictor.IdleTimeEndAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.IdleTimeEndAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.IdleTimeEndAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.invalidate.IdleTimeEndAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.invalidate.IdleTimeEndAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.BluetoothConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.BluetoothConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.invalidate.BluetoothConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.invalidate.BluetoothConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.CarPlayConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.CarPlayConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.invalidate.CarPlayConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.invalidate.CarPlayConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.WiredAudioDeviceConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.WiredAudioDeviceConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.invalidate.WiredAudioDeviceConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.invalidate.WiredAudioDeviceConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.ChargerConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.ChargerConnectedAnchor"
+            },
+            "com.apple.duetexpertd.ATXAnchorModel.invalidate.ChargerConnectedAnchor": {
+              "Notification": "com.apple.duetexpertd.ATXAnchorModel.invalidate.ChargerConnectedAnchor"
+            },
+            "com.apple.proactive.information.source.weather": {
+              "Notification": "com.apple.proactive.information.source.weather"
+            },
+            "com.apple.duetexpertd.clientModelRefreshBlendingLayer": {
+              "Notification": "com.apple.duetexpertd.clientModelRefreshBlendingLayer"
+            }
+          },
+          "com.apple.bg.system.task": {
+            "com.apple.duetexpertd.anchormodeldataharvesting": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "ResourceIntensive": true,
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.duetexpertd.anchormodeltraining": {
+              "Priority": "Utility",
+              "RequiresExternalPower": true,
+              "ResourceIntensive": true,
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.duetexpertd.atxtrain": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "ResourceIntensive": true,
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.duetexpertd.magicalmoments": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "ResourceIntensive": true,
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.duetexpertd.mode-entity-model-training": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "ResourceIntensive": true,
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.duetexpertd.datastoremaintenance": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "ResourceIntensive": true,
+              "RepeatingTask": {
+                "Interval": 604800
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.duetexpertd.notificationmetrics": {
+              "Priority": "Utility",
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "ResourceIntensive": false,
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            },
+            "com.apple.duetexpertd.promptexecutionmerging": {
+              "Priority": "Utility",
+              "RequiresExternalPower": true,
+              "ResourceIntensive": true,
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "kBGSTProtectionClassC",
+              "GroupName": "com.apple.duetexpertd.defaultGroup",
+              "GroupConcurrencyLimit": 1
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.duetexpertd.pruneNotificationsBasedOnHardLimits": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.pruneSuggestionsBasedOnHardLimits": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.analyzeNotificationsAndSuggestionsDatabase": {
+              "Repeating": true,
+              "Interval": 604800,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.notificationAndSuggestionDatastorePerfMetricsLogging": {
+              "Repeating": true,
+              "Interval": 1209600,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.pruneNotificationSuggestionDatastore": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.logModeActivityMetrics": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.updateInferredModeBiomeStream": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.blendingbiomestreamlogging": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.everydayshortcuts": {
+              "Repeating": true,
+              "Interval": 3600,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": true,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.action.timeestimate": {
+              "Repeating": true,
+              "Interval": 86400.0,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.cardSuggestionClientCacheCleanup": {
+              "Repeating": false,
+              "Interval": 86400.0,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.apppredictionupdate": {
+              "Repeating": true,
+              "Interval": 7200,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": true,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.biomepruning": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.pruningGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.updateAssetMetadata": {
+              "Repeating": true,
+              "Interval": 43200,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": false
+            },
+            "com.apple.duetexpertd.biome-ui-feedback-result-stream-writing": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.urgency-tuning-global-metrics-logging": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.infoStorePeriodicCleanup": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.appdirectory": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Utility",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true,
+              "PowerNap": true
+            },
+            "com.apple.duetexpertd.controlsupdate": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Utility",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true,
+              "PowerNap": true
+            },
+            "com.apple.duetexpertd.appdirectorylogging": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.blending-shadow-logging": {
+              "Repeating": true,
+              "Interval": 86400.0,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.activitySuggestionFeedbackProcessing": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.focusMetricsLogging": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.modelscoreharvesting": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            },
+            "com.apple.duetexpertd.timelinedonationspruning": {
+              "Repeating": true,
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "MemoryIntensive": false,
+              "CPUIntensive": false,
+              "DiskIntensive": false,
+              "ActivityGroupName": "com.apple.duetexpertd.defaultGroup",
+              "ActivityGroupConcurrencyLimit": 1,
+              "AllowBattery": false,
+              "RequiresClassC": true
+            }
+          }
+        },
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "ProcessType": "Adaptive",
+        "Label": "com.apple.duetexpertd",
+        "MachServices": {
+          "com.apple.ModeEntityScorer": true,
+          "com.apple.proactive.appPreference.intentStreamUpdate": true,
+          "com.apple.duet.expertcenter": true,
+          "com.apple.duet.appPrediction.inspection": true,
+          "com.apple.proactive.AppPrediction.predictions": true,
+          "com.apple.proactive.hero.AppPrediction.predictions": true,
+          "com.apple.duet.appPreference.prediction": true,
+          "com.apple.private.alloy.apppredictionsync-idswake": true,
+          "com.apple.proactive.ActionPrediction.predictions": true,
+          "com.apple.notifications.logging": true,
+          "com.apple.usernotifications.delegate.com.apple.Siri.ActionPredictionNotifications": true,
+          "com.apple.usernotifications.delegate.com.apple.ATXDebugNotifications": true,
+          "com.apple.proactive.ProactiveSuggestionClientModel.xpc": true,
+          "com.apple.proactive.appDirectory": true,
+          "com.apple.proactive.infoSuggestion.xpc": true,
+          "com.apple.proactive.sleepSchedule": true,
+          "com.apple.proactive.timeIntelligence": true,
+          "com.apple.proactive.ContextualEngine.internal.xpc": true,
+          "com.apple.proactive.ContextualEngine.suggestions.xpc": true,
+          "com.apple.proactive.sports.xpc": true,
+          "com.apple.duetexpertd.SettingsActions": true,
+          "com.apple.personalization.notificationCategorization": true,
+          "com.apple.proactive.app-client.donation": true,
+          "com.apple.proactive.client.predictions": true,
+          "com.apple.duetexpertd.ControlCenter": true,
+          "com.apple.duetexpertd.assistant-actions": true,
+          "com.apple.proactive.visual-action-prediction": true,
+          "com.apple.proactive.visual-action-execution.resource-retrieval": true
+        },
+        "Program": "/usr/libexec/duetexpertd",
+        "ProgramArguments": [
+          "/usr/libexec/duetexpertd"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.mediastream.mstreamd.plist",
+      "sha256": "3122aad8b384c3f9eab780374dbe3791c2fedbe30d2050caf239d7830627eda1",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "KeepAlive": {
+          "Crashed": true
+        },
+        "Label": "com.apple.mediastream.mstreamd",
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "com.apple.photostream.idslaunchnotification": {
+              "Notification": "com.apple.photostream.idslaunchnotification"
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.mediastream.mstreamd.sharing.push-dev": true,
+          "com.apple.mediastream.mstreamd.sharing.push-prod": true,
+          "com.apple.mediastream.sharing": true
+        },
+        "POSIXSpawnType": "Adaptive",
+        "Program": "/System/Library/PrivateFrameworks/MediaStream.framework/Versions/A/Support/mstreamd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.financed.plist",
+      "sha256": "fb1e1d7cac4ef759fea0b65ec79ac080227bafae214e98ee302adc1e8d953ee5",
+      "plist": {
+        "POSIXSpawnType": "Adaptive",
+        "MachServices": {
+          "com.apple.financed.service.coredatastore": true,
+          "com.apple.financed.service.bankconnect": true,
+          "com.apple.aps.financed": true,
+          "com.apple.aps.financed.store": true,
+          "com.apple.financed.service.financestore": true,
+          "com.apple.financed.service.store": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/System/Library/Frameworks/FinanceKit.framework/financed"
+        ],
+        "LaunchEvents": {
+          "com.apple.biome.compute.publisher": {
+            "com.apple.financed.biome.orderEmail": {
+              "graph": {
+                "name": "streamPublisher",
+                "streamIdentifier": "WalletPaymentsCommerce.FoundIn.OrderEmail",
+                "version": 1
+              },
+              "client": "com.apple.financed",
+              "identifier": "com.apple.financed.biome.orderEmail"
+            },
+            "com.apple.financed.biome.receiptEmail": {
+              "graph": {
+                "name": "streamPublisher",
+                "streamIdentifier": "WalletPaymentsCommerce.FoundIn.ReceiptEmail",
+                "version": 1
+              },
+              "client": "com.apple.financed",
+              "identifier": "com.apple.financed.biome.receiptEmail"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.financed.bankconnect.reboot": {
+              "AllowBattery": true,
+              "Priority": "Utility",
+              "RequiresClassC": true
+            }
+          },
+          "com.apple.bg.system.task": {
+            "com.apple.financed.orders.reboot": {
+              "Priority": "Utility",
+              "RequiresExternalPower": false,
+              "RequiresProtectionClass": "C"
+            },
+            "com.apple.financed.instrumentation": {
+              "Priority": "Maintenance",
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresProtectionClass": "C"
+            },
+            "com.apple.financed.maintenance": {
+              "Priority": "Maintenance",
+              "RepeatingTask": {
+                "Interval": 86400
+              },
+              "RequiresExternalPower": true,
+              "RequiresNetworkConnectivity": false,
+              "RequiresProtectionClass": "C",
+              "RequiresUserInactivity": true
+            },
+            "com.apple.financed.refresh.institutions": {
+              "Priority": "Maintenance",
+              "RepeatingTask": {
+                "Interval": 2592000
+              },
+              "RequiresExternalPower": false,
+              "RequiresInexpensiveNetworkConnectivity": true,
+              "RequiresProtectionClass": "C",
+              "RequiresUserInactivity": false
+            },
+            "com.apple.financed.post-install": {
+              "Priority": "Utility",
+              "RequiresExternalPower": false,
+              "PostInstall": true,
+              "RequiresProtectionClass": "C"
+            }
+          }
+        },
+        "EnablePressuredExit": true,
+        "Label": "com.apple.financed"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.SoftwareUpdateNotificationManager.plist",
+      "sha256": "6c0c5fce101e6f8dda649f5ab538d998bbd336b0884f1066b00a1491046e97ff",
+      "plist": {
+        "Label": "com.apple.SoftwareUpdateNotificationManager",
+        "MachServices": {
+          "com.apple.usernotifications.delegate.com.apple.SoftwareUpdateNotification": true,
+          "com.apple.SoftwareUpdateNotificationManagerService": true
+        },
+        "Program": "/System/Library/PrivateFrameworks/SoftwareUpdate.framework/Resources/SoftwareUpdateNotificationManager.app/Contents/MacOS/SoftwareUpdateNotificationManager",
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "ProcessType": "Interactive",
+        "LimitLoadToSessionType": [
+          "LoginWindow",
+          "Aqua"
+        ],
+        "LaunchEvents": {
+          "com.apple.notifyd.matching": {
+            "InsufficientSpace": {
+              "Notification": "com.apple.SoftwareUpdateNotificationManager.InsufficientSpace"
+            },
+            "Wakeup": {
+              "Notification": "com.apple.SoftwareUpdateNotificationManager.wakeup"
+            },
+            "UpdatesAvailable": {
+              "Notification": "com.apple.SoftwareUpdate.updatesAvailable"
+            },
+            "LoginDone": {
+              "Notification": "com.apple.system.loginwindow.delayedLoginItemsInitiated"
+            },
+            "PostMinorUpdateSuccess": {
+              "Notification": "com.apple.SoftwareUpdateNotificationManager.PostMinorUpdateSuccess"
+            },
+            "BadgingCountChanged": {
+              "Notification": "com.apple.SoftwareUpdate.BadgingCountChanged"
+            },
+            "SettingsWillSelect": {
+              "Notification": "com.apple.SoftwareUpdate.SettingsWillSelect"
+            },
+            "SettingsDidUnselect": {
+              "Notification": "com.apple.SoftwareUpdate.SettingsDidUnselect"
+            }
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.iconservices.iconservicesagent.plist",
+      "sha256": "d428ea0a01c0ccfd388686f4df4ceb35449d842d3aec37657eaa1c0404fe2d0e",
+      "plist": {
+        "EnvironmentVariables": {},
+        "POSIXSpawnType": "Adaptive",
+        "MachServices": {
+          "com.apple.iconservices": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/System/Library/CoreServices/iconservicesagent"
+        ],
+        "RunAtLoad": false,
+        "EnablePressuredExit": true,
+        "Label": "com.apple.iconservices.iconservicesagent"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.inputanalyticsd.plist",
+      "sha256": "d0ff7ed11d9fc360e672b51a61ea46631ebd14f5349499239962a9e1807cbeaf",
+      "plist": {
+        "ProcessType": "Adaptive",
+        "Disabled": false,
+        "MachServices": {
+          "com.apple.inputanalyticsd": true
+        },
+        "EnableTransactions": true,
+        "ProgramArguments": [
+          "/usr/libexec/inputanalyticsd"
+        ],
+        "LaunchEvents": {
+          "com.apple.bg.system.task": {
+            "com.apple.inputanalyticsd.daily": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": false,
+              "RequiresNetworkConnectivity": false,
+              "RepeatingTask": {
+                "MinDurationBetweenInstances": 82800,
+                "Interval": 86400
+              }
+            },
+            "com.apple.inputanalyticsd.semiweekly": {
+              "Priority": "Maintenance",
+              "RequiresExternalPower": false,
+              "RequiresNetworkConnectivity": false,
+              "RepeatingTask": {
+                "MinDurationBetweenInstances": 604800,
+                "Interval": 1209600
+              }
+            }
+          }
+        },
+        "EnablePressuredExit": true,
+        "Label": "com.apple.inputanalyticsd"
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.amsengagementd.plist",
+      "sha256": "f48563661ca9c77653f0b0dd99c88c1773fbb8065f0603e1ae93ec4fd692f572",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.amsengagementd",
+        "LaunchEvents": {
+          "com.apple.distnoted.matching": {
+            "com.apple.nfcd.ams.accessory": {
+              "Name": "com.apple.nfcd.ams.accessory"
+            }
+          },
+          "com.apple.notifyd.matching": {
+            "SignificantTimeChangeNotification": {
+              "Notification": "SignificantTimeChangeNotification"
+            },
+            "com.apple.appstored.ActivitySubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.ActivitySubEntitlementsCacheUpdated"
+            },
+            "com.apple.appstored.AppStoreSubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.AppStoreSubEntitlementsCacheUpdated"
+            },
+            "com.apple.appstored.HWBundleSubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.HWBundleSubEntitlementsCacheUpdated"
+            },
+            "com.apple.appstored.MusicSubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.MusicSubEntitlementsCacheUpdated"
+            },
+            "com.apple.appstored.NewsSubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.NewsSubEntitlementsCacheUpdated"
+            },
+            "com.apple.appstored.PodcastSubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.PodcastSubEntitlementsCacheUpdated"
+            },
+            "com.apple.appstored.TVSubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.TVSubEntitlementsCacheUpdated"
+            },
+            "com.apple.appstored.iCloudSubEntitlementsCacheUpdated": {
+              "Notification": "com.apple.appstored.iCloudSubEntitlementsCacheUpdated"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.amsengagementd.daily": {
+              "Interval": 86400.0,
+              "Priority": "Utility",
+              "Repeating": true
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.aps.amsengagementd": true,
+          "com.apple.xpc.amsengagementd": true,
+          "com.apple.xpc.amsmediacatalogsync": true,
+          "com.apple.xpc.amsserverdatacacheservice": true,
+          "com.apple.xpc.amsuniversallinks": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/AppleMediaServicesUI.framework/amsengagementd"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.photoanalysisd.plist",
+      "sha256": "f67659edef702587f7d7dfc47391c8e34652a88ca978b0752d9460a6c7dc865a",
+      "plist": {
+        "Label": "com.apple.photoanalysisd",
+        "Program": "/System/Library/PrivateFrameworks/PhotoAnalysis.framework/Versions/A/Support/photoanalysisd",
+        "MachServices": {
+          "com.apple.photoanalysisd": true
+        },
+        "EnableTransactions": true,
+        "EnablePressuredExit": true,
+        "ProcessType": "Interactive",
+        "LaunchEvents": {
+          "com.apple.bg.system.task": {
+            "com.apple.photoanalysisd.backgroundanalysis": {
+              "RandomInitialDelay": 2700,
+              "ResourceIntensive": true,
+              "ExpectedDuration": 2700,
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "Dependencies": [
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.mediaanalysisd.photos.face"
+                },
+                {
+                  "DependencyType": "DependencyTypeResult",
+                  "DependencyIdentifier": "com.apple.mediaanalysisd.photos.face.fullResults",
+                  "ResultDependencyBatchSize": "500"
+                }
+              ],
+              "RepeatingTask": {
+                "Interval": 21600,
+                "MinDurationBetweenInstances": 6000
+              },
+              "ProducedResultIdentifiers": [
+                "com.apple.photoanalysisd.backgroundanalysis"
+              ]
+            },
+            "com.apple.photoanalysisd.featuredcontent": {
+              "ResourceIntensive": true,
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "Dependencies": [
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.backgroundanalysis"
+                },
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.highlightenrichment"
+                }
+              ],
+              "RepeatingTask": {
+                "Interval": 86400,
+                "MinDurationBetweenInstances": 6000
+              }
+            },
+            "com.apple.photoanalysisd.highlightenrichment": {
+              "ResourceIntensive": true,
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "Dependencies": [
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.backgroundanalysis"
+                }
+              ],
+              "RepeatingTask": {
+                "Interval": 21600,
+                "MinDurationBetweenInstances": 6000
+              },
+              "ProducedResultIdentifiers": [
+                "com.apple.photoanalysisd.highlightenrichment"
+              ]
+            },
+            "com.apple.photoanalysisd.wallpaper": {
+              "ResourceIntensive": true,
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "Dependencies": [
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.backgroundanalysis"
+                }
+              ],
+              "RepeatingTask": {
+                "Interval": 86400,
+                "MinDurationBetweenInstances": 6000
+              }
+            },
+            "com.apple.photoanalysisd.libraryprocessing": {
+              "ResourceIntensive": true,
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "Dependencies": [
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.backgroundanalysis"
+                }
+              ],
+              "RepeatingTask": {
+                "Interval": 86400,
+                "MinDurationBetweenInstances": 6000
+              }
+            },
+            "com.apple.photoanalysisd.searchdonation": {
+              "ResourceIntensive": true,
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "Dependencies": [
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.backgroundanalysis"
+                }
+              ],
+              "RepeatingTask": {
+                "Interval": 21600,
+                "MinDurationBetweenInstances": 6000
+              }
+            },
+            "com.apple.photoanalysisd.internal": {
+              "ResourceIntensive": true,
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "Dependencies": [
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.backgroundanalysis"
+                },
+                {
+                  "DependencyType": "DependencyTypeCompletion",
+                  "DependencyIdentifier": "com.apple.photoanalysisd.highlightenrichment"
+                }
+              ],
+              "RepeatingTask": {
+                "Interval": 86400
+              }
+            },
+            "com.apple.photoanalysisd.music": {
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RandomInitialDelay": 7200,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "RepeatingTask": {
+                "Interval": 28800,
+                "MinDurationBetweenInstances": 23040
+              }
+            },
+            "com.apple.photoanalysisd.graphNonIntensiveTasks": {
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "RepeatingTask": {
+                "Interval": 7200,
+                "MinDurationBetweenInstances": 6000
+              }
+            },
+            "com.apple.photoanalysisd.photolibraryNonIntensiveTasks": {
+              "RequiresExternalPower": true,
+              "PowerNap": true,
+              "Priority": "Maintenance",
+              "PreventsDeviceSleep": true,
+              "RequiresBuddyComplete": true,
+              "RequiresProtectionClass": "C",
+              "GroupName": "com.apple.photoanalysisd.sequentialProcessing",
+              "GroupConcurrencyLimit": 1,
+              "RepeatingTask": {
+                "Interval": 7200,
+                "MinDurationBetweenInstances": 6000
+              }
+            }
+          }
+        }
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.geodMachServiceBridge.plist",
+      "sha256": "be7a9b7374e23838fb8f4f80d681a1376ae9b7091a1d67e24b941759e807dd29",
+      "plist": {
+        "Label": "com.apple.geodMachServiceBridge",
+        "MachServices": {
+          "com.apple.geod.cachedelete": true
+        },
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/GeoServices.framework/geodMachServiceBridge"
+        ],
+        "POSIXSpawnType": "Adaptive",
+        "RunAtLoad": false,
+        "EnableTransactions": true,
+        "EnablePressuredExit": true
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.biomesyncd.plist",
+      "sha256": "f87ae17c0f838288eba85d3a340ca9a8bf96ab8c4b0f1038c44d94c7b5a9b67f",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnableTransactions": true,
+        "Label": "com.apple.biomesyncd",
+        "LaunchEvents": {
+          "com.apple.cascade.xpc_event.setChange": {
+            "com.apple.biomesyncd.cascadeSetChange": {}
+          },
+          "com.apple.notifyd.matching": {
+            "com.apple.rapport.CompanionLinkDeviceAdded": {
+              "Notification": "com.apple.rapport.CompanionLinkDeviceAdded"
+            }
+          },
+          "com.apple.rapport.matching": {
+            "BiomeRapportWake": {
+              "serviceType": "com.apple.biomesyncd.rapport",
+              "type": "server"
+            },
+            "CascadeRapportWakeSystemDomain": {
+              "serviceType": "com.apple.biomesyncd.cascade.rapport.system",
+              "type": "server"
+            },
+            "CascadeRapportWakeUserDomain": {
+              "serviceType": "com.apple.biomesyncd.cascade.rapport.user",
+              "type": "server"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.biomesyncd.cascade.periodic-sync": {
+              "AllowBattery": true,
+              "ExpectedDuration": 300.0,
+              "Interval": 3600.0,
+              "Priority": "Maintenance",
+              "RandomInitialDelay": 3600.0,
+              "Repeating": true,
+              "RequireNetworkConnectivity": true,
+              "RequiresBuddyComplete": true,
+              "RequiresClassC": true
+            },
+            "com.apple.biomesyncd.database-maintenance": {
+              "AllowBattery": false,
+              "ExpectedDuration": 300.0,
+              "Interval": 86400.0,
+              "Priority": "Maintenance",
+              "RandomInitialDelay": 3600.0,
+              "Repeating": true,
+              "RequireNetworkConnectivity": false,
+              "RequiresBuddyComplete": true,
+              "RequiresClassC": true
+            },
+            "com.apple.biomesyncd.metrics-collection": {
+              "AllowBattery": false,
+              "ExpectedDuration": 300.0,
+              "Interval": 86400.0,
+              "Priority": "Maintenance",
+              "RandomInitialDelay": 3600.0,
+              "Repeating": true,
+              "RequireNetworkConnectivity": true,
+              "RequiresBuddyComplete": true,
+              "RequiresClassC": true
+            },
+            "com.apple.biomesyncd.periodic-sync": {
+              "AllowBattery": true,
+              "ExpectedDuration": 300.0,
+              "Interval": 3600.0,
+              "Priority": "Maintenance",
+              "RandomInitialDelay": 3600.0,
+              "Repeating": true,
+              "RequireNetworkConnectivity": true,
+              "RequiresBuddyComplete": true,
+              "RequiresClassC": true
+            },
+            "com.apple.biomesyncd.post-install-immediate-sync": {
+              "AllowBattery": true,
+              "ExpectedDuration": 300.0,
+              "PostInstall": true,
+              "Priority": "Utility",
+              "Repeating": false,
+              "RequireNetworkConnectivity": true,
+              "RequiresBuddyComplete": true,
+              "RequiresClassC": true
+            }
+          }
+        },
+        "LimitLoadToSessionType": "Aqua",
+        "MachServices": {
+          "com.apple.aps.biomesyncd": true,
+          "com.apple.biome.ContextSync": true,
+          "com.apple.biomesyncd.sync": true,
+          "com.apple.private.alloy.contextsync-idswake": true,
+          "com.apple.private.alloy.contextsync.local-idswake": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/usr/libexec/biomesyncd"
+        ]
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.siriactionsd.plist",
+      "sha256": "714478852b8850446aeb4ff03c82408d2e11bb9e4506a1b5fa60c9a35ad88bbb",
+      "plist": {
+        "EnablePressuredExit": true,
+        "EnvironmentVariables": {
+          "MallocStackLoggingDirectory": "/private/var/tmp/com.apple.siriactionsd"
+        },
+        "Label": "com.apple.siriactionsd",
+        "LaunchEvents": {
+          "com.apple.appprotection.preferences.change.event": {
+            "Hidden App Bundle IDs Subscription": {
+              "hiddenEvent": true,
+              "unhiddenEvent": true
+            }
+          },
+          "com.apple.coreduetcontext.client_event_stream": {
+            "notification": {
+              "client-identifier": "com.apple.siriactionsd.contextstore-registration"
+            }
+          },
+          "com.apple.distnoted.matching": {
+            "AXInterfaceClassicInvertColorStatusDidChange": {
+              "Name": "AXInterfaceClassicInvertColorStatusDidChange"
+            },
+            "AXInterfaceIncreaseContrastStatusDidChange": {
+              "Name": "AXInterfaceIncreaseContrastStatusDidChange"
+            },
+            "AXInterfaceReduceMotionStatusDidChange": {
+              "Name": "AXInterfaceReduceMotionStatusDidChange"
+            },
+            "AXInterfaceReduceTransparencyStatusDidChange": {
+              "Name": "AXInterfaceReduceTransparencyStatusDidChange"
+            },
+            "AppShortcutsChanged": {
+              "Name": "LNAppShortcutsChangedNotification"
+            },
+            "ApplicationRegistered": {
+              "Name": "com.apple.LaunchServices.applicationRegistered"
+            },
+            "ApplicationStateChanged": {
+              "Name": "com.apple.LaunchServices.applicationStateChanged"
+            },
+            "ApplicationUnregistered": {
+              "Name": "com.apple.LaunchServices.applicationUnregistered"
+            },
+            "CoreDataDatabaseChanged": {
+              "Name": "com.apple.shortcuts.WFCoreDataDatabaseContextDidSaveNotification"
+            },
+            "LNMetadataChangedNotification": {
+              "Name": "LNMetadataChangedNotification"
+            },
+            "TKToolkitLocalDatabaseChangedNotification": {
+              "Name": "TKToolkitLocalDatabaseChangedNotification"
+            },
+            "TKToolkitRemoteDatabaseChangedNotification": {
+              "Name": "TKToolkitRemoteDatabaseChangedNotification"
+            },
+            "UniversalAccessDomainCloseViewSettingsDidChangeNotification": {
+              "Name": "UniversalAccessDomainCloseViewSettingsDidChangeNotification"
+            },
+            "com.apple.universalaccess.VoiceOverSettingsDidChange": {
+              "Name": "com.apple.universalaccess.VoiceOverSettingsDidChange"
+            },
+            "com.apple.universalaccess.screenPolarityDidChange": {
+              "Name": "com.apple.universalaccess.screenPolarityDidChange"
+            },
+            "kDictationIMNotificationUseOnlyOfflineDictationChanged": {
+              "Name": "kDictationIMNotificationUseOnlyOfflineDictationChanged"
+            }
+          },
+          "com.apple.distnoted.matching.trusted": {
+            "AppShortcutsChanged": {
+              "Name": "LNAppShortcutsChangedNotification"
+            },
+            "LNMetadataChangedNotification": {
+              "Name": "LNMetadataChangedNotification"
+            }
+          },
+          "com.apple.notifyd.matching": {
+            "com.apple.appprotection.change.hidden": {
+              "Notification": "com.apple.appprotection.change.hidden"
+            },
+            "com.apple.gms.availability.notification": {
+              "Notification": "com.apple.gms.availability.notification"
+            },
+            "com.apple.mediaaccessibility.displayFilterSettingsChanged": {
+              "Notification": "com.apple.mediaaccessibility.displayFilterSettingsChanged"
+            },
+            "com.apple.mobile.keybagd.first_unlock": {
+              "Notification": "com.apple.mobile.keybagd.first_unlock"
+            },
+            "com.apple.nanoregistry.paireddevicedidchangeversion": {
+              "Notification": "com.apple.nanoregistry.paireddevicedidchangeversion"
+            },
+            "com.apple.shortcuts.daemon-wakeup-request": {
+              "Notification": "com.apple.shortcuts.daemon-wakeup-request"
+            },
+            "com.apple.siri.ShortcutsCloudKitAccountAddedNotification": {
+              "Notification": "com.apple.siri.ShortcutsCloudKitAccountAddedNotification"
+            },
+            "com.apple.siri.ShortcutsCloudKitAccountModifiedNotification": {
+              "Notification": "com.apple.siri.ShortcutsCloudKitAccountModifiedNotification"
+            },
+            "com.apple.siri.uaf.com.apple.MobileAsset.UAF.Shortcuts.Generator": {
+              "Notification": "com.apple.siri.uaf.com.apple.MobileAsset.UAF.Shortcuts.Generator"
+            },
+            "com.apple.spotlightui.prefschanged": {
+              "Notification": "com.apple.spotlightui.prefschanged"
+            },
+            "com.apple.system.clock_set": {
+              "Notification": "com.apple.system.clock_set"
+            },
+            "com.apple.system.timezone": {
+              "Notification": "com.apple.system.timezone"
+            },
+            "kAFPreferencesDidChangeDarwinNotification": {
+              "Notification": "kAFPreferencesDidChangeDarwinNotification"
+            }
+          },
+          "com.apple.xpc.activity": {
+            "com.apple.siriactionsd.RemoteQuarantineUpdate": {
+              "AllowBattery": true,
+              "DuetRelatedApplications": [
+                "com.apple.shortcuts"
+              ],
+              "Interval": 86400,
+              "NetworkTransferDirection": "Download",
+              "Priority": "Utility",
+              "RandomInitialDelay": 3600,
+              "Repeating": true,
+              "RequireNetworkConnectivity": true
+            },
+            "com.apple.siriactionsd.ShortcutsDailyMetricCheckIn": {
+              "AllowBattery": true,
+              "DuetRelatedApplications": [
+                "com.apple.shortcuts"
+              ],
+              "Interval": 28800,
+              "Priority": "Maintenance",
+              "RandomInitialDelay": 28800.0,
+              "Repeating": true
+            },
+            "com.apple.siriactionsd.ShortcutsWeeklyMetricCheckIn": {
+              "AllowBattery": true,
+              "DuetRelatedApplications": [
+                "com.apple.shortcuts"
+              ],
+              "Interval": 86400,
+              "Priority": "Maintenance",
+              "RandomInitialDelay": 86400,
+              "Repeating": true
+            },
+            "com.apple.siriactionsd.TriggersEnabledBootNotification": {
+              "AllowBattery": true,
+              "GracePeriod": 0,
+              "Priority": "Utility",
+              "Repeating": false,
+              "RequiresClassC": false
+            }
+          }
+        },
+        "MachServices": {
+          "com.apple.aps.siriactionsd": true,
+          "com.apple.private.alloy.shortcuts-idswake": true,
+          "com.apple.shortcuts.systemshortcutservice.runner": true,
+          "com.apple.siri.VoiceShortcuts.xpc": true,
+          "com.apple.siriactionsd.xpc": true,
+          "com.apple.usernotifications.delegate.com.apple.shortcuts": true
+        },
+        "ProcessType": "Adaptive",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/VoiceShortcuts.framework/Versions/A/Support/siriactionsd"
+        ],
+        "RunAtLoad": false
+      },
+      "sip_removable": false
+    },
+    {
+      "path": "System/Library/LaunchAgents/com.apple.identityservicesd.plist",
+      "sha256": "bcc862a916aec82eb2245aeae1b71bc8ef2870d82d88a5a5919667b6bf66b79d",
+      "plist": {
+        "EnableTransactions": true,
+        "KeepAlive": {
+          "SuccessfulExit": false
+        },
+        "POSIXSpawnType": "Interactive",
+        "Label": "com.apple.identityservicesd",
+        "ProgramArguments": [
+          "/System/Library/PrivateFrameworks/IDS.framework/identityservicesd.app/Contents/MacOS/identityservicesd"
+        ],
+        "MachServices": {
+          "com.apple.identityservicesd.nsxpc.auth": true,
+          "com.apple.identityservicesd.regionstore": true,
+          "com.apple.identityservicesd.xpc": true,
+          "com.apple.identityservicesd.desktop.auth": true,
+          "com.apple.identityservicesd.aps": true,
+          "com.apple.identityservicesd.idquery.desktop.auth": true,
+          "com.apple.identityservicesd.nsxpc": true,
+          "com.apple.identityservicesd.pds": true,
+          "com.apple.usernotifications.delegate.com.apple.identityservicesd.firewall": true,
+          "com.apple.identityservicesd.desktop.sim2host": true
+        },
+        "EnablePressuredExit": false,
+        "EnvironmentVariables": {
+          "NSRunningFromLaunchd": "1"
+        }
+      },
+      "sip_removable": false
+    }
+  ],
+  "unread_symlinks": 11,
+  "findings": [
+    "usermanagerd label is com.apple.mobile.usermanagerd, not com.apple.usermanagerd",
+    "Root-owned 0644 files pass secure reader; st_gid is not checked",
+    "Existing disabled.migrated skips only legacy migration; current policy still loads",
+    "csr_check(2) initializes rootless restrictions at 0x1000480d8..0x1000480ec",
+    "System import bit 0x100 with SIP and label absent from RemovableServices ignores user override at 0x100003e94..0x100003f30"
+  ],
+  "hardware_verified": false,
+  "nested_services": [
+    {
+      "path": "System/Library/CoreServices/XPCServices/ReportCrashService.xpc/Contents/Info.plist",
+      "sha256": "f7ae3240ba7da6ac1ea276e0258b20c6fd6f1146755e597e60df14b21011a8dd",
+      "plist": {
+        "BuildMachineOSBuild": "23A344017",
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleDisplayName": "ReportCrashService",
+        "CFBundleExecutable": "ReportCrashService",
+        "CFBundleIdentifier": "com.apple.ReportCrashService",
+        "CFBundleInfoDictionaryVersion": "6.0",
+        "CFBundleName": "ReportCrashService",
+        "CFBundlePackageType": "XPC!",
+        "CFBundleShortVersionString": "1.0",
+        "CFBundleSupportedPlatforms": [
+          "MacOSX"
+        ],
+        "CFBundleVersion": "1",
+        "DTCompiler": "com.apple.compilers.llvm.clang.1_0",
+        "DTPlatformBuild": "",
+        "DTPlatformName": "macosx",
+        "DTPlatformVersion": "27.3",
+        "DTSDKBuild": "26C5035e",
+        "DTSDKName": "macosx27.3.internal",
+        "DTXcode": "2700",
+        "DTXcodeBuild": "27A225b",
+        "LSMinimumSystemVersion": "27.3",
+        "XPCService": {
+          "ServiceType": "Application",
+          "_MultipleInstances": true
+        }
+      }
+    },
+    {
+      "path": "System/Library/PrivateFrameworks/GeoServices.framework/Versions/A/XPCServices/com.apple.geod.xpc/Contents/Info.plist",
+      "sha256": "4807a2c45b7b674c124a6f8f2e47484604c85baaa83097e37db9ef13b0d8670d",
+      "plist": {
+        "BuildMachineOSBuild": "23A344017",
+        "CFBundleAllowMixedLocalizations": true,
+        "CFBundleDevelopmentRegion": "English",
+        "CFBundleExecutable": "com.apple.geod",
+        "CFBundleIdentifier": "com.apple.geod",
+        "CFBundleInfoDictionaryVersion": "6.0",
+        "CFBundleName": "com.apple.geod",
+        "CFBundlePackageType": "XPC!",
+        "CFBundleShortVersionString": "1.0",
+        "CFBundleSignature": "????",
+        "CFBundleSupportedPlatforms": [
+          "MacOSX"
+        ],
+        "CFBundleVersion": "2076.22.9.18.5",
+        "DTCompiler": "com.apple.compilers.llvm.clang.1_0",
+        "DTPlatformBuild": "",
+        "DTPlatformName": "macosx",
+        "DTPlatformVersion": "27.3",
+        "DTSDKBuild": "26C5035e",
+        "DTSDKName": "macosx27.3.internal",
+        "DTXcode": "2700",
+        "DTXcodeBuild": "27A225b",
+        "LSMinimumSystemVersion": "27.3",
+        "XPCService": {
+          "ServiceType": "User"
+        }
+      }
+    },
+    {
+      "path": "System/Library/ExtensionKit/Extensions/WallpaperAerialsExtension.appex/Contents/Info.plist",
+      "sha256": "ab2856b6fcdf2142a3cecfc86dd4201ac9091552404b98377ad3922907a64b5c",
+      "plist": {
+        "BuildMachineOSBuild": "23A344017",
+        "CFBundleDevelopmentRegion": "en",
+        "CFBundleDisplayName": "WallpaperAerialsExtension",
+        "CFBundleExecutable": "WallpaperAerialsExtension",
+        "CFBundleIdentifier": "com.apple.wallpaper.extension.aerials",
+        "CFBundleInfoDictionaryVersion": "6.0",
+        "CFBundleName": "WallpaperAerialsExtension",
+        "CFBundlePackageType": "XPC!",
+        "CFBundleShortVersionString": "1.0",
+        "CFBundleSupportedPlatforms": [
+          "MacOSX"
+        ],
+        "CFBundleVersion": "313.2.3",
+        "DTCompiler": "com.apple.compilers.llvm.clang.1_0",
+        "DTPlatformBuild": "",
+        "DTPlatformName": "macosx",
+        "DTPlatformVersion": "27.3",
+        "DTSDKBuild": "26C5035e",
+        "DTSDKName": "macosx27.3.internal",
+        "DTXcode": "2700",
+        "DTXcodeBuild": "27A225b",
+        "EXAppExtensionAttributes": {
+          "EXExtensionPointIdentifier": "com.apple.wallpaper"
+        },
+        "LSMinimumSystemVersion": "27.3",
+        "NSHumanReadableCopyright": "Apple",
+        "_CFBundleUseAppleLocalizations": true
+      }
+    }
+  ]
+}
