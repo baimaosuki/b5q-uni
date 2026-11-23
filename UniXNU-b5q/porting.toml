@@ -2511,3 +2511,8 @@ result = "CI45106921809 reused completednative/prelink from45105913288 with0newb
 kind = "source"
 reference = "reports/batch2-validation.json"
 result = "CI45107692131 nativecachehit0boardbuilds; resize/fsck/mountsucceed. enableOwnershiprequiresroot, soscope sudo-n onlytoattachedfilebackedDataownershipcommand; supportplistswithoutMountedwhenUUID/absoluteMountPointproven.7hostregressionspass. Kernel/GPU/UEFIunchanged; finalCIimagegatecontinues."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45108103050 cachehit0compiles; postresizeautomountignoredownership, misleadingmountedstat. IndependentAPFSparseronretainedDataandcompleteESPreadbackPASS, actualrootwheel0644/59+26/UUID/account/signaturescorrect. EnableownershipunconditionallyonoriginalUUIDdevicebeforestat;7productionhelpercasesPASS. No board/kernel/GPUchange."

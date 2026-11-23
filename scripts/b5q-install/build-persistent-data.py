@@ -5,15 +5,17 @@ from pathlib import Path
 from b5q_data_format import DATA_UUID,ENVELOPE_BLOCKS,SECTOR,ROOT_FIRST,ROOT_LAST,TAIL_FIRST,fletcher
 SEED_SHA='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70'
 def mounted_volume(device,preferred=None):
- # Native resize leaves the volume unmounted on current macOS. It can also
- # remount elsewhere; use the original device, then verify UUID and path.
+ # Native resize may remount elsewhere with ownership ignored. Every mounted
+ # branch must enable real ownership before checking on-disk uid/mode.
  command=['diskutil','info','-plist',device]
  info=plistlib.loads(subprocess.check_output(command))
+ if info.get('VolumeUUID','').upper()!=DATA_UUID:raise ValueError('resized Data UUID mismatch')
  mounted=lambda value:value.get('Mounted',bool(value.get('MountPoint')))
  if not mounted(info) and preferred is not None:
   subprocess.run(['diskutil','mount','-mountPoint',str(preferred),device],check=True)
-  subprocess.run(['sudo','-n','diskutil','enableOwnership',device],check=True)
-  info=plistlib.loads(subprocess.check_output(command))
+ if not mounted(info) and preferred is None:raise ValueError('resized volume is unmounted')
+ subprocess.run(['sudo','-n','diskutil','enableOwnership',device],check=True)
+ info=plistlib.loads(subprocess.check_output(command))
  if not mounted(info) or info.get('VolumeUUID','').upper()!=DATA_UUID:
   raise ValueError('resized volume is not mounted with the original Data UUID')
  mount=Path(info.get('MountPoint',''))

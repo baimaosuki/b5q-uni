@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression for diskutil changing the mountpoint during native APFS growth."""
+"""Native APFS remount/ownership regression using the real builder helper."""
 import importlib.util,sys,tempfile,plistlib
 from pathlib import Path
 from unittest.mock import patch
@@ -8,21 +8,19 @@ s=importlib.util.spec_from_file_location('grow',R/'scripts/b5q-install/build-per
 with tempfile.TemporaryDirectory(prefix='b5q-native-remount-')as td:
  actual=Path(td)/'new-mount';actual.mkdir()
  info=dict(Mounted=True,VolumeUUID=m.DATA_UUID,MountPoint=str(actual),DeviceIdentifier='disk8s1')
- with patch.object(m.subprocess,'check_output',return_value=plistlib.dumps(info))as call:
-  assert m.mounted_volume('disk8s1')==actual;call.assert_called_once_with(['diskutil','info','-plist','disk8s1'])
- # diskutil versions may omit Mounted; an explicit absolute MountPoint
- # plus the exact original VolumeUUID remains authoritative.
- without_flag=dict(info);without_flag.pop('Mounted')
- with patch.object(m.subprocess,'check_output',return_value=plistlib.dumps(without_flag)):
-  assert m.mounted_volume('disk8s1')==actual
- # Regression from actual CI: resize succeeds but leaves the volume unmounted.
+ for explicit_mounted in (True,False):
+  response=dict(info)
+  if not explicit_mounted:response.pop('Mounted')
+  with patch.object(m.subprocess,'check_output',return_value=plistlib.dumps(response))as call,patch.object(m.subprocess,'run')as run:
+   assert m.mounted_volume('disk8s1')==actual
+   assert all(x.args[0]==['diskutil','info','-plist','disk8s1']for x in call.call_args_list)
+   run.assert_called_once_with(['sudo','-n','diskutil','enableOwnership','disk8s1'],check=True)
  with patch.object(m.subprocess,'check_output',side_effect=[plistlib.dumps(dict(info,Mounted=False)),plistlib.dumps(info)]),patch.object(m.subprocess,'run')as run:
   assert m.mounted_volume('disk8s1',actual)==actual
-  assert run.call_args_list[0].args[0]==['diskutil','mount','-mountPoint',str(actual),'disk8s1']
-  assert run.call_args_list[1].args[0]==['sudo','-n','diskutil','enableOwnership','disk8s1']
+  assert [x.args[0]for x in run.call_args_list]==[['diskutil','mount','-mountPoint',str(actual),'disk8s1'],['sudo','-n','diskutil','enableOwnership','disk8s1']]
  for bad in (dict(info,Mounted=False),dict(info,VolumeUUID='0'*36),dict(info,MountPoint='relative'),dict(info,MountPoint=str(actual/'missing'))):
-  with patch.object(m.subprocess,'check_output',return_value=plistlib.dumps(bad)):
+  with patch.object(m.subprocess,'check_output',return_value=plistlib.dumps(bad)),patch.object(m.subprocess,'run'):
    try:m.mounted_volume('disk8s1')
    except ValueError:pass
    else:raise AssertionError(bad)
-print('PASS remounted Data path by same device+UUID; reject unmounted/wrong UUID/relative/missing mountpoint (7 cases)')
+print('PASS 7 production mount cases: explicit/implicit mounted flags, unmounted remount, ownership ALWAYS enabled, UUID/path refusals')
