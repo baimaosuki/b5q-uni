@@ -1,0 +1,94 @@
+{
+  "delivery": {
+    "boot.img": {
+      "bytes": 19120128,
+      "sha256": "d7124d060a25d623e356cabd3d28c1af61ed38b902f47e78f82a73a6f192dbf6"
+    },
+    "esp.img": {
+      "bytes": 838860800,
+      "sha256": "88f330c11f63f6cf15d1be6c9a79dca513c9d2ecf0ac9f040169b07c449a2bdc"
+    }
+  },
+  "hardware_tested": false,
+  "firmware_build": "local CLANGPDB",
+  "inputs": {
+    "v29_payload_ci": 44985774704,
+    "v29_payload_commit": "e94593ae5aa7e6111a20a0515dcef33c0cc316cc",
+    "uefi_base_commit": "b303410c8e401fc9419ae65a024356ed09a438ef",
+    "uniXNU_base_commit": "563595abedfdfa413ad583b66b6176d82007e633",
+    "mu_basecore_commit": "cfb93724a06ff86ff5ba971413368a7809ee42a5"
+  },
+  "firmware": {
+    "result": "PASS",
+    "firmware_sha256": "df26529ae53be872b6c3856ab1f4fadb3c994fca8a8199c219112438783ea983",
+    "handoff_sha256": "45dab488db87197361c082e52bd0a2f56f50491a1daa9c37a6f860ce5a3a0f18",
+    "darwinboot_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "ufs_sha256": "f33a84726dacd79bb243d4131f1ab25cf55aa686e1f980a59285bd024cc38d7a",
+    "ramdisk_sha256": "5aac45e7229ab6704d11277ee5bd44397f6d23feeb01690209d75293ccf66a80",
+    "retained": [
+      "B5qHandoffDxe",
+      "ButtonsDxe",
+      "CmdDbDxe",
+      "DarwinBoot",
+      "DisplayDxe",
+      "HALIOMMU",
+      "RamManagerDxe",
+      "RpmhDxe",
+      "UFSDxe",
+      "UniXNURamDiskDxe"
+    ],
+    "excluded": [
+      "PILDxe",
+      "PILProxyDxe",
+      "SPSSDxe",
+      "SdccDxe",
+      "UsbBusDxe",
+      "UsbConfigDxe",
+      "UsbDeviceDxe",
+      "UsbInitDxe",
+      "UsbKbDxe",
+      "UsbMassStorageDxe",
+      "UsbMsdDxe",
+      "UsbPwrCtrlDxe",
+      "UsbfnDwc3Dxe",
+      "XhciDxe",
+      "XhciPciEmulation",
+      "XhciPciEmulationDxe"
+    ],
+    "firmware_module_count": 95,
+    "compiled_depex_checked": 54
+  },
+  "boot": {
+    "boot_source": "physical 4Kn UFS ESP",
+    "bootstrap_fat16_bytes": 16777216,
+    "bootstrap_fat16_sha256": "ec709a0a612ce76091cf117104b70f18837c1881c648338f590ff6b1281ffb96",
+    "darwinboot_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "samsung_dtb_sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+    "bootshim_sha256": "9346a527441b242c69414fd7e3d6fa17813f281d562fef13d9ba8373d39007a9",
+    "boot": {
+      "bytes": 19120128,
+      "sha256": "d7124d060a25d623e356cabd3d28c1af61ed38b902f47e78f82a73a6f192dbf6"
+    },
+    "source_boot": {
+      "bytes": 19275776,
+      "sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1"
+    },
+    "firmware": {
+      "bytes": 3145728,
+      "sha256": "df26529ae53be872b6c3856ab1f4fadb3c994fca8a8199c219112438783ea983"
+    },
+    "esp": {
+      "bytes": 838860800,
+      "sha256": "88f330c11f63f6cf15d1be6c9a79dca513c9d2ecf0ac9f040169b07c449a2bdc"
+    },
+    "boot_partition_bytes": 100663296,
+    "hardware_tested": false
+  },
+  "esp_changed_files": [
+    "EFI/UniXNU/Drivers/DarwinBoot.efi"
+  ],
+  "kernel_sha256": "b9493392c6dd55130841124a1fa084f6572dc66a62d50fef40c24492db543878",
+  "data_seed_sha256": "f1f6afe508b4c7c57254780c82018f039ae2b3cd691222a287d9d3a37bb3749b",
+  "journal_verification": "PASS production FAT mirror, contiguous allocation, token, CRC and write bounds",
+  "v29_diagnosis": "Simple File System discovery failed. The exact initrd runtime failure is unknown. Pinned Mu DxeMain registers the decompress protocol itself."
+}

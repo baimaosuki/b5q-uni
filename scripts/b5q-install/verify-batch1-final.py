@@ -61,24 +61,27 @@ def main():
         assert digest(a.ci / "tree" / archive) == digest(a.cache / "tree" / archive)
     for name in ("B5qBootPolicy.o", "B5qProcTop.o"):
         assert digest(a.ci / "kernel/incremental-objects" / name) == digest(a.cache / "kernel/incremental-objects" / name)
-    old = json.loads((ROOT / "artifacts/b5q-esp-runtime-v33/package.manifest.json").read_text())
     payload = json.loads((a.ci / "payload/payload.json").read_text())
     with tempfile.TemporaryDirectory(prefix="b5q-v33-verify-") as td:
         temp = Path(td)
         files = temp / "efi"
         members = filesystem.members(esp, files)
         new = {k: v for k, v in members.items() if k.startswith("EFI/")}
-        assert set(new) == {name for name in old["esp_files"] if name.startswith("EFI/")}
-        allowed_changes = {filesystem.ADT, "EFI/UniXNU/Payloads/scratch-data.img",
-                           "EFI/UniXNU/Payloads/kernel.macho.trustcache"}
-        changes = {k for k, v in new.items() if v != old["esp_files"][k]}
-        assert changes <= allowed_changes and {"EFI/UniXNU/Payloads/scratch-data.img", "EFI/UniXNU/Payloads/kernel.macho.trustcache"} <= changes
+        baseline_esp = ROOT / "artifacts/b5q-esp-batch1-final/esp.img"
+        baseline = filesystem.members(baseline_esp, temp / "baseline")
+        baseline_efi = {k: v for k, v in baseline.items() if k.startswith("EFI/")}
+        assert set(new) == set(baseline_efi)
+        kernel_path = "EFI/UniXNU/Payloads/kernel.macho"
+        allowed_changes = {filesystem.ADT, kernel_path, "EFI/UniXNU/Payloads/kernel.macho.trustcache",
+                           "EFI/UniXNU/Payloads/kernel.macho.crypto-hmac.json"}
+        changes = {k for k, v in new.items() if v != baseline_efi[k]}
+        assert changes <= allowed_changes and kernel_path in changes
         adt_bytes = (files / filesystem.ADT).read_bytes()
         nodes = filesystem.adt_nodes(adt_bytes)
         adt = nodes["/chosen"][2]
         assert all(adt[key] == bytes(size) for key, size in filesystem.PLACEHOLDERS.items())
         assert nodes["/chosen/asmb"][2]["lp-sip0"] == struct.pack("<Q", 2)
-        baseline_adt = subprocess.check_output(["mtype", "-i", str(ROOT / "artifacts/b5q-esp-runtime-v33/esp.img"), "::/" + filesystem.ADT])
+        baseline_adt = subprocess.check_output(["mtype", "-i", str(baseline_esp), "::/" + filesystem.ADT])
         assert nodes["/chosen/asmb"][2] == filesystem.adt_nodes(baseline_adt)["/chosen/asmb"][2]
         (a.out / "ADT-lp-sip0.json").write_text(json.dumps({"path":"/chosen/asmb/lp-sip0", "bytes":8, "hex":nodes["/chosen/asmb"][2]["lp-sip0"].hex(), "value":2, "other_asmb_properties_unchanged":True},indent=2)+"\n")
         menu = tomllib.loads((files / "EFI/UniXNU/unixnu.toml").read_text())
@@ -90,9 +93,13 @@ def main():
         assert (files / filesystem.DRIVER).read_bytes() == loader_pe(a.fd.read_bytes(), filesystem.LOADER)
         kernel = files / "EFI/UniXNU/Payloads/kernel.macho"
         kernel_sha = digest(kernel)
-        assert kernel_sha == payload["payload_kernel_sha256"] == old["deploy_kernel_sha256"]
-        for marker in (b"disabled11=%u selected=%02x", b"touch-mouse", b"HID mode=%s", b"DRP opcode=%02x", b"B5qProcTop: window=30s"):
-            assert marker in kernel.read_bytes(), marker
+        assert kernel_sha == payload["payload_kernel_sha256"] and kernel_sha != baseline_efi[kernel_path]
+        kernel_bytes = kernel.read_bytes()
+        for marker in (b"disabled11=%u selected=%02x", b"touch-mouse", b"HID mode=%s", b"DRP opcode=%02x",
+                       b"B5qProcTop: window=30s", b"B5qProcTop: %s TOP%u %s:%u(exit=%u/sig=%u)",
+                       b"TOP1..5", b"TOP6..10 end rows=%u overflow=%llu"):
+            assert marker in kernel_bytes, marker
+        assert b"B5qProcTop: window=30s spawns=%llu exits=%llu top=" not in kernel_bytes
         sys.path.insert(0, str(ROOT / "sources/UniXNU/kits/XnuPrelink"))
         from kc_image import Image
         outer = Image(kernel.read_bytes())
@@ -162,7 +169,7 @@ def main():
         assert b"com.apple.mobileactivationd" in stand_in and b"com.apple.security.cryptexd" in stand_in
         assert "com.apple.endpointsecurity.endpointsecurityd" not in policy.policies()["disabled.plist"]
         assert stats["private/var/ngpu/bin/b5q-absentd"]["mode"] == 0o100755
-        original = subprocess.check_output(["mtype","-i",str(ROOT/"artifacts/b5q-esp-runtime-v33/esp.img"),
+        original = subprocess.check_output(["mtype","-i",str(baseline_esp),
                                             "::/EFI/UniXNU/Payloads/kernel.macho.trustcache"])
         originals = helpers["modules"](original)
         assert trust[:-1] == originals and len(trust[-1]) == 48
@@ -172,7 +179,8 @@ def main():
         verification = {"kernel_sha256": kernel_sha, "seed_sha256": digest(seed),
                         "data_bytes": logical, "ESP": geometry, "members": new,
                         "launchd_overrides": {key: len(value) for key, value in policy.policies().items()},
-                        "changed_archive_members": [], "kernel_and_all_archives_reused": True, "board_builtin_policy":builtin_policy,
+                        "changed_archive_members": ["B5qProcTop.o"], "kernel_and_all_archives_reused": False,
+                        "core_recompiled": False, "board_objects_recompiled": 1, "board_builtin_policy":builtin_policy,
                         "board_stand_in_cdhashes":[h.hex() for h in hashes], "hardware_tested": False,
                         "checks": ["FAT32 4Kn", "XNU2LOG allocation", "v30 physical ESP loader", "USB DMA ADT placeholders",
                                    "4 GiB APFS Data and launchd policy", "unchanged boot args and GPU addon", "native stand-in page signatures and trust", "POST seal"]}

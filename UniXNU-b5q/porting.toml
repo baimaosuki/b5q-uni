@@ -2414,6 +2414,24 @@ reference = "reports/batch1-final.json"
 result = "Complete local source preflight before one package-only CI; actual final ADT/APFS/signature/contents verification still pending. Source proof is distinguished from final hardware acceptance."
 
 [[area]]
+id = "batch1-proctop-closure"
+status = "implemented"
+components = ["B5qProcTop", "launchd-policy"]
+paths = ["package/B5qProcTop.c", "package/B5qProcTop.h", "package/B5qProcTopFormat.h", "scripts/relink-b5q-peripherals.py", "scripts/b5q-install/pre-ci-batch1-final.py", "scripts/b5q-install/verify-batch1-final.py", "scripts/b5q-install/verify-batch1-proctop-image.py", "tests/b5q-ufs/test-proctop.cpp", ".github/workflows/b5q-batch1-final.yml", "reports/batch1-final.json"]
+inputs = ["26C5035r launchd and Batch1 seed/policy evidence are unchanged from the verified batch1-final artifact; the v33 runtime log records the prior single-line ProcTop output truncating at IOLog's 255-byte limit."]
+configuration = ["B5qProcTop snapshots fixed-storage counters every 30 seconds and emits one summary plus ten ranked exit rows, each shorter than 200 bytes. The data seed and all non-kernel ESP members are reused byte-for-byte."]
+procedure = ["Run native launchd/XPC/absentd and ProcTop ASan/UBSan checks locally; compile only B5qProcTop.c for arm64e; compare its PAC contracts with unchanged core callers; package one 4Kn ESP and inspect its embedded kernel and unchanged Data seed."]
+findings = ["The previously delivered Batch1 ESP reused the v33 B5qProcTop object; its 1536-byte formatter still exceeded IOLog's 255-byte limit and cut off the tail of TOP-10. The v33 runtime lines prove that artifact was not the complete ProcTop fix.", "The replacement formatter emits TOP1..5 and TOP6..10 rows separately; the host test will exercise maximum name/counter widths and require every emitted line below 200 bytes.", "Only B5qProcTop.c is scheduled for target compilation. XNU core, GPU/addon, firmware and the already verified 4 GiB Data seed are reused."]
+completion = ["Source correction and local preflight are in progress; final target object PAC check and final ESP readback are pending."]
+limits = ["The final image has not yet been rebuilt or run on hardware.", "Local LLVM 21 cannot parse the pinned MacOSX26.5 SDK's four-argument __ptrauth qualifier; the exact Xcode 26.6 target compile and PAC check are therefore required in CI."]
+next_action = ["Run the one-object cached-core CI, download only esp.img, verify the embedded TOP-10 format and unchanged 4 GiB Data/APFS policy, then record its hash and CI run."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch1-final.json"
+result = "The earlier final image's ProcTop implementation was still the truncated v33 single-line binary; corrected source and image gates now explicitly reject that format. Final rebuild remains pending."
+
+[[area]]
 id = "recovery-display"
 status = "implemented"
 components = []

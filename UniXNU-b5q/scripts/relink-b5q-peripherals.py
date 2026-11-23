@@ -60,6 +60,8 @@ RECIPES = {
             ('B5qUsbBoard.cpp', 'B5qBootPolicy.c')),
     'v33': (45016691051, '2f74ab3b3850711cd4f2bc61c75bdbe187a1f586',
             ('B5qBootPolicy.c', 'B5qProcTop.c')),
+    'batch1-proctop': (45041019820, 'ac082c9d53049323fd701cec5d6ba5bd7621bc1f',
+                       ('B5qProcTop.c',)),
 }
 
 

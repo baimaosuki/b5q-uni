@@ -150,8 +150,8 @@
     "Req-2": "source-verified; final image readback pending",
     "Req-3": "five jobs/source sandbox/real XPC lifecycle and production tests verified; no invented per-PID v32 exit reason",
     "Req-4": "all labels and native gate verified; final image readback pending",
-    "Req-5": "existing v33 observer already target/PAC/image/device-log verified; reused",
-    "Req-6": "source/tests complete; final artifact verification pending"
+    "Req-5": "source fixed and host formatter test added; the previous final image still carried the truncated v33 object, so one-object target relink and new image verification are pending",
+    "Req-6": "native source tests pass; final one-image CI and final ESP readback pending"
   },
   "evidence": {
     "launchd": "reports/launchd-26C5035r-policy.json",
@@ -166,7 +166,7 @@
     "gpu_recompiled": false,
     "UEFI_recompiled": false,
     "new_Data_volume_created": false,
-    "state": "local preflight PASS, package CI pending"
+    "state": "source preflight in progress; only B5qProcTop target object relink and final image CI/readback remain"
   },
   "hardware_tested_final_image": false
 }

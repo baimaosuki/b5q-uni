@@ -10,7 +10,7 @@ struct knote;
 struct vnode_attr;
 #include <security/mac_policy.h>
 #include <libkern/libkern.h>
-#include "B5qProcTop.h"
+#include "B5qProcTopFormat.h"
 
 // Exact pinned XNU proc_private.h contracts: exitstatus is specifically safe
 // in mpo_proc_notify_exit, after the process has left the PID lookup table.
@@ -28,22 +28,13 @@ static void created(kauth_cred_t cred, proc_t proc) {
 static void exited(proc_t proc) {
     b5q_proc_exit(&counts, proc_best_name(proc), (unsigned)proc_exitstatus(proc));
 }
+static void emitLine(const char *line,void *context) {(void)context;IOLog("%s",line);}
 static void reporter(void *arg, wait_result_t result) {
     (void)arg; (void)result;
     for (;;) {
         IOSleep(30000);
         struct b5q_proc_window w = b5q_proc_snapshot(&counts, rows);
-        char line[1536];
-        int used = snprintf(line, sizeof(line),
-            "B5qProcTop: window=30s spawns=%llu exits=%llu top=",
-            (unsigned long long)w.spawns, (unsigned long long)w.exits);
-        for (unsigned i = 0; i < w.rows && i < B5Q_PROC_TOP && used > 0 && (unsigned)used < sizeof(line); ++i) {
-            unsigned status = rows[i].status;
-            used += snprintf(line + used, sizeof(line) - (unsigned)used,
-                "%s%s:%u(exit=%u/sig=%u)", i ? "," : "", rows[i].name,
-                rows[i].count, (status >> 8) & 255u, status & 127u);
-        }
-        IOLog("%s overflow=%llu\n", line, (unsigned long long)w.overflow);
+        b5q_proc_print(w,rows,emitLine,NULL);
     }
 }
 static void b5q_proc_top_init(void) {

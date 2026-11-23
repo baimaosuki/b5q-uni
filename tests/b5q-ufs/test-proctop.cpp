@@ -3,9 +3,12 @@
 #include "B5qProcTop.h"
 #include <cassert>
 #include <cstdio>
+#include <cstring>
 #include <thread>
 #include <vector>
 #include <atomic>
+#include <string>
+#include "B5qProcTopFormat.h"
 
 static b5q_proc_top top;
 static b5q_proc_row rows[B5Q_PROC_BUCKETS];
@@ -55,5 +58,22 @@ int main() {
     for (unsigned j = 0; j < w.rows; ++j) counted += rows[j].count;
     assert(w.exits == B5Q_PROC_BUCKETS + 50 && counted == w.exits && w.overflow >= 50);
     assert(w.rows + w.overflow == w.exits);
-    puts("PASS: production counters, wait-status, reset, 160000 concurrent exits/snapshots, full-table explicit overflow");
+
+    b5q_proc_window full = {UINT64_MAX, UINT64_MAX, UINT64_MAX, B5Q_PROC_TOP};
+    b5q_proc_row top[B5Q_PROC_TOP] = {};
+    for (unsigned i = 0; i < B5Q_PROC_TOP; ++i) {
+        memset(top[i].name, 'X', sizeof top[i].name - 1);
+        top[i].count = UINT32_MAX;
+        top[i].status = UINT16_MAX;
+    }
+    std::vector<std::string> lines;
+    b5q_proc_print(full, top, [](const char *line, void *context) {
+        assert(strlen(line) < 200);
+        static_cast<std::vector<std::string> *>(context)->emplace_back(line);
+    }, &lines);
+    assert(lines.size() == 12);
+    assert(lines[1].find("TOP1 ") != std::string::npos);
+    assert(lines[10].find("TOP10 ") != std::string::npos);
+    assert(lines[11].find("overflow=18446744073709551615") != std::string::npos);
+    puts("PASS: counters, wait-status, reset, 160000 concurrent events, overflow, complete TOP-10, each line <200B");
 }

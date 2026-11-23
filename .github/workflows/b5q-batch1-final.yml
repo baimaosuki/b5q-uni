@@ -42,7 +42,7 @@ jobs:
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
-      - name: Reuse completed v33 kernel, Data and addon; zero kernel/object builds
+      - name: Reuse completed Batch1 kernel, Data and addon
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -57,47 +57,20 @@ jobs:
         run: |
           set -euo pipefail
           UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os macos-27.3-26C5035r
-          gh run download 45041019820 --repo "$GITHUB_REPOSITORY" \
-            --name b5q-build-45041019820 --dir "$RUNNER_TEMP/completed-cache"
-          # Reuse Samsung GPU inputs and the menu application.
-          # Existing firmware inputs are reused; no firmware compiler is run.
+          gh run download 45047962341 --repo "$GITHUB_REPOSITORY" \
+            --name b5q-build-45047962341 --dir "$RUNNER_TEMP/batch1-final-cache"
           python3 UniXNU-b5q/scripts/stage-v24-inputs.py --unixnu UniXNU \
-            --artifact "$RUNNER_TEMP/completed-cache" --inputs "$RUNNER_TEMP/batch1-final-inputs" \
-            --data-out "$RUNNER_TEMP/v33-data"
+            --artifact "$RUNNER_TEMP/batch1-final-cache" --inputs "$RUNNER_TEMP/batch1-final-inputs" \
+            --data-out "$RUNNER_TEMP/batch1-final-shared"
           python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q \
-            --artifact "$RUNNER_TEMP/completed-cache" --data-out "$RUNNER_TEMP/v33-data-reused" \
+            --artifact "$RUNNER_TEMP/batch1-final-cache" --data-out "$RUNNER_TEMP/batch1-final-data" \
             --source-run 45041019820 --source-commit ac082c9d53049323fd701cec5d6ba5bd7621bc1f
-          echo "V33_DATA=$RUNNER_TEMP/v33-data-reused/data.dbr" >> "$GITHUB_ENV"
-      - name: Check out the pinned RAM seed codec
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: UniXNU/DarwinBoot
-          ref: 5243c68ec332a227fe3680cd5da6d5a0e127035c
-          path: seed-codec
-          persist-credentials: false
-      - name: Update the existing APFS seed and reuse existing firmware inputs
+          echo "BATCH1_FINAL_DATA=$RUNNER_TEMP/batch1-final-data/data.dbr" >> "$GITHUB_ENV"
+      - name: Stage the previously verified DarwinBoot loader
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/b5q-absent-source"
-          cp UniXNU/scripts/absent-service/{absentd.c,build.py} "$RUNNER_TEMP/b5q-absent-source/"
-          patch --batch --fuzz=0 -d "$RUNNER_TEMP/b5q-absent-source" -p1 < UniXNU-b5q/patches/tools/b5q-absentd-user-domains.patch
-          python3 "$RUNNER_TEMP/b5q-absent-source/build.py" "$RUNNER_TEMP/b5q-absent-service" macos27
-          python3 UniXNU-b5q/scripts/update-b5q-launchd-seed.py --darwinboot seed-codec \
-            --baseline v33 --seed "$V33_DATA" --out "$RUNNER_TEMP/batch1-final-data" \
-            --stand-in "$RUNNER_TEMP/b5q-absent-service/bin/unixnu-absentd"
-          cp "$(dirname "$V33_DATA")"/{gpu-addon.bin,owner-trust.bundle,original-ipsw-trust.bundle} "$RUNNER_TEMP/batch1-final-data/"
-          python3 - "$RUNNER_TEMP/b5q-absent-service/report.json" "$RUNNER_TEMP/batch1-final-data" <<'PYTRUST'
-          import json, subprocess, sys
-          from pathlib import Path
-          report = json.loads(Path(sys.argv[1]).read_text())
-          root = Path(sys.argv[2])
-          output = root / "owner-trust-updated.bundle"
-          subprocess.run([sys.executable, "UniXNU/scripts/trust-append-module.py",
-                          str(root / "owner-trust.bundle"), str(output), report["cdhash"]], check=True)
-          output.replace(root / "owner-trust.bundle")
-          PYTRUST
           gh run download 44983031320 --repo "$GITHUB_REPOSITORY" \
             --name b5q-uefi-fd-217d311278b77518d8df83cec65705512795dad7 --dir "$RUNNER_TEMP/v28-fd"
           python3 - "$RUNNER_TEMP/v28-fd" "$RUNNER_TEMP/batch1-final-inputs" <<'PYCI'
@@ -112,14 +85,13 @@ jobs:
           (Path(sys.argv[2]) / "DarwinBoot.efi").write_bytes(
               loader_pe(data, "1b64af87-8415-4b57-9b16-680d70913b9f"))
           PYCI
-          echo "BATCH1_FINAL_DATA=$RUNNER_TEMP/batch1-final-data/data.dbr" >> "$GITHUB_ENV"
       - name: Prepare only the official payload tree
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           UniXNU/unixnu tree --device UniXNU-b5q --os macos-27.3-26C5035r
-          python3 - "$RUNNER_TEMP/completed-cache" <<'PYKEEP'
+          python3 - "$RUNNER_TEMP/batch1-final-cache" <<'PYKEEP'
           from pathlib import Path
           import shutil, sys
           sys.path.insert(0, "UniXNU/scripts")
@@ -131,6 +103,31 @@ jobs:
           shutil.copytree(source / "tree/build", ctx.tree / "build", dirs_exist_ok=True)
           shutil.copytree(source / "kernel/incremental-objects", ctx.work / "kernel/incremental-objects", dirs_exist_ok=True)
           PYKEEP
+      - name: Fetch pinned headers for the cached-core relink
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          UniXNU/unixnu fetch xnu IOHIDFamily --device UniXNU-b5q --os macos-27.3-26C5035r
+      - name: Compile only B5qProcTop and relink the cached core
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/relink-b5q-peripherals.py --version batch1-proctop \
+            --unixnu UniXNU --device UniXNU-b5q \
+            --cached-tree "$RUNNER_TEMP/batch1-final-cache/macos-27.3-26C5035r/b5q_macos/tree" \
+            --source-run 45041019820 --source-commit ac082c9d53049323fd701cec5d6ba5bd7621bc1f \
+            --changed B5qProcTop.c --reused-data "$BATCH1_FINAL_DATA" \
+            --out "$RUNNER_TEMP/batch1-final-relink" 2>&1 | tee "$RUNNER_TEMP/batch1-final-relink.log"
+          mkdir -p "$RUNNER_TEMP/batch1-final-pac"
+          (cd "$RUNNER_TEMP/batch1-final-pac" && xcrun ar -x \
+            "$RUNNER_TEMP/batch1-final-cache/macos-27.3-26C5035r/b5q_macos/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.link/mach.development.bcm2837.a" \
+            mac_process.o startup.o cswitch.o)
+          python3 scripts/b5q-install/check-proctop-pac.py \
+            --object "$RUNNER_TEMP/batch1-final-relink/board-input/B5qProcTop.o" \
+            --core-objects "$RUNNER_TEMP/batch1-final-pac" \
+            --out "$RUNNER_TEMP/batch1-final-proctop-pac.json"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/uefi-sheng
@@ -147,44 +144,10 @@ jobs:
             --font-source font-reference --data-ramdisk "$BATCH1_FINAL_DATA" --reuse-addon 2>&1 | tee "$RUNNER_TEMP/batch1-final-payload.log"
           python3 UniXNU-b5q/scripts/package-v24-esp.py --unixnu UniXNU --inputs "$RUNNER_TEMP/batch1-final-inputs"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        if: always()
         with:
           name: b5q-build-${{ github.run_id }}
-          path: |
-            UniXNU/out/b5q/**/esp.img
-            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
-            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.link/mach.development.bcm2837.a
-            UniXNU/out/b5q/**/tree/build/firehose/sym/Release-iphoneos/liblibfirehose_kernel.a
-            UniXNU/out/b5q/**/tree/build/corecrypto-2023/libcorecrypto_kernel_noasm-namespaced.a
-            UniXNU/out/b5q/**/tree/build/armdt-platform/libArmDTPlatform.a
-            UniXNU/out/b5q/**/tree/build/armcpu/libArmCpu.a
-            UniXNU/out/b5q/**/tree/build/adreno740/libAdreno740.a
-            UniXNU/out/b5q/**/tree/build/native-legacy-display/libNativeLegacyDisplay.late.a
-            UniXNU/out/b5q/**/tree/build/ram-block/libRamBlock.a
-            UniXNU/out/b5q/**/tree/build/libpthread-kernel/libpthread_kernel.a
-            UniXNU/out/b5q/**/tree/build/software-aes/libSoftwareAES.a
-            UniXNU/out/b5q/**/tree/build/qcom-dwc3/libQcomDwc3.a
-            UniXNU/out/b5q/**/kernel/kernel.macho
-            UniXNU/out/b5q/**/kernel/*.json
-            UniXNU/out/b5q/**/kernel/incremental-objects/B5qProcTop.o
-            UniXNU/out/b5q/**/kernel/incremental-objects/B5qBootPolicy.o
-            UniXNU/out/b5q/**/kernel/incremental-objects/*.json
-            UniXNU/out/b5q/**/payload/payload.img
-            UniXNU/out/b5q/**/payload/payload.json
-            UniXNU/out/b5q/**/runtime/data.dbr
-            UniXNU/out/b5q/**/runtime/data-seed.json
-            UniXNU/out/b5q/**/runtime/inputs.json
-            UniXNU/out/b5q/**/package.manifest.json
-            UniXNU/out/b5q/**/kernel-reuse.json
+          path: UniXNU/out/b5q/**/esp.img
           compression-level: 1
-          retention-days: 3
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
-        if: always()
-        with:
-          name: batch1-final-incremental-logs
-          path: |
-            UniXNU/out/b5q/**/logs/
-            ${{ runner.temp }}/batch1-final-payload.log
           retention-days: 3
       - name: Release temporary source artifact and staging inputs
         if: always()
@@ -193,7 +156,7 @@ jobs:
           import os, shutil
           from pathlib import Path
           root = Path(os.environ["RUNNER_TEMP"]).resolve()
-          for name in ("completed-cache", "batch1-final-inputs", "v33-data", "v33-data-reused", "batch1-final-data", "v28-fd", "batch1-final-relink"):
+          for name in ("batch1-final-cache", "batch1-final-inputs", "batch1-final-shared", "batch1-final-data", "v28-fd", "batch1-final-pac", "batch1-final-relink"):
               target = root / name
               if target.is_dir() and target.resolve().parent == root:
                   shutil.rmtree(target)
