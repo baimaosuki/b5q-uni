@@ -4,10 +4,15 @@ import argparse,hashlib,json,plistlib,struct,subprocess,sys,tempfile,uuid
 from pathlib import Path
 from b5q_data_format import DATA_UUID,ENVELOPE_BLOCKS,SECTOR,ROOT_FIRST,ROOT_LAST,TAIL_FIRST,fletcher
 SEED_SHA='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70'
-def mounted_volume(device):
- # resizeContainer may remount at /Volumes/Data instead of hdiutil's custom
- # mountpoint. Re-query the SAME device and UUID; never follow a guessed name.
- info=plistlib.loads(subprocess.check_output(['diskutil','info','-plist',device]))
+def mounted_volume(device,preferred=None):
+ # Native resize leaves the volume unmounted on current macOS. It can also
+ # remount elsewhere; use the original device, then verify UUID and path.
+ command=['diskutil','info','-plist',device]
+ info=plistlib.loads(subprocess.check_output(command))
+ if not info.get('Mounted') and preferred is not None:
+  subprocess.run(['diskutil','mount','-mountPoint',str(preferred),device],check=True)
+  subprocess.run(['diskutil','enableOwnership',device],check=True)
+  info=plistlib.loads(subprocess.check_output(command))
  if not info.get('Mounted') or info.get('VolumeUUID','').upper()!=DATA_UUID:
   raise ValueError('resized volume is not mounted with the original Data UUID')
  mount=Path(info.get('MountPoint',''))
@@ -33,7 +38,7 @@ def main():
    info=plistlib.loads(subprocess.check_output(['diskutil','info','-plist',str(mount)]));assert info['VolumeUUID'].upper()==DATA_UUID
    container=info['APFSContainerReference']
    subprocess.run(['diskutil','apfs','resizeContainer',container,'0'],check=True)
-   mount=mounted_volume(info['DeviceIdentifier'])
+   mount=mounted_volume(info['DeviceIdentifier'],mount)
    directory=mount/'private/var/db/com.apple.xpc.launchd'
    policy={}
    for name,expected in [('disabled.plist',59),('disabled.501.plist',26)]:

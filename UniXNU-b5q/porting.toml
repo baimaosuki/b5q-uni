@@ -2501,3 +2501,8 @@ result = "First CI45105257996 stopped at sixth object because the submission omi
 kind = "source"
 reference = "reports/batch2-validation.json"
 result = "CI45105913288 compiled all6boardobjects, linkednative f6756042 and packagedESP with0core/GPUrebuilds. NativeAPFSresize/fsckpassed32211206144B andcorrectDataUUID; postresizepolicyreadfailedbecausemacOSremountedoutsidehdiutilcustompath. Fixqueries sameDeviceIdentifier/UUIDMountPoint;5hostremountcasesPASS. Resume matching completednative/prelinkcache; retainESP/partialDataevenonlaterfailure. ESPinstalleracceptspersistentmanifestonlywithESP-onlyoutputandrejectsroot/boot/repair/all;mockCLItestsPASS."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45106921809 reused completednative/prelink from45105913288 with0newboardobjects; nativeAPFSgrowthpassesbutdiskutilleavesvolumeunmounted. Addexplicitmount/ownershipbeforequery;6hostcasesPASS. PreservefailedESP/grownDataandfirsterror;nextCIonlyreusesnativelinkandfinishesData/runtime. No finaldelivery yet."

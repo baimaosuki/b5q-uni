@@ -56,6 +56,7 @@ def main():
   assert sha(assets/'kernel.macho.gpuaddon')=='b68e1164f7dd0ff822f20e116e97adc4606926a4204fc25eaa5241c2a966d82d'
   kernel=assets/'kernel.macho';raw=kernel.read_bytes();outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1]);symbols={n:v for v,ns in core.symbols().items()for n in ns}
   for n in ('_b5q_power_start','_b5q_ufs_shutdown_status','_ml_outside_memory_pages','_ml_outside_memory_refused','_sheng_cpu_idle_mach'):assert n in symbols,n
+  (a.out/'kernel-symbols.json').write_text(json.dumps({n:hex(v)for n,v in symbols.items()if n in ('_b5q_power_start','_b5q_ufs_shutdown_status','_ml_outside_memory_pages','_ml_outside_memory_refused','_sheng_cpu_idle_mach')or 'B5qDataBlock' in n or 'b5qPlatformPower' in n},indent=2)+'\n')
   for marker in (b'FUA-still-accepted',b'outside adopted=',b'4.5 GiB',b'TOP6..10',b'window=[%llu,%llu]',b'B5qPower:'):assert marker in raw,marker
   assert b'B5qProcTop: window=30s spawns=%llu exits=%llu top='not in raw
   builtin=json.loads((R/'UniXNU-b5q/package/B5qBootPolicy.c').read_text().splitlines()[-1].rstrip(';'))

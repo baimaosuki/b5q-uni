@@ -1724,5 +1724,23 @@
       ]
     },
     "hardware_execution_tested": false
+  },
+  "DMA_memory_compatibility": {
+    "source_files": {
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c": "d1279c78212c517bfb34d743957532446d6915633450b890c969d67fdc72ab18",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h": "b23cc3e3c826e4b3fc66b52cce3da0a35e13b3fc3a3b8da052454d1be3895e6f",
+      "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29"
+    },
+    "firmware": "UsbDma.c BuildUsbTables: conventional EFI ranges plus loader memory clipped to actual OwnedBase/OwnedBytes, bounded by2GiB..64GiB; reserved table pages excluded. PrepareUsbDma receives the loader-selected current span, not a hardcoded4GiB. No firmware recompile.",
+    "USB": "36bit aperture includes static high/low-safe modeled allocations; original firmware result/retention flags still required. No claim that every static FDT page is runtime conventional.",
+    "UFS": "DMA CAP64AS check and contiguous allocation preserved; Data descriptor/tag1 has its own allocated pages; no EL1 SMMU modification. Physical address compatibility awaits runtime actual allocation as in the baseline.",
+    "shutdown_driver_delivery": "IOPMrootDomain.cpp10665..10908 walks the PM plane, selects actual systemWillShutdown overrides; B5qDataBlock PMinit+rootDomain.addPowerChild publishes the callback. Normal callback follows both vfs_unmountall passes; no early write closure."
+  },
+  "third_CI": {
+    "run": 45106921809,
+    "board_compiled_this_run": 0,
+    "completed_native_reused_from": 45105913288,
+    "APFS_growth": "PASS; diskutil left volume unmounted",
+    "fix": "Explicitly mount the already UUID-identified original device at owned temporary mountpoint, enable ownership, then query and verify UUID. Six host remount cases pass. Retained third ESP and grown Data for local inspection; not a delivery."
   }
 }
