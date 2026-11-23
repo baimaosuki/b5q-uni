@@ -1,6 +1,9 @@
 name: b5q Batch 1 final launchd and resident service package
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - codex/b5q-batch1-final-proctop
 permissions:
   contents: read
   actions: read
