@@ -28,9 +28,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-bt-target-') as td:
         # The native tty owns cdevsw/selinfo/lock startup objects. Compile
         # against pinned XNU private definitions, never SDK approximations.
         selected=options
-        if source.name=='btqca.c':
-            selected=[*options,'-include',str(R/'UniXNU-b5q/package/B5qBtLinuxCompat.h')]
-        if source.name=='qbt_tty.c':
+        if source.suffix=='.c':
             native=R/'artifacts/b5q-p2-work/xnu-private-source'
             generated=R/'artifacts/b5q-p2-work/xnu-private-headers'
             config=next(line.split('=',1)[1] for line in (generated/'Makefile').read_text().splitlines()
@@ -42,6 +40,8 @@ with tempfile.TemporaryDirectory(prefix='b5q-bt-target-') as td:
                 *shlex.split(config),'-DARM64_BOARD_CONFIG_BCM2837','-DMACH_KERNEL',
                 '-D_KERNEL_BUILD','-DKERNEL_BUILD','-DBSD_BUILD','-DBSD_KERNEL_PRIVATE',
                 '-include',str(generated/'meta_features.h'),*bsd_options]
+        if source.name=='btqca.c':
+            selected=[*selected,'-include',str(R/'UniXNU-b5q/package/B5qBtLinuxCompat.h')]
         objects.append(compile_object(cxx,selected,source,out/(source.stem+'.o'),llvm))
 result=dict(status='TARGET_OBJECTS_COMPILED',joint_P2_P3_symbol_PAC_gate_pending=True,
     hardware_verified=False,objects={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in objects})

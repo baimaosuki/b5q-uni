@@ -49,7 +49,7 @@ def build(tree,package,out):
     for source in sources:
         extra=['-Wno-sign-compare','-Wno-misleading-indentation','-Wno-missing-field-initializers']
         if source.name=='btqca.c':extra+=['-include',str(package/'B5qBtLinuxCompat.h')]
-        objects.append(compile(source,out/(source.stem+'.o'),flags,extra))
+        objects.append(compile(source,out/(source.stem+'.o'),flags,extra,bsd=source.suffix=='.c'))
     llvm=Path(subprocess.check_output(['brew','--prefix','llvm'],text=True).strip())/'bin'
     subprocess.run([sys.executable,str(Path(__file__).with_name('build-b5q-wifi.py')),
         '--module',str(module),'--out',str(out/'ath11k'),'--llvm',str(llvm),'--jobs','4'],check=True)

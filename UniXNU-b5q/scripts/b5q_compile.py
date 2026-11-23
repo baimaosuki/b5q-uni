@@ -5,12 +5,13 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 OBJ=ROOT/'build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837'
 
-def record(cpp=True):
- p=OBJ/('iokit/DEVELOPMENT/IOPlatformExpert.cpo.json' if cpp else 'osfmk/DEVELOPMENT/startup.o.json')
+def record(cpp=True,bsd=False):
+ p=OBJ/('iokit/DEVELOPMENT/IOPlatformExpert.cpo.json' if cpp else
+        'bsd/DEVELOPMENT/kern_event.o.json' if bsd else 'osfmk/DEVELOPMENT/startup.o.json')
  return json.loads(p.read_text().strip().rstrip(','))
 
-def compile(source,output,includes=(),flags=()):
- source,output=Path(source),Path(output);r=record(source.suffix!='.c');args=r['arguments'];cmd=[args[0],*includes];i=1;replaced=False
+def compile(source,output,includes=(),flags=(),bsd=False):
+ source,output=Path(source),Path(output);r=record(source.suffix!='.c',bsd);args=r['arguments'];cmd=[args[0],*includes];i=1;replaced=False
  while i<len(args):
   v=args[i]
   if v==r['file']:cmd.append(str(source));replaced=True

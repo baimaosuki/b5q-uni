@@ -29,16 +29,16 @@ static uint32_t rd(struct b5q_bt_fifo *g, uint32_t r) {return g->ops.read(g->ops
 static void wr(struct b5q_bt_fifo *g,uint32_t r,uint32_t v) {g->ops.write(g->ops.context,r,v);}
 static void barrier(struct b5q_bt_fifo *g) {g->ops.barrier(g->ops.context);}
 static uint64_t now(struct b5q_bt_fifo *g) {return g->ops.now_ns(g->ops.context);}
-static void mask(struct b5q_bt_fifo *g,bool value) {g->ops.irq_mask(g->ops.context,value);}
+static void fifoMask(struct b5q_bt_fifo *g,bool value) {g->ops.irq_mask(g->ops.context,value);}
 static void rfr(struct b5q_bt_fifo *g,bool ready) {wr(g,G_MANUAL_RFR,ready && g->flow ? 0 : G_RFR_OFF);}
 static void fail(struct b5q_bt_fifo *g,int error) {
     g->error=error;g->state=B5Q_BT_FIFO_FAILED;g->stop_deadline=g->retry_at=0;
-    rfr(g,false);wr(g,G_IRQ_EN,0);barrier(g);mask(g,true);
+    rfr(g,false);wr(g,G_IRQ_EN,0);barrier(g);fifoMask(g,true);
 }
 int b5q_bt_fifo_prepare(struct b5q_bt_fifo *g,const struct b5q_bt_fifo_ops *ops) {
     if(!g || !ops || !ops->read || !ops->write || !ops->barrier || !ops->now_ns ||
        !ops->irq_mask || !ops->wake_worker || !ops->receive)return -EINVAL;
-    memset(g,0,sizeof(*g));g->ops=*ops;g->flow=true;mask(g,true);
+    memset(g,0,sizeof(*g));g->ops=*ops;g->flow=true;fifoMask(g,true);
     /* This is a read-only hardware capability, never clear it to force FIFO. */
     if(rd(g,F_IF_DISABLE)&1u)return -ENOTSUP;
     if(((rd(g,G_FW_REV)>>8)&255u)!=2)return -ENXIO;
@@ -75,10 +75,10 @@ int b5q_bt_fifo_start(struct b5q_bt_fifo *g) {
     g->state=B5Q_BT_FIFO_RUN;
     wr(g,G_S_CMD,(1u<<27)|(1u<<7));rfr(g,true);
     wr(g,G_IRQ_EN,3);barrier(g); // CPU M/S interrupts only, no DMA IRQs.
-    __atomic_store_n(&g->irq_pending,false,__ATOMIC_RELEASE);mask(g,false);return 0;
+    __atomic_store_n(&g->irq_pending,false,__ATOMIC_RELEASE);fifoMask(g,false);return 0;
 }
 void b5q_bt_fifo_irq(struct b5q_bt_fifo *g) {
-    mask(g,true);__atomic_store_n(&g->irq_pending,true,__ATOMIC_RELEASE);
+    fifoMask(g,true);__atomic_store_n(&g->irq_pending,true,__ATOMIC_RELEASE);
     g->ops.wake_worker(g->ops.context);
 }
 static void deliver(struct b5q_bt_fifo *g) {
@@ -141,7 +141,7 @@ bool b5q_bt_fifo_service(struct b5q_bt_fifo *g) {
     if(g->state==B5Q_BT_FIFO_CANCEL || g->state==B5Q_BT_FIFO_ABORT) {
         if(!(rd(g,G_STATUS)&G_S_ACTIVE) && !g->rx_count) {
             g->state=B5Q_BT_FIFO_STOPPED;g->stop_deadline=g->retry_at=0;
-            wr(g,G_IRQ_EN,0);barrier(g);mask(g,true);return false;
+            wr(g,G_IRQ_EN,0);barrier(g);fifoMask(g,true);return false;
         }
         if(now(g)>=g->stop_deadline) {
             g->stats.cancel_timeouts++;
@@ -157,7 +157,7 @@ bool b5q_bt_fifo_service(struct b5q_bt_fifo *g) {
         wr(g,G_S_IRQ_EN,room?F_S_IRQS:F_S_IRQS&~(F_RX_WATER|F_RX_LAST));
     }
     g->retry_at=g->rx_count?now(g)+1000000ULL:0;
-    barrier(g);mask(g,false);return false;
+    barrier(g);fifoMask(g,false);return false;
 }
 bool b5q_bt_fifo_drained(struct b5q_bt_fifo *g) {
     return !g->tx_busy && !(rd(g,G_STATUS)&G_M_ACTIVE) && !(rd(g,G_TX_FIFO_STATUS)&0xfffffffu);
