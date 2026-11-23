@@ -42,8 +42,9 @@ extern "C" void b5q_ram_storage_start(void) {
     bool seed=map && (map->getProperty("PackedRAMDisk") || map->getProperty("RAMDisk"));
     OSSafeReleaseNULL(map);
     unsigned persistent=0;PE_parse_boot_argn("b5q-data-ufs",&persistent,sizeof(persistent));
-    if(!seed && persistent!=1)return;
-    if(persistent==1) {
+    if(persistent>2)panic("B5qRamStorage: invalid persistent Data mode");
+    if(!seed && !persistent)return;
+    if(persistent) {
         if(!b5q_power_ready())panic("B5qPower: persistent Data requires verified PSCI reset/off handler");
         // Six GiB is the target, not a boot prerequisite: firmware reservations
         // and refused outside pages legitimately reduce the usable total.
@@ -61,5 +62,5 @@ extern "C" void b5q_ram_storage_start(void) {
     status=OSKextLoadKextWithIdentifier("com.apple.filesystems.apfs");
     if(status!=kOSReturnSuccess)panic("B5qRootStorage: APFS load %x",status);
     b5q_ufs_start(provider);
-    IOLog("B5qRamStorage: Data=%s root=authenticated-read-only\n",persistent==1?"persistent-UFS":"volatile-RAM");
+    IOLog("B5qRamStorage: Data=%s root=authenticated-read-only\n",persistent?"persistent-UFS":"volatile-RAM");
 }

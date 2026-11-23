@@ -53,6 +53,8 @@ REPLACEMENTS = {
     'B5qUfs/B5qUfs.cpp': ('B5qUfs.late.o', (STORAGE,)),
 }
 RECIPES = {
+    'userdata': (45108577992, 'e66beea40e2a887e177c762804206d21ba983ef2',
+                 ('B5qRamStorage.cpp','B5qUfs/B5qUfs.cpp')),
     'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp', 'GeniI2c.c')),
     'v27': (44937931538, '85a328d1956a7216892569a034decf049f889d16',
             ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp')),
@@ -262,7 +264,7 @@ def main():
     sdk = Path(subprocess.check_output(['xcrun', '--sdk', 'macosx', '--show-sdk-path'], text=True).strip())
     include = out / 'include'
     header = prepare_headers(sdk, include, hid)
-    if args.version=='batch2':
+    if args.version in ('batch2','userdata'):
         storage=dependency(core,'IOStorageFamily','IOBlockStorageDevice.h')
         dest=include/'IOKit/storage';dest.mkdir(parents=True,exist_ok=True)
         for path in storage.glob('*.h'):shutil.copyfile(path,dest/path.name)

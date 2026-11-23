@@ -1,0 +1,238 @@
+{
+  "state": "local preflight complete; finalCI/images pending",
+  "local_pre_ci": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "records",
+        "passed": true
+      },
+      {
+        "name": "data-partition",
+        "passed": true
+      },
+      {
+        "name": "data-queue",
+        "passed": true
+      },
+      {
+        "name": "data-installer",
+        "passed": true
+      },
+      {
+        "name": "userdata-installer",
+        "passed": true
+      },
+      {
+        "name": "batch2-contract",
+        "passed": true
+      },
+      {
+        "name": "installer",
+        "passed": true
+      },
+      {
+        "name": "data-grow",
+        "passed": true
+      },
+      {
+        "name": "layout",
+        "passed": true
+      },
+      {
+        "name": "two-storage-target",
+        "passed": true
+      },
+      {
+        "name": "storage-PAC-zero-SMMU",
+        "passed": true
+      },
+      {
+        "name": "fixed-GPT-existing-root-Batch1-inheritance-981B-two-object-cache-workflow",
+        "passed": true
+      }
+    ],
+    "package_source_changes": [
+      "B5qRamStorage.cpp",
+      "B5qUfs/B5qDataFormat.h",
+      "B5qUfs/B5qUfs.cpp"
+    ],
+    "board_objects": 2,
+    "core_GPU_Mesa_UEFI_recompiled": false,
+    "device_access": false,
+    "final_CI_and_image_acceptance": "pending"
+  },
+  "objects": {
+    "passed": true,
+    "objects": {
+      "B5qRamStorage.o": {
+        "sha256": "32dfa9312dcc60c3584ca5e5f6dbd54f2e7c90238308829d9b9c84fbaf200cf1",
+        "instructions": 292,
+        "apps_smmu_materializations": 0
+      },
+      "B5qProcTop.o": {
+        "sha256": "6283c27624aa50adb568e3de77988babb45e2386e56e41aba167bb01c2b8fcce",
+        "instructions": 705,
+        "apps_smmu_materializations": 0
+      },
+      "NativeHidInput.o": {
+        "sha256": "27348ebce0b3d8198bd230353ed5f2452f114498f21e7e4d03e20b543499f801",
+        "instructions": 2652,
+        "apps_smmu_materializations": 0
+      },
+      "B5qPower.o": {
+        "sha256": "96ac9831e78c15bcbbeb7a5f709fd41dc4d076adf60e7c7a24d9395feff9a659",
+        "instructions": 219,
+        "apps_smmu_materializations": 0
+      },
+      "B5qUfs.o": {
+        "sha256": "95ef4e687830b050f1d510d0b46a3aeaa251f225409fab70d85de146d4fb1bc9",
+        "instructions": 9584,
+        "apps_smmu_materializations": 0
+      },
+      "HidInputProbe.o": {
+        "sha256": "557d3ead50b756d165d797882d2e91a4dbdc2309ed1523d44f3219f4299a31d8",
+        "instructions": 1674,
+        "apps_smmu_materializations": 0
+      }
+    },
+    "platform_power_PAC": {
+      "key": "IA",
+      "diversity": "0x0ba5",
+      "producer": [
+        {
+          "site": "0x240",
+          "key": 0,
+          "diversity": 2981,
+          "address_diversity": 0
+        }
+      ],
+      "core_consumer_sites": [
+        "0xe60",
+        "0x474c"
+      ]
+    },
+    "data_root_shared_virtual_slots_verified": 326,
+    "Data_and_root_completion_PAC": {
+      "diversity": "0xe90c",
+      "calls": [
+        {
+          "site": 15368,
+          "diversity": 59660
+        },
+        {
+          "site": 17088,
+          "diversity": 59660
+        }
+      ]
+    },
+    "hardware_execution_tested": false
+  },
+  "layout": {
+    "schema_version": 1,
+    "state": "minimal-layout-selected; images not yet built",
+    "sector_bytes": 4096,
+    "source": {
+      "kind": "user-pasted GPT listing, 2026-11-19; not independently read from a disk",
+      "fresh_device_read": false,
+      "live_disk_and_partition_GUIDs": "unknown until installer verifies actual GPT"
+    },
+    "design": "Keep every GPT entry and name byte-identical; reuse only original userdata contents for macOS Data. No system move, no GPT edits.",
+    "partitions": {
+      "boot": {
+        "number": 21,
+        "first_lba": 152448,
+        "last_lba": 177023,
+        "size_bytes": 100663296,
+        "byte_offset": 624427008,
+        "type_code": "FFFF",
+        "name": "boot"
+      },
+      "esp": {
+        "number": 29,
+        "first_lba": 3162880,
+        "last_lba": 3367679,
+        "size_bytes": 838860800,
+        "byte_offset": 12955156480,
+        "type_code": "EF00",
+        "name": "esp"
+      },
+      "macosroot": {
+        "number": 37,
+        "first_lba": 49692663,
+        "last_lba": 62275574,
+        "size_bytes": 51539607552,
+        "byte_offset": 203541147648,
+        "type_code": "AF0A",
+        "name": "macosroot"
+      },
+      "userdata": {
+        "number": 36,
+        "first_lba": 3406336,
+        "last_lba": 47595510,
+        "size_bytes": 180998860800,
+        "byte_offset": 13952352256,
+        "type_code": "A03A",
+        "name": "userdata"
+      }
+    },
+    "GPT_entries_unchanged": 37,
+    "GPT_write_count": 0,
+    "root": {
+      "existing_image_bytes": 17603493888,
+      "existing_header_SHA256": "d93a00b589d64b7e0757aa40288aaa927a5364382ec5a0dd08faa3629d9a7d8b",
+      "partition_bytes": 51539607552,
+      "reflash_required": false,
+      "read_only": true
+    },
+    "Data": {
+      "physical_partition": "userdata",
+      "partition_bytes": 180998860800,
+      "partition_GiB": 168.5683250427246,
+      "envelope_first_lba": 3406336,
+      "envelope_blocks": 256,
+      "APFS_first_lba": 3406592,
+      "APFS_last_lba": 47595510,
+      "APFS_blocks": 44188919,
+      "APFS_bytes": 180997812224,
+      "APFS_GiB": 168.5673484802246,
+      "kernel_arg": "b5q-data-ufs=2",
+      "format": "B5QDATA1 1MiB envelope + APFS exposed by B5qDataBlock; GPT name userdata retained"
+    },
+    "unused": {
+      "existing_gap_bytes": 8589934592,
+      "old_root_tail_remains_unmodified": true,
+      "reason": "Using these areas would add GPT changes/move existing system; user explicitly requested least work"
+    },
+    "existing_Android_data": "Discarded during explicit first-install conversion; no preservation requested",
+    "build": {
+      "board_objects": [
+        "B5qRamStorage.cpp",
+        "B5qUfs/B5qUfs.cpp"
+      ],
+      "core_GPU_Mesa_UEFI_rebuild": false,
+      "existing_root_reflash": false,
+      "ESP_update": true,
+      "Data": "grow verified Batch1 seed to exact original userdata capacity minus1MiB; preserve account/SIP2/59+26policies"
+    },
+    "install": {
+      "connected_device_access": false,
+      "flash_performed": false,
+      "scope": "User-run TWRP tool validates b5q+LUN0+4Kn+GPTCRC/name/UUID/exactbounds+root hash; requires userdata explicitly unmounted and explicit replacement flag; existing APFS/macOS envelope refused",
+      "required_images": [
+        "esp.img",
+        "data-ufs.img"
+      ]
+    },
+    "input_hashes": {
+      "source_GPT_listing_SHA256": "f03c7b4e6349ac7d7d1a92c387fccb9566c940af0efd407a21821d346489a644",
+      "planner_SHA256": "1fc5fa480b1b14edcad1cb534bd2d48ecfe79aaf7cd237b6963b9d268e43b9ba"
+    }
+  },
+  "source_hashes": {
+    "UniXNU-b5q/package/B5qRamStorage.cpp": "6236fd36e643524140221cc1376d2046130471e8bdd8cfef800ba004ad294f78",
+    "UniXNU-b5q/package/B5qUfs/B5qDataFormat.h": "3801a84580eb3dba54211286c06f069fff701157b3d77d8fa945a989ea4cbc30",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "fe8bf3261227d8c2d567a51deef2cb775c90271e92e7e97c76360d4dfb4599a3",
+    "scripts/b5q-install/install-data-ufs.py": "baeffda8173470ca472b7e1a0a7dcf7e2c2d5a28f4d50f4214678c08d98c0ee5"
+  }
+}

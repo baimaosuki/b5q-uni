@@ -77,6 +77,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-installer-cli-') as td:
    if cmd.startswith('blockdev --getsize64'):return str(capacity*4096)
    if cmd.endswith('/start'):return str(f.ROOT_FIRST*8+(1 if case=='sysfs-start' else 0))
    if cmd.endswith('/size'):return str((f.ROOT_LAST-f.ROOT_FIRST+1)*8)
+   if cmd=='cat /proc/swaps':return 'Filename Type Size Used Priority'
    if cmd=='cat /proc/mounts':return '/dev/block/sda28 /data apfs rw 0 0' if case=='mounted' else ''
    if 'sha256sum' in cmd:return ('0' if case=='readback-sha' else 'a')*64+'  -'
    raise AssertionError(cmd)

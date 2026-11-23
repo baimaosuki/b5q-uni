@@ -32,7 +32,7 @@ shutil.copyfile(W/'objects/NativeHidInput.o',W/'pac/NativeHidInput.o')
 run('cross-object-PAC',[sys.executable,'scripts/b5q-install/check-usb-gmu-pac.py','--usb',W/'pac/QcomDwc3.o','--armcpu',W/'pac/ArmCpu.o','--gpu',W/'pac/B5qGpu.o','--gmu',W/'pac/ShengGmu.kit.o','--extended-dir',W/'pac','--out',W/'full-pac.json'])
 b=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text());assert b['adt']['chosen']['asmb']=={'u64':{'lp-sip0':2}}
 assert b['payload']['adt']['persistent_data'] and int(b['payload']['adt']['owned_memory_size'],0)==6<<30
-args=b['payload']['kernel_args'];assert 'b5q-data-ufs=1'in args and 'b5q-psci-reset=1'in args and not any(x.startswith('offline-mobile-graphics-client=')for x in args)
+args=b['payload']['kernel_args'];assert any(x in args for x in ('b5q-data-ufs=1','b5q-data-ufs=2')) and 'b5q-psci-reset=1'in args and not any(x.startswith('offline-mobile-graphics-client=')for x in args)
 assert (R/'UniXNU-b5q/scripts/package.sh').read_bytes()==(R/'UniXNU/templates/package.sh').read_bytes()
 assert hashlib.sha256((R/'UniXNU-b5q/inputs/DarwinBoot-v30.efi').read_bytes()).hexdigest()=='100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde'
 import yaml

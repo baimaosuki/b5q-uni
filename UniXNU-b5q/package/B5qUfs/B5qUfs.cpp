@@ -46,7 +46,8 @@ struct Transport {
 };
 static Transport host;
 static B5qData::Identity dataIdentity;
-static bool dataRequested=false,dataSeparate=false;
+static bool dataRequested=false;
+static uint32_t dataMode=B5qData::tailMode;
 static uint32_t read32(uintptr_t p,unsigned off) { return *reinterpret_cast<volatile uint32_t*>(p+off); }
 static void write32(uintptr_t p,unsigned off,uint32_t n) { __asm__ volatile("dsb sy":::"memory");*reinterpret_cast<volatile uint32_t*>(p+off)=n;__asm__ volatile("dsb sy":::"memory"); }
 static uintptr_t map(uint64_t physical,uint64_t size,IOMemoryMap **keep) {
@@ -213,7 +214,7 @@ static bool selectLun() {
   for(size_t at=0;at<allocated;){uint32_t take=uint32_t(allocated-at>maxTransfer?maxTransfer:allocated-at);if(!readLba(lun,g.entriesLba+at/4096,take/4096,table+at,true)){ok=false;host.gptReason="gpt-table-read";break;}at+=take;}
   if(ok&&target(table,g,&host.gptReason)){
    ++found;selected=lun;host.gptReason="matched";
-   if(dataRequested && (lun!=0 || !B5qData::select(block,table,g,dataSeparate,last+1,dataIdentity))) {
+   if(dataRequested && (lun!=0 || !B5qData::selectMode(block,table,g,dataMode,last+1,dataIdentity))) {
     host.gptReason="persistent-data-GPT-identity";IOFree(table,allocated);IOFree(block,4096);return false;
    }
   }
@@ -295,10 +296,13 @@ static void publish(void *context,wait_result_t) {auto *provider=static_cast<IOS
 }
 #include "B5qDataBlock.h"
 extern "C" void b5q_ufs_start(IOService *provider) {
- unsigned data=0;PE_parse_boot_argn("b5q-data-ufs",&data,sizeof(data));dataRequested=data==1;
+ unsigned data=0;PE_parse_boot_argn("b5q-data-ufs",&data,sizeof(data));
+ if(data>2)fail("invalid persistent Data mode");
+ dataRequested=data!=0;
  char partition[32]={};PE_parse_boot_argn("b5q-data-partition",partition,sizeof(partition));
- dataSeparate=!strcmp(partition,"macosdata");
- if(partition[0] && !dataSeparate && strcmp(partition,"macosroot-tail"))fail("invalid Data partition selection");
+ dataMode=data==2?B5qData::userdataMode:!strcmp(partition,"macosdata")?B5qData::partitionMode:B5qData::tailMode;
+ if(data==2 && partition[0] && strcmp(partition,"userdata"))fail("userdata mode conflicts with Data partition selection");
+ if(data!=2 && partition[0] && strcmp(partition,"macosdata") && strcmp(partition,"macosroot-tail"))fail("invalid Data partition selection");
  unsigned requested=0;if(!PE_parse_boot_argn("b5q-root",&requested,sizeof(requested))||requested!=1)fail("explicit b5q-root=1 required");
  if(!startTransport())fail("Samsung firmware warm handoff/queue/SMMU unavailable");
  if(!wakeDevice())fail("UFS device wake/readiness");

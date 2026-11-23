@@ -15,14 +15,16 @@ def run(*cmd):subprocess.run(list(map(str,cmd)),check=True)
 def main():
  p=argparse.ArgumentParser(description=__doc__)
  for n in ('esp','data','manifest','diagnostics','out'):p.add_argument('--'+n,type=Path,required=True)
+ p.add_argument('--storage-profile',choices=['tail','userdata'],default='tail')
  a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
  fs=load(R/'scripts/b5q-install/package-usb-dma-esp.py');fs.image_format(a.esp);run('fsck.fat','-n',a.esp)
  run(sys.executable,R/'scripts/b5q-install/verify-esp-log.py','--esp',a.esp,'--out',a.out/'log-allocation.json')
  def unique(name):
   rows=list(a.diagnostics.rglob(name));assert len(rows)==1,(name,rows);return rows[0]
  relink=json.loads(unique('incremental-relink.json').read_text())
- assert relink['relink_version']=='batch2' and relink['source_run']==45047962341
- assert relink['core_translation_units_compiled']==0 and relink['board_translation_units_compiled']==6 and not relink['gpu_recompiled']
+ selected_userdata=a.storage_profile=='userdata';expected_objects=2 if selected_userdata else 6
+ assert relink['relink_version']==('userdata'if selected_userdata else'batch2') and relink['source_run']==(45108577992 if selected_userdata else 45047962341)
+ assert relink['core_translation_units_compiled']==0 and relink['board_translation_units_compiled']==expected_objects and not relink['gpu_recompiled']
  assert relink['expected_core_sha256']==relink['unchanged_core_after_link_sha256']=='88703fdc7eb18011294b5fe634d23b085496732f1e8bd4dd04e47f82dbe6ec2b'
  for name,meta in relink['returned_objects'].items():assert sha(unique(name))==meta['sha256']
  changed_members={}
@@ -41,7 +43,8 @@ def main():
   assert menu['boot']['default']=='xnu' and set(entries)=={'xnu','ram-fallback'}
   normal,recovery=entries['xnu'],entries['ram-fallback'];assert 'initrd'not in normal and recovery['initrd']=='Payloads/scratch-data.img'
   b=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text());assert normal['args']==' '.join(b['payload']['kernel_args']) and len(normal['args'].encode('ascii'))<=1000
-  assert recovery['args']==normal['args'].replace('b5q-data-ufs=1','b5q-data-ufs=0')
+  assert recovery['args']==' '.join('b5q-data-ufs=0'if x.startswith('b5q-data-ufs=')else x for x in normal['args'].split())
+  assert ('b5q-data-ufs=2'if selected_userdata else'b5q-data-ufs=1')in normal['args'].split()
   assert 'offline-mobile-graphics-client'not in normal['args']
   profiles={}
   for name,entry in entries.items():
@@ -85,7 +88,8 @@ def main():
    assert stats['private/var/ngpu/bin/b5q-absentd']['mode']==0o100755
    return result,absent.read_bytes()
   install=load(R/'scripts/b5q-install/install-data-ufs.py');manifest=json.loads(a.manifest.read_text());install.local_image(a.data,manifest)
-  assert manifest['apfs_blocks']==fmt.ROOT_LAST-fmt.TAIL_FIRST+1-fmt.ENVELOPE_BLOCKS
+  expected_blocks=(fmt.USERDATA_LAST-fmt.USERDATA_FIRST+1 if selected_userdata else fmt.ROOT_LAST-fmt.TAIL_FIRST+1)-fmt.ENVELOPE_BLOCKS
+  assert manifest['apfs_blocks']==expected_blocks
   persistent,absent=read_apfs(a.data,'persistent')
   sys.path.insert(0,str(R/'sources/UniXNU/drivers/DarwinBoot/Test'));from packed_ramdisk import regions
   logical,extents=regions((assets/'scratch-data.img').read_bytes());assert logical==4<<30
@@ -102,6 +106,6 @@ def main():
    f.seek(-4096,2);assert hashlib.sha256(f.read(4096)).hexdigest()==manifest['tail_block_sha256']
   run(sys.executable,R/'tests/b5q-ufs/test-post-seal.py','--kernel',kernel,'--out',a.out/'post-seal.json')
   (a.out/'disabled-plists-readback.json').write_text(json.dumps(persistent,indent=2)+'\n')
-  result=dict(passed=True,CI_core_recompiled=False,board_objects_recompiled=6,board_objects_compiled_this_run=relink.get("board_objects_compiled_this_run",6),completed_native_source_CI=relink.get("completed_relink_reused_from_CI"),ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),Data=dict(bytes=a.data.stat().st_size,sha256=manifest['sha256'],APFS_volume_uuid=fmt.DATA_UUID,APFS_container_uuid=manifest['container_uuid'],policies_counts={p:len(v['contents'])for p,v in persistent.items()}),profiles=profiles,changed_archive_members=changed_members,loader_sha256=sha(boot/'Drivers/DarwinBoot.efi'),Batch1_absentd_signatures_trusted=[h.hex()for h in hashes],hardware_qualified=False)
+  result=dict(passed=True,CI_core_recompiled=False,board_objects_recompiled=expected_objects,storage_profile=a.storage_profile,board_objects_compiled_this_run=relink.get("board_objects_compiled_this_run",expected_objects),completed_native_source_CI=relink.get("completed_relink_reused_from_CI"),ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),Data=dict(bytes=a.data.stat().st_size,sha256=manifest['sha256'],APFS_volume_uuid=fmt.DATA_UUID,APFS_container_uuid=manifest['container_uuid'],policies_counts={p:len(v['contents'])for p,v in persistent.items()}),profiles=profiles,changed_archive_members=changed_members,loader_sha256=sha(boot/'Drivers/DarwinBoot.efi'),Batch1_absentd_signatures_trusted=[h.hex()for h in hashes],hardware_qualified=False)
   (a.out/'images.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':main()

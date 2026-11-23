@@ -7,6 +7,7 @@ ROOT_HEADER_SHA='d93a00b589d64b7e0757aa40288aaa927a5364382ec5a0dd08faa3629d9a7d8
 GUARD=256<<20
 TAIL_FIRST=ROOT_LAST+1-(30<<30)//SECTOR
 ENVELOPE_BLOCKS=256
+USERDATA_FIRST,USERDATA_LAST=3406336,47595510
 DATA_UUID='1552CFEE-78FF-48D8-8A6C-694B867D61AC'
 def inside(first,last,start,end):
  return first<=start<=end<=last
@@ -38,13 +39,14 @@ def choose(disk,parts,root,partition):
  if partition=='macosroot-tail':
   if TAIL_FIRST<ROOT_FIRST+(ROOT_TOTAL+GUARD+4095)//4096:raise ValueError('readonly guard overlap')
   return dict(mode=1,first=TAIL_FIRST,last=ROOT_LAST,disk=disk,partition=root['uuid'])
- if partition!='macosdata':raise ValueError('Data partition must be macosroot-tail or macosdata')
- selected=[x for x in parts if x['name']=='macosdata']
- if len(selected)!=1:raise ValueError('one explicit macosdata required')
+ if partition not in ('macosdata','userdata'):raise ValueError('Data partition must be macosroot-tail, macosdata or userdata')
+ selected=[x for x in parts if x['name']==partition]
+ if len(selected)!=1:raise ValueError('one explicit Data partition required')
  p=selected[0]
+ if partition=='userdata' and (p['first'],p['last'])!=(USERDATA_FIRST,USERDATA_LAST):raise ValueError('userdata exact geometry mismatch')
  if not any(p['uuid']) or any(x is not p and (x['uuid']==p['uuid'] or x['first']<=p['last'] and p['first']<=x['last']) for x in parts):raise ValueError('macosdata overlap/alias')
  if p['first']<=ROOT_LAST and ROOT_FIRST<=p['last'] or p['first']<265 or p['last']>0xffffffff or p['last']-p['first']+1<=ENVELOPE_BLOCKS:raise ValueError('macosdata unsafe geometry')
- return dict(mode=2,first=p['first'],last=p['last'],disk=disk,partition=p['uuid'])
+ return dict(mode=3 if partition=='userdata'else 2,first=p['first'],last=p['last'],disk=disk,partition=p['uuid'])
 
 def envelope(identity,container_uuid):
  first,last=identity['first'],identity['last']
