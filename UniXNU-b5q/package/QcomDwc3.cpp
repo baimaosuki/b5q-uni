@@ -168,6 +168,15 @@ void selectUtmiClock() {
     *cfg = *cfg | 1u | 1u << 3; barrier(); IOSleep(1);
     *cfg = *cfg & ~(1u << 8); barrier();
 }
+// Reverse the QSCRATCH UTMI-only mux after a successful hot-plug QMP start.
+// PIPE_UTMI_CLK_DIS gates the mux while PIPE_UTMI_CLK_SEL/PIPE3_PHYSTATUS_SW
+// change. Preserve every unrelated GENERAL_CFG bit.
+void selectPipeClock() {
+    volatile uint32_t *cfg = gScratch.va + 0x8 / 4;
+    *cfg = *cfg | 1u << 8; barrier(); IOSleep(1);
+    *cfg = *cfg & ~(1u | 1u << 3); barrier(); IOSleep(1);
+    *cfg = *cfg & ~(1u << 8); barrier();
+}
 void vbusOverride(bool on) {
     volatile uint32_t *ss = gScratch.va + 0x30 / 4, *hs = gScratch.va + 0x10 / 4;
     const uint32_t ssBits = 1u << 24, hsBits = 1u << 20 | 1u << 28;
@@ -185,9 +194,11 @@ bool qmpInit(bool reverse) {
     volatile uint32_t *reset = gGcc.va + 0x50000 / 4, *common = gGcc.va + 0x50008 / 4;
     *reset = *reset | 1u; *common = *common | 1u; barrier(); IODelay(20);
     *reset = *reset & ~1u; *common = *common & ~1u; barrier();
-    if (!rcg(0x39070, 0) || !branch(0x39060) || !branch(0x39064)) return false;
-    sm8550_gcc_update32(gGcc.va + 0x3906c / 4, 3u, 0);                          // the pipe clock comes from the PHY
-    sm8550_gcc_update32(gGcc.va + 0x39068 / 4, 0, 1u);
+    if (!rcg(0x39070, 0) || !branch(0x39060) || !branch(0x39064) ||
+        !sm8550_gcc_update32(gGcc.va + 0x3906c / 4, 3u, 0) ||
+        !sm8550_gcc_update32(gGcc.va + 0x39068 / 4, 0, 1u)) {
+        phy.map->release();return false;
+    }
     wr(kQmpComPower, rd(kQmpComPower) | 1u);
     wr(kQmpComResetOvrd, rd(kQmpComResetOvrd) | 0xfu);
     wr(kQmpComTypec, 1u << 1 | (reverse ? 1u : 0));                             // software port select
@@ -202,6 +213,8 @@ bool qmpInit(bool reverse) {
     bool ok = false;
     for (unsigned i = 0; i < 1000 && !ok; ++i) {ok = !(rd(kQmpStatus) & 1u << 6); if (!ok) IODelay(200);}
     native_usb_stats[33] = rd(kQmpStatus);
+    if(ok)selectPipeClock();
+    phy.map->release();
     return ok;
 }
 // The USB 3 path, or false for USB 2 only with the UTMI clock in place of the PIPE clock (a USB 2 cable still works on the former).

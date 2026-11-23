@@ -13,6 +13,7 @@
 // Only opaque process helpers are used; avoid importing private proc layouts.
 extern "C" void *get_bsdtask_info(task_t);
 extern "C" int proc_pid(struct proc *);
+extern "C" void b5q_wifi_probe(void),b5q_bluetooth_probe(void);
 #include <pexpert/pexpert.h>
 #include <mach/kmod.h>
 #include <machine/machine_routines.h>
@@ -669,6 +670,12 @@ void b5qPeripheralWorker(void *,wait_result_t) {
     IOLog("B5qPeripherals: step=%s\n","sheng_usb_probe:before");
     sheng_usb_probe();
     IOLog("B5qPeripherals: step=%s\n","sheng_usb_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","b5q_wifi_probe:before");
+    b5q_wifi_probe();
+    IOLog("B5qPeripherals: step=%s\n","b5q_wifi_probe:after");
+    IOLog("B5qPeripherals: step=%s\n","b5q_bluetooth_probe:before");
+    b5q_bluetooth_probe();
+    IOLog("B5qPeripherals: step=%s\n","b5q_bluetooth_probe:after");
     IOLog("B5qPeripherals: stage=ready\n");
     thread_terminate(current_thread());
 }

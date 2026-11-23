@@ -117,6 +117,8 @@ def full_build(tree, package, out, scripts):
         raise SystemExit('Current XNU processor object does not define _sheng_cpu_idle_mach; check bootstrap compilation and patch series')
     cflags = flags(sdk, include, header, package, tree, tree / '.cache/xnu-work', have_idle)
     objects = build_added(package, out / 'board-input', cxx, cflags, llvm, scripts)
+    from b5q_wireless import build as build_wireless
+    objects += build_wireless(tree,package,out/'wireless')
     import hashlib
     (out / 'native-recount-build.json').write_text(json.dumps({
         'B5Q_HAVE_CPU_IDLE_MACH': int(have_idle),

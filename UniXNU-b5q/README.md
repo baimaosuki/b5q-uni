@@ -2,6 +2,30 @@
 
 Samsung Galaxy Z Flip5 / b5q / SM8550-AC; target `macos-27.3-26C5035r`, XNU `12377.121.6`.
 
+Deliver the required flashable IMG files for each update. The boot and recovery
+assemblers omit Odin TAR archives, and the ESP assembler emits esp.img once.
+Boot input DTB and FAT files use a temporary directory during packaging.
+
+The boot-memory-v8 firmware update reserves four high DRAM ranges from the
+captured b5q SM-F731B runtime FDT. A local test with the production RAM manager
+and loader functions moves the 2 GiB allocation from `0x880004000` to
+`0x8c0004000`. Install `../artifacts/b5q-boot-memory-v8/boot.img` using that
+package's installer with `--boot`, or use its Odin TAR. The existing ESP-v7
+provides the macOS menu and payload. Evidence is in `reports/boot-memory-v8.json`.
+
+ESP-v7 removes the GPU, GMU and GPU SMMU exports from the ADT. The GPU and
+GMU interrupt references in ESP-v6 triggered a null read in IOKit because
+the controller lacked Apple's AAPL,phandle property. The hardware DTS
+continues to enable the three devices. Adreno matching requires restoring
+its ADT nodes with working interrupt bindings in a later update.
+
+The deployed ADT and kernel reach StartIOKitMatching on QEMU Cortex-A710.
+QEMU virt maps its GIC at different addresses from b5q. A local control using
+the QEMU GIC reaches bsd_init and IOKitBSDInit, then stops at the Samsung
+UFS warm-handoff check. The deployment archive is
+`../artifacts/b5q-esp-adt-v7.tar.zst` and installs with `--esp`.
+See `reports/esp-adt-v7.json` and `reports/kernel-patches-next.json`.
+
 This Format 2 device package selects the pinned UniXNU SM8550 common layer and
 thirteen shared components. `scripts/package.sh` is the unchanged upstream
 template. `porting.toml` records each subsystem's findings and evidence.
@@ -81,3 +105,24 @@ use the documented merge-copy method when those must be preserved.
 FAT images with AArch64 UniXNU/DarwinBoot under QEMU. This verifies discovery
 and loader handoff only; no SM8550/macOS runtime success is inferred.
 See `reports/esp-delivery-audit.json` for actual embedded-driver bytes and logs.
+
+## Restored payload baseline (2026-11-20)
+
+The v3 custom reset diagnostics and v4 intermediate-kernel substitution are
+withdrawn. The pinned UniXNU debugging guide, lines202–230, documents the
+existing `panic_screen = true` payload step and `--panic-screen --no-reset`.
+Restore that original setting and the original pre-v3 device adapter, without
+adding reset modes or entries. The deployment kernel comes from the completed
+CI payload, SHA256 `7ea22869a35061a45d00221d503442a3d58b6f845c6d1d7fbecd7f49ff18cacf`.
+The root `kernel.macho` remains the separate intermediate build output; do not
+copy it over the completed payload member.
+
+`../scripts/b5q-install/build-4kn-esp.py` now verifies and repacks the unchanged
+ESP-v2 file tree onto the device-required 4096-byte-sector FAT32 ESP. Menu,
+loader, ADT, trust cache, Data seed, arguments and deployment kernel all remain
+byte-identical. This is local deployment recovery, not a replacement for the
+unchanged official `scripts/package.sh` or a new port implementation. Historical restoration
+archive: `../artifacts/b5q-esp-guide-restored-v5.tar.zst`. Its ADT retains the
+zero-DRAM defect. ESP-v7 above is the current deployment candidate. The source and limitations are recorded in
+`reports/guide-restoration.json`. No new driver, firmware, DTS or memory-window
+changes accompany this restoration.

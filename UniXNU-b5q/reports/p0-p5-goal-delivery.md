@@ -6,8 +6,8 @@ Goal source: `/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b
 | --- | --- | --- |
 | P0 | Samsung touch lifecycle, verbatim sheng pointer, absolute HID fallback; tests, full kernel+UEFI images, independent commit | HOST_VERIFIED_PENDING_HARDWARE; source4108c9e, jointCI45167257160 andimageacceptance PASS |
 | P1 | CC1/CC2, powered Sink+DFP hub, four-byte bus-number, TI/QMP, firmware DMA | HOST_VERIFIED_PENDING_HARDWARE; sourceb1e7ae4,53jointgroups/fullkernel+UEFI/actualimage&PAC PASS |
-| P2 | WCN6855 FIFO Bluetooth, six rails/shared WCN power, Samsung firmware, native macOS addon | NOT_STARTED |
-| P3 | QCA6490 ath11k/MHI/QMI/PCIe, shared power, firmware HAL DMA, wpa addon | NOT_STARTED |
+| P2 | WCN6855 FIFO Bluetooth, six rails/shared WCN power, Samsung firmware, native macOS addon | IN_PROGRESS; joint P2+P3 delivery required |
+| P3 | QCA6490 ath11k/MHI/QMI/PCIe, shared power, firmware HAL DMA, wpa addon | IN_PROGRESS; target/production helper gates pass, full joint CI pending |
 | P4A | Samsung GPIO107 lid, MAX77705 battery, inner-panel DCS0x51 backlight | NOT_STARTED |
 | P4B | Samsung ADSP/AudioReach/HAL, two TFA9878 amplifiers and HAL DMA | NOT_STARTED |
 | P4C | Iris/VPU30 original firmware, UEFI SID1940/1947 mappings, VideoToolbox | NOT_STARTED |
@@ -36,3 +36,7 @@ Input log `logs/b5q-xnu2log-data-mount-fix/XNU2LOG.txt` SHA256 `6b4624e6960f27c4
 - Actual binary gates:31returnedboardobjects/PAC/zeroEL1apps_smmu;1145USBHIDvirtualslots+326storagevirtualslots matchsourceandoriginalABI; allsource/corehelpersresolved. No newphoneaccessorflashperformed.
 
 This is stage evidence retained for rollback. The final P0–P5 package, four-profile menu and complete final report are still outstanding; these stage images are not presented as the final goal delivery.
+
+Latest user steering: P2 Bluetooth and P3 Wi-Fi must be delivered together. Complete both production implementations and local gates before joint CI and returned-image acceptance; no Bluetooth-only image handoff.
+
+2026-11-24 delivery steering: combined P2+P3 ESP includes reviewed Wi-Fi wait/Window, USB UTMI-to-PIPE/map-release, and staggered two-finger right-click fixes. P4 and P5 each require a separate ESP and final recheck. No intermediate image is delivered.

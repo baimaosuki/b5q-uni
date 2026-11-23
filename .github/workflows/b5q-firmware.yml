@@ -61,6 +61,8 @@ jobs:
             git -C uefi-b5q apply "$patch"
           done
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0005-b5q-physical-esp.patch"
+          git -C UniXNU apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch"
           git -C uefi-b5q submodule update --init --depth 1 Binaries
           UNIXNU_UEFI="$GITHUB_WORKSPACE/uefi-b5q" python3 UniXNU-b5q/scripts/check-b5q-uefi.py
       - name: Build b5q firmware with upstream resolver
@@ -91,21 +93,22 @@ jobs:
             ${{ runner.temp }}/b5q-firmware.sha256
           if-no-files-found: error
           retention-days: 14
-      - name: Retrieve the verified v27 ESP input
+      - name: Retrieve the verified v29 ESP input
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
         with:
-          name: b5q-build-44980608285
-          run-id: 44980608285
+          name: b5q-build-44985774704
+          run-id: 44985774704
           github-token: ${{ github.token }}
-          path: ${{ runner.temp }}/v27-ci
+          path: ${{ runner.temp }}/v29-ci
       - name: Repack the ESP with the compiled DarwinBoot
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/b5q-usb-dma-esp"
-          mapfile -t esp < <(find "$RUNNER_TEMP/v27-ci" -type f -name esp.img)
+          mapfile -t esp < <(find "$RUNNER_TEMP/v29-ci" -type f -name esp.img)
           test "${#esp[@]}" -eq 1
           mv "${esp[0]}" "$RUNNER_TEMP/b5q-usb-dma-esp/esp.img"
           python3 scripts/b5q-install/package-usb-dma-esp.py \
+            --baseline v29 \
             --esp "$RUNNER_TEMP/b5q-usb-dma-esp/esp.img" \
             --fd uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd \
             --report "$RUNNER_TEMP/b5q-usb-dma-esp/esp-manifest.json"

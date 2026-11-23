@@ -1,0 +1,171 @@
+diff --git a/DarwinBootPkg/Driver/DarwinBoot.c b/DarwinBootPkg/Driver/DarwinBoot.c
+--- a/DarwinBootPkg/Driver/DarwinBoot.c
++++ b/DarwinBootPkg/Driver/DarwinBoot.c
+@@ -21,6 +21,7 @@
+ #include "MemoryWindow.h"
+ #include "LoaderInputs.h"
+ #include "B5qUsbDmaLoader.h"
++#include "B5qPcieDmaLoader.h"
+ 
+ #define WINDOW_SIZE  SIZE_256MB
+ #define BLOCK_SIZE   SIZE_2MB
+@@ -829,6 +830,8 @@
+   UINTN                           ExcludedOffset;
+   B5Q_USB_DMA_ADT                  UsbAdt = { MAX_UINTN, MAX_UINTN, MAX_UINTN };
+   B5Q_USB_DMA_RESULT               UsbResult;
++  B5Q_PCIE_DMA_ADT                 PcieAdt = { MAX_UINTN, MAX_UINTN };
++  B5Q_PCIE_DMA_RESULT              PcieResult;
+   UINTN                           ExcludedCapacity;
+   UINTN                           ExcludedCount;
+   UINT8                           *Excluded;
+@@ -1049,6 +1052,11 @@
+             (EFI_STATUS)UsbResult.Diagnostics.PrepareStatus, UsbResult.Diagnostics.TableBase,
+             UsbResult.Diagnostics.TableBytes, UsbResult.Diagnostics.MappedBytes));
+   }
++  UINTN PcieOffset = 0;
++  if (!FindPcieDmaNode ((CONST UINT8 *)(UINTN)TreeAddress, TreeSize, &PcieOffset, 0, 3, &PcieAdt) || PcieOffset != TreeSize) {
++    Status = EFI_COMPROMISED_DATA; goto Fail;
++  }
++  if (PcieAdt.Ready != MAX_UINTN) { GetPcieDmaResult (CommandLine, &PcieResult); }
+   Status = GetMap (&Map, &Capacity, &MapSize, &Key, &Stride);
+   if (EFI_ERROR (Status)) { goto Fail; }
+   Print (L"DARWINBOOT: ARM64 va=0x%lx pa=0x%lx args=0x%lx entry=0x%lx owned=0x%lx\n",
+@@ -1149,6 +1157,10 @@
+       WriteUsbDmaResult ((UINT8 *)(UINTN)TreeAddress, &UsbAdt, &UsbResult, Map, MapSize, Stride,
+                          Address, WindowSize, Excluded != NULL);
+     }
++    if (PcieAdt.Ready != MAX_UINTN) {
++      WritePcieDmaResult ((UINT8 *)(UINTN)TreeAddress, &PcieAdt, &PcieResult, Map, MapSize, Stride,
++                          Address, WindowSize, ExcludedOffset != MAX_UINTN);
++    }
+     Status = gBS->ExitBootServices (mImage, Key);
+     if (!EFI_ERROR (Status)) {
+       if (Excluded == NULL) {
+diff --git a/DarwinBootPkg/Driver/B5qPcieDma.h b/DarwinBootPkg/Driver/B5qPcieDma.h
+new file mode 100644
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qPcieDma.h
+@@ -0,0 +1,30 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_PCIE_DMA_H
++#define B5Q_PCIE_DMA_H
++#define B5Q_PCIE_DMA_PROTOCOL_GUID \
++  {0x610234d8,0x0a0d,0x4d3b,{0x9b,0xac,0xce,0xe7,0x73,0x28,0x3e,0x76}}
++#define B5Q_PCIE_DMA_IOVA 0xa0000000ULL
++#define B5Q_PCIE_DMA_BYTES 0x02000000ULL
++#define B5Q_PCIE_DMA_ALIGN 0x00400000ULL
++#define B5Q_PCIE_DMA_NOT_RUN 0xffffffffU
++// Original firmware IORT names PCIE0 and masks SID1400 by007f, including1401.
++typedef struct {
++  UINT32 Version;
++  UINT32 SidMask;
++  UINT64 Locate;
++  UINT32 Create;
++  UINT32 Configure;
++  UINT32 Attach;
++  UINT32 Map;
++  UINT64 PoolBase;
++  UINT64 PoolBytes;
++  UINT64 Iova;
++  UINT64 TableBase;
++  UINT64 TableBytes;
++  UINT64 PrepareStatus;
++  UINT64 RetentionStatus;
++} B5Q_PCIE_DMA_RESULT;
++typedef VOID (EFIAPI *B5Q_PCIE_DMA_PREPARE)(OUT B5Q_PCIE_DMA_RESULT *);
++typedef struct {UINT64 Revision; B5Q_PCIE_DMA_PREPARE Prepare;} B5Q_PCIE_DMA_PROTOCOL;
++STATIC_ASSERT(sizeof(B5Q_PCIE_DMA_RESULT)==88,"PCIe DMA wire ABI");
++#endif
+diff --git a/DarwinBootPkg/Driver/B5qPcieDmaLoader.h b/DarwinBootPkg/Driver/B5qPcieDmaLoader.h
+new file mode 100644
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qPcieDmaLoader.h
+@@ -0,0 +1,88 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_PCIE_DMA_LOADER_H
++#define B5Q_PCIE_DMA_LOADER_H
++#include "B5qPcieDma.h"
++typedef struct {UINTN Ready,State;} B5Q_PCIE_DMA_ADT;
++STATIC BOOLEAN PcieArgEnabled(CONST CHAR8 *Line)
++{
++  if(!Line)return FALSE;
++  BOOLEAN Enabled=FALSE;
++  while(*Line) {
++    while(*Line==' ')Line++;
++    CONST CHAR8 *End=Line;while(*End && *End!=' ')End++;
++    if(End-Line>5 && AsciiStrnCmp(Line,"wifi=",5)==0) {
++      BOOLEAN Valid=TRUE,Nonzero=FALSE;
++      for(CONST CHAR8 *P=Line+5;P<End;P++){if(*P<'0'||*P>'9')Valid=FALSE;Nonzero|=*P!='0';}
++      Enabled=Valid&&Nonzero;
++    }
++    Line=End;
++  }
++  return Enabled;
++}
++STATIC BOOLEAN FindPcieDmaNode(CONST UINT8 *Data,UINTN Size,UINTN *At,UINTN Depth,UINTN Parent,B5Q_PCIE_DMA_ADT *Adt)
++{
++  if(Depth>32 || *At>Size || Size-*At<8)return FALSE;
++  UINT32 Properties=ReadUnaligned32((CONST UINT32*)(Data+*At));
++  UINT32 Children=ReadUnaligned32((CONST UINT32*)(Data+*At+4));*At+=8;
++  CONST UINT8 *NodeName=NULL;UINTN NodeLength=0;
++  B5Q_PCIE_DMA_ADT Candidate={MAX_UINTN,MAX_UINTN};
++  for(UINT32 I=0;I<Properties;I++) {
++    if(*At>Size || Size-*At<36)return FALSE;
++    CONST CHAR8 *Name=(CONST CHAR8*)(Data+*At);
++    if(AsciiStrnLenS(Name,32)==32)return FALSE;
++    UINT32 Length=ReadUnaligned32((CONST UINT32*)(Data+*At+32))&0x7fffffff;
++    *At+=36;if(Length>Size-*At)return FALSE;
++    if(AsciiStrCmp(Name,"name")==0){NodeName=Data+*At;NodeLength=Length;}
++    UINTN *Slot=NULL,Expected=0;
++    if(AsciiStrCmp(Name,"b5q-pcie-dma-ready")==0){Slot=&Candidate.Ready;Expected=4;}
++    if(AsciiStrCmp(Name,"b5q-pcie-dma-state")==0){Slot=&Candidate.State;Expected=sizeof(B5Q_PCIE_DMA_RESULT);}
++    if(Slot){if(*Slot!=MAX_UINTN || Length!=Expected || !IsZeroBuffer(Data+*At,Length))return FALSE;*Slot=*At;}
++    *At+=Length;if(*At>MAX_UINTN-3)return FALSE;*At=ALIGN_VALUE(*At,4);if(*At>Size)return FALSE;
++  }
++  UINTN Path=3;
++  if(!Depth)Path=0;
++  if(Depth==1 && Parent==0 && NodeLength==7 && NodeName && CompareMem(NodeName,"chosen",7)==0)Path=1;
++  if(Candidate.Ready!=MAX_UINTN || Candidate.State!=MAX_UINTN) {
++    if(Path!=1 || Adt->Ready!=MAX_UINTN || Candidate.Ready==MAX_UINTN || Candidate.State==MAX_UINTN)return FALSE;
++    *Adt=Candidate;
++  }
++  if(Children>(Size-*At)/8)return FALSE;
++  for(UINT32 I=0;I<Children;I++)if(!FindPcieDmaNode(Data,Size,At,Depth+1,Path,Adt))return FALSE;
++  return TRUE;
++}
++STATIC VOID GetPcieDmaResult(CONST CHAR8 *Args,B5Q_PCIE_DMA_RESULT *Result)
++{
++  ZeroMem(Result,sizeof(*Result));Result->Version=2;Result->SidMask=0x007f1400;
++  Result->Locate=EFI_NOT_STARTED;Result->PrepareStatus=EFI_NOT_STARTED;Result->RetentionStatus=EFI_NOT_STARTED;
++  Result->Create=Result->Configure=Result->Attach=Result->Map=B5Q_PCIE_DMA_NOT_RUN;
++  if(!PcieArgEnabled(Args))return;
++  EFI_GUID Guid=B5Q_PCIE_DMA_PROTOCOL_GUID;B5Q_PCIE_DMA_PROTOCOL *Protocol=NULL;
++  EFI_STATUS Status=gBS->LocateProtocol(&Guid,NULL,(VOID**)&Protocol);
++  if(!EFI_ERROR(Status)) {
++    if(Protocol && Protocol->Revision==1 && Protocol->Prepare){Protocol->Prepare(Result);return;}
++    Status=EFI_INCOMPATIBLE_VERSION;
++  }
++  Result->PrepareStatus=Status;
++}
++STATIC VOID WritePcieDmaResult(UINT8 *Tree,CONST B5Q_PCIE_DMA_ADT *Adt,
++  CONST B5Q_PCIE_DMA_RESULT *Result,CONST EFI_MEMORY_DESCRIPTOR *Map,UINTN Size,UINTN Stride,
++  UINT64 Owned,UINT64 OwnedBytes,BOOLEAN HasExclusions)
++{
++  B5Q_PCIE_DMA_RESULT State=*Result;UINT32 Ready=0;
++  if(State.PrepareStatus==EFI_SUCCESS && State.Version==2 && State.SidMask==0x007f1400 &&
++     State.Locate==EFI_SUCCESS && !State.Create && !State.Configure && !State.Attach && !State.Map &&
++     State.Iova==B5Q_PCIE_DMA_IOVA && State.PoolBytes==B5Q_PCIE_DMA_BYTES &&
++     !(State.PoolBase&(B5Q_PCIE_DMA_ALIGN-1)) && State.PoolBase>=0x80000000ULL &&
++     State.PoolBase<=0x100000000ULL-State.PoolBytes && State.TableBytes==32*EFI_PAGE_SIZE &&
++     State.TableBase<=MAX_UINT64-State.TableBytes &&
++     (State.TableBase+State.TableBytes<=State.PoolBase || State.TableBase>=State.PoolBase+State.PoolBytes)) {
++    BOOLEAN Retained=UsbDmaPagesRetained(Map,Size,Stride,State.PoolBase,State.PoolBytes)&&
++      UsbDmaPagesRetained(Map,Size,Stride,State.TableBase,State.TableBytes);
++    if(Retained && !HasExclusions)Retained=
++      (State.PoolBase+State.PoolBytes<=Owned || State.PoolBase>=Owned+OwnedBytes)&&
++      (State.TableBase+State.TableBytes<=Owned || State.TableBase>=Owned+OwnedBytes);
++    State.RetentionStatus=Retained?EFI_SUCCESS:EFI_COMPROMISED_DATA;Ready=Retained?1:0;
++  }
++  CopyMem(Tree+Adt->Ready,&Ready,sizeof(Ready));CopyMem(Tree+Adt->State,&State,sizeof(State));
++}
++#endif

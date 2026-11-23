@@ -13,7 +13,7 @@ include = [
   "ArmDTPlatform", "ArmCpu", "DarwinBoot", "XnuPrelink",
   "SoftwareAES", "AppleKeyStoreState", "GopFramebuffer",
   "Adreno740", "AdrenoMetal", "QcomDwc3", "QcomGeniSpi",
-  "RamBlock", "VerifiedRoot",
+  "RamBlock", "VerifiedRoot", "QcaBluetooth",
 ]
 
 [kernel]
@@ -67,7 +67,7 @@ tools = true
 # b5q-root selects authenticated read-only macosroot; persistent Data has an independent bounded window.
 # The existing ArmCpu secondary/SM8550 IPI path is opt-in. no-lc selects the
 # already-built launch-constraint policy for signed, owner-trusted boot shims.
-kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "armcpu-edge=1", "no-lc=1", "ethernet=1", "vsync=60", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-data-ufs=2", "b5q-psci-reset=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "cs-lazy=1", "boot-payload-release=1", "b5q-ws-signal=1", "usb=1", "gpu-power=9", "gpu-metal=1", "fb-gpu=1", "fb-bgra=1", "fb-half=2", "gpu-dcvs=1", "gpu-addon=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2", "timebase-user=1", "validation_disables=0x11040", "ca-triple-buffer=1", "ca-free-wakeup=1", "ci-mps=0", "cpufreq=4", "thermal=1", "thermal-ms=100", "thermal-level=1", "board-clock=1", "offline-hid-input=1", "offline-hid-home=1", "buttons=1", "touch=1", "touch-hid=1", "b5q-dpi=425", "dpu=1", "offline-legacy-unit-scale=2"]
+kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "armcpu-edge=1", "no-lc=1", "ethernet=1", "vsync=60", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-data-ufs=2", "wifi=5", "bluetooth=1", "b5q-psci-reset=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "cs-lazy=1", "boot-payload-release=1", "b5q-ws-signal=1", "usb=1", "gpu-power=9", "gpu-metal=1", "fb-gpu=1", "fb-bgra=1", "fb-half=2", "gpu-dcvs=1", "gpu-addon=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2", "timebase-user=1", "validation_disables=0x11040", "ca-triple-buffer=1", "ca-free-wakeup=1", "ci-mps=0", "cpufreq=4", "thermal=1", "thermal-ms=100", "thermal-level=1", "board-clock=1", "offline-hid-input=1", "offline-hid-home=1", "buttons=1", "touch=1", "touch-hid=1", "b5q-dpi=425", "dpu=1", "offline-legacy-unit-scale=2"]
 
 [payload.adt]
 # EFI allocator chooses a real contiguous window; no physical DRAM address is invented.
@@ -100,10 +100,12 @@ packed_data_ramdisk = true
 kernel-ctrr-to-be-enabled = 0
 # These slots are zero in the build. DarwinBoot fills them from B5qHandoffDxe.
 b5q-usb-dma-ready = 0
+b5q-pcie-dma-ready = 0
 
 [adt.chosen.bytes]
 b5q-usb-dma-state = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 b5q-usb-dma-diagnostics = "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+b5q-pcie-dma-state = "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
 
 # Native ARM64 local boot policy: only CSR_ALLOW_UNRESTRICTED_FS (user authorized).
 # launchd's disabled-service overrides remain ignored without this one SIP bit.
@@ -133,4 +135,8 @@ data_gib = 4
 skip_setup = true
 boot_shims = true
 gpu_addon = true
+bluetooth_tool = "scripts/build-b5q-bluetooth-userspace.py"
+bluetooth_target = "macos27"
+wifi_tool = "scripts/build-b5q-wifi-userspace.py"
+wifi_target = "macos27"
 trust_components = ["StaticTrustCache", "Cryptex1,SystemTrustCache", "Cryptex1,AppTrustCache"]

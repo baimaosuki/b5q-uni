@@ -22,7 +22,7 @@ struct IOService{static IOService*getResourceService(){static IOService p;return
 struct B5qEthernet:IOService{bool init(void*){return init_ok;}bool attach(IOService*){return attach_ok;}
  bool start(IOService*){return start_ok;}void registerService(){++registered;}void retain(){++retains;}
  void release(){++releases;}void detach(IOService*){++detaches;}};
-static B5qEthernet object;
+static B5qEthernet object; static B5qEthernet *gController;
 static B5qEthernet*allocate(){return allocation_ok?&object:nullptr;}
 #define OSTypeAlloc(T) allocate()
 #define OSSafeReleaseNULL(p) do{if(p)(p)->release();p=nullptr;}while(0)

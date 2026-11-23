@@ -1,0 +1,98 @@
+{
+  "status": "HOST_VERIFIED_PENDING_CI_AND_HARDWARE",
+  "hardware_verified": false,
+  "inputs": {
+    "uefi-b5q/Resources/DTBs/b5q.dts": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f",
+    "sources/twrp-b5q/recovery/root/lib/modules/msm_geni_serial.ko": "2bdaa390ba67bcbd1025c8d058e6a42de939e84e6af1edd4ff1842adbeffe405",
+    "artifacts/b5q-p2-work/samsung-source/msm_geni_serial.c": "235d3f306322537c25129828bd261716ad827134bc620c0ea255283e874bf44b",
+    "artifacts/b5q-p2-work/samsung-source/qcom-geni-se.h": "b50626e80fb4497fb3f60ef860673964167aa2cfa803ce930799b92e2e1f5149",
+    "artifacts/b5q-p2-work/samsung-source/gcc-kalama.c": "d653b83fcdfdbf9524664c4455eca2d6a460ba97294588ba373c6518e0441a31",
+    "artifacts/b5q-p2-work/samsung-source/pinctrl-kalama.c": "d8d416b79fab46a466f130ea4f61893b93444c736d2d9b916e2678bc8c27ac48"
+  },
+  "samsung_source": {
+    "repository": "https://github.com/LineageOS/android_kernel_samsung_sm8550",
+    "commit": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9"
+  },
+  "evidence": [
+    {
+      "symbol": "handle_rx_hs",
+      "rva": "0x9a9c",
+      "module": "msm_geni_serial.ko",
+      "instructions": "0x9af4 RX FIFO base+0x780; 0x9af8..0x9b04 repeated words; 0x9adc/0x9ae0/0x9b14..0x9b28 width/8*(words-1)+valid-tail"
+    },
+    {
+      "dts": "22965,37794",
+      "uart_base": "0x898000",
+      "spi": 461,
+      "gic_intid": 493,
+      "bt_enable": 81,
+      "sw_ctrl": 82,
+      "xo": 204
+    },
+    {
+      "dts": "37794..37825",
+      "logical_rails": {
+        "io": [
+          "ldob15",
+          1800
+        ],
+        "aon": [
+          "smpe4",
+          966
+        ],
+        "dig": [
+          "smpe4",
+          966
+        ],
+        "rfaOp8": [
+          "smpe4",
+          966
+        ],
+        "rfa1": [
+          "smpg6",
+          1900
+        ],
+        "rfa2": [
+          "smpg4",
+          1350
+        ]
+      }
+    }
+  ],
+  "reuse": {
+    "sources/UniXNU-sheng/package/BluetoothProbe.cpp": "e66a4a8328f878fc7bd59c2e158c3e69d4a65b680df264a548d200225e61a652"
+  },
+  "samsung_btpower": {
+    "repository": "https://github.com/LineageOS/android_kernel_samsung_sm8550-modules",
+    "commit": "a1fdd086620bc0e2f767323c2853bcc9424e3087",
+    "path": "qcom/opensource/bt-kernel/pwr/btpower.c",
+    "sha256": "7535f7f4c2ecc190b951a0ef61d03de3a9bbc07aa53b7b67a66271af028b82b4",
+    "evidence": "btpower_set_xo_clk_gpio_state: 200us before enable/5ms after; cold-discharge upper500ms; SW_CTRL direction input; b5q DT drives81 at2mA pulldown instead of sheng16mA"
+  },
+  "host_tests": {
+    "fifo": "PASS ASan+UBSan actual production; all4096 TX lengths, tails/partialRX, ringfull backpressure, IRQ, cancel/abort deadlines",
+    "wcn-power": "PASS ASan+UBSan all acquire failure/coexistence/release orders and original XO/reset timing",
+    "wcn6855-runtime": "PASS ASan+UBSan locked original btqca with board QCA_WCN6855 selection, genuine wcnhp->hp firmware fallback, H4/IBS/error/timeout paths"
+  },
+  "target_compile": {
+    "status": "TARGET_OBJECTS_COMPILED",
+    "joint_P2_P3_symbol_PAC_gate_pending": false,
+    "hardware_verified": false,
+    "objects": {
+      "B5qBluetooth.o": "d3717e69baeb3b52adbf0e1fcbf6724e5cb80210dd8e634b686351c09b649f83",
+      "B5qBtFifo.o": "c92c76b02cf7cd6e94538a31d2004c8a8a5c178670384a86c33ec7fae2190ffd",
+      "B5qWcnPower.o": "30fa5396f8fecf6cfdfd2965a536fd066d450492941e1967861977604a6a3a8c",
+      "BluetoothFirmware.o": "c6bf8f7614c0c1e0636c16ed1aa1c605f4393883763a3a9cba2c80ad5ee8d4e6",
+      "qbt_core.o": "bf9e4c20c44d5c9792b271f9c450d77ca1343874e29e52403a8e12ef34489f73",
+      "qbt_tty.o": "27caf90728e53c2dfde6841e321e3e5ea30287c1c5a8a0009ec15d8ae1902148",
+      "btqca.o": "c45bc79fdca66a4eeeef530de329fcb5b8b626df44392c31954b4c5d6e7ea108",
+      "qbt_linux.o": "abbff42e2bcd8cbc41fb1761e7e96793a1a71389ba519d72764276b59a93c205",
+      "Sm8550GeniUart.o": "ec112117de04d7f0a959b845b439bfedf78ce8bf30e526af083f91f4f04534b8"
+    }
+  },
+  "native_macos27": {
+    "report": "artifacts/b5q-p2-work/native-macos27.json",
+    "result": "PASS original82e244d5 arm64e slice, UUID, native vendor routing/H4/capability patch assertions; signing/packaging pending"
+  },
+  "integration": "18 combined host gate groups pass; 122 target objects, 62 callback contracts, zero missing/duplicate symbols and apps_smmu materializations. Full native signing, CI and returned images pending."
+}

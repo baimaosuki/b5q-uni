@@ -7,7 +7,7 @@
 struct B5qTouchMouse {
  wn8030_pointer pointer={};
  uint32_t began=0;
- unsigned tapCount=0;
+ unsigned tapCount=0,tapRemaining=0;
  uint8_t tapIds[2]={};
  int startX[2]={},startY[2]={};
  bool tapping=false;
@@ -20,7 +20,7 @@ struct B5qTouchMouse {
   // More than three contacts temporarily release, never latch a blocked mode.
   const bool valid=count<=WN8030_TOUCHPAD_FINGERS && (!count || (ids&&xs&&ys));
   if(recovered || !valid) {
-   tapping=false;tapCount=0;
+   tapping=false;tapCount=tapRemaining=0;
    pointer={};out[0]=WN8030_POINTER_ID;send(out);
    return;
   }
@@ -31,12 +31,17 @@ struct B5qTouchMouse {
   }
   pad[20]=uint8_t(count);
   if(count && !pointer.fingers) {
-   began=now;tapCount=count;tapping=count<=2;
+   began=now;tapCount=tapRemaining=count;tapping=count<=2;
    for(unsigned i=0;tapping&&i<count;++i) {
     tapIds[i]=uint8_t(ids[i]);startX[i]=coordinate(xs[i]);startY[i]=coordinate(ys[i]);
    }
   } else if(count && tapping) {
-   if(count!=tapCount || now-pointer.at_ms>WN8030_POINTER_GAP_MS)tapping=false;
+   // A real two-finger tap normally releases one finger before the other.
+   // Keep the original two-finger identity while that set only shrinks;
+   // adding/replacing a finger still cancels the gesture.
+   if(count>tapRemaining || (count!=tapCount && !(tapCount==2 && count==1)) ||
+      now-pointer.at_ms>WN8030_POINTER_GAP_MS || now-began>250)tapping=false;
+   tapRemaining=count;
    for(unsigned i=0;tapping&&i<count;++i) {
     unsigned j=0;while(j<tapCount && tapIds[j]!=uint8_t(ids[i]))++j;
     if(j==tapCount) {tapping=false;break;}

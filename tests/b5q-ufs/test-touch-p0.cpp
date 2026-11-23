@@ -71,6 +71,26 @@ static void pointer() {
  s.update(0,nullptr,nullptr,nullptr,1400,true,send);assert(!sent.back()[1]&&!s.pointer.fingers&&!s.tapping);
  sent.clear();s.update(2,ids,x,y,1500,false,send);s.update(0,nullptr,nullptr,nullptr,1520,false,send);
  assert(sent.size()==2&&sent[0][1]==2&&!sent[1][1]);
+ // Natural staggered lift: either original finger may be the last one up.
+ for(unsigned last=0;last<2;last++) {
+  s={};sent.clear();s.update(2,ids,x,y,1530,false,send);
+  s.update(1,ids+last,x+last,y+last,1543,false,send);
+  assert(s.tapping&&s.tapCount==2&&s.tapRemaining==1);
+  s.update(0,nullptr,nullptr,nullptr,1556,false,send);
+  assert(sent.size()==2&&sent[0][1]==2&&!sent[1][1]);
+ }
+ // A replacement finger, renewed contact, excess movement, timeout or a
+ // recovery release cannot turn the partial lift into a right click.
+ for(unsigned failure=0;failure<5;failure++) {
+  s={};sent.clear();s.update(2,ids,x,y,2000,false,send);
+  int oneId=ids[0],oneX=x[0],oneY=y[0];
+  if(failure==0)oneId=9;if(failure==2)oneX+=1000;
+  s.update(1,&oneId,&oneX,&oneY,2013,false,send);
+  if(failure==1)s.update(2,ids,x,y,2026,false,send);
+  s.update(0,nullptr,nullptr,nullptr,failure==3?2300:2039,failure==4,send);
+  for(auto &packet:sent)assert(!(packet[1]&2));
+ }
+ s={};sent.clear();
  sent.clear();s.update(2,ids,x,y,1600,false,send);x[0]+=1000;x[1]+=1000;y[0]+=1000;y[1]+=1000;
  s.update(2,ids,x,y,1613,false,send);assert(sent.size()==1&&int8_t(sent[0][6])<0&&int8_t(sent[0][7])>0);
  s.update(0,nullptr,nullptr,nullptr,1626,false,send);assert(sent.size()==1);

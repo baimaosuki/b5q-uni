@@ -2605,15 +2605,43 @@ paths = ["package/B5qUfs/B5qDataBlock.h", "package/B5qUfs/B5qDataSeed.h", "packa
 inputs = ["ActualBatch2logSHAa4fe97b42b23971720526d22c30240f0ef7c056203ba79850d409f6dbfb47089;NativeRamBlock.cppsourceSHA772d47a069c50c9bf92f6c9292668340e005a61d996651033d9af2b6474b897c. Existingcore88703fdc/GPU/v30loader/Data unchanged."]
 configuration = ["No boot-arg/DTS/ADT/Data format or kernelcorepatch changes. Weaktypedprovider hook accepts onlyonlineB5qDataBlock with validatedDataUUID/geometry,base0,bytes180997812224 andSHA256immutableenvelope. RAM provider remains first unchanged branch."]
 procedure = ["Prepare NativeRamBlock from pinned upstream plus original4GiBpatch andnewproviderpatch;compileonlyNativeRamBlockandB5qUfs;relinkcached45115332412native. RootpublisherthreadwaitsuniqueDataIOMediawithUUID/BSDName/Major/Minor beforepublishingbootroot;duplicates/missingproperties/refusedprovidertimeoutfailclosed."]
-findings = ["Actualhardwareadopts205811lowpages/refused0,usable7014903808B;Data mode3APFSdisk0xid23 recognized,thenPID1panicsENOENTbeforelaunchd. SourceNativeRamBlockselectVolumeSeedrequiresNativeRamBlock andcannotfindB5qDataBlock; no evidence ofDataformatfailure.", "21actualselector/hook/readinessASanUBSan casesPASS inclpersistentwithoutRAM,wrongUUID/duplicates/unready/bytebound/unknownprovider/delayedarrival/RAMrecovery. Twoarm64etargetobjects0missing/duplicate and7objectPAC326slots/zeroapps_smmuPASS;actualCIandESPacceptancepending."]
-completion = ["Req1providerandReq2readinessimplemented;Req3localchecksPASS;Req4incrementalCIandfinalESPreadbackmustcompletebeforeimages/flashcommands."]
+findings = ["Actualhardwareadopts205811lowpages/refused0,usable7014903808B;Data mode3APFSdisk0xid23 recognized,thenPID1panicsENOENTbeforelaunchd. SourceNativeRamBlockselectVolumeSeedrequiresNativeRamBlock andcannotfindB5qDataBlock; no evidence ofDataformatfailure.", "21actualselector/hook/readinessASanUBSan casesPASS inclpersistentwithoutRAM,wrongUUID/duplicates/unready/bytebound/unknownprovider/delayedarrival/RAMrecovery. Twoarm64etargetobjects0missing/duplicate and7objectPAC326slots/zeroapps_smmuPASS;actualCI45127313070SUCCESSandfinalESPreadbackPASS."]
+completion = ["Req1..4DONE:typedproviderintegration,uniqueBSDvolume gate,21actualproductionASanUBSan cases/returnedobjectPAC,onecachedCI45127313070SUCCESS/singleESPfinalreadbackPASS."]
 limits = ["No phone access orDatawrite thisround. NoXNUcore/GPU/Mesa/UEFIrebuild. Static/localvalidationnotclaimedphysicaldesktopmountsuccess."]
-next_action = ["Runonecachedstorage-onlyCI,downloadandverifyactualobjects/ESP,thenprovideESP-onlydeploymentcommandand0..7report."]
+next_action = ["UsermayupdateESPonly;collectactualB5qData:media-ready/devicebytes,Data mountsuccessandlaunchdspawns. Neverinitializeuserdataorreflashboot/rootforthisfix."]
 
 [[area.evidence]]
 kind = "source"
 reference = "reports/data-mount-fix.json"
 result = "ActualBatch2journal/sourcecausalchainplus21ASanUBSan productionselector/hook/readinesscases,2targetobjects0missing/duplicate andcross-objectstoragePAC326slots/IAe90c/PSCI0ba5/zeroapps_smmuPASS. Digestdescribesvalidatedenvelopeonly. CIandfinalimageacceptancepending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/data-mount-fix.json"
+result = "CI45127313070SUCCESSsource05eeb6e4599d0170322853f97f0a2e71baf92bb2;ordinaryartifactdigestsverified. OnlyNativeRamBlock.late.o/B5qUfs.late.ochanged;core88703fdc/GPU/UEFI/Dataunchanged. ActualreturnedhookweakpresenceIA0xbd41/directBR26and326RAM/DataPACslots,7objectzeroapps_smmuPASS. FinalESP838860800BSHA5dffcb16774b4b25746676835b61977d1e2fa8d305fbe5deb13b925be2c42ed0;retainoriginalADTsafterprovingonlygeneratedentropywasdifferent;allotherFATmembersbyteidenticalexceptkernel/HMACnormal+RAMcopies. FAT4Kn/mirrors/journal,981Bargs/SIPu64LE2/2fixups/6GiB+4GiB,69POSTsitesandunchangedRAMseedAPFSaccount/59+26policy/absentdPASS. Req1..4localcomplete;newdevicebootnotclaimed,nophoneaccess."
+
+[[area]]
+id = "twrp-fastcharge"
+status = "implemented"
+components = []
+paths = ["reports/twrp-fastcharge.json"]
+inputs = ["Userrequestsnewb5qTWRPwithfastcharging. Existingcover-off-v4kernel/DTB/modules retained. Actualsec-battery.komodulehash+symbol/attraddressesandpinnedSamsungdriver36ffdaa5sourcehashesinreports/twrp-fastcharge.json."]
+configuration = ["Boardqcom/SamsunginitrestoreSIOP100;initservicewaitsmodularbatteryandsetsvolatilebattery/pd_disable0oncewithreadback. NativePD/PPS/AFCnegotiationandthermal/batterylimitspreserved. Noafc_disablepersistentwrite,noforced9Vcabletype,norawPMICregister,current,temperature/factorycontrolwrites."]
+procedure = ["Layerboard-onlychargepatchontheexistingcover-off-v4patch;6productionshellcasesPASS;incrementalrecoveryimagebuildfromexistingTWRPout;finalramdisk/FATtools/unchangedkernelDTBDTBOanddriververificationbeforeIMGdelivery. NoOdinTAR/ZIP,phoneflashorfullkernelbuild."]
+findings = ["BothcurrentqcomandsharedSamsungrccontainexplicitbattery/siop_level0withcut-chargingcomment. PinnedSamsungSIOPstore100clearsSIOPcurrenteventandqueuesworker;SIOPworkreleasesvoltage/FCC/inputvotes. Actualmoduleattributesandworkercmp80/releasevoteinstructionsconfirmmatchinginterface.", "Host6casesPASS:normalSIOP/PD,idempotence,statusreadonly,optionalPD,absentbattery,lateprobe;thermal/current/cablecontrolsbyteunchanged. NewrecoveryIMGbuiltandactualramdiskverified;physicalchargingnegotiationpending,nodeviceconnected."]
+completion = ["recovery.imgbuilt109576192BSHAbd13d25a4692236e8525afbe259a1f46c9b1c4f6e9e50bac852bfd19cd931498;actualramdiskpolicy/version/module/kernelDTBDTBOandcoveroffchecksPASS;6scriptcases/initverifier/patchreplayPASS."]
+limits = ["Nocharger/cableorphoneconnected;cannotclaim9V/PPS/25Wphysicallynegotiated. Actualpowerdependsnativeadapter/cable/SOC/temperaturelimits. Noautomaticflashauthorized."]
+next_action = ["UsermayinstallnewrecoveryIMGandverifybatteryreadback/negotiationwithcompatiblecharger;noflashorrebootperformed."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/twrp-fastcharge.json"
+result = "ActualinitSIOP0restriction+sec-battery.koattr/workerevidence+pinnedSamsungsource;6productionpolicyhostcasesPASS. Nativecharginglimitsretained;build/hardwarepending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/twrp-fastcharge.json"
+result = "FinalactualrecoveryIMG109576192BSHAbd13d25a4692236e8525afbe259a1f46c9b1c4f6e9e50bac852bfd19cd931498;Androidv2/4Kheader/partitionfit/ramdisktoolinventory/6chargepolicycases/hostinitverifier/6filepatchreplayPASS. FinalramdisknoSIOP0writes;normalSIOP100+volatilePD0serviceandlate-probeobserverpresent;nativebattery/PDIC/PCA9482/MAX77705modulesunchanged. Existingcoveroff4andkernel/DTB/DTBOexacthashesretained. OnlyIMGoutput,noTAR/ZIP/fullkernelbuild/CI/phoneaccess. Hardware9V/PPS/25Wnegotiationnotclaimed."
 
 [[area]]
 id = "p0-touch-lifecycle"
@@ -2662,3 +2690,51 @@ reference = "reports/p1-usb-source-audit.json"
 command = "python3 scripts/b5q-install/pre-ci-p0-p1.py; CI45167257160fullkernel+UEFI; python3 scripts/b5q-install/verify-p0-images.py; python3 scripts/b5q-install/check-stage-returned-objects.py"
 revision = "b1e7ae43fb01857d8d845fddeebe4bfdcec0cbfd"
 result = "53jointpreflightgroupsPASS; fullkernelandUEFISUCCESS; actual31XcodeboardobjectsPAC/zeroapps_smmu,1145USBHID+326storagePACslots,69POSTsites,800MiB4KnESP/SIPu64LE2/981Bargs/twoBGRA/E-P8/4GiBRAMrecovery/59+26binaryrootownedpolicies/absentdtrust/FATjournalallPASS. ESPb07c6002,FD b909347d,boot38cbf9eb34f942e4. No hardwarequalification ordeviceaccess."
+
+[[area]]
+id = "p2-bluetooth"
+status = "host-verified"
+components = ["QcaBluetooth"]
+paths = ["package/B5qBtFifo.c", "package/B5qBtFifo.h", "package/B5qBluetooth.cpp", "package/B5qWcnPower.cpp", "scripts/b5q_bluetooth.py", "reports/p2-bluetooth-source-audit.json"]
+inputs = ["Samsung b5q UART14 and six logical BT supplies; original hpbtfw21/hpnv21 firmware; QcaBluetooth effe4ec5c57cd400a5f818b21c9903fef237edbc"]
+configuration = ["Independent bluetooth boot argument; FIFO only, no EL1 apps_smmu or DMA mapping"]
+procedure = ["Implement and test Samsung FIFO transport, WCN shared power and native macOS runtime before stage CI"]
+findings = ["2026-11-24 host gate PASS. Original Samsung msm_geni_serial.ko handle_rx_hs RVA9a9c verifies RX FIFO780/word packing/tail count; DTS UART SPI461 is GIC INTID493. BT six logical supplies collapse to four physical resources and are shared with Wi-Fi. FIFO capability is read-only and unavailable FIFO fails safely without hardware override. Production FIFO, shared-power, pinned WCN6855 H4/IBS, original macOS 27 bluetoothd ABI, native target-object and joint P2/P3 closure checks pass. Three reviewed fixes are covered by ASan/UBSan regressions. Full CI, returned image and hardware behavior remain pending."]
+completion = ["Host source, target, PAC/MMIO and joint P2/P3 preflight pass; full CI, image readback and hardware remain pending"]
+limits = ["Native signing/linking, full CI/image return and device qualification are pending"]
+next_action = ["Submit the joint P2/P3 branch once, verify returned kernel/UEFI/runtime and package the paired ESP"]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p2-bluetooth-source-audit.json"
+result = "Pinned DT/module/source hashes and exact instruction evidence; IN_PROGRESS"
+
+[[area.evidence]]
+kind = "host"
+reference = "reports/p2-p3-pre-ci.json"
+command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
+result = "Production FIFO/shared power/WCN6855, original macOS runtime input and nine target Bluetooth objects pass; 122-object joint closure/PAC/MMIO gate passes. Full CI, signing and hardware pending."
+
+[[area]]
+id = "p3-wifi"
+status = "host-verified"
+components = ["Ath12kWifi"]
+paths = ["scripts/build-b5q-wifi.py", "package/B5qAth11kCompat/**", "reports/p3-wifi-source-audit.json"]
+inputs = ["Locked Linux458c6079 ath11k and shared native mac80211/cfg80211; Samsung b5q DT; zizhan a7f8ae29 software ABI adapters only"]
+configuration = ["Independent wifi switch and firmware HAL DMA; no EL1 apps_smmu"]
+procedure = ["Complete production ath11k/PCIe/MHI/QMI, native network and wpa integration, then jointP2+P3 host/PAC/CI/image gates"]
+findings = ["2026-11-24 currentjointlocalgatesPASS:14originalsharedLinux/WPA/MHIhostregressions, originalQCA6490PCIrevision/MHIconfigASanUBSan, all22ath11kstrictcallbacktypes,122arm64eobjects0missing/0duplicates/62PACproducerconsumercontracts/0apps_smmu;43P0+10P1baselinegroupsretained. RealEDK2PCIeproducer/DarwinBoottargetcompile+8firmwarepatchreconstructionPASS.24SamsungoriginalFWfilehashesvalidatedandprivateCIdraftasset91f82f09validated;noneingit. RealmacOS27BlueTool/Type0targetcompilesandoriginalbluetoothdpatchassertionsPASS. CI/signing/finalnewimagespending;hardwarepending. Threeuserreviewfixesincludedandregressiontested;1000Bargsandnew88BzeroPCIehandoffslotschecked.", "2026-11-24 userreview3fixes complete: WiFi armwaitcancel has elseblock and temporaryWindowRAII; USBQMPsuccess switches UTMIbits0/3 backtoPIPE and releases12KiB onallmappedexits; natural2to1to0righttap retainsoriginalIDs/time/motion and rejectsreadd. ProductionASanUBSanPASS including6USBfaults,2IRQracebranches,andrighttapnegativecases. Nativeen0OSadapter400+346slots/221bindingsPASS; full141XNUpatchesapply. Added signednativeBluetooth/wpa+originalSamsung24filemanifest integration, runtimeviews and1000Bargs; fullintegration/CI pending. Delivery usernowrequests combinedP2P3ESP then separateP4/P5ESP; noimageoffered beforelocalgates.", "2026-11-24 P2+P3 combined gate continues: full ath11k/shared stack target compile passes. Added original115-entry b5q PCIe PHY, bounded controller bringup, firmware-only32MiB DMA allocator, exact Samsung QMI BDF names/amss20 mapping and QGIC MSI alternative from original disabled DT node (17110040/SPI768, not sheng SPI141); hardware applicability explicitly pending. Firmware statev2 requires Device-mapped MSI page and retainedWBISpool. Production allocator/name/table/loader ASanUBSan and3boardarm64eobjectsPASS. Native Ethernet/packet ABI, joint symbol/PAC, addon/UEFI/CI/image gates remain incomplete; no delivery or hardware claim.", "P3 implementation in progress. Samsung DTS PCIe0SID1400/1401, IOVAa0000000+10000000 and dynamic32MiB cnss pool are distinct facts; pool has no fixed physical base. Shared locked Linux source resolved; moving FreeBSD release tip was corrected to pinned95719d8 without claiming source identity from the tag. Compatibility bridge uses same-version ath11k unified BSS callback for native split mac80211 notifications. No P3 build, firmware handoff or hardware success claimed."]
+completion = ["Joint P2/P3 production tests, target symbol/PAC closure, source UEFI/DarwinBoot target compile and no-apps_smmu gate pass; full CI, image readback and hardware remain pending"]
+limits = ["Stock MSI applicability, native signing/linking, full CI/image return and device qualification are pending; the QGIC alternative is feature-gated and is not claimed as stock ITS hardware proof"]
+next_action = ["Submit the joint P2/P3 branch once, verify returned kernel/UEFI/runtime and package the paired ESP"]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p3-wifi-source-audit.json"
+result = "Pinned input hashes, Samsung resource facts and allowed software reuse scope; IN_PROGRESS"
+
+[[area.evidence]]
+kind = "host"
+reference = "reports/p2-p3-pre-ci.json"
+command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
+result = "18 joint gate groups pass, preserving 43 P0 and 10 P1 groups; 122 arm64e target objects, 62 PAC producer/consumer contracts, zero unresolved/duplicate symbols and apps_smmu materializations. 14 original shared runtime regressions, 141 XNU patches and 8 firmware patch reconstructions pass. Native signing, full CI and returned image checks remain pending."

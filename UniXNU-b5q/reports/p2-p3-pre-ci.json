@@ -1,0 +1,342 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "P0-P1-all-preserved-baselines",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/pre-ci-p0-p1.py"
+      ]
+    },
+    {
+      "name": "bt-fifo",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-bt-fifo.py"
+      ]
+    },
+    {
+      "name": "bt-wcn6855",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-bt-wcn6855.py"
+      ]
+    },
+    {
+      "name": "wcn-power",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-wcn-power.py"
+      ]
+    },
+    {
+      "name": "wifi-platform",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-wifi-platform.py"
+      ]
+    },
+    {
+      "name": "pcie-controller",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-pcie-controller.py"
+      ]
+    },
+    {
+      "name": "pcie-firmware-dma",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-pcie-firmware-dma.py"
+      ]
+    },
+    {
+      "name": "ath11k-qca6490",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-ath11k-qca6490.py"
+      ]
+    },
+    {
+      "name": "wireless-review-fixes",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/tests/b5q-ufs/test-wireless-review-fixes.py"
+      ]
+    },
+    {
+      "name": "native-userland-and-firmware-identities",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/check-wireless-userland.py"
+      ]
+    },
+    {
+      "name": "Bluetooth-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/check-bt-target.py"
+      ]
+    },
+    {
+      "name": "ath11k-full-shared-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/UniXNU-b5q/scripts/build-b5q-wifi.py",
+        "--module",
+        "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi",
+        "--out",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/target",
+        "--compiler",
+        "/home/baimao/zflip5/tools/llvm21/usr/lib/llvm-21/bin/clang",
+        "--llvm",
+        "/home/baimao/zflip5/tools/llvm21/usr/lib/llvm-21/bin",
+        "--jobs",
+        "4"
+      ]
+    },
+    {
+      "name": "WiFi-board-and-network-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/check-wifi-target.py"
+      ]
+    },
+    {
+      "name": "original-network-ABI",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/check-wifi-ethernet-abi.py"
+      ]
+    },
+    {
+      "name": "shared-production-runtime-regressions",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/test-wireless-shared-host.py"
+      ]
+    },
+    {
+      "name": "firmware-and-loader-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/check-pcie-uefi-target.py"
+      ]
+    },
+    {
+      "name": "joint-symbol-PAC-zero-apps-smmu",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/scripts/b5q-install/check-wireless-target-closure.py"
+      ]
+    },
+    {
+      "name": "all-XNU-patches",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/UniXNU-b5q/scripts/check-xnu-patches.py",
+        "--unixnu",
+        "/home/baimao/zflip5/UniXNU",
+        "--source",
+        "/home/baimao/zflip5/sources/UniXNU/out/feeds/xnu-3199e8bc"
+      ]
+    }
+  ],
+  "hardware_verified": false,
+  "P2_P3_joint_required": true,
+  "completed_local_only": true,
+  "full_CI_signing_and_returned_images_required": true,
+  "source_sha256": {
+    "UniXNU-b5q/package/AppsSmmuLock.h": "52028e6d9d0627c1df954914860a2dfd18d300572aab0ac1c5c84264d312875d",
+    "UniXNU-b5q/package/B5qAth11k.c": "ddee414630b61daa84935d02910fece97b9c436f08c9481514c4f581a8fc21e1",
+    "UniXNU-b5q/package/B5qAth11kCompat/B5qAth11kCompat.h": "4c20d3189729ec59011167e7e2ba4ac9e2ded7e30cfd08992f1f76fab4c34ed8",
+    "UniXNU-b5q/package/B5qAth11kCompat/B5qWait.h": "0301ed959274e0bdc0cbfd6aa83c7850f505e2ca85ecfef9f926746c7a9e45cc",
+    "UniXNU-b5q/package/B5qAth11kCompat/linux/dmi.h": "835342a1ff35468427484e8022bcf1570e21d33fc0b40b7bd7d8f9381abd24eb",
+    "UniXNU-b5q/package/B5qAth11kCompat/linux/of_irq.h": "846a6504da0216a2c7490a8a6b7bdc0407fbc3af943f09b45741a9fdef37f3af",
+    "UniXNU-b5q/package/B5qAth11kCompat/linux/suspend.h": "72736f8ecebbdb2524385ab03e07264d18faa240928def719c6c99bb5e093157",
+    "UniXNU-b5q/package/B5qBootPolicy.c": "337bd5a5217b87b467f66cf7121e6f8b0ac4e08b2b376061e5a0eadd31b4f039",
+    "UniXNU-b5q/package/B5qBtFifo.c": "8f68f0189307b14707971f05b12033dd0b074c902dcc9ab4920bbd66d02bda66",
+    "UniXNU-b5q/package/B5qBtFifo.h": "af2b1c06300bde43578c4e50d181f592f23f37bd0b9a57c3a9f83b6005f69a95",
+    "UniXNU-b5q/package/B5qBtFirmwareName.h": "930d1182594266f4d6faef660ed730a160c6d22fe45bcdb3f071beee0f33bae0",
+    "UniXNU-b5q/package/B5qBtLinuxCompat.h": "2b100facbfdb51efd5cb472c9d05fa7daaf11cbcf4acfe59fc5c19b5f17ca986",
+    "UniXNU-b5q/package/B5qGmuLoad.h": "6e2cb746a40c4b793178cea6c07a3084c26b26b0fbd82898f48e678d4f6695a7",
+    "UniXNU-b5q/package/B5qGmuVotes.c": "8a259d9d49657ac2c90b1542b39e5726039ecfe72564f20f20eff0fb4178c054",
+    "UniXNU-b5q/package/B5qGpuFirmware.h": "b628cfaa795023d7d470d14893248ee8fe8228c6ac3f199253da02b676699494",
+    "UniXNU-b5q/package/B5qGpuPowerBoard.h": "6138dd87734ca0bf995e50490d1e7f2f8fb0b846d20f0381cc37a1b621b7fb07",
+    "UniXNU-b5q/package/B5qGpuTrace.h": "a0b2dba23a2a0fa1c356f26244553cd3e1e60413a955b082a9b099d03aaad575",
+    "UniXNU-b5q/package/B5qMax77705.h": "9ceff1b3faa2dfdb9554f02045dba3ab75942036b6fd7fdb8a630e6564532218",
+    "UniXNU-b5q/package/B5qMouseReport.h": "3a527aee84e17a3a28cf0b84c9ceb3699a10a83bff9a63fadd2d88731962bc6d",
+    "UniXNU-b5q/package/B5qPcieCore.h": "4129520c45cb82c9a7b1a333c031e9708f81637f0b06caad64b694cd509a2d1e",
+    "UniXNU-b5q/package/B5qPcieInputs.h": "3b6dc17bca47ec467bdcbbf51a325d2eda1ce24aff7f5c883f7c8b5e207a2b9b",
+    "UniXNU-b5q/package/B5qPeripheralHardware.h": "de7e968148612f5feba3c66141797aba4785564e664016f782d7f8adbc8f7a15",
+    "UniXNU-b5q/package/B5qProcTop.c": "5dcad30e3bdbf35185981a50cdcea7628d9ed2bc364a1470fed04ed8652ec26b",
+    "UniXNU-b5q/package/B5qProcTop.h": "1bfe9ad2062abfc331ce5df7b96bcbd13e45005015bb2c0aaeb81d3822f09307",
+    "UniXNU-b5q/package/B5qProcTopFormat.h": "8820f1bcd0facf898d94101eb22f2284a5904887decc9482de912a03a339d9a7",
+    "UniXNU-b5q/package/B5qQupClock.h": "a71e4c89ec89d37e74863665521b183087771880cdd4d2f645dd7086c4e44e56",
+    "UniXNU-b5q/package/B5qTouchBus.h": "57efea31d69dfaf878b31f6eb40700a8d87da322d3181a4dde47912a02fe1a83",
+    "UniXNU-b5q/package/B5qTouchClock.h": "f8945a0803b00bf64a78e2d3d8b938c19e965f33c3c460ac99944e6f54ae6fa1",
+    "UniXNU-b5q/package/B5qTouchIrq.h": "82068375f2cb5f145630d8da2708d70c4c3445e28d01516f0403892e3d4e0eb1",
+    "UniXNU-b5q/package/B5qTouchMouse.h": "105310dbdc6a979be69cfe5509bc069ffec9e5fd4134093bc4608ed9ecfc979a",
+    "UniXNU-b5q/package/B5qTouchPower.h": "1d4a07f2ba3f57ba175ff7562dd83b265d208b37a5bc0ab22f4428bde51fac75",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "f1d5d8bbc7eab6d24f1f4c5b3521868e9bae39de357563ddd02c09853cc8091f",
+    "UniXNU-b5q/package/B5qTouchReports.h": "46104f4b59e72c7d81a87de1b607e57873aa458d82576fd185a739ec23a1f1be",
+    "UniXNU-b5q/package/B5qUfs/B5qDataBlock.h": "f70d43b8bf4e492530fde20132cd7a7e6ba8bfca2beb6c07918625fcd5607389",
+    "UniXNU-b5q/package/B5qUfs/B5qDataFormat.h": "3801a84580eb3dba54211286c06f069fff701157b3d77d8fa945a989ea4cbc30",
+    "UniXNU-b5q/package/B5qUfs/B5qDataSeed.h": "afc17bad2541ef12b9c8857db48bb9eb4bc3f45525252034e2389453611219fd",
+    "UniXNU-b5q/package/B5qUfs/B5qLogArgs.h": "a41d505915d4fe13cdce209197bd610e97c56f0ddef1a2bceb12e1280ed3e887",
+    "UniXNU-b5q/package/B5qUfs/B5qLogCore.h": "8d0a834dadea6ca796ece05d9f464157d210e2eb9d5f5d598ea1138aa7144643",
+    "UniXNU-b5q/package/B5qUfs/B5qLogFormat.h": "fe8bfe6c572d62cff03dc5f4b83c1f379b4151d34a0fc608f51961d259bcbd5c",
+    "UniXNU-b5q/package/B5qUfs/B5qLogProtocol.h": "c79006e1d20ff9abf71e4d23584dfa82b7f9d19e3a5d5cbf032858f397d36620",
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "9c185561a62971beb5ff3dad6b5ce2c3630bd3e78dba4af864a03e52c59d2448",
+    "UniXNU-b5q/package/B5qUfs/B5qLogVolume.h": "ecb267c9adbda425d9c59d0bd6167e22b3036a25599d12f581a48fa693a46cb0",
+    "UniXNU-b5q/package/B5qUfs/B5qRootFormat.h": "aa4a57dc5ca81609ad616edfeca7e30ba7c26df0ca656990aac9fe4508cedc1c",
+    "UniXNU-b5q/package/B5qUfs/B5qRootPolicies.h": "9f45e765c1e9466aa0f98cbe8860d342c7733a9b9285dccc453462d69b5e9eb4",
+    "UniXNU-b5q/package/B5qUfs/B5qSmmu.h": "de60642e39d4c15b33b55cfb34d2e4c6a8199d64f68d4c9ccc48885090111d5e",
+    "UniXNU-b5q/package/B5qUfs/B5qUfsProtocol.h": "93d1eaf948a1c598d7398d40f5c01d0e42bb372ab1fbdc850b3ddaadc7538b9d",
+    "UniXNU-b5q/package/B5qUfs/B5qVerifiedRead.h": "969e8a14b7132089c00303d8e53bdfac1101add1ad152126056f3e8b7bf3c885",
+    "UniXNU-b5q/package/B5qUfs/B5qVmAlloc.h": "ffee186bf84063e451f4201b8b956f0d01148f6a218b7463dc4540d75f87d24a",
+    "UniXNU-b5q/package/B5qUsbBoardCore.h": "381bff31be85799874d8dce6212f5ab8948847c6c91876a77b725e8fc6cc5b26",
+    "UniXNU-b5q/package/B5qUsbDmaHandoff.h": "6ac989dbc054c3823d3e66910b72234a10c94a0c858b66f46bed02d56347d3fe",
+    "UniXNU-b5q/package/B5qUsbInputs.h": "676e88f1b5cb9e0af19e6e819b5ea0d438c2e01d7ce3542769936b0c50503c89",
+    "UniXNU-b5q/package/B5qUsbIrq.h": "5eac2e2cbf5f983c1d0a2f5d8711d8df941f460332549612c2bd3bfeec2b8831",
+    "UniXNU-b5q/package/B5qUsbSmmu.h": "af5ff7c49470b8c6c7577b07e4fc5795c73140250f4a8059315d77c02eb802a1",
+    "UniXNU-b5q/package/B5qWcnPower.h": "b2f46920ef40ff08f105595608cabe1f5cceb17d942f083236918c976bfe14bc",
+    "UniXNU-b5q/package/B5qWcnPowerCore.h": "6750aa77a7f8ed6fde4ff5e20c5bc538488dbbcb43186105f52e2c392f412310",
+    "UniXNU-b5q/package/B5qWifiArena.h": "00b678c36b5f1d993f29804debdbd81604a0a3c1bd76fc7c71fa8b9b01363b3e",
+    "UniXNU-b5q/package/B5qWifiDma.h": "a082987a2594b0f21ea46b1ec70bd3bf2b765972b137a1d4562650be21155832",
+    "UniXNU-b5q/package/B5qWifiFirmwareName.h": "c294a041890d9163b394557eb1366fe1d362c83fac4ac62d6c500bb314df5142",
+    "UniXNU-b5q/package/BluetoothFirmware.c": "22303d9f960580e2a7173a52ffdb3c1bbf9fa77e093ed07ab977646bbf0403c1",
+    "UniXNU-b5q/package/BluetoothFirmware.h": "f7de07a08ae060645a36a5d543ce29ba130166d1700858bacccb4d2f1c736014",
+    "UniXNU-b5q/package/BluetoothHciTrace.h": "2da1fdea981f2c1fb04428ace43a6e63721c9dac17782d51707db194d7561d74",
+    "UniXNU-b5q/package/BoardClock.h": "47c950b288ffc659a9306c1da79ff8b0fb6968c809508aa74a1a6a4bfb79e59d",
+    "UniXNU-b5q/package/BootResetCore.h": "7f0f4b835116a958e7d1e277129744c4904a6123d3934e0b427d9c359c305c8f",
+    "UniXNU-b5q/package/GeniI2c.c": "aba6f4840120cead2210d65fb85e99db89a4ef8d11ea0ed7f47edc4da8247011",
+    "UniXNU-b5q/package/GeniI2c.h": "7d183900e3768bb7342dc3dee142ad7bd6fa51d93948b4a07c5e4bbede4d2e61",
+    "UniXNU-b5q/package/QcomEusb2Phy.h": "e0355b0c802de08eaad183a17ccfdd1afc3c4e3ec5f5f6c4a71788a8aa23038d",
+    "UniXNU-b5q/package/QcomQmpUsb3.h": "3bd87d90186142942398b1f41e96dfd838bf8bfae370b0cbda2b3cefb8522a4e",
+    "UniXNU-b5q/package/QcomRpmh.c": "679a55467e6ed4c7e75a8191f1d6da48637377088ef5e27879b1c99bc4a62314",
+    "UniXNU-b5q/package/QcomRpmh.h": "47e299744ff83989449d262f74f5dfd2ba1cdbf921b2886643735f2febb6ee21",
+    "UniXNU-b5q/package/ShengSleep.h": "c7469cf97ca66975539cd380698284527a9988331cdbb11f8cfc11cc33791697",
+    "UniXNU-b5q/package/Sm8550Gcc.c": "59a4963d0f2ef78b25c9a2cc775ead513c8e04856215db4c707e1a4dea4ce044",
+    "UniXNU-b5q/package/Sm8550GeniUart.h": "1549ec51d15bb74133ca9d2190a7cbc87643605e64eb85466c7bb612801f9882",
+    "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-0.h": "c94edd4260e2b73167505d49d103f1c398a50acda722f5ef1f92de7f33598819",
+    "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-1.h": "83273760c59b759217ac1006965dac60a826eec49186e3862b85c8940ab39bca",
+    "UniXNU-b5q/package/Sm8550Inputs/B5qGmuVotes-common.h": "c4aca6e6225cfb862c0f021e882cfdfcff50144f6d9c779d336e68a2b1ab1feb",
+    "UniXNU-b5q/package/Sm8550Inputs/B5qGpuRates.h": "a106b1e2854785b5f13ea5311572efbd621dbd8646825f463029022505a88372",
+    "UniXNU-b5q/package/Sm8550Inputs/ShengGmuCommandDbSource.h": "2ed10058e2bf9147057a73f7a074e01560dd501e0b712df446cb1a88b87c6b35",
+    "UniXNU-b5q/package/Sm8550Inputs/ShengGmuSource.h": "cca9bacf3a1773cffb0ed79b4eed1f01e9b59b018aef28d223d5d7ccdf11dde7",
+    "UniXNU-b5q/package/Sm8550Inputs/ShengGmuVotesSource.h": "83859ce5c2507eb572f66a5e7c1c9f0776e1a346abac7ada5a13bec2fa550b86",
+    "UniXNU-b5q/package/Sm8550Inputs/ShengGpuSmmuSource.h": "bb71466456a4033f1513bd3fca616a6f1e8e4e9c30d9dca0f1703509291669b6",
+    "UniXNU-b5q/package/Sm8550QupDma.h": "bf28dfd47f38a4d041d4dc892317f52ce1b812a7b69731ac3d32dc2b44fa5abe",
+    "UniXNU-b5q/package/ThermalLevel.h": "218e06b2ca93823c2e9518ffb7c673157c96b49b62101e332743dd9a5ea9b360",
+    "UniXNU-b5q/package/ThermalProbe.h": "9f8c853ce54b940c066b0b0880f825b050cf6bef3f6c7c603f887866730ea619",
+    "UniXNU-b5q/package/WifiFirmware.c": "4e6637e99327d0a58eb9a146c7b71af5f76a138167181c371f5059c8c9c13401",
+    "UniXNU-b5q/package/WifiFirmware.h": "27c36787851fee723b3662fce86f5ebe5b29baff9433aa9583c4c3f868cbac60",
+    "UniXNU-b5q/package/Wn8030Pointer.h": "e22967c836a14971e47b9f4ee88314db06ce7e6dbf75c8379633bb3a7bd4c237",
+    "UniXNU-b5q/package/B5qAbsentBoard.cpp": "643302e0e296ccf1032b473a37b3d151137280b3adee317aaf9af2d91ff20429",
+    "UniXNU-b5q/package/B5qBluetooth.cpp": "a309f3b86b5b8193f09a63154f5ba6e3e28404bce328e5598ed42cdd4f02e2dc",
+    "UniXNU-b5q/package/B5qEthernet.cpp": "ddaa7a7d95d0bfd221e3ead9a6413da36bf15fa295cda529f782d98e3fc30c7e",
+    "UniXNU-b5q/package/B5qGpu.cpp": "c48bf79831b8dd47d16df46d3ef0b688f625d3022b115c67c4fd8ec4807816c5",
+    "UniXNU-b5q/package/B5qPmgr.cpp": "8465895e4a2fc92568361e04f6c489b66848229fb1697f025bd15c4a99c14f58",
+    "UniXNU-b5q/package/B5qPower.cpp": "7a2cda7669c20ce6f08929d1ef1dadc4c19c5b02178e0389b39f7641e7f32888",
+    "UniXNU-b5q/package/B5qRamStorage.cpp": "6236fd36e643524140221cc1376d2046130471e8bdd8cfef800ba004ad294f78",
+    "UniXNU-b5q/package/B5qRootBinding.cpp": "f936b72d1f032e8017182f43f785cedda587c37d102875954f55a884849f327a",
+    "UniXNU-b5q/package/B5qTouch.cpp": "3b3f81d72337ea4849bf286c906f661bddfa08ba9cf2b2a2acd5acd729acd70c",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "4d1c92873731da4452e0a22f0a2d34d8d07ce773b0c2175109a329de7ef0cb2b",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp": "da102e9448d596026ee52949c03be15cbda0f047ba7d4c155f1c6ee238cfd504",
+    "UniXNU-b5q/package/B5qWcnPower.cpp": "2a7ea654aa777055eb7bfc90771b4a31010ebe9ee49b133cb16e91cfb5b27b1f",
+    "UniXNU-b5q/package/B5qWifiBoard.cpp": "07f5d99b83ad340dbdd589ee28b191f2a333362d5ab1bf6950d0868459971d5b",
+    "UniXNU-b5q/package/BoardClock.cpp": "849cae5937637abcff32c14b4d7878c984eb0f013cf4f7b6628f3e667cb5a32f",
+    "UniXNU-b5q/package/ButtonProbe.cpp": "3ff3eb89abff2620429e113004f4877dade01c9e91f24aedb02379821d819d9d",
+    "UniXNU-b5q/package/CpuFreqProbe.cpp": "d2b00b044f36269cb7daa66fff38ebd2159e968c329ca736506c777b6822a39a",
+    "UniXNU-b5q/package/DisplayTimingProbe.cpp": "c63e5958a3251be7e498a64824324e1253cd966833c776e072b06fe2a3a7b2d9",
+    "UniXNU-b5q/package/HidInputProbe.cpp": "6f20f1e012902aaeae66f6df504591af0008935493652a09d7ab50a97a070574",
+    "UniXNU-b5q/package/KeyStoreProbe.cpp": "06411388f0aabcbfbf1cfd25cb94d9f957ea31dc56ce3df2fb59835299a10391",
+    "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "eeedd81d24c77b433448b9bfa7308c45e7f45549c6958896f32f9e78ffd49607",
+    "UniXNU-b5q/package/NativeHidInput.cpp": "3a6774d3795b7fb7e3381e2a2bbb07401f9e5c8cd343e5e6a1faa2a0c9e6efb1",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "b9a9301497001f7b14c37633bde90c7066681c721fe96cf1111c7f792e8ae9c1",
+    "UniXNU-b5q/package/SoftwareAesProbe.cpp": "1a9b1d799112de032b49bfbb7557e7244fedd37a60e096eb772ca6f948a65e0a",
+    "UniXNU-b5q/package/ThermalLevel.cpp": "8d256c6c898864b35b57dcc588f56c917cf12a3638153c25b057569b5a9b031f",
+    "UniXNU-b5q/package/ThermalProbe.cpp": "185eed43bfb75f8dd5e5524a35c115f3039126c4781e978a9d2cb34e639cdf22",
+    "UniXNU-b5q/package/UsbProbe.cpp": "6fc03496fbd56ccdb4b784bef9a52fb71361d42d886ea241c1e0320261206d4f",
+    "UniXNU-b5q/scripts/adapt-b5q-platform.py": "84f4d8912ffaebc992eb9d1f3a77ae2768308005ac108ca4f7068c7d6e17377c",
+    "UniXNU-b5q/scripts/audit-usb-handoff.py": "e6da93601d76eaf43f2463e248663e641182c9e1641b22a935f784d31b0f0411",
+    "UniXNU-b5q/scripts/b5q_abi.py": "83b6abb2d75e82f4467abe1cb98a551b9c0c5a1f75fdbaaa18a21d2d23e6a7a8",
+    "UniXNU-b5q/scripts/b5q_bluetooth.py": "a69b32f0f201d09c652bd121b61de2b0ca561739a81e95239fffdd877483a06a",
+    "UniXNU-b5q/scripts/b5q_compile.py": "acb19e4534fc20a78088f6e2bbd07964f077f99fd45b121a1f9ceb7a4a2e3880",
+    "UniXNU-b5q/scripts/b5q_hid.py": "fecddcf106c6c965bf8bf5fbe398fbba9986b5b9576d59516bde2e1586e29c8e",
+    "UniXNU-b5q/scripts/b5q_peripherals.py": "db080dc68316c2fefdc924f5e88e6448ea9dd78a51946182211e920f45eb64d2",
+    "UniXNU-b5q/scripts/b5q_ramblock.py": "de9a9d9e004d7faa7bd25d2406919495acd097675822d47d41ff24745c23cc79",
+    "UniXNU-b5q/scripts/b5q_wcn_firmware.py": "2be4035ace587938390c9f483e584e36d4554c2d073b340a49c5a0d753618436",
+    "UniXNU-b5q/scripts/b5q_wifi.py": "c90dccea4d48def8d631d7612da2d8bf163d22c65385a77355d606974c056efc",
+    "UniXNU-b5q/scripts/b5q_wireless.py": "cb6be8053c58929fd1a5f2125fa00725b1d301b49b90447bcde02c049f122e7b",
+    "UniXNU-b5q/scripts/build-b5q-adreno.py": "b2829b4960b5716d8bffc235ae25ec2cb1d0f7f2a0435159ed9240795dfb9e99",
+    "UniXNU-b5q/scripts/build-b5q-bluetooth-userspace.py": "b0f717c70d2f909417422186af29153a70bf380f25deff18acd68a41c4cf9490",
+    "UniXNU-b5q/scripts/build-b5q-gop-27.py": "ff1fa9685c1bb6a43a9d40109da367723eb4e46bed8512f63ad63cdc723a9bd9",
+    "UniXNU-b5q/scripts/build-b5q-payload.py": "766f19759c3cf13c714f7f159e39ed2c1057043edcd16c50e4af67018ec9dd68",
+    "UniXNU-b5q/scripts/build-b5q-pmgr.py": "7c8f84e9290c4356f2ca3cb61adaf3420eae8938ebd950b8dd19252b14c41944",
+    "UniXNU-b5q/scripts/build-b5q-storage.py": "148ff9cdab9bb6c84c39c6295ab01f87e976facd0f42e310ac66d7e17ff8049c",
+    "UniXNU-b5q/scripts/build-b5q-usb.py": "3f22c21312723550f0890e7082c097a0e982d577d35aec98b1867cd689dc51a9",
+    "UniXNU-b5q/scripts/build-b5q-wifi-userspace.py": "511540e1cba0f239271279c482491d1920f210b38495c7aa4bc5747f6445517f",
+    "UniXNU-b5q/scripts/build-b5q-wifi.py": "7f434210fb4c0fa87bd121882f195db6e801e044aa336c26dfaa2b6b071b28a9",
+    "UniXNU-b5q/scripts/check-b5q-inputs.py": "fa0a1e649264bf380767c5d5e6683c8a2f047d50684b70e3a272ecfcabe12dd6",
+    "UniXNU-b5q/scripts/check-b5q-uefi.py": "d4f43480c666c19ba280ce7fa3394c6ad47d76f0123b078879672fbdd83ebcc5",
+    "UniXNU-b5q/scripts/check-xnu-patches.py": "8e5dc9477788102d351bb0f149d10834125c6dcfa4cb4cfa659a941f77eed417",
+    "UniXNU-b5q/scripts/ci-transfer.py": "09da81e49dd2a49e8920e6375f689aab67df0abea24307453f91aa305f3c5a83",
+    "UniXNU-b5q/scripts/collect-runtime-fdt.py": "be7ab9f6fe6bb99225c7ede13e89e450541c5843046d0877192f1ec9139c482d",
+    "UniXNU-b5q/scripts/extract-b5q-usb-inputs.py": "c4f3134d17cd5b5e067e325214c6d58867701f903bbd059e53303d0cfe7ede8c",
+    "UniXNU-b5q/scripts/inventory-hardware.py": "075d573306ebc3869be5dcb6d9b92b0b2fe6bed815702ed97f0fce4074932804",
+    "UniXNU-b5q/scripts/package-batch2-esp.py": "e46b340c4b0f64559d9adf61954aa2080168e5be3978ae5aa30473adffc573ef",
+    "UniXNU-b5q/scripts/package-v24-esp.py": "d2109e52274ad9550f4569f835873b8ec9c96327e79db67b32d83004f7fff860",
+    "UniXNU-b5q/scripts/patch-xnu-entry-probe.py": "6a9ecd77c7c551b7737f51557eb0ee5f05ae3fb7219b8e92aca0ad41da699f40",
+    "UniXNU-b5q/scripts/prepare-b5q-gmu.py": "f891a756e9ddb23c7dc7bedd93b36ba3db96bac6a0ef0a8f649f871cbd8e5879",
+    "UniXNU-b5q/scripts/prepare-b5q-votes.py": "b80374106669a5ff39a4630ede764fdf82771daea19a1114a433ad83e3f76206",
+    "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "7e56f39b4e3c2cdf5243f64ce7772c92fd4b38a99ff362a37186cba03be8dbe3",
+    "UniXNU-b5q/scripts/reuse-batch2-native.py": "2860838ae895d85896625b1223c5f8262d455213b38e25e013219d7e0e006f27",
+    "UniXNU-b5q/scripts/reuse-completed-build.py": "e09cffcdf06a5ca1fca554f5138c7b402502508793a3cde34b428bd0b5451fc8",
+    "UniXNU-b5q/scripts/reuse-v10-kernel.py": "7540dd020d6791c769ac1e7aa3200922b42a19564a942f8270dc007573e1ab11",
+    "UniXNU-b5q/scripts/reuse-v13-build.py": "4c866dd96ec06f9e160ffd29d8fe7eeec21b58635e733428e15f67cf8a970413",
+    "UniXNU-b5q/scripts/stage-v24-inputs.py": "14c9a14276b2dd933e86cf44215befaf4886dd92774af33c046e0fdc3fb25a9a",
+    "UniXNU-b5q/scripts/stage-wcn-ci-input.py": "b980b1e8f80fa0446e4c0af001451553e985b34aaacb33a37f232cc38a097703",
+    "UniXNU-b5q/scripts/test-ramblock-host.py": "058a8e2e36310029a65654fe908c9610dabc2839e74049ee98c9f47bda8259f0",
+    "UniXNU-b5q/scripts/update-b5q-launchd-seed.py": "62e9320aefa6f2934f21f5699d9ffc0f736c7a04d3a136580d0d383ee33977cd",
+    "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
+    "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+    "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
+    "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29",
+    "patches/uefi-b5q/0005-b5q-physical-esp.patch": "45539390db2142e460c12c9d71b56f79cca88922976bac29096feb6b0aa4da11",
+    "patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch": "ee152149bf5395e97987de7f9e1587c8a5fec78da64ad25fb416feb416ba68b1",
+    "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
+    "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
+    "UniXNU-b5q/board.toml": "0e460588c245550456d020b7622b1b4846f33134162496a33999458f431dfb79",
+    ".github/workflows/b5q-p0-p5.yml": "2949dd7602db91a25ecf81909082c992cea37e9dde23d417a0d34e20ef086d2f"
+  },
+  "summary": {
+    "target_objects": 122,
+    "PAC_contracts": 62,
+    "missing_symbols": 0,
+    "duplicate_symbols": 0,
+    "apps_smmu_materializations": 0,
+    "workflow_shell_syntax": "PASS",
+    "original_fw_files": 24,
+    "hardware_verified": false
+  }
+}

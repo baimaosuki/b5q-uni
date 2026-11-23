@@ -23,3 +23,4 @@ b5q-windowserver-signal.patch
 zzye-b5q-cpu-idle.patch
 zzyf-b5q-amp.patch
 zzzzzzzzzzz-b5q-edge-matrix.patch
+b5q-wireless-runtime.patch

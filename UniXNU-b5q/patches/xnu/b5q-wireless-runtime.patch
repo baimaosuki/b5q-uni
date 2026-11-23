@@ -1,0 +1,33 @@
+diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
+--- a/bsd/kern/kern_exec.c
++++ b/bsd/kern/kern_exec.c
+@@ -24,6 +24,29 @@
+ 	    "7570.iPadOS_17_Flat_Background-1024w-1366h@2x~ipad.ca/assets/J120.HEIC",
+ 	    "/Library/Wallpaper/Collections/iPadOS_17~ipad.wallpaperCollection/Wallpapers/7570.iPadOS_17_Flat-1024w-1366h@2x~ipad.wallpaper/"
+ 	    "7570.iPadOS_17_Flat_Background-1024w-1366h@2x~ipad.ca/J120.png", &native_gpu_addon3_stage, &native_gpu_addon3_status);
++	/* Native macOS wireless userland keeps its original system paths. The
++	 * existing addon installer publishes all files before these union views. */
++	uint32_t bluetooth_enabled = 0, wifi_enabled = 0;
++	PE_parse_boot_argn("bluetooth", &bluetooth_enabled, sizeof(bluetooth_enabled));
++	PE_parse_boot_argn("wifi", &wifi_enabled, sizeof(wifi_enabled));
++	if (bluetooth_enabled == 1) {
++		static const char library_source[] = "/private/var/ngpu/lib", library_point[] = "/usr/lib";
++		static const char service_source[] = "/private/var/ngpu/sbin", service_point[] = "/usr/sbin";
++		static volatile int lib_stage, lib_status, bin_stage, bin_status;
++		native_gpu_addon_mount(p, scratch, 0x600, library_source, sizeof(library_source), library_point, sizeof(library_point),
++		    "/usr/lib/dyld", "/usr/lib/QcaBTType0.dylib", &lib_stage, &lib_status);
++		if (lib_stage == 5 && !lib_status)
++			native_gpu_addon_mount(p, scratch, 0x600, service_source, sizeof(service_source), service_point, sizeof(service_point),
++			    "/usr/sbin/notifyd", "/usr/sbin/QcaBluetooth.runtime", &bin_stage, &bin_status);
++		printf("B5qWireless: bluetooth library=%d/%d services=%d/%d\n", lib_stage, lib_status, bin_stage, bin_status);
++	}
++	if (wifi_enabled) {
++		static const char service_source[] = "/private/var/ngpu/Library/LaunchDaemons", service_point[] = "/Library/LaunchDaemons";
++		static volatile int service_stage, service_status;
++		native_gpu_addon_mount(p, scratch, 0x600, service_source, sizeof(service_source), service_point, sizeof(service_point),
++		    "/Library/LaunchDaemons", "/Library/LaunchDaemons/org.unixnu.wifi.supplicant.plist", &service_stage, &service_status);
++		printf("B5qWireless: wifi launchd=%d/%d\n", service_stage, service_status);
++	}
+ 	native_cryptex_os_view(p, scratch);
+ 	native_gestalt_cache_drop(p, scratch);
+ 	native_ls_store_drop(p, scratch);
