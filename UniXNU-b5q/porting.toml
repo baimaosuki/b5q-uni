@@ -2491,3 +2491,8 @@ result = "Pinned XNU/DarwinBoot source hashes and shutdown ordering, 1000/1001 a
 kind = "source"
 reference = "reports/batch2-validation.json"
 result = "20 NewBatch2 local preflight groups PASS, including real8000queueiterations/14installerCLInegativecases,89macOSlaunchdinstructioncases/3libxpctransactioncases/21absentdcases,gesture/descriptor/boundedProcTopASanUBSan,6arm64eobjects with full symbolclosure,326storagevtablePACslots,IA0ba5platformcallback,allUSB/GMU/clock/button/HID/Thermalcross-objectPACandactual-objectzeroapps_smmu. Dedicated branch uses only6boardobjects, v24core88703fdc/GPU/Batch1seed and exactv30loader10008091; native30GiBAPFSgrowth and finalimage acceptance pending CI."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "First CI45105257996 stopped at sixth object because the submission omitted existing B5qVmAlloc.h. Fulltransitiveboardincludeclosurefinds onlythismissingheader; retainedfirsterrorand5compiledobjects. Addheaderandcontinuecachedcore/GPUincrementalrecipe; no hardware/outcome inferred."

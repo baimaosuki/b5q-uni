@@ -1635,5 +1635,11 @@
     "plist_sha256": "10826a8764e0e8adefb6a1402c0c2c76426d0d20c21d043df8adf973495b3730",
     "label": "com.apple.linkd",
     "decision": "MACF key-store policy denial; no evidence of panic/respawn. Keep signing/MACF intact and retain inherited 59/26 policy; no new hardware inference."
+  },
+  "first_CI": {
+    "run": 45105257996,
+    "status": "failure",
+    "reason": "Submission manifest omitted existing B5qVmAlloc.h; first 5 board objects compiled, no core/GPU compilation",
+    "diagnostics_sha256": "623edd2e1daed9b3924d0afce44196c3081990d2c1e624ba8ad1b90eb8295c46"
   }
 }
