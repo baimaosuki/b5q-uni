@@ -1,0 +1,342 @@
+{
+  "source": "Offline original Samsung NON-HLOS FAT; no phone/partition access",
+  "parent": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/images/NON-HLOS.bin",
+  "parent_sha256": "69ef3d02a7458747da3d1381d8429c4da728e0c08fed54be65dc5d0829e1bef0",
+  "extracted_files": [
+    "adsp.b00",
+    "adsp.b01",
+    "adsp.b02",
+    "adsp.b03",
+    "adsp.b04",
+    "adsp.b05",
+    "adsp.b06",
+    "adsp.b07",
+    "adsp.b08",
+    "adsp.b09",
+    "adsp.b10",
+    "adsp.b11",
+    "adsp.b12",
+    "adsp.b13",
+    "adsp.b14",
+    "adsp.b15",
+    "adsp.b16",
+    "adsp.b17",
+    "adsp.b18",
+    "adsp.b19",
+    "adsp.b20",
+    "adsp.b21",
+    "adsp.b22",
+    "adsp.b23",
+    "adsp.b24",
+    "adsp.b25",
+    "adsp.b27",
+    "adsp.b28",
+    "adsp.b30",
+    "adsp.b31",
+    "adsp.b32",
+    "adsp.b33",
+    "adsp.b34",
+    "adsp.b35",
+    "adsp.b36",
+    "adsp.b38",
+    "adsp.b39",
+    "adsp.b40",
+    "adsp.b41",
+    "adsp.b42",
+    "adsp.b43",
+    "adsp.b44",
+    "adsp.b45",
+    "adsp.b46",
+    "adsp.b47",
+    "adsp.b48",
+    "adsp.b49",
+    "adsp.b51",
+    "adsp.mdt",
+    "adsp_dtb.b00",
+    "adsp_dtb.b01",
+    "adsp_dtb.b02",
+    "adsp_dtb.mdt"
+  ],
+  "containers": {
+    "adsp": {
+      "bytes": 34773096,
+      "sha256": "681ab07eea92eeb42ce1da35a866105851dd1dfb4f207c1c9fcb5f853be84380",
+      "segment_count": 52,
+      "derivation": "Exact original ELF offsets and unchanged split segments; MDT header/hash identity verified",
+      "metadata_sha256": "1f1a78ea028e6c544f8d2d87020527737fcb5c1ddc387429e653a4ca584147e3",
+      "inputs": {
+        "adsp.b00": {
+          "bytes": 1716,
+          "sha256": "91556e9b3f6bc9452281375924ad7b6547fc5c20568d87cff4672d42474fa081",
+          "elf_offset": 0
+        },
+        "adsp.b01": {
+          "bytes": 6824,
+          "sha256": "475bd54976171eaa5ffc013f32d058e7424822b149fb8599801aa5d16cbe0c0c",
+          "elf_offset": 12288
+        },
+        "adsp.b02": {
+          "bytes": 6453380,
+          "sha256": "cb1182d0545f97ad66a7566d8641ad8d15718171c98e7901d94de71d51daee92",
+          "elf_offset": 20480
+        },
+        "adsp.b03": {
+          "bytes": 27380,
+          "sha256": "6206f5f24677b86229843277045752bee86459f82c5c31cf14530b66ad97e70a",
+          "elf_offset": 6475776
+        },
+        "adsp.b04": {
+          "bytes": 43088,
+          "sha256": "cfaad569845b7133cbf158d5fc362ec291e3c012d67c5a9ee3457fd5be666177",
+          "elf_offset": 6504448
+        },
+        "adsp.b05": {
+          "bytes": 802816,
+          "sha256": "4373bddd7239c52269e8332b0382a8be575a97f819a3d2e25eb567b72483da05",
+          "elf_offset": 6549504
+        },
+        "adsp.b06": {
+          "bytes": 236,
+          "sha256": "22a2e7f471f97a0f6e395ff85258eeb9a87b58b8894412c6b4bc5b2a65a20718",
+          "elf_offset": 7352320
+        },
+        "adsp.b07": {
+          "bytes": 20660,
+          "sha256": "b675b4088e13b83422ed87a124d950f82f64aa2ff4eec67b6cb771b39ec47629",
+          "elf_offset": 7356416
+        },
+        "adsp.b08": {
+          "bytes": 2618360,
+          "sha256": "4a37b6f067e9f9978d96b9e7a963fd7a6a19e04a3c19cd58f6c5db19e8c4a8f9",
+          "elf_offset": 7380992
+        },
+        "adsp.b09": {
+          "bytes": 264760,
+          "sha256": "665154525c6029226f3d764eee7b8db90f6eee13d621d117589acdb384a7fb6f",
+          "elf_offset": 10002432
+        },
+        "adsp.b10": {
+          "bytes": 2016,
+          "sha256": "7653ab59c9353772ae24000e657012cc72183018e440eddecacad8d2c288cce0",
+          "elf_offset": 10268672
+        },
+        "adsp.b11": {
+          "bytes": 23068,
+          "sha256": "130261d7160c2f10da37e90cef0dfd22ed3b499c566ae01252af75771fd3b9ee",
+          "elf_offset": 10272768
+        },
+        "adsp.b12": {
+          "bytes": 5684,
+          "sha256": "d260f6c39a0d8b16f8a5e0ac57c534d643da838b3d144e5d9146439282b606ba",
+          "elf_offset": 10297344
+        },
+        "adsp.b13": {
+          "bytes": 205952,
+          "sha256": "125393f1b72aafbcbb00a0938aed690bea2494eadb9e0794a687094c00e5ccf3",
+          "elf_offset": 10305536
+        },
+        "adsp.b14": {
+          "bytes": 10800,
+          "sha256": "3fe332e00d6d2d09a22b60620b050578eecc5f6b8f3550d20d5a624174704931",
+          "elf_offset": 10511488
+        },
+        "adsp.b15": {
+          "bytes": 108,
+          "sha256": "268d552257767cc03eda517ebaa6f4fe168b2535ffe0af1879c5cfd02592b398",
+          "elf_offset": 10522624
+        },
+        "adsp.b16": {
+          "bytes": 133500,
+          "sha256": "0614880c7721e6f4828b16fe94c962504fdc4eecfe0e2d1bf0bc497a17d77167",
+          "elf_offset": 10522732
+        },
+        "adsp.b17": {
+          "bytes": 884736,
+          "sha256": "cbfb30df70bbcb1c289d662a3898c6bbd39571898753f7cf372ece42a29a6fab",
+          "elf_offset": 10657792
+        },
+        "adsp.b18": {
+          "bytes": 2164824,
+          "sha256": "a3cd787f441ea4ef14024e1e5e626ce69bf5049c3d44906e870167bcf4d9079b",
+          "elf_offset": 11542528
+        },
+        "adsp.b19": {
+          "bytes": 45060,
+          "sha256": "6fb997c199385bb406484cf1fa2023dbe5e41fe4ac3b51193164876032de4b5f",
+          "elf_offset": 13709312
+        },
+        "adsp.b20": {
+          "bytes": 11640,
+          "sha256": "866007d834e0ae0fd1c0df6145b8a8cc47979279fe853e2b7b2f67de47d1ff4c",
+          "elf_offset": 13758464
+        },
+        "adsp.b21": {
+          "bytes": 1927,
+          "sha256": "f1152916f96e6d0264f9ca22a6e770d5a9eee25086e6898b178c9eacc59c067c",
+          "elf_offset": 13770752
+        },
+        "adsp.b22": {
+          "bytes": 20944,
+          "sha256": "b0fb1ccc88faa91d740a12c3a62aa40672eea16f955d42034d825f0f87d4d460",
+          "elf_offset": 13774848
+        },
+        "adsp.b23": {
+          "bytes": 3216,
+          "sha256": "3071e82516eafb7c2ae830d0361a160c98061655e1b9fc80ff4aec73e1d354ea",
+          "elf_offset": 13795792
+        },
+        "adsp.b24": {
+          "bytes": 139808,
+          "sha256": "966ff21904ab40cc9e0a436600b10f0769cb6288e5c3a5a956f202338401dd22",
+          "elf_offset": 13799424
+        },
+        "adsp.b25": {
+          "bytes": 51280,
+          "sha256": "b036ed5044d094cf15f50a234a40bd92c0ff2060e7fee59b27a3e854fb3f6959",
+          "elf_offset": 13939232
+        },
+        "adsp.b27": {
+          "bytes": 5816,
+          "sha256": "d7bbc3f9f24f3e004bd4929f8b6d93ae3f6019802db131e17dc37314f209979c",
+          "elf_offset": 13990520
+        },
+        "adsp.b28": {
+          "bytes": 7188,
+          "sha256": "5a3edb5fea3556a7a0f6058ed77115cb8770f4287d2da590965608a75fb9d308",
+          "elf_offset": 13996336
+        },
+        "adsp.b30": {
+          "bytes": 155852,
+          "sha256": "8e153eb05426e3903d61686cd4545def1dd0f3956f6042db2d0479c446a0329a",
+          "elf_offset": 14003936
+        },
+        "adsp.b31": {
+          "bytes": 679212,
+          "sha256": "24881aa6fd4e670571e9d2a4a30e3e2cf163afec4493f256119dc70e07cf977e",
+          "elf_offset": 14159872
+        },
+        "adsp.b32": {
+          "bytes": 557056,
+          "sha256": "9dd7ffeddeedb2b6a865200ed211050a041b98d5caf98e6ba1684fc76eab0c7a",
+          "elf_offset": 14839808
+        },
+        "adsp.b33": {
+          "bytes": 12506680,
+          "sha256": "8222795d8cadd3e411da5aa2b709fb514620fec6a8475ed0969f4a7fa759e415",
+          "elf_offset": 15396864
+        },
+        "adsp.b34": {
+          "bytes": 3153928,
+          "sha256": "b14bdc185e3723a76fd6039d90a1eddbc110364502eff37c47e2ab384cf87cb7",
+          "elf_offset": 27906048
+        },
+        "adsp.b35": {
+          "bytes": 82,
+          "sha256": "aef47c479a71adcbc5e688b5365274047d971f3c244d8a45f9961d85ee3382f7",
+          "elf_offset": 31064064
+        },
+        "adsp.b36": {
+          "bytes": 24576,
+          "sha256": "8ebd2465e1cabed57a3b03e7bd7180297d93d7714067b4c2eb02d33c413205d9",
+          "elf_offset": 31068160
+        },
+        "adsp.b38": {
+          "bytes": 688,
+          "sha256": "be32141230bd497448810f7b0c266e0d38637c8d2132bab59aeccc89fef62116",
+          "elf_offset": 31092736
+        },
+        "adsp.b39": {
+          "bytes": 334360,
+          "sha256": "8c3ab09228e2139cc7b7d3f3f302d8fdf1dbabce6d77d340d8349ad4fd5d3d10",
+          "elf_offset": 31096832
+        },
+        "adsp.b40": {
+          "bytes": 8616,
+          "sha256": "c8ede9f410db2c6dbd44fe8dbc2245b7199ac69effb1c5635391814dda808235",
+          "elf_offset": 31432704
+        },
+        "adsp.b41": {
+          "bytes": 11224,
+          "sha256": "6f70e9461bfadc063cfebc948e39ef55501d549dc53eb96c76945ac4e4d38d6c",
+          "elf_offset": 31444992
+        },
+        "adsp.b42": {
+          "bytes": 5080,
+          "sha256": "a1219dec74743b34241279b83ff181c96da2a702276e154e421ab70387a46776",
+          "elf_offset": 31456216
+        },
+        "adsp.b43": {
+          "bytes": 414400,
+          "sha256": "228c4b536f32eea46a240c96bf2bda3c34a1938e898849a4c054184257df9bab",
+          "elf_offset": 31461376
+        },
+        "adsp.b44": {
+          "bytes": 618196,
+          "sha256": "56141b0cd0960a23ee2890b0bea18ca5f1d175320713bada8bacf2cee9798759",
+          "elf_offset": 31875776
+        },
+        "adsp.b45": {
+          "bytes": 524288,
+          "sha256": "675ed499e16797ddf364ccc5f0bea509babc05605caed77e533d2e3b21a9dce0",
+          "elf_offset": 32497664
+        },
+        "adsp.b46": {
+          "bytes": 80607,
+          "sha256": "b596744d900b1dde1af42b29e5f1a06b3ab7c05daf37f52d4f558406ec566e90",
+          "elf_offset": 33021952
+        },
+        "adsp.b47": {
+          "bytes": 966656,
+          "sha256": "1f63bffabb214666ad168694dc0068568a3389c2950498bcd68c06945f404322",
+          "elf_offset": 33103872
+        },
+        "adsp.b48": {
+          "bytes": 49152,
+          "sha256": "88094b00486a3cf662a27c9c2afcd4c392b2e4f363ee1a50adc43e5fc08b8d51",
+          "elf_offset": 34070528
+        },
+        "adsp.b49": {
+          "bytes": 642560,
+          "sha256": "ca0d9f8657b1edaaefbba6c295e04a7abf169faf233463ac5adc607370c6e052",
+          "elf_offset": 34119680
+        },
+        "adsp.b51": {
+          "bytes": 6248,
+          "sha256": "e0dd97a847aea9bbe3248aaecc496e16fa5f5ad709a9b0029206d6cc134d6a29",
+          "elf_offset": 34766848
+        }
+      }
+    },
+    "adsp_dtb": {
+      "bytes": 16184,
+      "sha256": "13a0d68a97b0fb04a32c0b478d420ddec821b251e38cd656322b0acdd2cd2e90",
+      "segment_count": 3,
+      "derivation": "Exact original ELF offsets and unchanged split segments; MDT header/hash identity verified",
+      "metadata_sha256": "24ca381f3bc4e4d868fd7d45e7b4f10bf3b37b372153d34efa154dab9d022e7e",
+      "inputs": {
+        "adsp_dtb.b00": {
+          "bytes": 148,
+          "sha256": "6bf39fd29034606433776d7320ad7a12d7372319d8ec364bbeb671e82d99155c",
+          "elf_offset": 0
+        },
+        "adsp_dtb.b01": {
+          "bytes": 8376,
+          "sha256": "006d0a6abb068e10fa6f69d53174343c7b5744e8c0be8493c70ac8d44b7cbb05",
+          "elf_offset": 148
+        },
+        "adsp_dtb.b02": {
+          "bytes": 3896,
+          "sha256": "1351f754521cc7871167f04c04c0bd0b001fd2632be5f350c7c3c76f7a1367a5",
+          "elf_offset": 12288
+        }
+      }
+    }
+  },
+  "hardware_verified": false,
+  "firmware_signature_execution_verified": false,
+  "tool": {
+    "path": "scripts/b5q-install/extract-p4-stock-inputs.py",
+    "sha256": "e9c1b5acac5facf7adbb612bb66aab2ab649c4bc2799dc126bf3d0c99a9db027"
+  },
+  "status": "INPUTS_PREPARED_NOT_STAGE_COMPLETE"
+}
