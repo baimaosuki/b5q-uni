@@ -2424,7 +2424,7 @@ procedure = ["Run native launchd/XPC/absentd and ProcTop ASan/UBSan checks local
 findings = ["The previously delivered Batch1 ESP reused the v33 B5qProcTop object; its 1536-byte formatter still exceeded IOLog's 255-byte limit and cut off the tail of TOP-10. The v33 runtime lines prove that artifact was not the complete ProcTop fix.", "The replacement formatter emits TOP1..5 and TOP6..10 rows separately; the host test will exercise maximum name/counter widths and require every emitted line below 200 bytes.", "Only B5qProcTop.c is scheduled for target compilation. XNU core, GPU/addon, firmware and the already verified 4 GiB Data seed are reused."]
 completion = ["Source correction and local preflight are in progress; final target object PAC check and final ESP readback are pending."]
 limits = ["The final image has not yet been rebuilt or run on hardware.", "Local LLVM 21 cannot parse the pinned MacOSX26.5 SDK's four-argument __ptrauth qualifier; the exact Xcode 26.6 target compile and PAC check are therefore required in CI."]
-next_action = ["Run the one-object cached-core CI, download only esp.img, verify the embedded TOP-10 format and unchanged 4 GiB Data/APFS policy, then record its hash and CI run."]
+next_action = ["CI45100252804 completed inputs/tree/header preparation but failed at the combined object/relink/PAC step. Preserve the step log, new object and relink cache on subsequent failures, then read the first error. Final image/readback remains pending."]
 
 [[area.evidence]]
 kind = "source"

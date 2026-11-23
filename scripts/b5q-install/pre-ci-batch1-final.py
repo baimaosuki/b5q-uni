@@ -64,7 +64,8 @@ assert 'B5qBootPolicy.c' not in commands
 assert not any(s in commands for s in ['unixnu build xnu', 'unixnu build firmware', 'build-mesa'])
 uploads = [step for step in workflow['jobs']['incremental']['steps']
            if step.get('uses', '').startswith('actions/upload-artifact@')]
-assert len(uploads) == 1 and uploads[0]['with']['path'] == 'UniXNU/out/b5q/**/esp.img'
+assert len(uploads) == 2 and uploads[0]['with']['path'] == 'UniXNU/out/b5q/**/esp.img'
+assert '.img' not in uploads[1]['with']['path'] and 'capstone' in commands
 checks.append(dict(name='ADT-binary-plist-desktop-exclusions-cache-only-workflow', passed=True))
 report = dict(passed=True, checks=checks, hardware_verified=False, core_and_board_objects_recompiled=0,
     existing_v33_kernel_and_4GiB_volume_reused=True, native_launchd_instruction_cases=89,

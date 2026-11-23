@@ -42,6 +42,7 @@ jobs:
         run: |
           set -euo pipefail
           brew install llvm lld mtools dtc blacktop/tap/ipsw
+          python3 -m pip install capstone
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
@@ -152,6 +153,26 @@ jobs:
           path: UniXNU/out/b5q/**/esp.img
           compression-level: 1
           retention-days: 3
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
+        with:
+          name: batch1-object-and-diagnostics-${{ github.run_id }}
+          path: |
+            UniXNU/out/b5q/**/kernel/incremental-objects/B5qProcTop.o
+            UniXNU/out/b5q/**/kernel/incremental-objects/B5qProcTop.command.json
+            UniXNU/out/b5q/**/kernel/incremental-relink.json
+            ${{ runner.temp }}/batch1-final-relink.log
+            ${{ runner.temp }}/batch1-final-payload.log
+            ${{ runner.temp }}/batch1-final-proctop-pac.json
+          retention-days: 3
+      - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        if: always()
+        with:
+          path: |
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/libNativeLegacyDisplay.late.a
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
+            UniXNU/out/b5q/**/kernel/
+          key: macOS-ARM64-xcode26.6-batch1-proctop-${{ hashFiles('UniXNU-b5q/package/B5qProcTop*', 'UniXNU-b5q/scripts/relink-b5q-peripherals.py') }}-${{ github.run_id }}
       - name: Release temporary source artifact and staging inputs
         if: always()
         run: |
