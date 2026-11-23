@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "checks": 20,
+  "hardware_verified": false,
+  "first_error": {
+    "run": 45250039600,
+    "file": "btqca.c",
+    "reason": "Forced strrchr macro renamed later native pure declaration; Xcode rejects attributes declared after definition"
+  },
+  "fix": "Consume native sys/systm.h and string.h before Linux compatibility macro; upstream btqca remains unchanged",
+  "input_sha256": "59fe46891f7dc4439e74598cf27f8ba0ab19967ee56562831d86167e1ddfb613",
+  "pre_ci_sha256": "9706dfaafe842cdbe7fb763b91d8699abff134a683d955f8c0c20191ac1487e4"
+}
