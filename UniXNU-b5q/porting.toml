@@ -2631,3 +2631,20 @@ next_action = ["Finish full hostpreflight, build kernel+UEFI, readback images, c
 kind = "source"
 reference = "reports/p0-touch-source-audit.json"
 result = "Actual module symbol addresses, fullinputSHA256, SamsungDTlines and pinned upstream sourceidentity recorded; no hardware success inferred."
+
+[[area]]
+id = "p1-native-usb"
+status = "implemented"
+components = ["QcomDwc3"]
+paths = ["package/QcomDwc3.cpp", "package/B5qUsbBoard.cpp", "package/B5qMax77705.h", "reports/p1-usb-source-audit.json"]
+inputs = ["SamsungPDICmodule f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca", "OriginalCcicDxe 5388db26dd4d8c1b10ee6f3e2190b476dbb19ff306ceece7f9f3cd61a8af787d", "ReferenceDTS/runtimeFDT/stockfirmwareprovenance distinguished in sourceaudit."]
+configuration = ["Keep usb=1 and optionalusb-host; preserve168QMP/TI/IRQfuse/firmwareHALDMA; noEL1apps_smmu."]
+procedure = ["DisassembleCCPinStat/CCpower/PDdata role functions; replay actualproduction snapshot/rolefunctions and compileexactmacOSABI; jointlygateP0+P1 beforeCI per latestuserinstruction."]
+findings = ["PD0d bit7isdataHost independentlyofCC0a powerrole; source/sink no longer guessesdata role. CC0a bits7:6determineQMPorientation; noGPIO11/PS5169access.", "Removeforced vendor5e01 initialization; statusadoptionneverclobbers livePDcontract. PoweredSink+DFPdoesnotrequestboost; Source+UFPpowersupplystaysindependent. Toread/waterfailuresrejectroles withoutdisabling futurestatusrecovery.", "Bothbus-numbervaluesareu32. Existingrolethreadobservespower/orientationgeneration andyieldsonfailedtransition; newdevicediagnosticsomitSMMU. TargetedASanUBSan/P1twoobjectclosurepassed; fulljointgates/CI/returnimages pending.", "InitialP0CI45162509107 kernel succeeded; UEFI stoppedbeforecompilebecause oldbranchmissed existingv30patch0005/0006. Firsterrorretained; userrequiresP0+P1localcompletionbeforeanynewCI, so noP0retrywaslaunched."]
+completion = ["CompleteP0+P1localpreflight, onejointCI,actualimage/PAC/ADT/APFSreadback; hardwareclaimsremainseparate."]
+limits = ["No new hardware validation; nofirmwareopcodeechoisacceptedashardwareenumerationproof."]
+next_action = ["Finishjointsource/target/PAC/firmwaregates, submitP1commitandonejointCI, thencontinueP2-P5."]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p1-usb-source-audit.json"
+result = "OriginalmoduleRVA/bitfields,inputSHA256,DTprovenance,implementednativeCC/PDpolicy andremaininggates recorded."

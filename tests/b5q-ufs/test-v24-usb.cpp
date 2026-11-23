@@ -42,7 +42,9 @@ int main(){
  {Pmic x;x.regs[0xb2]=0;assert(!B5qMax77705::otg(x,true,[](unsigned){}));assert(x.writes.empty());}
  {Pmic x;x.regs[0xb2]=0x24;assert(!B5qMax77705::otg(x,true,[](unsigned){}));assert(x.writes.empty());}
  {Pmic x;x.fail=true;assert(!B5qMax77705::otg(x,true,[](unsigned){}));}
- assert(B5qMax77705::role(2,0)==2&&B5qMax77705::role(1,0)==1&&B5qMax77705::role(2,2)==0);
+ assert((B5qMax77705::Cable{0x82,0,0x80,0,true}.role()==2));
+ assert((B5qMax77705::Cable{0x81,0,0x80,0,true}.role()==2));
+ assert((B5qMax77705::Cable{0x82,2,0x80,0,true}.role()==0));
  {B5qUsbIrq::Window w;for(unsigned n=0;n<8192;n++)assert(!w.observe(100,1000));assert(w.observe(100,1000));assert(!w.observe(1100,1000));}
  puts("PASS production CBAR planner/install:display+slot0+bypass isolated,existingSID/full/race/TLBtimeout negatives;max77705state/readback/rails;IRQtimewindow");
 }

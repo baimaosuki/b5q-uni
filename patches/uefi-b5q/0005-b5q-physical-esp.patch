@@ -1,0 +1,187 @@
+diff --git a/Platforms/Samsung/b5qPkg/Include/DXE.inc b/Platforms/Samsung/b5qPkg/Include/DXE.inc
+--- a/Platforms/Samsung/b5qPkg/Include/DXE.inc
++++ b/Platforms/Samsung/b5qPkg/Include/DXE.inc
+@@ -41,6 +41,7 @@
+   INF FatPkg/EnhancedFatDxe/Fat.inf
+   INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
+ 
++  INF Binaries/b5q/QcomPkg/Drivers/UFSDxe/UFSDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/CmdDbDxe/CmdDbDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/PwrUtilsDxe/PwrUtilsDxe.inf
+   INF Binaries/b5q/QcomPkg/Drivers/RpmhDxe/RpmhDxe.inf
+diff --git a/Platforms/Samsung/b5qPkg/Include/APRIORI.inc b/Platforms/Samsung/b5qPkg/Include/APRIORI.inc
+--- a/Platforms/Samsung/b5qPkg/Include/APRIORI.inc
++++ b/Platforms/Samsung/b5qPkg/Include/APRIORI.inc
+@@ -42,7 +42,7 @@
+   INF MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
+   INF MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+   INF MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
+-
++  INF Binaries/b5q/QcomPkg/Drivers/UFSDxe/UFSDxe.inf
+ 
+   INF FatPkg/EnhancedFatDxe/Fat.inf
+ 
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+@@ -2,127 +2,21 @@
+ // Read-only runtime evidence. Never exports /chosen, serials, or bootargs.
+ #include <Uefi.h>
+ #include <Guid/EventGroup.h>
+-#include <Protocol/GraphicsOutput.h>
+-#include <Library/BaseLib.h>
+-#include <Library/BaseMemoryLib.h>
+ #include <Library/DebugLib.h>
+-#include <Library/FdtLib.h>
+-#include <Library/HobLib.h>
+-#include <Library/MemoryAllocationLib.h>
+ #include <Library/UefiBootServicesTableLib.h>
+ 
+-STATIC CONST EFI_GUID mEntryArgGuid = {
+-  0xdaee82e6, 0x8090, 0x4e72, {0xbf, 0xb9, 0x78, 0xc1, 0x3c, 0xd4, 0xe3, 0x59}
+-};
+-STATIC EFI_EVENT mReadyEvent;
+-
+ EFI_STATUS InstallB5qUsbDma (EFI_HANDLE ImageHandle);
+-
+-STATIC VOID
+-LogReg (CONST VOID *Fdt, INT32 Node, CONST CHAR8 *Kind)
+-{
+-  INT32 Length;
+-  INT32 Parent = FdtParentOffset (Fdt, Node);
+-  INT32 Ac = FdtAddressCells (Fdt, Parent);
+-  INT32 Sc = FdtSizeCells (Fdt, Parent);
+-  CONST UINT32 *Reg = FdtGetProp (Fdt, Node, "reg", &Length);
+-  if (Reg == NULL || (Ac != 1 && Ac != 2) || (Sc != 1 && Sc != 2) ||
+-      Length <= 0 || Length % ((Ac + Sc) * sizeof (UINT32)) != 0) {
+-    DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: %a reg unknown/invalid\n", Kind));
+-    return;
+-  }
+-  for (INT32 At = 0; At < Length / (INT32)sizeof (UINT32); At += Ac + Sc) {
+-    UINT64 Base = 0, Size = 0;
+-    for (INT32 I = 0; I < Ac; I++) Base = (Base << 32) | Fdt32ToCpu (Reg[At + I]);
+-    for (INT32 I = 0; I < Sc; I++) Size = (Size << 32) | Fdt32ToCpu (Reg[At + Ac + I]);
+-    if (Size == 0 || Base > MAX_UINT64 - Size) {
+-      DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: %a zero/overflow reg (not usable RAM)\n", Kind));
+-      continue;
+-    }
+-    DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: %a base=0x%lx size=0x%lx\n", Kind, Base, Size));
+-  }
+-}
+-
+-STATIC VOID
+-LogFdt (VOID)
+-{
+-  VOID *Hob = GetFirstGuidHob (&mEntryArgGuid);
+-  UINT64 Address;
+-  if (Hob == NULL || GET_GUID_HOB_DATA_SIZE (Hob) != sizeof (Address)) {
+-    DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: incoming FDT HOB missing\n"));
+-    return;
+-  }
+-  CopyMem (&Address, GET_GUID_HOB_DATA (Hob), sizeof (Address));
+-  CONST VOID *Fdt = (CONST VOID *)(UINTN)Address;
+-  if (Address == 0 || (Address & 7) != 0 || FdtCheckHeader (Fdt) != 0 ||
+-      FdtTotalSize (Fdt) < 40 || FdtTotalSize (Fdt) > 16 * 1024 * 1024) {
+-    DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: incoming FDT invalid\n"));
+-    return;
+-  }
+-  INT32 Node;
+-  FdtForEachSubnode (Node, Fdt, 0) {
+-    INT32 Length;
+-    CONST CHAR8 *Type = FdtGetProp (Fdt, Node, "device_type", &Length);
+-    if (Type != NULL && Length == sizeof ("memory") &&
+-        CompareMem (Type, "memory", sizeof ("memory")) == 0) LogReg (Fdt, Node, "DRAM");
+-  }
+-  INT32 Reserved = FdtPathOffset (Fdt, "/reserved-memory");
+-  if (Reserved >= 0) {
+-    FdtForEachSubnode (Node, Fdt, Reserved) {
+-      INT32 Length;
+-      CONST CHAR8 *Status = FdtGetProp (Fdt, Node, "status", &Length);
+-      if (Status != NULL && Length == sizeof ("disabled") &&
+-          CompareMem (Status, "disabled", sizeof ("disabled")) == 0) continue;
+-      LogReg (Fdt, Node, "reserved-memory");
+-    }
+-  }
+-  INT32 Count = FdtGetNumberOfReserveMapEntries (Fdt);
+-  for (INT32 I = 0; I < Count && I < 1024; I++) {
+-    UINT64 Base, Size;
+-    if (FdtGetReserveMapEntry (Fdt, I, &Base, &Size) == 0)
+-      DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: memreserve base=0x%lx size=0x%lx\n", Base, Size));
+-  }
+-}
+ 
+ STATIC VOID EFIAPI
+ LogHandoff (EFI_EVENT Event, VOID *Context)
+ {
+-  EFI_HANDLE *Handles = NULL;
+-  UINTN Count = 0;
++  UINTN Size = 0, Key, EntrySize = 0;
++  UINT32 Version;
+   (VOID)Event;
+   (VOID)Context;
+-  LogFdt ();
+-  EFI_STATUS Status = gBS->LocateHandleBuffer (ByProtocol, &gEfiGraphicsOutputProtocolGuid,
+-                                              NULL, &Count, &Handles);
+-  if (!EFI_ERROR (Status)) {
+-    for (UINTN I = 0; I < Count; I++) {
+-      EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
+-      Status = gBS->HandleProtocol (Handles[I], &gEfiGraphicsOutputProtocolGuid, (VOID **)&Gop);
+-      if (EFI_ERROR (Status) || Gop->Mode == NULL || Gop->Mode->Info == NULL) continue;
+-      EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *Info = Gop->Mode->Info;
+-      DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: GOP %ux%u pitch=%u format=%u base=0x%lx bytes=0x%lx main=%u\n",
+-              Info->HorizontalResolution, Info->VerticalResolution, Info->PixelsPerScanLine,
+-              Info->PixelFormat, Gop->Mode->FrameBufferBase, (UINT64)Gop->Mode->FrameBufferSize,
+-              Info->HorizontalResolution == 1080 && Info->VerticalResolution == 2640));
+-    }
+-    FreePool (Handles);
+-  }
+-  UINTN Size = 0, Key, EntrySize;
+-  UINT32 Version;
+-  Status = gBS->GetMemoryMap (&Size, NULL, &Key, &EntrySize, &Version);
+-  if (Status != EFI_BUFFER_TOO_SMALL || EntrySize == 0 || Size > MAX_UINTN - 16 * EntrySize) return;
+-  Size += 16 * EntrySize;
+-  EFI_MEMORY_DESCRIPTOR *Map = AllocatePool (Size);
+-  if (Map == NULL) return;
+-  Status = gBS->GetMemoryMap (&Size, Map, &Key, &EntrySize, &Version);
+-  if (!EFI_ERROR (Status) && EntrySize >= sizeof (*Map)) {
+-    for (UINTN At = 0; At + EntrySize <= Size; At += EntrySize) {
+-      EFI_MEMORY_DESCRIPTOR *D = (VOID *)((UINT8 *)Map + At);
+-      DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: EFI type=%u base=0x%lx pages=0x%lx attr=0x%lx\n",
+-              D->Type, D->PhysicalStart, D->NumberOfPages, D->Attribute));
+-    }
+-  }
+-  FreePool (Map);
++  EFI_STATUS Status = gBS->GetMemoryMap (&Size, NULL, &Key, &EntrySize, &Version);
++  DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: EFI memory map query %r bytes=%lu descriptor-size=%lu\n",
++          Status, (UINT64)Size, (UINT64)EntrySize));
+ }
+ 
+ EFI_STATUS EFIAPI
+@@ -131,7 +25,7 @@
+   (VOID)SystemTable;
+   EFI_STATUS UsbStatus = InstallB5qUsbDma (ImageHandle);
+   DEBUG ((DEBUG_ERROR, "B5Q-USBDMA: handoff protocol %r\n", UsbStatus));
+-  DEBUG ((DEBUG_ERROR, "B5Q-HANDOFF: runtime evidence armed; no controller or partition I/O\n"));
++  EFI_EVENT Event;
+   return gBS->CreateEventEx (EVT_NOTIFY_SIGNAL, TPL_CALLBACK, LogHandoff, NULL,
+-                             &gEfiEventReadyToBootGuid, &mReadyEvent);
++                             &gEfiEventReadyToBootGuid, &Event);
+ }
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+@@ -15,14 +15,10 @@
+   BaseMemoryLib
+   CacheMaintenanceLib
+   DebugLib
+-  FdtLib
+-  HobLib
+   MemoryAllocationLib
+   UefiBootServicesTableLib
+   UefiDriverEntryPoint
+ [Guids]
+   gEfiEventReadyToBootGuid
+-[Protocols]
+-  gEfiGraphicsOutputProtocolGuid
+ [Depex]
+   TRUE

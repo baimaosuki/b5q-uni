@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Download ordinary Actions artifacts; validate and unpack in local staging."""
-import argparse,hashlib,json,os,stat,tempfile,time,urllib.request,urllib.error,urllib.parse,zipfile
+import argparse,hashlib,json,os,stat,subprocess,tempfile,time,urllib.request,urllib.error,urllib.parse,zipfile
 from pathlib import Path
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('--run',type=int,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--run',type=int,required=True);p.add_argument('--out',type=Path,required=True)
+p.add_argument('--esp-only',action='store_true',help='Stage build returns one ESP containing kernel/addon/seed; verify kernel from its actual FAT bytes')
+a=p.parse_args()
 repo='baimaosuki/b5q-uni';token=os.environ.get('GH_TOKEN') or (Path.home()/'.config/gh/token').read_text().strip()
 base='https://api.github.com/repos/'+repo
 headers={'Authorization':'Bearer '+token,'User-Agent':'b5q-build-download','Accept':'application/vnd.github+json'}
@@ -46,7 +48,14 @@ with tempfile.TemporaryDirectory(prefix='b5q-artifact-') as tmp:
     while block:=source.read(1024*1024):output.write(block)
    files[rel.as_posix()]={'bytes':target.stat().st_size,'sha256':sha(target)}
  manifest=json.loads((dest/'package.manifest.json').read_text())
- for name,rel in [('kernel.macho','kernel/kernel.macho'),('payload.img','payload/payload.img')]:assert files[rel]==manifest['outputs'][name],name
+ if a.esp_only:
+  metadata=json.loads((dest/'batch2-package.json').read_text())
+  assert files['esp.img']==metadata['esp']
+  kernel=Path(tmp)/'readback-kernel'
+  subprocess.run(['mcopy','-i',str(dest/'esp.img'),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
+  assert dict(bytes=kernel.stat().st_size,sha256=sha(kernel))==manifest['outputs']['kernel.macho']
+ else:
+  for name,rel in [('kernel.macho','kernel/kernel.macho'),('payload.img','payload/payload.img')]:assert files[rel]==manifest['outputs'][name],name
  index={'run':str(a.run),'commit':info['head_sha'],'artifact':{'id':artifact['id'],'archive_sha256':digest,'github_digest_verified':bool(expected)},'files':files}
  (dest/'transfer-index.json').write_text(json.dumps(index,indent=2)+'\n')
  print(json.dumps({'run':a.run,'artifact_id':artifact['id'],'files':len(files),'outputs':manifest['outputs'],'directory':str(dest)},indent=2))

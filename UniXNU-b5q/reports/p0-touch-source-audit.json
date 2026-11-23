@@ -49,7 +49,7 @@
   "host_tests": {
     "groups": 43,
     "result": "PASS",
-    "preflight_report": "artifacts/b5q-p0-work/pre-ci.json",
+    "preflight_report": "artifacts/b5q-p0-work/pre-ci-initial-43.json",
     "preflight_sha256": "f3c265e9033287f649886b81932e189c3aaf4dd3ba5be84209ba9f0f7de9466d",
     "target_objects": 28,
     "PAC": "All requested callback producers/consumers and original storage vtable discriminators verified",

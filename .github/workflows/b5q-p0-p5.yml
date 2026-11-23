@@ -1,8 +1,17 @@
-name: b5q P0-P5 full stage build
-run-name: b5q P0-P5 / ${{ github.sha }}
+name: b5q P0-P1 verified joint build
+run-name: b5q P0+P1 / ${{ github.sha }}
 on:
   push:
     branches: [codex/b5q-p0-p5]
+    paths:
+      - '.github/workflows/b5q-p0-p5.yml'
+      - 'UniXNU-b5q/board.toml'
+      - 'UniXNU-b5q/package/**'
+      - 'UniXNU-b5q/scripts/**'
+      - 'UniXNU-b5q/configs/**'
+      - 'UniXNU-b5q/dts/**'
+      - 'UniXNU-b5q/patches/**'
+      - 'patches/uefi-b5q/**'
   workflow_dispatch:
     inputs:
       os_profile:
@@ -236,9 +245,7 @@ jobs:
           name: b5q-build-${{ github.run_id }}
           path: |
             UniXNU/out/b5q/**/esp.img
-            UniXNU/out/b5q/**/kernel/kernel.macho
             UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
-            UniXNU/out/b5q/**/tree/build/**/*.a
             UniXNU/out/b5q/**/tree/build/**/native-recount-build.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.command.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.o
@@ -250,10 +257,8 @@ jobs:
             UniXNU/out/b5q/**/tree/build/**/processor.o
             UniXNU/out/b5q/**/tree/build/**/IOUserClient.cpo
             UniXNU/out/b5q/**/kernel/*.json
-            UniXNU/out/b5q/**/payload/payload.img
             UniXNU/out/b5q/**/payload/payload.json
             UniXNU/out/b5q/**/runtime/data-seed.json
-            UniXNU/out/b5q/**/runtime/data.dbr
             UniXNU/out/b5q/**/runtime/generated.json
             UniXNU/out/b5q/**/runtime/inputs.json
             UniXNU/out/b5q/**/package.manifest.json

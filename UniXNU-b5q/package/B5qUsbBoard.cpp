@@ -172,30 +172,33 @@ extern "C" bool b5q_usb_repeater(bool init,bool host){
 }
 extern "C" bool b5q_usb_typec_init(void){
  maxim=new Bus;if(!maxim||!maxim->open(true))return false;
- uint8_t id=0,rev=0,cc=0,water=0;IOLockLock(maxim->lock);
- maximReady=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&maxim->read(0x25,0x0a,cc)&&
-            maxim->read(0x25,0x0b,water)&&id!=0xff&&!(water&2);
- bool roleCommandOk=false;
- if(maximReady)roleCommandOk=B5qMax77705::drp(*maxim,[](unsigned us){IODelay(us);},
-  [](const B5qMax77705::OpcodeResult &r){
-   IOLog("qcom-dwc3: max77705 DRP opcode=%02x reply=%02x irq=%02x polls=%u triggered=%u reg=%02x ok=%u\n",
-         r.opcode,r.reply,r.interrupt,r.polls,r.triggered,r.failedReg,r.ok);
-  });
+ uint8_t id=0,rev=0;B5qMax77705::Cable cable;
+ IOLockLock(maxim->lock);
+ maximReady=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&id!=0xff&&
+            B5qMax77705::readCable(*maxim,cable);
  IOLockUnlock(maxim->lock);
- IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x water=%u bus-ready=%u role-command-ok=%u\n",
-       id,rev,cc,!!(water&2),maximReady,roleCommandOk);
+ IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x/%x PD=%x water=%u bus-ready=%u policy=firmware-negotiated\n",
+       id,rev,cable.cc0,cable.cc1,cable.pd,cable.water(),maximReady);
+ // Water blocks roles in Cable, not future dry-cable status observations.
  return maximReady;
 }
+extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *out){
+ if(!out)return false;
+ *out={};if(!maximReady)return false;
+ IOLockLock(maxim->lock);const bool ok=B5qMax77705::readCable(*maxim,*out);IOLockUnlock(maxim->lock);
+ static uint32_t previous=~0u;
+ if(__atomic_exchange_n(&previous,out->signature(),__ATOMIC_RELAXED)!=out->signature())
+  IOLog("qcom-dwc3: max77705 CC0=%x CC1=%x PD=%x BC=%x power=%u data=%d reverse=%d valid=%u\n",
+        out->cc0,out->cc1,out->pd,out->bc,out->power(),out->role(),out->orientation(),out->valid);
+ return ok;
+}
 extern "C" int b5q_usb_cable_role(void){
- if(!maximReady)return 0;uint8_t cc0=0,cc1=0;IOLockLock(maxim->lock);
- const bool ok=maxim->read(0x25,0x0a,cc0)&&maxim->read(0x25,0x0b,cc1);IOLockUnlock(maxim->lock);
- const int role=ok?B5qMax77705::role(cc0,cc1):0;
- static int previous=-1;if(role!=previous){IOLog("qcom-dwc3: max77705 CC0=%x CC1=%x role=%d valid=%u\n",cc0,cc1,role,ok);previous=role;}
- return role;
+ B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
+ return cable.role();
 }
 extern "C" bool b5q_usb_otg(bool on){
  if(!maximReady)return false;IOLockLock(maxim->lock);
- // Always disable explicitly on a non-host transition, including firmware's prior state.
+ // The caller follows the PDIC power role, independently of Host/Device.
  const bool ok=B5qMax77705::otg(*maxim,on,[](unsigned us){IODelay(us);});
  if(ok)otgOn=on;uint8_t mode=0,ilim=0,c3=0;maxim->read(0x69,0xb7,mode);maxim->read(0x69,0xb9,ilim);maxim->read(0x69,0xc3,c3);
  IOLockUnlock(maxim->lock);IOLog("qcom-dwc3: Charger69 OTG=%u verified=%u B7=%02x B9=%02x C3=%02x\n",on,ok,mode,ilim,c3);return ok;

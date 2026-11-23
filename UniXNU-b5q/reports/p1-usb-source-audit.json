@@ -1,0 +1,54 @@
+{
+  "stage": "P1",
+  "status": "P0_P1_JOINT_HOST_PREFLIGHT_PASS_CI_PENDING",
+  "hardware_tested": false,
+  "inputs": {
+    "sources/twrp-b5q/recovery/root/lib/modules/pdic_max77705.ko": "f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca",
+    "sources/twrp-b5q/recovery/root/lib/modules/max77705_charger.ko": "2c7b72c1fd1c5eb840f1c18880ea18c4afb81634d2dd56e9e77c24c31566b6b1",
+    "sources/twrp-b5q/recovery/root/lib/modules/repeater-i2c-eusb2.ko": "a9ee6f9335ddff418bd4cdbd3f82869b01c8a759b0ccc4b151ed9f85fc67bcb5",
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/SamsungDxe/CcicDxe/CcicDxe.efi": "5388db26dd4d8c1b10ee6f3e2190b476dbb19ff306ceece7f9f3cd61a8af787d",
+    "uefi-b5q/Resources/DTBs/b5q.dts": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f",
+    "b5q-runtime.fdt": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+    "UniXNU-b5q/reports/official-firmware-hardware.json": "e834c46556af74de85f5e988bf2adde0fa7ff600cbf16939e0c07f71943f151f",
+    "UniXNU-b5q/reports/hardware-baseline.json": "7e4e6117b4bf54c3d714742139b19eecde04bd33db8ab787a19ef588706d4228"
+  },
+  "provenance": "UEFI b5q.dts is the Project-Silicium reference. Existing separately extracted stockfirmware reports and runtimeFDT corroborate device properties; copies are not new independent phone samples.",
+  "Samsung_symbols": {
+    "max77705_ccpinstat_irq": "0x16e8..0x18ec;0x1710 reads0a;0x1728 extracts bits7:6",
+    "max77705_ccstat_irq_handler": "0x1b88..0x2250;CC_STATUS0 powerrole1Sink/2Source",
+    "max77705_datarole_irq_handler": "0x6f5c..0x7144;0x6f84 reads0d;0x6fa0 signedbyte and0x7004 bit31 choose data0UFP/1DFP",
+    "max77705_usbc_opcode_write": "0x7340..0x76cc",
+    "CcicDxe": "0x2410..0x2454 accepts a callerparameter for vendor set_sink; it does not prove literal1 is required native DRP initialization",
+    "eusb2_repeater_init": "originalsymbol disassembly inartifacts/b5q-p1-work/eusb2_repeater_init.txt"
+  },
+  "decisions": [
+    "Delete the old forced5e/01 opcode path; adopt firmware negotiated CC/PD state with zero opcode/interruptregister writes. Never label its echo as a proven rolechange.",
+    "Five-read status snapshot0a/0b/0d/08/0a rejects tornCC; pin1CC1/pin2CC2 drivesQMP. Unknownpin degradesUTMI; noGPIO11/PS5169 programming.",
+    "DataHost readsPD0d bit7 independently ofCCpower; Sink+DFP disables localboost and startsXHCI, Source+UFP can keepboost while runningXDCI.",
+    "Connector power/orientation generation reuses the existing serialized QcomDwc3 rolethread, quiescing oldrole before PHYreset; failedtransition backs off1second.",
+    "Both provider bus-number properties now use sizeof(uint32_t). Device register summaries reuse upstreamDWC3 offsets and never sample SMMU.",
+    "Existing168orderedSamsungQMPpairs,TI0x3eoverrides,reset/FIFO powerinputs,1secondIRQfuse,HALhandoff remain. Verified6firmwarepatches reconstructexactv30sources; missingCIinputfiles must be included beforejointCI."
+  ],
+  "dt_lines": [
+    "22447 repeater0x3e",
+    "23315 MAX77705SE8",
+    "23423 DWC3/SID40 and0x90000000+0x60000000 IOVApool",
+    "23499/23513 QMP168sequence"
+  ],
+  "reused_components": [
+    "QcomDwc3 classes/ABI/XDCI/XHCI/reset/rolethread/IRQ",
+    "QcomEusb2Phy.h",
+    "QcomQmpUsb3.h",
+    "UsbProbe kextcatalogue path"
+  ],
+  "remaining_gates": [
+    "FullP0+P1hostpreflight/PAC/firmwareinputs then onejointCI, actualreturnedkernel/UEFI/ESPbootreadback",
+    "NewUSB3/PDhub/Devicephonequalification HOST_VERIFIED_PENDING_HARDWARE"
+  ],
+  "joint_preflight": {
+    "baseline_groups": 43,
+    "P1_groups": 10,
+    "report": "artifacts/b5q-p1-work/pre-ci.json",
+    "sha256": "33f82f5ff2f2ec8adbfc7cde59b305f02953dd16dd1cab20c76dc82164afbd33"
+  }
+}

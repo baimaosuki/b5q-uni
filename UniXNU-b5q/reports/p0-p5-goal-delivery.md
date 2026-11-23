@@ -5,7 +5,7 @@ Goal source: `/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b
 | Stage | Required final state | Current evidence/status |
 | --- | --- | --- |
 | P0 | Samsung touch lifecycle, verbatim sheng pointer, absolute HID fallback; tests, full kernel+UEFI images, independent commit | 43 host preflight groups and28 target objects/PAC/zeroapps_smmu pass; full builds/image/commit pending |
-| P1 | CC1/CC2, powered Sink+DFP hub, four-byte bus-number, TI/QMP, firmware DMA | NOT_STARTED |
+| P1 | CC1/CC2, powered Sink+DFP hub, four-byte bus-number, TI/QMP, firmware DMA | Implemented; targeted production host tests and2targetobject closure pass; joint gates/CI/images pending |
 | P2 | WCN6855 FIFO Bluetooth, six rails/shared WCN power, Samsung firmware, native macOS addon | NOT_STARTED |
 | P3 | QCA6490 ath11k/MHI/QMI/PCIe, shared power, firmware HAL DMA, wpa addon | NOT_STARTED |
 | P4A | Samsung GPIO107 lid, MAX77705 battery, inner-panel DCS0x51 backlight | NOT_STARTED |
@@ -13,6 +13,8 @@ Goal source: `/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b
 | P4C | Iris/VPU30 original firmware, UEFI SID1940/1947 mappings, VideoToolbox | NOT_STARTED |
 | P5 | PD VDM, DP PHY/controller/clock/AUX/EDID/training, DPU INTF_DP and external IOMFB | NOT_STARTED |
 | Final | All regressions, SHA256/ADT/args/fixups/APFS policy readback, boot/ESP/addon, four menu profiles, flashing/acceptance commands | NOT_STARTED |
+
+Latest user steering: finish all P0+P1 local gates before one joint CI; do not trigger separate P0 retries. Initial P0 CI45162509107 kernel passed; firmware failed before compilation on missing0005/0006 input files, now source reconstruction verified.
 
 Every stage requires original DT/module evidence, complete implementation, passing host tests, full kernel and UEFI builds, returned-image validation, and a separate commit before the next stage. Host tests never prove hardware behavior. Missing original firmware must be named exactly, with injection instructions, while work continues on all remaining requirements.
 
