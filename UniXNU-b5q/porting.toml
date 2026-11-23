@@ -2712,6 +2712,7 @@ result = "Pinned DT/module/source hashes and exact instruction evidence; IN_PROG
 [[area.evidence]]
 kind = "host"
 reference = "reports/p2-p3-pre-ci.json"
+revision = "a91c3fbd071fff37893816f588e1f0b4ec213f9d"
 command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
 result = "Production FIFO/shared power/WCN6855, original macOS runtime input and nine target Bluetooth objects pass; 122-object joint closure/PAC/MMIO gate passes. Full CI, signing and hardware pending."
 
@@ -2736,5 +2737,6 @@ result = "Pinned input hashes, Samsung resource facts and allowed software reuse
 [[area.evidence]]
 kind = "host"
 reference = "reports/p2-p3-pre-ci.json"
+revision = "a91c3fbd071fff37893816f588e1f0b4ec213f9d"
 command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
 result = "18 joint gate groups pass, preserving 43 P0 and 10 P1 groups; 122 arm64e target objects, 62 PAC producer/consumer contracts, zero unresolved/duplicate symbols and apps_smmu materializations. 14 original shared runtime regressions, 141 XNU patches and 8 firmware patch reconstructions pass. Native signing, full CI and returned image checks remain pending."
