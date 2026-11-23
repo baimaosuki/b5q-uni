@@ -32,6 +32,8 @@ def main():
   expected={m['archive_member']for m in relink['returned_objects'].values()if archive in m['archives']}
   assert changed==expected,(archive,changed,expected)
  assert relink['input_archives']['build/adreno740/libAdreno740.a']==relink['archive_outputs']['build/adreno740/libAdreno740.a']
+ kmeta=json.loads(unique('kernel.json').read_text());assert not kmeta['missing'] and not kmeta['stubbed'] and not kmeta['allow_missing'] and kmeta['mapping_complete']
+ assert kmeta['inputs']['native_sha256']==relink['native_output_sha256']
  with tempfile.TemporaryDirectory(prefix='b5q-batch2-readback-')as td:
   t=Path(td);members=fs.members(a.esp,t/'files');boot=t/'files/EFI/UniXNU';assets=boot/'Payloads'
   package=json.loads(unique('batch2-package.json').read_text());assert members==package['members'] and sha(a.esp)==package['esp']['sha256']
@@ -98,6 +100,6 @@ def main():
    f.seek(-4096,2);assert hashlib.sha256(f.read(4096)).hexdigest()==manifest['tail_block_sha256']
   run(sys.executable,R/'tests/b5q-ufs/test-post-seal.py','--kernel',kernel,'--out',a.out/'post-seal.json')
   (a.out/'disabled-plists-readback.json').write_text(json.dumps(persistent,indent=2)+'\n')
-  result=dict(passed=True,CI_core_recompiled=False,board_objects_recompiled=6,ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),Data=dict(bytes=a.data.stat().st_size,sha256=manifest['sha256'],APFS_volume_uuid=fmt.DATA_UUID,APFS_container_uuid=manifest['container_uuid'],policies_counts={p:len(v['contents'])for p,v in persistent.items()}),profiles=profiles,changed_archive_members=changed_members,loader_sha256=sha(boot/'Drivers/DarwinBoot.efi'),Batch1_absentd_signatures_trusted=[h.hex()for h in hashes],hardware_qualified=False)
+  result=dict(passed=True,CI_core_recompiled=False,board_objects_recompiled=6,board_objects_compiled_this_run=relink.get("board_objects_compiled_this_run",6),completed_native_source_CI=relink.get("completed_relink_reused_from_CI"),ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),Data=dict(bytes=a.data.stat().st_size,sha256=manifest['sha256'],APFS_volume_uuid=fmt.DATA_UUID,APFS_container_uuid=manifest['container_uuid'],policies_counts={p:len(v['contents'])for p,v in persistent.items()}),profiles=profiles,changed_archive_members=changed_members,loader_sha256=sha(boot/'Drivers/DarwinBoot.efi'),Batch1_absentd_signatures_trusted=[h.hex()for h in hashes],hardware_qualified=False)
   (a.out/'images.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':main()
