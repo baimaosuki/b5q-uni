@@ -9,11 +9,12 @@ def mounted_volume(device,preferred=None):
  # remount elsewhere; use the original device, then verify UUID and path.
  command=['diskutil','info','-plist',device]
  info=plistlib.loads(subprocess.check_output(command))
- if not info.get('Mounted') and preferred is not None:
+ mounted=lambda value:value.get('Mounted',bool(value.get('MountPoint')))
+ if not mounted(info) and preferred is not None:
   subprocess.run(['diskutil','mount','-mountPoint',str(preferred),device],check=True)
-  subprocess.run(['diskutil','enableOwnership',device],check=True)
+  subprocess.run(['sudo','-n','diskutil','enableOwnership',device],check=True)
   info=plistlib.loads(subprocess.check_output(command))
- if not info.get('Mounted') or info.get('VolumeUUID','').upper()!=DATA_UUID:
+ if not mounted(info) or info.get('VolumeUUID','').upper()!=DATA_UUID:
   raise ValueError('resized volume is not mounted with the original Data UUID')
  mount=Path(info.get('MountPoint',''))
  if not mount.is_absolute() or not mount.is_dir():raise ValueError('invalid resized Data mountpoint')

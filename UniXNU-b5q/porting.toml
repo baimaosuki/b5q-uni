@@ -2506,3 +2506,8 @@ result = "CI45105913288 compiled all6boardobjects, linkednative f6756042 and pac
 kind = "source"
 reference = "reports/batch2-validation.json"
 result = "CI45106921809 reused completednative/prelink from45105913288 with0newboardobjects; nativeAPFSgrowthpassesbutdiskutilleavesvolumeunmounted. Addexplicitmount/ownershipbeforequery;6hostcasesPASS. PreservefailedESP/grownDataandfirsterror;nextCIonlyreusesnativelinkandfinishesData/runtime. No finaldelivery yet."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45107692131 nativecachehit0boardbuilds; resize/fsck/mountsucceed. enableOwnershiprequiresroot, soscope sudo-n onlytoattachedfilebackedDataownershipcommand; supportplistswithoutMountedwhenUUID/absoluteMountPointproven.7hostregressionspass. Kernel/GPU/UEFIunchanged; finalCIimagegatecontinues."

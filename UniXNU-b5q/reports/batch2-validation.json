@@ -1742,5 +1742,11 @@
     "completed_native_reused_from": 45105913288,
     "APFS_growth": "PASS; diskutil left volume unmounted",
     "fix": "Explicitly mount the already UUID-identified original device at owned temporary mountpoint, enable ownership, then query and verify UUID. Six host remount cases pass. Retained third ESP and grown Data for local inspection; not a delivery."
+  },
+  "fourth_CI": {
+    "run": 45107692131,
+    "compiled_board_objects": 0,
+    "first_error": "diskutil mount succeeded; enableOwnership requires root on runner",
+    "fix": "Use scoped sudo -n diskutil enableOwnership for the locally attached file-backed APFS device; tolerate diskutil plist variants that omit Mounted but provide an exact UUID and absolute MountPoint. Seven mount regressions PASS. Native core/board/GPU unchanged."
   }
 }
