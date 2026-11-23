@@ -43,7 +43,9 @@ jobs:
     permissions:
       contents: write
       actions: read
-    runs-on: macos-26
+    # Same Xcode 26.6/17F113 and SDK; cross-compile the unchanged arm64e target.
+    # GitHub's ARM64 pool could not acquire a runner on two consecutive attempts.
+    runs-on: macos-26-intel
     timeout-minutes: 360
     env:
       DEVELOPER_DIR: /Applications/Xcode_${{ inputs.xcode || '26.6' }}.app/Contents/Developer

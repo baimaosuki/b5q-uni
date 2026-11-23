@@ -327,7 +327,7 @@
     "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
     "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
     "UniXNU-b5q/board.toml": "0e460588c245550456d020b7622b1b4846f33134162496a33999458f431dfb79",
-    ".github/workflows/b5q-p0-p5.yml": "c747d3ddb10b6b8396080840b9737ab83a8514741b892b7147b1e6049d4b9cc5"
+    ".github/workflows/b5q-p0-p5.yml": "df4633434cc633ce0d6500745a436f1fade8a250ee935dddd65300d7b080923f"
   },
   "summary": {
     "target_objects": 122,
@@ -346,5 +346,16 @@
     "kernel_compilation_started": false,
     "fix": "contents:write required to read unpublished draft assets",
     "firmware_reused": true
+  },
+  "runner_fallback": {
+    "reason": "Hosted ARM64 capacity exhausted before job acquisition",
+    "original_run": 45232005688,
+    "runner": "macos-26-intel",
+    "Xcode": "26.6 17F113",
+    "SDK": "macOS26.5",
+    "target": "arm64e-apple-ios27.0",
+    "source": "https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md",
+    "binary_inputs_unchanged": true,
+    "host_architecture_cache_isolated": true
   }
 }

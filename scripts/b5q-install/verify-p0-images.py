@@ -13,6 +13,7 @@ def run(*cmd):subprocess.run(list(map(str,cmd)),check=True)
 def main():
  p=argparse.ArgumentParser(description=__doc__)
  for key in ['esp','ci','fd','out']:p.add_argument('--'+key,type=Path,required=True)
+ p.add_argument('--board',type=Path,default=R/'UniXNU-b5q/board.toml',help='Source configuration for this exact image revision')
  p.add_argument('--wireless',action='store_true',help='Also verify P2/P3 runtime against the accepted GPU addon')
  a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
  fs=load(R/'scripts/b5q-install/package-usb-dma-esp.py');fs.image_format(a.esp)
@@ -25,7 +26,7 @@ def main():
  with tempfile.TemporaryDirectory(prefix='b5q-p0-readback-')as td:
   t=Path(td);members=fs.members(a.esp,t/'files')
   assert members==expected['members'] and sha(a.esp)==expected['esp']['sha256']
-  boot=t/'files/EFI/UniXNU';assets=boot/'Payloads';board=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text())
+  boot=t/'files/EFI/UniXNU';assets=boot/'Payloads';board=tomllib.loads(a.board.read_text())
   menu=tomllib.loads((boot/'unixnu.toml').read_text());entries={e['id']:e for e in menu['entry']if e['type']=='xnu'}
   assert menu['boot']['default']=='xnu' and set(entries)=={'xnu','ram-fallback'}
   assert entries['xnu']['args']==' '.join(board['payload']['kernel_args']) and len(entries['xnu']['args'].encode())<=1000
