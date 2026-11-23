@@ -50,10 +50,14 @@ def main():
   required=['_native_ram_block_provider_seed','_native_ram_block_volume_seed','_native_ram_block_volume_device','_b5q_power_start','_sheng_cpu_idle_mach','_ml_outside_memory_pages','_ml_outside_memory_refused','_native_touch_recovered','_native_touch_set_sink']
   assert all(n in symbols for n in required),[n for n in required if n not in symbols]
   assert not any('B5qTouchPointer'in n for n in symbols)
-  for marker in [b'B5qTouch: mode=%02x',b'c2=%u release_all=%u hid=%u',b'stage=release-all',b'stage=report-recovery',b'FUA-still-accepted',b'outside adopted=',b'4.5 GiB',b'TOP6..10',b'B5qPower:',b'persistent Data media/UUID/BSD readiness timeout or duplicate UUID']:
+  for marker in [b'B5qTouch: mode=%02x',b'c2=%u release_all=%u hid=%u',b'stage=release-all',b'report-recovery',b'FUA-still-accepted',b'outside adopted=',b'4.5 GiB',b'TOP6..10',b'B5qPower:',b'persistent Data media/UUID/BSD readiness timeout or duplicate UUID']:
    assert marker in raw,marker
+  for marker in [b'policy=firmware-negotiated',b'external-hub=%u',b'QMP orientation=unknown',b'qcom-dwc3: device dctl=']:
+   assert marker in raw,marker
+  run(sys.executable,R/'scripts/b5q-install/check-stage-linked-PAC.py','--kernel',kernel,'--out',a.out/'linked-PAC.json')
   for name,digest in [('scratch-data.img','d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70'),('kernel.macho.gpuaddon','b68e1164f7dd0ff822f20e116e97adc4606926a4204fc25eaa5241c2a966d82d')]:assert sha(assets/name)==digest,name
-  assert sha(boot/'Drivers/DarwinBoot.efi')=='100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde'
+  sys.path.insert(0,str(R/'UniXNU/scripts'));from unixnu.boot_template import loader_pe
+  assert (boot/'Drivers/DarwinBoot.efi').read_bytes()==loader_pe(a.fd.read_bytes(),'1b64af87-8415-4b57-9b16-680d70913b9f')
   builtin=json.loads((R/'UniXNU-b5q/package/B5qBootPolicy.c').read_text().splitlines()[-1].rstrip(';'))
   assert core.read(symbols['_PE_builtin_boot_args'],len(builtin)+1)==builtin.encode()+b'\0' and 'endpointsecurity'not in builtin
   run(sys.executable,R/'tests/b5q-ufs/test-post-seal.py','--kernel',kernel,'--out',a.out/'POST.json')
@@ -64,7 +68,7 @@ def main():
    stream.truncate(size)
    for offset,body in extents:stream.seek(offset);stream.write(body)
   run(sys.executable,R/'scripts/b5q-install/verify-apfs-init-readback.py','--image',recovery,'--trust-cache',assets/'kernel.macho.trustcache','--out',a.out/'APFS.json')
-  result=dict(passed=True,stage='P0',ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),FD=dict(bytes=a.fd.stat().st_size,sha256=sha(a.fd)),profiles=profiles,required_symbols={n:hex(symbols[n])for n in required},FAT_members=len(members),all_real_link_inputs_resolved=True,Data_GPU_loader_unchanged=True,hardware_qualification='HOST_VERIFIED_PENDING_HARDWARE',physical_Data_accessed=False)
+  result=dict(passed=True,stage='P0+P1',ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),FD=dict(bytes=a.fd.stat().st_size,sha256=sha(a.fd)),profiles=profiles,required_symbols={n:hex(symbols[n])for n in required},FAT_members=len(members),all_real_link_inputs_resolved=True,Data_GPU_unchanged=True,loader_matches_actual_rebuilt_FD=True,hardware_qualification='HOST_VERIFIED_PENDING_HARDWARE',physical_Data_accessed=False)
   (a.out/'images.json').write_text(json.dumps(result,indent=2)+'\n')
   print(json.dumps(result,indent=2))
 if __name__=='__main__':main()

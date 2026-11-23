@@ -53,7 +53,13 @@ with tempfile.TemporaryDirectory(prefix='b5q-artifact-') as tmp:
   assert files['esp.img']==metadata['esp']
   kernel=Path(tmp)/'readback-kernel'
   subprocess.run(['mcopy','-i',str(dest/'esp.img'),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
-  assert dict(bytes=kernel.stat().st_size,sha256=sha(kernel))==manifest['outputs']['kernel.macho']
+  # The payload seals its deployment copy after prelink. The build manifest
+  # identifies that pre-seal collection; actual deploy bytes belong to the
+  # package member map and its paired HMAC report, both checked here.
+  deployed=dict(bytes=kernel.stat().st_size,sha256=sha(kernel))
+  assert deployed==metadata['members']['EFI/UniXNU/Payloads/kernel.macho']
+  seal=json.loads(subprocess.check_output(['mtype','-i',str(dest/'esp.img'),'::/EFI/UniXNU/Payloads/kernel.macho.crypto-hmac.json']))
+  assert seal['kernel_sha256']==deployed['sha256']
  else:
   for name,rel in [('kernel.macho','kernel/kernel.macho'),('payload.img','payload/payload.img')]:assert files[rel]==manifest['outputs'][name],name
  index={'run':str(a.run),'commit':info['head_sha'],'artifact':{'id':artifact['id'],'archive_sha256':digest,'github_digest_verified':bool(expected)},'files':files}

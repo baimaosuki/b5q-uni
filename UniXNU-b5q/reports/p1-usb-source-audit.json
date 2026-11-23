@@ -1,6 +1,6 @@
 {
   "stage": "P1",
-  "status": "P0_P1_JOINT_HOST_PREFLIGHT_PASS_CI_PENDING",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
   "hardware_tested": false,
   "inputs": {
     "sources/twrp-b5q/recovery/root/lib/modules/pdic_max77705.ko": "f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca",
@@ -42,13 +42,93 @@
     "UsbProbe kextcatalogue path"
   ],
   "remaining_gates": [
-    "FullP0+P1hostpreflight/PAC/firmwareinputs then onejointCI, actualreturnedkernel/UEFI/ESPbootreadback",
-    "NewUSB3/PDhub/Devicephonequalification HOST_VERIFIED_PENDING_HARDWARE"
+    "New USB3/PDhub/Device phone qualification only; HOST_VERIFIED_PENDING_HARDWARE"
   ],
   "joint_preflight": {
     "baseline_groups": 43,
     "P1_groups": 10,
     "report": "artifacts/b5q-p1-work/pre-ci.json",
     "sha256": "33f82f5ff2f2ec8adbfc7cde59b305f02953dd16dd1cab20c76dc82164afbd33"
+  },
+  "stage_build_and_readback": {
+    "source_commit": "b1e7ae43fb01857d8d845fddeebe4bfdcec0cbfd",
+    "CI_run": 45167257160,
+    "CI_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45167257160",
+    "kernel_and_UEFI_full_builds": "SUCCESS",
+    "images": {
+      "passed": true,
+      "stage": "P0+P1",
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "b07c600256dc392bbd6d752c7f6a7f10adb33aa5f3bfe3ac0abc474945d7b02b"
+      },
+      "FD": {
+        "bytes": 3145728,
+        "sha256": "b909347dd044341ff5e573f2be33154be27900f31b8753cb9f88101b60ece157"
+      },
+      "profiles": {
+        "xnu": {
+          "kernel_sha256": "6996d91a3eaae44ac7e26416d68c98a6fb3fdd65c3ce2c25fbe7e70697746a50",
+          "args_bytes": 981,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "ram-fallback": {
+          "kernel_sha256": "6996d91a3eaae44ac7e26416d68c98a6fb3fdd65c3ce2c25fbe7e70697746a50",
+          "args_bytes": 981,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": true
+        }
+      },
+      "required_symbols": {
+        "_native_ram_block_provider_seed": "0xfffffff00c2d3f14",
+        "_native_ram_block_volume_seed": "0xfffffff00c2d1f44",
+        "_native_ram_block_volume_device": "0xfffffff00c2d1578",
+        "_b5q_power_start": "0xfffffff00c2d3494",
+        "_sheng_cpu_idle_mach": "0xfffffff00b9ab124",
+        "_ml_outside_memory_pages": "0xfffffff00c941118",
+        "_ml_outside_memory_refused": "0xfffffff00c94111c",
+        "_native_touch_recovered": "0xfffffff00c99ff68",
+        "_native_touch_set_sink": "0xfffffff00c2c27d8"
+      },
+      "FAT_members": 16,
+      "all_real_link_inputs_resolved": true,
+      "Data_GPU_unchanged": true,
+      "loader_matches_actual_rebuilt_FD": true,
+      "hardware_qualification": "HOST_VERIFIED_PENDING_HARDWARE",
+      "physical_Data_accessed": false
+    },
+    "boot": {
+      "boot_source": "physical 4Kn UFS ESP",
+      "bootstrap_fat16_bytes": 16777216,
+      "bootstrap_fat16_sha256": "ec709a0a612ce76091cf117104b70f18837c1881c648338f590ff6b1281ffb96",
+      "darwinboot_sha256": "9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f",
+      "samsung_dtb_sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+      "bootshim_sha256": "9346a527441b242c69414fd7e3d6fa17813f281d562fef13d9ba8373d39007a9",
+      "boot": {
+        "bytes": 19116032,
+        "sha256": "38cbf9eb34f942e4f6f816538c4b4b3071c89d2563f00901dd2826493da4a6fc"
+      },
+      "source_boot": {
+        "bytes": 19275776,
+        "sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1"
+      },
+      "firmware": {
+        "bytes": 3145728,
+        "sha256": "b909347dd044341ff5e573f2be33154be27900f31b8753cb9f88101b60ece157"
+      },
+      "esp": {
+        "bytes": 838860800,
+        "sha256": "b07c600256dc392bbd6d752c7f6a7f10adb33aa5f3bfe3ac0abc474945d7b02b"
+      },
+      "boot_partition_bytes": 100663296,
+      "hardware_tested": false
+    },
+    "actual_object_PAC_report": "artifacts/b5q-p1-work/returned-PAC/report.json",
+    "full_image_report": "artifacts/b5q-p1-work/image-acceptance/images.json",
+    "physical_device_accessed": false,
+    "firmware_pairing": "RebuiltDarwinBoot fromtheexactv30source/pinnedpatches; ESPdriverreplaced to matchactualnewFD;15otherFATmembersunchanged",
+    "previous_loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "new_loader_sha256": "9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f"
   }
 }

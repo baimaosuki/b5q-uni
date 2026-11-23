@@ -1,11 +1,11 @@
 # b5q P0–P5 goal delivery — work in progress
 
-Goal source: `/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b9d/goal-objective.md`; SHA256 `91a3d44e421a5f6ee73f5df857cdc2bf1c53b2b6246c8d9e6485936ffe5ebf14`. No stage is yet fully accepted. Existing desktop/Data/GPU/memory evidence is kept separate from new hardware qualification.
+Goal source: `/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b9d/goal-objective.md`; SHA256 `91a3d44e421a5f6ee73f5df857cdc2bf1c53b2b6246c8d9e6485936ffe5ebf14`. P0 and P1 host/build/image gates have passed; new hardware qualification is explicitly pending. Remaining stages are not complete. Existing desktop/Data/GPU/memory evidence is kept separate from new hardware qualification.
 
 | Stage | Required final state | Current evidence/status |
 | --- | --- | --- |
-| P0 | Samsung touch lifecycle, verbatim sheng pointer, absolute HID fallback; tests, full kernel+UEFI images, independent commit | 43 host preflight groups and28 target objects/PAC/zeroapps_smmu pass; full builds/image/commit pending |
-| P1 | CC1/CC2, powered Sink+DFP hub, four-byte bus-number, TI/QMP, firmware DMA | Implemented; targeted production host tests and2targetobject closure pass; joint gates/CI/images pending |
+| P0 | Samsung touch lifecycle, verbatim sheng pointer, absolute HID fallback; tests, full kernel+UEFI images, independent commit | HOST_VERIFIED_PENDING_HARDWARE; source4108c9e, jointCI45167257160 andimageacceptance PASS |
+| P1 | CC1/CC2, powered Sink+DFP hub, four-byte bus-number, TI/QMP, firmware DMA | HOST_VERIFIED_PENDING_HARDWARE; sourceb1e7ae4,53jointgroups/fullkernel+UEFI/actualimage&PAC PASS |
 | P2 | WCN6855 FIFO Bluetooth, six rails/shared WCN power, Samsung firmware, native macOS addon | NOT_STARTED |
 | P3 | QCA6490 ath11k/MHI/QMI/PCIe, shared power, firmware HAL DMA, wpa addon | NOT_STARTED |
 | P4A | Samsung GPIO107 lid, MAX77705 battery, inner-panel DCS0x51 backlight | NOT_STARTED |
@@ -23,3 +23,16 @@ P0 source facts and input hashes: [p0-touch-source-audit.json](p0-touch-source-a
 ## Preserved hardware baseline
 
 Input log `logs/b5q-xnu2log-data-mount-fix/XNU2LOG.txt` SHA256 `6b4624e6960f27c42bd1d018aacc82eb4b5dba0b0ba910f9b49cf76dea7b677a`. Preserve usable RAM7014903808 bytes, outside205811 adopted/0refused, writable FUA Data LUN0 [3406592,47595510]/44188919blocks, GPU/Metal, PSCI and Batch1 service policy. No device access or flashing is performed by this goal build workflow.
+
+## P0+P1 accepted host/build artifacts
+
+- Joint CI: https://github.com/baimaosuki/b5q-uni/actions/runs/45167257160 (`b1e7ae43fb01857d8d845fddeebe4bfdcec0cbfd`), both full kernel and UEFI SUCCESS.
+- ESP: `artifacts/b5q-p1-work/ci45167257160/esp.img`,838860800bytes,SHA256`b07c600256dc392bbd6d752c7f6a7f10adb33aa5f3bfe3ac0abc474945d7b02b`.
+- New firmware FD: `artifacts/b5q-p1-work/firmware/SILICIUM_UEFI.fd`,SHA256`b909347dd044341ff5e573f2be33154be27900f31b8753cb9f88101b60ece157`.
+- Boot: `artifacts/b5q-p1-work/boot/boot.img`,SHA256`38cbf9eb34f942e4f6f816538c4b4b3071c89d2563f00901dd2826493da4a6fc`; original16MiBplainFAT16bootstrap/SamsungDTB/112Bshimretained.
+- Deployed kernel SHA256`6996d91a3eaae44ac7e26416d68c98a6fb3fdd65c3ce2c25fbe7e70697746a50`; pre-seal buildmanifesthash3058f8f2 is separately recorded. ZIP transferpassedGitHubdigest; actualFATkernelmatchesdeploymentHMACmetadata and69POSTruntimepatchsites.
+- RebuiltDarwinBootfromexactv30sources/compilerproducesSHA256`9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f`; ESPexplicitdriverpairedtotheFD. All15otherFATmembersunchangedbythispairing.
+- Actual image gates:981Bargs,SIPu64`0200000000000000`,twoBGRAfixups,E/P8nodes,6GiBspan/outsideadoptionpolicy,defaultpersistentDatawithoutinitrd,original4GiBRAMrecovery,59/26binaryplistsroot:wheel0644/disabled.migrated/absentdtrusted,authenticatedrootproviderhooks,GPUaddonunchanged.
+- Actual binary gates:31returnedboardobjects/PAC/zeroEL1apps_smmu;1145USBHIDvirtualslots+326storagevirtualslots matchsourceandoriginalABI; allsource/corehelpersresolved. No newphoneaccessorflashperformed.
+
+This is stage evidence retained for rollback. The final P0–P5 package, four-profile menu and complete final report are still outstanding; these stage images are not presented as the final goal delivery.
