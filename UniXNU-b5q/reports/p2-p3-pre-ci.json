@@ -327,7 +327,7 @@
     "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
     "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
     "UniXNU-b5q/board.toml": "0e460588c245550456d020b7622b1b4846f33134162496a33999458f431dfb79",
-    ".github/workflows/b5q-p0-p5.yml": "df4633434cc633ce0d6500745a436f1fade8a250ee935dddd65300d7b080923f"
+    ".github/workflows/b5q-p0-p5.yml": "ad8e8e70cc2983a03062c07a74b2d587b9e3f21d951dfd5992edd2652dc4b8fb"
   },
   "summary": {
     "target_objects": 122,
@@ -357,5 +357,11 @@
     "source": "https://github.com/actions/runner-images/blob/main/images/macos/macos-26-Readme.md",
     "binary_inputs_unchanged": true,
     "host_architecture_cache_isolated": true
+  },
+  "Intel_first_error": {
+    "run": 45236971355,
+    "error": "ipsw cask zap syntax incompatible with installed Homebrew",
+    "fix": "Select --formula CLI explicitly",
+    "kernel_compilation_started": false
   }
 }

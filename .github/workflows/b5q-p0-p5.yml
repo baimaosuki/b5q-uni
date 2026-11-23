@@ -108,7 +108,7 @@ jobs:
       - name: Install upstream macOS host tools
         run: |
           set -euo pipefail
-          brew install llvm lld mtools dtc blacktop/tap/ipsw bison ninja glslang shaderc spirv-tools pkgconf
+          brew install --formula llvm lld mtools dtc blacktop/tap/ipsw bison ninja glslang shaderc spirv-tools pkgconf
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
