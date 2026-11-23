@@ -76,3 +76,9 @@
 ## v24 当前授权（2026-11-21，用户附件指令）
 
 本轮允许且要求原生 XNU core 全量重编并接入 recount、AMP/Edge；图形与已有无变化依赖继续复用缓存。USB 移到显示就绪后正常外设流，取消35秒人为延迟。允许独立 USB SID40 Stage1、TI repeater/max77705/QMP 和 GPIO19 IRQ触控实现，禁止修改 ArmCpu.cpp 或用软件 cache/IOMapper 替代硬件一致性。禁止读写 S2CR0、显示handoff槽及对应ContextBank，禁止改写userdata/GPT和既有三星保护分区。仅 s2dos05 LDO2/3按来源RMW。Data目标4GiB易失RAM，持久Data待独立分区名后另行实现。所有本地检查完毕前不推CI、不交付过渡镜像；编译成功不代表硬件验收。
+
+## macOS-only userdata（2026-11-23，最新明确用户指令）
+
+用户选择“只跑macOS”，并要求“最小工作量，而且不用管安卓的数据”。允许为此实现、编译和打包原 `userdata` 内容替换为持久APFS Data的驱动及用户执行安装工具；先前不改userdata的开发限制由本项明确例外取代。最小方案保持全部GPT条目、分区名称、boot/UEFI/recovery及现有48GiB macosroot不变，不采用先前移动系统/24GiB root的重分区草案。
+
+固定userdata原范围为4Kn LBA3406336..47595510，前1MiB为B5QDATA1身份封装；APFS范围3406592..47595510。`b5q-data-ufs=2`只启用经实际GPT/name/CRC/UUID/精确边界/无重叠/root-header哈希校验的该范围，root仍只读。继续保留所有三星保护分区限制。覆盖Android内容须由用户在TWRP运行显式userdata转换命令，工具必须拒绝/data已挂载、swap和已初始化macOS Data；本项不授权助手自动连接、采集或刷写手机。只增量编译必要存储对象，保留Batch1/Batch2已验证成果与v30loader，无需重编core/GPU/Mesa/UEFI。

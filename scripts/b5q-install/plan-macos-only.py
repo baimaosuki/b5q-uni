@@ -21,7 +21,7 @@ def plan(source,header,root_bytes):
  if len(header)!=4096 or header[:8]!=b'SHNGROOT' or struct.unpack_from('<II',header,8)!=(2,6)or hashlib.sha256(header[:4064]).digest()!=header[4064:]:raise ValueError('SHNGROOT v2 header integrity')
  if struct.unpack_from('<Q',header,16)[0]!=root_bytes or root_bytes!=17603493888:raise ValueError('root source size')
  data=by['userdata'];first,last=data['first_lba'],data['last_lba'];apfs=first+256
- return dict(schema_version=1,state='minimal-layout-selected; images not yet built',sector_bytes=SECTOR,source=dict(kind=source.get('source','unknown'),fresh_device_read=False,live_disk_and_partition_GUIDs='unknown until installer verifies actual GPT'),
+ return dict(schema_version=1,state='minimal-layout-selected; build and deployment status recorded in macos-only-validation.json',sector_bytes=SECTOR,source=dict(kind=source.get('source','unknown'),fresh_device_read=False,live_disk_and_partition_GUIDs='unknown until installer verifies actual GPT'),
   design='Keep every GPT entry and name byte-identical; reuse only original userdata contents for macOS Data. No system move, no GPT edits.',
   partitions=dict(boot=by['boot'],esp=by['esp'],macosroot=by['macosroot'],userdata=data),GPT_entries_unchanged=len(parts),GPT_write_count=0,
   root=dict(existing_image_bytes=root_bytes,existing_header_SHA256=hashlib.sha256(header).hexdigest(),partition_bytes=by['macosroot']['size_bytes'],reflash_required=False,read_only=True),

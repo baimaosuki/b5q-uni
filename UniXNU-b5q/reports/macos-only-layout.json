@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "state": "minimal-layout-selected; images not yet built",
+  "state": "minimal-layout-selected; build and deployment status recorded in macos-only-validation.json",
   "sector_bytes": 4096,
   "source": {
     "kind": "user-pasted GPT listing, 2026-11-19; not independently read from a disk",
@@ -96,6 +96,6 @@
   },
   "input_hashes": {
     "source_GPT_listing_SHA256": "f03c7b4e6349ac7d7d1a92c387fccb9566c940af0efd407a21821d346489a644",
-    "planner_SHA256": "1fc5fa480b1b14edcad1cb534bd2d48ecfe79aaf7cd237b6963b9d268e43b9ba"
+    "planner_SHA256": "a2219ec82089e48050d1bd75b026746f1f4d9d6385993f65605b5fa595d4d0ea"
   }
 }

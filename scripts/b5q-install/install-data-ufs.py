@@ -1,17 +1,21 @@
 #!/usr/bin/env python3
 """Initialize only a GPT-validated b5q Data tail/window, never repartition."""
-import argparse,hashlib,json,re,struct,subprocess,sys
+import argparse,hashlib,json,re,shutil,struct,subprocess,sys
 from pathlib import Path
 from b5q_data_format import *
 
-def local_image(image,manifest):
+def local_image_metadata(image,manifest):
  if image.stat().st_size!=manifest['bytes'] or manifest['bytes']!=manifest['apfs_blocks']*4096:raise ValueError('image size')
  with image.open('rb') as f:
-  if hashlib.file_digest(f,'sha256').hexdigest()!=manifest['sha256']:raise ValueError('image SHA256')
-  f.seek(0);sb=f.read(4096)
+  sb=f.read(4096)
   if not apfs_superblock(sb,manifest['apfs_blocks'],manifest['container_uuid']):raise ValueError('APFS NXSB/geometry/UUID')
  if manifest['volume_uuid']!=DATA_UUID or manifest['seed_sha256']!='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70':raise ValueError('Batch1 seed identity')
  if {k:len(v) for k,v in manifest['policies'].items()}!={'disabled.plist':59,'disabled.501.plist':26}:raise ValueError('Batch1 policy')
+
+def local_image(image,manifest):
+ local_image_metadata(image,manifest)
+ with image.open('rb') as f:
+  if hashlib.file_digest(f,'sha256').hexdigest()!=manifest['sha256']:raise ValueError('image SHA256')
 
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--image',type=Path,required=True);p.add_argument('--manifest',type=Path);p.add_argument('--partition',choices=['macosroot-tail','macosdata','userdata'],default='macosroot-tail');p.add_argument('--replace-android-data',action='store_true',help='explicitly permit replacing old Android contents of the exact userdata partition; never overwrite initialized macOS Data');p.add_argument('--serial');p.add_argument('--apply',action='store_true',help='explicitly write a first-install Data window; existing initialized Data is always refused');a=p.parse_args()
@@ -61,15 +65,30 @@ def main():
  mounted=shell('cat /proc/mounts').splitlines();swaps=shell('cat /proc/swaps').splitlines()[1:];target_real=shell('readlink -f '+target)
  if any(line.split() and line.split()[0] in (target,target_real) for line in mounted+swaps):raise ValueError('target partition is mounted')
  # Both writes use fixed allowlisted aliases and prevalidated relative offsets.
+ # Read the verified image through EOF: dd count counts partial pipe reads and
+ # can otherwise stop early on ADB packets. The exact image size is checked
+ # above; the selected partition ends exactly at the APFS window boundary.
+ write_command=f'dd of={target} bs=4096 seek={start+ENVELOPE_BLOCKS} conv=fsync'
+ compressed=a.partition=='userdata' and shutil.which('gzip') and shell('command -v gzip || true')
  with a.image.open('rb') as f:
-  subprocess.run(adb+['shell','-T',f'dd of={target} bs=4096 seek={start+ENVELOPE_BLOCKS} count={m["apfs_blocks"]} conv=fsync'],stdin=f,check=True)
+  if compressed:
+   # Compress only the transfer stream; keep the deliverable a normal sparse
+   # APFS IMG. Large zero-filled free space never crosses ADB uncompressed.
+   print('Transferring Data as a gzip stream; no temporary archive')
+   encoder=subprocess.Popen(['gzip','-1','-c'],stdin=f,stdout=subprocess.PIPE)
+   try:
+    subprocess.run(adb+['shell','-T','set -o pipefail; gzip -dc | '+write_command],stdin=encoder.stdout,check=True)
+   finally:
+    encoder.stdout.close();encoded_status=encoder.wait()
+   if encoded_status:raise ValueError('Data compression failed; envelope not committed')
+  else:subprocess.run(adb+['shell','-T',write_command],stdin=f,check=True)
  actual=shell(f'set -o pipefail; dd if={target} bs=4096 skip={start+ENVELOPE_BLOCKS} count={m["apfs_blocks"]} status=none | sha256sum').split()[0]
  if actual!=m['sha256']:raise ValueError('full Data readback SHA256 mismatch; envelope not committed')
  for block,expected in m['checkpoint_blocks'].items():
   data=read(target,start+ENVELOPE_BLOCKS+int(block),1)
   if hashlib.sha256(data).hexdigest()!=expected:raise ValueError('Data checkpoint readback failed; configuration not committed')
  if hashlib.sha256(read(target,start+ENVELOPE_BLOCKS+m['apfs_blocks']-1,1)).hexdigest()!=m['tail_block_sha256']:raise ValueError('Data last-block readback failed')
- subprocess.run(adb+['shell','-T',f'dd of={target} bs=4096 seek={start} count=1 conv=fsync'],input=config,check=True)
+ subprocess.run(adb+['shell','-T',f'dd of={target} bs=4096 seek={start} conv=fsync'],input=config,check=True)
  validate_envelope(read(target,start,1),identity)
  print('PASS Data initialized; GPT/root/guard untouched; subsequent boots mount persistent APFS directly')
 if __name__=='__main__':main()
