@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Execute the production family binder on the actual native network object."""
-import json,sys,textwrap
+import argparse,hashlib,json,sys,textwrap
 from pathlib import Path
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R/'UniXNU-b5q/scripts'))
 from b5q_abi import object_symbols,object_vtable,require
-path=R/'artifacts/b5q-p3-work/board-target/B5qEthernet.o'
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--object',type=Path,default=R/'artifacts/b5q-p3-work/board-target/B5qEthernet.o')
+parser.add_argument('--out',type=Path)
+a=parser.parse_args();path=a.object
 raw=path.read_bytes();abi=json.loads((R/'UniXNU-b5q/scripts/net-ether-26C5035r.json').read_text())
 family=tuple(str(len(n))+n for n in ('IONetworkController','IOEthernetController','IONetworkMedium','IONetworkInterface','IOEthernetInterface','IOOutputQueue'))
 found=object_symbols(raw);used={n for n,_,k in found if k==1 and any(c in n for c in family)}
@@ -20,6 +23,6 @@ for cls,base,key in [('B5qEthernet','IOEthernetController','slots'),('ShengWifiI
     slots=[(int(t,16),int(d,16))for t,d in abi[key]]
     context['family_vtable'](cls,base,slots);classes[cls]=len(slots)
 missing=sorted(used-set(bindings));assert not missing,missing
-report=dict(passed=True,classes=classes,original_bindings={n:hex(bindings[n])for n in sorted(used)},hardware_verified=False)
-(path.parent/'ethernet-abi.json').write_text(json.dumps(report,indent=2)+'\n')
+report=dict(passed=True,object_sha256=hashlib.sha256(raw).hexdigest(),classes=classes,original_bindings={n:hex(bindings[n])for n in sorted(used)},hardware_verified=False)
+(a.out or path.parent/'ethernet-abi.json').write_text(json.dumps(report,indent=2)+'\n')
 print('PASS native Ethernet/Wi-Fi interface production vtable binder',classes,len(used),'original bindings')

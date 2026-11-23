@@ -24,6 +24,13 @@ if a.ci:
         assert path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest()==digest,name
         paths.append(path)
     ethernet,=[v for v in a.ci.rglob('B5qEthernet.o') if '/raw/'not in str(v)]
+    # Re-run the exact production family binder on this returned compiler's
+    # raw object. A prior Linux object report is not CI ABI evidence.
+    returned_abi=manifest.parent/'returned-ethernet-abi.json'
+    subprocess.run([sys.executable,str(R/'scripts/b5q-install/check-wifi-ethernet-abi.py'),
+        '--object',str(ethernet),'--out',str(returned_abi)],check=True)
+    ethernet=ethernet.with_name('B5qEthernet.late.o')
+    assert ethernet.is_file()
     paths.append(ethernet)
     armPath,=a.ci.rglob('ArmCpu.o')
     kernelESP=a.esp
@@ -53,7 +60,34 @@ def calls(instructions):
             if value is not None:result.append(dict(site=hex(ins.address),diversity=value&65535))
         if ins.mnemonic in ('ret','retab','bl','blr','blraa','braa','b'):values.clear()
     return result
+def unused_auth_declarations(path,scan):
+    # Apple clang emits unused weak l_<name>.ptrauth nlist declarations next
+    # to the *referenced*, authenticated $auth_ptr. They carry no relocation.
+    # Classify only this proven metadata shape; never excuse a weak call.
+    raw=path.read_bytes();headers=macho(raw);referenced=set()
+    for seg in headers['segments']:
+        for sec in seg['sections']:
+            off,count=struct.unpack_from('<II',raw,sec['command_offset']+56)
+            for i in range(count):
+                _,bits=struct.unpack_from('<II',raw,off+8*i)
+                if bits>>27&1:referenced.add(scan['symbols'][bits&0xffffff][0])
+    st=next(at for cmd,at,_ in headers['commands']if cmd==2)
+    sy,count,_,_=struct.unpack_from('<4I',raw,st+8);rows=[]
+    defined={n for n,_,kind in scan['symbols']if kind&14}
+    for i,(name,_,kind)in enumerate(scan['symbols']):
+        if kind!=1 or not(name.startswith('l_')and name.endswith('.ptrauth')):continue
+        _,_,_,description,_=struct.unpack_from('<IBBHQ',raw,sy+16*i)
+        target=name[1:-len('.ptrauth')]
+        assert description&0x40 and name not in referenced,(path,name,'not unused weak compiler metadata')
+        assert any(n.startswith('l'+target+'$auth_ptr$')for n in defined),(path,name,'no real auth pointer')
+        assert target in referenced and scan['signed'].get(target),(path,name,'real function lacks authenticated relocation')
+        rows.append(dict(object=str(path),declaration=name,target=target,external_relocations=0,
+            actual_target_auth_relocations=scan['signed'][target]))
+    return rows
 scans={p:pac.scan(p)for p in paths};coreCalls=[]
+auth_metadata=[row for p,scan in scans.items()for row in unused_auth_declarations(p,scan)]
+metadata_names={row['declaration']for row in auth_metadata}
+
 with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
     kernel=Path(td)/'kernel'
     subprocess.run(['mcopy','-i',str(kernelESP),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
@@ -75,8 +109,9 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
             if not kind&1:continue
             if kind&14:owners[name].append(str(p))
             else:undefined.add(name)
-    abi=json.loads((out/'board-target/ethernet-abi.json').read_text())
-    missing=sorted(undefined-names-set(owners)-set(abi['original_bindings']))
+    abi=json.loads((returned_abi if a.ci else out/'board-target/ethernet-abi.json').read_text())
+    assert all(row['target']in names or row['target']in owners for row in auth_metadata)
+    missing=sorted(undefined-names-set(owners)-set(abi['original_bindings'])-metadata_names)
     duplicates={n:v for n,v in owners.items()if len(v)>1}
     assert not missing and not duplicates,(missing,duplicates)
     consumers=collections.defaultdict(list)
@@ -109,7 +144,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
         assert not any('smmu_plan_bypass'in name or 'smmu_configure_bypass'in name for name,_,_ in scan['symbols'])
         mmio[str(p)]=dict(sha256=scan['sha256'],instructions=len(scan['instructions']),apps_smmu_materializations=0)
     result=dict(passed=True,hardware_verified=False,objects=len(paths),duplicate_definitions=duplicates,unresolved=missing,
-        optional_weak_imports=[],core=coreName,callback_contracts=contracts,
+        optional_weak_imports=[],unused_compiler_auth_declarations=auth_metadata,core=coreName,callback_contracts=contracts,
         zero_apps_smmu=mmio,network_vtables=abi['classes'],new_CI_binary_revalidation_required=not bool(a.ci),
         actual_returned_CI_objects=bool(a.ci),kernel_sha256=hashlib.sha256(raw).hexdigest())
     destination=a.out or out/'joint-target-closure.json'
