@@ -105,6 +105,17 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-b5q-wireless-v1-${{ hashFiles('UniXNU-b5q/scripts/b5q_wireless.py', 'UniXNU-b5q/scripts/build-b5q-wifi.py', 'UniXNU-b5q/scripts/b5q_wifi.py', 'UniXNU-b5q/scripts/b5q_bluetooth.py', 'UniXNU-b5q/package/B5qAth11kCompat/**') }}-${{ github.run_id }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-b5q-wireless-v1-${{ hashFiles('UniXNU-b5q/scripts/b5q_wireless.py', 'UniXNU-b5q/scripts/build-b5q-wifi.py', 'UniXNU-b5q/scripts/b5q_wifi.py', 'UniXNU-b5q/scripts/b5q_bluetooth.py', 'UniXNU-b5q/package/B5qAth11kCompat/**') }}-
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-b5q-wireless-v1-
+      - name: Restore matching XNU core compilation progress
+        id: xnu-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/xnu-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/xnu
+          key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-macos26C5035r-xnu-v1-${{ hashFiles('UniXNU-b5q/unixnu.lock', 'UniXNU-b5q/patches/xnu/**', 'UniXNU-b5q/configs/**', 'UniXNU/components.toml', 'UniXNU/profiles/**') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-macos26C5035r-xnu-v1-${{ hashFiles('UniXNU-b5q/unixnu.lock', 'UniXNU-b5q/patches/xnu/**', 'UniXNU-b5q/configs/**', 'UniXNU/components.toml', 'UniXNU/profiles/**') }}-
       - name: Install upstream macOS host tools
         run: |
           set -euo pipefail
@@ -196,6 +207,14 @@ jobs:
             UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/b5q-wireless
             UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/native-legacy-display/wireless
           key: ${{ steps.wireless-cache.outputs.cache-primary-key }}
+      - name: Preserve XNU core progress after success or failure
+        if: always()
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/xnu-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/xnu
+          key: ${{ steps.xnu-cache.outputs.cache-primary-key }}
       - name: Collect text diagnostics
         if: always()
         env:

@@ -7,7 +7,7 @@ adapted. Source preparation shares one output tree, so tests run sequentially.
 import contextlib,hashlib,json,os,shutil,subprocess,sys,tempfile
 from pathlib import Path
 R=Path(__file__).resolve().parents[2]
-module=R/'sources/UniXNU-sheng/drivers/Ath12kWifi';out=R/'artifacts/b5q-p3-work/host-regression'
+module=(R/'sources/UniXNU-sheng/drivers/Ath12kWifi').resolve();out=R/'artifacts/b5q-p3-work/host-regression'
 out.mkdir(parents=True,exist_ok=True)
 compiler=str(R/'tools/llvm21/usr/lib/llvm-21/bin/clang')
 if not Path(compiler).is_file():raise SystemExit('Host clang unavailable')
@@ -38,6 +38,14 @@ os.execv({compiler!r},[{compiler!r},*extra,*args])
 ''')
     wrapper.chmod(0o755);env=dict(os.environ,PATH=str(td)+':'+os.environ['PATH'])
     env.pop('LD_PRELOAD',None)
+    # The upstream cache records the command before this wrapper substitutes
+    # the host fixture. Keep only an object whose dependencies actually name
+    # and hash that fixture; an object of the old callback must be rebuilt.
+    identity=module/'out/mainline-runtime-test/mainline_runtime_test.inputs.json'
+    if identity.is_file():
+        saved=json.loads(identity.read_text())
+        if saved.get('dependencies',{}).get(str(fixture.resolve()))!=hashlib.sha256(fixture.read_bytes()).hexdigest():
+            identity.with_name('mainline_runtime_test.o').unlink(missing_ok=True)
     # Old failed host-only compilations may reference an expired temp header.
     # Invalidate only those host objects; production target caches are intact.
     for dependency in (module/'out/wpa-host').rglob('*.d'):
