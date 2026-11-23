@@ -76,7 +76,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
             if kind&14:owners[name].append(str(p))
             else:undefined.add(name)
     abi=json.loads((out/'board-target/ethernet-abi.json').read_text())
-    missing=sorted(undefined-names-set(owners)-set(abi['original_bindings'])-{'_boot_cpu_kick','_boot_kthread_report'})
+    missing=sorted(undefined-names-set(owners)-set(abi['original_bindings']))
     duplicates={n:v for n,v in owners.items()if len(v)>1}
     assert not missing and not duplicates,(missing,duplicates)
     consumers=collections.defaultdict(list)
@@ -109,7 +109,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
         assert not any('smmu_plan_bypass'in name or 'smmu_configure_bypass'in name for name,_,_ in scan['symbols'])
         mmio[str(p)]=dict(sha256=scan['sha256'],instructions=len(scan['instructions']),apps_smmu_materializations=0)
     result=dict(passed=True,hardware_verified=False,objects=len(paths),duplicate_definitions=duplicates,unresolved=missing,
-        optional_weak_imports=['_boot_cpu_kick','_boot_kthread_report'],core=coreName,callback_contracts=contracts,
+        optional_weak_imports=[],core=coreName,callback_contracts=contracts,
         zero_apps_smmu=mmio,network_vtables=abi['classes'],new_CI_binary_revalidation_required=not bool(a.ci),
         actual_returned_CI_objects=bool(a.ci),kernel_sha256=hashlib.sha256(raw).hexdigest())
     destination=a.out or out/'joint-target-closure.json'
