@@ -304,6 +304,8 @@ jobs:
             UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.o
             UniXNU/out/b5q/**/tree/build/native-legacy-display/wireless/**/*.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/wireless/**/*.log
+            UniXNU/out/b5q/**/tree/build/b5q/ethernet/*.o
+            UniXNU/out/b5q/**/tree/build/b5q/ethernet/*.S
             UniXNU/out/b5q/**/tree/build/qcom-dwc3/**/*.o
             UniXNU/out/b5q/**/tree/build/qcom-dwc3/**/*.json
             UniXNU/out/b5q/**/tree/build/**/ArmCpu.o

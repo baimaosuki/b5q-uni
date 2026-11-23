@@ -1,0 +1,22 @@
+{
+  "passed": true,
+  "local_only": true,
+  "hardware_verified": false,
+  "pre_ci_checks": 22,
+  "pre_ci_sha256": "e13726e445646b76d34963a76c64ea6683f2ffff316cfc825f5c5d2331d3e016",
+  "first_image_failure": {
+    "run": 45261064321,
+    "ci": "SUCCESS",
+    "binary": "wireless helper landed in unused iPadOS path, compiler removed it; macOS native lib/sbin views already present but WiFi launchd overlay missing",
+    "preserved_log": "artifacts/b5q-p3-work/ci45261064321/acceptance.log"
+  },
+  "fix": "Place WiFi LaunchDaemons view plus actual BT view checks in selected native_owner_macos_data_prepare after existing addon_sbin before payload release; no duplicate BT union mounts",
+  "regressions": "6featuremodes,5lookupfaults,3copyoutfaults,mountfailure; fullselectedmacOSpath/order;141patches;122targetobjects/62PACcontracts/zero unresolved/apps_smmu",
+  "source_sha256": {
+    "UniXNU-b5q/patches/xnu/b5q-wireless-runtime.patch": "1b5c0d07a4fae80fcd972c80911b8339425132951a3e6bc7d723947d44d635c3",
+    ".github/workflows/b5q-p0-p5.yml": "ecbfd0d23ce2acfdaf2b30543ac53cd9f1a7008ca6ac2f36790ee27bd9ca442f",
+    "tests/b5q-ufs/test-wireless-runtime.py": "63da6ee82e75c278df1327555a49d154a535cdb0e5eaef2f77c6c19a32a51bf4",
+    "scripts/b5q-install/pre-ci-p2-p3.py": "f7ae86094e29cf0eb30ab6b515e52be472c37ebf6e5bad19d7f913e4f1bb1bab"
+  },
+  "reuse": "Existingcore/GPU/Data/acceptedPCIeFD unchanged except necessary kern_exec compilation; no phone writes; corrected returned image still required"
+}

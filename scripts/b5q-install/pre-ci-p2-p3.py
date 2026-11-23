@@ -9,7 +9,7 @@ def run(name,command):
     if r.returncode:print((out/(name+'.log')).read_text()[-5000:]);raise SystemExit('FAIL '+name)
     checks.append(dict(name=name,passed=True,command=list(map(str,command))));print('PASS',name,flush=True)
 run('P0-P1-all-preserved-baselines',[sys.executable,R/'scripts/b5q-install/pre-ci-p0-p1.py'])
-for name in ['bt-fifo','bt-wcn6855','bt-string-compat','wcn-power','wifi-platform','wifi-diagnostics','pcie-controller','pcie-firmware-dma','ath11k-qca6490','wireless-review-fixes','wireless-source-pins']:
+for name in ['bt-fifo','bt-wcn6855','bt-string-compat','wcn-power','wifi-platform','wifi-diagnostics','pcie-controller','pcie-firmware-dma','ath11k-qca6490','wireless-review-fixes','wireless-source-pins','wireless-runtime']:
     run(name,[sys.executable,R/'tests/b5q-ufs'/('test-'+name+'.py')])
 run('native-userland-and-firmware-identities',[sys.executable,R/'scripts/b5q-install/check-wireless-userland.py'])
 run('Bluetooth-target',[sys.executable,R/'scripts/b5q-install/check-bt-target.py'])
