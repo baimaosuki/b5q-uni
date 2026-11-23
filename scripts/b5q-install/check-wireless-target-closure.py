@@ -1,15 +1,42 @@
 #!/usr/bin/env python3
 """Joint original-core symbol, authenticated callback and MMIO inspection."""
-import collections,hashlib,importlib.util,json,struct,subprocess,sys,tempfile
+import argparse,collections,hashlib,importlib.util,json,struct,subprocess,sys,tempfile
 from pathlib import Path
 from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R/'UniXNU-b5q/scripts'));sys.path.insert(0,str(R/'sources/UniXNU/kits/XnuPrelink'))
 from b5q_abi import object_symbols,macho
 from kc_image import Image
 spec=importlib.util.spec_from_file_location('pac',R/'scripts/b5q-install/check-proctop-pac.py');pac=importlib.util.module_from_spec(spec);spec.loader.exec_module(pac)
-out=R/'artifacts/b5q-p3-work';target=json.loads((out/'target/compile-result.json').read_text());assert target['passed']and not target['core_only']
-paths=list(map(Path,target['objects']));paths+=list((out/'board-target').glob('*.o'))
-bt=R/'artifacts/b5q-p2-work/target';paths+=[bt/n for n in json.loads((bt/'report.json').read_text())['objects']if n!='B5qWcnPower.o']
+p=argparse.ArgumentParser(description=__doc__)
+p.add_argument('--ci',type=Path,help='Actual downloaded CI objects; never use raw namespace inputs')
+p.add_argument('--esp',type=Path,help='Actual returned deployment ESP')
+p.add_argument('--out',type=Path)
+a=p.parse_args()
+out=R/'artifacts/b5q-p3-work';bt=R/'artifacts/b5q-p2-work/target'
+if a.ci:
+    assert a.esp and a.esp.is_file()
+    manifest,=a.ci.rglob('wireless-build.json')
+    wireless=json.loads(manifest.read_text())
+    paths=[]
+    for name,digest in wireless['objects'].items():
+        relative=name.split('/native-legacy-display/wireless/',1)[1]
+        path=manifest.parent/relative
+        assert path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest()==digest,name
+        paths.append(path)
+    ethernet,=[v for v in a.ci.rglob('B5qEthernet.o') if '/raw/'not in str(v)]
+    paths.append(ethernet)
+    armPath,=a.ci.rglob('ArmCpu.o')
+    kernelESP=a.esp
+    coreName='actual returned CI deployment kernel'
+    callbackPaths=[manifest.parent/'B5qWifiBoard.o',manifest.parent/'B5qBluetooth.o']
+else:
+    target=json.loads((out/'target/compile-result.json').read_text());assert target['passed']and not target['core_only']
+    paths=list(map(Path,target['objects']));paths+=list((out/'board-target').glob('*.o'))
+    paths+=[bt/n for n in json.loads((bt/'report.json').read_text())['objects']if n!='B5qWcnPower.o']
+    armPath=R/'artifacts/b5q-p1-work/returned-PAC/ArmCpu.o'
+    kernelESP=R/'artifacts/b5q-p1-work/ci45167257160/esp.img'
+    coreName='actual P1 CI45167257160'
+    callbackPaths=[out/'board-target/B5qWifiBoard.o',bt/'B5qBluetooth.o']
 def calls(instructions):
     values={};result=[]
     for ins in instructions:
@@ -29,7 +56,7 @@ def calls(instructions):
 scans={p:pac.scan(p)for p in paths};coreCalls=[]
 with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
     kernel=Path(td)/'kernel'
-    subprocess.run(['mcopy','-i',str(R/'artifacts/b5q-p1-work/ci45167257160/esp.img'),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
+    subprocess.run(['mcopy','-i',str(kernelESP),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
     raw=kernel.read_bytes();outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1])
     symbols={n:v for v,names in core.symbols().items()for n in names};names=set(symbols)
     decoder=Cs(CS_ARCH_ARM64,CS_MODE_ARM);decoder.skipdata=True
@@ -55,11 +82,11 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
     consumers=collections.defaultdict(list)
     for p,scan in scans.items():
         for call in calls(scan['instructions']):consumers[call['diversity']].append(dict(object=str(p),**call))
-    arm=pac.scan(R/'artifacts/b5q-p1-work/returned-PAC/ArmCpu.o')
-    for call in calls(arm['instructions']):consumers[call['diversity']].append(dict(object='accepted P1 ArmCpu.o',**call))
-    for call in coreCalls:consumers[call['diversity']].append(dict(object='accepted P1 core',**call))
+    arm=pac.scan(armPath)
+    for call in calls(arm['instructions']):consumers[call['diversity']].append(dict(object=str(armPath),**call))
+    for call in coreCalls:consumers[call['diversity']].append(dict(object=coreName,**call))
     contracts=[]
-    for p in [out/'board-target/B5qWifiBoard.o',bt/'B5qBluetooth.o']:
+    for p in callbackPaths:
         for callback,sites in scans[p]['signed'].items():
             if not callback.startswith(('__ZN12_GLOBAL__N_','__Z11processSeen','__Z12processWatch','__enable_preemption','__disable_preemption')):continue
             for site in sites:
@@ -82,7 +109,10 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
         assert not any('smmu_plan_bypass'in name or 'smmu_configure_bypass'in name for name,_,_ in scan['symbols'])
         mmio[str(p)]=dict(sha256=scan['sha256'],instructions=len(scan['instructions']),apps_smmu_materializations=0)
     result=dict(passed=True,hardware_verified=False,objects=len(paths),duplicate_definitions=duplicates,unresolved=missing,
-        optional_weak_imports=['_boot_cpu_kick','_boot_kthread_report'],core='actual P1 CI45167257160',callback_contracts=contracts,
-        zero_apps_smmu=mmio,network_vtables=abi['classes'],new_CI_binary_revalidation_required=True)
-    (out/'joint-target-closure.json').write_text(json.dumps(result,indent=2)+'\n')
+        optional_weak_imports=['_boot_cpu_kick','_boot_kthread_report'],core=coreName,callback_contracts=contracts,
+        zero_apps_smmu=mmio,network_vtables=abi['classes'],new_CI_binary_revalidation_required=not bool(a.ci),
+        actual_returned_CI_objects=bool(a.ci),kernel_sha256=hashlib.sha256(raw).hexdigest())
+    destination=a.out or out/'joint-target-closure.json'
+    destination.parent.mkdir(parents=True,exist_ok=True)
+    destination.write_text(json.dumps(result,indent=2)+'\n')
     print('PASS joint',len(paths),'objects; symbols/no duplicates;',len(contracts),'authenticated producer/consumer contracts; zero EL1 apps_smmu')

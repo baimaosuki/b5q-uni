@@ -327,7 +327,7 @@
     "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
     "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
     "UniXNU-b5q/board.toml": "0e460588c245550456d020b7622b1b4846f33134162496a33999458f431dfb79",
-    ".github/workflows/b5q-p0-p5.yml": "2949dd7602db91a25ecf81909082c992cea37e9dde23d417a0d34e20ef086d2f"
+    ".github/workflows/b5q-p0-p5.yml": "c747d3ddb10b6b8396080840b9737ab83a8514741b892b7147b1e6049d4b9cc5"
   },
   "summary": {
     "target_objects": 122,
@@ -338,5 +338,13 @@
     "workflow_shell_syntax": "PASS",
     "original_fw_files": 24,
     "hardware_verified": false
+  },
+  "CI_first_failure": {
+    "run": 45229274907,
+    "stage": "private draft release input download",
+    "http_status": 403,
+    "kernel_compilation_started": false,
+    "fix": "contents:write required to read unpublished draft assets",
+    "firmware_reused": true
   }
 }
