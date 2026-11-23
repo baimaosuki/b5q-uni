@@ -5,7 +5,7 @@
 #include <kern/thread.h>
 #include <pexpert/pexpert.h>
 #include "B5qTouchBus.h"
-#include "B5qTouchProtocol.h"
+#include "B5qTouchReports.h"
 #include "B5qTouchIrq.h"
 #include "B5qTouchPower.h"
 extern "C" {
@@ -16,7 +16,7 @@ volatile int native_touch_xs[12],native_touch_ys[12],native_touch_ids[12];
 }
 extern "C" { __attribute__((visibility("default"))) volatile uint32_t native_touch_recovered; }
 namespace {
-IOMemoryMap *tlmmMapping;volatile uint32_t *tlmm;B5qTouch::Point points[12];
+IOMemoryMap *tlmmMapping;volatile uint32_t *tlmm;B5qTouch::Reports reports;
 void (*sink)(void *);void *sinkContext;uint8_t message[4096],config[512];size_t configBytes;unsigned frames,maxObjects;
 volatile uint32_t *mapTlmm(){
  auto *memory=IODeviceMemory::withRange(0xf100000,0x100000);
@@ -76,24 +76,29 @@ bool packet(TouchBus &bus,uint8_t &code,unsigned &length){
 void publish(bool fromReport=true){
  __atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);unsigned count=0;
  native_touch_recovered=!fromReport;
- for(unsigned i=0;i<12;++i)if(points[i].kind==1||points[i].kind==2){native_touch_xs[count]=int(B5qTouch::hid(points[i].x));native_touch_ys[count]=int(B5qTouch::hid(points[i].y));native_touch_ids[count]=int(i);++count;}
+ for(unsigned i=0;i<12;++i)if(reports.points[i].kind==1||reports.points[i].kind==2){native_touch_xs[count]=int(B5qTouch::hid(reports.points[i].x));native_touch_ys[count]=int(B5qTouch::hid(reports.points[i].y));native_touch_ids[count]=int(i);++count;}
  native_touch_count=count;__asm__ volatile("dmb ish":::"memory");__atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
  if(auto callback=__atomic_load_n(&sink,__ATOMIC_ACQUIRE))callback(sinkContext);
  if(fromReport){
-  if(++frames<=8||!(frames%256))IOLog("B5qTouch: stage=report frames=%u contacts=%u seq=%u irq=%u hid_reports=%u\n",frames,count,native_touch_seq,__atomic_load_n(&irqEvents,__ATOMIC_RELAXED),native_touch_hid_reports);
- }else IOLog("B5qTouch: stage=release-contacts seq=%u hid_reports=%u\n",native_touch_seq,native_touch_hid_reports);
+  if(++frames<=8||!(frames%256))IOLog("B5qTouch: mode=%02x frames=%u contacts=%u palm=%u c2=%u release_all=%u hid=%u\n",reports.mode,frames,count,reports.palm,reports.c2,reports.releases,native_touch_hid_reports);
+ }else if(reports.releases<=8 || !(reports.releases&(reports.releases-1)))
+  IOLog("B5qTouch: stage=release-all mode=%02x contacts=0 palm=%u c2=%u identify=%u errors=%u release_all=%u hid=%u\n",reports.mode,reports.palm,reports.c2,reports.identify,reports.errors,reports.releases,native_touch_hid_reports);
 }
-uint8_t reportMode;
+unsigned layoutFailures;
 void report(uint8_t code,unsigned n){
- if(code!=reportMode)return;
  static unsigned sampled=0;
  if((code==0x11 || code==0xc1) && sampled++<5){
   char hex[97]={};const unsigned count=n<32?n:32;
   for(unsigned i=0;i<count;++i)snprintf(hex+3*i,sizeof(hex)-3*i,"%02x ",message[i]);
   IOLog("B5qTouch: raw code=%02x bytes=%u first=%s\n",code,n,hex);
  }
- bool ready=code==0x11&&configBytes?B5qTouch::parse(config,configBytes,message,n,points,maxObjects):code==0xc1?B5qTouch::sec(message,n,points):false;
- if(ready)publish();else if(code==0x11)IOLog("B5qTouch: stage=touch-layout code=%02x bytes=%u config=%lu\n",code,n,(unsigned long)configBytes);
+ const auto result=reports.consume(code,message,n,config,configBytes,maxObjects);
+ if(result==B5qTouch::ReportResult::Frame){layoutFailures=0;publish();}
+ else if(result==B5qTouch::ReportResult::Released){
+  publish(false);
+  if(code==0x11 && ++layoutFailures<=3)
+   IOLog("B5qTouch: stage=touch-layout code=%02x bytes=%u config=%lu failures=%u\n",code,n,(unsigned long)configBytes,layoutFailures);
+ }
 }
 bool command(TouchBus &bus,uint8_t cmd,const uint8_t *p,unsigned n,bool getConfig=false){
  if(n>16)return false;
@@ -112,10 +117,25 @@ bool command(TouchBus &bus,uint8_t cmd,const uint8_t *p,unsigned n,bool getConfi
   }
   if(code==1){if(cmd==0x20&&!B5qTouch::appInfo(message,length,maxObjects)){IOLog("B5qTouch: command=%02x failed=application-info bytes=%u\n",cmd,length);return false;}if(getConfig){if(length>sizeof(config)||!length){IOLog("B5qTouch: command=%02x failed=config-length bytes=%u\n",cmd,length);return false;}memcpy(config,message,length);configBytes=length;}return true;}
   if(code==0x10&&cmd==2){IOLog("B5qTouch: stage=identify mode=%u bytes=%u\n",length>1?message[1]:255,length);return length>1&&message[1]==1;}
-  if(code>=0x10)report(code,length);else if(code!=0&&code!=7){IOLog("B5qTouch: command=%02x failed=response code=%02x bytes=%u\n",cmd,code,length);return false;}
+  report(code,length);
+  if(code==0x10 || (code<0x10&&code!=0&&code!=7)){
+   IOLog("B5qTouch: command=%02x failed=response code=%02x bytes=%u\n",cmd,code,length);return false;
+  }
  }
  IOLog("B5qTouch: command=%02x failed=response-timeout gpio19=%u\n",cmd,!lowAttention());
  return false;
+}
+bool configureReports(TouchBus &bus,bool preferFull=true){
+ reports.mode=0;reports.reconfigure=false;configBytes=0;layoutFailures=0;
+ if(!command(bus,0x20,nullptr,0))return false;
+ const bool got=command(bus,0x25,nullptr,0,true);
+ const uint8_t full=0x11,delta=0xc1;
+ bool ok11=false,okC1=false;
+ if(preferFull&&got)ok11=command(bus,5,&full,1);
+ if(ok11){command(bus,6,&delta,1);reports.mode=full;}
+ else {command(bus,6,&full,1);okC1=command(bus,5,&delta,1);if(okC1)reports.mode=delta;}
+ IOLog("B5qTouch: stage=enable-report mode=%02x full_config=%lu ok11=%u okC1=%u\n",reports.mode,(unsigned long)configBytes,ok11,okC1);
+ return reports.mode!=0;
 }
 void worker(void *,wait_result_t){
  const char *stage="mapping";
@@ -140,18 +160,7 @@ void worker(void *,wait_result_t){
   if(!busReady)break;
   stage="identify";IOLog("B5qTouch: stage=%s phase=before\n",stage);
   const bool identified=command(bus,2,nullptr,0);IOLog("B5qTouch: stage=%s phase=after ok=%u\n",stage,identified);if(!identified)break;
-  stage="application-info";IOLog("B5qTouch: stage=%s phase=before\n",stage);
-  const bool appReady=command(bus,0x20,nullptr,0);IOLog("B5qTouch: stage=%s phase=after ok=%u max_objects=%u\n",stage,appReady,maxObjects);if(!appReady)break;
-  stage="report-config";IOLog("B5qTouch: stage=%s phase=before\n",stage);
-  const bool got=command(bus,0x25,nullptr,0,true);IOLog("B5qTouch: stage=report-config phase=after available=%u bytes=%lu\n",got,(unsigned long)configBytes);
-  stage="enable-report";IOLog("B5qTouch: stage=%s phase=before\n",stage);const uint8_t touch=0x11,samsung=0xc1;
-  const bool disabled11=command(bus,6,&touch,1);
-  const bool okC1=command(bus,5,&samsung,1);
-  const bool ok11=!okC1 && got && command(bus,5,&touch,1);
-  reportMode=okC1?samsung:ok11?touch:0;
-  IOLog("B5qTouch: stage=enable-report phase=after disabled11=%u selected=%02x ok11=%u okC1=%u\n",
-        disabled11,reportMode,ok11,okC1);
-  if(!(ok11||okC1))break;
+  stage="enable-report";if(!configureReports(bus))break;
   stage="attach-irq";
   IOLog("B5qTouch: stage=%s phase=before gpio=%u intid=%u\n",stage,B5qTouchIrq::gpio,B5qTouchIrq::intid);
   const uint32_t cfg=B5qTouchIrq::disabled(tlmmRead(B5qTouchIrq::cfg));
@@ -162,18 +171,26 @@ void worker(void *,wait_result_t){
   irqAttached=true;__atomic_store_n(&irqOnline,true,__ATOMIC_RELEASE);
   tlmmWrite(B5qTouchIrq::cfg,cfg|1u);
   IOLog("B5qTouch: stage=ready address=20 gpio19=%u config=%lu seq=%u hid_reports=%u\n",!lowAttention(),(unsigned long)configBytes,native_touch_seq,native_touch_hid_reports);
-  for(unsigned consecutive=0;;){
+  for(unsigned consecutive=0,readErrors=0;;){
    if(!lowAttention()){consecutive=0;waitAttention();continue;}
    uint8_t code=0;unsigned n=0;stage="read-report";
    if(!packet(bus,code,n)){
-    bool hadContacts=false;
-    for(auto &p:points){hadContacts|=p.kind!=0;p={};}
-    if(hadContacts)publish(false);
+    reports.error();publish(false);
     consecutive=0;
+    if(++readErrors==3){
+     stage="bus-recovery";
+     IOLog("B5qTouch: stage=%s errors=%u\n",stage,reports.errors);
+     if(!bus.prepare()||!command(bus,2,nullptr,0)||!configureReports(bus))break;
+     readErrors=0;
+    }
     IOSleep(5);
     continue;
    }
-   report(code,n);
+   readErrors=0;report(code,n);
+   if(reports.reconfigure || layoutFailures>=3){
+    stage="report-recovery";
+    if(!configureReports(bus,layoutFailures<3))break;
+   }
    // Drain a sustained interrupt in batches so another thread can run.
    if(++consecutive==128){consecutive=0;IOSleep(1);}
   }
@@ -184,7 +201,7 @@ void worker(void *,wait_result_t){
   __atomic_store_n(&irqOnline,false,__ATOMIC_RELEASE);
  }
  // Release active contacts on initialization failure.
- for(auto &p:points)p={};
+ reports.release();
  publish(false);
  IOLog("B5qTouch: stage=%s stopped error=%s stop=%s\n",stage,B5qTouchBus::name(bus.error()),B5qTouchBus::name(bus.stopError()));
  // The shared IRQ handler has no detach API; keep its pin mapping valid.

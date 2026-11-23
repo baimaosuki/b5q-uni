@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Build the official FAT payload and a genuine volatile APFS RAM seed.
-
-This is the user's compile/link bring-up target. It does not invent Samsung
-physical memory, include persistent OS root windows, or claim a desktop boot.
-"""
+"""Build the official payload with verified Data recovery seed and board inputs."""
 import argparse,hashlib,importlib.util,json,os,secrets,subprocess,sys
 from pathlib import Path
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--unixnu',type=Path,required=True);p.add_argument('--device',type=Path,required=True);p.add_argument('--font-source',type=Path,required=True);p.add_argument('--data-ramdisk',type=Path,required=True);p.add_argument('--reuse-addon',action='store_true');a=p.parse_args()
@@ -36,8 +32,8 @@ subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--o
 files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/payload.img'}
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)
 manifest=pipeline.write_manifest(ctx,modules,plan,files)
-data=json.loads(manifest.read_text());data['scope']='Initial b5q macosroot reader build; authenticated roots plus volatile template Data; hardware boot not yet observed'
-data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':True,'persistent_block_writes':'validated XNU2LOG.BIN A/B slots only', 'root_read_only':True, 'log_file':'XNU2LOG.BIN','smmu_mode':'b5q-smmu-reuse=1; no SMMU MMIO; arbitrary DMA compatibility requires hardware verification','persistent_root_windows':True,'root_partition':'macosroot','data_seed':'official template-derived sparse RAM Data; size and exact UUID recorded in runtime/data-seed.json'}
+data=json.loads(manifest.read_text());data['scope']='b5q macOS27.3 build; baseline hardware evidence is separate from qualification of this new image'
+data['storage']={'ramblock':True,'verified_root_implementation':True,'ufs_controller':True,'persistent_block_writes':'validated B5QDATA1 Data window and XNU2LOG.BIN A/B slots only', 'root_read_only':True, 'log_file':'XNU2LOG.BIN','smmu_mode':'firmware-owned handoff; zero EL1 apps_smmu MMIO','persistent_root_windows':True,'root_partition':'macosroot','data_seed':'verified 4GiB RAM recovery seed; default persistent Data selected independently by board arguments'}
 data['identity']={'kind':'fresh development build namespace','published_seed':False}
 data['memory_handoff']={'dts_dram':'b5q low physical bank 0x80000000 + 0x80000000 for DRAM classification; not the allocator window','physical_window':'DarwinBoot EFI allocator at load time, not a fabricated b5q physical address'}
 data['hardware_tested']=False

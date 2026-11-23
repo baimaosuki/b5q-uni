@@ -2614,3 +2614,20 @@ next_action = ["Runonecachedstorage-onlyCI,downloadandverifyactualobjects/ESP,th
 kind = "source"
 reference = "reports/data-mount-fix.json"
 result = "ActualBatch2journal/sourcecausalchainplus21ASanUBSan productionselector/hook/readinesscases,2targetobjects0missing/duplicate andcross-objectstoragePAC326slots/IAe90c/PSCI0ba5/zeroapps_smmuPASS. Digestdescribesvalidatedenvelopeonly. CIandfinalimageacceptancepending."
+
+[[area]]
+id = "p0-touch-lifecycle"
+status = "implemented"
+components = ["ShengHidInput", "QcomGeniSpi"]
+paths = ["package/B5qTouch.cpp", "package/B5qTouchProtocol.h", "package/B5qTouchReports.h", "package/B5qTouchMouse.h", "package/Wn8030Pointer.h", "package/NativeHidInput.cpp", "reports/p0-touch-source-audit.json", "reports/p0-p5-goal-delivery.md"]
+inputs = ["Samsung original touch module SHA256 42933f1b8d51c8caa89755472d264456417734837c46ffa7f8ffd5025c99a7c0", "Samsung sec_common_fn SHA256 0755d4c6a92e6090f8b2ab62d370632696c5482bd49fe1cc142ff7b3e6b0a521", "Pinned sheng6c42e105 Wn8030.c SHA256 15643bbcb9d240ebf94a76bab0fab94bac5d0712157b79be663ff4d2e547e253"]
+configuration = ["Keep board, memory, UFS Data, GPU and service policy unchanged; touch-mouse=0 retains typed tenfinger HID and digitizerPairGuard."]
+procedure = ["Original DT and module disassembly, verbatim upstream pointer extraction, production lifecycle tests and target compilation; full kernel+UEFI and final image acceptance required before stage completion."]
+findings = ["Original0x69 type mask includesPALM5 with a separate palm flag atirq_thread0x9e14..0x9e4c. Desktop policy excludesPALM5, keeps0/3/6, releases invalidtypeslots, and clearsall12 onC2/Identify/status/I2C/malformed frames.", "Prefer fullframe0x11; bounded fallbacktoC1 on unsupportedlayout. Delete old latchedmultifingerpointer; movement/scroll/identity/60msreset come from unchanged shengfunctionbodies, with boardtap/coordinatepacking only.", "43hostpreflightgroups,28arm64eobjects withzero unresolved/duplicates, allrequestedcrossobjectPAC andzeroapps_smmu passed; fullkernel+UEFICI,returnedimages andnewhardwarequalification pending."]
+completion = ["Host preflight, full kernel+UEFI build/image readback, independent stage commit; hardware status is always explicit."]
+limits = ["New hardware behavior unverified. C2 is called rawdata in originalmodule; unconditional release is requested board safety policy."]
+next_action = ["Finish full hostpreflight, build kernel+UEFI, readback images, commit P0, then immediately proceedP1 throughP5."]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p0-touch-source-audit.json"
+result = "Actual module symbol addresses, fullinputSHA256, SamsungDTlines and pinned upstream sourceidentity recorded; no hardware success inferred."
