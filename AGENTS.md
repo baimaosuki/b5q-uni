@@ -82,3 +82,7 @@
 用户选择“只跑macOS”，并要求“最小工作量，而且不用管安卓的数据”。允许为此实现、编译和打包原 `userdata` 内容替换为持久APFS Data的驱动及用户执行安装工具；先前不改userdata的开发限制由本项明确例外取代。最小方案保持全部GPT条目、分区名称、boot/UEFI/recovery及现有48GiB macosroot不变，不采用先前移动系统/24GiB root的重分区草案。
 
 固定userdata原范围为4Kn LBA3406336..47595510，前1MiB为B5QDATA1身份封装；APFS范围3406592..47595510。`b5q-data-ufs=2`只启用经实际GPT/name/CRC/UUID/精确边界/无重叠/root-header哈希校验的该范围，root仍只读。继续保留所有三星保护分区限制。覆盖Android内容须由用户在TWRP运行显式userdata转换命令，工具必须拒绝/data已挂载、swap和已初始化macOS Data；本项不授权助手自动连接、采集或刷写手机。只增量编译必要存储对象，保留Batch1/Batch2已验证成果与v30loader，无需重编core/GPU/Mesa/UEFI。
+
+## TWRP userdata原地初始化（2026-11-23，最新用户明确授权）
+
+用户禁止写满百余GiB镜像，并明确要求“设备已经在TWRP里面，你自己初始化”。允许连接现有b5q TWRP并仅对已验证边界的userdata执行UNMAP与小范围APFS初始化写入、回读和身份头最后提交；不需要再次确认。源已验证APFS按分配位图保留所有allocated-zero数据、internal pool、checkpoint/元数据，复制量必须小于1GiB。禁止调用完整168GiB写入路径。GPT/boot/ESP/macosroot和三星受保护分区不得写；仅允许GPT元数据及已授权macosroot身份头的只读核验。完成后保留小型操作结果与逐段SHA证据，清理RAM/主机临时恢复副本，不重编任何内核/固件或触发CI。
