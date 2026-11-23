@@ -4,6 +4,7 @@
 #include <IOKit/IOMessage.h>
 #include <IOKit/pwr_mgt/RootDomain.h>
 namespace {
+static uint8_t dataSeedDigest[32]={};
 static IOBufferMemoryDescriptor *dataMemory;
 static uint8_t *dataDma;
 static uint64_t dataPhysical;
@@ -65,6 +66,9 @@ class B5qDataBlock:public IOBlockStorageDevice {
  uint8_t *bounce=nullptr;
  bool online=false;
 public:
+ bool seedInfo(const char *uuid,uint64_t *base,uint64_t *bytes,uint8_t hash[32]) {
+  return B5qData::seed(dataVolume,online,uuid,dataSeedDigest,base,bytes,hash);
+ }
  bool start(IOService *p) override {
   if(!dataVolume.valid || !IOBlockStorageDevice::start(p))return false;
   bufferLock=IOLockAlloc();bounce=static_cast<uint8_t *>(IOMalloc(maxTransfer));
@@ -124,7 +128,25 @@ public:
  }
 };
 OSDefineMetaClassAndStructors(B5qDataBlock,IOBlockStorageDevice)
+extern "C" int native_ram_block_provider_seed(IOService *provider,const char *uuid,
+ uint64_t *base,uint64_t *bytes,uint8_t digest[32]) {
+ auto *disk=OSDynamicCast(B5qDataBlock,provider);
+ return disk&&disk->seedInfo(uuid,base,bytes,digest)?1:0;
+}
+extern "C" int native_ram_block_volume_seed(const char *,dev_t *,char *,size_t,uint64_t *,uint64_t *,uint8_t *);
 namespace {
+static bool b5qDataWaitReady() {
+ for(unsigned retry=0;retry<1200;++retry) {
+  dev_t device;char path[64]={};uint64_t base=0,bytes=0;uint8_t digest[32]={};
+  if(native_ram_block_volume_seed(B5qData::volumeUuid,&device,path,sizeof(path),&base,&bytes,digest)&&
+     base==0&&bytes==dataVolume.blocks*4096&&equal(digest,dataSeedDigest,32)) {
+   IOLog("B5qData: media-ready path=%s bytes=%llu retry=%u unique=1\n",path,(unsigned long long)bytes,retry);
+   return true;
+  }
+  IOSleep(50);
+ }
+ return false;
+}
 static bool b5qDataStart(IOService *provider) {
  uint8_t header[4096],rootHeader[4096],hash[32];
  if(host.lun!=0 || !B5qData::validIdentity(dataIdentity,host.capacity[host.lun]) ||
@@ -132,6 +154,7 @@ static bool b5qDataStart(IOService *provider) {
     !equal(hash,B5qData::rootHeaderSha,32))return false;
  uint8_t cdb[16];if(!readCdb(cdb,dataIdentity.first,1) || command(host.lun,cdb,4096,header)!=0 ||
     !B5qData::open(header,dataIdentity,host.capacity[host.lun],dataVolume))return false;
+ if(!vr_xnu_crypto.sha256(header,4096,dataSeedDigest))return false;
  // UFSHCI CAP.NUTRS is encoded as number of slots minus one.
  if((read32(host.hc,0)&31)<1)return false;
  dataMemory=IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task,

@@ -25,9 +25,9 @@ includes=['-I',str(out/'headers/include'),'-I',str(ROOT/'.cache/xnu-work/osfmk')
 flags=['-include',str(osx)]
 ramblock=ROOT/'drivers/RamBlock'
 ram_source=out/'NativeRamBlock.cpp'
+from b5q_ramblock import prepare_source
 ram_patch=Path(__file__).with_name('b5q-volatile-data-4g.patch')
-shutil.copyfile(ramblock/ram_source.name,ram_source)
-subprocess.run(['patch','--batch','--fuzz=0',ram_source],input=ram_patch.read_bytes(),check=True)
+prepare_source(ramblock/ram_source.name,ram_source)
 includes+=['-iquote',str(ramblock)]
 sources=[base,ram_source,ROOT/'kits/b5q/B5qRamStorage.cpp',ROOT/'kits/b5q/B5qPower.cpp',ROOT/'kits/b5q/B5qAbsentBoard.cpp',ROOT/'kits/b5q/B5qUfs/B5qUfs.cpp',ROOT/'kits/b5q/B5qRootBinding.cpp',ROOT/'kits/VerifiedRoot/src/verified_root.c',ROOT/'kits/VerifiedRoot/adapters/xnu_crypto.c']
 objects=[]
@@ -38,5 +38,5 @@ for source in sources:
 import json,sys
 objects += [Path(p) for p in json.loads(subprocess.check_output([sys.executable,str(ROOT/'scripts/build-b5q-pmgr.py')],text=True))]
 path=archive(out/'libRamBlock.a',objects)
-report(path,objects,[*sources,ramblock/ram_source.name,ram_patch],dict(ufs_controller=True,persistent_block_writes="validated ESP XNU2LOG.BIN slots only",root_partition="macosroot",data_in_ram=True,original_storage_class_size_checked_at_runtime=True))
+report(path,objects,[*sources,ramblock/ram_source.name,ram_patch,Path(__file__).with_name('b5q-storage-provider.patch')],dict(ufs_controller=True,persistent_block_writes="validated Data window and ESP journal slots",root_partition="macosroot",original_storage_class_size_checked_at_runtime=True))
 print('PASS: macOS source storage ABI, actual RamBlock and VerifiedRoot; b5q authenticated read-only macosroot driver linked; root read-only; isolated ESP journal writer enabled')

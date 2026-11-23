@@ -1,9 +1,6 @@
 name: b5q macOS-only userdata Data (two storage objects)
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - codex/b5q-new-batch2
 permissions:
   contents: read
   actions: read
@@ -185,7 +182,7 @@ jobs:
             UniXNU/out/b5q/**/esp.img
             ${{ runner.temp }}/batch2-delivery/data-ufs.img
             ${{ runner.temp }}/batch2-delivery/data-ufs.json
-          compression-level: 6
+          compression-level: 1
           retention-days: 3
       - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
         if: always()

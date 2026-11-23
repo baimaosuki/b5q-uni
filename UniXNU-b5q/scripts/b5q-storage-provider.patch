@@ -1,0 +1,29 @@
+--- a/NativeRamBlock.cpp
++++ b/NativeRamBlock.cpp
+@@ -27,6 +27,8 @@
+ bool ml_static_mfree_prepare(vm_offset_t, vm_size_t) __attribute__((weak_import));
+ void IODTFreeLoaderInfo(const char *, void *, int);
+ int native_ram_block_volume_device(const char *, dev_t *, char *, size_t);
++// Optional typed board-backed Data provider; RAM-only builds need no hook.
++int native_ram_block_provider_seed(IOService *, const char *, uint64_t *, uint64_t *, uint8_t *) __attribute__((weak_import));
+ volatile uint32_t native_ram_block_ready = 0;
+ volatile uint64_t native_ram_block_bytes = 0;
+ volatile uint64_t native_ram_block_reads = 0;
+@@ -666,9 +668,14 @@
+     unsigned depth = 0;
+     for (IOService *provider = media; provider && depth++ < 64; provider = provider->getProvider()) {
+       NativeRamBlock *ram = OSDynamicCast(NativeRamBlock, provider);
+-      if (!ram) continue;
+-      ram->attachStore();
+-      if (!ram->seedInfo(&base,&bytes,hash)) continue;
++      if (ram) {
++        ram->attachStore();
++        if (!ram->seedInfo(&base,&bytes,hash)) continue;
++      } else {
++        if (!native_ram_block_provider_seed ||
++            !native_ram_block_provider_seed(provider,uuid,&base,&bytes,hash)) continue;
++        if (base || !bytes || bytes > (UINT64_C(1)<<40) || (bytes&4095)) continue;
++      }
+       candidate = static_cast<dev_t>(makedev(mjr->unsigned32BitValue(), mnr->unsigned32BitValue()));
+       snprintf(candidatePath, sizeof(candidatePath), "/dev/%s", name->getCStringNoCopy());
+       selected = true;

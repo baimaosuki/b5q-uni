@@ -72,7 +72,7 @@ def compile_object(cxx, cflags, source, target, llvm):
     command = [str(cxx), *options, '-c', str(source), '-o', str(target)]
     target.with_suffix('.command.json').write_text(json.dumps(command, indent=2) + '\n')
     subprocess.run(command, check=True)
-    if source.name in ['NativeHidInput.cpp', 'ThermalLevel.cpp', 'QcomDwc3.cpp','B5qUfs.cpp']:
+    if source.name in ['NativeHidInput.cpp', 'ThermalLevel.cpp', 'QcomDwc3.cpp','B5qUfs.cpp','NativeRamBlock.cpp']:
         late = target.with_suffix('.late.o')
         subprocess.run([str(llvm / 'llvm-objcopy'), '--remove-section=__DATA,__mod_init_func',
                        '--globalize-symbol=__GLOBAL__sub_I_' + source.name, str(target), str(late)], check=True)

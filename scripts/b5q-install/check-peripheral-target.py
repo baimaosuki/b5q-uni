@@ -3,10 +3,10 @@
 import argparse,json,os,subprocess,sys,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
-DEFAULT=Path('/home/baimao/nabu_macos/out/nabu-27.3-fresh')
+DEFAULT=ROOT/'tools'
 p=argparse.ArgumentParser(description=__doc__)
-p.add_argument('--compiler',type=Path,default=Path(os.environ.get('B5Q_TARGET_CXX',DEFAULT/'p025-m2v/toolchain/llvm21/usr/lib/llvm-21/bin/clang++')))
-p.add_argument('--sdk',type=Path,default=Path(os.environ.get('B5Q_KERNEL_SDK',DEFAULT/'p020-input/local-sdk/macsdk/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk')))
+p.add_argument('--compiler',type=Path,default=Path(os.environ.get('B5Q_TARGET_CXX',DEFAULT/'llvm21/usr/lib/llvm-21/bin/clang++')))
+p.add_argument('--sdk',type=Path,default=Path(os.environ.get('B5Q_KERNEL_SDK',DEFAULT/'macos-sdk/MacOSX26.5.sdk')))
 p.add_argument('--objects-out',type=Path)
 p.add_argument('--sources',help='Comma separated board sources; verify only changed translation units')
 p.add_argument('--native-recount',action='store_true',help='Compile CPU/thermal with real recount import; final new-core linkage remains a separate check')
@@ -51,8 +51,12 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  sources.append(adapted)
  timer=t/'NativeAdrenoTimer.cpp';timer.write_text('#include "ShengGmuSource.h"\n'+(ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoTimer.cpp').read_text().replace('TimerGmuLow = 0x14220','TimerGmuLow = (0x1f888u*4u)-SHENG_GMU_CORE_GPU_DELTA').replace('TimerGmuHigh = 0x14224','TimerGmuHigh = (0x1f889u*4u)-SHENG_GMU_CORE_GPU_DELTA'));sources.append(timer)
  sources += [ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c','ShengGpuSmmu.c']]
+ if a.sources and 'NativeRamBlock.cpp'in a.sources.split(','):
+  from b5q_ramblock import prepare_source
+  sources.append(prepare_source(ROOT/'UniXNU/drivers/RamBlock/NativeRamBlock.cpp',t/'NativeRamBlock.cpp'))
+  flags+=['-iquote',str(ROOT/'UniXNU/drivers/RamBlock')]
  if a.sources:sources=[s for s in sources if s.name in set(a.sources.split(','))]
- if any(s.name in ('B5qUfs.cpp','B5qRamStorage.cpp') for s in sources):
+ if any(s.name in ('B5qUfs.cpp','B5qRamStorage.cpp','NativeRamBlock.cpp') for s in sources):
   storage=next((ROOT/'sources/UniXNU/out/feeds').glob('IOStorageFamily-*'))
   dest=t/'IOKit/storage';dest.mkdir(parents=True,exist_ok=True)
   for h in storage.glob('*.h'):shutil.copyfile(h,dest/h.name)

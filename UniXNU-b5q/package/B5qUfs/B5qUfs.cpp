@@ -6,6 +6,7 @@
 #include <IOKit/IOBufferMemoryDescriptor.h>
 #include <IOKit/storage/IOBlockStorageDevice.h>
 #include <IOKit/IOLib.h>
+#include <IOKit/IOBSD.h>
 #include <libkern/c++/OSIterator.h>
 #include <libkern/c++/OSString.h>
 #include <libkern/crypto/sha2.h>
@@ -24,6 +25,7 @@
 #include "B5qRootPolicies.h"
 #include "B5qVerifiedRead.h"
 #include "B5qDataFormat.h"
+#include "B5qDataSeed.h"
 using namespace B5qFormat;
 extern "C" const struct vr_crypto vr_xnu_crypto;
 namespace {
@@ -282,12 +284,16 @@ public:
 OSDefineMetaClassAndStructors(B5qRootBlock,IOBlockStorageDevice)
 extern "C" int b5q_ufs_block_authenticates(IOService *provider,const char *uuid,uint8_t *digest) {auto *block=OSDynamicCast(B5qRootBlock,provider);return block?(block->authenticates(uuid,digest)?1:0):-1;}
 namespace {
+static bool b5qDataWaitReady();
 static bool mediaReady(B5qRootBlock *root,const char *uuid) {
  OSDictionary *matching=IOService::serviceMatching("IOMedia");if(!matching)return false;OSIterator *iterator=IOService::getMatchingServices(matching);matching->release();if(!iterator)return false;bool found=false;
  while(OSObject *o=iterator->getNextObject()){auto *media=OSDynamicCast(IOService,o);auto *id=media?OSDynamicCast(OSString,media->getProperty("UUID")):nullptr;if(!id||strcmp(id->getCStringNoCopy(),uuid))continue;for(IOService *p=media;p;p=p->getProvider())if(p==root)found=true;}
  iterator->release();return found;
 }
 static void publish(void *context,wait_result_t) {auto *provider=static_cast<IOService*>(context);unsigned order[]={1,2,0};
+ // Root publication gates load_init_program(). Wait here, outside the loader
+ // thread, until the one typed Data volume has all BSD identity properties.
+ if(dataRequested&&!b5qDataWaitReady())fail("persistent Data media/UUID/BSD readiness timeout or duplicate UUID");
  for(unsigned i:order){auto *disk=new B5qRootBlock;if(!disk||!disk->init(static_cast<OSDictionary*>(nullptr))||!disk->configure(i)||!disk->attach(provider)||!disk->start(provider))fail("root block publication");
   bool ready=false;for(unsigned retry=0;retry<1200&&!ready;++retry){ready=mediaReady(disk,roots[i].uuid);if(!ready)IOSleep(50);}if(!ready)fail("APFS volume media timeout");IOLog("B5qUfs: authenticated %s volume %s ready\n",roots[i].image.name,roots[i].uuid);
  }
