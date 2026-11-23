@@ -4,6 +4,15 @@ import argparse,hashlib,json,plistlib,struct,subprocess,sys,tempfile,uuid
 from pathlib import Path
 from b5q_data_format import DATA_UUID,ENVELOPE_BLOCKS,SECTOR,ROOT_FIRST,ROOT_LAST,TAIL_FIRST,fletcher
 SEED_SHA='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70'
+def mounted_volume(device):
+ # resizeContainer may remount at /Volumes/Data instead of hdiutil's custom
+ # mountpoint. Re-query the SAME device and UUID; never follow a guessed name.
+ info=plistlib.loads(subprocess.check_output(['diskutil','info','-plist',device]))
+ if not info.get('Mounted') or info.get('VolumeUUID','').upper()!=DATA_UUID:
+  raise ValueError('resized volume is not mounted with the original Data UUID')
+ mount=Path(info.get('MountPoint',''))
+ if not mount.is_absolute() or not mount.is_dir():raise ValueError('invalid resized Data mountpoint')
+ return mount
 def main():
  p=argparse.ArgumentParser(description=__doc__);p.add_argument('--seed',type=Path,required=True);p.add_argument('--codec',type=Path,required=True);p.add_argument('--out',type=Path,required=True)
  p.add_argument('--blocks',type=int,default=ROOT_LAST-TAIL_FIRST+1-ENVELOPE_BLOCKS);a=p.parse_args()
@@ -24,6 +33,7 @@ def main():
    info=plistlib.loads(subprocess.check_output(['diskutil','info','-plist',str(mount)]));assert info['VolumeUUID'].upper()==DATA_UUID
    container=info['APFSContainerReference']
    subprocess.run(['diskutil','apfs','resizeContainer',container,'0'],check=True)
+   mount=mounted_volume(info['DeviceIdentifier'])
    directory=mount/'private/var/db/com.apple.xpc.launchd'
    policy={}
    for name,expected in [('disabled.plist',59),('disabled.501.plist',26)]:

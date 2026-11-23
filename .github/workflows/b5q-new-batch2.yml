@@ -97,17 +97,29 @@ jobs:
         run: |
           set -euo pipefail
           UniXNU/unixnu fetch xnu IOHIDFamily IOStorageFamily --device UniXNU-b5q --os macos-27.3-26C5035r
+      - uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/libNativeLegacyDisplay.late.a
+            UniXNU/out/b5q/**/tree/build/ram-block/libRamBlock.a
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
+            UniXNU/out/b5q/**/kernel/
+          key: macOS-ARM64-xcode26.6-batch2-${{ hashFiles('UniXNU-b5q/package/**', 'UniXNU-b5q/scripts/relink-b5q-peripherals.py') }}-45105913288
       - name: Compile the six Batch2 board objects and relink the cached core
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
+          if python3 UniXNU-b5q/scripts/reuse-batch2-native.py --unixnu UniXNU --device UniXNU-b5q --source-run 45105913288; then
+            echo "Reused completed Batch2 link and prelink"
+          else
           python3 UniXNU-b5q/scripts/relink-b5q-peripherals.py --version batch2 \
             --unixnu UniXNU --device UniXNU-b5q \
             --cached-tree "$RUNNER_TEMP/batch2-cache/macos-27.3-26C5035r/b5q_macos/tree" \
             --source-run 45047962341 --source-commit 5d7c4eadaa5344e1b96edc593b26d6d18d2bc6d0 \
             --changed NativeHidInput.cpp,HidInputProbe.cpp,B5qProcTop.c,B5qRamStorage.cpp,B5qPower.cpp,B5qUfs/B5qUfs.cpp --reused-data "$BATCH2_DATA" \
             --out "$RUNNER_TEMP/batch2-relink" 2>&1 | tee "$RUNNER_TEMP/batch2-relink.log"
+          fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/uefi-sheng
@@ -136,6 +148,7 @@ jobs:
           python3 scripts/b5q-install/build-persistent-data.py --seed "$BATCH2_DATA" \
             --codec seed-codec --out "$RUNNER_TEMP/batch2-delivery/data-ufs.img" 2>&1 | tee "$RUNNER_TEMP/batch2-data.log"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        if: always()
         with:
           name: b5q-batch2-images-${{ github.run_id }}
           path: |

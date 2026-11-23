@@ -44,6 +44,14 @@
         "passed": true
       },
       {
+        "name": "data-grow",
+        "passed": true
+      },
+      {
+        "name": "installer",
+        "passed": true
+      },
+      {
         "name": "absentd-v33",
         "passed": true
       },
@@ -1641,5 +1649,80 @@
     "status": "failure",
     "reason": "Submission manifest omitted existing B5qVmAlloc.h; first 5 board objects compiled, no core/GPU compilation",
     "diagnostics_sha256": "623edd2e1daed9b3924d0afce44196c3081990d2c1e624ba8ad1b90eb8295c46"
+  },
+  "second_CI": {
+    "run": 45105913288,
+    "native_relink": "PASS six board objects; zero core/GPU rebuilds",
+    "native_sha256": "f6756042309a6d540fedcc62381640227692ea701b64d96782cb73d10756fe49",
+    "ESP_build": "PASS; final download was skipped by old success-only upload; next workflow retains products even if a later step fails",
+    "APFS_growth": "PASS native resize to32211206144 and fsck_apfs exit0",
+    "first_error": "resizeContainer remounted Data at a different mountpoint; policy read used stale hdiutil path",
+    "fix": "Query the same APFS DeviceIdentifier/UUID for actual MountPoint after growth; 5 native remount regression cases PASS; reuse saved native cache from this run"
+  },
+  "returned_Xcode_objects": {
+    "passed": true,
+    "objects": {
+      "B5qRamStorage.o": {
+        "sha256": "1b4676758acc8a6b53611bf77443f141faaac386ccc02669cb55e76ea3350e5b",
+        "instructions": 286,
+        "apps_smmu_materializations": 0
+      },
+      "B5qProcTop.o": {
+        "sha256": "6283c27624aa50adb568e3de77988babb45e2386e56e41aba167bb01c2b8fcce",
+        "instructions": 705,
+        "apps_smmu_materializations": 0
+      },
+      "NativeHidInput.o": {
+        "sha256": "27348ebce0b3d8198bd230353ed5f2452f114498f21e7e4d03e20b543499f801",
+        "instructions": 2652,
+        "apps_smmu_materializations": 0
+      },
+      "B5qPower.o": {
+        "sha256": "96ac9831e78c15bcbbeb7a5f709fd41dc4d076adf60e7c7a24d9395feff9a659",
+        "instructions": 219,
+        "apps_smmu_materializations": 0
+      },
+      "B5qUfs.o": {
+        "sha256": "8d7b7368a5261b3ce547639ff5a6ed440fadfa2db37aa20d3c80dadd339ad5e2",
+        "instructions": 9509,
+        "apps_smmu_materializations": 0
+      },
+      "HidInputProbe.o": {
+        "sha256": "557d3ead50b756d165d797882d2e91a4dbdc2309ed1523d44f3219f4299a31d8",
+        "instructions": 1674,
+        "apps_smmu_materializations": 0
+      }
+    },
+    "platform_power_PAC": {
+      "key": "IA",
+      "diversity": "0x0ba5",
+      "producer": [
+        {
+          "site": "0x240",
+          "key": 0,
+          "diversity": 2981,
+          "address_diversity": 0
+        }
+      ],
+      "core_consumer_sites": [
+        "0xe60",
+        "0x474c"
+      ]
+    },
+    "data_root_shared_virtual_slots_verified": 326,
+    "Data_and_root_completion_PAC": {
+      "diversity": "0xe90c",
+      "calls": [
+        {
+          "site": 14876,
+          "diversity": 59660
+        },
+        {
+          "site": 16504,
+          "diversity": 59660
+        }
+      ]
+    },
+    "hardware_execution_tested": false
   }
 }

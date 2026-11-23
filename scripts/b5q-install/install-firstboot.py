@@ -67,8 +67,18 @@ def main():
     if manifest['os_profile'] != 'macos-27.3-26C5035r':
         raise SystemExit('Unexpected OS profile')
     status = manifest['build_status']
-    if not status['flash_candidate_ready'] or not status['root_read_only'] or not status['data_volatile']:
-        raise SystemExit('Package is not the expected read-only-root/RAM-Data candidate')
+    persistent = status.get('data_persistent') is True
+    if not status['flash_candidate_ready'] or not status['root_read_only']:
+        raise SystemExit('Package is not a validated read-only-root candidate')
+    if persistent:
+        # First-install Data has its own GPT/window-locked tool. This package
+        # can only update ESP, and can never select root, boot or bulk repair.
+        if status.get('data_volatile') is not False or set(manifest['outputs']) != {'esp.img'}:
+            raise SystemExit('Persistent Data package must contain only the ESP deployment')
+        if args.root or args.boot or args.repair or args.all:
+            raise SystemExit('Persistent Data update permits --check or --esp only')
+    elif not status.get('data_volatile'):
+        raise SystemExit('Package has no recognized Data mode')
     writing = args.root or args.boot or args.esp or args.repair or args.all
     if args.repair:
         chosen = ['esp', 'boot']

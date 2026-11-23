@@ -2496,3 +2496,8 @@ result = "20 NewBatch2 local preflight groups PASS, including real8000queueitera
 kind = "source"
 reference = "reports/batch2-validation.json"
 result = "First CI45105257996 stopped at sixth object because the submission omitted existing B5qVmAlloc.h. Fulltransitiveboardincludeclosurefinds onlythismissingheader; retainedfirsterrorand5compiledobjects. Addheaderandcontinuecachedcore/GPUincrementalrecipe; no hardware/outcome inferred."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45105913288 compiled all6boardobjects, linkednative f6756042 and packagedESP with0core/GPUrebuilds. NativeAPFSresize/fsckpassed32211206144B andcorrectDataUUID; postresizepolicyreadfailedbecausemacOSremountedoutsidehdiutilcustompath. Fixqueries sameDeviceIdentifier/UUIDMountPoint;5hostremountcasesPASS. Resume matching completednative/prelinkcache; retainESP/partialDataevenonlaterfailure. ESPinstalleracceptspersistentmanifestonlywithESP-onlyoutputandrejectsroot/boot/repair/all;mockCLItestsPASS."
