@@ -15,16 +15,15 @@
 #include "B5qLogCore.h"
 #include "B5qLogArgs.h"
 #include <pexpert/pexpert.h>
-#include <vm/vm_kern.h>
-#include <vm/vm_kern_xnu.h>
-#include <vm/vm_map.h>
+#include "B5qVmAlloc.h"
 #include <mach/mach_vm.h>
 #include "verified_root.h"
 #include "B5qRootFormat.h"
-#include "B5qSmmu.h"
+
 #include "B5qUfsProtocol.h"
 #include "B5qRootPolicies.h"
 #include "B5qVerifiedRead.h"
+#include "B5qDataFormat.h"
 using namespace B5qFormat;
 extern "C" const struct vr_crypto vr_xnu_crypto;
 namespace {
@@ -32,9 +31,9 @@ using namespace B5qUfsProtocol;
 constexpr uint32_t dmaBytes=0x25000,maxTransfer=128*1024;
 constexpr uint32_t fatalStatus=0x71880U;
 struct Transport {
- IOMemoryMap *hcMap=nullptr,*smmuMap=nullptr,*gccMap=nullptr;
+ IOMemoryMap *hcMap=nullptr,*gccMap=nullptr;
  IOBufferMemoryDescriptor *memory=nullptr;
- uintptr_t hc=0,smmu=0;uint8_t *dma=nullptr;uint64_t physical=0;
+ uintptr_t hc=0;uint8_t *dma=nullptr;uint64_t physical=0;
  const char *stage="initial";
  uint32_t lastOcs=0xffffffffU;
  uint8_t lastResponse=0;
@@ -46,6 +45,8 @@ struct Transport {
  IOLock *lock=nullptr;uint8_t lun=0;bool selected=false,poisoned=false;uint64_t capacity[8]={};
 };
 static Transport host;
+static B5qData::Identity dataIdentity;
+static bool dataRequested=false,dataSeparate=false;
 static uint32_t read32(uintptr_t p,unsigned off) { return *reinterpret_cast<volatile uint32_t*>(p+off); }
 static void write32(uintptr_t p,unsigned off,uint32_t n) { __asm__ volatile("dsb sy":::"memory");*reinterpret_cast<volatile uint32_t*>(p+off)=n;__asm__ volatile("dsb sy":::"memory"); }
 static uintptr_t map(uint64_t physical,uint64_t size,IOMemoryMap **keep) {
@@ -59,16 +60,13 @@ static bool waitValue(unsigned reg,uint32_t mask,uint32_t value,unsigned loops) 
 #define B5Q_STATE_VALUES host.stage,host.commandLun,host.opcode,static_cast<unsigned long long>(host.commandLba),host.status.scsi,host.status.flags,host.status.response,host.status.residual,host.status.sense,host.status.senseKnown,host.power.before,host.power.after,static_cast<unsigned long long>(host.blocks),host.blockSize,host.gptReason,host.rootName,host.matches,host.poisoned,host.hc?read32(host.hc,0x34):0,host.hc?read32(host.hc,0x30):0,host.hc?read32(host.hc,0x20):0,host.hc?read32(host.hc,0x58):0,host.lastOcs,host.lastResponse,static_cast<unsigned long long>(host.physical),host.reuseSmmu,host.scan[0],host.scan[1],host.scan[2],host.scan[3],host.scan[4],host.scan[5],host.scan[6],host.scan[7]
 static void transportDiagnostic(const char *why) { IOLog("B5qUfs: %s " B5Q_STATE_FORMAT "\n",why,B5Q_STATE_VALUES); }
 static void fail(const char *why) { panic("B5qUfs: %s " B5Q_STATE_FORMAT,why,B5Q_STATE_VALUES); }
-// Default firmware reuse performs no SMMU mapping or register access.
-// Explicit non-reuse mode configures only the exact Samsung UFS SID.
-// The UFS queue is already stopped and has no pending DMA before this executes.
-static bool mapUfsStream() {
- return b5qConfigureUfsStream(host.physical,dmaBytes,[](unsigned off){return read32(host.smmu,off);},[](unsigned off,uint32_t v){write32(host.smmu,off,v);},host.reuseSmmu);
-}
+// Samsung apps_smmu is owned by EL2. Only the verified firmware mapping
+// handoff is supported; this translation unit contains no EL1 SMMU MMIO path.
 static bool startTransport() {
  unsigned reuse=0;
  PE_parse_boot_argn("b5q-smmu-reuse",&reuse,sizeof(reuse));
  host.reuseSmmu=reuse==1;
+ if(!host.reuseSmmu)return false;
  host.stage="UFS clock handoff";
  IOMemoryMap *gcc=nullptr;
  uintptr_t g=map(0x00177000,0x1000,&gcc);
@@ -78,11 +76,7 @@ static bool startTransport() {
  host.stage="UFS host mapping";
  host.hc=map(0x01d84000,0x3000,&host.hcMap);
  if(!host.hc)return false;
- if(!host.reuseSmmu){
-  host.stage="SMMU mapping";
-  host.smmu=map(0x15000000,0x100000,&host.smmuMap);
-  if(!host.smmu)return false;
- }
+
  host.stage="UFS link ready";
  if((read32(host.hc,0x34)&1)!=1||(read32(host.hc,0x30)&0x0f)!=0x0f||read32(host.hc,0x20)&fatalStatus)return false;
  host.stage="drain firmware queues";
@@ -99,7 +93,7 @@ static bool startTransport() {
  host.stage="DMA address width";
  if(!host.dma||!host.physical||(host.physical&4095)||contiguous<dmaBytes||(!(read32(host.hc,0)&(1U<<24))&&host.physical+dmaBytes>0x100000000ULL))return false;
  host.stage=host.reuseSmmu?"firmware SMMU reuse":"configure UFS stream";
- if(!mapUfsStream())return false;
+ // No EL1 apps_smmu register access or fallback mapping.
  host.lock=IOLockAlloc();
  if(!host.lock)return false;
  bzero(host.dma,dmaBytes);
@@ -217,7 +211,12 @@ static bool selectLun() {
   if(!table){host.gptReason="gpt-table-allocation";IOFree(block,4096);return false;}
   bool ok=true;
   for(size_t at=0;at<allocated;){uint32_t take=uint32_t(allocated-at>maxTransfer?maxTransfer:allocated-at);if(!readLba(lun,g.entriesLba+at/4096,take/4096,table+at,true)){ok=false;host.gptReason="gpt-table-read";break;}at+=take;}
-  if(ok&&target(table,g,&host.gptReason)){++found;selected=lun;host.gptReason="matched";}
+  if(ok&&target(table,g,&host.gptReason)){
+   ++found;selected=lun;host.gptReason="matched";
+   if(dataRequested && (lun!=0 || !B5qData::select(block,table,g,dataSeparate,last+1,dataIdentity))) {
+    host.gptReason="persistent-data-GPT-identity";IOFree(table,allocated);IOFree(block,4096);return false;
+   }
+  }
   host.matches=found;host.scan[lun]=host.gptReason;IOFree(table,allocated);
  }
  IOFree(block,4096);
@@ -237,7 +236,7 @@ static bool authenticateRoots() {
  for(unsigned i=0;i<3;++i){Root &r=roots[i];r.image=entries[i];r.table=entries[i+3];vr_view headerView={};host.rootName=r.image.name;
   host.stage="signed root header";
   if(vr_open_header(b5q_root_headers[i],544,b5q_root_key,1,&vr_xnu_crypto,&headerView)!=VR_OK||headerView.image_bytes!=r.image.bytes||!equal(headerView.image_sha256,r.image.sha256,32)||r.table.bytes!=headerView.block_count*32||r.table.bytes%4096)return false;
-  host.stage="hash table allocation";uint64_t envelope=544+r.table.bytes;r.allocated=round_page(envelope);if(kmem_alloc(kernel_map,&r.allocation,r.allocated,kma_flags_t(KMA_KOBJECT|KMA_DATA),VM_KERN_MEMORY_SECURITY)!=KERN_SUCCESS)return false;
+  host.stage="hash table allocation";uint64_t envelope=544+r.table.bytes;r.allocated=round_page(envelope);if(b5q_root_hash_allocate(&r.allocation,r.allocated)!=KERN_SUCCESS)return false;
   auto *buffer=reinterpret_cast<uint8_t*>(r.allocation);memcpy(buffer,b5q_root_headers[i],544);host.stage="hash table read";if(!rootRead(r.table.offset,r.table.bytes,buffer+544))return false;
   host.stage="hash table SHA256";if(!vr_xnu_crypto.sha256(buffer+544,r.table.bytes,hash)||!equal(hash,r.table.sha256,32)||!equal(hash,b5q_root_headers[i]+88,32))return false;
   host.stage="verified root policy";if(mach_vm_protect(kernel_map,r.allocation,r.allocated,TRUE,VM_PROT_READ)!=KERN_SUCCESS||vr_open(buffer,envelope,b5q_root_key,1,&vr_xnu_crypto,&r.policy)!=VR_OK)return false;
@@ -294,12 +293,18 @@ static void publish(void *context,wait_result_t) {auto *provider=static_cast<IOS
  provider->release();thread_terminate(current_thread());
 }
 }
+#include "B5qDataBlock.h"
 extern "C" void b5q_ufs_start(IOService *provider) {
+ unsigned data=0;PE_parse_boot_argn("b5q-data-ufs",&data,sizeof(data));dataRequested=data==1;
+ char partition[32]={};PE_parse_boot_argn("b5q-data-partition",partition,sizeof(partition));
+ dataSeparate=!strcmp(partition,"macosdata");
+ if(partition[0] && !dataSeparate && strcmp(partition,"macosroot-tail"))fail("invalid Data partition selection");
  unsigned requested=0;if(!PE_parse_boot_argn("b5q-root",&requested,sizeof(requested))||requested!=1)fail("explicit b5q-root=1 required");
  if(!startTransport())fail("Samsung firmware warm handoff/queue/SMMU unavailable");
  if(!wakeDevice())fail("UFS device wake/readiness");
  if(!selectLun())fail("macosroot discovery failed");
  if(!authenticateRoots())fail("root signature/hash-table authentication");
+ if(dataRequested && !b5qDataStart(provider))fail("persistent Data identity/APFS validation");
  nabuLogStart();
  provider->retain();thread_t thread=nullptr;if(kernel_thread_start(publish,provider,&thread)!=KERN_SUCCESS)fail("publisher thread");thread_deallocate(thread);
 }

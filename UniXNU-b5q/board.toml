@@ -64,14 +64,33 @@ text_fixups = [
   "dyld_shared_cache_arm64e.03,5de63cc,1811981a,f803082a",
 ]
 tools = true
-# b5q-root selects authenticated read-only macosroot; Data remains volatile in RAM.
+# b5q-root selects authenticated read-only macosroot; persistent Data has an independent bounded window.
 # The existing ArmCpu secondary/SM8550 IPI path is opt-in. no-lc selects the
 # already-built launch-constraint policy for signed, owner-trusted boot shims.
-kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "armcpu-edge=1", "no-lc=1", "ethernet=1", "vsync=60", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "cs-lazy=1", "boot-payload-release=1", "b5q-ws-signal=1", "usb=1", "gpu-power=9", "gpu-metal=1", "fb-gpu=1", "fb-bgra=1", "fb-half=2", "gpu-dcvs=1", "gpu-addon=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2", "timebase-user=1", "validation_disables=0x11040", "ca-triple-buffer=1", "ca-free-wakeup=1", "ci-mps=0", "cpufreq=4", "thermal=1", "thermal-ms=100", "thermal-level=1", "board-clock=1", "offline-hid-input=1", "offline-hid-home=1", "buttons=1", "touch=1", "touch-hid=1", "b5q-dpi=425", "dpu=1", "offline-legacy-unit-scale=2"]
+kernel_args = ["-v", "debug=0x14e", "use_contiguous_hint=0", "kt_fixed_zones=120", "-no_slto_panic", "smp=1", "armcpu-spi-ipi=1", "armcpu-self-ipi=1", "armcpu-edge=1", "no-lc=1", "ethernet=1", "vsync=60", "vc-text=1", "native-source-storage=1", "b5q-root=1", "b5q-data-ufs=1", "b5q-psci-reset=1", "b5q-smmu-reuse=1", "offline-mobile-graphics-load=1", "offline-legacy-register=1", "offline-legacy-gop=1", "offline-legacy-pm=1", "offline-legacy-validate=1", "offline-legacy-transfer=1", "offline-legacy-cpu-present=1", "offline-legacy-phase=4", "aks=1", "aks-sls=3", "offline-key-events=1", "apfs-boot-shim=1", "timebase-hz=24000000", "cs-lazy=1", "boot-payload-release=1", "b5q-ws-signal=1", "usb=1", "gpu-power=9", "gpu-metal=1", "fb-gpu=1", "fb-bgra=1", "fb-half=2", "gpu-dcvs=1", "gpu-addon=1", "b5q-log=1", "b5q-log-token=411839cbaebac4088c251c0ea57579a2", "timebase-user=1", "validation_disables=0x11040", "ca-triple-buffer=1", "ca-free-wakeup=1", "ci-mps=0", "cpufreq=4", "thermal=1", "thermal-ms=100", "thermal-level=1", "board-clock=1", "offline-hid-input=1", "offline-hid-home=1", "buttons=1", "touch=1", "touch-hid=1", "b5q-dpi=425", "dpu=1", "offline-legacy-unit-scale=2"]
 
 [payload.adt]
 # EFI allocator chooses a real contiguous window; no physical DRAM address is invented.
-owned_memory_size = "0x100000000"
+# A 6 GiB physical span with explicit EFI exclusions; low safe fragments are
+# adopted by the already-built outside-memory interface. Span != usable RAM.
+owned_memory_size = "0x180000000"
+owned_memory_excluded_ranges = 128
+owned_memory_outside_ranges = 16
+owned_memory_outside_reserved = [
+  "0x80000000:0x11d0000",
+  "0x81a00000:0x2f5000",
+  "0x81d00000:0x220000",
+  "0x82600000:0x200000",
+  "0x8a800000:0x1ad80000",
+  "0xa6100000:0x1500000",
+  "0xa7601000:0x206bf000",
+  "0xd4d00000:0xaf00000",
+  "0xe6440000:0x2dd000",
+  "0xf3800000:0x4200000",
+  "0xff800000:0x600000",
+  "0x100000000:0xf00000000"
+]
+persistent_data = true
 chip_id = "6050"
 unique_chip_id = "required"
 packed_data_ramdisk = true

@@ -29,7 +29,7 @@ ram_patch=Path(__file__).with_name('b5q-volatile-data-4g.patch')
 shutil.copyfile(ramblock/ram_source.name,ram_source)
 subprocess.run(['patch','--batch','--fuzz=0',ram_source],input=ram_patch.read_bytes(),check=True)
 includes+=['-iquote',str(ramblock)]
-sources=[base,ram_source,ROOT/'kits/b5q/B5qRamStorage.cpp',ROOT/'kits/b5q/B5qAbsentBoard.cpp',ROOT/'kits/b5q/B5qUfs/B5qUfs.cpp',ROOT/'kits/b5q/B5qRootBinding.cpp',ROOT/'kits/VerifiedRoot/src/verified_root.c',ROOT/'kits/VerifiedRoot/adapters/xnu_crypto.c']
+sources=[base,ram_source,ROOT/'kits/b5q/B5qRamStorage.cpp',ROOT/'kits/b5q/B5qPower.cpp',ROOT/'kits/b5q/B5qAbsentBoard.cpp',ROOT/'kits/b5q/B5qUfs/B5qUfs.cpp',ROOT/'kits/b5q/B5qRootBinding.cpp',ROOT/'kits/VerifiedRoot/src/verified_root.c',ROOT/'kits/VerifiedRoot/adapters/xnu_crypto.c']
 objects=[]
 for source in sources:
  obj=compile(source,out/(source.stem+'.o'),includes,flags+(['-Wno-error'] if source==base else []))

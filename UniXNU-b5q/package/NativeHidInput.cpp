@@ -67,14 +67,7 @@ static const unsigned char touchDescriptor[]={
     0x09,0x54,0x75,0x08,0x95,0x01,0x15,0x00,0x26,0xff,0x00,0x81,0x02,0xc0
 };
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
-// Report 0x1a uses the relative Mouse/Pointer collection used by the sheng cover.
-static constexpr unsigned char mouseDescriptor[]={
-    0x05,0x01,0x09,0x02,0xa1,0x01,0x85,0x1a,0x09,0x01,0xa1,0x00,
-    0x05,0x09,0x09,0x01,0x15,0x00,0x25,0x01,0x75,0x01,0x95,0x01,0x81,0x02,
-    0x75,0x07,0x95,0x01,0x81,0x03,
-    0x05,0x01,0x09,0x30,0x09,0x31,0x16,0x01,0x80,0x26,0xff,0x7f,
-    0x75,0x10,0x95,0x02,0x81,0x06,0xc0,0xc0
-};
+#include "B5qMouseReport.h"
 #endif
 #define TOUCH_FINGERS 10
 // Edge contacts (int-163). A contact that starts within ~3 mm of a panel edge carries kIOHIDDigitizerEventFromEdgeTip (0x800) in its
@@ -268,7 +261,7 @@ class NativeHidInput : public IOHIDDevice {
     // The digitizer is a separate service from the keyboard: backboardd matches digitizers by primary usage page/usage
     // (Digitizer/Touch Screen) and the Built-In flag, which a combined keyboard-first descriptor would not provide.
     bool touchOnly=false;
-    bool eventDriverFound=false;
+    IORegistryEntry *cachedEventDriver=nullptr;
     IOReturn submitReport(IOMemoryDescriptor *report) {
 #if defined(NATIVE_HID_SOURCE_API) && NATIVE_HID_SOURCE_API
         return handleReport(report,kIOHIDReportTypeInput,0);
@@ -280,11 +273,11 @@ class NativeHidInput : public IOHIDDevice {
     bool mouseEnabled=false;
     B5qTouchPointer::Pointer pointer;
     uint64_t tapLimit=0;
-    void sendPointer(uint8_t buttons,int dx,int dy) {
-        const unsigned x=uint16_t(dx),y=uint16_t(dy);
-        const unsigned char report[]={0x1a,buttons,uint8_t(x),uint8_t(x>>8),uint8_t(y),uint8_t(y>>8)};
+    IOReturn sendPointer(uint8_t buttonMask,int dx,int dy,int wheel=0,int pan=0) {
+        uint8_t report[8];b5q_mouse_report(report,buttonMask,dx,dy,wheel,pan);
         IOBufferMemoryDescriptor *buffer=IOBufferMemoryDescriptor::withBytes(report,sizeof(report),kIODirectionNone);
-        if(buffer){submitReport(buffer);buffer->release();}
+        IOReturn status=buffer?submitReport(buffer):kIOReturnNoMemory;
+        OSSafeReleaseNULL(buffer);native_hid_input_observed(6,status);return status;
     }
 #endif
     uint32_t lastSeq=0;
@@ -324,8 +317,11 @@ class NativeHidInput : public IOHIDDevice {
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         if(mouseEnabled) {
             const auto movement=pointer.update(count,ids,xs,ys,mach_absolute_time(),tapLimit,recovered);
-            if(movement.dx || movement.dy)sendPointer(0,movement.dx,movement.dy);
-            if(movement.click){sendPointer(1,0,0);sendPointer(0,0,0);}
+            if(movement.send)sendPointer(movement.buttons,movement.dx,movement.dy,movement.wheel,movement.pan);
+            if(movement.click || movement.rightClick) {
+                sendPointer(movement.rightClick?2:1,0,0);
+                sendPointer(0,0,0); // release even when press completion was ambiguous
+            }
             native_touch_hid_reports=native_touch_hid_reports+1;
             return; // One input mode per service; never also submit digitizer report 3.
         }
@@ -387,14 +383,23 @@ class NativeHidInput : public IOHIDDevice {
         return kIOReturnSuccess;
     }
     bool hasEventDriverCached() {
-        if(!eventDriverFound) {
-            IORegistryEntry *driver=eventDriver(this,4);
-            eventDriverFound=driver!=nullptr;
-            if(driver && (touchEnabled || touchOnly))edge::install(driver);
+        IORegistryEntry *driver=eventDriver(this,4);
+        if(driver!=cachedEventDriver) {
+            IOLog("B5qInput: event-driver changed old=%p new=%p\n",cachedEventDriver,driver);
+            OSSafeReleaseNULL(cachedEventDriver);cachedEventDriver=driver;driver=nullptr;
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+            pointer={};
+            if(cachedEventDriver && mouseEnabled)sendPointer(0,0,0);
+#endif
+            if(cachedEventDriver && (touchEnabled || touchOnly))edge::install(cachedEventDriver);
         }
-        return eventDriverFound;
+        OSSafeReleaseNULL(driver);
+        return cachedEventDriver!=nullptr;
     }
-    static bool hasEventDriver(IORegistryEntry *parent,unsigned depth) {return eventDriver(parent,depth)!=nullptr;}
+    static bool hasEventDriver(IORegistryEntry *parent,unsigned depth) {
+        IORegistryEntry *driver=eventDriver(parent,depth);
+        const bool found=driver!=nullptr;OSSafeReleaseNULL(driver);return found;
+    }
     // The IOHIDEventDriver below this device, if one has attached.
     static IORegistryEntry *eventDriver(IORegistryEntry *parent,unsigned depth) {
         if(!depth)return nullptr;
@@ -403,7 +408,10 @@ class NativeHidInput : public IOHIDDevice {
         while(OSObject *child=it->getNextObject()) {
             IORegistryEntry *entry=OSDynamicCast(IORegistryEntry,child);
             if(!entry)continue;
-            found=entry->metaCast("IOHIDEventDriver")?entry:eventDriver(entry,depth-1);
+            IOService *service=OSDynamicCast(IOService,entry);
+            if(service && !service->isInactive() && entry->metaCast("IOHIDEventDriver")) {
+                found=entry;found->retain();
+            } else found=eventDriver(entry,depth-1);
             if(found)break;
         }
         it->release();return found;
@@ -411,6 +419,7 @@ class NativeHidInput : public IOHIDDevice {
     static void tick(OSObject *owner,IOTimerEventSource *source) {
         NativeHidInput *self=OSDynamicCast(NativeHidInput,owner);if(!self)return;
         native_hid_live_checkpoint(self);
+        self->hasEventDriverCached();
         if(self->touchOnly){source->setTimeoutMS(1000);return;}
         if(!self->down && !hasEventDriver(self,4)) {
             native_hid_input_observed(3,0);
@@ -512,6 +521,10 @@ public:
         }
 #endif
         if(touchOnly||touchEnabled){
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+            setProperty("B5qRelativePointer",mouseEnabled);
+            if(!mouseEnabled)
+#endif
             setProperty("Built-In",true);
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
             if(!mouseEnabled)
@@ -532,12 +545,16 @@ public:
         timer->setTimeoutMS(1000);return true;
     }
     void stop(IOService *provider) override {
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+        if(mouseEnabled)sendPointer(0,0,0);
+#endif
+        OSSafeReleaseNULL(cachedEventDriver);
         if((touchOnly||touchEnabled) && &native_touch_set_sink)native_touch_set_sink(nullptr,nullptr);
         if(!touchOnly && &native_buttons_set_sink)native_buttons_set_sink(nullptr,nullptr);
         if(timer){timer->cancelTimeout();inputLoop->removeEventSource(timer);OSSafeReleaseNULL(timer);}
         IOHIDDevice::stop(provider);
     }
-    void free() override {OSSafeReleaseNULL(inputLoop);IOHIDDevice::free();}
+    void free() override {OSSafeReleaseNULL(cachedEventDriver);OSSafeReleaseNULL(inputLoop);IOHIDDevice::free();}
 };
 OSDefineMetaClassAndStructors(NativeHidInput,IOHIDDevice)
 extern "C" IOService *native_hid_input_allocate(void) {return new NativeHidInput;}
