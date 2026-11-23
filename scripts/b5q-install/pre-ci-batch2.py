@@ -12,7 +12,7 @@ def run(name,cmd,extra=None):
  checks.append(dict(name=name,passed=True));print('PASS '+name,flush=True)
 run('records',[sys.executable,'UniXNU/scripts/porting-record.py','check','--device','UniXNU-b5q'])
 run('memory-model',[sys.executable,'scripts/b5q-install/check-batch2-memory.py'],{'LD_PRELOAD':'/usr/lib/llvm-17/lib/clang/17/lib/linux/libclang_rt.ubsan_standalone-x86_64.so'})
-for name in ('batch2-contract','data-queue','data-installer','data-grow','installer','absentd-v33','data-account','log-startup','log-writer'):
+for name in ('batch2-contract','data-queue','data-installer','data-partition','data-grow','installer','absentd-v33','data-account','log-startup','log-writer'):
  run(name,[sys.executable,'tests/b5q-ufs/test-'+name+'.py'])
 with tempfile.TemporaryDirectory(prefix='b5q-batch2-host-')as td:
  for name in ('pointer-batch2','proctop'):

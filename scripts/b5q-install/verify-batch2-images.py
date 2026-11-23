@@ -49,9 +49,11 @@ def main():
    assert adt['/chosen/asmb'][2]['lp-sip0']==struct.pack('<Q',2)
    assert chosen['text-fixups']==b''.join(x.encode()+b'\0'for x in b['payload']['text_fixups']) and len(b['payload']['text_fixups'])==2
    assert sum('cluster-type'in props for path,(_,_,props)in adt.items()if path.startswith('/cpus/'))==8
+   expected_span=(6 if name=='xnu'else 4)<<30
+   assert chosen['darwinboot-memory-size']==struct.pack('<Q',expected_span)
    if name=='xnu':assert 'PackedRAMDisk'not in maps and 'RAMDisk'not in maps and 'ephemeral-storage'not in chosen and len(chosen['darwinboot-memory-excluded'])==128*16 and len(chosen['darwinboot-memory-outside'])==16*16
    else:assert 'PackedRAMDisk'in maps and chosen['ephemeral-storage']==struct.pack('<I',1) and 'darwinboot-memory-outside'not in chosen
-   profiles[name]=dict(kernel_sha256=sha(kernel),lp_sip0_hex=adt['/chosen/asmb'][2]['lp-sip0'].hex(),RAM_seed_loaded='initrd'in entry,args_bytes=len(entry['args'].encode()),ADT_sha256=sha(kernel.with_suffix('.macho.adt')))
+   profiles[name]=dict(owned_memory_span_bytes=expected_span,kernel_sha256=sha(kernel),lp_sip0_hex=adt['/chosen/asmb'][2]['lp-sip0'].hex(),RAM_seed_loaded='initrd'in entry,args_bytes=len(entry['args'].encode()),ADT_sha256=sha(kernel.with_suffix('.macho.adt')))
   assert profiles['xnu']['kernel_sha256']==profiles['ram-fallback']['kernel_sha256']
   assert sha(boot/'Drivers/DarwinBoot.efi')=='100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde'
   assert sha(assets/'scratch-data.img')=='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70'

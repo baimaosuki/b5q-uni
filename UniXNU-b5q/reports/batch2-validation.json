@@ -23,7 +23,7 @@
     "scripts/b5q-install/install-data-ufs.py": "6658de004bd3a2ce83e34df4e9a1f78ac9657689784699d765016248d7073b8f",
     "scripts/b5q-install/build-persistent-data.py": "0dfc6545c39841ed6ce70ae7f0b0fe7aeae741a2daa0cf318ecdaf970e6be0fc",
     "UniXNU-b5q/scripts/package-batch2-esp.py": "eb614d231001f32936b272683cd7b81ca2d7f6793c60a9f1d5ee4bcce2b98a13",
-    "scripts/b5q-install/verify-batch2-images.py": "636d3565ee911af80a9fc94b55b4da4773ca72c03388130b362468b8453ce894"
+    "scripts/b5q-install/verify-batch2-images.py": "4666b5d74848a692f3bf5f64ad33a851cd83dea451860c4999e23e1a4aaf1db1"
   },
   "stage": "local pre-CI; final returned-object/image acceptance pending",
   "input_source_sha256": {
@@ -52,6 +52,10 @@
       },
       {
         "name": "data-installer",
+        "passed": true
+      },
+      {
+        "name": "data-partition",
         "passed": true
       },
       {
@@ -3249,6 +3253,7 @@
     },
     "profiles": {
       "xnu": {
+        "owned_memory_span_bytes": 6442450944,
         "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
         "lp_sip0_hex": "0200000000000000",
         "RAM_seed_loaded": false,
@@ -3256,6 +3261,7 @@
         "ADT_sha256": "a3c27eab51494ff992ec2bec1f50b49539c36634b18653d29d438483f997d977"
       },
       "ram-fallback": {
+        "owned_memory_span_bytes": 4294967296,
         "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
         "lp_sip0_hex": "0200000000000000",
         "RAM_seed_loaded": true,
@@ -3290,5 +3296,144 @@
     "Req-5": "DONE",
     "Req-6": "DONE"
   },
-  "scope": "Local implementation/tests and returned CI bytes complete; hardware RAM/PSCI/persistence/input qualification pending"
+  "scope": "Local implementation/tests and returned CI bytes complete; hardware RAM/PSCI/persistence/input qualification pending",
+  "completion_audit": {
+    "passed": true,
+    "requirements": {
+      "Req-1": {
+        "result": "DONE",
+        "evidence": [
+          "reports/batch2-inputs.json",
+          "reports/batch2-validation.json:source hashes and memory model",
+          "b5q-runtime.fdt",
+          "MemoryMapLib.c",
+          "SHNGROOT first4096 bytes"
+        ],
+        "scope": "All static sources and model rechecked; actual >=6GiB remains a hardware observation, as required by the approved 4.5GiB floor correction"
+      },
+      "Req-2": {
+        "result": "DONE",
+        "evidence": [
+          "package/B5qUfs/B5qDataBlock.h",
+          "package/B5qUfs/B5qDataFormat.h",
+          "package/B5qPower.cpp",
+          "data-queue.log",
+          "data-partition-modes.json",
+          "boot-shutdown-contract.json"
+        ],
+        "scope": "Independent Data tag/UCD/DMA; shared mutex; GPT/hash/envelope bounds; FUA+SYNC; pinned shutdown order and platform PAC. No device write performed"
+      },
+      "Req-3": {
+        "result": "DONE",
+        "evidence": [
+          "completion-image-audit/images.json:profiles",
+          "board.toml",
+          "memory-model.json"
+        ],
+        "scope": "Actual normal6GiB span/noinitrd/exclusions/outside; separate4GiBRAM recovery. Physical usable memory not fabricated"
+      },
+      "Req-4": {
+        "result": "DONE",
+        "evidence": [
+          "pointer-batch2-ASan-UBSan.log",
+          "proctop-ASan-UBSan.log",
+          "reports/batch2-validation.json:linkd/mouse_descriptor",
+          "returned six object hashes"
+        ],
+        "scope": "Gesture/HID/report/drivercache/ProcTop source matches actual CI objects; MACF left intact"
+      },
+      "Req-5": {
+        "result": "DONE",
+        "evidence": [
+          "pre-ci.json:23groups",
+          "ci45105913288/objects-verified.json",
+          "ci45105913288/full-cross-object-PAC.json",
+          "completion-image-audit/images.json",
+          "completion-image-audit/disabled-plists-readback.json",
+          "completion-image-audit/post-seal.json"
+        ],
+        "scope": "Positive/negative host tests, real arm64e compile, closure/PAC/zeroMMIO and actual final IMG readback"
+      },
+      "Req-6": {
+        "result": "DONE",
+        "evidence": [
+          "tests/b5q-ufs/test-data-installer.py",
+          "tests/b5q-ufs/test-data-partition.py",
+          "tests/b5q-ufs/test-installer.py",
+          "reports/batch2-delivery.md:section6",
+          "porting.toml:batch2-persistent-data-input"
+        ],
+        "scope": "Scoped TWRP installer with explicit apply, whole payload/checkpoint/tail readback before envelope; later updates ESP-only"
+      }
+    },
+    "previous_goal_turn_classification": "progress: NewBatch2 source, CI images and readback artifacts were produced",
+    "current_goal_turn_classification": "progress: completion audit, explicit positive/negative future macosdata tests and complete numeric memory tables",
+    "CI": {
+      "run": 45108577992,
+      "status": "completed",
+      "conclusion": "success",
+      "source": "e66beea40e2a887e177c762804206d21ba983ef2"
+    },
+    "compiled_package_source_files_unchanged": 84,
+    "pre_ci_groups": 23,
+    "final_image_readback": {
+      "passed": true,
+      "CI_core_recompiled": false,
+      "board_objects_recompiled": 6,
+      "board_objects_compiled_this_run": 0,
+      "completed_native_source_CI": 45105913288,
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "c97e09e6993f3df6ccccc075db69adc5154ecf8c1593bee2aed82a78284f3047"
+      },
+      "Data": {
+        "bytes": 32211206144,
+        "sha256": "0af5262d519d0dd8a4a86da7cc5e4c0b10470b51a272591b0d8b52e6df34da96",
+        "APFS_volume_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+        "APFS_container_uuid": "1a7527c1-5215-4737-888d-3c6bfd79595d",
+        "policies_counts": {
+          "private/var/db/com.apple.xpc.launchd/disabled.plist": 59,
+          "private/var/db/com.apple.xpc.launchd/disabled.501.plist": 26
+        }
+      },
+      "profiles": {
+        "xnu": {
+          "owned_memory_span_bytes": 6442450944,
+          "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false,
+          "args_bytes": 981,
+          "ADT_sha256": "a3c27eab51494ff992ec2bec1f50b49539c36634b18653d29d438483f997d977"
+        },
+        "ram-fallback": {
+          "owned_memory_span_bytes": 4294967296,
+          "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": true,
+          "args_bytes": 981,
+          "ADT_sha256": "823963a0d0eb1ee205864bde6ba225765f9a147b33e3319d17c2d932aa7f3595"
+        }
+      },
+      "changed_archive_members": {
+        "build/native-legacy-display/libNativeLegacyDisplay.late.a": [
+          "B5qProcTop.o",
+          "HidInputProbe.o",
+          "NativeHidInput.late.o"
+        ],
+        "build/qcom-dwc3/libQcomDwc3.a": [],
+        "build/ram-block/libRamBlock.a": [
+          "B5qPower.o",
+          "B5qRamStorage.o",
+          "B5qUfs.late.o"
+        ]
+      },
+      "loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+      "Batch1_absentd_signatures_trusted": [
+        "828bb566402d31e6d5171ad26c04a139f9c4dcec"
+      ],
+      "hardware_qualified": false
+    },
+    "device_access_performed": false,
+    "hardware_qualification_claimed": false
+  }
 }
