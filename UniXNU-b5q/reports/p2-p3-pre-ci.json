@@ -327,7 +327,7 @@
     "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
     "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
     "UniXNU-b5q/board.toml": "0e460588c245550456d020b7622b1b4846f33134162496a33999458f431dfb79",
-    ".github/workflows/b5q-p0-p5.yml": "ad8e8e70cc2983a03062c07a74b2d587b9e3f21d951dfd5992edd2652dc4b8fb"
+    ".github/workflows/b5q-p0-p5.yml": "14d0a58a46f4fa90a81ac54b2cd0807a901eed2e81e9810a2b73978b57a94ae0"
   },
   "summary": {
     "target_objects": 122,
@@ -363,5 +363,15 @@
     "error": "ipsw cask zap syntax incompatible with installed Homebrew",
     "fix": "Select --formula CLI explicitly",
     "kernel_compilation_started": false
-  }
+  },
+  "ipsw_CLI_input": {
+    "version": "3.1.750",
+    "arch": "x86_64",
+    "url": "https://github.com/blacktop/ipsw/releases/download/v3.1.750/ipsw_3.1.750_macOS_x86_64_extras.tar.gz",
+    "archive_sha256": "0c75b8130657cf3098f837e4f93caa87206e4efd74868ba98003463ea78f09cf",
+    "executable_sha256": "a7b2a48b780a9bb19fa991a107053fb81d74e543b39e07c26d14be9d37aca4c6",
+    "bytes": 95518888,
+    "verified_only": true
+  },
+  "ipsw_CLI_installer_sha256": "d9e25eaa8cfe555615f3c50cb937a456c36af7268f873d350e1b5030ef490744"
 }

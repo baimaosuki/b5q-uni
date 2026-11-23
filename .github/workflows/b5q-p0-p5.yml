@@ -108,7 +108,9 @@ jobs:
       - name: Install upstream macOS host tools
         run: |
           set -euo pipefail
-          brew install --formula llvm lld mtools dtc blacktop/tap/ipsw bison ninja glslang shaderc spirv-tools pkgconf
+          brew install --formula llvm lld mtools dtc bison ninja glslang shaderc spirv-tools pkgconf
+          python3 scripts/b5q-install/install-ci-ipsw.py --out "$RUNNER_TEMP/b5q-host-tools"
+          echo "$RUNNER_TEMP/b5q-host-tools" >> "$GITHUB_PATH"
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
