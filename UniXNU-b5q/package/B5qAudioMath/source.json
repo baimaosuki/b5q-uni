@@ -1,0 +1,13 @@
+{
+  "repository": "https://android.googlesource.com/platform/external/compiler-rt",
+  "revision": "4bca908c4c4387ec754cd45aedef42f2a20aa6d8",
+  "unchanged_sources": {
+    "int_lib.h": "dc07b444bdfff6d336569a098167d1fcde33bf273552bdfd419d850521ac30ef",
+    "int_types.h": "a545fca142d7a7f101333f68cd88f121cdbc300204a70b421ddcdb556b323b9d",
+    "int_util.h": "6afb257f6b3edb7a2d25b1affa4d4dacd67258017f6fdd726b96d148c6405081",
+    "int_endianness.h": "3214cb49b829d43fb71cec794d995f66cf57d45ff034f08df565aff325094c77",
+    "udivti3.c": "efc650ac227336da68b86eae8a85c37acd587a64ff9e5bc3d127d00890212648",
+    "udivmodti4.c": "0cbb62ea33917cfcac22317a6f407aea0e340a0c627e7bdb4fdfa20ddcb66ec7"
+  },
+  "purpose": "Real compiler builtin for exact128bit audio host-time arithmetic, no kernel core rebuild or fake helper"
+}

@@ -1,0 +1,28 @@
+{
+  "audio_complete": false,
+  "hardware_verified": false,
+  "implementation": "Actual primary TDM AudioReach adaptation, firmware-reserved audio buffer consumer, Samsung I2C18 transport/reset/TDMpins, source-derived DSP-free TFA9878 prepare/start/stop; full HAL/startup/build/image remains incomplete",
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qTfa9878.h": "342428548add4a2fcb318f167c88cfc1555a5328bbf82579ab4c93e0655b9933",
+    "UniXNU-b5q/package/B5qAudioBoard.cpp": "2209dcd3fa487eee791f7544f8e6dcd2a0570e3ae01e8496451e35fd7932ef61",
+    "UniXNU-b5q/package/B5qAudioDma.cpp": "4041795a1a792727c3160e0183bc6817949b97f30140c28e511f57e59bcc9ae2",
+    "UniXNU-b5q/scripts/b5q_audio.py": "1c11dbc764bbd7bee30b1a61d3077e49cc64ad0775e6e4efb710faada728fae1",
+    "tests/b5q-ufs/test-tfa9878.py": "91e952bf64d5bc18c4cc6a17972b9565154fe53b859559987542b7cfa102d3dd",
+    "artifacts/b5q-p4-work/samsung-source/full/qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_init.c": "e91882a7ca24df21d9ef0c762b714264b72d32b5fb9348ea239e39ce968805e6",
+    "artifacts/b5q-p4-work/samsung-source/full/qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_dsp.c": "e6e99208eae1a083404be66e7ab4402ba600bf470c446bea5e1d8149ee5ce0f3",
+    "artifacts/b5q-p4-work/samsung-source/full/qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9878_tfafieldnames.h": "7c6d38f6992c577ed1c1c0c3fbe5703899d24e6aa9b4a9cee5cadb80c0df37fd",
+    "artifacts/b5q-p2-work/samsung-source/gcc-kalama.c": "d653b83fcdfdbf9524664c4455eca2d6a460ba97294588ba373c6518e0441a31",
+    "artifacts/b5q-p2-work/samsung-source/pinctrl-kalama.c": "d8d416b79fab46a466f130ea4f61893b93444c736d2d9b916e2678bc8c27ac48"
+  },
+  "source_facts": [
+    "TFA-specific tfa_init.c:315..401, tfa_dsp.c963 reset,1109key2,2321powerdown,3352startup,5350state; default profiles register-only, reject unsupportedrevisions",
+    "I2C18=998000 GPIO8/9/reset0, primaryTDM126..129; GCC hubcore52008bit8/S6bit16,CBCR170ac,RCG170b0; distinct from USBQUP1SE6",
+    "Firmware104Bready/state validated then retainedWBIS2MiB pool,64KiBaudiobuffer atIOVAa0000000 withstreamindex1; no EL1 apps_smmu access",
+    "No microphone advertised or undocumented register/MTP calibration writes; actual service publication result required; DSPdisconnect disables ready"
+  ],
+  "tests": [
+    "524TFA0a78/1a78/2addresses/source-extracted-optimal/defaultprofiles/startstop/timeout/transferfault cases ASanUBSanPASS"
+  ],
+  "status": "Target recipe33objects in progress; full HAL/runtime/CI pending",
+  "current_integration": "Complete production source selection/startup/runtime/menu present; local host/arm64e/EDK2/PAC gates PASS, CI and returned final image still required"
+}

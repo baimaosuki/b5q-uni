@@ -338,5 +338,41 @@
     "path": "scripts/b5q-install/extract-p4-stock-inputs.py",
     "sha256": "e9c1b5acac5facf7adbb612bb66aab2ab649c4bc2799dc126bf3d0c99a9db027"
   },
-  "status": "INPUTS_PREPARED_NOT_STAGE_COMPLETE"
+  "status": "INPUTS_PREPARED_NOT_STAGE_COMPLETE",
+  "P4A_initial_helper": {
+    "status": "HELPER_HOST_TESTED_BOARD_INTEGRATION_PENDING",
+    "files": {
+      "UniXNU-b5q/package/B5qFuelGauge.h": "fc357828b341344419cf169f9c5b4e98a0781a7ff527dba2bcd6597d6afa4ef2",
+      "tests/b5q-ufs/test-fuel-gauge.cpp": "eea711e788099c42cbcdf81b06fca4bb4052b508e652a8a22c842cd59fd38c50",
+      "tests/b5q-ufs/test-fuel-gauge.py": "a76579042e9a6e02c50cff5a058e1f2bbd5f670e1f79f753929fd71f056af852",
+      "artifacts/b5q-p4-work/samsung-source/max77705_fuelgauge.c": "698c6b225896a40a5022dedf242104c9adfebae15f57510d1e1593b29bb934ef",
+      "sources/twrp-b5q/recovery/root/lib/modules/max77705-fuelgauge.ko": "35f1e216258f5f1b95a738f0af76e43d6d41b15058806c9f6802c7727ee1dd79",
+      "sources/twrp-b5q/recovery/root/lib/modules/hall_ic.ko": "885788a889ec76b74f2bae6adddb86dd6d77892213cc711efb14438a4fb821e2"
+    },
+    "test": "python3 tests/b5q-ufs/test-fuel-gauge.py PASS ASan/UBSan",
+    "module_evidence": {
+      "fuel_voltage": "RVAa6c..c10 readreg9, splitinteger voltage conversion",
+      "hall": "RVAdf4..e60 rawGPIO XOR active_low beforeinput_event; DTflipGPIO107 active-low debounce50ms"
+    },
+    "hardware_verified": false
+  },
+  "other_original_inputs": {
+    "vpu30_4v.mbn": {
+      "bytes": 2310760,
+      "sha256": "4a3b9ed9e3a46068c491be25ae8180a97550c06ce95be803a586d10e20923a52",
+      "source": "artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/firmware/vpu30_4v.mbn"
+    },
+    "tfa98xx.cnt": {
+      "bytes": 5096,
+      "sha256": "540934d3f79bbbef1c1503f3e531f2e2cf92a1ec0c735a898f3bed5d7b350f49",
+      "source": "artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/firmware/tfa98xx.cnt"
+    }
+  },
+  "original_ADSP_memory_span": {
+    "first": "0x9ea00000",
+    "end_exclusive": "0xa43b4000",
+    "length": "0x59b4000",
+    "matches_original_b5q_DTS": true,
+    "does_not_match_sheng_length": true
+  }
 }
