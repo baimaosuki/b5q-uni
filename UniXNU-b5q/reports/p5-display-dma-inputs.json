@@ -1,0 +1,116 @@
+{
+  "complete_P5": false,
+  "hardware_verified": false,
+  "separate_DP_DMA_mapping_proven": false,
+  "inputs": {
+    "selected_DisplayDxe": {
+      "path": "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/DisplayDxe/DisplayDxe.patched.efi",
+      "bytes": 401408,
+      "sha256": "51babf469c8a6753082b1a84c677a21ed4ddca64ac98ca939a3bb42a614e8070"
+    },
+    "b5q_dts": {
+      "path": "uefi-b5q/Resources/DTBs/b5q.dts",
+      "bytes": 1758336,
+      "sha256": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f"
+    },
+    "original_IORT": {
+      "path": "artifacts/b5q-p4-work/stock-IORT/reference.dts",
+      "bytes": 108427,
+      "sha256": "ba1113818b491d3d6cce99926e90f7619fbe25f7dc16b9b142f1761af2840206"
+    },
+    "original_msm_drm": {
+      "path": "sources/twrp-b5q/recovery/root/lib/modules/msm_drm.ko",
+      "bytes": 11725080,
+      "sha256": "81248f938e3ff18c71335ea535f3f5a6868e66c6005f8520571422cbedb8945a"
+    },
+    "matching_sde_kms": {
+      "path": "artifacts/b5q-p5-work/source-extra/qcom/opensource/display-drivers/msm/sde/sde_kms.c",
+      "bytes": 145592,
+      "sha256": "961da44288dcc5b5ca0ccc183bfafbdc4ee66050eaa0a6491c1ecae62a00f2d4"
+    },
+    "matching_sde_hw_top": {
+      "path": "artifacts/b5q-p5-work/source-extra/qcom/opensource/display-drivers/msm/sde/sde_hw_top.c",
+      "bytes": 24402,
+      "sha256": "50c0255a88cd75b88f76e638e7721ceef2ea5cf45ff7ceb92699f00d764dcdcf"
+    },
+    "matching_sde_plane": {
+      "path": "artifacts/b5q-p5-work/source-extra/qcom/opensource/display-drivers/msm/sde/sde_plane.c",
+      "bytes": 148590,
+      "sha256": "656a71719520455c9d0ed76e9424640d01ff3f166f88eb4e700ea09e29729e47"
+    },
+    "existing_MemoryMapLib": {
+      "path": "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c",
+      "bytes": 5629,
+      "sha256": "8a18883b21362fd088b2c0c47b471ff6121a73764ca93df7b14036c1aef06bdb"
+    }
+  },
+  "selected_DisplayDxe": {
+    "caller_RVA": "0x133cc",
+    "target_RVA": "0x19b18",
+    "actual_words": [
+      "mov w0,wzr",
+      "ret"
+    ],
+    "orphan_HAL_body": "0x19b20..0x19bd4; not executed by the selected caller; does not prove a retained identity/bypass mapping"
+  },
+  "display_IORT": [
+    {
+      "arid": "0x3000000",
+      "encoded": "0x21c00",
+      "sid": "0x1c00",
+      "mask": "0x2"
+    },
+    {
+      "arid": "0x3000001",
+      "encoded": "0x1c01",
+      "sid": "0x1c01",
+      "mask": "0x0"
+    },
+    {
+      "arid": "0x3000002",
+      "encoded": "0x1c03",
+      "sid": "0x1c03",
+      "mask": "0x0"
+    },
+    {
+      "arid": "0x3000003",
+      "encoded": "0x21c04",
+      "sid": "0x1c04",
+      "mask": "0x2"
+    }
+  ],
+  "mdp_reg_names": [
+    "mdp_phys",
+    "vbif_phys",
+    "regdma_phys",
+    "ipcc_reg"
+  ],
+  "sid_phys_present": false,
+  "source_route": "sde_plane_set_sid -> sde_hw_set_sspp_sid; no write when hw_sid absent; sid_phys is optional and absent in original b5q node",
+  "existing_primary_stream": {
+    "sid": "0x1c00",
+    "mask": "0x2",
+    "must_preserve": true
+  },
+  "candidate_only": {
+    "arid": "0x03000003",
+    "sid": "0x1c04",
+    "mask": "0x2",
+    "routable_by_b5q_display": "unknown"
+  },
+  "reservation_is_not_mapping": "0xb8000000+0x02b00000 is a splash reservation, not proof of unused GOP allocation or DP DMA coverage",
+  "required": "A source-qualified independently routable DP fetch stream and retained firmware mapping, or a qualified nonoverlapping scanout allocation within an actually mapped display range",
+  "prohibited_assumptions": [
+    "copy another board sid_phys address",
+    "reconfigure the live primary Display domain/bank",
+    "scan apps_smmu at XNU EL1",
+    "infer whole-RAM identity from a firmware success-return patch"
+  ],
+  "unresolved_software": [
+    "native complete hardware ownership/glue",
+    "external IOMFB scanout and hotplug/lid integration",
+    "final P5 link closure/CI/ESP"
+  ],
+  "device_access": false,
+  "EL1_apps_smmu_access": false
+}

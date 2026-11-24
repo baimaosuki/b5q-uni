@@ -12,6 +12,7 @@
 #include "B5qUsbIrq.h"
 #include "B5qUsbDmaHandoff.h"
 #include "B5qMax77705.h"
+#include "B5qDpPort.h"
 #include <mach/mach_time.h>
 extern "C" bool b5q_usb_repeater(bool,bool);
 extern "C" bool b5q_usb_typec_init(void);
@@ -28,6 +29,9 @@ extern "C" bool b5q_usb_otg(bool);
 #include <IOKit/IODeviceTreeSupport.h>
 #include <IOKit/IOPlatformExpert.h>
 #include <libkern/c++/OSData.h>
+#include "B5qFeatures.h"
+extern "C" void b5q_dp_link_stop(void);
+extern "C" void b5q_dp_link_update(const B5qDpPortState *);
 extern "C" {
 int armcpu_spi_attach(uint32_t, bool, void (*)(void *), void *, uint32_t *, uint64_t *);
 int armcpu_spi_mask(uint32_t, bool);
@@ -54,6 +58,7 @@ constexpr unsigned kOwnedTcs = 2;   // shared with the microphone rail under the
 struct Region {IOMemoryMap *map; volatile uint32_t *va;};
 Region gGcc, gScratch, gPhy, gTcsrMap;
 bool gSuperSpeed;
+unsigned gDpLanes;
 void stage(int value) {native_usb_stats[0] = (uint32_t)value;IOLog("qcom-dwc3: stage=%d\n",value);}
 bool mapRegion(Region &r, uint64_t pa, uint64_t bytes) {
     IODeviceMemory *d = IODeviceMemory::withRange(pa, bytes);
@@ -191,6 +196,14 @@ bool qmpInit(bool reverse) {
     volatile uint8_t *base = reinterpret_cast<volatile uint8_t *>(phy.va);
     auto rd = [&](uint32_t o) {return *reinterpret_cast<volatile uint32_t *>(base + o);};
     auto wr = [&](uint32_t o, uint32_t v) {*reinterpret_cast<volatile uint32_t *>(base + o) = v; barrier();};
+    if(gDpLanes==4){
+        // Samsung dp_catalog_ctrl_usb_reset: USB is already stopped by
+        // roleThread. Four DP lanes retain USB2 through the UTMI mux.
+        wr(kQmpComResetOvrd,0x0a);wr(kQmpComMode,2);wr(kQmpComReset,1);
+        wr(kQmpComTypec,reverse?3:2);wr(kQmpComSwi,0);wr(kQmpComReset,0);
+        wr(kQmpComPower,1);wr(kQmpComResetOvrd,0);
+        phy.map->release();return false;
+    }
     volatile uint32_t *reset = gGcc.va + 0x50000 / 4, *common = gGcc.va + 0x50008 / 4;
     *reset = *reset | 1u; *common = *common | 1u; barrier(); IODelay(20);
     *reset = *reset & ~1u; *common = *common & ~1u; barrier();
@@ -202,7 +215,7 @@ bool qmpInit(bool reverse) {
     wr(kQmpComPower, rd(kQmpComPower) | 1u);
     wr(kQmpComResetOvrd, rd(kQmpComResetOvrd) | 0xfu);
     wr(kQmpComTypec, 1u << 1 | (reverse ? 1u : 0));                             // software port select
-    wr(kQmpComMode, 1u);                                                        // USB3_MODE
+    wr(kQmpComMode, gDpLanes==2?3u:1u);                                        // Samsung USB3+DP / USB3 only
     wr(kQmpComResetOvrd, rd(kQmpComResetOvrd) & ~0xcu);
     wr(kQmpComSwi, rd(kQmpComSwi) & ~3u);
     wr(kQmpComReset, rd(kQmpComReset) & ~1u);
@@ -210,6 +223,7 @@ bool qmpInit(bool reverse) {
     for (const auto &w : B5qUsbInputs::qmp) wr(w.offset, w.value);
     wr(kQmpReset, rd(kQmpReset) & ~1u);
     wr(kQmpStart, rd(kQmpStart) | 3u);
+    if(gDpLanes==2)wr(kQmpComResetOvrd,rd(kQmpComResetOvrd)&~0xfu);
     bool ok = false;
     for (unsigned i = 0; i < 1000 && !ok; ++i) {ok = !(rd(kQmpStatus) & 1u << 6); if (!ok) IODelay(200);}
     native_usb_stats[33] = rd(kQmpStatus);
@@ -554,6 +568,7 @@ bool setCoreRole(int role) {
 void followOrientation() {
     B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
     const int reverse=cable.orientation();
+    if (gDpLanes==4) {selectUtmiClock();return;}
     if (!gSuperSpeed || uint32_t(reverse) != native_usb_stats[34]) {
         gSuperSpeed = superSpeedInit();
         if (!gSuperSpeed) selectUtmiClock();
@@ -654,23 +669,41 @@ void deviceStats() {
           native_usb_stats[12],native_usb_stats[13],native_usb_stats[11],gIrqStormed);
 }
 void roleThread(void *, wait_result_t) {
+    const bool dpEnabled=B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)!=0;
+    uint32_t dpGeneration=0;
     for (;;) {
+        B5qDpPortState port{};
+        if(dpEnabled)b5q_dp_port_poll(&port);
+        const unsigned requestedDp=dpEnabled&&port.configured?port.lanes:0;
         IOLockLock(gRoleLock);
-        if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied){
+        if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied&&requestedDp==gDpLanes){
             uint64_t deadline;clock_interval_to_deadline(1,kSecondScale,&deadline);
             IOLockSleepDeadline(gRoleLock,&gRoleWanted,deadline,THREAD_UNINT);
             IOLockUnlock(gRoleLock);
             cableChanged();hostStats();deviceStats();
+            if(dpEnabled){
+                b5q_dp_port_poll(&port);
+                if((port.configured?port.lanes:0)==gDpLanes&&port.generation==dpGeneration)b5q_dp_link_update(&port);
+            }
             IOLockLock(gRoleLock);
-            if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied){IOLockUnlock(gRoleLock);continue;}
+            if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied&&
+               (!dpEnabled||((port.configured?port.lanes:0)==gDpLanes&&port.generation==dpGeneration))){IOLockUnlock(gRoleLock);continue;}
         }
         const int role = gRoleWanted;
         const uint32_t cableVersion = gCableWanted;
         IOLockUnlock(gRoleLock);
+        if(dpEnabled)b5q_dp_link_stop();
         gDeviceStackAllowed = false;
         leaveRole(gRoleApplied);
         gRoleApplied = kRoleNone;
+        if(dpEnabled){
+            gDpLanes=port.configured?port.lanes:0;dpGeneration=port.generation;
+            B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
+            if(cable.orientation()>=0){gSuperSpeed=qmpInit(cable.orientation()!=0);if(!gSuperSpeed)selectUtmiClock();}
+            IOLog("B5qDP: combo lanes=%u reverse=%d usb3=%u generation=%u\n",gDpLanes,cable.orientation(),gSuperSpeed,dpGeneration);
+        }
         const bool entered=enterRole(role);
+        if(dpEnabled)b5q_dp_link_update(&port);
         IOLockLock(gRoleLock);
         gCableApplied=cableVersion;
         if(entered)gRoleApplied=role;

@@ -2815,9 +2815,9 @@ inputs = ["Pinned sheng6c42e10; original F7310ZCS7EYF3 files and source hashes i
 configuration = ["Feature-mask63; explicit subsystem arguments and b5q-f menu override; firmware readiness remains independently observed"]
 procedure = ["Compile exact production source recipe, host fault tests, actual PAC/ABI, baseline regression, then CI and image readback"]
 completion = ["All local P4A/B/C gates plus actual CI firmware/kernel/HAL/ESP return acceptance"]
-limits = ["P4 CI/image and physical hardware validation pending; no image delivered"]
-next_action = ["Finish local gates then build and verify the independent P4 ESP"]
-findings = ["Local17P4groups/22P2P3baselinegroups/35productionarm64eobjects/6vtablePACgroups/105callbackcontracts/10firmwarepatches/142XNUpatches/4menuentries PASS. ActualEFIproducer16failurepaths and retainedpool lifetime verified. NativeAppleHALlink/sign, fullCI and actualimageacceptance remain pending; noP4delivery or hardwareclaim.", "P4 source-qualified media recipe and display-after worker integrated; loader must use same ADT feature mask as XNU or it never prepares DMA domains. Corrected selection retains explicit subsystem overrides and menu safe disable. Runtime extension preserves Data/GPU entries and original trust modules. Full CI and actual image acceptance are still pending."]
+limits = ["Physical P4 hardware validation pending; accepted image retained until complete P5 and overall recheck"]
+next_action = ["Complete independent P5 then recheck all three accepted images before delivery"]
+findings = ["ActualCI45295645295kernel-HAL-ESP and45296602477firmwarePASS; actual35mediaobjects-105callbackPAC-6vtables and122wirelessobjects-62callbackPAC-zeroEL1apps_smmuPASS. Loader-onlyFDpairing and800MiB4KnFAT-menu-ADT-POST-APFS59-26policies-50preservedaddonentries-7mediaentries-signatures-4stockmediahashesPASS. Receipt reports/p4-final-images.json; hardware pending.", "Local17P4groups/22P2P3baselinegroups/35productionarm64eobjects/6vtablePACgroups/105callbackcontracts/10firmwarepatches/142XNUpatches/4menuentries PASS. ActualEFIproducer16failurepaths and retainedpool lifetime verified. NativeAppleHALlink/sign, fullCI and actualimageacceptance remain pending; noP4delivery or hardwareclaim.", "P4 source-qualified media recipe and display-after worker integrated; loader must use same ADT feature mask as XNU or it never prepares DMA domains. Corrected selection retains explicit subsystem overrides and menu safe disable. Runtime extension preserves Data/GPU entries and original trust modules. Full CI and actual image acceptance are still pending."]
 [[area.evidence]]
 revision = "d0d106f95c9aba22bc6e7ea4006ab7f45581faf0"
 kind = "host"
@@ -2831,6 +2831,56 @@ revision = "828009313241637d9c17a67dbc65e34518c05557"
 reference = "reports/p4-firmware-gitapply-fix.json"
 command = "python3 scripts/b5q-install/check-stage-firmware-inputs.py --media --out artifacts/b5q-p4-work/firmware-gitapply.json"
 result = "Exact git apply reconstruction10patchesPASS; firstCI firmware failedmissingnewfilemode metadata, fixed without kernel/GPU/Data rebuild. ActualfirmwareCIpending."
+
+[[area.evidence]]
+kind = "host"
+revision = "9b0653f1894d3b144acfb694dd233342890c6c5b"
+reference = "reports/p4-final-images.json"
+command = "verify-p0-images.py --media; actual media/wireless target PAC and closure; package-usb-dma-boot.py --physical-esp"
+result = "Actual returned binary-ESP-FD acceptancePASS; ESP fb874c56a44d2c8632609a2719ba2bc2c18d816ea263a14baf406db2676960ba; hardware remains pending."
+
+[[area]]
+id = "p5-dp-link"
+status = "planned"
+components = ["GopFramebuffer"]
+paths = ["package/B5qDpModes.h", "package/B5qDpAux.h", "package/B5qDpPdic.h", "package/B5qDpTraining.h", "reports/p5-link-source.json"]
+inputs = ["Original b5q.dts34863..34958 and Samsung msm_drm/pdic modules; hash-qualified matching platform DP/PDIC source"]
+configuration = ["P5 not enabled or part of P4 image; no fabricatedready flag"]
+procedure = ["Source/module alignment, production protocol helpers, host fault tests, then fullPD/PHY/AUX/DPU/IOMFB integration"]
+findings = ["P5exactPLL24Samsungfunctionwrite-traces-plus105fault-voltagecasesPASS; sharedSE8adapteraddedwithoutsecondGENIowner andarm64ecompiled. USB roleThread serializes combo transitions and link work; link implementation,targetPAC,CI,image remainpending.", "ProductionAUX72fault-framingcases,PDIC190cases-plus100000fuzz andCR-EQ-downshift65555casesASanUBSanPASS. SamsungcountincludesmessageheaderplusVDMheader; status-configIDs0x10-0x11. Fullhardwareintegration,targetPAC,CIandimage stillincomplete.", "P5 originalDPregister/clock/PLL/AUX constants andPDpinselection evidence retained. New boundedEDID1.xDTD/CTAbounds parser validates128bytechecksums/extensionlengths,progressiveseparateSync,precisetiming and24bitRGB8b10blinkbudget. ASanUBSan128faults/alltruncations/100000randomEDIDcasesPASS. This is oneprotocolhelper only;PD/PHY/AUX/DPU/IOMFB/target/CI/image remain incomplete."]
+completion = ["Complete nativePD/PHY/AUX/link/clock/DPU/externalIOMFB plus hosttargetPAC,CI and actual independentP5ESP before delivery"]
+limits = ["NoP5 image or physical connector DP routing qualification"]
+next_action = ["Continue allP5layers while P4 nativeCI runs;do not deliver unfinished image"]
+[[area.evidence]]
+kind = "host"
+revision = "828009313241637d9c17a67dbc65e34518c05557"
+reference = "reports/p5-link-source.json"
+command = "python3 tests/b5q-ufs/test-dp-modes.py"
+result = "ProductionprotocolhelperASanUBSanPASS;nohardware-ready or completeP5claim. Exactoriginalsource/inputandhelperhashes retained."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p5-tu-source.json"
+result = "Source-qualified Samsung TU algorithm integrated as bounded RGB24 helper; original adaptive fixedpoint rounding preserved with defined unsigned shift arithmetic. Differential tests and full P5 integration still pending; no complete-image or hardware claim."
+
+[[area]]
+id = "p5-controller-protocol"
+status = "planned"
+components = []
+paths = ["package/B5qDpAux.h", "package/B5qDpPdic.h", "package/B5qDpMsa.h", "package/B5qDpController.h", "package/B5qDpTiming.h", "reports/p5-link-source.json"]
+inputs = ["Samsung original msm_drm.ko/pdic_max77705.ko; pinned Samsung display source a1fdd086620bc0e2f767323c2853bcc9424e3087 and kernel36ffdaa5a4e2bff6e66812b444874b0cb6133fa9; individual SHA256s in p5-link-source.json"]
+configuration = ["P5 path remains disabled in accepted P2/P3 and P4 images; no Display SMMU domain change"]
+procedure = ["Qualify exact original arithmetic, register writes and fault paths before linking native external output"]
+findings = ["EDID now restores segment/offset for every chunk and explicitly resets a previously used high segment;90 register-level sink cases and72 AUX cases ASanUBSanPASS. Samsung automatic Identity/SVID/Modes discovery retained; explicit Identity only Sink+DFP;PDIC190cases plus100000fuzzPASS. DPU progressiveRGB timing includes original bottom-right transform and inverted-negative-sync polarity;2094 exact original write traces PASS. MSA rational/adaptivefixedpoint agrees with original71892inputs; controllerSST/TPS/video/TU testsPASS. TU487original outputs/389rejects and94CTA entries verified. Native hardware glue, display DMA qualification, externalIOMFB and P5 CI/image remain incomplete."]
+completion = ["All P5 layers, target/PAC/zeroMMIO, CI and actual separate ESP acceptance required"]
+limits = ["No P5 delivery or physical DP routing/hardware success claim"]
+next_action = ["Finish native integration without touching live Display handoff or guessing SID routing"]
+[[area.evidence]]
+revision = "c5c59d394c88864ba4e477f5ea02a8d6692acaf7"
+kind = "host"
+reference = "reports/p5-link-source.json"
+command = "python3 tests/b5q-ufs/test-dp-{aux,pdic,timing,controller,tu,cta}.py"
+result = "Production protocol tests above PASS; this is explicitly not full P5 implementation or a hardware result."
 
 [[area]]
 id = "p4-returned-image-acceptance"
@@ -2850,3 +2900,27 @@ revision = "9b0653f1894d3b144acfb694dd233342890c6c5b"
 reference = "reports/p4-final-images.json"
 command = "verify-p0-images.py --media; check-media-target-closure.py --ci; test-compiler-auth-metadata.py"
 result = "Actual returned image and independent full second readback PASS; no new core/GPU/Data build or phone access."
+
+[[area]]
+id = "p5-target-and-dma-contract"
+status = "planned"
+components = ["DarwinBoot", "GopFramebuffer"]
+paths = ["reports/p5-link-source.json", "reports/p5-display-dma-inputs.json", "../scripts/b5q-install/check-dp-target.py", "../scripts/b5q-install/check-dp-display-dma-inputs.py"]
+inputs = ["Original selected DisplayDxe SHA51babf469c8a6753082b1a84c677a21ed4ddca64ac98ca939a3bb42a614e8070; original b5q DTS/IORT/msm_drm and pinned matching source hashes in p5-display-dma-inputs.json"]
+configuration = ["No P5 hardware path in either accepted image; existing primary Display SID1c00/mask2 remains unchanged"]
+procedure = ["Read actual selected PE code and original stream tuples; compile actual SE8/USB plus production protocol instantiations; compare original vtables and actual ArmCpu/GENI callback authentication"]
+findings = ["12 production protocol host groupsPASS; actual arm64e3objects,originalUSB ABI,IRQ IA2abe andSE6/SE8 read/write IA50c7/c120 versus returnedGeniI2c.o PASS; zeroEL1apps_smmu materializations. FullP5 link explicitly FAILS with2 unresolved integration hooks; native hardware/link owner and externalIOMFB/scanout/hotplug/lid remain unfinished. No P5 CI or ESP.", "Actual selectedDisplayDxe caller133cc targets19b18 movw0,wzr;ret, so orphanHALbody19b20..19bd4 cannot prove an identity/bypassdomain. OriginalIORT hascandidateDISPLAYarid03000003 SID1c04/mask2, but originalb5qMDP lacks sid_phys and matching originalmodule/source's selector requires it. Routing and independentreservedscanoutmapping remainunknown. Splash B8000000+2B00000 is onlya reservation; no wholeRAM or unusedGOPallocation inference made. No liveDisplaydomain/bank changes and no phone access."]
+completion = ["Resolve DMA/resource ownership and finish complete nativeP5 integration, alltargetclosure/PAC,CI and actual independentESP before release"]
+limits = ["P5 INCOMPLETE; helper/target checks cannot satisfy full driver or image gates"]
+next_action = ["Obtain a source-qualified independently routable Display DMA contract while preserving primary scanout; then finish native link and IOMFB"]
+[[area.evidence]]
+revision = "c5c59d394c88864ba4e477f5ea02a8d6692acaf7"
+kind = "host"
+reference = "reports/p5-link-source.json"
+command = "check-dp-target.py; test-dp-port.py; twelve production protocol groups"
+result = "Protocol/target scopes PASS; wholeP5link not closed. Exact input hashes and unresolved symbols retained."
+[[area.evidence]]
+kind = "source"
+reference = "reports/p5-display-dma-inputs.json"
+command = "python3 scripts/b5q-install/check-dp-display-dma-inputs.py"
+result = "Original static input checksPASS; independent DP DMA routing/coverage remains unknown. Explicitly no release qualification or hardware success."

@@ -17,7 +17,7 @@ harness=r'''
 #include "QcomQmpUsb3.h"
 #include "B5qUsbInputs.h"
 uint32_t scratch[1024],gcc[0x80000/4],phyWords[0x3000/4],native_usb_stats[54];
-unsigned releases,maps,stageFailure,clockCalls,elapsed;
+unsigned releases,maps,stageFailure,clockCalls,elapsed,gDpLanes;
 std::vector<uint32_t> mux;
 struct Mapping {void release(){releases++;}} mapping;
 struct Region {Mapping *map=nullptr;volatile uint32_t *va=nullptr;}gScratch,gGcc;
