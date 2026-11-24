@@ -1,4 +1,5 @@
 diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+new file mode 100644
 --- /dev/null
 +++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
 @@ -0,0 +1,101 @@
@@ -104,6 +105,7 @@ diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c b/Platfor
 + return gBS->InstallMultipleProtocolInterfaces(&ImageHandle,&mMediaGuid,&mProtocol,NULL);
 +}
 diff --git a/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h b/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h
+new file mode 100644
 --- /dev/null
 +++ b/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h
 @@ -0,0 +1,18 @@

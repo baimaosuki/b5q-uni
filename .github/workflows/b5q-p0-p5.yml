@@ -36,7 +36,7 @@ env:
 
 jobs:
   kernel:
-    if: ${{ !contains(github.event.head_commit.message, '[seed-only]') && !contains(github.event.head_commit.message, '[payload-only]') }}
+    if: ${{ !contains(github.event.head_commit.message, '[seed-only]') && !contains(github.event.head_commit.message, '[payload-only]') && !contains(github.event.head_commit.message, '[firmware-only]') }}
     name: macOS XNU full-component build
     # GitHub draft release assets require push access even for downloads.
     # Firmware stays in the unpublished draft; this token is used only by API clients.

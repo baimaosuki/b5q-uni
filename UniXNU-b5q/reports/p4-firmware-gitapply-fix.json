@@ -1,0 +1,13 @@
+{
+  "hardware_verified": false,
+  "first_error": "CI45295645295firmwaregitapply:dev/nullNosuchfile;GNU patchaccepted missing newfilemode metadata",
+  "first_error_log_sha256": "12760c28060d3f48e7eff2d4b1c891b34c138d2629951a1b5a29928ef5832bf6",
+  "fix": "Addgitnewfilemodemetadata;localreconstructionnowusesexactgitapply--whitespace=error",
+  "local": "10patchesexactsource/firmwarepreflightPASS",
+  "source_sha256": {
+    "patches/uefi-b5q/0009-b5q-media-dma.patch": "b41f5d54e4fc03f3b72bdfa300c3d81a0bf3ac8a184e5bf659fcfef7538701b6",
+    "scripts/b5q-install/check-stage-firmware-inputs.py": "699aa969e8cc0a269dae08979b961825421df9792720a52cf3d17af13315a1a6",
+    ".github/workflows/b5q-p0-p5.yml": "e061ceefaa7d9029fc382233481900d85e468f3f172b2e9a872fd2df23894b6b"
+  },
+  "reuse": "Originalkerneljobcontinues;firmware-onlyretry skipskernel/GPU/Data"
+}

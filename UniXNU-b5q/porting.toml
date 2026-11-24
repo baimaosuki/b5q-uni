@@ -2824,3 +2824,10 @@ kind = "host"
 reference = "reports/p4-integration.json"
 command = "python3 tests/b5q-ufs/test-media-loader.py"
 result = "ASan/UBSan actual media loader/USB regressions and256kind-mask cases pass; hardware qualification pending. Input/source hashes are in the referenced receipt."
+
+[[area.evidence]]
+kind = "host"
+revision = "828009313241637d9c17a67dbc65e34518c05557"
+reference = "reports/p4-firmware-gitapply-fix.json"
+command = "python3 scripts/b5q-install/check-stage-firmware-inputs.py --media --out artifacts/b5q-p4-work/firmware-gitapply.json"
+result = "Exact git apply reconstruction10patchesPASS; firstCI firmware failedmissingnewfilemode metadata, fixed without kernel/GPU/Data rebuild. ActualfirmwareCIpending."

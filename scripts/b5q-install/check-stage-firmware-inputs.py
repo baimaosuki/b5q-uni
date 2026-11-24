@@ -15,7 +15,7 @@ if a.media:
  groups[2][2].append(patch/'0010-darwinboot-b5q-media-dma.patch')
 with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
  for index,(repo,revision,patches)in enumerate(groups):
-  dest=Path(td)/str(index);dest.mkdir();paths=set()
+  dest=Path(td)/str(index);dest.mkdir();paths=set();subprocess.run(['git','init','-q',str(dest)],check=True)
   for f in patches:
    assert f.is_file(),f
    paths.update(re.findall(r'^diff --git a/(\S+) b/\S+',f.read_text(),re.M))
@@ -24,7 +24,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
    if not r.returncode:
     target=dest/name;target.parent.mkdir(parents=True,exist_ok=True);target.write_bytes(r.stdout)
   for f in patches:
-   result=subprocess.run(['patch','--batch','--fuzz=0','-p1','-d',str(dest)],input=f.read_bytes(),stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+   result=subprocess.run(['git','-C',str(dest),'apply','--whitespace=error'],input=f.read_bytes(),stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
    assert not result.returncode,(str(f),result.stdout.decode())
   # The reconstructed sources must be the sources of the retained known-good
   # local v30 firmware, not a different historical file with the same name.
