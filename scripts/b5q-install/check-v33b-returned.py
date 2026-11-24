@@ -25,8 +25,10 @@ bound=json.loads((local/'local-gates.json').read_text())['source_sha256'];assert
 static=json.loads((local/'static-gates.json').read_text());assert sha(ci/'device-tree/hardware.dtb')==static['DTB_SHA256']
 firmware=json.loads(a.firmware_receipt.read_text());assert firmware['passed']and firmware['github_digest_verified']
 assert firmware['source_commit']==transfer['commit']and firmware['FD']['sha256']==sha(a.fd),'Firmware/kernel must match same actual CI source and transfer SHA'
+fd_bytes=a.fd.read_bytes()
+for index in range(12):assert ('b5q low no-map '+str(index)).encode()+b'\0'in fd_bytes,('missing actual FD reservation',index)
 from unixnu.boot_template import loader_pe
-handoff=loader_pe(a.fd.read_bytes(),'f8a45ce9-92de-48cc-8e19-e97c28b724a0')
+handoff=loader_pe(fd_bytes,'f8a45ce9-92de-48cc-8e19-e97c28b724a0')
 for marker in [b'stock-reserved-guard=before-zero',b'stock-reserved-filter=1']:assert marker in handoff,marker
 with tempfile.TemporaryDirectory(prefix='b5q-payload-accept-')as td:
  t=Path(td);fat=payload
@@ -36,7 +38,13 @@ with tempfile.TemporaryDirectory(prefix='b5q-payload-accept-')as td:
  assets=t/'files/EFI/UniXNU/Payloads';kernel=assets/'kernel.macho';raw=kernel.read_bytes();outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1]);symbols={n:v for v,names in core.symbols().items()for n in names}
  for n in ['_b5q_launchd_policy_blob','_sm8550_gcc_trigger32','_sheng_cpu_idle_mach','_native_ram_block_volume_seed']:
   assert n in symbols,n
- assert '__ZTV22NativeAdrenoGmuService'not in symbols,'Unselected implicit-cache generic GMU service entered archive'
+ assert '__ZTV22NativeAdrenoGmuService'in symbols
+ helper,=ci.rglob('mmio-helper.json');helper_proof=json.loads(helper.read_text());assert helper_proof['passed']
+ assert helper_proof['only_recompiled_member']=='NativeAdrenoGmuService.o'
+ assert helper_proof['members_before'].keys()==helper_proof['members_after'].keys()
+ assert helper_proof['members_before']['NativeAdrenoGmuService.o']!=helper_proof['members_after']['NativeAdrenoGmuService.o']
+ helper_object,=ci.rglob('NativeAdrenoGmuService.o');assert sha(helper_object)==helper_proof['members_after']['NativeAdrenoGmuService.o']
+ assert all(v==helper_proof['members_after'][n]for n,v in helper_proof['members_before'].items()if n!='NativeAdrenoGmuService.o')
  for marker in [b'B5qLaunchd: stage=before-launchd',b'B5qKeyStorePlatformGrant',b'b5q-wifi-ready',b'host DMA64=',b'B5qTouch: HID mode=']:
   assert marker in raw,marker
  policy=load(R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py')

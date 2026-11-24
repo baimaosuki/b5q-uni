@@ -51,6 +51,10 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  sources.append(adapted)
  timer=t/'NativeAdrenoTimer.cpp';timer.write_text('#include "ShengGmuSource.h"\n'+(ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoTimer.cpp').read_text().replace('TimerGmuLow = 0x14220','TimerGmuLow = (0x1f888u*4u)-SHENG_GMU_CORE_GPU_DELTA').replace('TimerGmuHigh = 0x14224','TimerGmuHigh = (0x1f889u*4u)-SHENG_GMU_CORE_GPU_DELTA'));sources.append(timer)
  sources += [ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c','ShengGpuSmmu.c']]
+ if a.sources and 'NativeAdrenoGmuService.cpp'in a.sources.split(','):
+  from b5q_adreno_mmio import prepare
+  original=ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp'
+  sources.append(prepare(original,t/original.name));flags+=['-iquote',str(original.parent)]
  if a.sources and 'NativeKeyStoreEvents.cpp'in a.sources.split(','):
   import ast
   recipe=ast.parse((ROOT/'UniXNU-b5q/scripts/build-b5q-gop-27.py').read_text())

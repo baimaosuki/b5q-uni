@@ -25,11 +25,12 @@ assert '/arm-io/wlan'in nodes
 files=sorted(p for p in (R/'UniXNU-b5q/package').rglob('*')if p.suffix in ['.c','.h','.cpp'])
 shared_roots=[R/'UniXNU/drivers'/n for n in ['ArmCpu','ArmDTPlatform','AppleKeyStoreState','GopFramebuffer','Adreno740','AdrenoMetal','RamBlock','SoftwareAES']]
 shared_roots+=[R/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',R/'artifacts/b5q-p4-work/target/generated-adsp',R/'artifacts/b5q-p4-work/target/generated-audio-service',R/'artifacts/b5q-p4-work/target/generated-video']
-# This legacy generic GMU IOService is not selected by the b5q archive;
-# its only implicit-cache map is a register window (never memset RAM).
-# Verify its class remains absent from the returned native kernel as well.
+# The pinned shared GMU source is compiled through a reproducible adapter.
+# Scan the exact adapted source and prove its actual returned map argument.
 legacy_unselected=R/'UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp'
-files=sorted(set(files+[p for d in shared_roots for p in d.rglob('*')if p.suffix in ['.c','.cpp','.h']and p!=legacy_unselected]))
+sys.path.insert(0,str(R/'UniXNU-b5q/scripts'));from b5q_adreno_mmio import prepare as adapt_gmu
+adapted_gmu=adapt_gmu(legacy_unselected,W/'NativeAdrenoGmuService.cpp')
+files=sorted(set(files+[adapted_gmu]+[p for d in shared_roots for p in d.rglob('*')if p.suffix in ['.c','.cpp','.h']and p!=legacy_unselected]))
 # Inventory every device repository mapping. MMIO defaults remain inhibit;
 # reserved pools must be explicit Normal WB. No default/zero cache accepted.
 mappings=[];lookups=[];chosen_names=set();optional={
@@ -108,6 +109,6 @@ lengths={x['id']:len(x['args'].encode())for x in menus(bargs)};assert max(length
 report=dict(passed=True,hardware_verified=False,memory_mappings=mappings,ADT_lookups=lookups,chosen_properties={v:('present'if v in chosen else optional[v])for v in sorted(chosen_names)},
  DTB_SHA256=hashlib.sha256(dtb.read_bytes()).hexdigest(),ADT_SHA256={str(k):hashlib.sha256((W/('recovery.adt'if k else'normal.adt')).read_bytes()).hexdigest()for k in variants},
  sheng_revision=subprocess.check_output(['git','-C',str(R/'sources/UniXNU-sheng'),'rev-parse','HEAD'],text=True).strip(),
- sheng_shared_value_changes={k:dict(sheng=v[0],b5q=v[1],resolution=value_resolutions[k])for k,v in value_changes.items()},unselected_MMIO_source=dict(path=str(legacy_unselected),sha256=hashlib.sha256(legacy_unselected.read_bytes()).hexdigest(),reason='Generic GMU register-only service not selected by b5q; returned kernel class-absence checked'),source_sha256={str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},sheng_missing_args_resolved=missing,missing_root_nodes=root_delta,component_omissions={v:component_resolutions[v]for v in component_omissions},policy_counts={k:len(v)for k,v in lists.items()},iconservices_enabled=True,
+ sheng_shared_value_changes={k:dict(sheng=v[0],b5q=v[1],resolution=value_resolutions[k])for k,v in value_changes.items()},adapted_MMIO_source=dict(path=str(legacy_unselected),sha256=hashlib.sha256(legacy_unselected.read_bytes()).hexdigest(),reason='Actual linked GMU register service uses explicit Inhibit through source adapter; actual returned map options checked'),source_sha256={str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},sheng_missing_args_resolved=missing,missing_root_nodes=root_delta,component_omissions={v:component_resolutions[v]for v in component_omissions},policy_counts={k:len(v)for k,v in lists.items()},iconservices_enabled=True,
  sheng_macOS_removes_ipad_launchd_environment=True,menu_args_bytes=lengths,scope='Actual compiled DTB and generated ADT, every board source map/fromPath/chosen inventory; selected component MMIO sources audited separately by target-object gates')
 a.out.write_text(json.dumps(report,indent=2)+'\n');print('PASS explicit cache/source scan, realDTB/ADT lookups, macOSshengdiff,iconservices58/25,allmenu1024Bbounds')

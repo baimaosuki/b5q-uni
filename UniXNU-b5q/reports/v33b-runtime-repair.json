@@ -2,7 +2,7 @@
   "log_BIN_SHA256": "dd8acfb9f130bdb1899d76c53990fb4e04cd64fc91687208c4ecaaf2c2908410",
   "hardware_verified": false,
   "source_implemented": true,
-  "CI_status": "final combined native kernel+UEFI not yet dispatched",
+  "CI_status": "Final source passed all five local gates; native combined build and returned-byte acceptance required",
   "final_ESP_created": false,
   "local_evidence": {
     "keyprobe-target.log": {
@@ -14,8 +14,8 @@
       "path": "artifacts/b5q-v33b-fix-work/shared-host.log"
     },
     "pre-ci-all.log": {
-      "sha256": "1c578ba1e570b932d54bd75b2dccad9f628090314566fb66e8b0b74042019274",
-      "path": "artifacts/b5q-v33b-fix-work/pre-ci-all.log"
+      "path": "artifacts/b5q-v33b-fix-work/pre-ci-all.log",
+      "sha256": "cd2c98948d68db6f56b9ea74248325161c91234dd3ae099d72e797a52682331d"
     },
     "pcie-regression.log": {
       "sha256": "19123d035017cfd5bd1b02b4a0bc0a8b86f0d93ebf7564d0759b517f0f533dfe",
@@ -129,7 +129,7 @@
       {
         "name": "addon-reuse-policy",
         "passed": true,
-        "log_sha256": "d36775965b0c705beb7959764ed4b081e49b569b788015863b7d39af3549bbc3"
+        "log_sha256": "32efb176624b88ad4d15fa6209c201cd9d94534db509f668cb7e43b858dd256f"
       },
       {
         "name": "policy-migration",
@@ -170,6 +170,16 @@
         "name": "keyprobe-target",
         "passed": true,
         "log_sha256": "0a4374b04f4d12311ef0a4829490a924f153f884225ab07e6a4a791f178e5af9"
+      },
+      {
+        "name": "gmu-mmio-target",
+        "passed": true,
+        "log_sha256": "9bb9dd1e7e420ef43a56e1cd199b63b4fc97102529282771ec65c8c7106c2249"
+      },
+      {
+        "name": "cache-local-machine-code",
+        "passed": true,
+        "log_sha256": "455364041ade25e1c08b94c9d4012771c65863fc238d4bbccd997753180f52d8"
       },
       {
         "name": "hid-callback-pac",
@@ -348,6 +358,7 @@
       "UniXNU-b5q/scripts/adapt-b5q-platform.py": "84f4d8912ffaebc992eb9d1f3a77ae2768308005ac108ca4f7068c7d6e17377c",
       "UniXNU-b5q/scripts/audit-usb-handoff.py": "e6da93601d76eaf43f2463e248663e641182c9e1641b22a935f784d31b0f0411",
       "UniXNU-b5q/scripts/b5q_abi.py": "83b6abb2d75e82f4467abe1cb98a551b9c0c5a1f75fdbaaa18a21d2d23e6a7a8",
+      "UniXNU-b5q/scripts/b5q_adreno_mmio.py": "e8d3f2511a21f090d7be211b10619c73121587b9f9918115f88060cf860a2e91",
       "UniXNU-b5q/scripts/b5q_adsp.py": "9eae38b5750054d3d1bc6ad4c12762506ec12e5e08bab0147ed98ab0f231239b",
       "UniXNU-b5q/scripts/b5q_audio.py": "1c11dbc764bbd7bee30b1a61d3077e49cc64ad0775e6e4efb710faada728fae1",
       "UniXNU-b5q/scripts/b5q_bluetooth.py": "a69b32f0f201d09c652bd121b61de2b0ca561739a81e95239fffdd877483a06a",
@@ -361,7 +372,7 @@
       "UniXNU-b5q/scripts/b5q_wcn_firmware.py": "2be4035ace587938390c9f483e584e36d4554c2d073b340a49c5a0d753618436",
       "UniXNU-b5q/scripts/b5q_wifi.py": "df2e2e921ed442c1756747be2e4d12cc36ce3baf465e8abf3765a38a4afecd23",
       "UniXNU-b5q/scripts/b5q_wireless.py": "fcab3f379d7261a455321dfda419b6b87caad09f7855c29c9c3e51ccdb2d6346",
-      "UniXNU-b5q/scripts/build-b5q-adreno.py": "b2829b4960b5716d8bffc235ae25ec2cb1d0f7f2a0435159ed9240795dfb9e99",
+      "UniXNU-b5q/scripts/build-b5q-adreno.py": "3091d0e76dfe84cb7dcf78840079eca99e4c8eae8d8ae8cf7aa0fbc7185a49a5",
       "UniXNU-b5q/scripts/build-b5q-audio-hal.py": "0dbd152eda2659f9648eccf83efdf3dd725d375f2495df93158b1847b98cfe6f",
       "UniXNU-b5q/scripts/build-b5q-bluetooth-userspace.py": "b0f717c70d2f909417422186af29153a70bf380f25deff18acd68a41c4cf9490",
       "UniXNU-b5q/scripts/build-b5q-gop-27.py": "c0ecc4cbecfbaf27804ccf870197e8119e7fc3f3d1cc63eb22a650e5bdf0caea",
@@ -413,7 +424,7 @@
       "UniXNU-b5q/dts/b5q.dts": "82381ebe1022aad63dc7db1bf4293845af37a79ef93508a0fd2a966e5ed5ff60",
       "UniXNU-b5q/board.toml": "8d0d7db9130f678a8d1fb749a08e1de099a54bc61fbaf2237ba1f1fbc640ed6d",
       "UniXNU-b5q/package/b5q-launchd-lite.json": "191a83be9c1febbcb36a32a6fd3a2606d2eb3fd7a688d5d1796386efac832053",
-      ".github/workflows/b5q-p0-p5.yml": "0ec0d5d43a87a545728e3f28ccb43feae5c92bba170916027c0cd329e32c4b46",
+      ".github/workflows/b5q-p0-p5.yml": "4426fbccc71a92887376a052716d78fd82b189f04db2ae71264c3c06a8e06d9f",
       "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
       "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
       "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
@@ -464,9 +475,9 @@
       "scripts/b5q-install/check-p4a-abi.py": "6c835676575ba48387b0b2c7607e0b0d7314f0463c707f6b73ad6e8facab22b9",
       "scripts/b5q-install/check-p4a-target.py": "2126cb1b7f00d50bcbe6853c33a84c78817e27ab5557f27f16e67eb65dc7dce9",
       "scripts/b5q-install/check-pcie-uefi-target.py": "cc2afb99b8bb6a740634507d79694bcf4bee64f9ea02273f4392758a2ef0d0da",
-      "scripts/b5q-install/check-peripheral-target.py": "f58514221204e72486d6e62ac468be75ba604d5bccde8a3fa66f9cc9c697c452",
+      "scripts/b5q-install/check-peripheral-target.py": "f8fd8c12dab50ceef63dc72d551c52150d54b86c93716c0b42a4ef26692cc4fd",
       "scripts/b5q-install/check-proctop-pac.py": "b6145f4f836c6b9f992f66818826cbfd862720a061002a8e66b471e2cce1fe23",
-      "scripts/b5q-install/check-returned-cache.py": "39b39883e97dc825504708209c7833516c5d73623dae8b7f550b435385ea2348",
+      "scripts/b5q-install/check-returned-cache.py": "dba4fc6ed8e215576d3ca4233858d70132cb46ee4d6c60dae39288cdb94032de",
       "scripts/b5q-install/check-stage-firmware-inputs.py": "6169aefb16fcd678b384ab72197d8b298d59a556c0369cb17ee69899dd6cc461",
       "scripts/b5q-install/check-stage-linked-PAC.py": "37b50b7a4b0abf817530021d16be9bfe6b25471fd30ee9e7856e789c01efebe7",
       "scripts/b5q-install/check-stage-returned-objects.py": "ba0f9083510f6650c8ff51e05f7259baab30065d5d1c12e974cf1369b1063ac9",
@@ -474,8 +485,8 @@
       "scripts/b5q-install/check-usb-gmu-pac.py": "cdd736a9e448a6e75408c4fe79e1ef76de44f94c2af96964c8a77db1fd429c93",
       "scripts/b5q-install/check-usb-no-smmu.py": "466083c9fd15a14f6138d90eee24d6d623c0adbb5281433f3c711231c9dc2eb1",
       "scripts/b5q-install/check-v33b-failures.py": "6aeea19091e45d9b9c90b7a341fe0d9b89bcf19117a60fcf15973770e8700211",
-      "scripts/b5q-install/check-v33b-returned.py": "a70a054cd278a4c0e5c370ac7ed362065ccf364d5621a537b11874c1e322c048",
-      "scripts/b5q-install/check-v33b-static.py": "679cf532a552209e952d7f8ecfaa5d9d9ce9ff2bff0a2adeb49c4fb71f4afe0c",
+      "scripts/b5q-install/check-v33b-returned.py": "86d656d2e92fa05211b4331f38bbb13c55feb0549a2346011dd80f08bfe2c49c",
+      "scripts/b5q-install/check-v33b-static.py": "65ad166c1dee35da8167d4bad25b8d02331049592475ce82e486981ed52f1681",
       "scripts/b5q-install/check-wifi-ethernet-abi.py": "9f5e5bbac605701bbe3564d26cd164505daa668c225b872ee36a98819d2844de",
       "scripts/b5q-install/check-wifi-target.py": "c60d90c02495b1b06d5da048471ab01f3ebe6324533e323042a5d43ff77462b8",
       "scripts/b5q-install/check-wireless-target-closure.py": "d69ff3b0249fb2d896dd4f17b8b381cc1ede2c132a990ab96984d14ce8e2f599",
@@ -500,7 +511,7 @@
       "scripts/b5q-install/pre-ci-userdata.py": "f39857baeb11fc124319f637b0c6819131f0155cff1c8f009f4870be611b46f6",
       "scripts/b5q-install/pre-ci-v24.py": "8c2e7aa0f3d5a903d0b7c8d30710deeaf63cc3e0a08297572c909ca81b9e7fae",
       "scripts/b5q-install/pre-ci-v33.py": "5a8984af0e66952b06ef8410264d16d8bb94fc1e2b0a23bc1c70925524aa8fb8",
-      "scripts/b5q-install/pre-ci-v33b.py": "348cb6382213d2b7e05b8a2d7caff0fdfd78c9c08fdf74aeccac34d6241d0dae",
+      "scripts/b5q-install/pre-ci-v33b.py": "b5156d3d7c8d56f09d5a97129772208b3d09d29e233f431e7c8652354277248a",
       "scripts/b5q-install/pre-ci.py": "0faba986ac272f1ed39aab84728098e26340a6db5cadb3b91351af4eff6b1455",
       "scripts/b5q-install/repack-adt-esp.py": "23a9d43f122d41e37cc1987fccb631a4bd322a0eaafb2dc3173ff007746524f2",
       "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
@@ -621,5 +632,14 @@
     "official_uncovered_no_map": 0
   },
   "reuse_UEFI": false,
-  "cache_strategy": "Same OS/arch/Xcode/profile fallback for compile progress; ordered source+patch identity reapplied, byte-identical timestamps preserved, actual changed objects compiled and linked"
+  "cache_strategy": "Same OS/arch/Xcode/profile fallback for compile progress; ordered source+patch identity reapplied, byte-identical timestamps preserved, actual changed objects compiled and linked",
+  "GMU_MMIO": {
+    "returned_kernel_class_present": true,
+    "previous_unselected_assumption_corrected": true,
+    "map_options": "kIOMapAnywhere | kIOMapInhibitCache",
+    "only_recompiled_GPU_member": "NativeAdrenoGmuService.o",
+    "archive_regression": "artifacts/b5q-v33b-fix-work/one-gmu-member-regression.json",
+    "other_members_byte_identical": 50,
+    "native_CI_acceptance": "pending"
+  }
 }

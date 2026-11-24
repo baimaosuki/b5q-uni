@@ -7,17 +7,18 @@ from b5q_abi import macho,object_symbols
 spec=importlib.util.spec_from_file_location('pac',R/'scripts/b5q-install/check-proctop-pac.py');pac=importlib.util.module_from_spec(spec);spec.loader.exec_module(pac)
 p=argparse.ArgumentParser();p.add_argument('--ci',type=Path);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
 paths={}
-for name,folder in [('B5qAudioDma.o','b5q-p4-work/target'),('B5qVideoMemory.o','b5q-p4-work/target'),('B5qWifiBoard.o','b5q-p3-work/board-target'),('B5qDpLink.o','b5q-p5-work/target')]:
+for name,folder in [('B5qAudioDma.o','b5q-p4-work/target'),('B5qVideoMemory.o','b5q-p4-work/target'),('B5qWifiBoard.o','b5q-p3-work/board-target'),('B5qDpLink.o','b5q-p5-work/target'),('NativeAdrenoGmuService.o','b5q-v33b-fix-work/gmu-mmio-target')]:
  if a.ci:paths[name],=a.ci.rglob(name)
  else:paths[name]=R/'artifacts'/folder/name
 proof={}
 for name,path in paths.items():
  scan=pac.scan(path);ins=scan['instructions'];direct=[]
+ expected=0x101 if name=='NativeAdrenoGmuService.o'else 0x301
  for i,x in enumerate(ins):
-  if x.mnemonic=='mov'and x.op_str in ('w1, #0x301','x1, #0x301'):
+  if x.mnemonic=='mov'and x.op_str in (f'w1, #{hex(expected)}',f'x1, #{hex(expected)}'):
    window=ins[i+1:i+10]
    if any(k.mnemonic=='movk'and k.op_str.split(', ',1)[-1]=='#0x3ed6, lsl #48'for k in window)and any(k.mnemonic=='blraa'for k in window):
-    direct.append(dict(options_site=hex(x.address),options='0x301 = Anywhere | Copyback',map_slot_PAC='IA3ed6',instructions=[k.mnemonic+' '+k.op_str for k in ins[i:i+10]]))
+    direct.append(dict(options_site=hex(x.address),options=hex(expected)+(' = Anywhere | Inhibit'if expected==0x101 else' = Anywhere | Copyback'),map_slot_PAC='IA3ed6',instructions=[k.mnemonic+' '+k.op_str for k in ins[i:i+10]]))
  if name!='B5qDpLink.o':assert direct,(name,'missing actual NormalWB map argument')
  else:
   # The non-inlined Window.open(base,bytes,cache) must receive0x300,
@@ -42,4 +43,4 @@ for name,path in paths.items():
   assert calls,(name,'pool call does not supply Copyback')
   direct=[dict(caller_options_sites=calls,cache='0x300 Copyback',callee=symbol,map_options='cache|1',map_slot_PAC='IA3ed6')]
  proof[name]=dict(sha256=scan['sha256'],direct=direct)
-a.out.write_text(json.dumps(dict(passed=True,hardware_verified=False,actual_CI_objects=bool(a.ci),objects=proof),indent=2)+'\n');print('PASS actual arm64e Audio/Video/WiFi/DP NormalWB map arguments and authenticated IOMemoryDescriptor.map call')
+a.out.write_text(json.dumps(dict(passed=True,hardware_verified=False,actual_CI_objects=bool(a.ci),objects=proof),indent=2)+'\n');print('PASS actual arm64e Audio/Video/WiFi/DP NormalWB +GMU MMIOInhibit map arguments and authenticated IOMemoryDescriptor.map call')

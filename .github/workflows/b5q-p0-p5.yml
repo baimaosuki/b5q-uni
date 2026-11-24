@@ -321,6 +321,8 @@ jobs:
             UniXNU/out/b5q/**/payload/payload.img
             UniXNU/out/b5q/**/device-tree/hardware.dtb
             UniXNU/out/b5q/**/tree/build/apple-key-store-state/*.o
+            UniXNU/out/b5q/**/tree/build/adreno740/NativeAdrenoGmuService.o
+            UniXNU/out/b5q/**/tree/build/adreno740/mmio-helper.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/NativeLegacyDisplay*.o
             UniXNU/out/b5q/**/tree/build/native-legacy-display/board-include/B5qLaunchdPolicyData.h
             UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
