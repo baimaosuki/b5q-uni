@@ -79,7 +79,7 @@ int main(void){for(unsigned kind=1;kind<=2;kind++)for(unsigned f=0;f<=9;f++){
  B5Q_MEDIA_DMA_RESULT twice={0};PrepareMedia(kind,&twice);assert(!memcmp(&r,&twice,sizeof(r))&&locates==1);
  }
  reset(0);B5Q_MEDIA_DMA_RESULT bad;PrepareMedia(0,&bad);assert(bad.PrepareStatus==EFI_INVALID_PARAMETER&&!allocs&&!locates);assert(!InstallB5qMediaDma(NULL));
- reset(0);puts("PASS actual EFI media producer16fault/dual-domain paths:exact HAL ABI,independentLPASS/VIDEOtuples,reservedWBISpages,cacheclean,partialattachmentretention,noDisplaydomain,idempotence; ASanUBSan");
+ reset(0);puts("PASS actual EFI media producer20fault/dual-domain paths:exact HAL ABI,independentLPASS/VIDEOtuples,reservedWBISpages,cacheclean,partialattachmentretention,noDisplaydomain,idempotence; ASanUBSan");
 }
 '''.replace('\nSOURCE\n','\n'+s+'\n')
 with tempfile.TemporaryDirectory(prefix='b5q-media-producer-')as td:
