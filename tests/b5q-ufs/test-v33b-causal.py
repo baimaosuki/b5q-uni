@@ -64,6 +64,7 @@ uint64_t mach_absolute_time(){return ticks*1000;}void absolutetime_to_nanosecond
 HELPERS
 POLL
 const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1;
+constexpr unsigned kXhciRegisterBytes=0x8000;
 int gRoleWanted=2,gRoleApplied=2,gCoreRole=2;uint32_t gCableWanted=0,gCableApplied=0,gDpLanes=0;
 void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=true;uint32_t native_usb_stats[54]={};
 namespace B5qFeatures{enum{DisplayPort=64};unsigned option(const char*,unsigned){return 1;}}
@@ -140,3 +141,9 @@ int main(){NativeHidInput n;int id=1,x=10000,y=10000;
 execute('hid-stop',body.replace('SCHEDULE',function(hid,'void scheduleClick(')).replace('TICK',function(hid,'static void clickTick(')).replace('STOP',function(hid,'static IOReturn stopAction(')))
 stop=function(hid,'void stop(IOService *provider) override')
 assert stop.index('runAction(&NativeHidInput::stopAction')<stop.index('removeEventSource(clickTimer)')
+
+# RTSOFF/ERST lie past the capability/operational4KiB page on DWC3.
+# The production diagnostic must use the same32KiB register mapping as xHCI.
+assert 'mapRegion(gXhciRegs, kCore, kXhciRegisterBytes)'in q
+assert 'constexpr unsigned kXhciRegisterBytes=0x8000;'in q
+assert 'rt+0x40/4<kXhciRegisterBytes/4'in q

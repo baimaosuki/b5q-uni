@@ -325,7 +325,7 @@
       "UniXNU-b5q/package/KeyStoreProbe.cpp": "3cb8a711e77881a070c1fe74b02fc675289921e2a291d2c451418a55590b90db",
       "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "3fd8101c0a3ff1d65d6ef464474826391537b1a5c2c9f096236e306a78f4fe09",
       "UniXNU-b5q/package/NativeHidInput.cpp": "a49ef4faaa6e7fc2943cf03eb8562c69d90491ebe3175c151d2d2776d69805a2",
-      "UniXNU-b5q/package/QcomDwc3.cpp": "e186b8849a75f3ee2cd6ff6ac4e72a4aaed0fc68f8cd6cbf9af0fcbcb42e81f9",
+      "UniXNU-b5q/package/QcomDwc3.cpp": "66693ce72aa36caa83dd19e60f03ee01dc0f16dc040a68107dc1bca19532b811",
       "UniXNU-b5q/package/SoftwareAesProbe.cpp": "98b06bff20ed1dcef632e88d5327831a9b5f2b1afd96f33289ffaabda98ab503",
       "UniXNU-b5q/package/ThermalLevel.cpp": "76a42d6996c98f69e5b3d020b830697c8b6938823a3692525964e44f6791b46f",
       "UniXNU-b5q/package/ThermalProbe.cpp": "a5d2fd14e025e66600f2dd35938d74db57bf5b09d3a164102bc310d59907d1ec",
@@ -402,7 +402,7 @@
       "scripts/b5q-install/check-v33b-returned.py": "0244c01128550a0a1f9c780f93f78bd10023a98f37a51fc0e2bd53202bc04802",
       "scripts/b5q-install/check-v33b-static.py": "679cf532a552209e952d7f8ecfaa5d9d9ce9ff2bff0a2adeb49c4fb71f4afe0c",
       "scripts/b5q-install/pre-ci-v33b.py": "cdba4fea497ecc2e7e854f3ad89423ca9dc7656d242c98476a09c2bf21186014",
-      "tests/b5q-ufs/test-v33b-causal.py": "ec83d00233e4972a0f718896d1a4d52124a24b9059b32607bc82c75a901bd5aa",
+      "tests/b5q-ufs/test-v33b-causal.py": "ed100f1de348c4c63a3590c47abc6224a69b8b351f0ceaa68d200701f2a5c003",
       "tests/b5q-ufs/test-v33b-host-abi.py": "3d4644c0b7cef673e6dd17e8a4ff3dd9dce3c64bd9a2a09a0b64792f08843474",
       "tests/b5q-ufs/test-v33b-policy.py": "820b5ee19ea7bc408edb3ecc95237a7489cb0229101d2030370d698a86fccf2e"
     },
@@ -416,5 +416,12 @@
     "native_CI_returned_binary_APFS_verification": "Required before final ESP assembly; check-v33b-returned.py",
     "ESP_created": false
   },
-  "local_gates_passed": true
+  "local_gates_passed": true,
+  "wireless_reuse_regression": {
+    "assertion": "assert job['RunAtLoad']is False and job['ThrottleInterval']>=60 and job['KeepAlive']=={'PathState':{'/private/var/run/b5q-wifi-ready':True}}",
+    "file": "scripts/b5q-install/check-v33b-returned.py",
+    "sha256": "6d6fd0f89904ff13c287030e51ab683f9768f28ac2a8bcc042c561b21caa0512",
+    "reuse_regression_passed": true
+  },
+  "monitor_window": "same32KiB aperture as host; no Runtime read outside map"
 }

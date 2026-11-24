@@ -491,6 +491,7 @@ IOLock *gRoleLock;
 int gRoleWanted, gRoleApplied, gCoreRole = kRoleDevice;
 uint32_t gCableWanted, gCableApplied;
 bool gForceHost;
+constexpr unsigned kXhciRegisterBytes=0x8000; // same bounded host window as makeHost()
 Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
 QcomDwc3Xhci *gHost;
@@ -644,7 +645,7 @@ void hostStats() {
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
     const uint64_t dcbaa=uint64_t(op[0x30/4])|(uint64_t(op[0x34/4])<<32);
     const unsigned rt=(gXhciRegs.va[0x18/4]&~31u)/4;
-    if(rt+0x40/4<0x8000/4){
+    if(rt+0x40/4<kXhciRegisterBytes/4){
         const uint64_t erst=uint64_t(gXhciRegs.va[rt+0x30/4])|(uint64_t(gXhciRegs.va[rt+0x34/4])<<32);
         IOLog("qcom-dwc3: host DMA64=%u crcr=%llx dcbaa=%llx erst=%llx iman=%x routed=%u enabled=%u\n",
           gXhciRegs.va[0x10/4]&1,crcr,dcbaa,erst,gXhciRegs.va[rt+0x20/4],gActiveNub==gHostNub,gLineAttached);
@@ -814,7 +815,7 @@ extern "C" void qcom_dwc3_publish(void) {
         unsigned forced = 0;
         PE_parse_boot_argn("usb-host", &forced, sizeof forced);
         gRoleLock = IOLockAlloc();
-        if (!gRoleLock || !mapRegion(gGlobals, kAppleWindow, 0x1000) || !mapRegion(gXhciRegs, kCore, 0x1000) ||
+        if (!gRoleLock || !mapRegion(gGlobals, kAppleWindow, 0x1000) || !mapRegion(gXhciRegs, kCore, kXhciRegisterBytes) ||
             kernel_thread_start(roleThread, nullptr, &thread) != KERN_SUCCESS) {stage(-17); break;}
         thread_deallocate(thread);
         if (forced && kernel_thread_start(forceHostThread, reinterpret_cast<void *>((uintptr_t)forced), &thread) == KERN_SUCCESS) thread_deallocate(thread);
