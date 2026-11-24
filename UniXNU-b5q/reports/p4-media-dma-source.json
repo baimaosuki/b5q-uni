@@ -1,0 +1,54 @@
+{
+  "hardware_verified": false,
+  "complete_P4": false,
+  "input": "Original Samsung xbl_config IORT NAMEDNODE_LPASS / NAMEDNODE_Video; exact input hashes in reports/p5-source-inputs.json and reports/p3-wifi-source-audit.json",
+  "domains": {
+    "audio": {
+      "client": "LPASS",
+      "arids": [
+        "03000001",
+        "0300000e"
+      ],
+      "sid_masks": [
+        "00801001",
+        "00001061"
+      ],
+      "iova": "a0000000",
+      "bytes": 2097152
+    },
+    "video": {
+      "client": "VIDEO",
+      "arids": [
+        "03000000",
+        "03000005"
+      ],
+      "sids": [
+        "1940",
+        "1947"
+      ],
+      "iova": "40000000",
+      "bytes": 134217728
+    }
+  },
+  "implementation": "UEFI HAL only, independent retained WBIS pools/tables. DarwinBoot validates final EFI reserved descriptors; ADT states initialized zero. Not selected in P2P3 source or firmware.",
+  "checks": [
+    "MediaDma.obj real EDK2 target compilePASS",
+    "actual updatedDarwinBoot+handoff EDK2 targetcompilePASS",
+    "ASanUBSan media state/33280poolpages/boundsPASS",
+    "actual loader args/HAL failure/retention/allADTtruncations plusUSBregressionPASS",
+    "10pinnedfirmwarepatches reconstruct complete newproducer/loader sourcesPASS",
+    "27actualarm64eobjects symbolsand4vtablesPAC/zeroapps_smmuPASS; audio/fullcallback/integrationstillpending"
+  ],
+  "remaining": "Samsung TFA/TDM audio and HAL implementation, complete callbacks/startup/runtime integration, P4 firmware/kernel CI and actual returned images",
+  "sha256": {
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h": "ec2bb043be6ff945be72a2c93a8353ad9906905f0cd40c2c5020e7e1ea791875",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c": "41ba211acf84de403d712fa25c3fd247741ae1f351006760bf65dbbea93cf947",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h": "f5cefe46559bb4504dfcb111a91a7237865b8ddbabc9c2d1ca94a6b73c949671",
+    "UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/B5qMediaDmaLoader.h": "86c8d251fa601c399618bf5d91ad30b5b129b96b9f13626b55bfd61f187c4621",
+    "UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/DarwinBoot.c": "53e379fedeb4a3028bb9eaa70c4dd9cec63c7b9a22a5a1f0233233320ac0adad",
+    "UniXNU-b5q/package/B5qMediaDma.h": "f7c335d702272861129215d386a321eb382f02f07de665cd76c05b0fa4377ce3",
+    "patches/uefi-b5q/0009-b5q-media-dma.patch": "964446b76bfdcb93f3c63a29188826283c1f341193a9569da39e2fab406563d4",
+    "patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch": "00f6e3dbecd897b5d7d54b182b0ab7a3d3bc522b1f1e81bafff19cda942fdd15"
+  },
+  "current_integration": "Complete production source selection/startup/runtime/menu present; local host/arm64e/EDK2/PAC gates PASS, CI and returned final image still required"
+}

@@ -7,6 +7,7 @@
 #include "B5qUsbBoardCore.h"
 #include "B5qMax77705.h"
 #include "B5qQupClock.h"
+#include "B5qFuelGauge.h"
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 namespace {
 void barrier(){__asm__ volatile("dsb sy":::"memory");}
@@ -19,6 +20,7 @@ uint32_t seRead(void *ctx,uint32_t reg){return static_cast<volatile uint32_t*>(c
 void seWrite(void *ctx,uint32_t reg,uint32_t value){static_cast<volatile uint32_t*>(ctx)[reg/4]=value;barrier();}
 struct Bus {
  Map engine;GeniI2c bus={};IOLock *lock=nullptr;bool ready=false;
+ ~Bus(){if(lock)IOLockFree(lock);}
  bool open(bool hub){
   if(ready)return true;
   Map gcc,tlmm;
@@ -75,6 +77,11 @@ struct Bus {
   }return false;
  }
  bool read(uint8_t address,uint8_t reg,uint8_t &value){bus.address=address;if(geni_i2c_start_read(&bus,reg)||!finish())return false;value=bus.data;return true;}
+ bool readWord(uint8_t address,uint8_t reg,uint16_t &value){
+  uint8_t bytes[2]={};bus.address=address;
+  if(geni_i2c_start_read_buffer(&bus,&reg,1,bytes,2)||!finish())return false;
+  value=uint16_t(bytes[0])|(uint16_t(bytes[1])<<8);return true;
+ }
  bool write(uint8_t address,uint8_t reg,uint8_t value){bus.address=address;return !geni_i2c_start_write(&bus,reg,value)&&finish();}
  uint32_t ios() const {return seRead(bus.io.ctx,B5qUsbBoardCore::geniIos);}
  B5qUsbBoardCore::Transfer tiTransfer(bool reading,uint8_t address,uint8_t reg,uint8_t value=0){
@@ -92,6 +99,23 @@ struct Bus {
  }
 };
 Bus *ti,*maxim;bool maximReady=false;bool otgOn=false;
+volatile unsigned maximBusState;
+bool openMaxim(){
+ unsigned expected=0;
+ if(__atomic_compare_exchange_n(&maximBusState,&expected,1u,false,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE)){
+  Bus *candidate=new Bus;
+  const bool ok=candidate&&candidate->open(true);
+  if(ok)maxim=candidate;else delete candidate;
+  __atomic_store_n(&maximBusState,ok?2u:3u,__ATOMIC_RELEASE);
+  return ok;
+ }
+ for(unsigned i=0;i<100;++i){
+  const unsigned state=__atomic_load_n(&maximBusState,__ATOMIC_ACQUIRE);
+  if(state!=1)return state==2;
+  IOSleep(10);
+ }
+ return false;
+}
 // PM8550VS SID3 GPIO4 => PPID38b. Select only an APPS-owned channel.
 bool releaseTiReset(){
  Map core,cnfg,obs,channel;if(!core.open(0xc400000,0x3000)||!cnfg.open(0xc42d000,0x4000))return false;
@@ -171,7 +195,7 @@ extern "C" bool b5q_usb_repeater(bool init,bool host){
  return ok;
 }
 extern "C" bool b5q_usb_typec_init(void){
- maxim=new Bus;if(!maxim||!maxim->open(true))return false;
+ if(!openMaxim())return false;
  uint8_t id=0,rev=0;B5qMax77705::Cable cable;
  IOLockLock(maxim->lock);
  maximReady=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&id!=0xff&&
@@ -181,6 +205,20 @@ extern "C" bool b5q_usb_typec_init(void){
        id,rev,cable.cc0,cable.cc1,cable.pd,cable.water(),maximReady);
  // Water blocks roles in Cable, not future dry-cable status observations.
  return maximReady;
+}
+// Battery and USB share the same physical SE8 engine and lock. Read-only
+// gauge/charger sampling never changes charge policy or clears IRQ status.
+extern "C" bool b5q_battery_snapshot(B5qFuelGauge::Raw *raw,
+                                     B5qMax77705::Cable *cable,uint8_t *detail){
+ if(!raw||!cable||!detail||!openMaxim())return false;
+ B5qFuelGauge::Raw pending{};B5qMax77705::Cable next{};uint8_t chargerDetail=0;
+ IOLockLock(maxim->lock);
+ const bool ok=B5qFuelGauge::read([](uint8_t address,uint8_t reg,uint16_t &value){
+    return maxim->readWord(address,reg,value);
+   },pending)&&B5qMax77705::readCable(*maxim,next)&&maxim->read(0x69,0xb3,chargerDetail);
+ IOLockUnlock(maxim->lock);
+ if(ok){*raw=pending;*cable=next;*detail=chargerDetail;}
+ return ok;
 }
 extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *out){
  if(!out)return false;

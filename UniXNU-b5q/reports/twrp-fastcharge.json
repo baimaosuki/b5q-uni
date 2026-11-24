@@ -1,0 +1,91 @@
+{
+  "state": "New recovery IMG built and actual ramdisk verified; physical PD/PPS handshake not yet tested",
+  "scope": "b5q TWRP native Samsung charging negotiation",
+  "root_cause": "board init.recovery.qcom.rc explicitly sets battery/siop_level=0; shared Samsung init rc also contains0. Samsung SIOP<100 may impose5V/current limits; original default100 releases SIOP votes.",
+  "source_index": [
+    {
+      "source": "https://github.com/LineageOS/android_kernel_samsung_sm8550/blob/36ffdaa5a4e2bff6e66812b444874b0cb6133fa9/drivers/battery/common/sec_battery_sysfs.c",
+      "path": "artifacts/b5q-twrp-fastcharge-work/source/sec_battery_sysfs.c",
+      "SHA256": "ebd8832102abcdad5ef6c590680cfedce5c7088cd7ad9d93255ce891223a5ce5"
+    },
+    {
+      "source": "https://github.com/LineageOS/android_kernel_samsung_sm8550/blob/36ffdaa5a4e2bff6e66812b444874b0cb6133fa9/drivers/battery/common/sec_battery.c",
+      "path": "artifacts/b5q-twrp-fastcharge-work/source/sec_battery.c",
+      "SHA256": "949ccd0b288b5b8d708ed7eb3e9bc1122a0d30be73e631328077621dd7c923f2"
+    },
+    {
+      "source": "https://github.com/LineageOS/android_kernel_samsung_sm8550/blob/36ffdaa5a4e2bff6e66812b444874b0cb6133fa9/drivers/battery/common/sec_battery_thermal.c",
+      "path": "artifacts/b5q-twrp-fastcharge-work/source/sec_battery_thermal.c",
+      "SHA256": "11e822de66330b75bbeb1c76522cd255dc0fd9da21214b8bfa3c90c10e005393"
+    },
+    {
+      "source": "https://github.com/LineageOS/android_kernel_samsung_sm8550/blob/36ffdaa5a4e2bff6e66812b444874b0cb6133fa9/drivers/battery/common/sec_charging_common.h",
+      "path": "artifacts/b5q-twrp-fastcharge-work/source/sec_charging_common.h",
+      "SHA256": "b3a7b8ab187b6194a96b5a9bf8227fa53a182f48e00f2f61cc4856dffb656ead"
+    }
+  ],
+  "actual_module": {
+    "path": "sources/twrp/device/samsung/b5q/recovery/root/lib/modules/sec-battery.ko",
+    "SHA256": "4b54b28902d13330201caaacdfb713a7fb9e96371eb38d6643a97cb153ad79f5",
+    "symbols": {
+      "sec_bat_store_attrs": "0x2b840",
+      "sec_bat_siop_level_work": "0x142a8"
+    },
+    "sysfs_attr_relocations": {
+      "siop_level": "0xda8",
+      "pd_disable": "0x2048"
+    },
+    "SIOP_vote_release_instructions": "0x1433c cmp w3,#0x50; b.lt0x143cc;0x14350..0x1439c three sec_vote calls with enable0"
+  },
+  "behavior": {
+    "siop_level": 100,
+    "pd_disable": 0,
+    "PD_setting": "volatile battery power-supply property only; not persistent MUIC afc_disable",
+    "native_thermal_battery_limits": true,
+    "forced_voltage_current": false,
+    "protected_partitions_accessed": false,
+    "late_driver_retry": true,
+    "existing_cover_off_preserved": true
+  },
+  "host_script_cases": 6,
+  "device_connected": false,
+  "fast_charge_hardware_verified": false,
+  "final_image": {
+    "passed": true,
+    "variant": "b5q-cover-off-4-charge-1",
+    "IMG_bytes": 109576192,
+    "IMG_SHA256": "bd13d25a4692236e8525afbe259a1f46c9b1c4f6e9e50bac852bfd19cd931498",
+    "kernel_DTB_DTBO_unchanged": {
+      "kernel": "cc0036af53f6ceecc57835439da69fc66a6aed7aa129112404716312df8efd53",
+      "dtb": "871fee3fa8948e3da00e441720c250904f1fb84241e1e2db6816a285c7b497ca",
+      "dtbo": "7a6239f8b78a37120b58306eecb090bb5cf1e07fce80eaa8124a8e4d2b6e7583"
+    },
+    "charging_modules_unchanged": {
+      "sec-battery.ko": "4b54b28902d13330201caaacdfb713a7fb9e96371eb38d6643a97cb153ad79f5",
+      "max77705_charger.ko": "2c7b72c1fd1c5eb840f1c18880ea18c4afb81634d2dd56e9e77c24c31566b6b1",
+      "pdic_max77705.ko": "f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca",
+      "pca9482_charger.ko": "6db8111ba0fe080833abfe0b8773fb0151b20989400b45036424b63284cbc7dd",
+      "max77705-fuelgauge.ko": "35f1e216258f5f1b95a738f0af76e43d6d41b15058806c9f6802c7727ee1dd79"
+    },
+    "policy": {
+      "siop_level": 100,
+      "pd_disable": 0,
+      "wait_for_modular_driver": true,
+      "native_voltage_current_negotiation": true,
+      "thermal_and_battery_protection_retained": true,
+      "persistent_settings_written": false
+    },
+    "hardware_fast_charge_negotiation_verified": false
+  },
+  "init_host_verifier": "PASS both board charging init scripts",
+  "patch_reverse_forward_replay": "PASS exact6files/executablemode",
+  "source_SHA256": {
+    "sources/twrp/device/samsung/b5q/recovery/root/init.recovery.qcom.rc": "e8935862e59a3fd04765a5703a7a1dad1a570267d69d03a54a0927db6a0c1271",
+    "sources/twrp/device/samsung/b5q/recovery/root/init.recovery.samsung.rc": "72ca496ed3744f5866970c32aaad808d988b0d68310107a9cc354dd47a1a66ee",
+    "sources/twrp/device/samsung/b5q/recovery/root/init.recovery.b5q-charge.rc": "dc51bac3e8872a57094ee821dbb226a2b949172ec681eb19d115cdb871e91d28",
+    "sources/twrp/device/samsung/b5q/recovery/root/system/bin/b5q-charge.sh": "d1459640ede217ffc892feebde96f3f2204a375e712b67160c2b1ffdcaf167d8",
+    "patches/twrp-fastcharge/0001-b5q-native-charging-policy.patch": "5078145aa689dcda5815ff9fcc97ceb9055a5dc1fc5b8b655de0e75ac9caecba"
+  },
+  "version_in_actual_recovery": "b5q-cover-off-4-charge-1",
+  "output_format": "only recovery.img plus small metadata; no Odin TAR/ZIP"
+}

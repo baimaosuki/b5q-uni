@@ -13,7 +13,13 @@ with tempfile.TemporaryDirectory(prefix="b5q-v32-") as temporary:
     subprocess.run(['python3',str(ROOT/'tests/b5q-ufs/test-absentd-v33.py')],check=True)
 
     board = (ROOT / "UniXNU-b5q/package/B5qUsbBoard.cpp").read_text()
-    init = board[board.index('extern "C" bool b5q_usb_typec_init'):board.index('extern "C" bool b5q_usb_otg')]
+    def function(signature):
+        start=board.index(signature);at=board.index('{',start);end=at+1;depth=1
+        while depth:depth+=(board[end]=='{')-(board[end]=='}');end+=1
+        return board[start:end]
+    init='\n'.join(function(n)for n in ['bool openMaxim()',
+        'extern "C" bool b5q_usb_typec_init','extern "C" bool b5q_usb_cable_state',
+        'extern "C" int b5q_usb_cable_role'])
     harness = r'''
 #include "B5qMax77705.h"
 #include <cassert>
@@ -35,14 +41,16 @@ struct Bus {
 };
 static Bus *maxim;
 static bool maximReady=false;
+static volatile unsigned maximBusState=0;
+static void IOSleep(unsigned){}
 static void IOLockLock(int*){}
 static void IOLockUnlock(int*){}
 template<class... Args>void IOLog(const char*,Args...){++logs;}
 '''
     harness += init + r'''
-static void reset(){delete maxim;maxim=nullptr;maximReady=false;writes=reads=0;water=identityFailure=ioFailure=false;}
+static void reset(){delete maxim;maxim=nullptr;maximReady=false;maximBusState=0;writes=reads=0;water=identityFailure=ioFailure=false;}
 int main(){
- assert(b5q_usb_typec_init()&&writes==0);assert(b5q_usb_cable_role()==2);reset();
+ assert(b5q_usb_typec_init()&&writes==0);Bus *same=maxim;assert(b5q_usb_typec_init()&&maxim==same);assert(b5q_usb_cable_role()==2);reset();
  water=true;assert(b5q_usb_typec_init()&&writes==0);assert(b5q_usb_cable_role()==0);
  water=false;assert(b5q_usb_cable_role()==2);reset();
  identityFailure=true;assert(!b5q_usb_typec_init()&&!maximReady&&!writes);reset();

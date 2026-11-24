@@ -3,7 +3,7 @@
 from pathlib import Path
 import importlib.util,json,struct,subprocess,sys,tempfile,zlib
 ROOT=Path(__file__).resolve().parents[2];HEADERS=ROOT/'UniXNU-b5q/package/B5qUfs'
-sys.path.insert(0,'/home/baimao/nabu_macos/scripts')
+sys.path.insert(0,str(ROOT/'tools/xnu2log/scripts'))
 from nabu_log_volume import make_config,decode_container
 TOKEN=bytes.fromhex('411839cbaebac4088c251c0ea57579a2');BLOCK=4096;ESP=3162880;ROOT_FIRST=49692663;ROOT_LAST=62275574;CAPACITY=62275584;FILE_BYTES=8400896
 
@@ -149,7 +149,7 @@ def main():
     text,info=decode_container(container);assert info['sequence']==(1 if case=='headerfail' else 2);assert len(text)==4<<20
     if case=='ok':assert text.endswith(b'LATE-BOOT\n')
     saved=temp/'XNU2LOG.BIN';saved.write_bytes(container)
-    subprocess.run([sys.executable,'/home/baimao/nabu_macos/scripts/read_xnu2log.py',str(saved),'--out',str(temp/'console.txt')],check=True,capture_output=True)
+    subprocess.run([sys.executable,str(ROOT/'tools/xnu2log/scripts/read_xnu2log.py'),str(saved),'--out',str(temp/'console.txt')],check=True,capture_output=True)
     assert (temp/'console.txt').read_bytes()==text
    elif case!='damagedslots':assert not any(container[BLOCK:])
    assert TOKEN.hex() not in run.stdout

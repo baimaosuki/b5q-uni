@@ -1,0 +1,186 @@
+diff --git a/DarwinBootPkg/Driver/B5qMediaDma.h b/DarwinBootPkg/Driver/B5qMediaDma.h
+new file mode 100644
+index 0000000..10dcbec
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qMediaDma.h
+@@ -0,0 +1,18 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_MEDIA_DMA_H
++#define B5Q_MEDIA_DMA_H
++#define B5Q_MEDIA_DMA_PROTOCOL_GUID \
++ {0x061f797d,0x3cda,0x473e,{0x8e,0x2b,0xd9,0xe1,0x0c,0xe6,0x25,0xd3}}
++#define B5Q_MEDIA_AUDIO 1U
++#define B5Q_MEDIA_VIDEO 2U
++#define B5Q_MEDIA_NOT_RUN 0xffffffffU
++typedef struct {
++ UINT32 Version,Kind,Sid[2];
++ UINT64 Locate;
++ UINT32 Create,Configure,Attach[2],Map,Reserved;
++ UINT64 PoolBase,PoolBytes,Iova,TableBase,TableBytes,PrepareStatus,RetentionStatus;
++} B5Q_MEDIA_DMA_RESULT;
++typedef VOID(EFIAPI *B5Q_MEDIA_PREPARE)(UINT32 Kind,OUT B5Q_MEDIA_DMA_RESULT *);
++typedef struct {UINT64 Revision;B5Q_MEDIA_PREPARE Prepare;} B5Q_MEDIA_DMA_PROTOCOL;
++STATIC_ASSERT(sizeof(B5Q_MEDIA_DMA_RESULT)==104,"Media DMA wire ABI");
++#endif
+diff --git a/DarwinBootPkg/Driver/B5qMediaDmaLoader.h b/DarwinBootPkg/Driver/B5qMediaDmaLoader.h
+new file mode 100644
+index 0000000..7272430
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qMediaDmaLoader.h
+@@ -0,0 +1,112 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_MEDIA_DMA_LOADER_H
++#define B5Q_MEDIA_DMA_LOADER_H
++#include "B5qMediaDma.h"
++typedef struct {UINTN Ready,State;UINT32 Features;} B5Q_MEDIA_DMA_ADT;
++// Selection follows the kernel feature contract: explicit subsystem option,
++// then the menu's compact mask, then the /chosen default. Never DMA readiness.
++STATIC BOOLEAN MediaUnsignedArg(CONST CHAR8 *Line,CONST CHAR8 *Name,UINT32 *Value)
++{
++ if(!Line)return FALSE;
++ UINTN Length=AsciiStrLen(Name);BOOLEAN Found=FALSE;
++ while(*Line) {
++  while(*Line==' ')Line++;
++  CONST CHAR8 *End=Line;while(*End&&*End!=' ')End++;
++  if((UINTN)(End-Line)>=Length&&AsciiStrnCmp(Line,Name,Length)==0) {
++   UINT32 N=0;BOOLEAN Valid=End>Line+Length;
++   for(CONST CHAR8 *P=Line+Length;P<End;P++) {
++    if(*P<'0'||*P>'9'||N>429496729U||(N==429496729U&&*P>'5')){Valid=FALSE;break;}
++    N=N*10+(UINT32)(*P-'0');
++   }
++   // Malformed selected overrides fail closed rather than enabling defaults.
++   Found=TRUE;*Value=Valid?N:0;
++  }
++  Line=End;
++ }
++ return Found;
++}
++STATIC BOOLEAN MediaArgEnabled(CONST CHAR8 *Line,UINT32 Kind,UINT32 Mask)
++{
++ UINT32 Value=0;
++ if(MediaUnsignedArg(Line,Kind==B5Q_MEDIA_AUDIO?"audio=":"sheng-video=",&Value))
++  return Kind==B5Q_MEDIA_AUDIO?(Value==1||Value==3):Value==1;
++ MediaUnsignedArg(Line,"b5q-f=",&Mask);
++ return (Mask&(Kind==B5Q_MEDIA_AUDIO?16U:32U))!=0;
++}
++STATIC BOOLEAN FindMediaDmaNode(CONST UINT8 *Data,UINTN Size,UINTN *At,UINTN Depth,UINTN Parent,B5Q_MEDIA_DMA_ADT Adt[2])
++{
++ if(Depth>32||*At>Size||Size-*At<8)return FALSE;
++ UINT32 Properties=ReadUnaligned32((CONST UINT32*)(Data+*At));
++ UINT32 Children=ReadUnaligned32((CONST UINT32*)(Data+*At+4));*At+=8;
++ CONST UINT8 *NodeName=NULL;UINTN NodeLength=0;UINT32 Features=0;BOOLEAN HasFeatures=FALSE;
++ B5Q_MEDIA_DMA_ADT Candidate[2]={{MAX_UINTN,MAX_UINTN,0},{MAX_UINTN,MAX_UINTN,0}};
++ CONST CHAR8 *Names[2][2]={{"b5q-audio-dma-ready","b5q-audio-dma-state"},{"b5q-video-dma-ready","b5q-video-dma-state"}};
++ for(UINT32 I=0;I<Properties;I++) {
++  if(*At>Size||Size-*At<36)return FALSE;
++  CONST CHAR8 *Name=(CONST CHAR8*)(Data+*At);
++  if(AsciiStrnLenS(Name,32)==32)return FALSE;
++  UINT32 Length=ReadUnaligned32((CONST UINT32*)(Data+*At+32))&0x7fffffff;
++  *At+=36;if(Length>Size-*At)return FALSE;
++  if(AsciiStrCmp(Name,"name")==0){NodeName=Data+*At;NodeLength=Length;}
++  if(AsciiStrCmp(Name,"b5q-feature-mask")==0) {
++   if(HasFeatures||Length!=4)return FALSE;
++   HasFeatures=TRUE;Features=ReadUnaligned32((CONST UINT32*)(Data+*At));
++  }
++  for(UINTN K=0;K<2;K++)for(UINTN J=0;J<2;J++)if(AsciiStrCmp(Name,Names[K][J])==0) {
++   UINTN *Slot=J?&Candidate[K].State:&Candidate[K].Ready;
++   if(*Slot!=MAX_UINTN||Length!=(J?sizeof(B5Q_MEDIA_DMA_RESULT):4)||!IsZeroBuffer(Data+*At,Length))return FALSE;
++   *Slot=*At;
++  }
++  *At+=Length;if(*At>MAX_UINTN-3)return FALSE;*At=ALIGN_VALUE(*At,4);if(*At>Size)return FALSE;
++ }
++ UINTN Path=3;if(!Depth)Path=0;
++ if(Depth==1&&Parent==0&&NodeLength==7&&NodeName&&CompareMem(NodeName,"chosen",7)==0)Path=1;
++ for(UINTN K=0;K<2;K++)if(Candidate[K].Ready!=MAX_UINTN||Candidate[K].State!=MAX_UINTN) {
++  if(Path!=1||Adt[K].Ready!=MAX_UINTN||Candidate[K].Ready==MAX_UINTN||Candidate[K].State==MAX_UINTN)return FALSE;
++  Adt[K]=Candidate[K];Adt[K].Features=Features;
++ }
++ if(HasFeatures&&Path!=1)return FALSE;
++ if(Children>(Size-*At)/8)return FALSE;
++ for(UINT32 I=0;I<Children;I++)if(!FindMediaDmaNode(Data,Size,At,Depth+1,Path,Adt))return FALSE;
++ return TRUE;
++}
++STATIC VOID GetMediaDmaResult(CONST CHAR8 *Args,UINT32 Kind,UINT32 Features,B5Q_MEDIA_DMA_RESULT *R)
++{
++ ZeroMem(R,sizeof(*R));R->Version=1;R->Kind=Kind;
++ const BOOLEAN Audio=Kind==B5Q_MEDIA_AUDIO;
++ R->Sid[0]=Audio?0x00801001:0x1940;R->Sid[1]=Audio?0x1061:0x1947;
++ R->Locate=R->PrepareStatus=R->RetentionStatus=EFI_NOT_STARTED;
++ R->Create=R->Configure=R->Attach[0]=R->Attach[1]=R->Map=B5Q_MEDIA_NOT_RUN;
++ if(!MediaArgEnabled(Args,Kind,Features))return;
++ EFI_GUID Guid=B5Q_MEDIA_DMA_PROTOCOL_GUID;B5Q_MEDIA_DMA_PROTOCOL *Protocol=NULL;
++ EFI_STATUS Status=gBS->LocateProtocol(&Guid,NULL,(VOID**)&Protocol);
++ if(!EFI_ERROR(Status)) {
++  if(Protocol&&Protocol->Revision==1&&Protocol->Prepare){Protocol->Prepare(Kind,R);return;}
++  Status=EFI_INCOMPATIBLE_VERSION;
++ }
++ R->PrepareStatus=Status;
++}
++STATIC VOID WriteMediaDmaResult(UINT8 *Tree,CONST B5Q_MEDIA_DMA_ADT *Adt,
++ CONST B5Q_MEDIA_DMA_RESULT *Result,CONST EFI_MEMORY_DESCRIPTOR *Map,UINTN Size,UINTN Stride,
++ UINT64 Owned,UINT64 OwnedBytes,BOOLEAN HasExclusions,UINT32 Kind)
++{
++ B5Q_MEDIA_DMA_RESULT S=*Result;UINT32 Ready=0;
++ CONST BOOLEAN Audio=Kind==B5Q_MEDIA_AUDIO;
++ UINT64 Bytes=Audio?0x200000ULL:0x8000000ULL,Iova=Audio?0xa0000000ULL:0x40000000ULL;
++ if(S.Version==1&&S.Kind==Kind&&!S.Reserved&&!S.Locate&&!S.Create&&!S.Configure&&
++    !S.Attach[0]&&!S.Attach[1]&&!S.Map&&!S.PrepareStatus&&
++    S.Sid[0]==(Audio?0x00801001U:0x1940U)&&S.Sid[1]==(Audio?0x1061U:0x1947U)&&
++    S.PoolBytes==Bytes&&S.Iova==Iova&&!(S.PoolBase&0x1fffff)&&
++    S.PoolBase>=0x80000000ULL&&S.PoolBase<=0x100000000ULL-Bytes&&
++    S.TableBytes==0x20000&&S.TableBase&&!(S.TableBase&4095)&&S.TableBase<=0x100000000ULL-S.TableBytes&&
++    (S.TableBase+S.TableBytes<=S.PoolBase||S.TableBase>=S.PoolBase+S.PoolBytes)) {
++  BOOLEAN Retained=UsbDmaPagesRetained(Map,Size,Stride,S.PoolBase,S.PoolBytes)&&
++   UsbDmaPagesRetained(Map,Size,Stride,S.TableBase,S.TableBytes);
++  if(Retained&&!HasExclusions)Retained=
++   (S.PoolBase+S.PoolBytes<=Owned||S.PoolBase>=Owned+OwnedBytes)&&
++   (S.TableBase+S.TableBytes<=Owned||S.TableBase>=Owned+OwnedBytes);
++  S.RetentionStatus=Retained?EFI_SUCCESS:EFI_COMPROMISED_DATA;Ready=Retained?1:0;
++ }
++ CopyMem(Tree+Adt->Ready,&Ready,4);CopyMem(Tree+Adt->State,&S,sizeof(S));
++}
++#endif
+diff --git a/DarwinBootPkg/Driver/DarwinBoot.c b/DarwinBootPkg/Driver/DarwinBoot.c
+index 1546211..7866900 100644
+--- a/DarwinBootPkg/Driver/DarwinBoot.c
++++ b/DarwinBootPkg/Driver/DarwinBoot.c
+@@ -22,6 +22,7 @@
+ #include "LoaderInputs.h"
+ #include "B5qUsbDmaLoader.h"
+ #include "B5qPcieDmaLoader.h"
++#include "B5qMediaDmaLoader.h"
+ 
+ #define WINDOW_SIZE  SIZE_256MB
+ #define BLOCK_SIZE   SIZE_2MB
+@@ -832,6 +833,8 @@ Boot (
+   B5Q_USB_DMA_RESULT               UsbResult;
+   B5Q_PCIE_DMA_ADT                 PcieAdt = { MAX_UINTN, MAX_UINTN };
+   B5Q_PCIE_DMA_RESULT              PcieResult;
++  B5Q_MEDIA_DMA_ADT                MediaAdt[2]={{MAX_UINTN,MAX_UINTN,0},{MAX_UINTN,MAX_UINTN,0}};
++  B5Q_MEDIA_DMA_RESULT             MediaResult[2];
+   UINTN                           ExcludedCapacity;
+   UINTN                           ExcludedCount;
+   UINT8                           *Excluded;
+@@ -1057,6 +1060,11 @@ Boot (
+     Status = EFI_COMPROMISED_DATA; goto Fail;
+   }
+   if (PcieAdt.Ready != MAX_UINTN) { GetPcieDmaResult (CommandLine, &PcieResult); }
++  UINTN MediaOffset=0;
++  if(!FindMediaDmaNode((CONST UINT8 *)(UINTN)TreeAddress,TreeSize,&MediaOffset,0,3,MediaAdt)||MediaOffset!=TreeSize) {
++    Status=EFI_COMPROMISED_DATA;goto Fail;
++  }
++  for(UINTN K=0;K<2;K++)if(MediaAdt[K].Ready!=MAX_UINTN)GetMediaDmaResult(CommandLine,(UINT32)K+1,MediaAdt[K].Features,&MediaResult[K]);
+   Status = GetMap (&Map, &Capacity, &MapSize, &Key, &Stride);
+   if (EFI_ERROR (Status)) { goto Fail; }
+   Print (L"DARWINBOOT: ARM64 va=0x%lx pa=0x%lx args=0x%lx entry=0x%lx owned=0x%lx\n",
+@@ -1161,6 +1169,10 @@ Boot (
+       WritePcieDmaResult ((UINT8 *)(UINTN)TreeAddress, &PcieAdt, &PcieResult, Map, MapSize, Stride,
+                           Address, WindowSize, ExcludedOffset != MAX_UINTN);
+     }
++    for(UINTN K=0;K<2;K++)if(MediaAdt[K].Ready!=MAX_UINTN) {
++      WriteMediaDmaResult((UINT8 *)(UINTN)TreeAddress,&MediaAdt[K],&MediaResult[K],Map,MapSize,Stride,
++                         Address,WindowSize,ExcludedOffset!=MAX_UINTN,(UINT32)K+1);
++    }
+     Status = gBS->ExitBootServices (mImage, Key);
+     if (!EFI_ERROR (Status)) {
+       if (Excluded == NULL) {

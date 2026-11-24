@@ -1,0 +1,32 @@
+{
+  "hardware_verified": false,
+  "complete": false,
+  "changes": "P4 production34object recipe/startup; retained domains use same explicit-option/menu/ADT selection in loader and kernel, default63, no ready forgery; runtime preserves original trust modules and appends absent CDHashes only",
+  "source_sha256": {
+    "UniXNU-b5q/scripts/b5q_media.py": "fe11b403485b76f6c56470d5d319781d8d67473bf67b2c70ec241bca983a4403",
+    "UniXNU-b5q/package/LegacyDisplayProbe.cpp": "3635b01918c293d049fd69e85951c3735e2abfe4933507985831884ab7128046",
+    "UniXNU-b5q/board.toml": "8de22642f0a30ffbb4533665601bb19b6e1c516feab90e7c3b85c8c046df7272",
+    "patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch": "00f6e3dbecd897b5d7d54b182b0ab7a3d3bc522b1f1e81bafff19cda942fdd15",
+    "UniXNU-b5q/scripts/build-b5q-media-runtime.py": "bbb666b36b769c5fb307531d3cf1457fa6ec742e661bf5939ae8faeb0fe58e87",
+    "UniXNU-b5q/scripts/b5q_menu.py": "4e042f5f1f71c43cc333ebe784df7ca2f3d593a314f74da42a67d703181579ba",
+    "UniXNU-b5q/scripts/b5q_audio.py": "1c11dbc764bbd7bee30b1a61d3077e49cc64ad0775e6e4efb710faada728fae1",
+    "UniXNU-b5q/scripts/package-batch2-esp.py": "8d7b15ff666d7ccf86c02c77db9ef7579025be28f2964c1fb12c847f913deea1",
+    ".github/workflows/b5q-p0-p5.yml": "70e8f1804ce2e5bbc47b10d8c285f1b6ae5ba6030a4e3b49c9fe0641858cb35c"
+  },
+  "tests": "Actual loader ASan/UBSan PASS:256mask/kind combinations plus explicit overrides, malformed overflow,retained-only status gate and USB regressions",
+  "pending": "Native Apple link/sign, full CI firmware/kernel/payload and returned image/objects/APFS/menu validation",
+  "local_gates": {
+    "p4_host_groups": 17,
+    "baseline_p2p3_groups": 22,
+    "arm64e_objects": 35,
+    "vtable_PAC_groups": 6,
+    "callback_PAC_contracts": 105,
+    "firmware_patches": 10,
+    "menu_profiles": 4,
+    "menu_buffer_boundary_cases": 80,
+    "ordered_XNU_patches": 142
+  },
+  "native_HAL_link": "LinuxLLVM21ld64.lld rejected authenticated-pointer relocations; exact first-error retained in audio-hal/link-first-error.log. Actual native Apple linker/signing is selected for CI; no unauthenticated fallback.",
+  "local_gate_complete": true,
+  "pre_ci_report": "reports/p4-pre-ci.json"
+}

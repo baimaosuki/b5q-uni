@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "hardware_verified": false,
+  "scope": "35 production-selected objects;6 basevtablegroups separately verified",
+  "callback_contracts": 105,
+  "detail": "artifacts/b5q-p4-work/target/media-callback-pac.json",
+  "detail_sha256": "19ee8eb56102c1dba4ad55b2e254be9aff833eb9f50c2968101ab0c5537cda50",
+  "sources": {
+    "scripts/b5q-install/check-media-callback-pac.py": "a08668123cf1202aee439bcc1446c3810a2f7c55a5472f5582217d7e78b29ba3"
+  },
+  "baseline": {
+    "ArmCpu.o": "b9f6ae3d43109dbd799e3483f7a9e824c31a5da2bdae47ce77c2d71294da69a1",
+    "GeniI2c.o": "366e64868bf625f23817b8a355537f6d13784f773af7e8bc86ae1265d7304936",
+    "mach.development.bcm2837.unstripped.noctf": "650d81a289783b4b416cccbf19480ee6e5b8eae6c1d9deff691dd159a257243e"
+  },
+  "local_gate_complete": true,
+  "pre_ci_report": "reports/p4-pre-ci.json"
+}

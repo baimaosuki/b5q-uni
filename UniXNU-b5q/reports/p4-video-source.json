@@ -1,0 +1,26 @@
+{
+  "hardware_verified": false,
+  "complete": false,
+  "evidence": [
+    "Original b5q.dts28552..28614:both nonsecure CBs dma-coherent,SIDs1940/1947,pool40000000..48000000 fits both apertures",
+    "Original official-firmware-hardware.json video carveout9bb00000+700000",
+    "Shared QcomIris/VideoProbe revision6c42e1055ffb3b335fda991190ad221edaa7af3c"
+  ],
+  "sha256": {
+    "UniXNU-b5q/scripts/b5q_video.py": "04a32e727d611a524d56a87dd9ab194f171f5a2feb208a1a6a1676469d396b12",
+    "UniXNU-b5q/package/B5qMediaPool.h": "2606968a6f2fe8677ad89de0033d555624d254a51f7fa67d65b933dd8fc345e9",
+    "UniXNU-b5q/package/B5qVideoMemory.h": "20f60c14b3da8da7b97515479b61cac58ef0a9368cc5bb1649bdabaaf566ebb8",
+    "UniXNU-b5q/package/B5qVideoMemory.cpp": "28170a17900f2808a26768c40f18da0ec886ba99db66fcc7ef5cf2d72bcd1bdb",
+    "tests/b5q-ufs/test-video-pool.py": "15874d6b728f9952c74dd92d52c57e0cce0afd7fdf99735ac36e034600dcda33",
+    "scripts/b5q-install/check-p4a-target.py": "2126cb1b7f00d50bcbe6853c33a84c78817e27ab5557f27f16e67eb65dc7dce9",
+    "UniXNU-b5q/package/B5qIrisUserClient.h": "19ece6684ee6c8837bfd0ce5ca475da4dd2d948ea46bf7db1a035c6bb1e44324"
+  },
+  "checks": [
+    "Production128MiBpool12kfragmentation/bounds/retention/copyerror ASanUBSanPASS",
+    "Actual target compile23P4objects incl Iris/VT/ADSP passes; ABIjointclosure/runtime/CI still pending"
+  ],
+  "P4_target_objects": 27,
+  "symbol_check": "610 imports closed against actual accepted P1 core plus27objects; full cross-objectPAC/returnedimage pending",
+  "review": "Incompatible draft audio/DP implementations were removed before integration. P5 remains source preparation only. No new P5 ready flag or superficial self-test is accepted.",
+  "current_integration": "Complete production source selection/startup/runtime/menu present; local host/arm64e/EDK2/PAC gates PASS, CI and returned final image still required"
+}

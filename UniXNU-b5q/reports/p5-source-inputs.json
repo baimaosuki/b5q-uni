@@ -1,0 +1,661 @@
+{
+  "hardware_verified": false,
+  "implementation_complete": false,
+  "original_firmware_dt": {
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay0.dtb": {
+      "/soc/qcom,dp_display@ae90000": {
+        "qcom,usbplug-cc-gpio": "0000007d0000000b00000000",
+        "qcom,aux-sel-gpio": "0000007d000000b400000000",
+        "qcom,aux-en-gpio": "0000007d000000b700000000",
+        "reg-names": "64705f6168620064705f6175780064705f6c696e6b0064705f70300064705f7068790064705f6c6e5f7478300064705f6c6e5f7478310064705f706c6c00757362335f64705f636f6d00686463705f706879736963616c0064705f7031006764736300",
+        "reg": "0ae90000000000fc0ae90200000000c00ae90400000007700ae9100000000098088eaa0000000200088ea20000000200088ea60000000200088ea00000000200088e8000000000200aee1000000000340ae91400000000980af0900000000014",
+        "compatible": "71636f6d2c64702d646973706c617900"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries/qcom,pll-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@1": {
+        "reg": "00000001"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries/qcom,ctrl-supply-entry@0": {
+        "reg": "00000000"
+      }
+    },
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay1.dtb": {
+      "/soc/qcom,dp_display@ae90000": {
+        "qcom,usbplug-cc-gpio": "0000007d0000000b00000000",
+        "qcom,aux-sel-gpio": "0000007d000000b400000000",
+        "qcom,aux-en-gpio": "0000007d000000b700000000",
+        "reg-names": "64705f6168620064705f6175780064705f6c696e6b0064705f70300064705f7068790064705f6c6e5f7478300064705f6c6e5f7478310064705f706c6c00757362335f64705f636f6d00686463705f706879736963616c0064705f7031006764736300",
+        "reg": "0ae90000000000fc0ae90200000000c00ae90400000007700ae9100000000098088eaa0000000200088ea20000000200088ea60000000200088ea00000000200088e8000000000200aee1000000000340ae91400000000980af0900000000014",
+        "compatible": "71636f6d2c64702d646973706c617900"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries/qcom,pll-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@1": {
+        "reg": "00000001"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries/qcom,ctrl-supply-entry@0": {
+        "reg": "00000000"
+      }
+    },
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay2.dtb": {
+      "/soc/qcom,dp_display@ae90000": {
+        "qcom,usbplug-cc-gpio": "0000007d0000000b00000000",
+        "qcom,aux-sel-gpio": "0000007d000000b400000000",
+        "qcom,aux-en-gpio": "0000007d000000b700000000",
+        "reg-names": "64705f6168620064705f6175780064705f6c696e6b0064705f70300064705f7068790064705f6c6e5f7478300064705f6c6e5f7478310064705f706c6c00757362335f64705f636f6d00686463705f706879736963616c0064705f7031006764736300",
+        "reg": "0ae90000000000fc0ae90200000000c00ae90400000007700ae9100000000098088eaa0000000200088ea20000000200088ea60000000200088ea00000000200088e8000000000200aee1000000000340ae91400000000980af0900000000014",
+        "compatible": "71636f6d2c64702d646973706c617900"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries/qcom,pll-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@1": {
+        "reg": "00000001"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries/qcom,ctrl-supply-entry@0": {
+        "reg": "00000000"
+      }
+    },
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay3.dtb": {
+      "/soc/qcom,dp_display@ae90000": {
+        "qcom,usbplug-cc-gpio": "0000007d0000000b00000000",
+        "qcom,aux-sel-gpio": "0000007d000000b400000000",
+        "qcom,aux-en-gpio": "0000007d000000b700000000",
+        "reg-names": "64705f6168620064705f6175780064705f6c696e6b0064705f70300064705f7068790064705f6c6e5f7478300064705f6c6e5f7478310064705f706c6c00757362335f64705f636f6d00686463705f706879736963616c0064705f7031006764736300",
+        "reg": "0ae90000000000fc0ae90200000000c00ae90400000007700ae9100000000098088eaa0000000200088ea20000000200088ea60000000200088ea00000000200088e8000000000200aee1000000000340ae91400000000980af0900000000014",
+        "compatible": "71636f6d2c64702d646973706c617900"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries/qcom,pll-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@1": {
+        "reg": "00000001"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries/qcom,ctrl-supply-entry@0": {
+        "reg": "00000000"
+      }
+    },
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay4.dtb": {
+      "/soc/qcom,dp_display@ae90000": {
+        "qcom,usbplug-cc-gpio": "0000007d0000000b00000000",
+        "qcom,aux-sel-gpio": "0000007d000000b400000000",
+        "qcom,aux-en-gpio": "0000007d000000b700000000",
+        "reg-names": "64705f6168620064705f6175780064705f6c696e6b0064705f70300064705f7068790064705f6c6e5f7478300064705f6c6e5f7478310064705f706c6c00757362335f64705f636f6d00686463705f706879736963616c0064705f7031006764736300",
+        "reg": "0ae90000000000fc0ae90200000000c00ae90400000007700ae9100000000098088eaa0000000200088ea20000000200088ea60000000200088ea00000000200088e8000000000200aee1000000000340ae91400000000980af0900000000014",
+        "compatible": "71636f6d2c64702d646973706c617900"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,pll-supply-entries/qcom,pll-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@1": {
+        "reg": "00000001"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,phy-supply-entries/qcom,phy-supply-entry@0": {
+        "reg": "00000000"
+      },
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries": {},
+      "/soc/qcom,dp_display@ae90000/qcom,ctrl-supply-entries/qcom,ctrl-supply-entry@0": {
+        "reg": "00000000"
+      }
+    }
+  },
+  "sha256": {
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay0.dtb": "e13ebde60453411032645217339de9ff136b94718c3f18bea065680e54876c1a",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay1.dtb": "aa633bab864b336d87fa2a20bdcf21ea098ad5c550ed9a7af43f992d3c368d9d",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay2.dtb": "d2f55ca4aa212277231df59cda54fa4c2ea2150336eca23274a46e9b4474e270",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay3.dtb": "70c3f63a7628d3830452d6c32cb7b8b7148249c246cda90e03d9721367ec5627",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/dt/merged-base0-overlay4.dtb": "ba51947a9e486c2a98becdc2fb41a7f6006732f3131fdb2fb0419be0047c67a8",
+    "sources/twrp-b5q/recovery/root/lib/modules/msm_drm.ko": "81248f938e3ff18c71335ea535f3f5a6868e66c6005f8520571422cbedb8945a",
+    "sources/twrp-b5q/recovery/root/lib/modules/pdic_max77705.ko": "f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca"
+  },
+  "original_msm_drm_symbols": [
+    "000000000001ef38 t dp_aux_transfer",
+    "000000000001f4c0 t dp_aux_transfer_debug",
+    "000000000001bb0c t dp_catalog_aux_clear_trans",
+    "000000000001ba44 t dp_catalog_aux_write_trans",
+    "0000000000017c1c t dp_catalog_ctrl_config_ctrl",
+    "000000000002a69c t dp_ctrl_link_maintenance",
+    "0000000000000230 d dp_ctrl_link_training_1._rs",
+    "000000000002cf3c t dp_ctrl_link_training_2",
+    "000000000002c6ec t dp_ctrl_setup_main_link",
+    "0000000000054d0c T dp_pll_clock_register_4nm",
+    "0000000000052e8c T dp_pll_clock_register_5nm",
+    "0000000000052758 T dp_pll_clock_register_helper"
+  ],
+  "original_pdic_symbols": [
+    "000000000000f204 t max77705_dp_configure_work_func",
+    "0000000000011780 T max77705_receive_alternate_message",
+    "0000000000000004 b max77705_receive_alternate_message.last_alternate",
+    "000000000001215c T max77705_set_enable_alternate_mode",
+    "0000000000000028 b max77705_set_enable_alternate_mode.check_is_driver_loaded",
+    "000000000000002c b max77705_set_enable_alternate_mode.prev_alternate_mode",
+    "000000000000c890 t max77705_vdm_discover_mode_irq",
+    "00000000000116b8 t max77705_vdm_dp_select_pin"
+  ],
+  "samsung_source": {
+    "repository": "LineageOS/android_kernel_samsung_sm8550-modules",
+    "revision": "a1fdd086620bc0e2f767323c2853bcc9424e3087",
+    "files": [
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/Kbuild",
+        "sha256": "20a2f64586fe69d9b382909e5f6ebd6f8f55985036bafc6e0678f14e5aa7e8a9",
+        "bytes": 4003
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/Kconfig",
+        "sha256": "401d446e5fefb57fbaad61aa1a2b2992db2f4cbe2979b076187bea0e19988f32",
+        "bytes": 836
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/LICENSE.txt",
+        "sha256": "3e063dd7841c13f3a0b32f2e54ed52f532e5ac4c396dd6d4f1d223a5e985b734",
+        "bytes": 240
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/Makefile",
+        "sha256": "69bdb374db587ca3a350063167b6893637315179e68f7db154b45ef43618e7ae",
+        "bytes": 1919
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/config.h",
+        "sha256": "6e080c7267eac163fddec1d968d803046f7704ade170296438abf3f3e0d197ef",
+        "bytes": 737
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/dbgprint.h",
+        "sha256": "b82efb9678465c35b6f5b0773ed0de6b5b6a47031bf8f752b95c9c6541f1539d",
+        "bytes": 4969
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa.h",
+        "sha256": "2a3e37780085f7f8610f654dd8168a8fa905263c7b4a189debbab39b2e31fc74",
+        "bytes": 1305
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa1_tfafieldnames.h",
+        "sha256": "c8215287084796d2bc517d9fef728bc64fe546e9ffa3b8702e8a149be99e84bc",
+        "bytes": 24706
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa2_tfafieldnames_N1C.h",
+        "sha256": "a15af5eb7062d96c4613d928639dbc83463a8fcd6dfe089d08e91f06356fa7b6",
+        "bytes": 42672
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9872_tfafieldnames.h",
+        "sha256": "af127eabd70f6c89ffb66291e8a73dbc8a7fb49b4f984e768efaa3b95b71629b",
+        "bytes": 34797
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9874_tfafieldnames.h",
+        "sha256": "c990a81a43175aeb4ec109eb898cc87b724956257cfa5c0bb3a9d929352c6c92",
+        "bytes": 23596
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9878_tfafieldnames.h",
+        "sha256": "7c6d38f6992c577ed1c1c0c3fbe5703899d24e6aa9b4a9cee5cadb80c0df37fd",
+        "bytes": 27749
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9887_tfafieldnames.h",
+        "sha256": "4fc3b9560c9f74b0665b7eb5a8f661fda5dcb582f2a58cd8afde93686289cf62",
+        "bytes": 1792
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9890_tfafieldnames.h",
+        "sha256": "e8361547222ded35b1cca97de74b928326e244bf31c5b701636236a4600bae24",
+        "bytes": 2119
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9891_genregs.h",
+        "sha256": "ab9474c15c02a2ed6f21150da1b29757bdc54f6f132eef3317e0a5a3dbb2a18c",
+        "bytes": 41666
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9891_tfafieldnames.h",
+        "sha256": "6465468da82512d651dbd61bb1743c079bb9cff921b0a82f2d42474b37ec52a2",
+        "bytes": 13882
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9894_tfafieldnames.h",
+        "sha256": "115d4e7bf9aa83dea96d4cd15dc4ccd4310cc80946c494b11b9b6172d92ac6a5",
+        "bytes": 30466
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9894_tfafieldnames_N2.h",
+        "sha256": "41115aa22e977bcf3c5a1521a9817137231b1c7d23abee8d13d258a2872ccc77",
+        "bytes": 32549
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9896_tfafieldnames.h",
+        "sha256": "c2e2245817164806d907828e09f8f91538f334fc8779213cccb11f06a2a16790",
+        "bytes": 25938
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa98xx.h",
+        "sha256": "fa1188a7af51e9f0c59228ad3c61e5df8cfbc57982f521888399786e1b75a525",
+        "bytes": 3574
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa98xx_genregs_N1C.h",
+        "sha256": "9f2319b5181a6d9f91166e71fe817aaaab22d6b6afb642a38b0ea339af310e2e",
+        "bytes": 147350
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa98xx_parameters.h",
+        "sha256": "ed66dee0c0c43c2922fdaf614eb24b4fe3a1534026b4e8b8d8fbf2a38f68bb1f",
+        "bytes": 16918
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa98xx_tfafieldnames.h",
+        "sha256": "f6f1a32cc796b6fe8ec7c8787e8a4fe79d035df54a5075def7935705c59f6a04",
+        "bytes": 4490
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa9912_tfafieldnames.h",
+        "sha256": "de1ddf62e9090367287bf29a3958b8e1110b1c85deaef7cd6b30148f7924d5bd",
+        "bytes": 50521
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_container.h",
+        "sha256": "e781e24061aeef9d355d329264be3bec813874df32eae88ef867d8ec4724455d",
+        "bytes": 13100
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_device.h",
+        "sha256": "be64eae888070a6fc59d6d8bed136e5ebe49c43a17e1869484611a6d870949cc",
+        "bytes": 11789
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_dsp_fw.h",
+        "sha256": "f689e9fa42e3a3cb85a4deb3e2f783020f65909e1b4128d72d53111bf4da1d42",
+        "bytes": 7760
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_error_map.h",
+        "sha256": "b93f36f7da66165a2087b26b58596291756be30c0c5491727e2334b267d77a4d",
+        "bytes": 1498
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_ext.h",
+        "sha256": "a878cde3c1369dc754716d1958414560de6d022bf4594d9d88e56599901fa7ee",
+        "bytes": 2246
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_internal.h",
+        "sha256": "b894ec2a45ad17d743eacda0589fe98cfe864cf0ad57bf96c493013b93230bfd",
+        "bytes": 2550
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_service.h",
+        "sha256": "944071e110e211a26aaf270fa9fa540fc8340aef24675a634d13b55f42830c78",
+        "bytes": 33849
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/inc/tfa_sysfs.h",
+        "sha256": "fa0702e2d2c399bf39c70c0a90f766a28ca3add8580d84b32b6ab521db833acc",
+        "bytes": 1211
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa98xx.c",
+        "sha256": "b4e06e1bacddc887028896ed89537abe5944c6fd4285eae875b4f996120f8a37",
+        "bytes": 142383
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_cal.c",
+        "sha256": "6a4ac3add68c6b93ca173d91517dcfb87a1793335e792661736ad65af0992b7c",
+        "bytes": 4534
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_container.c",
+        "sha256": "aafd880f0e23593354962f1c45362328538924d588d20c5b63dcce817b18a30a",
+        "bytes": 80260
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_debug.c",
+        "sha256": "138cdc3e969773f19e212cbe3f98baef548eb10a77647618db3aaab2f4afd214",
+        "bytes": 11344
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_dsp.c",
+        "sha256": "e6e99208eae1a083404be66e7ab4402ba600bf470c446bea5e1d8149ee5ce0f3",
+        "bytes": 144178
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_init.c",
+        "sha256": "e91882a7ca24df21d9ef0c762b714264b72d32b5fb9348ea239e39ce968805e6",
+        "bytes": 11926
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_stc.c",
+        "sha256": "0691a280c0a99e9c3f06002046f396e76dad019deb84be80b3f36ad523c0baff",
+        "bytes": 3942
+      },
+      {
+        "path": "qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_sysfs.c",
+        "sha256": "282cd11830a3157610b1c49059ab48995ec207464290e8c8090f5ca789a588bc",
+        "bytes": 1063
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/Kconfig",
+        "sha256": "383fa96e03dd2955c0f09fa7d9794bd367ac0970eab268aa6149be3c283f4b81",
+        "bytes": 900
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_altmode.c",
+        "sha256": "721abf7a6d13bc64c432edc0e3c5429eb751fb1009befb918ebce9682f1d5237",
+        "bytes": 8012
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_altmode.h",
+        "sha256": "8681a081eb94c3da30c2b4989b6b0fc032a843c3fbde3de3b2683cd06b6f883f",
+        "bytes": 420
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_audio.c",
+        "sha256": "645dfbc6e679004a891a9f74e0e8c4fc2f4a184999c53116cc2ba66cf7dd7a5d",
+        "bytes": 24144
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_audio.h",
+        "sha256": "eaf5a2159172ebe81df80c5dae1f51e35930ce010045e1acff1ef31277faed02",
+        "bytes": 1883
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_aux.c",
+        "sha256": "429be24f6f7c07a84f0854904b9f15f2ba88d599974f77cad84bd6331219d224",
+        "bytes": 24282
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_aux.h",
+        "sha256": "f80a3672f2ea0d1bf5a74d273221eb746269784ecd396adf82a10b2c65956e30",
+        "bytes": 2411
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_aux_bridge.c",
+        "sha256": "0f13acf4bbc13b9d148b845142f1de02bb48da7d348ee59f81fbab8aed5d8c82",
+        "bytes": 2482
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_aux_bridge.h",
+        "sha256": "84a064da80c069c841c865e5f096b0e5fbf9bafae12a2d490c459b5d75823249",
+        "bytes": 4278
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_bridge_hpd.c",
+        "sha256": "cac43bed8cfbd7f4c4c7a411b1e23c4c7bcdf33fb6c807899102b67757fcff8d",
+        "bytes": 4687
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_bridge_hpd.h",
+        "sha256": "9ec0300fd10eeb57a9c6196c359a163d30e579585045cac4766f87b7284f9968",
+        "bytes": 1217
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_catalog.c",
+        "sha256": "bc8df875bed0db82e93417bfab7278b0304f9450b952ba0625e6b2179a3312b6",
+        "bytes": 76806
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_catalog.h",
+        "sha256": "6ef4fb7bf274d5c3f59f8ab2381d029083f692bfaa9550226f7535e0412d8691",
+        "bytes": 9589
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_catalog_v200.c",
+        "sha256": "f92542722d54b3c398b0d535e1a69b0ea91f39bf205a7f1b2200448998418280",
+        "bytes": 6673
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_catalog_v420.c",
+        "sha256": "07d1f6f4d98f9c2c5fd35cd7a4ca9ace66565b4cf3ff8f57f9f8f42aafe0e1dc",
+        "bytes": 14444
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_ctrl.c",
+        "sha256": "551e34f7e269409d750432fd84f02ee19584b316fcb7f81725ab8ddcc173429e",
+        "bytes": 43280
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_ctrl.h",
+        "sha256": "22808fd185008c6679dce4f21677f6f56b524bbef46e1a7ca2d69c93a4d9cdbe",
+        "bytes": 1854
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_debug.c",
+        "sha256": "83787d62c03712fed1de4564b1fb194bb642a3e2ea927f0fe1df307fdbb4cf04",
+        "bytes": 58377
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_debug.h",
+        "sha256": "41ede0c57f37af0f8afcda590dfac57f6b0f810ab74fa29a10b8c757aaa9e578",
+        "bytes": 6567
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_display.c",
+        "sha256": "9425b807463ac6e2775832803daa35e923ad6ebeb8bc42afb1d02bb48dc0266e",
+        "bytes": 165828
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_display.h",
+        "sha256": "0f4ade8ce9a50d49a552013a67e4b5563082ef80027987becc27e4c3ab954381",
+        "bytes": 4616
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_drm.c",
+        "sha256": "08eb168ad79ee2a3967552cc427f62ba3efa4c8352501532a116e46a49fcc106",
+        "bytes": 17579
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_drm.h",
+        "sha256": "785ff44c6be24081192b2110068192e2bbf291103acaf03b60ebdcf8ef411897",
+        "bytes": 7456
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_gpio_hpd.c",
+        "sha256": "82504ec25c6f41231718a49f1d82b1602a29941967110b368ca995d22c61a8b3",
+        "bytes": 6941
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_gpio_hpd.h",
+        "sha256": "048b111907a329e49e989277ba6379f3f6230e0dc6854c20395910d20161f040",
+        "bytes": 660
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_hdcp2p2.c",
+        "sha256": "9517eff839fada0629abbe21b03334f7f63909e9154ff873be8fa13e010f9226",
+        "bytes": 24617
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_hpd.c",
+        "sha256": "fa068a4e9e82e153715744a1643e22e90d5a32346ade449df38a3852c8439a96",
+        "bytes": 2574
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_hpd.h",
+        "sha256": "1548e2ff7b7c4e242d4bb3634ca235bbe237248892e5b3e5d4d13ef1a9d91785",
+        "bytes": 3373
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_link.c",
+        "sha256": "6cd1fc221f8d0bc563f9bc335b15dfc9939759b2dbe1336e8d1f4b296f9f4134",
+        "bytes": 46623
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_link.h",
+        "sha256": "bf6ad27a27cf3d45caf99b2b56c6f4af3673f16872d2dc94499d899bd4133562",
+        "bytes": 7166
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_lphw_hpd.c",
+        "sha256": "c445d5fbb302f1891a83294f68f0dea934723a8de05249cefbab126f08bc80f7",
+        "bytes": 10228
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_lphw_hpd.h",
+        "sha256": "c422e998744f62dc22c425b175c145bb40853b7bdb7753f61f36281f504b6c98",
+        "bytes": 875
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_mst_drm.c",
+        "sha256": "7239752f9a96484ddc12fcbbbf7ef6e81fd253ac5e2750c0ea17d63262c649f4",
+        "bytes": 52295
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_mst_drm.h",
+        "sha256": "14365868141bebb620e814fd36c6e6de86a4ecdc0033722c2f3fd4eb479544f1",
+        "bytes": 1691
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_mst_sim.c",
+        "sha256": "fa7231a70a613bb04375a7265545e5879d0810dc1731a24d7cb99695c99996f0",
+        "bytes": 37366
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_mst_sim.h",
+        "sha256": "3e7f4911e429c7fc63cc0a92ac1369bd8404276a0a9abca7d0b4981e710a331c",
+        "bytes": 1658
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_mst_sim_helper.c",
+        "sha256": "a50c004aed6daf25c802d021e236834af6a7768a62e0785e66127e3c12c53cc4",
+        "bytes": 26537
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_mst_sim_helper.h",
+        "sha256": "d3d676ea360b2326f1d8554bedf34bbdcbb7fdd80857d06d3b246f4395b66565",
+        "bytes": 4692
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_panel.c",
+        "sha256": "7ec7c5b82460a9893fe4e8731167641721946779d0b2853d5674671b7befc0da",
+        "bytes": 100611
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_panel.h",
+        "sha256": "9a5e63a8d2d69d9aa0ad16be576a6f475fd9f21e1c3181bf65529521e3095d6f",
+        "bytes": 7106
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_parser.c",
+        "sha256": "d5a855c46a6425c5b85e1440de57bdf4382ab8b918629bd09cccd7fb1c3bd8bf",
+        "bytes": 50899
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_parser.h",
+        "sha256": "b623627112305447bfbd8492fa612cfcdb63f860927338938d8ed8e033cc420f",
+        "bytes": 9573
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_pll.c",
+        "sha256": "8c224625b86e0c7c0c206e0bb2588458a5198b89f18359cc30c7812f7867ac8f",
+        "bytes": 4013
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_pll.h",
+        "sha256": "f2fe1d5634c8ef011de8becf2e27edd7336ed52a73d36710df9738adbabab4af",
+        "bytes": 3954
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_pll_4nm.c",
+        "sha256": "3f18dd10fe1532c39374f2843deb828df46f0cae6322e22aa8d3ee98578d2f28",
+        "bytes": 24065
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_pll_5nm.c",
+        "sha256": "2dcf371a12f82ac151c0f384057beceb5574142ca6cd36b05ee7403537a90dad",
+        "bytes": 23121
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_power.c",
+        "sha256": "09423f80a4de274697a7ffa4ca2e919377c52692decad8220b6d42f6dbaf2ac3",
+        "bytes": 35147
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_power.h",
+        "sha256": "5a6882376af33ecd40a63377ed441fef925a5e7817d71a837be4cf76cf091dc6",
+        "bytes": 2491
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_reg.h",
+        "sha256": "8ff544a44a979a20c40422ac3b49bfbdb3783e7151f61fd8ddd5356d51e6d170",
+        "bytes": 18480
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_usbpd.c",
+        "sha256": "7cf58b65d225ac8bc86251b1bd1ee154e189cecba58403e009623ee9e9919d9c",
+        "bytes": 13919
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/dp_usbpd.h",
+        "sha256": "90bd9c2a8f3dfc5e193da5d3a2b9b35bbac5117c924d2a87ef365ea50378b72e",
+        "bytes": 1923
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/secdp.h",
+        "sha256": "2e03709c1b80f36aa439e660cadbe98b529e21f5e5ea4fa2c7fa3dca2c32d79f",
+        "bytes": 15361
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/secdp_bigdata.c",
+        "sha256": "450324c146e718e7cc0f65f87847f9a8bb5f05d5de13457385d8ec2b1c546b73",
+        "bytes": 9228
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/secdp_logger.c",
+        "sha256": "4aebb312ea657c2741286821e4c87d957bca8b0ad6f603600df2a150903c64d2",
+        "bytes": 5117
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/secdp_sysfs.c",
+        "sha256": "c78d319726cbc71144163fc8d5b83c915ae6c893c429fc87e35ae6d530b0d1ff",
+        "bytes": 37358
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/secdp_sysfs.h",
+        "sha256": "879aa0d4e9ad0587544fa718a621a798496c49eb0bc0dfdad7d559127d6bd192",
+        "bytes": 1199
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/secdp_unit_test.c",
+        "sha256": "7f249302fbee3622cc8f40d1de2f8774ef95c4af32a65f5970d79d874410c609",
+        "bytes": 6229
+      },
+      {
+        "path": "qcom/opensource/display-drivers/msm/dp/secdp_unit_test.h",
+        "sha256": "0d53e6058a1dc551b12e4b7dcd3ce58a75702e1cf43d6000baa8101e99f09020",
+        "bytes": 710
+      }
+    ]
+  },
+  "qualification": "Source inputs only; not a complete P5 implementation or delivery"
+}

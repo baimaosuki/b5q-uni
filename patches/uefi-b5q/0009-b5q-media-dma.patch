@@ -1,0 +1,170 @@
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+@@ -0,0 +1,101 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#include <Uefi.h>
++#include <Library/BaseMemoryLib.h>
++#include <Library/CacheMaintenanceLib.h>
++#include <Library/DebugLib.h>
++#include <Library/MemoryAllocationLib.h>
++#include <Library/UefiBootServicesTableLib.h>
++#include "../../Include/B5qMediaDma.h"
++#include "PcieDmaTables.h"
++typedef struct {UINT32 Vmsa,Reserved;UINT64 Ttbr0,Ttbr1;UINT32 Mair0,Mair1,Sctlr,Tcr,Tcr2,Padding;} HAL_CONFIG;
++typedef UINT32(EFIAPI *HAL_CREATE)(VOID**);
++typedef UINT32(EFIAPI *HAL_DELETE)(VOID*);
++typedef UINT32(EFIAPI *HAL_ATTACH)(VOID*,CONST CHAR8*,UINT32,UINT32);
++typedef UINT32(EFIAPI *HAL_CONFIGURE)(VOID*,HAL_CONFIG*);
++typedef struct {HAL_CREATE Create;HAL_DELETE Delete;HAL_ATTACH Attach,Detach;HAL_CONFIGURE Configure;} HAL_TABLE;
++typedef struct {UINT64 Revision;VOID(EFIAPI *Init)(CONST HAL_TABLE**);VOID(EFIAPI *Deinit)(VOID);} HAL_PROTOCOL;
++STATIC_ASSERT(sizeof(HAL_CONFIG)==48,"Original HAL configure ABI");
++STATIC EFI_GUID mHalGuid={0x54b6d3b4,0x5d33,0x4f91,{0x86,0x00,0x6c,0x41,0xd5,0xde,0xb1,0x9a}};
++STATIC EFI_GUID mMediaGuid=B5Q_MEDIA_DMA_PROTOCOL_GUID;
++STATIC B5Q_MEDIA_DMA_RESULT mResult[2];
++STATIC BOOLEAN mAttempted[2];
++
++STATIC EFI_STATUS PrepareDomain(B5Q_MEDIA_DMA_RESULT *R)
++{
++ HAL_PROTOCOL *Protocol=NULL;CONST HAL_TABLE *Hal=NULL;VOID *Domain=NULL;
++ EFI_STATUS Status=gBS->LocateProtocol(&mHalGuid,NULL,(VOID**)&Protocol);R->Locate=Status;
++ if(EFI_ERROR(Status))return Status;
++ if(!Protocol||Protocol->Revision!=0x10002||!Protocol->Init)return EFI_INCOMPATIBLE_VERSION;
++ Protocol->Init(&Hal);
++ if(!Hal||!Hal->Create||!Hal->Delete||!Hal->Attach||!Hal->Configure)return EFI_COMPROMISED_DATA;
++ EFI_PHYSICAL_ADDRESS Base=0xffffffffULL;
++ UINTN Pages=(UINTN)((R->PoolBytes+0x200000)/EFI_PAGE_SIZE);
++ Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,Pages,&Base);
++ if(EFI_ERROR(Status))return Status;
++ UINT64 Aligned=ALIGN_VALUE(Base,0x200000);
++ if(Base<0x80000000ULL||Aligned>0x100000000ULL-R->PoolBytes){gBS->FreePages(Base,Pages);return EFI_UNSUPPORTED;}
++ UINTN Head=(UINTN)((Aligned-Base)/EFI_PAGE_SIZE),Tail=Pages-Head-(UINTN)(R->PoolBytes/EFI_PAGE_SIZE);
++ if(Head)gBS->FreePages(Base,Head);
++ if(Tail)gBS->FreePages(Aligned+R->PoolBytes,Tail);
++ R->PoolBase=Aligned;
++ EFI_PHYSICAL_ADDRESS Table=0xffffffffULL;
++ Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,32,&Table);
++ if(EFI_ERROR(Status))goto Fail;
++ R->TableBase=Table;R->TableBytes=32*EFI_PAGE_SIZE;
++ ZeroMem((VOID*)(UINTN)Table,(UINTN)R->TableBytes);
++ ZeroMem((VOID*)(UINTN)R->PoolBase,(UINTN)R->PoolBytes);
++ USB_DMA_TABLES Tables={(VOID*)(UINTN)Table,Table,0,32};
++ R->Map=B5qPcieMapPool(&Tables,R->Iova,R->PoolBase,R->PoolBytes)?0:1;
++ if(R->Map){Status=EFI_COMPROMISED_DATA;goto Fail;}
++ WriteBackDataCacheRange((VOID*)(UINTN)Table,Tables.Used*EFI_PAGE_SIZE);
++ WriteBackDataCacheRange((VOID*)(UINTN)R->PoolBase,(UINTN)R->PoolBytes);
++ __asm__ volatile("dsb sy":::"memory");
++ R->Create=Hal->Create(&Domain);
++ if(R->Create||!Domain){Status=EFI_DEVICE_ERROR;goto Fail;}
++ HAL_CONFIG Config={0,0,Table,0,0x00ff0400,0,0x00c000e7,0x00802010,0x0003c071,0};
++ R->Configure=Hal->Configure(Domain,&Config);
++ if(R->Configure){Status=EFI_DEVICE_ERROR;goto Fail;}
++ // These original IORT tuples select only non-secure audio/video streams.
++ // No Display client, protected register scan or secure video stream is used.
++ CONST BOOLEAN Audio=R->Kind==B5Q_MEDIA_AUDIO;
++ CONST CHAR8 *Client=Audio?"LPASS":"VIDEO";
++ R->Attach[0]=Hal->Attach(Domain,Client,Audio?0x03000001:0x03000000,0);
++ if(R->Attach[0]){Status=EFI_DEVICE_ERROR;goto Fail;}
++ R->Attach[1]=Hal->Attach(Domain,Client,Audio?0x0300000e:0x03000005,0);
++ if(!R->Attach[1])return EFI_SUCCESS;
++ Status=EFI_DEVICE_ERROR;
++Fail:
++ // An attachment failure may leave a hardware reference. Preserve its pool
++ // and tables; never free or reroute partially attached streams at EBS.
++ if(R->Attach[0]==B5Q_MEDIA_NOT_RUN) {
++  if(Domain&&!R->Create)Hal->Delete(Domain);
++  if(R->TableBase)gBS->FreePages(R->TableBase,(UINTN)(R->TableBytes/EFI_PAGE_SIZE));
++  if(R->PoolBase)gBS->FreePages(R->PoolBase,(UINTN)(R->PoolBytes/EFI_PAGE_SIZE));
++  R->TableBase=R->TableBytes=R->PoolBase=0;
++ }
++ return Status;
++}
++STATIC VOID EFIAPI PrepareMedia(UINT32 Kind,B5Q_MEDIA_DMA_RESULT *Out)
++{
++ if(!Out)return;
++ if(Kind!=B5Q_MEDIA_AUDIO&&Kind!=B5Q_MEDIA_VIDEO){ZeroMem(Out,sizeof(*Out));Out->PrepareStatus=EFI_INVALID_PARAMETER;return;}
++ UINTN Index=Kind-1;B5Q_MEDIA_DMA_RESULT *R=&mResult[Index];
++ if(!mAttempted[Index]) {
++  mAttempted[Index]=TRUE;R->Version=1;R->Kind=Kind;
++  const BOOLEAN Audio=Kind==B5Q_MEDIA_AUDIO;
++  R->Sid[0]=Audio?0x00801001:0x1940;R->Sid[1]=Audio?0x1061:0x1947;
++  R->Iova=Audio?0xa0000000ULL:0x40000000ULL;R->PoolBytes=Audio?0x200000ULL:0x8000000ULL;
++  R->Locate=EFI_NOT_STARTED;R->RetentionStatus=EFI_NOT_STARTED;
++  R->Create=R->Configure=R->Attach[0]=R->Attach[1]=R->Map=B5Q_MEDIA_NOT_RUN;
++  R->PrepareStatus=PrepareDomain(R);
++  DEBUG((DEBUG_ERROR,"B5Q-MEDIADMA: kind=%u locate=%r create=%x configure=%x attach=%x/%x map=%x result=%r pool=%lx+%lx iova=%lx table=%lx+%lx\n",
++   Kind,(EFI_STATUS)R->Locate,R->Create,R->Configure,R->Attach[0],R->Attach[1],R->Map,
++   (EFI_STATUS)R->PrepareStatus,R->PoolBase,R->PoolBytes,R->Iova,R->TableBase,R->TableBytes));
++ }
++ *Out=*R;
++}
++STATIC B5Q_MEDIA_DMA_PROTOCOL mProtocol={1,PrepareMedia};
++EFI_STATUS InstallB5qMediaDma(EFI_HANDLE ImageHandle)
++{
++ return gBS->InstallMultipleProtocolInterfaces(&ImageHandle,&mMediaGuid,&mProtocol,NULL);
++}
+diff --git a/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h b/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h
+@@ -0,0 +1,18 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_MEDIA_DMA_H
++#define B5Q_MEDIA_DMA_H
++#define B5Q_MEDIA_DMA_PROTOCOL_GUID \
++ {0x061f797d,0x3cda,0x473e,{0x8e,0x2b,0xd9,0xe1,0x0c,0xe6,0x25,0xd3}}
++#define B5Q_MEDIA_AUDIO 1U
++#define B5Q_MEDIA_VIDEO 2U
++#define B5Q_MEDIA_NOT_RUN 0xffffffffU
++typedef struct {
++ UINT32 Version,Kind,Sid[2];
++ UINT64 Locate;
++ UINT32 Create,Configure,Attach[2],Map,Reserved;
++ UINT64 PoolBase,PoolBytes,Iova,TableBase,TableBytes,PrepareStatus,RetentionStatus;
++} B5Q_MEDIA_DMA_RESULT;
++typedef VOID(EFIAPI *B5Q_MEDIA_PREPARE)(UINT32 Kind,OUT B5Q_MEDIA_DMA_RESULT *);
++typedef struct {UINT64 Revision;B5Q_MEDIA_PREPARE Prepare;} B5Q_MEDIA_DMA_PROTOCOL;
++STATIC_ASSERT(sizeof(B5Q_MEDIA_DMA_RESULT)==104,"Media DMA wire ABI");
++#endif
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+@@ -7,6 +7,7 @@
+ 
+ EFI_STATUS InstallB5qUsbDma (EFI_HANDLE ImageHandle);
+ EFI_STATUS InstallB5qPcieDma (EFI_HANDLE ImageHandle);
++EFI_STATUS InstallB5qMediaDma (EFI_HANDLE ImageHandle);
+ 
+ STATIC VOID EFIAPI
+ LogHandoff (EFI_EVENT Event, VOID *Context)
+@@ -28,6 +29,8 @@
+   DEBUG ((DEBUG_ERROR, "B5Q-USBDMA: handoff protocol %r\n", UsbStatus));
+   EFI_STATUS PcieStatus = InstallB5qPcieDma (ImageHandle);
+   DEBUG ((DEBUG_ERROR, "B5Q-PCIEDMA: handoff protocol %r\n", PcieStatus));
++  EFI_STATUS MediaStatus=InstallB5qMediaDma(ImageHandle);
++  DEBUG((DEBUG_ERROR,"B5Q-MEDIADMA: handoff protocol %r\n",MediaStatus));
+   EFI_EVENT Event;
+   return gBS->CreateEventEx (EVT_NOTIFY_SIGNAL, TPL_CALLBACK, LogHandoff, NULL,
+                              &gEfiEventReadyToBootGuid, &Event);
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+@@ -9,6 +9,7 @@
+   B5qHandoffDxe.c
+   UsbDma.c
+   PcieDma.c
++  MediaDma.c
+ [Packages]
+   MdePkg/MdePkg.dec
+ [LibraryClasses]
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
+@@ -33,7 +33,7 @@
+ // The native SPI consumer uses that doorbell, not sheng's nonexistent MSI141.
+ // Like Samsung pci-msm-msi.c, map the register page through the PCIe domain.
+ // Keep Device-nGnRnE (MAIR Attr0), separate from the Normal-WB DMA pool.
+-STATIC BOOLEAN B5qPcieMapMsi(USB_DMA_TABLES *Tables)
++STATIC inline BOOLEAN B5qPcieMapMsi(USB_DMA_TABLES *Tables)
+ {
+   if(Tables->Used<3)return FALSE;
+   UINT64 *L1=UsbDmaChild(Tables,&Tables->Pages[0]);

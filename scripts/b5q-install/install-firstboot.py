@@ -151,7 +151,7 @@ done < /proc/mounts
         image = directory / filename
         print(f'Writing {filename} -> {name} ({record["bytes"]} bytes)...', flush=True)
         with image.open('rb') as source:
-            subprocess.run(adb + ['shell', '-T', f'dd of=/dev/block/by-name/{name} bs=4194304 conv=fsync'], stdin=source, check=True)
+            subprocess.run(adb + ['shell', '-T', f'dd of=/dev/block/by-name/{name} bs=4096 conv=fsync'], stdin=source, check=True)
         print(f'Verifying {name} readback...', flush=True)
         expected = record['sha256']
         # Read exactly the image extent, not the unused tail of the partition.

@@ -1,0 +1,198 @@
+{
+  "passed": true,
+  "original_workspace_required": false,
+  "original_workspace_deleted": false,
+  "source_project": "/home/baimao/zflip5",
+  "moves": {
+    "task": "Remove active b5q dependencies on the nabu workspace",
+    "apfs_fuse_source_revision": "66b86bd525e8cb90f9012543be89b1f092b75cf3",
+    "transfers": [
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/p016-zeta-pac/tools/apfs-fuse",
+        "destination": "tools/apfs-fuse",
+        "method": "same-filesystem rename",
+        "inode_preserved": true,
+        "destination_stat": {
+          "inode": 43557497,
+          "device": 66305,
+          "size_bytes": 4096
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/p025-m2v/toolchain/llvm21",
+        "destination": "tools/llvm21",
+        "method": "same-filesystem rename",
+        "inode_preserved": true,
+        "destination_stat": {
+          "inode": 43952108,
+          "device": 66305,
+          "size_bytes": 4096
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/p020-input/local-sdk/macsdk/Library/Developer/CommandLineTools/SDKs/MacOSX26.5.sdk",
+        "destination": "tools/macos-sdk/MacOSX26.5.sdk",
+        "method": "same-filesystem rename",
+        "inode_preserved": true,
+        "destination_stat": {
+          "inode": 44045577,
+          "device": 66305,
+          "size_bytes": 4096
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/assets/shared-cache/System/Library/dyld",
+        "destination": "inputs/macos-27.3-26C5035r/shared-cache",
+        "method": "same-filesystem rename",
+        "inode_preserved": true,
+        "destination_stat": {
+          "inode": 43406423,
+          "device": 66305,
+          "size_bytes": 20480
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/downloads/UniversalMac_27.3_26C5035r_Restore.ipsw",
+        "destination": "inputs/macos-27.3-26C5035r/UniversalMac_27.3_26C5035r_Restore.ipsw",
+        "method": "same-filesystem rename",
+        "inode_preserved": true,
+        "destination_stat": {
+          "inode": 43389723,
+          "device": 66305,
+          "size_bytes": 27206093542
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/scripts/read_xnu2log.py",
+        "destination": "tools/xnu2log/scripts/read_xnu2log.py",
+        "method": "small source copy",
+        "SHA256": "4222aff70e94ce002a2c91ceb0d30cc96dfb82e86b809c30507194f68b0afe0d",
+        "destination_stat": {
+          "inode": 31478970,
+          "device": 66305,
+          "size_bytes": 4082
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/scripts/nabu_log_volume.py",
+        "destination": "tools/xnu2log/scripts/nabu_log_volume.py",
+        "method": "small source copy",
+        "SHA256": "2627c66e9bb4eebfcc5baa746b755c52dfc4f76c930da3511a3bd53f0363808d",
+        "destination_stat": {
+          "inode": 31478971,
+          "device": 66305,
+          "size_bytes": 12282
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/scripts/make_xnu2log.py",
+        "destination": "tools/xnu2log/scripts/make_xnu2log.py",
+        "method": "small source copy",
+        "SHA256": "0856eccb984f5133d2e1bd9318045f993ef34771b16cd3e86ad92784afc5e729",
+        "destination_stat": {
+          "inode": 31478972,
+          "device": 66305,
+          "size_bytes": 3985
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/config/nabulog.json",
+        "destination": "tools/xnu2log/config/nabulog.json",
+        "method": "small source copy",
+        "SHA256": "586d579458c9d271319fe2b144bed3777527328647c48c1c7d159e4435c415d8",
+        "destination_stat": {
+          "inode": 31478973,
+          "device": 66305,
+          "size_bytes": 617
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/nabu-27.3-26C5035r-esp-session-aeabf17/cpu-userland-rules.json",
+        "destination": "inputs/reference-os-policies/cpu-userland-rules.json",
+        "method": "small source copy",
+        "SHA256": "5b79aa1eac9bdd828d24f82a9b7e5e9caf97b9b521b7506343a1a87e45040290",
+        "destination_stat": {
+          "inode": 31478974,
+          "device": 66305,
+          "size_bytes": 3668
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/backdrop-26C5035r.json",
+        "destination": "inputs/reference-os-policies/backdrop-26C5035r.json",
+        "method": "small source copy",
+        "SHA256": "0809e4e5c08b570ecaa81d2f511e6fac30b1bf93c3110f27dc2eadf49e0b525e",
+        "destination_stat": {
+          "inode": 31478975,
+          "device": 66305,
+          "size_bytes": 1581
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/safe-aperture-26C5035r.json",
+        "destination": "inputs/reference-os-policies/safe-aperture-26C5035r.json",
+        "method": "small source copy",
+        "SHA256": "f24be054ace19b2350fe146973ae185c5690756b63899eb97e16d6e20c3b3725",
+        "destination_stat": {
+          "inode": 31478976,
+          "device": 66305,
+          "size_bytes": 885
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/magnify-26C5035r.json",
+        "destination": "inputs/reference-os-policies/magnify-26C5035r.json",
+        "method": "small source copy",
+        "SHA256": "fa81c2558477ba9247bd2e25ff3aeac86160eebd0835ded21a4dfe07cc570c8a",
+        "destination_stat": {
+          "inode": 31478977,
+          "device": 66305,
+          "size_bytes": 979
+        }
+      },
+      {
+        "source": "/home/baimao/nabu_macos/out/nabu-27.3-fresh/source/devices/nabu/compat/cpu-display/managed-tcc-26C5035r.json",
+        "destination": "inputs/reference-os-policies/managed-tcc-26C5035r.json",
+        "method": "small source copy",
+        "SHA256": "0b659d605250ff69aaa8e3cf745cbe77a7243343853f55864ddc845a3efb801e",
+        "destination_stat": {
+          "inode": 31478978,
+          "device": 66305,
+          "size_bytes": 1237
+        }
+      }
+    ],
+    "original_workspace_removed": false,
+    "device_accessed": false,
+    "build_or_CI_triggered": false,
+    "validation": "pending",
+    "critical_input_SHA256": {
+      "tools/apfs-fuse/ApfsLib/DiskStruct.h": "082f02eacc0508fac29d911869a224f12b03707d03836cefc8452cb4030d33cb",
+      "tools/apfs-fuse/build/libapfs.a": "81068e785c9a3fafbf7748a1b5a20e8b966fd17b96ccf5fca926cc494105a240",
+      "tools/apfs-fuse/build/libcrypto.a": "afcc0f71a2fcf1895c6957d806796367289d1bdb8d46d9bea1272bd2762170d1",
+      "tools/apfs-fuse/build/liblzfse.a": "7f73ee64859c2517adf9b1eeba43dabb1daeb228384b7568a4b9770a6a4f828b",
+      "tools/llvm21/usr/lib/llvm-21/bin/clang": "ca624b13939495e48e99218a7def4039e443b9584dfccb161521952bd4a65289",
+      "tools/llvm21/usr/lib/llvm-21/bin/llvm-objdump": "f0fe662df04bf49d0dea63d8a03a9fa6bc084581b3505fd8b4f6fbb02fd318c0",
+      "inputs/macos-27.3-26C5035r/shared-cache/dyld_shared_cache_arm64e": "f4aefea64cb86bf2f82a0af1e0f6fde7f56b2ef67eaeba9ff3ae0cdfc1e1c36f",
+      "inputs/macos-27.3-26C5035r/shared-cache/dyld_shared_cache_arm64e.01": "b954fa0249bb2c9ab5b3d7207bb05f4767bb70d3c675b3cab6a37aafc9c6c890"
+    },
+    "IPSW_BuildManifest_SHA256": "58f18ab4195aef17c4d398bc8d9275b64f245730f637cea935343b4dfc2dff4a"
+  },
+  "active_old_workspace_references": 0,
+  "dependent_symlinks": 0,
+  "isolation": "bwrap mounts an empty tmpfs over /home/baimao/nabu_macos for real subprocess tests",
+  "checks": {
+    "APFS_account_owners_policy_readback": true,
+    "actual_log_writer_11_cases": true,
+    "real_v33_journal_decode": true,
+    "absentd_21_cases_ASan_UBSan": true,
+    "native_libxpc_3_cases_and_5_real_jobs": true,
+    "arm64e_2_objects_zero_missing_or_duplicate_symbols": true,
+    "returned_CI_6_objects_PAC326_and_zero_apps_smmu": true,
+    "upstream_original_IPSW_override": true
+  },
+  "phone_access": false,
+  "images_changed": false,
+  "full_build_or_CI_run": false,
+  "historical_source_records_preserved": true
+}

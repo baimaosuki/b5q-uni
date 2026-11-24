@@ -8,7 +8,7 @@ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--objects',type=P
 s=importlib.util.spec_from_file_location('pacscan',R/'scripts/b5q-install/check-proctop-pac.py');m=importlib.util.module_from_spec(s);s.loader.exec_module(m)
 files=list(a.objects.glob('*.o'));assert len(files)>=6
 reports={}
-objdump=Path('/home/baimao/nabu_macos/out/nabu-27.3-fresh/p025-m2v/toolchain/llvm21/usr/lib/llvm-21/bin/llvm-objdump')
+objdump=R/'tools/llvm21/usr/lib/llvm-21/bin/llvm-objdump'
 for f in files:
  d=m.scan(f);values={}
  for i in d['instructions']:

@@ -12,10 +12,16 @@ def load(path):
 def sha(p):
  with p.open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
 def run(*cmd):subprocess.run(list(map(str,cmd)),check=True)
+def validate_digest_receipt(image,receipt_path,expected_sha256):
+ receipt=json.loads(receipt_path.read_text());stat=image.stat()
+ assert receipt['path']==str(image.resolve()) and receipt['sha256']==expected_sha256
+ assert receipt['full_image_SHA256_calculated'] is True
+ assert receipt['stat']=={key:getattr(stat,key)for key in ('st_dev','st_ino','st_size','st_mtime_ns','st_ctime_ns')},'Data changed since the full SHA256 pass'
 def main():
  p=argparse.ArgumentParser(description=__doc__)
  for n in ('esp','data','manifest','diagnostics','out'):p.add_argument('--'+n,type=Path,required=True)
  p.add_argument('--storage-profile',choices=['tail','userdata'],default='tail')
+ p.add_argument('--data-sha256-receipt',type=Path,help='reuse this session full-image hash only while the exact file stat is unchanged')
  a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
  fs=load(R/'scripts/b5q-install/package-usb-dma-esp.py');fs.image_format(a.esp);run('fsck.fat','-n',a.esp)
  run(sys.executable,R/'scripts/b5q-install/verify-esp-log.py','--esp',a.esp,'--out',a.out/'log-allocation.json')
@@ -87,7 +93,11 @@ def main():
    absent=dest/'private/var/ngpu/bin/b5q-absentd';assert sha(absent)=='29c52a1b79e53b71022c973a071e1e5dc96830445f742263d68276cee3cb9b72'
    assert stats['private/var/ngpu/bin/b5q-absentd']['mode']==0o100755
    return result,absent.read_bytes()
-  install=load(R/'scripts/b5q-install/install-data-ufs.py');manifest=json.loads(a.manifest.read_text());install.local_image(a.data,manifest)
+  install=load(R/'scripts/b5q-install/install-data-ufs.py');manifest=json.loads(a.manifest.read_text())
+  if a.data_sha256_receipt:
+   validate_digest_receipt(a.data,a.data_sha256_receipt,manifest['sha256'])
+   install.local_image_metadata(a.data,manifest)
+  else:install.local_image(a.data,manifest)
   expected_blocks=(fmt.USERDATA_LAST-fmt.USERDATA_FIRST+1 if selected_userdata else fmt.ROOT_LAST-fmt.TAIL_FIRST+1)-fmt.ENVELOPE_BLOCKS
   assert manifest['apfs_blocks']==expected_blocks
   persistent,absent=read_apfs(a.data,'persistent')
@@ -105,7 +115,9 @@ def main():
     f.seek(int(block)*4096);data=f.read(4096);assert hashlib.sha256(data).hexdigest()==digest and fmt.fletcher(data)
    f.seek(-4096,2);assert hashlib.sha256(f.read(4096)).hexdigest()==manifest['tail_block_sha256']
   run(sys.executable,R/'tests/b5q-ufs/test-post-seal.py','--kernel',kernel,'--out',a.out/'post-seal.json')
+  if a.data_sha256_receipt:validate_digest_receipt(a.data,a.data_sha256_receipt,manifest['sha256'])
   (a.out/'disabled-plists-readback.json').write_text(json.dumps(persistent,indent=2)+'\n')
   result=dict(passed=True,CI_core_recompiled=False,board_objects_recompiled=expected_objects,storage_profile=a.storage_profile,board_objects_compiled_this_run=relink.get("board_objects_compiled_this_run",expected_objects),completed_native_source_CI=relink.get("completed_relink_reused_from_CI"),ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),Data=dict(bytes=a.data.stat().st_size,sha256=manifest['sha256'],APFS_volume_uuid=fmt.DATA_UUID,APFS_container_uuid=manifest['container_uuid'],policies_counts={p:len(v['contents'])for p,v in persistent.items()}),profiles=profiles,changed_archive_members=changed_members,loader_sha256=sha(boot/'Drivers/DarwinBoot.efi'),Batch1_absentd_signatures_trusted=[h.hex()for h in hashes],hardware_qualified=False)
+  result['Data_SHA256_verification']=dict(full_image_pass=True,reused_receipt=str(a.data_sha256_receipt.resolve())if a.data_sha256_receipt else None,unchanged_stat_checked_before_and_after=bool(a.data_sha256_receipt))
   (a.out/'images.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
 if __name__=='__main__':main()

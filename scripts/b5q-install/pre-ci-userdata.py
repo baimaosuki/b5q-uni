@@ -9,7 +9,7 @@ def run(name,args,env=None):
  if result.returncode:print((W/(name+'.log')).read_text()[-4000:]);raise SystemExit('FAIL '+name)
  checks.append(dict(name=name,passed=True));print('PASS '+name,flush=True)
 run('records',[sys.executable,'UniXNU/scripts/porting-record.py','check','--device','UniXNU-b5q'])
-for name in ['data-partition','data-queue','data-installer','userdata-installer','batch2-contract','installer','data-grow']:
+for name in ['data-partition','data-queue','data-installer','userdata-installer','data-stream','image-hash-receipt','batch2-contract','installer','data-grow']:
  run(name,[sys.executable,'tests/b5q-ufs/test-'+name+'.py'])
 run('layout',[sys.executable,'scripts/b5q-install/plan-macos-only.py'])
 run('two-storage-target',[sys.executable,'scripts/b5q-install/check-peripheral-target.py','--sources','B5qRamStorage.cpp,B5qUfs.cpp','--reference','artifacts/b5q-esp-new-batch2/esp.img','--objects-out',W/'objects'])

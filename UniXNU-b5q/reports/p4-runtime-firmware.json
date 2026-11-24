@@ -1,0 +1,22 @@
+{
+  "files": {
+    "adsp.mbn": {
+      "bytes": 34773096,
+      "sha256": "681ab07eea92eeb42ce1da35a866105851dd1dfb4f207c1c9fcb5f853be84380"
+    },
+    "adsp_dtb.mbn": {
+      "bytes": 16184,
+      "sha256": "13a0d68a97b0fb04a32c0b478d420ddec821b251e38cd656322b0acdd2cd2e90"
+    },
+    "vpu30_4v.mbn": {
+      "bytes": 2310760,
+      "sha256": "4a3b9ed9e3a46068c491be25ae8180a97550c06ce95be803a586d10e20923a52"
+    },
+    "tfa98xx.cnt": {
+      "bytes": 5096,
+      "sha256": "540934d3f79bbbef1c1503f3e531f2e2cf92a1ec0c735a898f3bed5d7b350f49"
+    }
+  },
+  "hardware_verified": false,
+  "source": "OriginalF7310ZCS7EYF3; ADSPcontainers reconstructed from original signedsplitsegments,allheaders/segments matched"
+}

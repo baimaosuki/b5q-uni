@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Pack the verified USB DMA firmware and an official packed RAM FAT into b5q boot.img."""
+"""Pack the verified USB DMA firmware into b5q boot.img."""
 import argparse
 import gzip
 import hashlib
@@ -64,11 +64,41 @@ def tree_files(path):
     return {p.relative_to(path).as_posix(): record(p) for p in path.rglob("*") if p.is_file()}
 
 
+def repack(original, shim, fd, dtb, ramdisk_bytes):
+    compressed = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=compressed, mtime=0, compresslevel=9) as stream:
+        stream.write(shim + fd)
+    kernel = compressed.getvalue() + dtb
+    header = bytearray(original[:PAGE])
+    struct.pack_into("<II", header, 8, len(kernel), len(ramdisk_bytes))
+    image = bytes(header) + kernel + bytes(pad(len(kernel))) + ramdisk_bytes
+    image += bytes(pad(len(ramdisk_bytes)))
+    assert len(image) <= BOOT_CAPACITY
+    assert split(image) == (shim, fd, dtb, ramdisk_bytes)
+    return image
+
+
+def publish(args, image, details):
+    args.out.mkdir(parents=True, exist_ok=True)
+    boot = args.out / "boot.img"
+    with boot.open("xb") as dest:
+        dest.write(image)
+    details.update(boot=record(boot), source_boot=record(args.baseline),
+                   firmware=record(args.fd), esp=record(args.esp),
+                   boot_partition_bytes=BOOT_CAPACITY, hardware_tested=False)
+    (args.out / "boot-verification.json").write_text(json.dumps(details, indent=2) + "\n")
+    print(json.dumps(details, indent=2))
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    for option in ("fd", "esp", "baseline", "out", "basetools"):
+    for option in ("fd", "esp", "baseline", "out"):
         p.add_argument("--" + option, type=Path, required=True)
+    p.add_argument("--basetools", type=Path)
+    p.add_argument("--physical-esp", action="store_true", help="retain v8's plain FAT16 bootstrap and load the payload from the physical ESP")
     a = p.parse_args()
+    if not a.physical_esp and not a.basetools:
+        p.error("--basetools is required when building a packed RAM FAT")
 
     original = a.baseline.read_bytes()
     assert sha(original) == V8_SHA
@@ -79,6 +109,17 @@ def main():
     ram_driver = loader_pe(fd, RAM_DISK_GUID)
     assert ramdisk.MAGIC in ram_driver and b"UNIXNURAMDISK: packed" in ram_driver
     pe = loader_pe(fd, DARWIN_BOOT_GUID)
+
+    if a.physical_esp:
+        assert len(bootstrap) == 16 << 20 and bootstrap[54:62] == b"FAT16   "
+        assert bootstrap[510:512] == b"\x55\xaa"
+        esp_loader = subprocess.check_output(["mtype", "-i", str(a.esp), "::/" + DARWIN_BOOT_EFI])
+        assert esp_loader == pe
+        image = repack(original, shim, fd, dtb, bootstrap)
+        publish(a, image, {"boot_source": "physical 4Kn UFS ESP",
+                           "bootstrap_fat16_bytes": len(bootstrap), "bootstrap_fat16_sha256": sha(bootstrap),
+                           "darwinboot_sha256": sha(pe), "samsung_dtb_sha256": sha(dtb), "bootshim_sha256": sha(shim)})
+        return
 
     with tempfile.TemporaryDirectory(prefix="b5q-boot-ram-") as tmp:
         d = Path(tmp)
@@ -95,18 +136,9 @@ def main():
         run("fsck.fat", "-n", fat)
         packed = d / "payload.packed"
         ramdisk.encode(fat, packed, a.basetools)
-        compressed = io.BytesIO()
-        with gzip.GzipFile(filename="", mode="wb", fileobj=compressed, mtime=0, compresslevel=9) as stream:
-            stream.write(shim + fd)
-        kernel = compressed.getvalue() + dtb
-        header = bytearray(original[:PAGE])
-        struct.pack_into("<II", header, 8, len(kernel), packed.stat().st_size)
-        image = bytes(header) + kernel + bytes(pad(len(kernel))) + packed.read_bytes()
-        image += bytes(pad(packed.stat().st_size))
-        assert len(image) <= BOOT_CAPACITY
-        new_shim, new_fd, new_dtb, new_ramdisk = split(image)
-        assert (new_shim, new_fd, new_dtb) == (shim, fd, dtb)
-        assert new_ramdisk[:8] == ramdisk.MAGIC and sha(new_ramdisk) == record(packed)["sha256"]
+        new_ramdisk = packed.read_bytes()
+        assert new_ramdisk[:8] == ramdisk.MAGIC
+        image = repack(original, shim, fd, dtb, new_ramdisk)
         decoded = d / "decoded.fat"
         ramdisk.decode(packed, decoded, a.basetools)
         assert record(fat) == record(decoded)
@@ -114,24 +146,15 @@ def main():
         readback.mkdir()
         run("mcopy", "-s", "-i", decoded, "::/EFI", readback)
         assert expected_files == tree_files(readback)
-        a.out.mkdir(parents=True, exist_ok=True)
-        boot = a.out / "boot.img"
-        with boot.open("xb") as dest:
-            dest.write(image)
         details = {
-            "boot": record(boot), "source_boot": record(a.baseline),
-            "firmware": record(a.fd), "esp": record(a.esp),
-            "boot_partition_bytes": BOOT_CAPACITY,
             "ram_fat_logical_bytes": fat.stat().st_size,
             "ram_fat_packed_bytes": packed.stat().st_size,
             "ram_fat_packed_sha256": sha(new_ramdisk),
             "samsung_dtb_sha256": sha(dtb), "bootshim_sha256": sha(shim),
             "bootshim_and_dtb_match_v8": True,
             "all_efi_files_match_esp": True,
-            "hardware_tested": False,
         }
-        (a.out / "boot-verification.json").write_text(json.dumps(details, indent=2) + "\n")
-        print(json.dumps(details, indent=2))
+        publish(a, image, details)
 
 
 if __name__ == "__main__":

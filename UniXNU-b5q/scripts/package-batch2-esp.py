@@ -35,16 +35,16 @@ with tempfile.TemporaryDirectory(prefix='b5q-batch2-package-')as td:
  ram['payload']['adt']['owned_memory_size']='0x100000000'
  ram['payload']['adt'].pop('owned_memory_outside_ranges',None);ram['payload']['adt'].pop('owned_memory_outside_reserved',None)
  (fallback/'kernel.macho.adt').write_bytes(generate(dtb,ram,unique_chip_id=seed,data=True,trust=True,addon=True,root_policies=False))
- args=check_args(ctx.board['payload']['kernel_args']);ramargs=check_args(['b5q-data-ufs=0'if v.startswith('b5q-data-ufs=')else v for v in ctx.board['payload']['kernel_args']])
- (boot/'unixnu.toml').write_text('version = 1\n[boot]\ntimeout = 3\ndefault = "xnu"\n[kits]\nautoload = false\n[[driver]]\npath = "Drivers/DarwinBoot.efi"\n'+
-  '[[entry]]\nid = "xnu"\ntitle = "b5q macOS - Persistent Data"\ntype = "xnu"\npath = "Payloads/kernel.macho"\nargs = '+json.dumps(args)+'\n'+
-  '[[entry]]\nid = "ram-fallback"\ntitle = "b5q - Original 4 GiB RAM Data recovery"\ntype = "xnu"\npath = "Payloads/RAM/kernel.macho"\ninitrd = "Payloads/scratch-data.img"\nargs = '+json.dumps(ramargs)+'\n'+
-  '[[entry]]\nid = "reset"\ntitle = "Restart"\ntype = "action"\naction = "reset"\n[[entry]]\nid = "shutdown"\ntitle = "Power off"\ntype = "action"\naction = "shutdown"\n')
+ from b5q_menu import profiles,config
+ entries=profiles(ctx.board['payload']['kernel_args'])
+ ram.setdefault('adt',{}).setdefault('chosen',{}).setdefault('u32',{})['b5q-feature-mask']=0
+ (fallback/'kernel.macho.adt').write_bytes(generate(dtb,ram,unique_chip_id=seed,data=True,trust=True,addon=True,root_policies=False))
+ (boot/'unixnu.toml').write_text(config(ctx.board['payload']['kernel_args']))
  (stage/'startup.nsh').write_text('\\EFI\\BOOT\\BOOTAA64.EFI\r\n')
  run(sys.executable,R/'scripts/b5q-install/make-xnu2log.py','--out',stage/'XNU2LOG.BIN','--token','411839cbaebac4088c251c0ea57579a2')
  with esp.open('wb')as f:f.truncate(800<<20)
  run('mformat','-i',esp,'-T','204800','-S','5','-c','1','-F','-v','B5QMACOS','::')
  for name in ['EFI','startup.nsh','XNU2LOG.BIN']:run('mcopy','-s','-i',esp,stage/name,'::/')
- metadata=dict(scope='New Batch2; persistent default and original 4GiB RAM recovery; hardware untested',members={str(p.relative_to(stage)):record(p)for p in stage.rglob('*')if p.is_file()},esp=record(esp),normal_no_initrd=True,ram_recovery_seed_sha256=record(assets/'scratch-data.img')['sha256'])
+ metadata=dict(scope='New Batch2; persistent default and original 4GiB RAM recovery; hardware untested',members={str(p.relative_to(stage)):record(p)for p in stage.rglob('*')if p.is_file()},esp=record(esp),normal_no_initrd=True,menu_feature_masks={'full':ctx.board['adt']['chosen']['u32']['b5q-feature-mask'],'daily':0,'safe':0,'ram-fallback':0},menu_arg_bytes={e['id']:len(e['args'].encode())for e in entries},ram_recovery_seed_sha256=record(assets/'scratch-data.img')['sha256'])
  (work/'batch2-package.json').write_text(json.dumps(metadata,indent=2)+'\n')
 print('Packaged New Batch2 800MiB4Kn ESP; persistent default loads no RAM seed; v30 loader retained')

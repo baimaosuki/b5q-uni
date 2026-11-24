@@ -33,6 +33,22 @@ def digest(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def undefined_imports(image):
+    command = image.command(0x2)  # LC_SYMTAB
+    assert command, "Mach-O symbol table is required to verify absentd imports"
+    symoff, count, stroff, strsize = struct.unpack_from("<4I", image.data, command[0] + 8)
+    imports = set()
+    for index in range(count):
+        strx, kind, _, _, _ = struct.unpack_from("<IBBHQ", image.data, symoff + 16 * index)
+        if strx >= strsize or (kind & 0x0E) != 0 or not (kind & 1):
+            continue
+        end = image.data.find(b"\0", stroff + strx, stroff + strsize)
+        assert end >= 0, "Malformed Mach-O symbol string"
+        name = image.data[stroff + strx:end].decode("utf-8")
+        imports.add(name)
+    return imports
+
+
 def run(*command):
     subprocess.run([str(part) for part in command], check=True)
 
@@ -156,9 +172,6 @@ def main():
         assert all(h in trusted for h in hashes)
         assert b"transaction-held" in stand_in and b"/System/Library/Launch" not in stand_in
         absent_image = Image(stand_in)
-        symbols = {name for names in absent_image.symbols().values() for name in names}
-        assert "_xpc_transaction_begin" in symbols
-        assert not any(name.startswith("_CFReadStream") or name.startswith("_CFPropertyList") or name.startswith("_sandbox_init") for name in symbols)
         assert b"com.apple.mobileactivationd" in stand_in and b"com.apple.security.cryptexd" in stand_in
         assert "com.apple.endpointsecurity.endpointsecurityd" not in policy.policies()["disabled.plist"]
         assert stats["private/var/ngpu/bin/b5q-absentd"]["mode"] == 0o100755
@@ -169,9 +182,13 @@ def main():
         assert trust[-1][24:44] in hashes
 
         geometry = {"bytes": esp.stat().st_size, "sha256": digest(esp)}
+        imports = undefined_imports(absent_image)
+        assert "_xpc_transaction_begin" in imports
+        assert not any(name.startswith(("_CFReadStream", "_CFPropertyList", "_sandbox_init")) for name in imports)
         verification = {"kernel_sha256": kernel_sha, "seed_sha256": digest(seed),
                         "data_bytes": logical, "ESP": geometry, "members": new,
                         "launchd_overrides": {key: len(value) for key, value in policy.policies().items()},
+                        "stand_in_undefined_imports": sorted(imports),
                         "changed_archive_members": [], "kernel_and_all_archives_reused": True, "board_builtin_policy":builtin_policy,
                         "board_stand_in_cdhashes":[h.hex() for h in hashes], "hardware_tested": False,
                         "checks": ["FAT32 4Kn", "XNU2LOG allocation", "v30 physical ESP loader", "USB DMA ADT placeholders",

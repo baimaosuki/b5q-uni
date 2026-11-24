@@ -6,11 +6,11 @@ Goal source: `/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b
 | --- | --- | --- |
 | P0 | Samsung touch lifecycle, verbatim sheng pointer, absolute HID fallback; tests, full kernel+UEFI images, independent commit | HOST_VERIFIED_PENDING_HARDWARE; source4108c9e, jointCI45167257160 andimageacceptance PASS |
 | P1 | CC1/CC2, powered Sink+DFP hub, four-byte bus-number, TI/QMP, firmware DMA | HOST_VERIFIED_PENDING_HARDWARE; sourceb1e7ae4,53jointgroups/fullkernel+UEFI/actualimage&PAC PASS |
-| P2 | WCN6855 FIFO Bluetooth, six rails/shared WCN power, Samsung firmware, native macOS addon | IN_PROGRESS; joint P2+P3 delivery required |
-| P3 | QCA6490 ath11k/MHI/QMI/PCIe, shared power, firmware HAL DMA, wpa addon | IN_PROGRESS; target/production helper gates pass, full joint CI pending |
-| P4A | Samsung GPIO107 lid, MAX77705 battery, inner-panel DCS0x51 backlight | NOT_STARTED |
-| P4B | Samsung ADSP/AudioReach/HAL, two TFA9878 amplifiers and HAL DMA | NOT_STARTED |
-| P4C | Iris/VPU30 original firmware, UEFI SID1940/1947 mappings, VideoToolbox | NOT_STARTED |
+| P2 | WCN6855 FIFO Bluetooth, six rails/shared WCN power, Samsung firmware, native macOS addon | HOST_VERIFIED_PENDING_HARDWARE; joint CI45268304105 + actual image acceptance PASS |
+| P3 | QCA6490 ath11k/MHI/QMI/PCIe, shared power, firmware HAL DMA, wpa addon | HOST_VERIFIED_PENDING_HARDWARE; CI45268304105 + paired PCIe firmware45229274907/actual122objects/62PAC PASS |
+| P4A | Samsung GPIO107 lid, MAX77705 battery, inner-panel DCS0x51 backlight | IN_PROGRESS; production services/host/target/PAC pass, integration/CI pending |
+| P4B | Samsung ADSP/AudioReach/HAL, two TFA9878 amplifiers and HAL DMA | IN_PROGRESS; ADSP/retained DMA/stock parser/TDM protocol pass; amplifier transport/HAL/integration incomplete |
+| P4C | Iris/VPU30 original firmware, UEFI SID1940/1947 mappings, VideoToolbox | IN_PROGRESS; retained pool/Iris/VT target+memory tests/PAC pass; full integration/CI pending |
 | P5 | PD VDM, DP PHY/controller/clock/AUX/EDID/training, DPU INTF_DP and external IOMFB | NOT_STARTED |
 | Final | All regressions, SHA256/ADT/args/fixups/APFS policy readback, boot/ESP/addon, four menu profiles, flashing/acceptance commands | NOT_STARTED |
 
@@ -40,3 +40,5 @@ This is stage evidence retained for rollback. The final P0–P5 package, four-pr
 Latest user steering: P2 Bluetooth and P3 Wi-Fi must be delivered together. Complete both production implementations and local gates before joint CI and returned-image acceptance; no Bluetooth-only image handoff.
 
 2026-11-24 delivery steering: combined P2+P3 ESP includes reviewed Wi-Fi wait/Window, USB UTMI-to-PIPE/map-release, and staggered two-finger right-click fixes. P4 and P5 each require a separate ESP and final recheck. No intermediate image is delivered.
+
+P2+P3 accepted stage bytes are retained in `artifacts/b5q-esp-p2-p3/esp.img` (SHA256`a537450f18d2f809649b9fbbb22bd8bcc0cdafba25120d1fda5e83eb8815c146`) and paired `boot.img` (SHA256`d8799ec099cb952b72d7768b46e57cbd94e25bd6a9a3f3f08e278b3410471abd`). Full receipt: reports/p2-p3-final-images.json. P4/P5 and final three-image recheck remain incomplete; no final flash instructions are issued.

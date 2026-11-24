@@ -24,3 +24,4 @@ zzye-b5q-cpu-idle.patch
 zzyf-b5q-amp.patch
 zzzzzzzzzzz-b5q-edge-matrix.patch
 b5q-wireless-runtime.patch
+b5q-media-runtime.patch

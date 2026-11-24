@@ -119,6 +119,8 @@ def full_build(tree, package, out, scripts):
     objects = build_added(package, out / 'board-input', cxx, cflags, llvm, scripts)
     from b5q_wireless import build as build_wireless
     objects += build_wireless(tree,package,out/'wireless')
+    from b5q_media import build as build_media
+    objects += build_media(tree,package,out/'media',Path(cxx),cflags,llvm)
     import hashlib
     (out / 'native-recount-build.json').write_text(json.dumps({
         'B5Q_HAVE_CPU_IDLE_MACH': int(have_idle),

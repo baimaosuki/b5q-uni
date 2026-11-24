@@ -3,11 +3,16 @@
 import argparse,hashlib,json,os,re,subprocess,tempfile
 from pathlib import Path
 R=Path(__file__).resolve().parents[2]
-p=argparse.ArgumentParser(description=__doc__);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
+p=argparse.ArgumentParser(description=__doc__);p.add_argument('--out',type=Path,required=True)
+p.add_argument('--media',action='store_true',help='Include optional P4 audio/video retained-domain patches')
+a=p.parse_args()
 patch=R/'patches/uefi-b5q';records=[]
-groups=[('uefi-b5q','b303410c8e401fc9419ae65a024356ed09a438ef',[*sorted(patch.glob('000[123]-*.patch')),patch/'0005-b5q-physical-esp.patch']),
+groups=[('uefi-b5q','b303410c8e401fc9419ae65a024356ed09a438ef',[*sorted(patch.glob('000[123]-*.patch')),patch/'0005-b5q-physical-esp.patch',patch/'0007-b5q-pcie-dma.patch']),
         ('UniXNU','563595abedfdfa413ad583b66b6176d82007e633',[patch/'0006-unixnu-ramdisk-direct-decompress.patch']),
-        ('UniXNU/drivers/DarwinBoot','5243c68ec332a227fe3680cd5da6d5a0e127035c',[patch/'0004-darwinboot-b5q-usb-dma.patch'])]
+        ('UniXNU/drivers/DarwinBoot','5243c68ec332a227fe3680cd5da6d5a0e127035c',[patch/'0004-darwinboot-b5q-usb-dma.patch',patch/'0008-darwinboot-b5q-pcie-dma.patch'])]
+if a.media:
+ groups[0][2].append(patch/'0009-b5q-media-dma.patch')
+ groups[2][2].append(patch/'0010-darwinboot-b5q-media-dma.patch')
 with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
  for index,(repo,revision,patches)in enumerate(groups):
   dest=Path(td)/str(index);dest.mkdir();paths=set()
@@ -36,4 +41,4 @@ with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
   records.append(dict(repo=repo,revision=revision,patch_sha256={f.name:hashlib.sha256(f.read_bytes()).hexdigest()for f in patches},reconstructed_source_sha256=identities))
 a.out.parent.mkdir(parents=True,exist_ok=True)
 a.out.write_text(json.dumps(dict(passed=True,groups=records,hardware_verified=False),indent=2)+'\n')
-print('PASS all6 CI firmware patches reconstruct exact v30 source; UFSDxe, USB exclusion, memory reservations and direct decompressor gates')
+print('PASS',sum(len(g[2])for g in groups),'firmware patches reconstruct exact current sources; retained DMA, UFSDxe, USB exclusion, memory reservations and direct decompressor gates')

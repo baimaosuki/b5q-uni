@@ -3,7 +3,7 @@
 import argparse,hashlib,json,plistlib,subprocess,sys,tempfile
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
-TOOLS=Path('/home/baimao/nabu_macos/out/nabu-27.3-fresh/p016-zeta-pac/tools/apfs-fuse')
+TOOLS=ROOT/'tools/apfs-fuse'
 PATHS={'private/var/db/.AppleSetupDone':(0,0,0o644),
  'private/var/db/dslocal/nodes/Default/users/baimao.plist':(0,0,0o600),
  'private/var/db/dslocal/nodes/Default/groups/admin.plist':(0,0,0o600),

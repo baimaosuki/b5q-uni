@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Mandatory joint P0+P1 source, hardware-input, production and ABI gates."""
-import hashlib,json,os,subprocess,sys,tempfile
+import hashlib,json,os,subprocess,sys,tempfile,tomllib
 from pathlib import Path
 R=Path(__file__).resolve().parents[2];W=R/'artifacts/b5q-p1-work';W.mkdir(exist_ok=True)
 checks=[]
@@ -12,7 +12,7 @@ def run(name,args):
 run('P0-and-all-desktop-baselines',[sys.executable,'scripts/b5q-install/pre-ci-p0.py'])
 for name in ['usb-p1','v32-boot-typec','usb-inputs-v24','usb-irq','usb-families','v25-usb','v26-geni']:
  run(name,[sys.executable,'tests/b5q-ufs/test-'+name+'.py'])
-run('firmware-input-closure',[sys.executable,'scripts/b5q-install/check-stage-firmware-inputs.py','--out',W/'firmware-inputs.json'])
+run('firmware-input-closure',[sys.executable,'scripts/b5q-install/check-stage-firmware-inputs.py','--out',W/'firmware-inputs.json',*(['--media']if tomllib.loads((R/'UniXNU-b5q/board.toml').read_text()).get('adt',{}).get('chosen',{}).get('u32',{}).get('b5q-feature-mask',0)&63 else[])])
 with tempfile.TemporaryDirectory(prefix='b5q-p1-firmware-test-')as td:
  exe=Path(td)/'usb-dma'
  includes=[R/'uefi-b5q/Platforms/Samsung/b5qPkg/Include',R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe',R/'UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver']

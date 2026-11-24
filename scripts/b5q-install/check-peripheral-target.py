@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Local target compile, xHCI ABI and complete new peripheral-symbol closure."""
-import argparse,json,os,subprocess,sys,tempfile
+import argparse,json,os,subprocess,sys,tempfile,tomllib
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 DEFAULT=ROOT/'tools'
@@ -105,6 +105,22 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
     output=t/(name+'.o');subprocess.run([str(a.compiler),'-target','arm64e-apple-ios27.0','-c',str(assembly),'-o',str(output)],env=env,check=True);kernel_target.check_object(output.read_bytes(),name)
  expected_core={'_sheng_cpu_idle_mach'} if a.native_recount else set()
  available=defined|set(qualified['bindings'])|set().union(*(e for _,_,e in objects))
+ # New wireless entry points are compiled by their own same-target recipe.
+ # Resolve only actual hashed objects, never an allowlist of future symbols.
+ for report_path in [ROOT/'artifacts/b5q-p2-work/target/report.json',ROOT/'artifacts/b5q-p3-work/board-target/report.json']:
+  if not report_path.is_file():continue
+  import hashlib
+  wireless=json.loads(report_path.read_text())
+  for name,digest in wireless['objects'].items():
+   path=Path(name)if Path(name).is_absolute()else report_path.parent/name
+   if path.is_file()and hashlib.sha256(path.read_bytes()).hexdigest()==digest:
+    available.update(n for n,_,kind in object_symbols(path.read_bytes())if kind&1 and kind&0xe)
+ media_report=ROOT/'artifacts/b5q-p4-work/target/report.json'
+ if tomllib.loads((ROOT/'UniXNU-b5q/board.toml').read_text()).get('adt',{}).get('chosen',{}).get('u32',{}).get('b5q-feature-mask',0)&63:
+  media=json.loads(media_report.read_text());assert media['passed']
+  for name,digest in media['objects'].items():
+   path=Path(name);assert path.is_file()and hashlib.sha256(path.read_bytes()).hexdigest()==digest
+   available.update(n for n,_,kind in object_symbols(path.read_bytes())if kind&1 and kind&0xe)
  for stem,imports,exports in objects:
   missing=imports-available;results[stem]['unresolved']=sorted(missing-expected_core)
   results[stem]['expected_new_core_imports']=sorted(imports&expected_core)
