@@ -18,6 +18,7 @@ run('causal','tests/b5q-ufs/test-v33b-causal.py')
 run('dyld-upl','tests/b5q-ufs/test-v33b-dyld-upl.py')
 run('firmware-reservations','tests/b5q-ufs/test-v33b-reservations.py')
 run('addon-reuse-policy','tests/b5q-ufs/test-addon-reuse-policy.py')
+run('iris-pinned-inputs','tests/b5q-ufs/test-iris-pinned-inputs.py')
 run('policy-migration','tests/b5q-ufs/test-v33b-policy.py')
 run('host-abi','tests/b5q-ufs/test-v33b-host-abi.py')
 run('static-gates','scripts/b5q-install/check-v33b-static.py')
@@ -31,6 +32,7 @@ run('cache-local-machine-code','scripts/b5q-install/check-returned-cache.py','--
 run('hid-callback-pac','scripts/b5q-install/check-media-callback-pac.py','--dp','--hid',W/'hid-target/NativeHidInput.o','--out',W/'hid-callback-pac.json')
 files=[*sorted((R/'UniXNU-b5q/package').rglob('*.c')),*sorted((R/'UniXNU-b5q/package').rglob('*.h')),*sorted((R/'UniXNU-b5q/package').rglob('*.cpp')),*sorted((R/'UniXNU-b5q/scripts').glob('*.py')),*sorted((R/'UniXNU-b5q/patches/xnu').glob('*.patch')),R/'UniXNU-b5q/patches/xnu/series',R/'UniXNU-b5q/dts/b5q.dts',R/'UniXNU-b5q/board.toml',R/'UniXNU-b5q/package/b5q-launchd-lite.json',R/'.github/workflows/b5q-p0-p5.yml',*sorted((R/'patches/uefi-b5q').glob('*.patch')),*sorted((R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe').glob('*.[ch]')),R/'uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h',R/'uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c']
 files+=sorted((R/'scripts/b5q-install').glob('*.py'))+sorted((R/'tests/b5q-ufs').glob('*v33b*.py'))+[R/'tests/b5q-ufs/test-addon-reuse-policy.py']
+files+=sorted((R/'UniXNU-b5q/inputs/iris-linux').rglob('*.[ch]'))+[R/'tests/b5q-ufs/test-iris-pinned-inputs.py']
 receipt=dict(passed=True,hardware_verified=False,checks=checks,source_sha256={str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},
  gates={'physical_cause_models':'PASS','memory_ABI_real_DTB_ADT':'PASS','sheng_macos_diff_accounted':'PASS','silent_failure_inventory':'PASS','existing_Data_idempotent_migration':'PASS'},
  native_CI_returned_binary_APFS_verification='Required before final ESP assembly; check-v33b-returned.py',ESP_created=False)

@@ -129,7 +129,12 @@
       {
         "name": "addon-reuse-policy",
         "passed": true,
-        "log_sha256": "32efb176624b88ad4d15fa6209c201cd9d94534db509f668cb7e43b858dd256f"
+        "log_sha256": "fcb223c2d383a5ab78d4d1d3ee67ee544bdda1abf0852041df902d4d96f06ad9"
+      },
+      {
+        "name": "iris-pinned-inputs",
+        "passed": true,
+        "log_sha256": "7a91f6f8b24903d85e1890c1dfe2a3f5b10dc153b1e089d109f87baaace42644"
       },
       {
         "name": "policy-migration",
@@ -368,7 +373,7 @@
       "UniXNU-b5q/scripts/b5q_menu.py": "f31df2066bb4d92c56108ec0520fa0d8a49820850fef670b068028d3a3732bab",
       "UniXNU-b5q/scripts/b5q_peripherals.py": "23a486cc932fe704a49d6f0fad1c66ee37381e7e08fa8d134b28491da40aad27",
       "UniXNU-b5q/scripts/b5q_ramblock.py": "de9a9d9e004d7faa7bd25d2406919495acd097675822d47d41ff24745c23cc79",
-      "UniXNU-b5q/scripts/b5q_video.py": "04a32e727d611a524d56a87dd9ab194f171f5a2feb208a1a6a1676469d396b12",
+      "UniXNU-b5q/scripts/b5q_video.py": "19bee662b0fa984bda44b9fd181967dd2c1c03f09333e7e0322d52cc56a23320",
       "UniXNU-b5q/scripts/b5q_wcn_firmware.py": "2be4035ace587938390c9f483e584e36d4554c2d073b340a49c5a0d753618436",
       "UniXNU-b5q/scripts/b5q_wifi.py": "df2e2e921ed442c1756747be2e4d12cc36ce3baf465e8abf3765a38a4afecd23",
       "UniXNU-b5q/scripts/b5q_wireless.py": "fcab3f379d7261a455321dfda419b6b87caad09f7855c29c9c3e51ccdb2d6346",
@@ -511,7 +516,7 @@
       "scripts/b5q-install/pre-ci-userdata.py": "f39857baeb11fc124319f637b0c6819131f0155cff1c8f009f4870be611b46f6",
       "scripts/b5q-install/pre-ci-v24.py": "8c2e7aa0f3d5a903d0b7c8d30710deeaf63cc3e0a08297572c909ca81b9e7fae",
       "scripts/b5q-install/pre-ci-v33.py": "5a8984af0e66952b06ef8410264d16d8bb94fc1e2b0a23bc1c70925524aa8fb8",
-      "scripts/b5q-install/pre-ci-v33b.py": "b5156d3d7c8d56f09d5a97129772208b3d09d29e233f431e7c8652354277248a",
+      "scripts/b5q-install/pre-ci-v33b.py": "acc535b37bdb6b43e5971ccce49e3d796172255013d9517b94cd12b564669a61",
       "scripts/b5q-install/pre-ci.py": "0faba986ac272f1ed39aab84728098e26340a6db5cadb3b91351af4eff6b1455",
       "scripts/b5q-install/repack-adt-esp.py": "23a9d43f122d41e37cc1987fccb631a4bd322a0eaafb2dc3173ff007746524f2",
       "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
@@ -552,7 +557,12 @@
       "tests/b5q-ufs/test-v33b-host-abi.py": "3d4644c0b7cef673e6dd17e8a4ff3dd9dce3c64bd9a2a09a0b64792f08843474",
       "tests/b5q-ufs/test-v33b-policy.py": "816bb7dededb3df1555c47939c124574e7e32bf6681a2696b8af547ea691747a",
       "tests/b5q-ufs/test-v33b-reservations.py": "bd7b980db74568b8f161b7e12a4d2a44e4889dce3c0b48b2a7943484795ccf16",
-      "tests/b5q-ufs/test-addon-reuse-policy.py": "d7a18cc400c959522cb0d63ba9431c039351bc35f4b102b42bf975965ccb2998"
+      "tests/b5q-ufs/test-addon-reuse-policy.py": "d7a18cc400c959522cb0d63ba9431c039351bc35f4b102b42bf975965ccb2998",
+      "UniXNU-b5q/inputs/iris-linux/d50d994bffa3c7c6db2d8bc4c5f0c55e3f46b0cd/drivers/media/platform/qcom/iris/iris_hfi_gen1_defines.h": "55f3d6df21d3865dcf318793e40fcaf6af7096911fdf91ef20802cdd97f847ed",
+      "UniXNU-b5q/inputs/iris-linux/d50d994bffa3c7c6db2d8bc4c5f0c55e3f46b0cd/drivers/media/platform/qcom/iris/iris_hfi_gen2_defines.h": "4caef320905199464babd26a7cb381866f5420e08a13b542c105a6e845c6463a",
+      "UniXNU-b5q/inputs/iris-linux/d50d994bffa3c7c6db2d8bc4c5f0c55e3f46b0cd/drivers/media/platform/qcom/iris/iris_vpu_buffer.c": "5a377805fb0b68ef20587e1105dc98acc729777d7e6361c734ac75fd54ba8e2e",
+      "UniXNU-b5q/inputs/iris-linux/d50d994bffa3c7c6db2d8bc4c5f0c55e3f46b0cd/drivers/media/platform/qcom/iris/iris_vpu_buffer.h": "8661857988ba99bbc52af2d58a9a31e59ae803a025bc8ec0815148db4a6d70d9",
+      "tests/b5q-ufs/test-iris-pinned-inputs.py": "36d1cfb5136fc8d9633a46e471bf90d46bf6efd940142793fb8ba9fc740ddce0"
     },
     "gates": {
       "physical_cause_models": "PASS",
@@ -641,5 +651,14 @@
     "archive_regression": "artifacts/b5q-v33b-fix-work/one-gmu-member-regression.json",
     "other_members_byte_identical": 50,
     "native_CI_acceptance": "pending"
+  },
+  "network_failures": {
+    "runs": [
+      45411469722,
+      45417673360
+    ],
+    "cause": "HTTP429 fetching unchanged pinned Linux Iris source",
+    "remedy": "four existing SHA-verified public source inputs109715bytes retained with device; no network needed",
+    "offline_input_test": "tests/b5q-ufs/test-iris-pinned-inputs.py"
   }
 }

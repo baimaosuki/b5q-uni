@@ -3,9 +3,19 @@
 No ArmSmmu4KLive/IrisMmu/Sm8550AppsSmmu implementation is selected. Client
 planes use explicit bounded copies through the retained coherent pool.
 """
-import hashlib,json,subprocess,urllib.request
+import hashlib,json,os,subprocess
 from pathlib import Path
 from b5q_adsp import REVISION,replace
+
+def pinned_linux(lock,path):
+    # These four public, hash-locked sources are retained with the device.
+    # CI must not redownload the same inputs from rate-limited raw GitHub.
+    device=Path(os.environ.get('UNIXNU_DEVICE',Path(__file__).resolve().parents[1]))
+    source=device/'inputs/iris-linux'/lock['commit']/path
+    data=source.read_bytes()
+    if hashlib.sha256(data).hexdigest()!=lock['files'][path]:
+        raise ValueError('Iris dependency SHA mismatch: '+path)
+    return data
 
 def prepare(reference,soc,out,fetch=True):
     reference,soc,out=map(Path,(reference,soc,out));out.mkdir(parents=True,exist_ok=True)
@@ -122,9 +132,7 @@ void QcomIrisDeviceRelease(QcomIrisBuffer *b) {
         p=out/'linux'/path
         if not p.exists()or hashlib.sha256(p.read_bytes()).hexdigest()!=digest:
             if not fetch:raise ValueError('Missing pinned Iris file '+path)
-            url='https://raw.githubusercontent.com/torvalds/linux/'+lock['commit']+'/'+path
-            request=urllib.request.Request(url,headers={'User-Agent':'b5q-iris'})
-            with urllib.request.urlopen(request,timeout=60)as response:data=response.read()
+            data=pinned_linux(lock,path)
             if hashlib.sha256(data).hexdigest()!=digest:raise ValueError('Iris dependency SHA mismatch: '+path)
             p.parent.mkdir(parents=True,exist_ok=True);p.write_bytes(data)
     linux=out/'linux/drivers/media/platform/qcom/iris'
