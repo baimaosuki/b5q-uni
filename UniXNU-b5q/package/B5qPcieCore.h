@@ -43,12 +43,15 @@ template<class IO> int train(IO &io) {
     tries=0;while((io.readPhy(0x214)&0x40) && tries++<100)io.delay(100);
     if(io.readPhy(0x214)&0x40)return -14;
     // Requester-ID to SID translation is PCIe PARF, never SMMU MMIO.
+    // qcom_pcie_config_sid_sm8250: BDF[31:16], offset[15:8], NEXT[7:0].
+    // b5q iommu-map: RID0100 -> SID1401, base1400 => offset1.
+    constexpr uint32_t endpointEntry=(0x0100u<<16)|(1u<<8);
     for(unsigned i=0;i<256;i++)io.parf(0x2000+4*i,~0u,0);
     io.parf(0x2c00,1,0);
     uint8_t crc=0;
     const unsigned requester[]={1,0};
     for(unsigned byte: requester){crc^=byte;for(unsigned bit=0;bit<8;bit++)crc=(crc&128)?uint8_t((crc<<1)^7):uint8_t(crc<<1);}
-    io.parf(0x2000+4*crc,~0u,0x01000100);
+    io.parf(0x2000+4*crc,~0u,endpointEntry);
     io.dbi(0x18,~0u,0x00010100);io.dbi(4,0,6);
     io.delay(100000);io.pin(94,0x201,1);io.delay(1000);
     io.parf(0x1b0,0,1u<<8);

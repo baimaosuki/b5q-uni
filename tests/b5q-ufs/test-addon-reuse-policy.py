@@ -16,6 +16,10 @@ with tempfile.TemporaryDirectory(prefix='b5q-reuse-addon-policy-')as td:
  old=td/'gpu-addon.bin';gpu=('Library/GPUBundles/AdrenoMetal.bundle/Contents/MacOS/AdrenoMetal',0o755,b'unchanged signed GPU boundary')
  target='Library/LaunchDaemons/org.unixnu.wifi.supplicant.plist'
  addon.write(old,[gpu,(target,0o644,plistlib.dumps({'Label':expected['Label'],'KeepAlive':True,'ThrottleInterval':3,'RunAtLoad':True}))])
+ refreshed=td/'explicit-refresh.bin'
+ subprocess.run([sys.executable,str(R/'UniXNU-b5q/scripts/refresh-b5q-addon-policy.py'),'--unixnu',str(R/'UniXNU'),'--input',str(old),'--out',str(refreshed)],check=True)
+ proof={n:(mode,b)for n,mode,b in addon.read(refreshed)}
+ assert proof[gpu[0]]==gpu[1:]and plistlib.loads(proof[target][1])==expected
  builder_calls=[];append_calls=[]
  def execute_wifi(request):
   out=Path(request['output']);out.mkdir(exist_ok=True,parents=True);work=td/'runtime-work';work.mkdir(exist_ok=True)

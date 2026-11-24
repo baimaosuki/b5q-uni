@@ -6,12 +6,13 @@ R=Path(__file__).resolve().parents[2];out=R/'artifacts/b5q-p3-work/uefi-target';
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--media',action='store_true');p.add_argument('--dp',action='store_true');a=p.parse_args()
 if a.media or a.dp:out=R/'artifacts/b5q-p4-work/uefi-target';out.mkdir(exist_ok=True)
 build=R/'uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64'
-groups=[(build/'b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe',R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe',['PcieDma.c','B5qHandoffDxe.c']),
+groups=[(build/'b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe',R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe',['PcieDma.c','B5qHandoffDxe.c','UsbDma.c']),
         (build/'DarwinBootPkg/Driver/DarwinBoot',R/'UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver',['DarwinBoot.c'])]
 if a.media or a.dp:groups[0][2].append('MediaDma.c')
 if a.dp:
  out=R/'artifacts/b5q-p5-work/uefi-target';out.mkdir(exist_ok=True)
  groups[0][2].append('DpDma.c')
+groups.append((build/'b5qPkg/Library/MemoryMapLib/MemoryMapLib',R/'uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib',['MemoryMapLib.c']))
 records=[]
 for directory,source,names in groups:
     text=(directory/'GNUmakefile').read_text().replace('\\\n',' ')

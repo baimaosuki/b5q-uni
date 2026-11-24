@@ -3026,3 +3026,10 @@ revision = "4a50a304c3fd96791970537b3793f9c241f895eb"
 reference = "reports/v33b-runtime-repair.json"
 command = "test-v33b-causal.py; test-v33b-policy.py; test-v33b-host-abi.py; check-v33b-static.py; check-v33b-failures.py; pre-ci-p4.py; check-dp-local.py; check-dp-target.py; check-media-callback-pac.py --dp --hid"
 result = "Production models, POSIX migration, exact ABI canaries, compiled DTB/ADT, 48probe/thread entry and87exit inventory, retained P0-P5 regression and target callback checks; complete native CI and image status recorded separately without hardware claims"
+
+[[area.evidence]]
+kind = "source"
+revision = "9a28e884665a5ff66b843b757db713f86601a70b"
+reference = "reports/v33b-additional-five.json"
+command = "Compare original b5q iommu-map and Linuxv6.12 pcie-qcom.c config_sid; complete50fixed DT reservations/HOB and production allocation/USB mapping tests; actualCI45393357234 payload plist readback; real UPL/error and policy boot-chain harnesses"
+result = "PARF encoding alreadycorrect01000100: BDF31:16=0100,SIDoffset15:8=1,NEXT7:0=0 =>SID1401; proposed01000001 wouldcorruptNEXT. Explicit encoding and actualDT/IORT assertions added. Fixed12uncovered low no-map HOB gaps, validates PCIe/media fullpool+table allocations beforezero and subtracts all fixedreserved spans from USB maps. New0013UEFIpatch requiresnewFD/boot. dyld loopalreadyguardsretval but nowlocalpage_kr+explicitbreak andeverychainparserfailurepropagates. Migrationfailure is independentofmount/GPU; uid501 GUIoldfile repairedtoroot, nonrootssystem/symlinks/hardlinksrejected. ActualCIaddon ReadBack alreadyPASS newfalseRunAtLoad/PathState/60job; addedexplicit addon-add-dir refresh inreusepath withoutchangingexecutablesorweakeningassertion. UpdatednativeCI/finalbytespending; nohardwareclaim."

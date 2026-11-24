@@ -3,9 +3,10 @@
   "result": "PASS",
   "files": {
     "b5q.dsc": "ae7f35e03accc44f56738e03a322fd2ba57fa5f051eedd5569b69da4db9a70aa",
-    "b5q.fdf": "2a1b320a2839020fa889e0e365bb7b73ff476f68c59ff405f0dcf5826cf9a2de",
-    "Include/DXE.inc": "d3ca6b9331508c8dd4a0e329c3c08af68dffd3476a72ebedaeb82cb7755d19a4",
-    "Include/APRIORI.inc": "2ebe6188f6c0acfec87202f66acce14665e3868f4915e9248c9eed8e56dde848"
+    "b5q.fdf": "c49811d33a7e43d441898c8c582ca19aa17bf12ea0bd3a8191bbbe58723fed6c",
+    "Include/DXE.inc": "bfc8aabcf3b162093b6f8e15cb27529bd0dc60e06e65b63ef858de1a801ab8a3",
+    "Include/APRIORI.inc": "403fdd1d2abcc4ef3988f2d05b5de5a89e73957a86d6922511e2346af1829517",
+    "Binaries/b5q/QcomPkg/Drivers/UFSDxe/UFSDxe.patched.efi": "f33a84726dacd79bb243d4131f1ab25cf55aa686e1f980a59285bd024cc38d7a"
   },
   "errors": []
 }

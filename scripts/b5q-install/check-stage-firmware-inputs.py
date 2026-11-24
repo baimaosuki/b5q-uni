@@ -17,6 +17,7 @@ if a.media or a.dp:
  groups[2][2].append(patch/'0010-darwinboot-b5q-media-dma.patch')
 if a.dp:
  groups[0][2].append(patch/'0011-b5q-dp-splash-tail.patch')
+ groups[0][2].append(patch/'0013-b5q-reserved-dma-guards.patch')
  groups[2][2].append(patch/'0012-darwinboot-b5q-dp-tail.patch')
 with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
  for index,(repo,revision,patches)in enumerate(groups):

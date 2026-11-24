@@ -12,6 +12,7 @@ base=r'''
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <map>
 #include <filesystem>
 #include <fstream>
 #include <unistd.h>
@@ -19,6 +20,7 @@ base=r'''
 #include <sys/stat.h>
 #include <cerrno>
 using namespace std;
+map<string,unsigned> owners;
 string root;unsigned renames=0,writes=0;int fault=0;
 string path(const char *p){return root+p;}
 struct Node{string name;int fd;struct stat stat;};using vnode_t=Node*;
@@ -32,7 +34,7 @@ struct vnode_attr {unsigned va_uid=0,va_gid=0,va_mode=0,va_nlink=0;size_t va_dat
 template<class...A>void quiet(A...){}
 int vfs_context_kernel(){return 0;}int vfs_context_ucred(int){return 0;}
 int vnode_lookup(const char*p,int,vnode_t *out,int){struct stat s;if(lstat(path(p).c_str(),&s))return errno;*out=new Node{path(p),-1,s};return 0;}
-int vnode_getattr(vnode_t p,vnode_attr *a,int){a->va_uid=p->stat.st_uid==getuid()?0:p->stat.st_uid;a->va_gid=0;a->va_nlink=p->stat.st_nlink;a->va_mode=p->stat.st_mode;a->va_data_size=p->stat.st_size;return 0;}
+int vnode_getattr(vnode_t p,vnode_attr *a,int){a->va_uid=owners.count(p->name)?owners[p->name]:(p->stat.st_uid==getuid()?0:p->stat.st_uid);a->va_gid=0;a->va_nlink=p->stat.st_nlink;a->va_mode=p->stat.st_mode;a->va_data_size=p->stat.st_size;return 0;}
 int vnode_vtype(vnode_t p){return S_ISDIR(p->stat.st_mode)?VDIR:S_ISREG(p->stat.st_mode)?VREG:3;}
 void vnode_put(vnode_t p){delete p;}
 int vnode_open(const char*p,int flags,int mode,int,vnode_t *out,int){int native=(flags&FWRITE)?O_WRONLY:O_RDONLY;native|=flags&~(FWRITE|FREAD|O_TRUNC); // reproduce XNU non-compound open
@@ -48,7 +50,7 @@ int vn_rdwr(int direction,vnode_t p,caddr_t bytes,int n,int,int,int,int,int *res
 unsigned char *kalloc_data(size_t n,int){return static_cast<unsigned char*>(malloc(n));}void kfree_data(void *p,size_t){free(p);}
 int copyout(const void *p,user_addr_t out,size_t n){memcpy((void*)out,p,n);return 0;}
 struct unlink_args{user_addr_t path;};int unlink(int,unlink_args *a,int32_t*){return ::unlink(path((const char*)a->path).c_str())?errno:0;}
-struct rename_args{user_addr_t from,to;};int rename(int,rename_args *a,int32_t*){if(fault==2)return EIO;renames++;return ::rename(path((const char*)a->from).c_str(),path((const char*)a->to).c_str())?errno:0;}
+struct rename_args{user_addr_t from,to;};int rename(int,rename_args *a,int32_t*){if(fault==2)return EIO;renames++;owners.erase(path((const char*)a->to));return ::rename(path((const char*)a->from).c_str(),path((const char*)a->to).c_str())?errno:0;}
 BLOB
 MIGRATE
 vector<unsigned char> readfile(const string &p){ifstream f(p,ios::binary);return {istreambuf_iterator<char>(f),istreambuf_iterator<char>()};}
@@ -63,6 +65,10 @@ int main(int argc,char **argv){assert(argc==2);root=argv[1];auto dir=root+"/priv
  ofstream(file)<<"old";assert(!link(file.c_str(),(dir+"/hardlink").c_str()));assert(b5q_launchd_policy_prepare(1,(uintptr_t)memory)==EPERM);filesystem::remove(dir+"/hardlink");
  for(int injected:{1,2}){fault=injected;assert(b5q_launchd_policy_prepare(1,(uintptr_t)memory)==EIO);auto old=readfile(file);assert(string(old.begin(),old.end())=="old");}
  fault=0;assert(!b5q_launchd_policy_prepare(1,(uintptr_t)memory));
+ auto gui=dir+"/disabled.501.plist";owners[gui]=501;unsigned oldRenames=renames;
+ assert(!b5q_launchd_policy_prepare(1,(uintptr_t)memory)&&renames==oldRenames+1&&!owners.count(gui));
+ owners[file]=501;assert(b5q_launchd_policy_prepare(1,(uintptr_t)memory)==EPERM);owners.erase(file);
+ chmod(dir.c_str(),0777);assert(b5q_launchd_policy_prepare(1,(uintptr_t)memory)==EPERM);chmod(dir.c_str(),0755);
  puts("PASS actual prelaunchd existingData migration:58/25 exactbinaryplists,iconenable,stalesentinelremoved,atomicrename,repeatno-op,symlink/hardlink/refused,write/renamefaultpreservesold ASanUBSan");
 }
 '''
@@ -74,3 +80,23 @@ with tempfile.TemporaryDirectory(prefix='b5q-policy-test-')as td:
  src=td/'test.cpp';src.write_text(base.replace('BLOB',blob).replace('MIGRATE',body))
  subprocess.run(['c++','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-fsanitize=address,undefined',str(src),'-o',str(td/'test')],check=True)
  subprocess.run([str(td/'test'),str(td/'root')],check=True)
+
+# Run the actual call-site fragment: migration errors cannot poison mount/GPU.
+start=text.index('\tif (!error) {\n\t\tconst int policy_error = b5q_launchd_policy_prepare')
+end=text.index('\n\tif (!error) native_gpu_addon_release()',start)
+callsite=text[start:end]
+source=r'''
+#include <cassert>
+#include <cstdio>
+using proc_t=int;using user_addr_t=unsigned long;int failure,calls;
+int b5q_launchd_policy_prepare(int,unsigned long){return failure;}
+void native_owner_macos_gpu_addon(int,unsigned long){calls|=1;}
+void native_owner_macos_addon_sbin(int,unsigned long){calls|=2;}
+void b5q_wireless_runtime_prepare(int,unsigned long){calls|=4;}
+void b5q_media_runtime_prepare(int,unsigned long){calls|=8;}
+void native_owner_macos_boot_shims(int,unsigned long){calls|=16;}
+int main(){for(int e:{1,5,13}){int error=0,p=1;user_addr_t scratch=0;failure=e;calls=0;CALLSITE;assert(!error&&calls==31);}}
+'''.replace('CALLSITE',callsite).replace('#include <cstdio>','#include <cstdio>\n#include <initializer_list>')
+with tempfile.TemporaryDirectory(prefix='b5q-policy-boot-')as td:
+ td=Path(td);(td/'test.cpp').write_text(source)
+ subprocess.run(['c++','-std=c++17','-fsanitize=address,undefined',str(td/'test.cpp'),'-o',str(td/'test')],check=True);subprocess.run([str(td/'test')],check=True)

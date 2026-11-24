@@ -1,0 +1,56 @@
+{
+  "source_implemented": true,
+  "hardware_verified": false,
+  "new_firmware_required": true,
+  "firmware_reason": "Original50fixedreservedmemory boundaries and12missinglow no-map gaps; validate pool/table allocations beforezero, filterUSBmappings",
+  "PCIe": {
+    "existing_value_correct": "0x01000100",
+    "format": "BDF[31:16]|SIDoffset[15:8]|NEXT[7:0]",
+    "endpoint_RID": "0x0100",
+    "endpoint_SID": "0x1401",
+    "proposed_wrong_value": "0x01000001",
+    "source": "Linuxv6.12 pcie-qcom.c L1113; originalb5q.dts iommu-map RID0100->1401",
+    "upstream_sha256": "f8dd91246a9ba436c29669732a22904984fc400c94c1b6a03124a030664c5b9b"
+  },
+  "actual_CI_wifi_job": {
+    "passed": true,
+    "run": 45393357234,
+    "artifact_GitHub_SHA256_verified": true,
+    "path": "Library/LaunchDaemons/org.unixnu.wifi.supplicant.plist",
+    "mode": "0o644",
+    "actual_plist": {
+      "KeepAlive": {
+        "PathState": {
+          "/private/var/run/b5q-wifi-ready": true
+        }
+      },
+      "Label": "org.unixnu.wifi.supplicant",
+      "ProcessType": "Interactive",
+      "ProgramArguments": [
+        "/private/var/ngpu/bin/unixnu-wpa_supplicant",
+        "-Dsheng",
+        "-ien0",
+        "-c/private/var/ngpu/etc/wifi/wpa_supplicant.conf",
+        "-q",
+        "-s"
+      ],
+      "RunAtLoad": false,
+      "ThrottleInterval": 60,
+      "Umask": 63,
+      "UserName": "root"
+    },
+    "final_ESP_created": false
+  },
+  "migration": "Independentpolicy_error cannot block GPU/addon/boot. launchd requiresuid0 evenforGUI501; singlylinked uid501 oldGUIfile replacedroot:wheel.",
+  "dyld": "Existingouterforcondition retval==SUCCESS already preventsnextiteration; explicitlocalpage_kr+break added,andactual fixup_page helperreturn discard repaired.",
+  "tests": {
+    "dyld-upl.log": "421357335b29380c6d66f9a7be095f43f73f227cbf93cf2e7fb597815cf240ee",
+    "reservations.log": "f759fe98598bd9b30ba1ca590ee690f3938674d7a65dbc7610908dbc252a5d4c",
+    "media-new-producer.log": "fbb0ff46a011d8e0b75a870a1ba5b8ba57aef7f3a9159582a6ed76b38824ef1e",
+    "policy-migration.log": "ea5324afacd612c3419073b609f348745ced242c6174f81e1368a63115895fa2",
+    "pcie-regression.log": "19123d035017cfd5bd1b02b4a0bc0a8b86f0d93ebf7564d0759b517f0f533dfe",
+    "addon-reuse.log": "5e0af3031de8e3d98074406fcaa22ac727aaf4e3f1babbc7b75a7218e033cf01"
+  },
+  "CI_final": "pending",
+  "final_image_created": false
+}

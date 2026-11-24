@@ -27,7 +27,12 @@ env=dict(os.environ,UNIXNU_UNIQUE_CHIP_ID=seedfile.read_text().strip(),UNIXNU_UE
 # The official runtime invokes boot_shims only when it collects/pairs trust itself.
 trust_args=[] if ctx.board.get('payload',{}).get('runtime',{}).get('boot_shims') else ['--trust-cache',str(trust)]
 if a.reuse_addon:
- trust_args=['--gpu-addon',str(provided.with_name('gpu-addon.bin')),'--owner-trust-cache',str(provided.with_name('owner-trust.bundle'))]
+ # Refresh the plist explicitly even when the GPU base is reused. The
+ # native runtime still builds/merges wireless, media and fresh trust entries.
+ refreshed=runtime/'reused-addon-current-policy.bin'
+ subprocess.run([sys.executable,str(device/'scripts/refresh-b5q-addon-policy.py'),'--unixnu',str(core),
+     '--input',str(provided.with_name('gpu-addon.bin')),'--out',str(refreshed)],check=True)
+ trust_args=['--gpu-addon',str(refreshed),'--owner-trust-cache',str(provided.with_name('owner-trust.bundle'))]
 subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--os','macos-27.3-26C5035r','--data-ramdisk',str(seed),*trust_args],cwd=core,env=env,check=True)
 files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/payload.img'}
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)

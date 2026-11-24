@@ -1,7 +1,7 @@
 diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 --- a/bsd/kern/kern_exec.c
 +++ b/bsd/kern/kern_exec.c
-@@ -9706,6 +9706,84 @@
+@@ -9706,6 +9706,88 @@
  	printf("owner Data: GPU addon memory release %d\n", native_gpu_addon_released);
  }
  
@@ -41,16 +41,20 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 +			if (error) return error;
 +			VATTR_INIT(&va); VATTR_WANTED(&va, va_uid); VATTR_WANTED(&va, va_nlink);
 +			error = vnode_getattr(vp, &va, ctx);
-+			if (!error && (vnode_vtype(vp) != VREG || va.va_uid != 0 || va.va_nlink != 1)) error = EPERM;
++			/* launchd itself requires uid0 for disabled.501.plist too.
++             * A singly linked uid501 GUI file can be atomically replaced;
++             * never trust/read it as current, and install the new file uid0. */
++            const bool gui_user_owned = n == 0 && i == 1 && va.va_uid == 501;
++            if (!error && (vnode_vtype(vp) != VREG || (va.va_uid != 0 && !gui_user_owned) || va.va_nlink != 1)) error = EPERM;
 +			vnode_put(vp); if (error) return error;
 +		}
 +		/* An already-current policy remains byte-for-byte untouched. */
 +		vp = NULLVP; error = vnode_open(path, FREAD | O_NOFOLLOW, 0, 0, &vp, ctx);
 +		bool same = false;
 +		if (!error) {
-+			VATTR_INIT(&va); VATTR_WANTED(&va, va_data_size); VATTR_WANTED(&va, va_mode); VATTR_WANTED(&va, va_gid);
++			VATTR_INIT(&va); VATTR_WANTED(&va, va_data_size); VATTR_WANTED(&va, va_mode); VATTR_WANTED(&va, va_gid); VATTR_WANTED(&va, va_uid);
 +			error = vnode_getattr(vp, &va, ctx);
-+			if (!error && va.va_data_size == bytes && (va.va_mode & 07777) == 0644 && va.va_gid == 0) {
++			if (!error && va.va_data_size == bytes && (va.va_mode & 07777) == 0644 && va.va_gid == 0 && va.va_uid == 0) {
 +				unsigned char *check = kalloc_data(bytes, Z_WAITOK | Z_NOFAIL); int resid = 0;
 +				error = vn_rdwr(UIO_READ, vp, (caddr_t)check, (int)bytes, 0, UIO_SYSSPACE, IO_NOAUTH, vfs_context_ucred(ctx), &resid, p);
 +				same = !error && !resid && !memcmp(check, data, bytes); kfree_data(check, bytes);
@@ -86,13 +90,13 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
  static int
  native_owner_macos_data_prepare(proc_t p, user_addr_t scratch)
  {
-@@ -9775,6 +9853,10 @@
+@@ -9775,6 +9857,10 @@
  #ifdef XNU_OWNER_APP_VOLUME_UUID
  	if (!error) native_owner_macos_app_cryptex(p, scratch);
  #endif
 +	if (!error) {
-+		error = b5q_launchd_policy_prepare(p, scratch);
-+		printf("B5qLaunchd: stage=before-launchd result=%d\n", error);
++		const int policy_error = b5q_launchd_policy_prepare(p, scratch);
++		printf("B5qLaunchd: stage=before-launchd result=%d boot-continues=1\n", policy_error);
 +	}
  	if (!error) native_owner_macos_gpu_addon(p, scratch);
  	if (!error) native_owner_macos_addon_sbin(p, scratch);
@@ -126,3 +130,97 @@ diff --git a/iokit/Kernel/IOUserClient.cpp b/iokit/Kernel/IOUserClient.cpp
  	proc_selfname(name, sizeof(name));
  	for (const char * at = list->getCStringNoCopy(); *at;) {
  		size_t length = 0;
+diff --git a/osfmk/vm/vm_dyld_pager.c b/osfmk/vm/vm_dyld_pager.c
+--- a/osfmk/vm/vm_dyld_pager.c
++++ b/osfmk/vm/vm_dyld_pager.c
+@@ -931,25 +931,19 @@
+ 	switch (hdr->mwli_pointer_format) {
+ #if defined(HAS_APPLE_PAC)
+ 	case DYLD_CHAINED_PTR_ARM64E:
+-		fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, false);
+-		break;
++		return fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, false);
+ 	case DYLD_CHAINED_PTR_ARM64E_USERLAND:
+ 	case DYLD_CHAINED_PTR_ARM64E_USERLAND24:
+-		fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, true);
+-		break;
++		return fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, true);
+ 	case DYLD_CHAINED_PTR_ARM64E_SHARED_CACHE:
+-		fixupCachePageAuth64(userVA, contents, pager, segInfo, pageIndex);
+-		break;
++		return fixupCachePageAuth64(userVA, contents, pager, segInfo, pageIndex);
+ #endif /* defined(HAS_APPLE_PAC) */
+ 	case DYLD_CHAINED_PTR_64:
+-		fixupPage64(userVA, contents, link_info, segInfo, pageIndex, false);
+-		break;
++		return fixupPage64(userVA, contents, link_info, segInfo, pageIndex, false);
+ 	case DYLD_CHAINED_PTR_64_OFFSET:
+-		fixupPage64(userVA, contents, link_info, segInfo, pageIndex, true);
+-		break;
++		return fixupPage64(userVA, contents, link_info, segInfo, pageIndex, true);
+ 	case DYLD_CHAINED_PTR_32:
+-		fixupPage32(userVA, contents, link_info, link_info_size, segInfo, pageIndex);
+-		break;
++		return fixupPage32(userVA, contents, link_info, link_info_size, segInfo, pageIndex);
+ 	default:
+ 		ktriage_record(thread_tid(current_thread()), KDBG_TRIAGE_EVENTID(KDBG_TRIAGE_SUBSYS_DYLD_PAGER, KDBG_TRIAGE_RESERVED, KDBG_TRIAGE_DYLD_PAGER_BAD_POINTER_FMT), (uintptr_t)userVA);
+ 		printf("%s(): unknown pointer_format %d\n", __func__, hdr->mwli_pointer_format);
+@@ -1316,7 +1310,7 @@
+ 				top_page = VM_PAGE_NULL;
+ 			}
+ 
+-			retval = KERN_SUCCESS;
++			kern_return_t page_kr = KERN_SUCCESS;
+ 			for (i = 0; i < mwli_page_size / PAGE_SIZE; ++i) {
+ 				if (i == part) {
+ 					continue;
+@@ -1324,20 +1318,24 @@
+ 				kr = dyld_pager_peek(src_top_object, base_off + (vm_object_offset_t)i * PAGE_SIZE,
+ 				    (char *)fixup_buffer + (vm_offset_t)i * PAGE_SIZE, &fault_info);
+ 				if (kr != KERN_SUCCESS) {
+-					retval = kr;
++					page_kr = kr;
+ 					break;
+ 				}
+ 			}
+-			if (retval == KERN_SUCCESS) {
+-				if (fixup_page((vm_offset_t)fixup_buffer, base_userVA, pager) != KERN_SUCCESS) {
+-					retval = KERN_FAILURE;
++			if (page_kr == KERN_SUCCESS) {
++				page_kr = fixup_page((vm_offset_t)fixup_buffer, base_userVA, pager);
++				if (page_kr != KERN_SUCCESS) {
++					retval = page_kr;
+ 				} else {
+ 					bcopy((const char *)fixup_buffer + (vm_offset_t)part * PAGE_SIZE, (char *)dst_vaddr, PAGE_SIZE);
+ 				}
++			} else {
++				retval = page_kr;
+ 			}
+-		} else if (fixup_page(dst_vaddr, userVA, pager) != KERN_SUCCESS) {
+-			/* KDBG / printf was done under fixup_page() */
+-			retval = KERN_FAILURE;
++
++		} else {
++			/* Preserve the exact chain parser/code-signing failure. */
++			retval = fixup_page(dst_vaddr, userVA, pager);
+ 		}
+ 		if (retval != KERN_SUCCESS) {
+ 			ktriage_record(thread_tid(current_thread()), KDBG_TRIAGE_EVENTID(KDBG_TRIAGE_SUBSYS_DYLD_PAGER, KDBG_TRIAGE_RESERVED, KDBG_TRIAGE_DYLD_PAGER_SLIDE_ERROR), userVA);
+@@ -1347,7 +1345,8 @@
+ 		}
+ 
+ 		if (src_page == VM_PAGE_NULL) {
+-			/* a fixup page larger than a page: its source page is already released (above) */
++			/* The source was already released. Abort the whole UPL on any subpage failure. */
++			if (retval != KERN_SUCCESS) break;
+ 			continue;
+ 		}
+ 
+@@ -1371,6 +1370,7 @@
+ 			vm_object_paging_end(src_top_object);
+ 			vm_object_unlock(src_top_object);
+ 		}
++		if (retval != KERN_SUCCESS) break;
+ 	}
+ 
+ done:

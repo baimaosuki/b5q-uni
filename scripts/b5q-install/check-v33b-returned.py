@@ -6,7 +6,7 @@ R=Path(__file__).resolve().parents[2]
 sys.path[:0]=[str(R/'UniXNU/scripts'),str(R/'UniXNU-b5q/scripts'),str(R/'sources/UniXNU/kits/XnuPrelink')]
 from unixnu import ramdisk
 from kc_image import Image
-p=argparse.ArgumentParser();p.add_argument('--ci',type=Path,required=True);p.add_argument('--fd',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--ci',type=Path,required=True);p.add_argument('--firmware-receipt',type=Path,required=True);p.add_argument('--fd',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
 def sha(p):
  with p.open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
 def load(path):
@@ -23,7 +23,11 @@ local=R/'artifacts/b5q-v33b-fix-work'
 for name in ['local-gates.json','static-gates.json','failure-gates.json']:assert json.loads((local/name).read_text())['passed'],name
 bound=json.loads((local/'local-gates.json').read_text())['source_sha256'];assert all(sha(R/n)==v for n,v in bound.items()),'source changed after local gates'
 static=json.loads((local/'static-gates.json').read_text());assert sha(ci/'device-tree/hardware.dtb')==static['DTB_SHA256']
-assert sha(a.fd)=='e5f20f393295df7743cbbd3f3a9d0e1bef427ba5caf0f25e18b044998b74897b'
+firmware=json.loads(a.firmware_receipt.read_text());assert firmware['passed']and firmware['github_digest_verified']
+assert firmware['source_commit']==transfer['commit']and firmware['FD']['sha256']==sha(a.fd),'Firmware/kernel must match same actual CI source and transfer SHA'
+from unixnu.boot_template import loader_pe
+handoff=loader_pe(a.fd.read_bytes(),'f8a45ce9-92de-48cc-8e19-e97c28b724a0')
+for marker in [b'stock-reserved-guard=before-zero',b'stock-reserved-filter=1']:assert marker in handoff,marker
 with tempfile.TemporaryDirectory(prefix='b5q-payload-accept-')as td:
  t=Path(td);fat=payload
  if ramdisk.packed(payload):fat=t/'payload.fat';ramdisk.decode(payload,fat)
@@ -52,6 +56,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-payload-accept-')as td:
   f.truncate(logical)
   for off,data in regions:f.seek(off);f.write(data)
  run('APFS-existing-policy-account-trust',sys.executable,R/'scripts/b5q-install/verify-apfs-init-readback.py','--image',seed,'--trust-cache',assets/'kernel.macho.trustcache','--out',a.out/'apfs.json')
+ run('reserved-RAM-actual-map-options',sys.executable,R/'scripts/b5q-install/check-returned-cache.py','--ci',ci,'--out',a.out/'NormalWB.json')
  run('linked-PAC',sys.executable,R/'scripts/b5q-install/check-stage-linked-PAC.py','--kernel',kernel,'--out',a.out/'linked-PAC.json')
  run('actual-new-core-callbacks-zeroMMIO',sys.executable,R/'scripts/b5q-install/check-stage-returned-objects.py','--ci',ci,'--out',a.out/'board-objects')
  hid,=ci.rglob('NativeHidInput.o')

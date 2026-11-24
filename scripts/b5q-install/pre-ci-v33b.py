@@ -15,6 +15,9 @@ for n,digest in baseline['source_sha256'].items():assert hashlib.sha256((R/n).re
 assert 'PASS complete P4 local gate'in(W/'pre-ci-all.log').read_text()
 checks.append(dict(name='full-P0-P4-retained-production-regressions',passed=True,checks=len(baseline['checks'])))
 run('causal','tests/b5q-ufs/test-v33b-causal.py')
+run('dyld-upl','tests/b5q-ufs/test-v33b-dyld-upl.py')
+run('firmware-reservations','tests/b5q-ufs/test-v33b-reservations.py')
+run('addon-reuse-policy','tests/b5q-ufs/test-addon-reuse-policy.py')
 run('policy-migration','tests/b5q-ufs/test-v33b-policy.py')
 run('host-abi','tests/b5q-ufs/test-v33b-host-abi.py')
 run('static-gates','scripts/b5q-install/check-v33b-static.py')
@@ -24,7 +27,7 @@ run('dp-target','scripts/b5q-install/check-dp-target.py')
 run('hid-target','scripts/b5q-install/check-peripheral-target.py','--sources','NativeHidInput.cpp,Sm8550Gcc.c,B5qLaunchdPolicy.c,UsbProbe.cpp','--objects-out',W/'hid-target','--reference',R/'artifacts/b5q-esp-p5/esp.img')
 run('keyprobe-target','scripts/b5q-install/check-peripheral-target.py','--sources','KeyStoreProbe.cpp,NativeKeyStoreEvents.cpp','--objects-out',W/'keyprobe-target','--reference',R/'artifacts/b5q-esp-p5/esp.img')
 run('hid-callback-pac','scripts/b5q-install/check-media-callback-pac.py','--dp','--hid',W/'hid-target/NativeHidInput.o','--out',W/'hid-callback-pac.json')
-files=[*sorted((R/'UniXNU-b5q/package').rglob('*.c')),*sorted((R/'UniXNU-b5q/package').rglob('*.h')),*sorted((R/'UniXNU-b5q/package').rglob('*.cpp')),*sorted((R/'UniXNU-b5q/scripts').glob('*.py')),*sorted((R/'UniXNU-b5q/patches/xnu').glob('*.patch')),R/'UniXNU-b5q/patches/xnu/series',R/'UniXNU-b5q/dts/b5q.dts',R/'UniXNU-b5q/board.toml',R/'UniXNU-b5q/package/b5q-launchd-lite.json',R/'.github/workflows/b5q-p0-p5.yml']
+files=[*sorted((R/'UniXNU-b5q/package').rglob('*.c')),*sorted((R/'UniXNU-b5q/package').rglob('*.h')),*sorted((R/'UniXNU-b5q/package').rglob('*.cpp')),*sorted((R/'UniXNU-b5q/scripts').glob('*.py')),*sorted((R/'UniXNU-b5q/patches/xnu').glob('*.patch')),R/'UniXNU-b5q/patches/xnu/series',R/'UniXNU-b5q/dts/b5q.dts',R/'UniXNU-b5q/board.toml',R/'UniXNU-b5q/package/b5q-launchd-lite.json',R/'.github/workflows/b5q-p0-p5.yml',*sorted((R/'patches/uefi-b5q').glob('*.patch')),*sorted((R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe').glob('*.[ch]')),R/'uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h',R/'uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c']
 files+=sorted((R/'scripts/b5q-install').glob('*v33b*.py'))+sorted((R/'tests/b5q-ufs').glob('*v33b*.py'))
 receipt=dict(passed=True,hardware_verified=False,checks=checks,source_sha256={str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},
  gates={'physical_cause_models':'PASS','memory_ABI_real_DTB_ADT':'PASS','sheng_macos_diff_accounted':'PASS','silent_failure_inventory':'PASS','existing_Data_idempotent_migration':'PASS'},

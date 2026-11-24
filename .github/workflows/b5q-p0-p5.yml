@@ -426,6 +426,7 @@ jobs:
           git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0009-b5q-media-dma.patch"
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch"
           git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0011-b5q-dp-splash-tail.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0013-b5q-reserved-dma-guards.patch"
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch"
           git -C UniXNU apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch"
           git -C uefi-b5q submodule update --init --depth 1 Binaries
