@@ -696,7 +696,7 @@ void startB5qPeripherals() {
 }
 
 void native_legacy_display_late_probe(void) {
-    {thread_t thread = nullptr; if (kernel_thread_start(busyReport, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);}
+    {thread_t thread = nullptr; const kern_return_t rc=kernel_thread_start(busyReport, nullptr, &thread);if (rc == KERN_SUCCESS) thread_deallocate(thread);else IOLog("B5qPeripherals: stage=busy-report-start result=%d\n",rc);}
     // NativeAES first: AppleImage4 waits for the real IOAESAccelerator service.
     b5q_software_aes_probe();
     b5q_ram_storage_start();

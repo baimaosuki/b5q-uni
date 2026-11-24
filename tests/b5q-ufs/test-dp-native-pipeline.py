@@ -7,6 +7,7 @@ s=(R/'UniXNU-b5q/package/B5qDpLink.cpp').read_text();start=s.index('struct Owner
 for at in range(brace,len(s)):
  depth+=(s[at]=='{')-(s[at]=='}')
  if not depth:body=s[start:at+1]+';';break
+body=body.replace('asm volatile("dc cvac, %0"::"r"(at):"memory");','cacheCleanLine(at);')
 h=r'''
 #include <cassert>
 #include <cstdint>
@@ -22,7 +23,8 @@ h=r'''
 #include "B5qDpAux.h"
 #include "B5qDpIrq.h"
 using B5qDp::Block;
-constexpr int kIOReturnSuccess=0,kIODirectionOut=1,kIOServiceSynchronous=1;
+constexpr int kIOReturnSuccess=0,kIODirectionOut=1,kIOServiceSynchronous=1,kIOMapCopybackCache=0x1000;
+unsigned cleanLines=0;void cacheCleanLine(uintptr_t at){assert(!(at&63));cleanLines++;}
 struct IOLock{bool locked=false;};IOLock *IOLockAlloc(){return new IOLock;}
 void IOLockLock(IOLock *l){assert(l&&!l->locked);l->locked=true;}void IOLockUnlock(IOLock *l){assert(l&&l->locked);l->locked=false;}
 uint64_t tick=100;uint64_t nowUs(){return tick;}void barrier(){}
@@ -54,7 +56,7 @@ struct IOMemoryDescriptor{
 };
 void *IOMallocData(unsigned bytes){return malloc(bytes);}void IOFreeData(void *p,unsigned){free(p);}
 struct Window {std::vector<uint32_t> memory;volatile uint32_t *va=nullptr;
- bool open(uint64_t,unsigned bytes){memory.resize(bytes/4);va=memory.data();return true;}
+ bool open(uint64_t,unsigned bytes,unsigned cache){assert(cache==kIOMapCopybackCache);memory.resize(bytes/4);va=memory.data();return true;}
  void close(){va=nullptr;memory.clear();}
 };
 bool online=false,drainOk=true;unsigned publications=0,completedTags=0;B5qDpDisplayConfig displayConfig;
@@ -99,7 +101,7 @@ int main(){unsigned cases=0;assert(B5qDpPool(&firmware,0xb8000000,1080*2640*4,0x
  for(uint64_t tag=1;tag<=8;tag++){
   assert(displayConfig.present(displayConfig.context,&memory,1920*4,false,tag));
   const auto slot=o.presentation.next;const auto off=(o.presentation.buffers[slot].address-firmware.PoolBase)/4;
-  assert(o.pool.va[off]==0x03020100&&o.presentation.pendingTag==tag);
+  assert(o.pool.va[off]==0x03020100&&o.presentation.pendingTag==tag&&cleanLines);
   o.io.delay(17000);assert(irqCallback);irqCallback(irqContext,o.io.regs[0x350ac],tick);
   assert(!o.presentation.pendingTag&&completedTags==tag&&memory.prepared==tag&&memory.completed==tag);cases++;
  }

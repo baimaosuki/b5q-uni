@@ -12,10 +12,20 @@ from pathlib import Path
 SOURCES = ['B5qUsbBoard.cpp', 'UsbProbe.cpp', 'CpuFreqProbe.cpp', 'ThermalProbe.cpp',
            'ThermalLevel.cpp', 'BoardClock.cpp', 'ButtonProbe.cpp',
            'DisplayTimingProbe.cpp', 'NativeHidInput.cpp', 'HidInputProbe.cpp',
-           'B5qTouch.cpp', 'GeniI2c.c', 'Sm8550Gcc.c', 'QcomRpmh.c', 'B5qBootPolicy.c', 'B5qProcTop.c']
+           'B5qTouch.cpp', 'GeniI2c.c', 'Sm8550Gcc.c', 'QcomRpmh.c', 'B5qBootPolicy.c', 'B5qProcTop.c', 'B5qLaunchdPolicy.c']
 
 
-def prepare_headers(sdk, include, hid):
+def prepare_headers(sdk, include, hid, package=None):
+    import importlib.util
+    policy_script=Path(__file__).with_name('update-b5q-launchd-seed.py')
+    spec=importlib.util.spec_from_file_location('b5q_policy',policy_script);policy=importlib.util.module_from_spec(spec);spec.loader.exec_module(policy)
+    if package is not None:policy.POLICY=Path(package)/'b5q-launchd-lite.json'
+    include.mkdir(parents=True,exist_ok=True)
+    rows=[]
+    for i,(name,labels) in enumerate(policy.policies().items()):
+        body=policy.merge(b'',labels)
+        rows.append('static const unsigned char b5q_policy_'+str(i)+'[]={'+','.join(str(v)for v in body)+'};')
+    (include/'B5qLaunchdPolicyData.h').write_text('\n'.join(rows)+'\n')
     header = sdk / 'System/Library/Frameworks/Kernel.framework/Headers'
     (include / 'libkern/c++').mkdir(parents=True, exist_ok=True)
     text = (header / 'libkern/c++/OSMetaClass.h').read_text()
@@ -107,7 +117,7 @@ def full_build(tree, package, out, scripts):
     llvm = Path(subprocess.check_output(['brew', '--prefix', 'llvm'], text=True).strip()) / 'bin'
     include = out / 'board-include'
     hid = tree / 'refer/IOHIDFamily'
-    header = prepare_headers(sdk, include, hid)
+    header = prepare_headers(sdk, include, hid, package)
     # Read definitions in the bootstrap pass's objects, never a prior image.
     from xnu_symbols import OBJ, defined_names
     filelist = tree / OBJ / 'link.filelist'

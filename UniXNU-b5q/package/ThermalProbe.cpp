@@ -203,14 +203,14 @@ extern "C" void sheng_thermal_probe(void) {
     if (!mode || gReady || native_thermal_info[0]) return;
     native_thermal_info[2] = (mode & 0xff) | periodMs << 8;
     for (unsigned c = 0; c < THERMAL_CONTROLLERS; ++c) {
-        if (!mapWindow(gTm[c], thermal_tm_base[c])) {native_thermal_info[0] = 0x10 + c; return;}
+        if (!mapWindow(gTm[c], thermal_tm_base[c])) {native_thermal_info[0] = 0x10 + c; IOLog("B5qThermal: stage=tm-map result=%u base=%llx\n",native_thermal_info[0],(unsigned long long)thermal_tm_base[c]); return;}
         native_thermal_info[3 + c] = 0; // SROT version unavailable
         native_thermal_info[6 + c] = 0; // SROT enable bitmap unavailable
         for (unsigned s = 0; s < THERMAL_SENSORS; ++s) native_thermal_mc[c][s] = THERMAL_NONE;
     }
     for (unsigned g = 0; g < THERMAL_GROUPS; ++g) {native_thermal_now[g] = THERMAL_NONE; native_thermal_peak[g] = THERMAL_NONE;}
     for (unsigned d = 0; d < 3; ++d) {
-        mapWindow(gDomain[d], kDomainBase[d]);
+        if(!mapWindow(gDomain[d], kDomainBase[d]))IOLog("B5qThermal: stage=domain-map result=failed domain=%u base=%llx\n",d,(unsigned long long)kDomainBase[d]);
         thermal_limit_init(&gLimit[d]);
         for (unsigned i = 2; i < 7; ++i) native_thermal_limit[d][i] = THERMAL_NONE;
     }
@@ -221,7 +221,9 @@ extern "C" void sheng_thermal_probe(void) {
     if (periodMs) {
         gPeriodMs = periodMs < 10 ? 10 : periodMs;   // a sample is about seventy register reads; faster than this measures the probe
         thread_t thread = nullptr;
-        if (kernel_thread_start(samplerThread, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);
+        const kern_return_t result=kernel_thread_start(samplerThread, nullptr, &thread);
+        if (result == KERN_SUCCESS) thread_deallocate(thread);
+        else IOLog("B5qThermal: stage=sampler-start result=%d\n",result);
     }
 }
 

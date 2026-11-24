@@ -24,12 +24,20 @@ with contextlib.nullcontext(out/'host-env')as td:
     assert text.count(old)==1
     text=text.replace(old,'static int config(struct ieee80211_hw *hw, int radio, u32 changed) { (void)hw; (void)radio; (void)changed; return 0; }')
     fixture.write_text(text)
+    cfg_original=module/'tests/cfg80211_control_test.c';cfg_fixture=td/'cfg80211_control_test.c'
+    cfg_text=cfg_original.read_text()
+    old='static int tx_port(struct wiphy *wiphy, struct net_device *dev, const void *frame, size_t length,'
+    assert cfg_text.count(old)==1
+    cfg_text=cfg_text.replace(old,old.replace('const void *frame','const u8 *frame'))
+    # Relocate only the fixture's source include; production code unchanged.
+    cfg_text=cfg_text.replace('"../src/nw_cfg80211_control.c"',str(module/'src/nw_cfg80211_control.c').__repr__().replace("'",'"'))
+    cfg_fixture.write_text(cfg_text)
     wrapper=td/'clang'
     wrapper.write_text(f'''#!/usr/bin/python3
 import os,sys
 sys.path.insert(0,{str(R/'UniXNU-b5q/scripts')!r})
 from b5q_wifi import select_shared
-args=["-Wl,--gc-sections" if x=="-Wl,-dead_strip" else {str(fixture)!r} if x=={str(original)!r} else x for x in sys.argv[1:]]
+args=["-Wl,--gc-sections" if x=="-Wl,-dead_strip" else {str(fixture)!r} if x=={str(original)!r} else {str(cfg_fixture)!r} if x=={str(cfg_original)!r} else x for x in sys.argv[1:]]
 args=[str(select_shared(x,{str(out/'selected')!r})) if x.endswith("/cfg80211/scan.c") else x for x in args]
 extra=[] if "-target" in args or any(x.startswith("--target=")for x in args) else ["-resource-dir=/usr/lib/llvm-17/lib/clang/17","-I",{str(td)!r},"-include",{str(header)!r}]
 if extra and any("out/wpa-src" in x for x in args):extra=["-I",{str(td/'supp')!r},*extra]
@@ -38,6 +46,7 @@ os.execv({compiler!r},[{compiler!r},*extra,*args])
 ''')
     wrapper.chmod(0o755);env=dict(os.environ,PATH=str(td)+':'+os.environ['PATH'])
     env.pop('LD_PRELOAD',None)
+    env.update(ASAN_SYMBOLIZER_PATH='/usr/bin/llvm-symbolizer-17',UBSAN_OPTIONS='halt_on_error=1:print_stacktrace=1')
     # The upstream cache records the command before this wrapper substitutes
     # the host fixture. Keep only an object whose dependencies actually name
     # and hash that fixture; an object of the old callback must be rebuilt.
@@ -61,7 +70,7 @@ os.execv({compiler!r},[{compiler!r},*extra,*args])
             test_source_sha256=hashlib.sha256(Path(command[-1]).read_bytes()).hexdigest()))
         report=dict(passed=len(checks)==len(jobs)and all(c['passed']for c in checks),
             checks=checks,total=len(jobs),hardware_verified=False,complete_stage=False,
-            host_adaptation='Darwin dead_strip -> ELF gc-sections; private Linux loff_t/errno/time namespace; fixture config callback gains same-version radio_idx; all production source and assertions retained',
+            host_adaptation='Darwin dead_strip -> ELF gc-sections; private Linux loff_t/errno/time namespace; fixture config callback gains same-version radio_idx and cfg80211 fixture const-u8 tx callback; all production source and assertions retained',
             fixture_sha256=hashlib.sha256(fixture.read_bytes()).hexdigest())
         (out/'shared-linux-report.json').write_text(json.dumps(report,indent=2)+'\n')
         print(name,'PASS'if not result.returncode else'FAIL',flush=True)

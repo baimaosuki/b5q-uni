@@ -50,7 +50,7 @@ template<class Io> struct Mailbox {
 struct AltMode {
  enum class Phase:unsigned {Off,Identity,Svid,Modes,Enter,Status,Configure,Active,Failed};
  Phase phase=Phase::Off;PdError error=PdError::None;uint8_t supported=0,pin=0;bool hpd=false,hpdIrq=false,multi=false;uint32_t status=0,generation=0;
- void reset(){const auto next=generation+1;*this={};generation=next;}
+ void reset(){const auto next=generation+(phase==Phase::Active);*this={};generation=next;}
  unsigned lanes()const{return pin==8?2:(pin==4||pin==16)?4:0;}
  static uint8_t choose(uint8_t pins,bool preferUsb){
   // Only the b5q USB-C C/D/E routes are selected, never unimplemented A/B/F.

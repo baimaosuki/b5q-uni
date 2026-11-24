@@ -183,23 +183,24 @@ extern "C" void sheng_thermal_level_probe(void) {
     // Without readings there is nothing to say: the level stays unwritten, as without this file.
     if (!sheng_thermal_sample || !&native_thermal_info[0] || !&native_thermal_now[0] || (native_thermal_info[0] != 1 && native_thermal_info[0] != 2)) {
         native_thermal_level_state = -1;
+        IOLog("B5qThermal: stage=level-source result=-1 thermal-state=%u\n",native_thermal_info[0]);
         return;
     }
     nanoseconds_to_absolutetime(kMinIntervalNs, &gMinIntervalAbs);
     gLock = IOLockAlloc();
-    if (!gLock) {native_thermal_level_state = -2; return;}
+    if (!gLock) {native_thermal_level_state = -2; IOLog("B5qThermal: stage=level-allocation result=-2\n"); return;}
     // The class names are Apple's. They must be free: the original kext is not in the image, and nothing ran the initializer before.
     static const char *const kClassNames[2] = {"AppleSMCSensorDispatcher", "AppleSMCSensorDispatcherUserClient"};
     for (const char *name : kClassNames) {
         const OSSymbol *symbol = OSSymbol::withCString(name);
         const bool taken = symbol && OSMetaClass::getMetaClassWithName(symbol);
         OSSafeReleaseNULL(symbol);
-        if (taken) {native_thermal_level_state = -12; return;}
+        if (taken) {native_thermal_level_state = -12; IOLog("B5qThermal: stage=level-class-occupied result=-12\n"); return;}
     }
     void *handle = OSMetaClass::preModLoad(g_kernel_kmod_info.name);
-    if (!handle) {native_thermal_level_state = -10; return;}
+    if (!handle) {native_thermal_level_state = -10; IOLog("B5qThermal: stage=level-metaclass-pre result=-10\n"); return;}
     sheng_thermal_level_static_init();
-    if (OSMetaClass::postModLoad(handle)) {native_thermal_level_state = -11; return;}
+    if (OSMetaClass::postModLoad(handle)) {native_thermal_level_state = -11; IOLog("B5qThermal: stage=level-metaclass-post result=-11\n"); return;}
     IOLockLock(gLock);
     currentLevel();
     IOLockUnlock(gLock);
@@ -207,21 +208,24 @@ extern "C" void sheng_thermal_level_probe(void) {
     if (!service || !service->init()) {
         OSSafeReleaseNULL(service);
         native_thermal_level_state = -2;
+        IOLog("B5qThermal: stage=level-allocation result=-2\n");
         return;
     }
     if (!service->attach(IOService::getPlatform())) {
         service->release();
         native_thermal_level_state = -3;
+        IOLog("B5qThermal: stage=level-publish result=-3\n");
         return;
     }
     if (!service->start(IOService::getPlatform()) || !service->publish()) {
         service->detach(IOService::getPlatform());
         service->release();
         native_thermal_level_state = -3;
+        IOLog("B5qThermal: stage=level-publish result=-3\n");
         return;
     }
     native_thermal_level_state = 1;
-    IOLog("B5qThermal: stage=ready thermal-level=%d keys=mTPL\n",native_thermal_level_state);
+    IOLog("B5qThermal: stage=ready thermal-level=%d keys=mTPL cpu-trips=90/95/110C gpu-trips=85/90/110C hysteresis=DT\n",native_thermal_level_state);
     service->release();   // the platform's attachment keeps it
 }
 

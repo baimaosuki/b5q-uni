@@ -8,6 +8,22 @@
     model = "Samsung Galaxy Z Flip5";
     compatible = "samsung,b5q", "qcom,sm8550";
 
+    // macOS transport descriptors; b5q WCN6855-compatible QCA6490,
+    // original Samsung DT UART14 and native FIFO transport at 3.2 Mbaud.
+    wlan {
+        compatible = "qcom,wcn6855";
+        unixnu,adt-name = "wlan";
+        status = "okay";
+    };
+    bluetooth {
+        device_type = "bluetooth";
+        compatible = "qcom,wcn6855-bt";
+        unixnu,adt-name = "bluetooth";
+        transport-encoding = <1>;
+        transport-speed = <3200000>;
+        status = "okay";
+    };
+
     // SM8550/b5q low physical DRAM bank, from b5q reference /ddr-regions/region0.
     // Supplies nonzero chosen/dram-base/size and classifies 0xB8000000
     // framebuffer memory as DRAM. This is not the full allocatable RAM map

@@ -2,6 +2,7 @@
 #include "Sm8550GeniUart.h"
 #include "Sm8550QupDma.h"
 #include <IOKit/IOLocks.h>
+#include <IOKit/IOLib.h>
 static IOLock *gcc_lock;
 static IOLock *smmu_lock;
 static uint32_t uart14_initial_bus;
@@ -32,6 +33,14 @@ bool sm8550_gcc_update32(volatile uint32_t *reg,uint32_t clear,uint32_t set) {
     __asm__ volatile("dsb sy" ::: "memory");
     bool ok=(*reg&set)==set && (*reg&(clear&~set))==0;
     IOLockUnlock(lock);return ok;
+}
+bool sm8550_gcc_trigger32(volatile uint32_t *reg,uint32_t trigger,unsigned timeout_us) {
+    if(!reg||!trigger||!timeout_us||timeout_us>100000)return false;
+    IOLock *lock=get_gcc_lock();if(!lock)return false;
+    IOLockLock(lock);*reg|=trigger;__asm__ volatile("dsb sy":::"memory");
+    unsigned waited=0;
+    while((*reg&trigger)&&waited<timeout_us){IODelay(1);++waited;}
+    bool ok=(*reg&trigger)==0;IOLockUnlock(lock);return ok;
 }
 bool sm8550_geni_uart14_vote(volatile uint32_t *reg,bool enabled) {
     if(!reg)return false;

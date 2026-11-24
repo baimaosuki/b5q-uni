@@ -9,6 +9,7 @@ from unixnu.boot_template import loader_pe
 spec=importlib.util.spec_from_file_location('pac',R/'scripts/b5q-install/check-proctop-pac.py');pac=importlib.util.module_from_spec(spec);spec.loader.exec_module(pac)
 p=argparse.ArgumentParser(description=__doc__)
 for name in ['ci','esp','fd','out']:p.add_argument('--'+name,type=Path,required=True)
+p.add_argument('--source-root',type=Path,default=R/'artifacts/b5q-p5-work/source-check/UniXNU-b5q/package')
 a=p.parse_args();a.out.mkdir(exist_ok=True,parents=True)
 def sha(p):
  with p.open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
@@ -16,7 +17,7 @@ manifest,=a.ci.rglob('dp-build.json');build=json.loads(manifest.read_text());obj
 for name,digest in build['objects'].items():
  path=manifest.parent/Path(name).name;assert path.is_file()and sha(path)==digest;objects[path]=digest
 assert {p.name for p in objects}=={'B5qDpLink.o','B5qDpIrq.o','B5qDpDisplay.late.o'}
-source_root=R/'artifacts/b5q-p5-work/source-check/UniXNU-b5q/package'
+source_root=a.source_root
 for name,digest in build['sources'].items():assert sha(source_root/Path(name).name)==digest,name
 scans={p.name:pac.scan(p)for p in objects}
 for path,digest in objects.items():

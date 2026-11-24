@@ -20,9 +20,11 @@ struct Cable {
   return attached()&&(pin==1||pin==2)?int(pin-1):-1;
  }
  bool sourceVbus(int requestedRole) const {return requestedRole!=0&&power()==2;}
+ // VBUS is an output while sourcing OTG. Its BC_STATUS feedback is not
+ // a cable/role change; CC power/data/orientation/water remain significant.
  uint32_t signature() const {
   return valid?0x80000000u|(cc0&0xc7u)|(uint32_t(cc1&2)<<8)|
-                     (uint32_t(pd&0x80)<<16)|(uint32_t(bc&0x80)<<17):0;
+                     (uint32_t(pd&0x80)<<16):0;
  }
 };
 template<class Io> bool readCable(Io &io,Cable &out){

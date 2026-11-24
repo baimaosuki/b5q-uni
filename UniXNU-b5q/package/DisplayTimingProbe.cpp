@@ -77,7 +77,7 @@ void dpuThread(void *, wait_result_t) {
     IODeviceMemory *memory = IODeviceMemory::withRange(kMdp, kMdpBytes);
     IOMemoryMap *map = memory ? memory->map(kIOMapAnywhere | kIOMapInhibitCache) : nullptr;
     if (memory) memory->release();
-    if (!map) {native_dpu_stats[0] = uint32_t(-1); return;}
+    if (!map) {native_dpu_stats[0] = uint32_t(-1); IOLog("B5qDpu: stage=map result=-1 base=%llx\n",(unsigned long long)kMdp); return;}
     volatile uint32_t *mdp = reinterpret_cast<volatile uint32_t *>(map->getVirtualAddress());
     auto rd = [&](uint32_t offset) {return mdp[offset / 4];};
     native_dpu_stats[0] = 1;
@@ -135,5 +135,5 @@ extern "C" void sheng_dpu_probe(void) {
     gLevel = enabled;
     thread_t thread = nullptr;
     if (kernel_thread_start(dpuThread, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);
-    else native_dpu_stats[0] = uint32_t(-7);
+    else {native_dpu_stats[0] = uint32_t(-7);IOLog("B5qDpu: stage=thread-start result=-7\n");}
 }

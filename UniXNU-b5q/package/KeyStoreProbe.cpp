@@ -2,8 +2,10 @@
 // Mutually exclusive offline probes: unchanged target keystore loading, or
 // ephemeral notification-only service. Neither supplies keys or unlock state.
 #include <IOKit/IOService.h>
+#include <IOKit/IOLib.h>
+#include <IOKit/IOCatalogue.h>
 #include <IOKit/IODeviceTreeSupport.h>
-#include <libkern/c++/OSKext.h>
+#include <libkern/OSKextLib.h>
 #include <libkern/c++/OSData.h>
 #include <libkern/c++/OSSymbol.h>
 #include <pexpert/pexpert.h>
@@ -96,25 +98,25 @@ static void native_keyevents_probe(void) {
     native_keyevents_status = kIOReturnNotPermitted;
     // An explicit plane requires a path without a second plane prefix.
     IORegistryEntry *chosen = IORegistryEntry::fromPath("/chosen", gIODTPlane);
-    if (!chosen) { native_keyevents_status = kIOReturnNoDevice; return; }
+    if (!chosen) { native_keyevents_status = kIOReturnNoDevice; IOLog("B5qKeyStore: stage=chosen result=no-device\n");return; }
     OSData *data = chosen ? OSDynamicCast(OSData, chosen->getProperty("ephemeral-storage")) : nullptr;
     uint32_t ephemeral = 0;
     if (data && data->getLength() == sizeof(ephemeral))
         memcpy(&ephemeral, data->getBytesNoCopy(), sizeof(ephemeral));
     OSSafeReleaseNULL(chosen);
     // A persistent Data store (no ephemeral-storage) still has no SEP: aks keeps the owned service for it.
-    if ((ephemeral != 1 && !native_aks_state_enabled()) || original) return;
+    if ((ephemeral != 1 && !native_aks_state_enabled()) || original){IOLog("B5qKeyStore: stage=policy result=refused ephemeral=%u original=%u\n",ephemeral,original);return;}
     const OSSymbol *name = OSSymbol::withCString("AppleKeyStore");
     bool absent = name && !OSMetaClass::getMetaClassWithName(name);
     OSSafeReleaseNULL(name);
-    if (!absent) return;
+    if (!absent) {IOLog("B5qKeyStore: stage=class-occupied result=%x\n",native_keyevents_status);return;}
     IOService *provider = IOService::getResourceService();
-    if (!provider) return;
+    if (!provider) {IOLog("B5qKeyStore: stage=provider result=%x\n",native_keyevents_status);return;}
     void *handle = OSMetaClass::preModLoad(g_kernel_kmod_info.name);
-    if (!handle) return;
+    if (!handle) {IOLog("B5qKeyStore: stage=metaclass-pre result=%x\n",native_keyevents_status);return;}
     native_keyevents_static_init();
     native_keyevents_status = OSMetaClass::postModLoad(handle);
-    if (native_keyevents_status) return;
+    if (native_keyevents_status) {IOLog("B5qKeyStore: stage=metaclass-post result=%x\n",native_keyevents_status);return;}
     native_keyevents_stage = 2;
     IOService *service = native_keyevents_allocate();
     bool initialized = service && service->init();
@@ -124,6 +126,7 @@ static void native_keyevents_probe(void) {
         if (attached) service->detach(provider);
         OSSafeReleaseNULL(service);
         native_keyevents_status = kIOReturnError;
+        IOLog("B5qKeyStore: stage=service-start result=%x init=%u attached=%u\n",native_keyevents_status,initialized,attached);
         return;
     }
     native_keyevents_service = (uintptr_t)service;
@@ -143,9 +146,13 @@ void native_keystore_probe(void) {
     if (!PE_parse_boot_argn("offline-keystore", &enabled, sizeof(enabled)) || enabled != 1 ||
         native_keystore_stage) return;
     native_keystore_stage = 1;
-    native_keystore_load_status = OSKext::loadKextWithIdentifier(
-        "com.apple.driver.AppleSEPKeyStore", true, false,
-        kOSKextExcludeNone, kOSKextExcludeNone, nullptr);
+    native_keystore_load_status = OSKextLoadKextWithIdentifier("com.apple.driver.AppleSEPKeyStore");
+    // The C wrapper loads without matching; preserve the prior explicit
+    // kOSKextExcludeNone behavior through the native catalogue API.
+    if(!native_keystore_load_status){
+        const OSSymbol *identifier=OSSymbol::withCString("com.apple.driver.AppleSEPKeyStore");
+        if(identifier){gIOCatalogue->startMatching(identifier);identifier->release();}
+    }
     native_keystore_stage = 2;
     if (!native_keystore_load_status) {
         OSDictionary *matching = IOService::serviceMatching("AppleKeyStore");
@@ -155,6 +162,7 @@ void native_keystore_probe(void) {
         OSSafeReleaseNULL(service);
         OSSafeReleaseNULL(matching);
     }
+    IOLog("B5qKeyStore: stage=original-load result=%d service=%u\n",native_keystore_load_status,native_keystore_service!=0);
     native_keystore_stage = 3;
     native_keystore_checkpoint();
 }

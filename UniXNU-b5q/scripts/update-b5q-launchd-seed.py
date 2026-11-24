@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import plistlib
 import re
@@ -15,7 +16,8 @@ V29_SEED_HASH = "f1f6afe508b4c7c57254780c82018f039ae2b3cd691222a287d9d3a37bb3749
 V31_SEED_HASH = "10223429847dd0a2d2db4a080cea37847db9d92a0499d9c998f53458ae1d6603"
 V32_SEED_HASH = "f84207df2076b9eec9f1ba5bec3e2a4e97e8eff1f10ee460967c2dcb91288e2f"
 V33_SEED_HASH = "3c375836fac6170e005ad164d41b05e275114246cd25657c944fa8c97b6b8c5e"
-POLICY = Path(__file__).resolve().parents[1] / "package/b5q-launchd-lite.json"
+CURRENT_SEED_HASH = "d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70"
+POLICY = Path(os.environ.get("UNIXNU_DEVICE", Path(__file__).resolve().parents[1])) / "package/b5q-launchd-lite.json"
 DIRECTORY = "private/var/db/com.apple.xpc.launchd"
 
 
@@ -42,7 +44,7 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("darwinboot", "seed", "out"):
         p.add_argument("--" + name, type=Path, required=True)
-    p.add_argument("--baseline", choices=("v27", "v29", "v31", "v32", "v33"), default="v27")
+    p.add_argument("--baseline", choices=("v27", "v29", "v31", "v32", "v33", "current"), default="v27")
     p.add_argument("--stand-in", type=Path, help="Ad hoc signed board absentd, installed under its own name")
     args = p.parse_args()
     sys.path.insert(0, str(args.darwinboot.resolve() / "Test"))
@@ -52,7 +54,7 @@ def main():
     out = args.out.resolve()
     metadata = json.loads(seed.with_name("data-seed.json").read_text())
     body = seed.read_bytes()
-    expected = {"v27": SEED_HASH, "v29": V29_SEED_HASH, "v31": V31_SEED_HASH, "v32": V32_SEED_HASH, "v33": V33_SEED_HASH}[args.baseline]
+    expected = {"v27": SEED_HASH, "v29": V29_SEED_HASH, "v31": V31_SEED_HASH, "v32": V32_SEED_HASH, "v33": V33_SEED_HASH, "current": CURRENT_SEED_HASH}[args.baseline]
     assert metadata["sha256"] == hashlib.sha256(body).hexdigest() == expected
     logical, extents = packed_ramdisk.regions(body)
     assert logical == metadata["logical_bytes"] == 4 * 2**30

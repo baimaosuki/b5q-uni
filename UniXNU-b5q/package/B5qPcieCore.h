@@ -15,13 +15,10 @@ template<class IO> int train(IO &io) {
     unsigned tries=0;
     while(tries++<100 && (!(io.readGcc(0x6b004)&(1u<<31)) || !(io.readGcc(0x6c000)&(1u<<31))))io.delay(10);
     if(!(io.readGcc(0x6b004)&(1u<<31)) || !(io.readGcc(0x6c000)&(1u<<31)))return -11;
-    if(!io.gcc(0x6b078,~0u,0) || !io.gcc(0x6b074,0,1) ||
-       !io.gcc(0x6b05c,~0u,(6u<<8)|5) || !io.gcc(0x6b058,0,1))return -12;
-    const uint32_t roots[]={0x6b074u,0x6b058u};
-    for(uint32_t reg: roots) {
-        tries=0;while((io.readGcc(reg)&1) && tries++<100)io.delay(100);
-        if(io.readGcc(reg)&1)return -12;
-    }
+    // CMD_UPDATE is a pulse: hardware clears it on a successful switch.
+    // Never verify it with the persistent RMW/readback helper.
+    if(!io.gcc(0x6b078,~0u,0) || !io.rcg(0x6b074) ||
+       !io.gcc(0x6b05c,~0u,(6u<<8)|5) || !io.rcg(0x6b058))return -12;
     if(!io.gcc(0x6b070,3,2) || !io.gcc(0x52008,0,0x7f) ||
        !io.gcc(0x52000,0,(1u<<12)|(1u<<19)|(1u<<22)) || !io.clkref())return -12;
     io.delay(200);

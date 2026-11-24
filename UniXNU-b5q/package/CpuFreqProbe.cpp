@@ -388,11 +388,11 @@ extern "C" void sheng_cpufreq_probe(void) {
     gFloorKHz = minMHz * 1000;
     if (!mode || gLock) return;
     gLock = IOLockAlloc();
-    if (!gLock) return;
+    if (!gLock) {IOLog("B5qCpuFreq: stage=lock result=no-memory\n");return;}
     native_cpufreq_stage = 1;
     gCapKHz = capMHz * 1000;
-    for (unsigned d = 0; d < 3; ++d) mapWindow(gDomain[d], kDomainBase[d]);
-    if (mode >= 3) mapWindow(gL3, kL3Base);
+    for (unsigned d = 0; d < 3; ++d) if(!mapWindow(gDomain[d], kDomainBase[d]))IOLog("B5qCpuFreq: stage=domain-map result=failed domain=%u base=%llx\n",d,(unsigned long long)kDomainBase[d]);
+    if (mode >= 3 && !mapWindow(gL3, kL3Base))IOLog("B5qCpuFreq: stage=l3-map result=failed base=%llx\n",(unsigned long long)kL3Base);
     if(mode>=4 && !kIdleMach)mode=3;
     gMode = mode;
     IOLog("B5qCpuFreq: mode=%u recount=%u\n",mode,kIdleMach!=nullptr);

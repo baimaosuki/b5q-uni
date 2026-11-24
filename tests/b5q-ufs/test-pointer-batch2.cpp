@@ -37,7 +37,7 @@ static void gestures() {
  B5qTouchMouse p;unsigned press=0,release=0,move=0;
  int ids[]={1,2,3},x[]={1000,2000,3000},y[]={1000,2000,3000};
  auto send=[&](const uint8_t *r){assert(r[0]==0x1a);if(r[1])++press;else ++release;if(r[2]||r[3]||r[4]||r[5])++move;};
- p.update(1,ids,x,y,1,false,send);p.update(0,nullptr,nullptr,nullptr,20,false,send);
+ p.update(1,ids,x,y,1,false,send);p.update(0,nullptr,nullptr,nullptr,20,false,send);p.advance(52,send);
  assert(press==1&&release==1);
  p.update(3,ids,x,y,100,false,send);p.update(1,ids,x,y,113,false,send);
  x[0]+=1000;p.update(1,ids,x,y,126,false,send);assert(move==1);

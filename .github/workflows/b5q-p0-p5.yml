@@ -1,5 +1,5 @@
-name: b5q P5 complete DisplayPort build
-run-name: b5q P5 DisplayPort / ${{ github.sha }}
+name: b5q v33b complete runtime repair
+run-name: b5q v33b runtime repair / ${{ github.sha }}
 on:
   push:
     branches: [codex/b5q-p0-p5]
@@ -181,6 +181,12 @@ jobs:
           set -euo pipefail
           ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
           ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
+      - name: Update existing RAM recovery seed policy without recreating APFS
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/update-b5q-launchd-seed.py --darwinboot UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/drivers/DarwinBoot --seed "$B5Q_DATA_SEED" --out "$RUNNER_TEMP/b5q-repaired-seed" --baseline current
+          mv "$RUNNER_TEMP/b5q-repaired-seed/data.dbr" "$B5Q_DATA_SEED"
+          mv "$RUNNER_TEMP/b5q-repaired-seed/data-seed.json" "$(dirname "$B5Q_DATA_SEED")/data-seed.json"
       - name: Build full-component XNU
         id: kernel
         working-directory: UniXNU
@@ -206,7 +212,8 @@ jobs:
         run: |
           set -euo pipefail
           python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$B5Q_DATA_SEED" --reuse-addon 2>&1 | tee "$RUNNER_TEMP/b5q-payload-console.log"
-          python3 UniXNU-b5q/scripts/package-batch2-esp.py --unixnu UniXNU --inputs "$RUNNER_TEMP/b5q-v24-inputs"
+          # Final 800 MiB ESP is assembled locally only after returned-binary gates.
+          # Preserve kernel/payload/DTB outputs for that local acceptance.
       - name: Preserve wireless sources and valid compilation progress
         if: always()
         uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
@@ -305,7 +312,12 @@ jobs:
         with:
           name: b5q-build-${{ github.run_id }}
           path: |
-            UniXNU/out/b5q/**/esp.img
+            UniXNU/out/b5q/**/kernel/kernel.macho
+            UniXNU/out/b5q/**/payload/payload.img
+            UniXNU/out/b5q/**/device-tree/hardware.dtb
+            UniXNU/out/b5q/**/tree/build/apple-key-store-state/*.o
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/NativeLegacyDisplay*.o
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/board-include/B5qLaunchdPolicyData.h
             UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
             UniXNU/out/b5q/**/tree/build/**/native-recount-build.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.command.json
@@ -321,6 +333,8 @@ jobs:
             UniXNU/out/b5q/**/tree/build/**/processor.cpo
             UniXNU/out/b5q/**/tree/build/**/processor.o
             UniXNU/out/b5q/**/tree/build/**/IOUserClient.cpo
+            UniXNU/out/b5q/**/tree/build/**/host.o
+            UniXNU/out/b5q/**/tree/build/**/kern_exec.o
             UniXNU/out/b5q/**/kernel/*.json
             UniXNU/out/b5q/**/payload/payload.json
             UniXNU/out/b5q/**/runtime/data-seed.json

@@ -50,10 +50,10 @@ static void pointer() {
  auto send=[&](const uint8_t *r){Packet p;memcpy(p.data(),r,8);sent.push_back(p);assert(p[0]==0x1a);};
  int ids[]={1,2,3,4,5,6,7,8,9,10},x[]={8000,16000,24000,100,200,300,400,500,600,700},y[]={8000,16000,24000,100,200,300,400,500,600,700};
  s.update(1,ids,x,y,1,false,send);assert(sent.empty());
- s.update(0,nullptr,nullptr,nullptr,20,false,send);assert(sent.size()==2&&sent[0][1]==1&&!sent[1][1]);
- s.update(1,ids,x,y,45,false,send);s.update(0,nullptr,nullptr,nullptr,65,false,send);
+ s.update(0,nullptr,nullptr,nullptr,20,false,send);s.advance(52,send);assert(sent.size()==2&&sent[0][1]==1&&!sent[1][1]);
+ s.update(1,ids,x,y,85,false,send);s.update(0,nullptr,nullptr,nullptr,125,false,send);
  assert(sent.size()==4&&sent[2][1]==1&&!sent[3][1]); // native double-click pair
- sent.clear();s.update(1,ids,x,y,100,false,send);x[0]+=1000;y[0]+=1000;
+ sent.clear();s={};s.update(1,ids,x,y,100,false,send);x[0]+=1000;y[0]+=1000;
  s.update(1,ids,x,y,113,false,send);assert(sent.size()==1&&int16_t(sent.back()[2]|sent.back()[3]<<8)>0&&int16_t(sent.back()[4]|sent.back()[5]<<8)>0);
  s.update(0,nullptr,nullptr,nullptr,126,false,send);assert(sent.size()==1);
  // Contact identity and timeout rebases. Next regular frame still moves.
@@ -69,14 +69,14 @@ static void pointer() {
   x[0]+=600;s.update(1,ids,x,y,326+count*100,false,send);assert(sent.size()>before);
  }
  s.update(0,nullptr,nullptr,nullptr,1400,true,send);assert(!sent.back()[1]&&!s.pointer.fingers&&!s.tapping);
- sent.clear();s.update(2,ids,x,y,1500,false,send);s.update(0,nullptr,nullptr,nullptr,1520,false,send);
+ sent.clear();s.update(2,ids,x,y,1500,false,send);s.update(0,nullptr,nullptr,nullptr,1520,false,send);s.advance(1552,send);
  assert(sent.size()==2&&sent[0][1]==2&&!sent[1][1]);
  // Natural staggered lift: either original finger may be the last one up.
  for(unsigned last=0;last<2;last++) {
   s={};sent.clear();s.update(2,ids,x,y,1530,false,send);
   s.update(1,ids+last,x+last,y+last,1543,false,send);
   assert(s.tapping&&s.tapCount==2&&s.tapRemaining==1);
-  s.update(0,nullptr,nullptr,nullptr,1556,false,send);
+  s.update(0,nullptr,nullptr,nullptr,1556,false,send);s.advance(1588,send);
   assert(sent.size()==2&&sent[0][1]==2&&!sent[1][1]);
  }
  // A replacement finger, renewed contact, excess movement, timeout or a
@@ -84,10 +84,10 @@ static void pointer() {
  for(unsigned failure=0;failure<5;failure++) {
   s={};sent.clear();s.update(2,ids,x,y,2000,false,send);
   int oneId=ids[0],oneX=x[0],oneY=y[0];
-  if(failure==0)oneId=9;if(failure==2)oneX+=1000;
+  if(failure==0)oneId=9;if(failure==2)oneX+=3000;
   s.update(1,&oneId,&oneX,&oneY,2013,false,send);
   if(failure==1)s.update(2,ids,x,y,2026,false,send);
-  s.update(0,nullptr,nullptr,nullptr,failure==3?2300:2039,failure==4,send);
+  s.update(0,nullptr,nullptr,nullptr,failure==3?2500:2039,failure==4,send);
   for(auto &packet:sent)assert(!(packet[1]&2));
  }
  s={};sent.clear();
@@ -98,13 +98,13 @@ static void pointer() {
  s={};sent.clear();s.update(2,ids,x,y,1700,false,send);
  int flipIds[]={2,1},flipX[]={x[1],x[0]},flipY[]={y[1],y[0]};
  s.update(2,flipIds,flipX,flipY,1713,false,send);assert(sent.empty());
- s.update(0,nullptr,nullptr,nullptr,1726,false,send);assert(sent.size()==2&&sent[0][1]==2);
+ s.update(0,nullptr,nullptr,nullptr,1726,false,send);s.advance(1758,send);assert(sent.size()==2&&sent[0][1]==2);
  // Bounded input sanitation and unsigned clock wrap.
  s.update(11,nullptr,nullptr,nullptr,1800,false,send);assert(!sent.back()[1]);
  s.update(1,nullptr,nullptr,nullptr,1810,false,send);assert(!sent.back()[1]);
  int extreme[]={INT_MIN,INT_MAX};s.update(2,ids,extreme,extreme,1820,false,send);
  s.update(0,nullptr,nullptr,nullptr,1830,true,send);
- s.update(1,ids,x,y,UINT_MAX-10,false,send);s.update(0,nullptr,nullptr,nullptr,10,false,send);assert(sent[sent.size()-2][1]==1&&!sent.back()[1]);
+ s={};s.update(1,ids,x,y,UINT_MAX-10,false,send);s.update(0,nullptr,nullptr,nullptr,10,false,send);s.advance(42,send);assert(sent[sent.size()-2][1]==1&&!sent.back()[1]);
  puts("PASS upstream pointer adapter:tap/doubletap/righttap/scroll/3..10contacts/rebase/identity/order/timeout/recovery/bounds/timewrap");
 }
 int main(){reports();pointer();}

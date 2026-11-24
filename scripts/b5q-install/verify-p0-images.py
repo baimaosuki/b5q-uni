@@ -16,6 +16,7 @@ def main():
  p.add_argument('--board',type=Path,default=R/'UniXNU-b5q/board.toml',help='Source configuration for this exact image revision')
  p.add_argument('--wireless',action='store_true',help='Also verify P2/P3 runtime against the accepted GPU addon')
  p.add_argument('--media',action='store_true',help='Verify P4 menu, media HAL, firmware and ADT slots')
+ p.add_argument('--v33b',action='store_true',help='Verify repaired icon policy, readiness-gated wireless job and transport nodes')
  p.add_argument('--dp',action='store_true',help='Verify final P5 native display, GOP tail handoff and menu isolation')
  a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
  fs=load(R/'scripts/b5q-install/package-usb-dma-esp.py');fs.image_format(a.esp)
@@ -79,7 +80,21 @@ def main():
   for marker in [b'policy=firmware-negotiated',b'external-hub=%u',b'QMP orientation=unknown',b'qcom-dwc3: device dctl=']:
    assert marker in raw,marker
   run(sys.executable,R/'scripts/b5q-install/check-stage-linked-PAC.py','--kernel',kernel,'--out',a.out/'linked-PAC.json')
-  assert sha(assets/'scratch-data.img')=='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70'
+  if a.v33b:
+   seed_meta,=a.ci.rglob('runtime/data-seed.json')
+   assert sha(assets/'scratch-data.img')==json.loads(seed_meta.read_text())['sha256']
+   for name,entry in entries.items():
+    nodes=fs.adt_nodes((boot/entry['path']).with_suffix('.macho.adt').read_bytes())
+    assert '/arm-io/wlan'in nodes
+    assert nodes['/arm-io/bluetooth'][2]['transport-encoding']==struct.pack('<I',1)
+    assert nodes['/arm-io/bluetooth'][2]['transport-speed']==struct.pack('<I',3200000)
+    assert 'vsync-fixed=1'in entry['args'].split()
+   assert '_b5q_launchd_policy_blob'in symbols
+   policy=load(R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py')
+   for labels in policy.policies().values():assert policy.merge(b'',labels)in raw
+   for marker in [b'B5qLaunchd: stage=before-launchd',b'B5qKeyStorePlatformGrant',b'NativeSandboxGrantProcess',b'b5q-wifi-ready',b'host DMA64=']:
+    assert marker in raw,marker
+  else:assert sha(assets/'scratch-data.img')=='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70' 
   if a.wireless or a.media:
    from uuid import UUID
    import plistlib
@@ -110,7 +125,11 @@ def main():
     mode,body=content[prefix+'/'+name]
     assert mode==0o644 and len(body)==item['bytes']and hashlib.sha256(body).hexdigest()==item['sha256'],key
    job=plistlib.loads(content['Library/LaunchDaemons/org.unixnu.wifi.supplicant.plist'][1])
-   assert job['Label']=='org.unixnu.wifi.supplicant'and job['UserName']=='root'and job['KeepAlive']is True
+   assert job['Label']=='org.unixnu.wifi.supplicant'and job['UserName']=='root'
+   if a.v33b:
+    assert job['KeepAlive']=={'PathState':{'/private/var/run/b5q-wifi-ready':True}}
+    assert job['RunAtLoad']is False and job['ThrottleInterval']>=60
+   else:assert job['KeepAlive']is True
    assert job['ProgramArguments'][0]=='/private/var/ngpu/bin/unixnu-wpa_supplicant'
    daemon=Image(content['sbin/bluetoothd'][1])
    patch=json.loads((R/'artifacts/b5q-p2-work/native-macos27.json').read_text())['patch']
@@ -135,7 +154,9 @@ def main():
     previous_wireless=t/'p2p3-addon'
     run('mcopy','-i',R/'artifacts/b5q-esp-p2-p3/esp.img','::/EFI/UniXNU/Payloads/kernel.macho.gpuaddon',previous_wireless)
     previous_content=addon.read(previous_wireless)
-    assert len(previous_content)==50 and all(content.get(n)==(m,b)for n,m,b in previous_content)
+    assert len(previous_content)==50
+    changes=[n for n,m,b in previous_content if content.get(n)!=(m,b)]
+    assert changes==(['Library/LaunchDaemons/org.unixnu.wifi.supplicant.plist']if a.v33b else[]),changes
     stock=json.loads((R/'UniXNU-b5q/reports/p4-runtime-firmware.json').read_text())
     assert media['firmware']==stock['files']
     for name,item in stock['files'].items():

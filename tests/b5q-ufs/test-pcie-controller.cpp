@@ -11,6 +11,7 @@ struct Fake {
     bool radio(bool){assert(powered);return fail!=10;}
     void pin(unsigned pin,uint32_t config,int level){assert(powered);assert(pin>=94 && pin<=96);if(pin==94)assert(config==0x201 && (level==0||level==1));}
     bool gcc(uint32_t reg,uint32_t clear,uint32_t set){assert(powered);if(fail==12&&reg!=0x52020)return false;registers[reg]=(registers[reg]&~clear)|set;return true;}
+    bool rcg(uint32_t reg){assert(reg==0x6b074||reg==0x6b058);assert(powered);return fail!=12;}
     uint32_t readGcc(uint32_t reg){assert(powered);if(reg==0x6b004||reg==0x6c000)return fail==11?0:1u<<31;if(reg==0x6b074||reg==0x6b058)return 0;return registers[reg];}
     bool clkref(){return fail!=22;}
     void delay(unsigned us){assert(us<=100000);elapsed+=us;assert(elapsed<3000000);}

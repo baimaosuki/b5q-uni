@@ -22,7 +22,7 @@ static void worker(void *, wait_result_t) {
         // IOUSBDeviceFamily below it, run on this load.
         const OSReturn loaded = OSKextLoadKextWithIdentifier("com.apple.driver.AppleUSBXDCI");
         native_usb_stats[21] = (uint32_t)loaded;
-        if (loaded != kOSReturnSuccess && loaded != kOSKextReturnStartStopError) {native_usb_stats[0] = (uint32_t)-9; thread_terminate(current_thread());}
+        if (loaded != kOSReturnSuccess && loaded != kOSKextReturnStartStopError) {native_usb_stats[0] = (uint32_t)-9; IOLog("qcom-dwc3: stage=xdci-load result=%x\n",loaded); thread_terminate(current_thread());}
         // The same for host mode: Apple's xHCI driver and the USB host family below it.
         qcom_dwc3_host_load((int)OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBXHCI"));
         const char *families[]={"com.apple.driver.usb.AppleUSBHub","com.apple.driver.usb.AppleUSBHostCompositeDevice","com.apple.driver.usb.IOUSBHostHIDDevice","com.apple.driver.AppleHIDKeyboard","com.apple.iokit.IOUSBMassStorageDriver"};
@@ -32,10 +32,11 @@ static void worker(void *, wait_result_t) {
             IOLog("qcom-dwc3: family=%s load=%x\n",identifier,rc);
         }
         void *handle = OSMetaClass::preModLoad(g_kernel_kmod_info.name);
-        if (!handle) native_usb_stats[0] = (uint32_t)-10;
+        if (!handle) {native_usb_stats[0] = (uint32_t)-10;IOLog("qcom-dwc3: stage=metaclass-pre result=-10\n");}
         else {
             qcom_dwc3_static_init();
-            if (OSMetaClass::postModLoad(handle)) native_usb_stats[0] = (uint32_t)-11;
+            const OSReturn status=OSMetaClass::postModLoad(handle);
+            if (status) {native_usb_stats[0] = (uint32_t)-11;IOLog("qcom-dwc3: stage=metaclass-post result=%x\n",status);}
             else {
                 qcom_dwc3_publish();
                 unsigned mode = 0;
@@ -52,5 +53,7 @@ extern "C" void sheng_usb_probe(void) {
     if (!PE_parse_boot_argn("usb", &enabled, sizeof enabled) || !enabled) return;
     if(__atomic_exchange_n(&once,1u,__ATOMIC_ACQ_REL))return;
     thread_t thread = nullptr;
-    if (kernel_thread_start(worker, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);
+    const kern_return_t status=kernel_thread_start(worker, nullptr, &thread);
+    if (status == KERN_SUCCESS) thread_deallocate(thread);
+    else IOLog("qcom-dwc3: stage=worker-start result=%d\n",status);
 }

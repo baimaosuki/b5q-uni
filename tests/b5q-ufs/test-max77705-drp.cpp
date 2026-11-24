@@ -27,7 +27,12 @@ int main(){
   c={uint8_t(power|(pin<<6)),0,uint8_t(data),0x80,true};
   assert(c.role()==(data?2:1));assert(c.sourceVbus(c.role())==(power==2));
   assert(c.orientation()==(pin==1||pin==2?int(pin-1):-1));
-  const auto sig=c.signature();c.bc=0;assert(c.signature()!=sig);
+  const auto sig=c.signature();c.bc=0;assert(c.signature()==sig);
+  c.cc1=9;assert(c.signature()==sig); // self-sourced VBUS feedback
+  c.cc0^=0x40;assert(c.signature()!=sig);c.cc0^=0x40;
+  c.cc0^=3;assert(c.signature()!=sig);c.cc0^=3;
+  c.pd^=0x80;assert(c.signature()!=sig);c.pd^=0x80;
+  c.cc1=2;assert(c.signature()!=sig);
   c.cc1=2;assert(!c.role()&&!c.sourceVbus(2)&&c.orientation()==-1);
  }
  puts("PASS original CC/PD snapshot:5statusreads,no opcode/interrupt writes,allpower/data/orientation pairs,water,I2C/torn rejection");

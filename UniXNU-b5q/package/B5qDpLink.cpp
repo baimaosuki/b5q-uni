@@ -33,9 +33,9 @@ uint64_t nowUs(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),
 struct Window {
  IOMemoryMap *map=nullptr;volatile uint32_t *va=nullptr;
  Window()=default;Window(const Window&)=delete;Window&operator=(const Window&)=delete;
- bool open(uint64_t base,unsigned bytes){
+ bool open(uint64_t base,unsigned bytes,IOOptionBits cache=kIOMapInhibitCache){
   if(va)return true;auto *d=IODeviceMemory::withRange(base,bytes);
-  map=d?d->map(kIOMapAnywhere|kIOMapInhibitCache):nullptr;OSSafeReleaseNULL(d);
+  map=d?d->map(kIOMapAnywhere|cache):nullptr;OSSafeReleaseNULL(d);
   va=map?reinterpret_cast<volatile uint32_t*>(map->getVirtualAddress()):nullptr;
   if(!va){OSSafeReleaseNULL(map);return false;}return true;
  }
@@ -175,7 +175,10 @@ struct Owner {
    for(uint64_t i=0;i<bytes/4;i++)out[i]=0xff000000;return true;
   }
   bool clean(const B5qDp::ScanoutBuffer &b,uint64_t bytes){
-   if(!dmaAllowed(b.address,bytes))return false;barrier();return true; // pool mapping is uncached
+   if(!dmaAllowed(b.address,bytes))return false;
+   const uintptr_t start=reinterpret_cast<uintptr_t>(owner.pool.va)+(b.address-owner.dma.PoolBase);
+   for(uintptr_t at=start&~uintptr_t(63);at<start+bytes;at+=64)asm volatile("dc cvac, %0"::"r"(at):"memory");
+   barrier();return true; // Explicit clean for the retained display domain.
   }
   bool copy(const B5qDp::ScanoutBuffer &b,const void *source,const B5qDp::Mode &m,unsigned stride){
    const auto &t=*static_cast<const Transfer*>(source);
@@ -240,7 +243,7 @@ struct Owner {
   return ready==1&&B5qDpPoolValid(&dma)&&!PE_current_console(&primary)&&
    primary.v_baseAddr==dma.FrameBufferBase&&primary.v_rowBytes&&primary.v_height&&
    uint64_t(primary.v_rowBytes)*primary.v_height<=dma.PrimaryEnd-dma.FrameBufferBase&&
-   pool.open(dma.PoolBase,unsigned(dma.PoolBytes));
+   pool.open(dma.PoolBase,unsigned(dma.PoolBytes),kIOMapCopybackCache);
  }
  bool startDisplay(){
   static bool initialized=false;
@@ -322,6 +325,8 @@ extern "C" bool b5q_dp_link_stop(void){
 extern "C" void b5q_dp_link_update(const B5qDpPortState *state){
  if(!state)return;
  if(!B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)){b5q_dp_link_stop();return;}
- if(!ensureLock())return;IOLockLock(lock);if(!owner)owner=new Owner;
+ if(!ensureLock()){static bool logged;if(!logged){logged=true;IOLog("B5qDP: stage=owner-lock result=no-memory\n");}return;}
+ IOLockLock(lock);if(!owner)owner=new Owner;
+ if(!owner){static bool logged;if(!logged){logged=true;IOLog("B5qDP: stage=owner-allocation result=no-memory\n");}}
  if(owner)owner->update(*state);IOLockUnlock(lock);
 }

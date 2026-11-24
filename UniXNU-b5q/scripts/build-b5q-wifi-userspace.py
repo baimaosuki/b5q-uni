@@ -20,7 +20,7 @@ match=re.search(r'^CDHash=([0-9a-f]{40})$',detail,re.M)
 if not match:raise ValueError('Signed native supplicant missing CDHash')
 (out/'etc/wifi/wpa_supplicant.conf').write_text('# Native Wi-Fi control supplies networks.\nap_scan=1\n')
 job={'Label':'org.unixnu.wifi.supplicant','ProgramArguments':['/private/var/ngpu/bin/unixnu-wpa_supplicant','-Dsheng','-ien0','-c/private/var/ngpu/etc/wifi/wpa_supplicant.conf','-q','-s'],
-    'RunAtLoad':True,'KeepAlive':True,'ThrottleInterval':3,'UserName':'root','Umask':0o77,'ProcessType':'Interactive'}
+    'RunAtLoad':False,'KeepAlive':{'PathState':{'/private/var/run/b5q-wifi-ready':True}},'ThrottleInterval':60,'UserName':'root','Umask':0o77,'ProcessType':'Interactive'}
 (out/'daemons/org.unixnu.wifi.supplicant.plist').write_bytes(plistlib.dumps(job))
 report=dict(built=True,target=a.target,cdhash=match[1],hardware_verified=False,firmware_prefix='firmware/ath11k/WCN6855/hw2.0',daemons_prefix='Library/LaunchDaemons',firmware=firmware,
     files={str(p.relative_to(out)):hashlib.sha256(p.read_bytes()).hexdigest()for n in ('bin','etc/wifi','daemons','firmware')for p in sorted((out/n).rglob('*'))if p.is_file()},

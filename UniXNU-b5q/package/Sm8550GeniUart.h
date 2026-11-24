@@ -20,6 +20,8 @@ struct sm8550_geni_clock_io {
 int sm8550_geni_uart14_source(const struct sm8550_geni_clock_io *,uint32_t baud,uint32_t *hz);
 /* Serialize shared GCC votes from worker context. Returns false on allocation failure. */
 bool sm8550_gcc_update32(volatile uint32_t *,uint32_t clear,uint32_t set);
+// Serialized self-clearing command, bounded in microseconds.
+bool sm8550_gcc_trigger32(volatile uint32_t *,uint32_t trigger,unsigned timeout_us);
 /* Own SE6 and its newly acquired shared core/AHB votes. */
 bool sm8550_geni_uart14_vote(volatile uint32_t *,bool enabled);
 #ifdef __cplusplus

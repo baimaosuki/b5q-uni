@@ -14,7 +14,11 @@
 #include <sys/kern_control.h>
 #include <sys/kern_control_private.h>
 #include <sys/kpi_mbuf.h>
+#include <net/kpi_interface.h>
 #include <stdarg.h>
+extern "C" bool sm8550_gcc_trigger32(volatile uint32_t *,uint32_t,unsigned);
+extern "C" ifnet_t sheng_ethernet_ifnet(void);
+extern "C" int b5q_wifi_publish_ready(void);
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 #include "B5qPcieCore.h"
 #include "B5qWifiDma.h"
@@ -78,7 +82,7 @@ bool readHandoff() {
     if(!B5qWifiDma::ready(flag,dmaState))return false;
     // Only retained, firmware-owned low memory; never a second mapping of
     // XNU allocator memory. PCIe is dma-coherent in the original b5q DTS.
-    if(!dma.open(dmaState.poolBase,dmaState.poolBytes,kIOMapDefaultCache))return false;
+    if(!dma.open(dmaState.poolBase,dmaState.poolBytes,kIOMapCopybackCache))return false;
     arena=static_cast<DmaArena*>(IOMallocData(sizeof(DmaArena)));arenaLock=IOLockAlloc();
     if(!arena || !arenaLock)return false;
     memset(arena,0,sizeof(*arena));
@@ -91,7 +95,8 @@ struct Hardware {
         if(level>=0)tlmm.va[(n*0x1000+4)/4]=level?2:0;
         tlmm.va[n*0x1000/4]=cfg;barrier();
     }
-    bool gcc(uint32_t reg,uint32_t clear,uint32_t set){return sm8550_gcc_update32(gccWindow.va+reg/4,clear,set);}
+    bool gcc(uint32_t reg,uint32_t clear,uint32_t set){bool ok=sm8550_gcc_update32(gccWindow.va+reg/4,clear,set);if(!ok)native_wifi_logf(3,"stage=gcc-rmw reg=%x value=%x clear=%x set=%x result=-12",reg,gccWindow.va[reg/4],clear,set);return ok;}
+    bool rcg(uint32_t reg){bool ok=sm8550_gcc_trigger32(gccWindow.va+reg/4,1,10000);native_wifi_logf(ok?6:3,"stage=rcg-update reg=%x value=%x result=%d",reg,gccWindow.va[reg/4],ok?0:-12);return ok;}
     uint32_t readGcc(uint32_t reg){return gccWindow.va[reg/4];}
     bool clkref(){Window ref;if(!ref.open(0x1fd5000,0x1000))return false;ref.va[0x100/4]|=1;barrier();return (ref.va[0x100/4]&1)!=0;}
     void delay(unsigned us){if(us>=1000)IOSleep((us+999)/1000);else IODelay(us);}
@@ -321,7 +326,10 @@ void worker(void *,wait_result_t) {
             error=nw_wifi_step();if(error<0)goto failed;
             if(!netStarted && nw_wifi_stats.stage>=4) {
                 uint8_t mac[6];if(!boardMac(mac)){error=-18;goto failed;}
-                sheng_wifi_net_start(mac);netStarted=true;
+                sheng_wifi_net_start(mac);
+                if(!sheng_ethernet_ifnet()){error=-ENXIO;native_wifi_logf(3,"stage=network-interface result=%d",error);goto failed;}
+                netStarted=true;int ready=b5q_wifi_publish_ready();
+                native_wifi_logf(ready?3:6,"stage=supplicant-ready result=%d firmware=%u interface=1",ready,nw_wifi_stats.stage);
             }
             if(nowMs()>=nextReport) {
                 nextReport=nowMs()+30000;native_wifi_stats[1]=nw_wifi_stats.stage;

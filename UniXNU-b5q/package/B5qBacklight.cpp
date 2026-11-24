@@ -90,11 +90,11 @@ public:
         auto *memory=IODeviceMemory::withRange(0xae94000,0x1000);
         mapping=memory?memory->map(kIOMapAnywhere|kIOMapInhibitCache):nullptr;
         OSSafeReleaseNULL(memory);
-        if(!mapping)return false;
+        if(!mapping){IOLog("B5qBacklight: stage=map result=failed base=ae94000\n");return false;}
         regs=reinterpret_cast<volatile uint32_t*>(mapping->getVirtualAddress());
-        if(!(regs[B5qPanelCommand::control/4]&1))return false;
+        if(!(regs[B5qPanelCommand::control/4]&1)){IOLog("B5qBacklight: stage=control result=disabled reg=%08x\n",regs[B5qPanelCommand::control/4]);return false;}
         loop=IOWorkLoop::workLoop();timer=IOTimerEventSource::timerEventSource(this,tick);
-        if(!loop||!timer||loop->addEventSource(timer)!=kIOReturnSuccess)return false;
+        if(!loop||!timer||loop->addEventSource(timer)!=kIOReturnSuccess){IOLog("B5qBacklight: stage=workloop-timer result=failed\n");return false;}
         setName("B5qBacklight");setProperty("backlight-control",true);calibration();
         // Successful FIFO completion precedes publication. A controller
         // failure never invents a brightness reading or blocks system boot.
@@ -140,11 +140,11 @@ extern "C" void b5q_backlight_probe() {
     gBacklightClass=name?OSMetaClass::getMetaClassWithName(name):nullptr;OSSafeReleaseNULL(name);
     if(!gBacklightClass){IOLog("B5qBacklight: original AppleARMBacklight metaclass unavailable\n");return;}
     void *handle=OSMetaClass::preModLoad(g_kernel_kmod_info.name);
-    if(!handle)return;
-    b5q_backlight_static_init();if(OSMetaClass::postModLoad(handle))return;
+    if(!handle){IOLog("B5qBacklight: stage=metaclass-pre result=failed\n");return;}
+    b5q_backlight_static_init();auto meta=OSMetaClass::postModLoad(handle);if(meta){IOLog("B5qBacklight: stage=metaclass-post result=%x\n",meta);return;}
     auto *service=OSTypeAlloc(B5qBacklight);
-    if(!service||!service->init()){OSSafeReleaseNULL(service);return;}
-    if(!service->attach(IOService::getPlatform())){service->release();return;}
-    if(!service->startPanel()){service->detach(IOService::getPlatform());service->release();return;}
+    if(!service||!service->init()){IOLog("B5qBacklight: stage=allocate-init result=failed\n");OSSafeReleaseNULL(service);return;}
+    if(!service->attach(IOService::getPlatform())){IOLog("B5qBacklight: stage=attach result=failed\n");service->release();return;}
+    if(!service->startPanel()){IOLog("B5qBacklight: stage=panel-start result=failed\n");service->detach(IOService::getPlatform());service->release();return;}
     service->release();
 }

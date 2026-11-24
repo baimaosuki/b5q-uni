@@ -1,0 +1,128 @@
+diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
+--- a/bsd/kern/kern_exec.c
++++ b/bsd/kern/kern_exec.c
+@@ -9706,6 +9706,84 @@
+ 	printf("owner Data: GPU addon memory release %d\n", native_gpu_addon_released);
+ }
+ 
++extern int b5q_launchd_policy_blob(unsigned, const char **, const unsigned char **, size_t *);
++static int
++b5q_launchd_policy_prepare(proc_t p, user_addr_t scratch)
++{
++	vfs_context_t ctx = vfs_context_kernel();
++	const char *dir = "/private/var/db/com.apple.xpc.launchd";
++	vnode_t vp = NULLVP;
++	int error = vnode_lookup(dir, VNODE_LOOKUP_NOFOLLOW, &vp, ctx);
++	if (error) return error;
++	struct vnode_attr va;
++	VATTR_INIT(&va); VATTR_WANTED(&va, va_uid); VATTR_WANTED(&va, va_mode);
++	error = vnode_getattr(vp, &va, ctx);
++	if (!error && (vnode_vtype(vp) != VDIR || va.va_uid != 0 || (va.va_mode & 022))) error = EPERM;
++	vnode_put(vp);
++	if (error) return error;
++	/* Stale readiness from a previous boot must never launch the supplicant. */
++	static const char ready[] = "/private/var/run/b5q-wifi-ready";
++	struct unlink_args remove = {.path = scratch + 0x100}; int32_t result = 0;
++	error = copyout(ready, remove.path, sizeof(ready));
++	if (!error) error = unlink(p, &remove, &result);
++	if (error == ENOENT) error = 0;
++	if (error) return error;
++	for (unsigned i = 0; i < 2; i++) {
++		const char *name = NULL; const unsigned char *data = NULL; size_t bytes = 0;
++		if (!b5q_launchd_policy_blob(i, &name, &data, &bytes) || !data || !bytes || bytes > 16384) return EINVAL;
++		char path[160], temp[176];
++		snprintf(path, sizeof(path), "%s/%s", dir, name);
++		snprintf(temp, sizeof(temp), "%s/.b5q-%s.new", dir, name);
++		/* Reject symlinks/hardlinks/foreign owners on both final and temp. */
++		const char *paths[] = {path, temp};
++		for (unsigned n = 0; n < 2; n++) {
++			vp = NULLVP; error = vnode_lookup(paths[n], VNODE_LOOKUP_NOFOLLOW, &vp, ctx);
++			if (error == ENOENT) {error = 0; continue;}
++			if (error) return error;
++			VATTR_INIT(&va); VATTR_WANTED(&va, va_uid); VATTR_WANTED(&va, va_nlink);
++			error = vnode_getattr(vp, &va, ctx);
++			if (!error && (vnode_vtype(vp) != VREG || va.va_uid != 0 || va.va_nlink != 1)) error = EPERM;
++			vnode_put(vp); if (error) return error;
++		}
++		/* An already-current policy remains byte-for-byte untouched. */
++		vp = NULLVP; error = vnode_open(path, FREAD | O_NOFOLLOW, 0, 0, &vp, ctx);
++		bool same = false;
++		if (!error) {
++			VATTR_INIT(&va); VATTR_WANTED(&va, va_data_size); VATTR_WANTED(&va, va_mode); VATTR_WANTED(&va, va_gid);
++			error = vnode_getattr(vp, &va, ctx);
++			if (!error && va.va_data_size == bytes && (va.va_mode & 07777) == 0644 && va.va_gid == 0) {
++				unsigned char *check = kalloc_data(bytes, Z_WAITOK | Z_NOFAIL); int resid = 0;
++				error = vn_rdwr(UIO_READ, vp, (caddr_t)check, (int)bytes, 0, UIO_SYSSPACE, IO_NOAUTH, vfs_context_ucred(ctx), &resid, p);
++				same = !error && !resid && !memcmp(check, data, bytes); kfree_data(check, bytes);
++			}
++			vnode_close(vp, FREAD, ctx);
++		} else if (error == ENOENT) error = 0;
++		if (error) return error;
++		if (same) {printf("B5qLaunchd: policy=%s current=1 iconservices=enabled\n", name); continue;}
++		vp = NULLVP; error = vnode_open(temp, FWRITE | O_CREAT | O_TRUNC | O_NOFOLLOW, 0600, 0, &vp, ctx);
++		if (error) return error;
++		int resid = 0;
++		error = vn_rdwr(UIO_WRITE, vp, (caddr_t)data, (int)bytes, 0, UIO_SYSSPACE, IO_NOAUTH | IO_SYNC, vfs_context_ucred(ctx), &resid, p);
++		if (!error && resid) error = EIO;
++		if (!error) {
++			VATTR_INIT(&va); VATTR_SET(&va, va_uid, 0); VATTR_SET(&va, va_gid, 0); VATTR_SET(&va, va_mode, 0644);
++			/* XNU non-compound vnode_open may leave O_TRUNC unfinished. */
++			VATTR_SET(&va, va_data_size, bytes);
++			error = vnode_setattr(vp, &va, ctx);
++		}
++		if (!error) error = VNOP_FSYNC(vp, MNT_WAIT, ctx);
++		int closed = vnode_close(vp, FWRITE, ctx); if (!error) error = closed;
++		if (error) return error;
++		struct rename_args move = {.from = scratch + 0x100, .to = scratch + 0x200};
++		error = copyout(temp, move.from, strlen(temp) + 1);
++		if (!error) error = copyout(path, move.to, strlen(path) + 1);
++		if (!error) error = rename(p, &move, &result);
++		printf("B5qLaunchd: policy=%s updated=%u bytes=%lu result=%d iconservices=enabled\n", name, !error, bytes, error);
++		if (error) return error;
++	}
++	return 0;
++}
++
+ static int
+ native_owner_macos_data_prepare(proc_t p, user_addr_t scratch)
+ {
+@@ -9775,6 +9853,10 @@
+ #ifdef XNU_OWNER_APP_VOLUME_UUID
+ 	if (!error) native_owner_macos_app_cryptex(p, scratch);
+ #endif
++	if (!error) {
++		error = b5q_launchd_policy_prepare(p, scratch);
++		printf("B5qLaunchd: stage=before-launchd result=%d\n", error);
++	}
+ 	if (!error) native_owner_macos_gpu_addon(p, scratch);
+ 	if (!error) native_owner_macos_addon_sbin(p, scratch);
+ 	if (!error) b5q_wireless_runtime_prepare(p, scratch);
+diff --git a/osfmk/kern/host.c b/osfmk/kern/host.c
+--- a/osfmk/kern/host.c
++++ b/osfmk/kern/host.c
+@@ -828,6 +828,11 @@
+ 	natural_t speculative_count = vm_page_speculative_count;
+ 	natural_t throttled_count = vm_page_throttled_count;
+ 
++	/* Newer macOS callers supply a larger append-only buffer capacity.
++	 * Return our supported revision/count; never write unknown tail fields. */
++#if XNU_TARGET_OS_OSX
++	if (*count > HOST_VM_INFO64_COUNT) *count = HOST_VM_INFO64_COUNT;
++#endif
+ 	if (*count > HOST_VM_INFO64_COUNT) {
+ 		vm_log_error("host_statistics64() count is larger than expected "
+ 		    "(actual:%u > HOST_VM_INFO64_COUNT:%u). This is most likely a bug in "
+diff --git a/iokit/Kernel/IOUserClient.cpp b/iokit/Kernel/IOUserClient.cpp
+--- a/iokit/Kernel/IOUserClient.cpp
++++ b/iokit/Kernel/IOUserClient.cpp
+@@ -4391,6 +4391,10 @@
+ 	if (!list) {
+ 		return false;
+ 	}
++	/* The board's owned keystore exposes software state only. Limit its
++	 * explicit grant to Apple platform processes; no global MACF bypass. */
++	if (service->getProperty("B5qKeyStorePlatformGrant") == kOSBooleanTrue
++	    && !task_get_platform_binary(current_task())) return false;
+ 	proc_selfname(name, sizeof(name));
+ 	for (const char * at = list->getCStringNoCopy(); *at;) {
+ 		size_t length = 0;

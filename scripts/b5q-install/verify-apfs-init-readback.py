@@ -38,5 +38,5 @@ def main():
    hashes=ns['codesign']((dest/name).read_bytes());assert hashes and all(h in trusted for h in hashes)
    trusted_hashes=[h.hex()for h in hashes]
  result=dict(passed=True,readback_image=str(a.image),APFS_volume_UUID='1552CFEE-78FF-48D8-8A6C-694B867D61AC',account_autologin_password_verified=True,policy_counts=counts,policy_contents=contents,inodes=stats,absentd_SHA256_verified=True,absentd_trusted_CodeDirectories=trusted_hashes)
- a.out.write_text(json.dumps(result,indent=2)+'\n');print('PASS APFS readback: account/autologin, UUID, root-owned binary59/26 policies, watchdogd, absentd',flush=True)
+ a.out.write_text(json.dumps(result,indent=2)+'\n');print('PASS APFS readback: account/autologin, UUID, root-owned binary policies, watchdogd, absentd',flush=True)
 if __name__=='__main__':main()
