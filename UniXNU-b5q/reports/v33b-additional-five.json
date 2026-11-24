@@ -51,9 +51,22 @@
     "pcie-regression.log": "19123d035017cfd5bd1b02b4a0bc0a8b86f0d93ebf7564d0759b517f0f533dfe",
     "addon-reuse.log": "5e0af3031de8e3d98074406fcaa22ac727aaf4e3f1babbc7b75a7218e033cf01"
   },
-  "CI_final": "pending",
-  "final_image_created": false,
+  "CI_final": 45426905030,
+  "final_image_created": true,
   "stale_ready_removed_before_policy_errors": true,
   "official_merged_low_no_map_checks": 190,
-  "official_uncovered_no_map": 0
+  "official_uncovered_no_map": 0,
+  "returned_acceptance": "/home/baimao/zflip5/artifacts/b5q-v33b-fix-work/returned-final/package-ready.json",
+  "images": {
+    "esp.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-v33b-repair/esp.img",
+      "bytes": 838860800,
+      "sha256": "6686c339a0f8ea6647ceaae0e381d2ee369889a1caf3319d45214cc8c97f6b63"
+    },
+    "boot.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-v33b-repair/boot.img",
+      "bytes": 19124224,
+      "sha256": "0c9f83986eae0f239f9e5a7f6fc81ee98ea56bf865fdb84b6f596c9566de3bc6"
+    }
+  }
 }
