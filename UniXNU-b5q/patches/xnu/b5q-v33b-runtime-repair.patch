@@ -1,7 +1,7 @@
 diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 --- a/bsd/kern/kern_exec.c
 +++ b/bsd/kern/kern_exec.c
-@@ -9706,6 +9706,88 @@
+@@ -9706,6 +9706,90 @@
  	printf("owner Data: GPU addon memory release %d\n", native_gpu_addon_released);
  }
  
@@ -12,14 +12,7 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 +	vfs_context_t ctx = vfs_context_kernel();
 +	const char *dir = "/private/var/db/com.apple.xpc.launchd";
 +	vnode_t vp = NULLVP;
-+	int error = vnode_lookup(dir, VNODE_LOOKUP_NOFOLLOW, &vp, ctx);
-+	if (error) return error;
-+	struct vnode_attr va;
-+	VATTR_INIT(&va); VATTR_WANTED(&va, va_uid); VATTR_WANTED(&va, va_mode);
-+	error = vnode_getattr(vp, &va, ctx);
-+	if (!error && (vnode_vtype(vp) != VDIR || va.va_uid != 0 || (va.va_mode & 022))) error = EPERM;
-+	vnode_put(vp);
-+	if (error) return error;
++	int error;
 +	/* Stale readiness from a previous boot must never launch the supplicant. */
 +	static const char ready[] = "/private/var/run/b5q-wifi-ready";
 +	struct unlink_args remove = {.path = scratch + 0x100}; int32_t result = 0;
@@ -27,6 +20,15 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
 +	if (!error) error = unlink(p, &remove, &result);
 +	if (error == ENOENT) error = 0;
 +	if (error) return error;
++	error = vnode_lookup(dir, VNODE_LOOKUP_NOFOLLOW, &vp, ctx);
++	if (error) return error;
++	struct vnode_attr va;
++	VATTR_INIT(&va); VATTR_WANTED(&va, va_uid); VATTR_WANTED(&va, va_mode);
++	error = vnode_getattr(vp, &va, ctx);
++	if (!error && (vnode_vtype(vp) != VDIR || va.va_uid != 0 || (va.va_mode & 022))) error = EPERM;
++	vnode_put(vp);
++	if (error) return error;
++
 +	for (unsigned i = 0; i < 2; i++) {
 +		const char *name = NULL; const unsigned char *data = NULL; size_t bytes = 0;
 +		if (!b5q_launchd_policy_blob(i, &name, &data, &bytes) || !data || !bytes || bytes > 16384) return EINVAL;
@@ -90,7 +92,7 @@ diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
  static int
  native_owner_macos_data_prepare(proc_t p, user_addr_t scratch)
  {
-@@ -9775,6 +9857,10 @@
+@@ -9775,6 +9859,10 @@
  #ifdef XNU_OWNER_APP_VOLUME_UUID
  	if (!error) native_owner_macos_app_cryptex(p, scratch);
  #endif

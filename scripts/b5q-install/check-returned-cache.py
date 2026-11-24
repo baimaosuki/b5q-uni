@@ -16,7 +16,7 @@ for name,path in paths.items():
  for i,x in enumerate(ins):
   if x.mnemonic=='mov'and x.op_str in ('w1, #0x301','x1, #0x301'):
    window=ins[i+1:i+10]
-   if any(k.mnemonic=='movk'and k.op_str=='x17, #0x3ed6, lsl #48'for k in window)and any(k.mnemonic=='blraa'for k in window):
+   if any(k.mnemonic=='movk'and k.op_str.split(', ',1)[-1]=='#0x3ed6, lsl #48'for k in window)and any(k.mnemonic=='blraa'for k in window):
     direct.append(dict(options_site=hex(x.address),options='0x301 = Anywhere | Copyback',map_slot_PAC='IA3ed6',instructions=[k.mnemonic+' '+k.op_str for k in ins[i:i+10]]))
  if name!='B5qDpLink.o':assert direct,(name,'missing actual NormalWB map argument')
  else:

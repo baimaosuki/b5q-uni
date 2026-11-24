@@ -52,5 +52,8 @@
     "addon-reuse.log": "5e0af3031de8e3d98074406fcaa22ac727aaf4e3f1babbc7b75a7218e033cf01"
   },
   "CI_final": "pending",
-  "final_image_created": false
+  "final_image_created": false,
+  "stale_ready_removed_before_policy_errors": true,
+  "official_merged_low_no_map_checks": 190,
+  "official_uncovered_no_map": 0
 }

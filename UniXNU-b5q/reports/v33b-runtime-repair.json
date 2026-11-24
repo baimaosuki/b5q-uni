@@ -129,7 +129,7 @@
       {
         "name": "addon-reuse-policy",
         "passed": true,
-        "log_sha256": "c74030daecb169e3720edaeb5e0364e9b32284aa8a4164ebfca0b3f242f361d1"
+        "log_sha256": "ae98b334c66a0b369e5320a90cd122ddee0a433ac876aa35d81d90403d618a58"
       },
       {
         "name": "policy-migration",
@@ -397,7 +397,7 @@
       "UniXNU-b5q/scripts/update-b5q-launchd-seed.py": "2f77aa7e81d65c84ea84f7ceacaf0fab539febbe7230d84cfe15c96dad05a98e",
       "UniXNU-b5q/patches/xnu/b5q-console-journal.patch": "c36530ec959bcc1ef4220f4726a709ea0dfb69684112eaab5b81763760bc7869",
       "UniXNU-b5q/patches/xnu/b5q-media-runtime.patch": "917748ccdaea777af030341a19b8cadca97ed52b21f2805963de4a39f090ddb4",
-      "UniXNU-b5q/patches/xnu/b5q-v33b-runtime-repair.patch": "f2baa4e726b19e77c823be0850bdc8c913d100227863b6bb6925b2549da42c34",
+      "UniXNU-b5q/patches/xnu/b5q-v33b-runtime-repair.patch": "16e9d4691f7ff8561135ef46cd3bc72a0b6f12b9c49f9abd4e89629288a9111e",
       "UniXNU-b5q/patches/xnu/b5q-windowserver-signal.patch": "8d4328609ecf90066cfbfc520b160fe5fafbb6edd6f4975e3755bbe578607571",
       "UniXNU-b5q/patches/xnu/b5q-wireless-runtime.patch": "1b5c0d07a4fae80fcd972c80911b8339425132951a3e6bc7d723947d44d635c3",
       "UniXNU-b5q/patches/xnu/macos-kernel-stack-alignment.patch": "a1b4caf6c1bbc087b405a5813753c404617a69f32b876aeaf4a9ac2534c5e3d5",
@@ -443,7 +443,7 @@
       "tests/b5q-ufs/test-v33b-causal.py": "ed100f1de348c4c63a3590c47abc6224a69b8b351f0ceaa68d200701f2a5c003",
       "tests/b5q-ufs/test-v33b-dyld-upl.py": "b1acbcf308597c1eb7d42e120619b05920caf1f851050aab0ac3a22f1b09c487",
       "tests/b5q-ufs/test-v33b-host-abi.py": "3d4644c0b7cef673e6dd17e8a4ff3dd9dce3c64bd9a2a09a0b64792f08843474",
-      "tests/b5q-ufs/test-v33b-policy.py": "5ff0af1b2e8ecf0f606c6e71146b25f45ceb5a1d569cce7d86cdd5e09687fdbf",
+      "tests/b5q-ufs/test-v33b-policy.py": "816bb7dededb3df1555c47939c124574e7e32bf6681a2696b8af547ea691747a",
       "tests/b5q-ufs/test-v33b-reservations.py": "bd7b980db74568b8f161b7e12a4d2a44e4889dce3c0b48b2a7943484795ccf16"
     },
     "gates": {
@@ -518,7 +518,10 @@
       "addon-reuse.log": "5e0af3031de8e3d98074406fcaa22ac727aaf4e3f1babbc7b75a7218e033cf01"
     },
     "CI_final": "pending",
-    "final_image_created": false
+    "final_image_created": false,
+    "stale_ready_removed_before_policy_errors": true,
+    "official_merged_low_no_map_checks": 190,
+    "official_uncovered_no_map": 0
   },
   "reuse_UEFI": false
 }
