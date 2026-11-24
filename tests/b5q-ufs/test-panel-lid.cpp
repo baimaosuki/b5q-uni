@@ -5,7 +5,6 @@
 #include <map>
 #include <vector>
 #include "B5qPanelCommand.h"
-#include "B5qLid.h"
 #include "B5qPanelLevels.h"
 using namespace B5qPanelCommand;
 struct Dsi {
@@ -65,12 +64,5 @@ int main() {
     const auto saved=mdp.regs;assert(mdp.send(1)==Result::Busy&&mdp.payload.empty()&&mdp.regs==saved);
     Dsi error;error.regs[interrupts]|=B5qPanelCommand::error;
     assert(error.send(1)==Result::Error&&error.payload.empty());
-    B5qLid::State lid;
-    assert(!lid.sample(true,0)&&!lid.sample(true,49)&&lid.sample(true,50)&&!lid.stable);
-    assert(!lid.sample(false,100)&&!lid.sample(true,120)&&!lid.sample(false,140));
-    assert(!lid.sample(false,189)&&lid.sample(false,190)&&lid.stable);
-    assert(!lid.sample(false,1000)&&!lid.sample(true,1001));
-    assert(lid.sample(true,1051)&&!lid.stable&&!lid.sample(true,1100));
-    assert(!lid.sample(false,5)&&!lid.sample(false,54)&&lid.sample(false,55));
-    puts("PASS 4096 Samsung DCS FIFO levels, completion/error/timeout/restoration and no-write rejects; GPIO107 active-low50ms debounce/bounce/clock rollback");
+    puts("PASS 4096 Samsung DCS FIFO levels, completion/error/timeout/restoration and no-write rejects; no lid controller selected");
 }

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Accept actual CI payload/objects before creating any final ESP."""
-import argparse,hashlib,importlib.util,json,plistlib,subprocess,sys,tempfile,tomllib
+import argparse,hashlib,importlib.util,json,os,plistlib,subprocess,sys,tempfile,tomllib
 from pathlib import Path
 R=Path(__file__).resolve().parents[2]
 sys.path[:0]=[str(R/'UniXNU/scripts'),str(R/'UniXNU-b5q/scripts'),str(R/'sources/UniXNU/kits/XnuPrelink')]
 from unixnu import ramdisk
 from kc_image import Image
-p=argparse.ArgumentParser();p.add_argument('--ci',type=Path,required=True);p.add_argument('--firmware-receipt',type=Path,required=True);p.add_argument('--fd',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--ci',type=Path,required=True);p.add_argument('--firmware-receipt',type=Path,required=True);p.add_argument('--fd',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--reuse-unchanged-firmware',action='store_true');a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
 def sha(p):
  with p.open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
 def load(path):
@@ -19,12 +19,15 @@ def run(name,*command):
 ci=a.ci.resolve();payload=ci/'payload/payload.img';transfer=json.loads((ci/'transfer-index.json').read_text());assert transfer['artifact']['github_digest_verified']
 manifest=json.loads((ci/'package.manifest.json').read_text())
 for n,rel in [('kernel.macho','kernel/kernel.macho'),('payload.img','payload/payload.img')]:assert dict(bytes=(ci/rel).stat().st_size,sha256=sha(ci/rel))==manifest['outputs'][n]
-local=R/'artifacts/b5q-v33b-fix-work'
+local=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33b-fix-work'))
 for name in ['local-gates.json','static-gates.json','failure-gates.json']:assert json.loads((local/name).read_text())['passed'],name
 bound=json.loads((local/'local-gates.json').read_text())['source_sha256'];assert all(sha(R/n)==v for n,v in bound.items()),'source changed after local gates'
 static=json.loads((local/'static-gates.json').read_text());assert sha(ci/'device-tree/hardware.dtb')==static['DTB_SHA256']
 firmware=json.loads(a.firmware_receipt.read_text());assert firmware['passed']and firmware['github_digest_verified']
-assert firmware['source_commit']==transfer['commit']and firmware['FD']['sha256']==sha(a.fd),'Firmware/kernel must match same actual CI source and transfer SHA'
+assert firmware['FD']['sha256']==sha(a.fd),'Firmware transfer SHA mismatch'
+if firmware['source_commit']!=transfer['commit']:
+ assert a.reuse_unchanged_firmware,'Different firmware source requires exact input identity proof'
+ run('unchanged-firmware-inputs',sys.executable,R/'scripts/b5q-install/check-firmware-reuse.py','--receipt',a.firmware_receipt,'--fd',a.fd,'--current',transfer['commit'],'--out',a.out/'firmware-reuse.json')
 fd_bytes=a.fd.read_bytes()
 for index in range(12):assert ('b5q low no-map '+str(index)).encode()+b'\0'in fd_bytes,('missing actual FD reservation',index)
 from unixnu.boot_template import loader_pe
@@ -49,6 +52,8 @@ with tempfile.TemporaryDirectory(prefix='b5q-payload-accept-')as td:
   assert marker in raw,marker
  policy=load(R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py')
  for labels in policy.policies().values():assert policy.merge(b'',labels)in raw
+ from b5q_gpu_adt import verify as verify_gpu_firmware
+ verify_gpu_firmware(fs.adt_nodes((assets/'kernel.macho.adt').read_bytes())['/chosen'][2])
  adt=fs.adt_nodes((assets/'kernel.macho.adt').read_bytes());assert adt['/chosen/asmb'][2]['lp-sip0']==(2).to_bytes(8,'little')
  for node,values in [('/arm-io/bluetooth',{'transport-encoding':1,'transport-speed':3200000}),('/arm-io/wlan',{})]:
   assert node in adt

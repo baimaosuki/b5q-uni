@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Bind the five requested offline gates to actual source and test receipts."""
-import hashlib,json,subprocess,sys
+import hashlib,json,os,subprocess,sys
 from pathlib import Path
-R=Path(__file__).resolve().parents[2];W=R/'artifacts/b5q-v33b-fix-work';checks=[]
+R=Path(__file__).resolve().parents[2];W=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33b-fix-work'));checks=[]
 def run(name,script,*args):
  path=W/(name+'.log')
  with path.open('w')as f:r=subprocess.run([sys.executable,str(R/script),*map(str,args)],cwd=R,stdout=f,stderr=subprocess.STDOUT)
@@ -15,6 +15,8 @@ for n,digest in baseline['source_sha256'].items():assert hashlib.sha256((R/n).re
 assert 'PASS complete P4 local gate'in(W/'pre-ci-all.log').read_text()
 checks.append(dict(name='full-P0-P4-retained-production-regressions',passed=True,checks=len(baseline['checks'])))
 run('causal','tests/b5q-ufs/test-v33b-causal.py')
+for name in ['gpu-adt-preservation','inner-only','pcie-link-timing','bt-fifo']:
+ run(name,'tests/b5q-ufs/test-'+name+'.py')
 run('dyld-upl','tests/b5q-ufs/test-v33b-dyld-upl.py')
 run('firmware-reservations','tests/b5q-ufs/test-v33b-reservations.py')
 run('addon-reuse-policy','tests/b5q-ufs/test-addon-reuse-policy.py')
@@ -34,7 +36,7 @@ run('hid-callback-pac','scripts/b5q-install/check-media-callback-pac.py','--dp',
 files=[*sorted((R/'UniXNU-b5q/package').rglob('*.c')),*sorted((R/'UniXNU-b5q/package').rglob('*.h')),*sorted((R/'UniXNU-b5q/package').rglob('*.cpp')),*sorted((R/'UniXNU-b5q/scripts').glob('*.py')),*sorted((R/'UniXNU-b5q/patches/xnu').glob('*.patch')),R/'UniXNU-b5q/patches/xnu/series',R/'UniXNU-b5q/dts/b5q.dts',R/'UniXNU-b5q/board.toml',R/'UniXNU-b5q/package/b5q-launchd-lite.json',R/'.github/workflows/b5q-p0-p5.yml',*sorted((R/'patches/uefi-b5q').glob('*.patch')),*sorted((R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe').glob('*.[ch]')),R/'uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h',R/'uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c']
 files+=sorted((R/'scripts/b5q-install').glob('*.py'))+sorted((R/'tests/b5q-ufs').glob('*v33b*.py'))+[R/'tests/b5q-ufs/test-addon-reuse-policy.py']
 files+=sorted((R/'UniXNU-b5q/inputs/iris-linux').rglob('*.[ch]'))+[R/'tests/b5q-ufs/test-iris-pinned-inputs.py']
-files+=[R/'tests/b5q-ufs/test-gmu-archive-index.py']
+files+=[R/'tests/b5q-ufs'/('test-'+n+'.py')for n in ['gmu-archive-index','gpu-adt-preservation','inner-only','pcie-link-timing','bt-fifo']]
 receipt=dict(passed=True,hardware_verified=False,checks=checks,source_sha256={str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},
  gates={'physical_cause_models':'PASS','memory_ABI_real_DTB_ADT':'PASS','sheng_macos_diff_accounted':'PASS','silent_failure_inventory':'PASS','existing_Data_idempotent_migration':'PASS'},
  native_CI_returned_binary_APFS_verification='Required before final ESP assembly; check-v33b-returned.py',ESP_created=False)

@@ -20,8 +20,6 @@
 extern kmod_info_t g_kernel_kmod_info;
 extern "C" void b5q_backlight_static_init(void) __asm__("__GLOBAL__sub_I_B5qBacklight.cpp");
 namespace {
-volatile uint32_t gClosed;
-IOTimerEventSource *gRequestTimer;
 const OSMetaClass *gBacklightClass;
 }
 class B5qBacklight:public IOService {
@@ -69,15 +67,15 @@ class B5qBacklight:public IOService {
     static void tick(OSObject *owner,IOTimerEventSource *) {
         auto *self=static_cast<B5qBacklight*>(owner);
         const uint32_t wanted=__atomic_load_n(&self->requested,__ATOMIC_ACQUIRE);
-        const uint32_t target=__atomic_load_n(&gClosed,__ATOMIC_ACQUIRE)?0:wanted;
+        const uint32_t target=wanted; // Only the inner-panel brightness request controls output.
         if(self->written==target)return;
         const uint32_t raw=target?B5qPanelLevels::normal[target-1].raw:0;
         const auto result=B5qPanelCommand::brightness(
             [&](uint32_t reg){return self->regs[reg/4];},
             [&](uint32_t reg,uint32_t value){self->regs[reg/4]=value;__asm__ volatile("dsb sy":::"memory");},
             [](unsigned us){IODelay(us);},raw);
-        IOLog("B5qBacklight: level=%u raw=%u closed=%u completion=%u failures=%u\n",
-            target,raw,__atomic_load_n(&gClosed,__ATOMIC_RELAXED),unsigned(result),self->failures);
+        IOLog("B5qBacklight: level=%u raw=%u inner-panel=1 completion=%u failures=%u\n",
+            target,raw,unsigned(result),self->failures);
         if(result!=B5qPanelCommand::Result::Ok) {
             if(++self->failures<=3)self->timer->setTimeoutMS(100);
             return;
@@ -98,7 +96,7 @@ public:
         setName("B5qBacklight");setProperty("backlight-control",true);calibration();
         // Successful FIFO completion precedes publication. A controller
         // failure never invents a brightness reading or blocks system boot.
-        __atomic_store_n(&gRequestTimer,timer,__ATOMIC_RELEASE);timer->setTimeoutMS(1);return true;
+        timer->setTimeoutMS(1);return true;
     }
     void free() override {
         if(timer){timer->cancelTimeout();if(loop)loop->removeEventSource(timer);}
@@ -129,10 +127,6 @@ const OSMetaClass *B5qBacklight::getMetaClass()const{return gBacklightClass?gBac
 OSMetaClassConstructorInit(B5qBacklight,IOService,)
 OSDefineDefaultStructors(B5qBacklight,IOService)
 
-extern "C" void b5q_backlight_lid(bool closed) {
-    __atomic_store_n(&gClosed,closed?1u:0u,__ATOMIC_RELEASE);
-    if(auto *timer=__atomic_load_n(&gRequestTimer,__ATOMIC_ACQUIRE))timer->setTimeoutUS(1);
-}
 extern "C" void b5q_backlight_probe() {
     if(B5qFeatures::option("backlight",B5qFeatures::Backlight)!=1)return;
     static uint32_t once;if(__atomic_exchange_n(&once,1u,__ATOMIC_ACQ_REL))return;

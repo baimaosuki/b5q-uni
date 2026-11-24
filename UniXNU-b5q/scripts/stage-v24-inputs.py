@@ -13,9 +13,13 @@ for name,count in files:
 # Private Samsung bytes enter only the temporary board config on this runner.
 # They are never added to Git; the official ADT generator carries them.
 board=root/'UniXNU-b5q/board.toml'
+from b5q_gpu_adt import verify
+verify({key:(inputs/name).read_bytes()for name,key in [('gmu_gen70200.bin','b5q-gmu-fw'),('a740_sqe.fw','b5q-sqe-fw'),('a740_zap.mbn','b5q-zap-fw')]})
 text=board.read_text()
 section='[adt.chosen.bytes]'
 lines=[]
+from b5q_gpu_adt import verify as verify_gpu_firmware
+verify_gpu_firmware({key:(inputs/name).read_bytes()for name,key in [('gmu_gen70200.bin','b5q-gmu-fw'),('a740_sqe.fw','b5q-sqe-fw'),('a740_zap.mbn','b5q-zap-fw')]})
 for name,key in [('gmu_gen70200.bin','b5q-gmu-fw'),('a740_sqe.fw','b5q-sqe-fw'),('a740_zap.mbn','b5q-zap-fw')]:
  lines.append(key+' = "'+(inputs/name).read_bytes().hex()+'"')
 if section in text:text=text.replace(section,section+'\n'+'\n'.join(lines),1)

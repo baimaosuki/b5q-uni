@@ -353,6 +353,7 @@ OSDefineMetaClassAndStructors(QcomDwc3Nub, IOService)
 
 // Whether the device stack may have the core: false while the core is in the host role or going there.
 static volatile bool gDeviceStackAllowed = false;
+static uint32_t gXdciDesiredCalls,gXdciDesired,gXdciCableCalls;
 class QcomDwc3Xdci : public AppleUSBXDCI {
     OSDeclareDefaultStructors(QcomDwc3Xdci)
     uint32_t read(uint32_t offset) {return (*reinterpret_cast<volatile uint32_t **>(reinterpret_cast<uint8_t *>(this) + 0x450))[offset / 4];}
@@ -364,16 +365,25 @@ public:
         if (!map) return false;
         *reinterpret_cast<IOMemoryMap **>(self + 0x448) = map;
         *reinterpret_cast<uint64_t *>(self + 0x450) = map->getVirtualAddress();
-        return AppleUSBXDCI::start(provider);
+        const bool started=AppleUSBXDCI::start(provider);
+        IOLog("qcom-dwc3: device stage=family-start result=%u pwr=%u\n",started,getPowerState());
+        return started;
     }
     // True keeps the family's already selected configuration list (IOUSBDeviceController builds it when this is false): Apple's SoC
     // classes answer from their IOPort transport object, and this class has none. The USB 3 descriptors follow the speed instead.
     bool XDCI_KEEP_CONFIGURATIONS() override {return false;}
     bool XDCI_TRANSPORT_ACTIVE() override {return true;}
     // The power the family asks for at each change, including when configd's description starts the stack: off while the host role has the core.
-    uint32_t XDCI_DESIRED_POWER() override {return gDeviceStackAllowed ? AppleUSBXDCI::XDCI_DESIRED_POWER() : 0;}
+    uint32_t XDCI_DESIRED_POWER() override {
+        const uint32_t wanted=gDeviceStackAllowed ? AppleUSBXDCI::XDCI_DESIRED_POWER() : 0;
+        __atomic_store_n(&gXdciDesired,wanted,__ATOMIC_RELEASE);
+        if(__atomic_fetch_add(&gXdciDesiredCalls,1u,__ATOMIC_RELAXED)<4)
+            IOLog("qcom-dwc3: device stage=desired-power allowed=%u wanted=%u pwr=%u\n",gDeviceStackAllowed,wanted,getPowerState());
+        return wanted;
+    }
     IOReturn XDCI_POWER_ON() override {
         native_usb_stats[12] = native_usb_stats[12] + 1;
+        IOLog("qcom-dwc3: device stage=power-on callback=%u\n",native_usb_stats[12]);
         vbusOverride(true);
         native_usb_stats[15] = read(0x70c);
         return kIOReturnSuccess;
@@ -413,7 +423,12 @@ public:
     }
     // Bandwidth accounting of Apple's fabric: nothing to vote for on this SoC, the SN2 vote covers the peak.
     // The family's power states: 4 starts the bus (the cable-connected path of Apple's SoC classes), 0 takes it off.
-    IOReturn cable(bool connected) {return changePowerStateTo(connected ? 4 : 0);}
+    IOReturn cable(bool connected) {
+        __atomic_fetch_add(&gXdciCableCalls,1u,__ATOMIC_RELAXED);
+        const IOReturn result=changePowerStateTo(connected ? 4 : 0);
+        IOLog("qcom-dwc3: device stage=cable-request connected=%u target=%u result=%x pwr=%u\n",connected,connected?4:0,result,getPowerState());
+        return result;
+    }
     uint32_t XDCI_PERIODIC_USAGE() override {return *reinterpret_cast<uint32_t *>(reinterpret_cast<uint8_t *>(this) + 0x58c) != 0;}
     void XDCI_PERIODIC_SET(uint32_t) override {}
 };
@@ -676,6 +691,10 @@ void deviceStats() {
     IOLog("qcom-dwc3: device dctl=%x dsts=%x events=%x evsz=%x on=%u off=%u irq=%u storm=%u\n",
           gGlobals.va[0x704/4],native_usb_stats[26],native_usb_stats[28],native_usb_stats[31],
           native_usb_stats[12],native_usb_stats[13],native_usb_stats[11],gIrqStormed);
+    IOLog("qcom-dwc3: device stage=power-path started=%u allowed=%u requests=%u wanted=%u cable-calls=%u cable-result=%x pwr=%u\n",
+          native_usb_stats[19],gDeviceStackAllowed,__atomic_load_n(&gXdciDesiredCalls,__ATOMIC_RELAXED),
+          __atomic_load_n(&gXdciDesired,__ATOMIC_ACQUIRE),__atomic_load_n(&gXdciCableCalls,__ATOMIC_RELAXED),
+          native_usb_stats[20],gController?gController->getPowerState():0);
 }
 void roleThread(void *, wait_result_t) {
     const bool dpEnabled=B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)!=0;

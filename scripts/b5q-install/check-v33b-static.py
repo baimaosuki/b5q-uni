@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Required physical-RAM, real ADT, sheng diff and launch-policy gates."""
-import argparse,hashlib,importlib.util,json,re,subprocess,sys,tomllib
+import argparse,hashlib,importlib.util,json,os,re,subprocess,sys,tomllib
 from pathlib import Path
-R=Path(__file__).resolve().parents[2];W=R/'artifacts/b5q-v33b-fix-work';W.mkdir(exist_ok=True)
+R=Path(__file__).resolve().parents[2];W=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33b-fix-work'));W.mkdir(exist_ok=True)
 sys.path.insert(0,str(R/'UniXNU/scripts'))
 from unixnu.cli import parser
 from unixnu.config import Context
@@ -65,11 +65,11 @@ resolved={
  'keyboard':'No Xiaomi keyboard; built-in buttons/touch and USB native HID are selected.',
  'log':'No Xiaomi diagnostic UI; B5QLOG2 is selected.',
  'data-persist':'b5q-data-ufs=2 validated B5QDATA1 userdata provider.',
- 'backlight':'Feature ADT/mask63 selects B5qBacklight in full profile; daily/safe isolate via b5q-f=0.',
+ 'backlight':'Feature ADT/mask61 selects B5qBacklight in full profile; daily/safe isolate via b5q-f=0.',
  'dpu-scanout':'Samsung primary GOP backend uses verified copy/Metal path; sheng direct-scanout allocation not authorized.',
  'disable-watchdogd':'Root-owned binary disabled.plist contains watchdogd and is migrated before launchd.',
- 'adsp':'Feature ADT/mask63 selects the Samsung ADSP service.',
- 'audio':'Feature ADT/mask63 selects Samsung AudioReach/TFA9878; sheng audio mode12 has different board routing.',
+ 'adsp':'Feature ADT/mask61 selects the Samsung ADSP service.',
+ 'audio':'Feature ADT/mask61 selects Samsung AudioReach/TFA9878; sheng audio mode12 has different board routing.',
  'autoreset':'Development timeout deliberately absent; never reset a running desktop at7200s.',
  'uefi-watchdog':'No boot menu watchdog deadline requested; preserve accepted firmware baseline.',
  'diag':'B5QLOG2/ProcTop hardware logs replace Xiaomi diagnostic UI.',

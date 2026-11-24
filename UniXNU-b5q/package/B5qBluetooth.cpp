@@ -345,9 +345,18 @@ int powerOn() {
     if(!bt.wake_irq){e=armcpu_spi_share(240,rxIrq,nullptr);if(e)return -EIO;bt.wake_irq=true;}
     if(bt.log>=2){e=loopbackCheck();if(e)return e;}
     e=b5q_wcn_radio_enable(B5Q_WCN_BLUETOOTH,1);if(e)return -e;
+    // radio_enable already includes the stock 50ms post-BT_EN delay.
+    // Keep UART detached for a further bounded guard after the shared vote.
+    IOLog("B5qBluetooth: stage=reset-settle wait-ms=50 pins=%x\n",linePins());
+    IOSleep(50);
     for(unsigned gpio=76;gpio<=79;gpio++)pin(gpio,kUartActive[gpio-76]);
     disarmRxWake();
-    e=b5q_bt_fifo_start(&bt.geni);if(e)return e;
+    e=b5q_bt_fifo_startup(&bt.geni);if(e)return e;
+    // Allow one reset/mux transient before any HCI command is transmitted.
+    for(unsigned i=0;i<20;i++){pump(nullptr);if(bt.geni.state==B5Q_BT_FIFO_FAILED)return bt.geni.error;IOSleep(1);}
+    IOLog("B5qBluetooth: stage=rx-settled pins=%x ios=%x startup-line=%llu discarded=%llu irq=%x/%x\n",
+        linePins(),urd(nullptr,0x908),bt.geni.stats.startup_line_errors,
+        bt.geni.stats.startup_rx_discarded,bt.geni.fault_irq[0],bt.geni.fault_irq[1]);
     native_bluetooth_stats[14]=6;
     bt.initializing=true;
     if(bt.log>=2) {

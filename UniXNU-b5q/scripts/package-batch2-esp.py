@@ -10,6 +10,7 @@ from unixnu.config import Context
 from unixnu.devicetree import generate,compile_hardware
 from unixnu import ramdisk
 from unixnu.payload import check_args
+from b5q_gpu_adt import preserve as preserve_gpu_firmware,verify as verify_gpu_firmware
 ctx=Context(parser().parse_args(['build','payload','--device',str(R/'UniXNU-b5q'),'--os','macos-27.3-26C5035r']))
 work=a.ci.resolve()if a.ci else ctx.work;payload=work/'payload/payload.img';esp=a.out.resolve()if a.out else work/'esp.img'
 if a.ci:
@@ -34,6 +35,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-batch2-package-')as td:
   import importlib.util,struct
   spec=importlib.util.spec_from_file_location('fs',R/'scripts/b5q-install/package-usb-dma-esp.py');fs=importlib.util.module_from_spec(spec);spec.loader.exec_module(fs)
   chosen=fs.adt_nodes((assets/'kernel.macho.adt').read_bytes())['/chosen'][2]
+  gpu_firmware=preserve_gpu_firmware(ctx.board,chosen)
   seed=format(struct.unpack('<Q',chosen['unique-chip-id'])[0],'016x');dtb=work/'device-tree/hardware.dtb'
  else:
   assert record(boot/'Drivers/DarwinBoot.efi')['sha256']=='100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde'
@@ -45,16 +47,21 @@ with tempfile.TemporaryDirectory(prefix='b5q-batch2-package-')as td:
  for asset in assets.iterdir():
   if asset.is_file()and asset.name.startswith('kernel.macho')and asset.suffix!='.adt':shutil.copyfile(asset,fallback/asset.name)
  normal=generate(dtb,ctx.board,unique_chip_id=seed,data=False,trust=True,addon=True,root_policies=False)
+ if a.ci:assert verify_gpu_firmware(fs.adt_nodes(normal)['/chosen'][2])==gpu_firmware
  (assets/'kernel.macho.adt').write_bytes(normal)
  ram=copy.deepcopy(ctx.board);ram['payload']['adt']['persistent_data']=False
  ram['payload']['adt']['owned_memory_size']='0x100000000'
  ram['payload']['adt'].pop('owned_memory_outside_ranges',None);ram['payload']['adt'].pop('owned_memory_outside_reserved',None)
  (fallback/'kernel.macho.adt').write_bytes(generate(dtb,ram,unique_chip_id=seed,data=True,trust=True,addon=True,root_policies=False))
+ if a.ci:assert verify_gpu_firmware(fs.adt_nodes((fallback/'kernel.macho.adt').read_bytes())['/chosen'][2])==gpu_firmware
  from b5q_menu import profiles,config
  entries=profiles(ctx.board['payload']['kernel_args'])
  ram.setdefault('adt',{}).setdefault('chosen',{}).setdefault('u32',{})['b5q-feature-mask']=0
  (fallback/'kernel.macho.adt').write_bytes(generate(dtb,ram,unique_chip_id=seed,data=True,trust=True,addon=True,root_policies=False))
  (boot/'unixnu.toml').write_text(config(ctx.board['payload']['kernel_args']))
+ if a.ci:
+  for path in assets.rglob('*.adt'):
+   assert verify_gpu_firmware(fs.adt_nodes(path.read_bytes())['/chosen'][2])==gpu_firmware
  (stage/'startup.nsh').write_text('\\EFI\\BOOT\\BOOTAA64.EFI\r\n')
  run(sys.executable,R/'scripts/b5q-install/make-xnu2log.py','--out',stage/'XNU2LOG.BIN','--token','411839cbaebac4088c251c0ea57579a2')
  with esp.open('wb')as f:f.truncate(800<<20)

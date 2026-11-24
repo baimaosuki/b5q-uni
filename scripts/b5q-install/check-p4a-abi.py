@@ -53,7 +53,6 @@ with tempfile.TemporaryDirectory(prefix='b5q-p4-abi-')as td:
     callbacks=[]
     for obj,needle,caller,diversity in [
         ('B5qDaily.late.o','batteryWorker','_kernel_thread_start',0xd507),
-        ('B5qDaily.late.o','lidWorker','_kernel_thread_start',0xd507),
         ('B5qBacklight.late.o','4tick','__ZN18IOTimerEventSource4initEP8OSObjectPFvS1_PS_E',0x73d8)]:
         scan=pac.scan(out/obj)
         found=[v for n,sites in scan['signed'].items()if needle in n for v in sites]

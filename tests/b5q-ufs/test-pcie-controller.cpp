@@ -24,7 +24,7 @@ struct Fake {
     uint32_t readDbi(uint32_t reg){assert(controller);assert(reg==0x72c||reg==0x728);return fail==16?0:reg==0x72c?16:0x11;}
 };
 int main(){
-    Fake good;assert(!B5qPcie::train(good));assert(good.phyWrites==115);assert(good.registers[0x18]==0x10100);
+    uint32_t trace[4]={};Fake good;assert(!B5qPcie::train(good,trace));assert(trace[0]==0x11&&trace[1]==16&&trace[2]==1&&!trace[3]);assert(good.phyWrites==115);assert(good.registers[0x18]==0x10100);
     assert(good.registers[0x2c00]==0 && good.registers[0x1b0]&(1u<<8));
     unsigned sidEntries=0;for(unsigned i=0;i<256;i++)if(good.registers[0x2000+4*i]){const uint32_t entry=good.registers[0x2000+4*i];assert(entry==0x01000100);
       assert((entry>>16)==0x0100&&((entry>>8)&255)==1&&(entry&255)==0);
@@ -32,7 +32,7 @@ int main(){
       const uint32_t wrong=0x01000001;assert(((wrong>>8)&255)==0&&(wrong&255)==1);sidEntries++;}assert(sidEntries==1);
     for(int failure: {9,10,11,12,13,14,16,22,24}) {
         Fake bad;bad.fail=failure;int expected=failure==22?-12:failure==24?-14:-failure;
-        int actual=B5qPcie::train(bad);if(actual!=expected)fprintf(stderr,"failure=%d actual=%d expected=%d\n",failure,actual,expected);assert(actual==expected);
+        uint32_t state[4]={};int actual=B5qPcie::train(bad,state);if(failure==16)assert(!state[0]&&!state[1]&&state[2]==1000&&!state[3]);if(actual!=expected)fprintf(stderr,"failure=%d actual=%d expected=%d\n",failure,actual,expected);assert(actual==expected);
         if(failure<13)assert(!bad.controller&&!bad.phyOn);
     }
     puts("PASS production PCIe train +9 bounded failure paths; power/clock before MMIO, all115 original PHY writes, RID100->SID1401");

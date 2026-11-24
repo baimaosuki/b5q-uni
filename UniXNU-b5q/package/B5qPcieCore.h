@@ -7,7 +7,7 @@ namespace B5qPcie {
 // Common SM8550 controller recipe from mainline WifiProbe. Offsets and
 // physical resources are checked against b5q DTS and Samsung gcc-kalama.
 // Each wait is bounded; no access to controller/PHY precedes power+clocks.
-template<class IO> int train(IO &io) {
+template<class IO> int train(IO &io,uint32_t *linkState=nullptr) {
     if(!io.power())return -9;
     io.pin(94,0x201,0);io.pin(95,7,-1);io.pin(96,3,-1);
     if(!io.radio(true))return -10;
@@ -55,7 +55,12 @@ template<class IO> int train(IO &io) {
     io.dbi(0x18,~0u,0x00010100);io.dbi(4,0,6);
     io.delay(100000);io.pin(94,0x201,1);io.delay(1000);
     io.parf(0x1b0,0,1u<<8);
-    tries=0;while(tries++<1000){if((io.readDbi(0x72c)&16) && (io.readDbi(0x728)&63)==0x11)return 0;io.delay(1000);}
+    tries=0;while(tries++<1000){
+        const uint32_t debug0=io.readDbi(0x728),debug1=io.readDbi(0x72c);
+        if(linkState){linkState[0]=debug0;linkState[1]=debug1;linkState[2]=tries;linkState[3]=io.readPhy(0x214);}
+        if((debug1&16) && (debug0&63)==0x11)return 0;
+        io.delay(1000);
+    }
     return -16;
 }
 }

@@ -3054,3 +3054,29 @@ revision = "269d3288db88751eee512d5af5029d8e53ef1bd8"
 reference = "reports/v33b-runtime-repair.json"
 command = "pre-ci-p4.py; pre-ci-v33b.py; native CI 45426905030; check-v33b-returned.py; package-batch2-esp.py; package-usb-dma-boot.py --physical-esp; verify-p0-images.py --v33b --wireless --media --dp twice"
 result = "All local/target/native/returned-image gates PASS. Firmware/kernel share source commit; GitHub artifact SHA verified; WiFi plist false RunAtLoad/PathState/Throttle60 present,58/25 APFS policy and lp-sip0 u64=2 verified; GPU50members unchanged, only GMU map helper rebuilt. Final source/CI/image results do not prove hardware enumeration/radio/media; HOST_VERIFIED_PENDING_HARDWARE."
+
+[[area]]
+id = "v33b-repair2-desktop-input-power"
+status = "implemented"
+components = ["Adreno740", "GopFramebuffer", "QcaBluetooth", "Ath12kWifi", "QcomDwc3"]
+paths = ["reports/v33b-repair2.md", "reports/v33b-repair2.json", "scripts/b5q_gpu_adt.py", "scripts/package-batch2-esp.py", "scripts/stage-v24-inputs.py", "package/B5qDaily.cpp", "package/B5qFeatures.h", "package/B5qBacklight.cpp", "package/B5qDpLink.cpp", "package/B5qBluetooth.cpp", "package/B5qBtFifo.*", "package/B5qPcieCore.h", "package/B5qWifiBoard.cpp", "package/QcomDwc3.cpp", "board.toml"]
+inputs = ["Physical repairBIN SHA256 09ea8203ed63805d638840365a23312af883a5225c97385c17d013cf2201e199", "ActualCI45426905030payload anddelivered800MiBESP; stockb5qGPUthreehashes inB5qPeripheralHardware.h", "Samsungmsm_geni_serial/btpower+stockDT andLinuxPCIe; allsourcehashes inrepair2inputevidence"]
+configuration = ["Lidbit1permanentlyunused; fullfeaturemask61; noGPIO107worker orPMclamshellcontrol; onlyinnerDSI0 andexternalDP", "OnlythreeoriginalGPUfirmwareproperties copiedfromSHA-qualifiedpayload toregeneratedADTs; nofirmwareingit", "BTpostresetguard50ms+precommand20ms;one50msboundedprecommandbreakrecovery;later/repeated/FIFOerrorsfatal"]
+procedure = ["Compare actualCIpayload anddeliveredESP; productionADTregeneration positive/negative tests", "RunretainedP0-P5host/target/PAC/zeroEL1apps_smmugatesandnewGPU/lid/BT/PCIetimingtests", "Incrementalnativebuildusingmatchingcache;verifyreturnedbinarythenpackageoneESP/readbackallprofiles;unchangedfirmwarereuse"]
+findings = ["CIpayloadhas3originalGPUblobs66844/76724/12088byteswithmatchingSHA,deliveredESPnone:localpackage-batch2regeneratedADTfromemptyboardanddroppedprivatebytes. Preservefrompayloadandhashverifyeverygeneratedprofile;strictmissing/corrupt/shortrejection", "Ownerremovedlidrequirement:deleteworker,bit,DPcouplingandgClosedbacklightoverride;noneofinnerbrightnessrequestsdependonhall;noDSI1render/backlightadded", "Originalradioenablealreadywaits55mspostBT_EN;SamsungserialcountslinebreaksinsteadofpermanentUARTshutdown. Addboundedpremux/postmuxsettleandoneprecommanderrorrecovery;neverignoreongoingHCIerrors", "WiFi115PHYentriesexactlymatchoriginalb5qDT;currentPERST100msholdand1mspostreleaseareLinuxaligned. ExistinglogcannotidentifywhyphysicalLTSSMfailed;newraw728/72c/PHY214/GCCandactualenabletimingsmakeonelogdiagnosticwithoutguessinghardwaremagic", "USBDeviceon0isnotforced:logfamilystart,cablerequest,desiredpowerandrealpowercallback;retainnativefamilypowersequenceandDMAhandoffguard"]
+completion = ["Implementationcomplete;finalsourceboundlocal/native/returnedimagegatesrequired"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE;physicalPCIeL0/BTversion/deviceenumerationremainunknownuntilnewlog. NoexistingDataorphoneaccess"]
+next_action = ["Completealllocalchecks,incrementalCI,actualreturnedbinariesandfinalimageGPUallprofileSHAverification"]
+[[area.evidence]]
+kind = "source"
+revision = "269d3288db88751eee512d5af5029d8e53ef1bd8"
+reference = "reports/v33b-repair2.md"
+command = "CompareactualCI45426905030payload/deliveredESP ADT;checkstockmsm_geni_serial.c3494..3506/btpower.c729;compare115DTphytuples;test-gpu-adt-preservation.py;test-inner-only.py;test-bt-fifo.py;test-pcie-link-timing.py"
+result = "ActualGPUpropertieslostonlyduringlocalESPregeneration;allthreepayloadSHAcorrect. ProductionADTpreservationand9negativecases+knownbadESPrejectionPASS. Nolid/coverfeaturemask61and257brightnessrequestsPASS. BTstartuptransientandrepeated/late/in-command/FIFOerrorASanUBSanPASS. Original115PHYsequenceandphysicalPERST/clock/LTSSMcausalmodel+3boundedtimeoutstatecapturesPASS. FullCI/returnedbytespending."
+
+[[area.evidence]]
+kind = "host"
+revision = "269d3288db88751eee512d5af5029d8e53ef1bd8"
+reference = "reports/v33b-repair2.md"
+command = "check-firmware-reuse.py;test-gpu-adt-preservation.py;test-inner-only.py;test-bt-fifo.py;test-pcie-link-timing.py;check-bt-target.py;check-wifi-target.py;check-peripheral-target.py --sources QcomDwc3.cpp;pre-ci-p4.py"
+result = "NewlocalGPUallprofileSHAcheckrejectsknownbadESP. Lidworker/bit/PMnotifications/backlightoverride/DPcouplingremoved;GPIO107neverread. BTstartuprecoveryislimitedtooneprecommandbreak/50ms,anddamagedbytesdiscarded;late/repeated/FIFO/incommanderrorsstillfatal. Actualarm64eUSB427slotsand642importsclosed,9BTobjectscompiled,WiFiboard/mediaobjectscompiled. Original13firmwarepatches/pins/configuration/buildjobunchanged:reusepriorvalidatedFDandboot,skipunnecessaryUEFICI. WiFi115PHY/electricaltimingmodelPASS;physicalL0stillpending. FinalCIandESPbytesawaitnewreceipts." 
