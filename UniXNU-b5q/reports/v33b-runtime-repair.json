@@ -129,12 +129,17 @@
       {
         "name": "addon-reuse-policy",
         "passed": true,
-        "log_sha256": "fcb223c2d383a5ab78d4d1d3ee67ee544bdda1abf0852041df902d4d96f06ad9"
+        "log_sha256": "42934348e28df517b9187353fd713e337fca79631d6393b815c1b114540e25c2"
       },
       {
         "name": "iris-pinned-inputs",
         "passed": true,
         "log_sha256": "7a91f6f8b24903d85e1890c1dfe2a3f5b10dc153b1e089d109f87baaace42644"
+      },
+      {
+        "name": "gmu-archive-index",
+        "passed": true,
+        "log_sha256": "0d1fd307642d658ccdd4814c4a162fe53eaee82019302da4f970f8e6148c0d19"
       },
       {
         "name": "policy-migration",
@@ -377,7 +382,7 @@
       "UniXNU-b5q/scripts/b5q_wcn_firmware.py": "2be4035ace587938390c9f483e584e36d4554c2d073b340a49c5a0d753618436",
       "UniXNU-b5q/scripts/b5q_wifi.py": "df2e2e921ed442c1756747be2e4d12cc36ce3baf465e8abf3765a38a4afecd23",
       "UniXNU-b5q/scripts/b5q_wireless.py": "fcab3f379d7261a455321dfda419b6b87caad09f7855c29c9c3e51ccdb2d6346",
-      "UniXNU-b5q/scripts/build-b5q-adreno.py": "3091d0e76dfe84cb7dcf78840079eca99e4c8eae8d8ae8cf7aa0fbc7185a49a5",
+      "UniXNU-b5q/scripts/build-b5q-adreno.py": "0820f6e7027a069aa77b676746e5dbf1fdfb196937a803f57c52ebb955183c46",
       "UniXNU-b5q/scripts/build-b5q-audio-hal.py": "0dbd152eda2659f9648eccf83efdf3dd725d375f2495df93158b1847b98cfe6f",
       "UniXNU-b5q/scripts/build-b5q-bluetooth-userspace.py": "b0f717c70d2f909417422186af29153a70bf380f25deff18acd68a41c4cf9490",
       "UniXNU-b5q/scripts/build-b5q-gop-27.py": "c0ecc4cbecfbaf27804ccf870197e8119e7fc3f3d1cc63eb22a650e5bdf0caea",
@@ -516,7 +521,7 @@
       "scripts/b5q-install/pre-ci-userdata.py": "f39857baeb11fc124319f637b0c6819131f0155cff1c8f009f4870be611b46f6",
       "scripts/b5q-install/pre-ci-v24.py": "8c2e7aa0f3d5a903d0b7c8d30710deeaf63cc3e0a08297572c909ca81b9e7fae",
       "scripts/b5q-install/pre-ci-v33.py": "5a8984af0e66952b06ef8410264d16d8bb94fc1e2b0a23bc1c70925524aa8fb8",
-      "scripts/b5q-install/pre-ci-v33b.py": "acc535b37bdb6b43e5971ccce49e3d796172255013d9517b94cd12b564669a61",
+      "scripts/b5q-install/pre-ci-v33b.py": "8a2658088da4e38c7c010b8cb1673962f732bc7f2e9fdd63304cda0376dc15e3",
       "scripts/b5q-install/pre-ci.py": "0faba986ac272f1ed39aab84728098e26340a6db5cadb3b91351af4eff6b1455",
       "scripts/b5q-install/repack-adt-esp.py": "23a9d43f122d41e37cc1987fccb631a4bd322a0eaafb2dc3173ff007746524f2",
       "scripts/b5q-install/repair-esp-package.py": "b3a7bb7b7f1710837583568a7409cc2a6b793d639f1d83478fbf9be687722f5c",
@@ -562,7 +567,8 @@
       "UniXNU-b5q/inputs/iris-linux/d50d994bffa3c7c6db2d8bc4c5f0c55e3f46b0cd/drivers/media/platform/qcom/iris/iris_hfi_gen2_defines.h": "4caef320905199464babd26a7cb381866f5420e08a13b542c105a6e845c6463a",
       "UniXNU-b5q/inputs/iris-linux/d50d994bffa3c7c6db2d8bc4c5f0c55e3f46b0cd/drivers/media/platform/qcom/iris/iris_vpu_buffer.c": "5a377805fb0b68ef20587e1105dc98acc729777d7e6361c734ac75fd54ba8e2e",
       "UniXNU-b5q/inputs/iris-linux/d50d994bffa3c7c6db2d8bc4c5f0c55e3f46b0cd/drivers/media/platform/qcom/iris/iris_vpu_buffer.h": "8661857988ba99bbc52af2d58a9a31e59ae803a025bc8ec0815148db4a6d70d9",
-      "tests/b5q-ufs/test-iris-pinned-inputs.py": "36d1cfb5136fc8d9633a46e471bf90d46bf6efd940142793fb8ba9fc740ddce0"
+      "tests/b5q-ufs/test-iris-pinned-inputs.py": "36d1cfb5136fc8d9633a46e471bf90d46bf6efd940142793fb8ba9fc740ddce0",
+      "tests/b5q-ufs/test-gmu-archive-index.py": "ca34449047625c9e125b100e045f839ee7a26c6f242d21a34464f1787a4f24ee"
     },
     "gates": {
       "physical_cause_models": "PASS",

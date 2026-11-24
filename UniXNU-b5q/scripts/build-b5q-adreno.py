@@ -17,11 +17,16 @@ if reuse:
  original=ROOT/'drivers/Adreno740/NativeAdrenoGmuService.cpp'
  adapted=prepare(original,out/original.name)
  member='NativeAdrenoGmuService.o';target=out/member;path=out/'libAdreno740.a'
- names=subprocess.check_output(['xcrun','ar','t',str(path)],text=True).splitlines();assert names.count(member)==1
+ # Apple ar lists its generated symbol index; llvm-ar hides it. Rebuilding
+ # the index is required when the replacement object's size changes. Verify
+ # every actual object, not the generated __.SYMDEF offsets into the archive.
+ indexes={'__.SYMDEF','__.SYMDEF SORTED','__.SYMDEF_64','__.SYMDEF_64 SORTED'}
+ def members():return [n for n in subprocess.check_output(['xcrun','ar','t',str(path)],text=True).splitlines()if n not in indexes]
+ names=members();assert names.count(member)==1 and len(names)==len(set(names))
  before={n:hashlib.sha256(subprocess.check_output(['xcrun','ar','p',str(path),n])).hexdigest()for n in names}
  compile(adapted,target,['-iquote',str(original.parent),'-I',str(ROOT/'.cache/xnu-work/osfmk')])
  subprocess.run(['xcrun','ar','r',str(path),str(target)],check=True)
- assert subprocess.check_output(['xcrun','ar','t',str(path)],text=True).splitlines()==names,'GPU archive member list changed'
+ assert members()==names,'GPU archive object member list changed'
  after={n:hashlib.sha256(subprocess.check_output(['xcrun','ar','p',str(path),n])).hexdigest()for n in names}
  assert set(before)==set(after)and all(before[n]==after[n]for n in names if n!=member)and before[member]!=after[member]
  (out/'mmio-helper.json').write_text(json.dumps(dict(passed=True,only_recompiled_member=member,
