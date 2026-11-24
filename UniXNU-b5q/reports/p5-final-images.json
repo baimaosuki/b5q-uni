@@ -1,0 +1,137 @@
+{
+  "passed": true,
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "source_commit": "07806e9b9ede578837ca44c10a11d7e6d5eedbee",
+  "CI": {
+    "kernel": 45344176858,
+    "firmware": 45344176858
+  },
+  "esp": {
+    "path": "artifacts/b5q-esp-p5/esp.img",
+    "bytes": 838860800,
+    "sha256": "b71e54f1c6567746442f88c05ff8d48ba7fed2870fbd335f825dbe56c60e136f"
+  },
+  "boot": {
+    "path": "artifacts/b5q-esp-p5/boot.img",
+    "bytes": 19124224,
+    "sha256": "0b672d636330b13117563ae50ba3479853f1eb7366bed312379129dab0c83f40"
+  },
+  "firmware": {
+    "bytes": 3145728,
+    "sha256": "e5f20f393295df7743cbbd3f3a9d0e1bef427ba5caf0f25e18b044998b74897b"
+  },
+  "kernel": "06b776e5c8d3f5f649ebcdcca0ea5ae20c04d3e9ea4666c3a6a0e6fbf3d1c039",
+  "profiles": {
+    "xnu": {
+      "kernel_sha256": "06b776e5c8d3f5f649ebcdcca0ea5ae20c04d3e9ea4666c3a6a0e6fbf3d1c039",
+      "args_bytes": 1009,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": false
+    },
+    "daily": {
+      "kernel_sha256": "06b776e5c8d3f5f649ebcdcca0ea5ae20c04d3e9ea4666c3a6a0e6fbf3d1c039",
+      "args_bytes": 1017,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": false
+    },
+    "safe": {
+      "kernel_sha256": "06b776e5c8d3f5f649ebcdcca0ea5ae20c04d3e9ea4666c3a6a0e6fbf3d1c039",
+      "args_bytes": 1017,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": false
+    },
+    "ram-fallback": {
+      "kernel_sha256": "06b776e5c8d3f5f649ebcdcca0ea5ae20c04d3e9ea4666c3a6a0e6fbf3d1c039",
+      "args_bytes": 1017,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": true
+    }
+  },
+  "tests": {
+    "host_DP_groups": 26,
+    "native_pipeline_cases": 13,
+    "tail_mode_bounds": 11029,
+    "DP_native_objects": 3,
+    "external_IOMFB_slots": 483,
+    "callback_PAC": 114,
+    "wireless_objects": 122,
+    "wireless_callback_PAC": 62,
+    "media_objects": {
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/B5qDaily.late.o": "8290f1ac31a4270be2cb6a001a4f24dab566b13c476687af2cb70a3b248fb5ca",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/B5qBacklight.late.o": "a4e1db098b2c4bec5a37d2acb30a3ee7377afcea2737ebcc09889ee98365c163",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/B5qMediaFirmware.o": "b5333b3f99ae453de7672e86a38449bc16193f662159b3aab5f0a27fd39f3912",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/B5qAudioBoard.o": "cb6d8b3357c4fb103b18e7a35ebc8ffffcfeb0b10790cdca8ded47dd6786e8fa",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/B5qAudioDma.o": "310e246f9c281910e61df822ab12fdbb9d56bb1b5d89fcb511691930b73dd1d6",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/B5qVideoMemory.o": "6bf89aa55426a8cfe010682c693981c1e06b529552b6b652f96efa5b4395d58f",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/udivti3.o": "0f8656eccca352602a5882cee4fa5c38d67f68339b75617382b99e76cb607148",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/udivmodti4.o": "93e6332466867a5baead44d717637a2459729c1fd0efe2539fb8d932728dd931",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/AdspProbe.o": "2f440f34d60b2f98472ff531a69cb152bb349ea0a5da5f6c812fa562f6a760b3",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/QcomMdt.o": "aaffe1910ca211d9ed4c275583f379dddafaf3354666bb77d84d276542deeaca",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/QcomSmem.o": "49041361787c45ccf886c6f80da34cf383a265a801895fe2dbb97fbaabfaa328",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/QcomSmp2p.o": "03f7a1fbf9a1a51685be63ff62c5a31d2afd1801501d5cf0ad5b7d7c1f435b75",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/QcomGlink.o": "8ebb352ad4aa0fd37c8f5be585694271a0abf303c3b6c73fa631c94d7d72acd6",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/QcomQmp.o": "638b2409a94b824f1af552b008bbfe64d960817935f259dc3c0b036f557f06a7",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/QcomQrtr.o": "1a0564b334956de0b3e66d7d7fa36a6e9c955174d93a1c609926803d1e699164",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/ShengQrtr.o": "a8bbc9fd03f54260fb664d8239bb22a38bae74b73fbea700f409ebedc76b94f0",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/ShengAudioReach.o": "d511e320381520fa529147e5ad4fcf41fb36529b456855354d83c9da98882180",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/ShengGpr.o": "93be17adfb4ffd544431d6ec13a2c3b7fa2b7def6880dbcc36b7cfbe245a7b43",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/AudioProbe.o": "c57f26195fb8a2470978e7e4ed1761d4b56ec76ec76b77612e46b8bd46374c8b",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/ShengAudioService.late.o": "05e3c855dd58d48a89a711c88e234ce80cfc4d5e516cf648d1fe60d8addef4fe",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/VideoProbe.o": "163edbea5f8e7291bc44af92097fa8b47e3fe298d3957e9c36e52eb7862db941",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisMedia.o": "2d16de48927ec6d65e6fa00b66c691a9bcf6fa30ef13b0f634ed32d29da066f1",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/VideoToolboxProbe.o": "e6f830c8c3213d6d4736b07f035a76747f53cfda8a3fe279003a6e20cdb6ce4c",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/VtHost.o": "c579519fd1e5e90368d616c528bbe38a4974105e6e89efbdf50df357b7b30045",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/VtParavirt.late.o": "d56d1f84df49896924df0508ab3876fbce707f0b442e2d0d33a0cf613467530c",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisBuffers.o": "0b0e73bd9fac8136ce5ef201f17099a548cf316ba4fb54f801c637fc1299774d",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisCore.o": "09a587bb72e55df8e0491fed28b7813d4b78bd23452968708c2c9197af6865c5",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisHfi.o": "8514d9d42450a00908a1508d7d761928cf7f3be1c5968b6823bcff96ca45e78c",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisIova.o": "ccff08109eb4b71c855729536841be028ae37ac6b6c6b95dc1a48177c7842f16",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisSession.o": "ff910e837d8e4d786efe77aa2e66f76127bdde7b7161a0d84600a6d885df2bff",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisSystem.o": "6428d9c114f41b71dce6aa0fb48df3159b206f159f908a6003c3023a9ae5ca3e",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/IrisVpu.o": "d2a237ae6225434f310436965b78755459864ce6475edce9aaebe85863469fa8",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/iris_vpu_buffer.o": "8512e5a023a4b537f1a380ef58c158366c96bf8e3ff82e2e5b08cf3123dc251d",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/media/Sm8550VideoCc.o": "5fa2d376064ab469defa8dccd1de045b1dbad35b2014c1bed3e8c021ab64c4d7",
+      "artifacts/b5q-p5-work/ci45344176858/tree/build/native-legacy-display/board-input/B5qUsbBoard.o": "ad41a6e42a3defcc5d614252d487844050b9e6af5568c012a04b2f3ac0977d65"
+    },
+    "all_board_objects_zero_EL1_apps_smmu": 303,
+    "Data_policy_counts": [
+      59,
+      26
+    ],
+    "independent_second_readback_passed": true,
+    "only_full_DP_enabled": true,
+    "no_Device_access": true
+  },
+  "evidence": {
+    "artifacts/b5q-p5-work/final-CI-run.json": "730c9a84c21de74833814463273ee0bbe70f7b5d8ae32262a357812a4955020e",
+    "artifacts/b5q-p5-work/ci45344176858/transfer-index.json": "a3e8b418310c84a69889d5152aac966fb406a2b5743b4ca7503115efdd922920",
+    "artifacts/b5q-p5-work/ci45344176858-firmware/artifact-transfer.json": "0d1e6deb366b10cc217fa3739222612a81ba9408b412e734f4b1f0a4f0ce6d35",
+    "artifacts/b5q-p5-work/firmware-pairing.json": "368ed22506d65f22941ce3397c3899b6e215f6df7a8e5fd3611b9ee4bcd89097",
+    "artifacts/b5q-p5-work/boot/boot-verification.json": "02a78a6591cb09ca821c26d53f36bcd367ffc9955d8da2684c33e6abc95fed45",
+    "artifacts/b5q-p5-work/returned-callback-PAC.json": "146f162bd488f583f6258c688bf3817dc4d8f0c7737af270d83a73811ca57ed9",
+    "artifacts/b5q-p5-work/returned-wireless.json": "1b257bccf061e02a41bbb88407fe1200f6dba212b482e8263f86caee32e48043",
+    "artifacts/b5q-p5-work/returned-media.json": "dfaf5d54e8334ba43c94afc371c09d89640d812eaf3a4d52cd58d8f2b2e5eede",
+    "artifacts/b5q-p5-work/returned-platform/report.json": "68aaa08f403651c31dd28422a88903b0f50dc7f45018edb061b583831c9900ce",
+    "artifacts/b5q-p5-work/returned-dp/report.json": "d9795e40dc39932a6909b16f5d6317722cdcddcd5705d972b3539dea37f47b00",
+    "artifacts/b5q-p5-work/firmware-returned/DP.json": "405b2910e824274d8b7e226dc6ea268cd368f82b208d562d3743d63b28102dd6",
+    "artifacts/b5q-p5-work/firmware-returned/preserved-original-modules.json": "7981f6f97bd57715aebdcd7eed2eac53137d5666dd1d5cb094aa5f9b10f05327",
+    "artifacts/b5q-p5-work/acceptance/APFS.json": "1d2826ae54f129cf9c00498d9540fe8c19d3f38852b14c4e94c4fea5eba50775",
+    "artifacts/b5q-p5-work/acceptance/POST.json": "fe75c741c6ad136e0519b270c2c8de128c62f50f0c5fddfff26288821589a406",
+    "artifacts/b5q-p5-work/acceptance/firmware-FV.json": "99dd3b5eedd750b2aef0257f84bb6a410cca26fa01c5698a5476630bd0c19c0d",
+    "artifacts/b5q-p5-work/acceptance/images.json": "12c2c5ae5dd650ebaa3eda75408141115617e3d5d449b918117de30aee255a06",
+    "artifacts/b5q-p5-work/acceptance/linked-PAC.json": "3e52b4503a4e33f29f2b50ee3d9d29a2aba6a1cf127979d7ccde022ca7074686",
+    "artifacts/b5q-p5-work/acceptance/log-allocation.json": "d99785d4d1444391872c0d9297e01945b5a02386ddf695d03c42ec4a139c4289",
+    "artifacts/b5q-p5-work/acceptance/media-runtime.json": "d50b348a62fb13b4e5ba65a53a5b715e400af1385c1db5d14617ccb15d4df6d1",
+    "artifacts/b5q-p5-work/acceptance/wireless-runtime.json": "758b4802c45aabec53c3a2fcabb9f1e3c9051f5e47e1d85cf35db8d975e76dde",
+    "artifacts/b5q-p5-work/handoff-recheck/APFS.json": "6a249f44d28285a0ed855526a64b5b89fe52aa439f2927a402a1828672f802af",
+    "artifacts/b5q-p5-work/handoff-recheck/POST.json": "fe75c741c6ad136e0519b270c2c8de128c62f50f0c5fddfff26288821589a406",
+    "artifacts/b5q-p5-work/handoff-recheck/boot.json": "7fcbfe9db2bde3001ec8e7e78ec9f11dd15df46a2d2d3d2ce5b5691983848327",
+    "artifacts/b5q-p5-work/handoff-recheck/firmware-FV.json": "99dd3b5eedd750b2aef0257f84bb6a410cca26fa01c5698a5476630bd0c19c0d",
+    "artifacts/b5q-p5-work/handoff-recheck/images.json": "12c2c5ae5dd650ebaa3eda75408141115617e3d5d449b918117de30aee255a06",
+    "artifacts/b5q-p5-work/handoff-recheck/linked-PAC.json": "3e52b4503a4e33f29f2b50ee3d9d29a2aba6a1cf127979d7ccde022ca7074686",
+    "artifacts/b5q-p5-work/handoff-recheck/log-allocation.json": "d99785d4d1444391872c0d9297e01945b5a02386ddf695d03c42ec4a139c4289",
+    "artifacts/b5q-p5-work/handoff-recheck/media-runtime.json": "d50b348a62fb13b4e5ba65a53a5b715e400af1385c1db5d14617ccb15d4df6d1",
+    "artifacts/b5q-p5-work/handoff-recheck/wireless-runtime.json": "758b4802c45aabec53c3a2fcabb9f1e3c9051f5e47e1d85cf35db8d975e76dde"
+  },
+  "delivery": "Three independent ESP/boot pairs ready for handoff; source/host/CI/image verified, all new physical hardware qualification pending. No phone access performed."
+}

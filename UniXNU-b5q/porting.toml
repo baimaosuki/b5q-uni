@@ -2982,3 +2982,28 @@ revision = "9b8620adadb2532224cc95c97dd74523af9b5254"
 reference = "reports/p5-splash-tail-integration.json"
 command = "Owner-selected GOP tail contract; original b5q DT435..437/35008..35014 and MemoryMapLib; production native pipeline and firmware checks"
 result = "Firmware/loader12patchreconstructionPASS; actualEDK2producer/loaderandnativearm64ecompilePASS; 26DPgroups include13nativeend-to-end pipeline scenarios and11029tail/modebounds. Fullbaseline/CI/actualimagegates tracked separately; nohardwareclaim."
+
+[[area]]
+id = "p5-final-three-package-delivery"
+status = "implemented"
+components = ["DarwinBoot", "GopFramebuffer", "QcomDwc3"]
+paths = ["reports/p5-final-images.json", "reports/p5-published-source-files.json", "reports/p0-p5-goal-delivery.md", "reports/p5-splash-tail-integration.json"]
+inputs = ["P5 source07806e9b9ede578837ca44c10a11d7e6d5eedbee; original b5q DTS SHA345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f; selected DisplayDxe SHA51babf469c8a6753082b1a84c677a21ed4ddca64ac98ca939a3bb42a614e8070; source, original-module and actual returned-file hashes in final receipts"]
+configuration = ["Owner-selected stock cont_splash earlymap tail; validate actual GOP allocation and retained memory, never modify primary Display domain or DisplayDxe; zero EL1 apps_smmu; only full menu enables b5q-dp=1; persistent userdata remains installed"]
+procedure = ["Finish full kernel and UEFI CI45344176858; verify ordinary artifact SHA256; pair actual FD DarwinBoot with ESP; inspect actual returned DP/media/wireless/platform objects and final chained PAC; read all three ESP and boot pairs twice before handoff"]
+findings = ["CI kernel+UEFI bothSUCCESS. P5 native DP objects,483originalIOMFB slots,114source-selectedcallbackcontracts,122wirelessobjects/62contracts,35mediaobjects and303returnedboardobjects zeroEL1apps_smmu PASS. FullFAT/ADT/69POST/APFS59+26binaryplist/trust/signature/menu gates and independent secondreadback PASS. P5 finalESP838860800B SHAb71e54f1c6567746442f88c05ff8d48ba7fed2870fbd335f825dbe56c60e136f; boot19124224B SHA0b672d636330b13117563ae50ba3479853f1eb7366bed312379129dab0c83f40; FDSHAe5f20f393295df7743cbbd3f3a9d0e1bef427ba5caf0f25e18b044998b74897b. P2/P3 andP4 fourpriorIMG hashesunchanged, freshfullreadbacksPASS. Allsource/host/build/image scope complete; actualphysicalqualificationremainsHOST_VERIFIED_PENDING_HARDWARE. LocaloriginalWCNinputs contain24files; chip/board-specificbdwlan.eXX orbdwlanHH.eLL unavailable andcannotbeinvented; exactrequest mustselectoriginalfile perfinalreport. No phone access or partition operation performed."]
+completion = ["Requested three independent ESP/boot pairs and final report complete within source/host/CI/image scope"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; original earlymap coverage/actualGOP size and DP train/scanout/lid/hotplug require physical validation; board-specific Wi-Fi BDF filename remains unknown until actual QMI ID, extraction/injection instructions provided"]
+next_action = ["User may install one matched ESP/boot pair using final report; review P0-P5 XNU2LOG criteria without reinitializing userdata or macosroot"]
+[[area.evidence]]
+kind = "host"
+revision = "07806e9b9ede578837ca44c10a11d7e6d5eedbee"
+reference = "reports/p5-final-images.json"
+command = "CI45344176858; check-dp-returned.py; check-media-callback-pac.py --dp --ci; check-stage-returned-objects.py; check-wireless-target-closure.py --ci; check-media-target-closure.py --ci; verify-p0-images.py --wireless --media --dp twice"
+result = "Actual returned and second-readback gates PASS; artifact GitHubSHA verified; final receipt records exact images,source,objects,loader,firmware,PAC andAPFS. No hardware success inferred."
+[[area.evidence]]
+kind = "host"
+revision = "07806e9b9ede578837ca44c10a11d7e6d5eedbee"
+reference = "reports/p0-p5-goal-delivery.md"
+command = "Repeat P2/P3 and P4 actual FAT/ADT/APFS/trust/PAC acceptance using each revision's board.toml; compare boot FD and original shim/DTB/FAT16; SHA256 all six final IMG files"
+result = "Three matched pairs accepted; final0-7report includes actualpaths/bytes/SHA,CI,firmware extraction/injection,selectiveESP+bootcommands andphysicalacceptancecriteria."

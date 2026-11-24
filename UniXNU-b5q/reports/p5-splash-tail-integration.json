@@ -46,8 +46,25 @@
   "command_line_bytes": 1009,
   "native_buffer": 1024,
   "engineering_limit": 1023,
-  "CI": null,
-  "images": null,
+  "CI": {
+    "run": 45344176858,
+    "commit": "07806e9b9ede578837ca44c10a11d7e6d5eedbee",
+    "kernel": "success",
+    "firmware": "success"
+  },
+  "images": {
+    "ESP": {
+      "path": "artifacts/b5q-esp-p5/esp.img",
+      "bytes": 838860800,
+      "sha256": "b71e54f1c6567746442f88c05ff8d48ba7fed2870fbd335f825dbe56c60e136f"
+    },
+    "boot": {
+      "path": "artifacts/b5q-esp-p5/boot.img",
+      "bytes": 19124224,
+      "sha256": "0b672d636330b13117563ae50ba3479853f1eb7366bed312379129dab0c83f40"
+    },
+    "receipt": "reports/p5-final-images.json"
+  },
   "local_gate_passed": true,
   "host_groups": 26,
   "native_pipeline_cases": 13,
