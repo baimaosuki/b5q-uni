@@ -1,158 +1,136 @@
 {
-  "status": "LOCAL_VERIFIED_PENDING_CI_RETURNED_IMAGE",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "source_commit": "037cd05c654f92145ef82bd86fc4c40a415bfccc",
+  "CI": {
+    "run": 45443154576,
+    "commit": "037cd05c654f92145ef82bd86fc4c40a415bfccc",
+    "url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45443154576"
+  },
   "hardware_verified": false,
-  "log_input_sha256": "09ea8203ed63805d638840365a23312af883a5225c97385c17d013cf2201e199",
-  "GPU_ADT_regression": {
-    "CI_payload": {
-      "b5q-gmu-fw": {
-        "present": true,
-        "bytes": 66844,
-        "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
-      },
-      "b5q-sqe-fw": {
-        "present": true,
-        "bytes": 76724,
-        "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
-      },
-      "b5q-zap-fw": {
-        "present": true,
-        "bytes": 12088,
-        "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
-      }
+  "requirements": {
+    "Req-1": {
+      "status": "DONE",
+      "scope": "Source/host/native/image validation",
+      "requirement": "GPU \u56fa\u4ef6\u968f\u6700\u7ec8 ADT \u4fdd\u7559\u5e76\u4e25\u683c\u9a8c\u8bc1",
+      "evidence": "payload\u5177\u6709\u4e09\u4efd\u56fa\u4ef6\uff0c\u6700\u7ec8ESP\u91cd\u751f\u6210\u4e22\u5931\u7684\u6839\u56e0\u5df2\u4fee\uff1b\u6b63\u5e38/RAM/\u56db\u6863\u5b9e\u9645SHA\u56de\u8bfb\u901a\u8fc7"
     },
-    "delivered_ESP": {
-      "b5q-gmu-fw": {
-        "present": false,
-        "bytes": 0,
-        "sha256": null
-      },
-      "b5q-sqe-fw": {
-        "present": false,
-        "bytes": 0,
-        "sha256": null
-      },
-      "b5q-zap-fw": {
-        "present": false,
-        "bytes": 0,
-        "sha256": null
-      }
+    "Req-2": {
+      "status": "DONE",
+      "scope": "Source/host/native/image validation",
+      "requirement": "\u6c38\u4e45\u79fb\u9664\u5408\u76d6\uff0c\u5185\u5c4f+\u5916\u63a5DP",
+      "evidence": "\u65e0lidWorker/featurebit1/PMclamshell\u901a\u77e5/\u80cc\u5149\u5f3a\u52360/DP\u8054\u52a8\uff1bmask61\uff1b\u65e0DSI1\u8f93\u51fa"
+    },
+    "Req-3": {
+      "status": "DONE",
+      "scope": "Source/host/native/image validation",
+      "requirement": "\u84dd\u7259\u590d\u4f4d\u7a33\u5b9a\u548c\u9996\u547d\u4ee4\u524d\u77ac\u6001\u6062\u590d",
+      "evidence": "\u590d\u4f4d\u540eguard+UART\u7a33\u5b9a\u7a97\u53e3\uff1b\u4e00\u6b21\u6709\u754cBreak\u6062\u590d\u53ca\u635f\u574f\u6570\u636e\u4e22\u5f03\uff1b\u91cd\u590d/\u665a\u5230/\u547d\u4ee4\u4e2d/FIFO\u6545\u969c\u62d2\u7edd"
+    },
+    "Req-4": {
+      "status": "DONE",
+      "scope": "Source/host/native/image validation",
+      "requirement": "Wi-Fi -16 \u8bad\u7ec3\u5ba1\u8ba1\u4e0e\u5b9e\u6d4b\u72b6\u6001\u65e5\u5fd7",
+      "evidence": "115PHY\u5143\u7ec4\u539f\u5382\u4e00\u81f4\u3001PERST/\u65f6\u949f\u65f6\u5e8f\u6a21\u578b\u901a\u8fc7\uff1b\u8bb0\u5f55DBI728/72c/PHY214\u53ca\u7535\u6e90\u65f6\u949f/\u5f15\u811a\u65f6\u5e8f\uff0c\u7269\u7406L0\u539f\u56e0\u672a\u5192\u5145\u5df2\u77e5"
+    },
+    "Req-5": {
+      "status": "DONE",
+      "scope": "Source/host/native/image validation",
+      "requirement": "USB Device\u539f\u751f\u7535\u6e90\u89e6\u53d1\u8def\u5f84\u65e5\u5fd7",
+      "evidence": "familystart\u3001cable\u8bf7\u6c42\u3001desiredpower\u3001POWER_ON\u56de\u8c03\u548c\u5f53\u524d\u7535\u6e90\u6001\u53ef\u5b9a\u4f4don0\uff1b\u4e0d\u5f3a\u884c\u542f\u52a8DMA"
     }
   },
-  "local_gates": {
+  "new_ESP_created": true,
+  "ESP": {
+    "path": "/home/baimao/zflip5/artifacts/b5q-esp-v33b-repair2/esp.img",
+    "bytes": 838860800,
+    "sha256": "cfcdc33d75d62e35b83807298e7ecbf84580661a0cb79e1423b50430edeb1cb2"
+  },
+  "GPU_profile_readback": {
+    "xnu": {
+      "ADT_path": "EFI/UniXNU/Payloads/kernel.macho.adt",
+      "ADT_sha256": "fead519c56669a7ad16b32d1defba6463a4d806461ac9acf6d7bbe3a2ffcd819",
+      "GPU_firmware": {
+        "b5q-gmu-fw": {
+          "bytes": 66844,
+          "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
+        },
+        "b5q-sqe-fw": {
+          "bytes": 76724,
+          "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
+        },
+        "b5q-zap-fw": {
+          "bytes": 12088,
+          "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+        }
+      },
+      "feature_mask": 61,
+      "lp_sip0_u64": 2
+    },
+    "daily": {
+      "ADT_path": "EFI/UniXNU/Payloads/kernel.macho.adt",
+      "ADT_sha256": "fead519c56669a7ad16b32d1defba6463a4d806461ac9acf6d7bbe3a2ffcd819",
+      "GPU_firmware": {
+        "b5q-gmu-fw": {
+          "bytes": 66844,
+          "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
+        },
+        "b5q-sqe-fw": {
+          "bytes": 76724,
+          "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
+        },
+        "b5q-zap-fw": {
+          "bytes": 12088,
+          "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+        }
+      },
+      "feature_mask": 61,
+      "lp_sip0_u64": 2
+    },
+    "safe": {
+      "ADT_path": "EFI/UniXNU/Payloads/kernel.macho.adt",
+      "ADT_sha256": "fead519c56669a7ad16b32d1defba6463a4d806461ac9acf6d7bbe3a2ffcd819",
+      "GPU_firmware": {
+        "b5q-gmu-fw": {
+          "bytes": 66844,
+          "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
+        },
+        "b5q-sqe-fw": {
+          "bytes": 76724,
+          "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
+        },
+        "b5q-zap-fw": {
+          "bytes": 12088,
+          "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+        }
+      },
+      "feature_mask": 61,
+      "lp_sip0_u64": 2
+    },
+    "ram-fallback": {
+      "ADT_path": "EFI/UniXNU/Payloads/RAM/kernel.macho.adt",
+      "ADT_sha256": "038a030b103601508e4c5e6aa5e1b4b7887c467813f443005608292fbbaca453",
+      "GPU_firmware": {
+        "b5q-gmu-fw": {
+          "bytes": 66844,
+          "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
+        },
+        "b5q-sqe-fw": {
+          "bytes": 76724,
+          "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
+        },
+        "b5q-zap-fw": {
+          "bytes": 12088,
+          "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+        }
+      },
+      "feature_mask": 0,
+      "lp_sip0_u64": 2
+    }
+  },
+  "returned_binary_acceptance": {
     "passed": true,
+    "returned_binaries_verified": true,
     "hardware_verified": false,
-    "checks": [
-      {
-        "name": "full-P0-P4-retained-production-regressions",
-        "passed": true,
-        "checks": 24
-      },
-      {
-        "name": "causal",
-        "passed": true,
-        "log_sha256": "b2fdb75fc282288e9adf4d065af0d8b70199e6eeaa6ffdd0fe58ea4e7ad50edf"
-      },
-      {
-        "name": "gpu-adt-preservation",
-        "passed": true,
-        "log_sha256": "ba09cbd86d9f80117e45e5e1e05007fd00ab91ad6d8500465ffcd6149696bc4f"
-      },
-      {
-        "name": "inner-only",
-        "passed": true,
-        "log_sha256": "35ee614237b5bab0ae32ac12e76bd22be2ee13e569a586c8dfbcabeebd0821d3"
-      },
-      {
-        "name": "pcie-link-timing",
-        "passed": true,
-        "log_sha256": "da08738e3c960f2ab843f00c21f14dfd17a48dc070aa82c111ca78edfafaff76"
-      },
-      {
-        "name": "bt-fifo",
-        "passed": true,
-        "log_sha256": "051777feab29a199f36f44b3cd0189ba6b09daaaca9fc544427ae79a699e7134"
-      },
-      {
-        "name": "dyld-upl",
-        "passed": true,
-        "log_sha256": "421357335b29380c6d66f9a7be095f43f73f227cbf93cf2e7fb597815cf240ee"
-      },
-      {
-        "name": "firmware-reservations",
-        "passed": true,
-        "log_sha256": "f759fe98598bd9b30ba1ca590ee690f3938674d7a65dbc7610908dbc252a5d4c"
-      },
-      {
-        "name": "addon-reuse-policy",
-        "passed": true,
-        "log_sha256": "2d9689ebbd12996ab0aa5aef924200b40ac765fba058f7d525209d916c72413b"
-      },
-      {
-        "name": "iris-pinned-inputs",
-        "passed": true,
-        "log_sha256": "7a91f6f8b24903d85e1890c1dfe2a3f5b10dc153b1e089d109f87baaace42644"
-      },
-      {
-        "name": "gmu-archive-index",
-        "passed": true,
-        "log_sha256": "0d1fd307642d658ccdd4814c4a162fe53eaee82019302da4f970f8e6148c0d19"
-      },
-      {
-        "name": "policy-migration",
-        "passed": true,
-        "log_sha256": "ea5324afacd612c3419073b609f348745ced242c6174f81e1368a63115895fa2"
-      },
-      {
-        "name": "host-abi",
-        "passed": true,
-        "log_sha256": "44ae803c312ab87c7e21eac1e11ca9b8fd8ec749510cf08657482ddbfd4e9f97"
-      },
-      {
-        "name": "static-gates",
-        "passed": true,
-        "log_sha256": "8782e94c6b1b6070fe089d07c65de98763684eb99fd53da3c94141e5eb4f25f0"
-      },
-      {
-        "name": "failure-gates",
-        "passed": true,
-        "log_sha256": "18622e0570389a7e956a280237ee253a8961320f6bfc722f3e3fcbc5bc845a0b"
-      },
-      {
-        "name": "dp-local",
-        "passed": true,
-        "log_sha256": "de85db4a79a64ae33576b61d2e73005e0705b2d00ac9ba030984172d7c1c613a"
-      },
-      {
-        "name": "dp-target",
-        "passed": true,
-        "log_sha256": "5b9a00a3aad2bdaac9d26796a7ca3d2e813b3f7f384374549ac763fe0f0be633"
-      },
-      {
-        "name": "hid-target",
-        "passed": true,
-        "log_sha256": "cfe03a29aa55c91d38fad742ed7b21edf4bda650c89b3b471fe4da161a86137a"
-      },
-      {
-        "name": "keyprobe-target",
-        "passed": true,
-        "log_sha256": "0a4374b04f4d12311ef0a4829490a924f153f884225ab07e6a4a791f178e5af9"
-      },
-      {
-        "name": "gmu-mmio-target",
-        "passed": true,
-        "log_sha256": "9bb9dd1e7e420ef43a56e1cd199b63b4fc97102529282771ec65c8c7106c2249"
-      },
-      {
-        "name": "cache-local-machine-code",
-        "passed": true,
-        "log_sha256": "455364041ade25e1c08b94c9d4012771c65863fc238d4bbccd997753180f52d8"
-      },
-      {
-        "name": "hid-callback-pac",
-        "passed": true,
-        "log_sha256": "41886d85b07a3f5ede3caf72243cc89c71f7c3df2627bec4b5c61d43c0b5252b"
-      }
-    ],
     "source_sha256": {
       "UniXNU-b5q/package/B5qAth11k.c": "ddee414630b61daa84935d02910fece97b9c436f08c9481514c4f581a8fc21e1",
       "UniXNU-b5q/package/B5qAudioMath/udivmodti4.c": "0cbb62ea33917cfcac22317a6f407aea0e340a0c627e7bdb4fdfa20ddcb66ec7",
@@ -532,19 +510,211 @@
       "tests/b5q-ufs/test-pcie-link-timing.py": "1ef37c3042a5abc7cf2e470ad5485c8652b956e3de002d5465823134aeca8391",
       "tests/b5q-ufs/test-bt-fifo.py": "1c0f4628c7718fb232391f750a1ce142e08faf072d0bcfa0860650ac1b3ee2dc"
     },
-    "gates": {
-      "physical_cause_models": "PASS",
-      "memory_ABI_real_DTB_ADT": "PASS",
-      "sheng_macos_diff_accounted": "PASS",
-      "silent_failure_inventory": "PASS",
-      "existing_Data_idempotent_migration": "PASS"
+    "payload_sha256": "af0c1935eb84e02d2917b807ac1ee1f5a687f3fcfc23aad8e4504c508bb5bd25",
+    "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+    "DTB_sha256": "7014a06efa91c4dca2825512a43a99d273ebf72be0c087a3a08961dc83383457",
+    "checks": [
+      "unchanged-firmware-inputs",
+      "APFS-existing-policy-account-trust",
+      "reserved-RAM-actual-map-options",
+      "linked-PAC",
+      "actual-new-core-callbacks-zeroMMIO",
+      "media-DP-HID-callbacks",
+      "wireless-closure",
+      "media-closure",
+      "DP-native-ABI"
+    ],
+    "ci_commit": "037cd05c654f92145ef82bd86fc4c40a415bfccc",
+    "ci_run": "45443154576",
+    "policies": {
+      "system": 58,
+      "gui": 25
     },
-    "native_CI_returned_binary_APFS_verification": "Required before final ESP assembly; check-v33b-returned.py",
+    "readiness_gated_wireless": true,
     "ESP_created": false
   },
-  "new_ESP_created": false,
-  "firmware_reused_from_run": 45426905030,
+  "readbacks": [
+    {
+      "passed": true,
+      "stage": "P5",
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "cfcdc33d75d62e35b83807298e7ecbf84580661a0cb79e1423b50430edeb1cb2"
+      },
+      "FD": {
+        "bytes": 3145728,
+        "sha256": "d747566ea07fbbde9b552a7bf698c2b221811ad69d13308f867e10418a67f818"
+      },
+      "profiles": {
+        "xnu": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1011,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "daily": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1019,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "safe": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1019,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "ram-fallback": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1019,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": true
+        }
+      },
+      "required_symbols": {
+        "_native_ram_block_provider_seed": "0xfffffff00c429bd8",
+        "_native_ram_block_volume_seed": "0xfffffff00c427c08",
+        "_native_ram_block_volume_device": "0xfffffff00c42723c",
+        "_b5q_power_start": "0xfffffff00c429158",
+        "_sheng_cpu_idle_mach": "0xfffffff00b9ab074",
+        "_ml_outside_memory_pages": "0xfffffff00c945118",
+        "_ml_outside_memory_refused": "0xfffffff00c94511c",
+        "_native_touch_recovered": "0xfffffff00c9a3fb8",
+        "_native_touch_set_sink": "0xfffffff00c2c7734"
+      },
+      "FAT_members": 16,
+      "all_real_link_inputs_resolved": true,
+      "Data_GPU_unchanged": true,
+      "loader_matches_actual_rebuilt_FD": true,
+      "hardware_qualification": "HOST_VERIFIED_PENDING_HARDWARE",
+      "physical_Data_accessed": false
+    },
+    {
+      "passed": true,
+      "stage": "P5",
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "cfcdc33d75d62e35b83807298e7ecbf84580661a0cb79e1423b50430edeb1cb2"
+      },
+      "FD": {
+        "bytes": 3145728,
+        "sha256": "d747566ea07fbbde9b552a7bf698c2b221811ad69d13308f867e10418a67f818"
+      },
+      "profiles": {
+        "xnu": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1011,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "daily": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1019,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "safe": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1019,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "ram-fallback": {
+          "kernel_sha256": "cfdda8ff9e136e06ac986ebe548511c6a5d4e417da9803837ac13ffb34a7d48d",
+          "args_bytes": 1019,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": true
+        }
+      },
+      "required_symbols": {
+        "_native_ram_block_provider_seed": "0xfffffff00c429bd8",
+        "_native_ram_block_volume_seed": "0xfffffff00c427c08",
+        "_native_ram_block_volume_device": "0xfffffff00c42723c",
+        "_b5q_power_start": "0xfffffff00c429158",
+        "_sheng_cpu_idle_mach": "0xfffffff00b9ab074",
+        "_ml_outside_memory_pages": "0xfffffff00c945118",
+        "_ml_outside_memory_refused": "0xfffffff00c94511c",
+        "_native_touch_recovered": "0xfffffff00c9a3fb8",
+        "_native_touch_set_sink": "0xfffffff00c2c7734"
+      },
+      "FAT_members": 16,
+      "all_real_link_inputs_resolved": true,
+      "Data_GPU_unchanged": true,
+      "loader_matches_actual_rebuilt_FD": true,
+      "hardware_qualification": "HOST_VERIFIED_PENDING_HARDWARE",
+      "physical_Data_accessed": false
+    }
+  ],
+  "local_gate_checks": 22,
+  "sourcebound_files": 377,
+  "firmware_reuse": {
+    "passed": true,
+    "source_firmware_commit": "269d3288db88751eee512d5af5029d8e53ef1bd8",
+    "current_commit": "037cd05c654f92145ef82bd86fc4c40a415bfccc",
+    "FD_sha256": "d747566ea07fbbde9b552a7bf698c2b221811ad69d13308f867e10418a67f818",
+    "patches": {
+      "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
+      "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+      "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
+      "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29",
+      "patches/uefi-b5q/0005-b5q-physical-esp.patch": "45539390db2142e460c12c9d71b56f79cca88922976bac29096feb6b0aa4da11",
+      "patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch": "ee152149bf5395e97987de7f9e1587c8a5fec78da64ad25fb416feb416ba68b1",
+      "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
+      "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
+      "patches/uefi-b5q/0009-b5q-media-dma.patch": "b41f5d54e4fc03f3b72bdfa300c3d81a0bf3ac8a184e5bf659fcfef7538701b6",
+      "patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch": "00f6e3dbecd897b5d7d54b182b0ab7a3d3bc522b1f1e81bafff19cda942fdd15",
+      "patches/uefi-b5q/0011-b5q-dp-splash-tail.patch": "07316f6c87fe7f66d8bdf0b44ac7c1217fa6525c20d74a0d201354c4c8705118",
+      "patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch": "7166412b0aa62093c6dc68fc4c38d810fbecf4d1b5dddd29aa860267655dae1d",
+      "patches/uefi-b5q/0013-b5q-reserved-dma-guards.patch": "22249582ec46dc5df2bcac9aa50ea73fb3667808961dbff930ee679e369ade62"
+    },
+    "lock_and_firmware_configuration_unchanged": true,
+    "firmware_job_unchanged": true
+  },
+  "boot_unchanged": true,
+  "boot_reused_path": "/home/baimao/zflip5/artifacts/b5q-esp-v33b-repair/boot.img",
   "boot_reused_sha256": "0c9f83986eae0f239f9e5a7f6fc81ee98ea56bf865fdb84b6f596c9566de3bc6",
-  "WiFi": "Original115PHY and reset/clock sequence verified;actual linkstate and enable/PERST timings now logged;silicon cause unknown withoutnewlog",
-  "USBDevice": "Native powerpathdiagnostics only,no forcedDMA"
+  "physical_Data_accessed": false,
+  "phone_connected": false,
+  "GPU_prior_regression": {
+    "CI_payload": {
+      "b5q-gmu-fw": {
+        "present": true,
+        "bytes": 66844,
+        "sha256": "1a2a419c39046d3141fc5fed5aa7f971de2db40cc7a1d89693c3e26fad64dd98"
+      },
+      "b5q-sqe-fw": {
+        "present": true,
+        "bytes": 76724,
+        "sha256": "96fee336424b139100fc60b5b45a907360e4b3936d7e1d00406b9bd80ca48473"
+      },
+      "b5q-zap-fw": {
+        "present": true,
+        "bytes": 12088,
+        "sha256": "824c864310b0c3a90bd14225a46177d4d4cd0ebca4c712eeb00aa7d82b0e6c1e"
+      }
+    },
+    "delivered_ESP": {
+      "b5q-gmu-fw": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "b5q-sqe-fw": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "b5q-zap-fw": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      }
+    }
+  },
+  "hardware_unknowns": [
+    "Actual desktop/GPU startup and frame submission",
+    "Bluetooth QCA version/initial RX electrical settling",
+    "WiFi PCIe physical L0 cause and link status",
+    "USB Device family configuration/power callback/enumeration"
+  ]
 }
