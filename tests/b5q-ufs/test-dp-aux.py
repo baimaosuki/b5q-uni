@@ -14,6 +14,7 @@ struct Io {
  struct Write{B5qDp::Block block;uint32_t off,value;};std::vector<Write>writes;
  uint32_t result=B5qDp::auxDone,control=1,trans=0;unsigned elapsed=0,starts=0,rx=0;bool active=false,reading=false,online=true,badIndex=false,deferOnce=false;
  bool connected(){return online;}
+ uint64_t nowUs(){return elapsed;}
  void delay(unsigned us){elapsed+=us;}
  uint32_t read(B5qDp::Block b,uint32_t off){
   if(b==B5qDp::Block::Ahb&&off==0x20)return active?(deferOnce&&starts==1?B5qDp::auxDefer:result):0;
@@ -36,7 +37,7 @@ struct EdidIo {
  unsigned segment=0,offset=0,rx=0,starts=0,segmentWrites=0,offsetWrites=0,failAt=0;
  bool active=false,oldSink=false;uint32_t trans=0,control=1;
  EdidIo(){for(unsigned b=0;b<8;b++){unsigned sum=0;for(unsigned i=0;i<127;i++){edid[b*128+i]=uint8_t(b*39+i*7);sum+=edid[b*128+i];}edid[b*128+127]=uint8_t(-sum);}}
- bool connected(){return true;}void delay(unsigned){}
+ bool connected(){return true;}void delay(unsigned){}uint64_t nowUs(){return 0;}
  uint32_t read(B5qDp::Block b,uint32_t off){using namespace B5qDp;
   if(b==Block::Ahb&&off==0x20)return active?(failAt==starts?auxNack:auxDone):0;
   if(b==Block::Aux&&off==0x30)return control;
@@ -60,6 +61,10 @@ struct EdidIo {
   if(!mot)offset=0;
  }
 };
+struct SlowIo:Io {
+ bool connected(){elapsed+=5000;return online;}
+ uint32_t read(B5qDp::Block b,uint32_t off){elapsed+=10000;return Io::read(b,off);}
+};
 int main(){using namespace B5qDp;unsigned cases=0;
  for(bool native:{false,true})for(bool reading:{false,true})for(unsigned n=1;n<=16;n++){
   Io io;Aux<Io> aux(io);uint8_t data[16];for(unsigned i=0;i<16;i++)data[i]=uint8_t(i+1);
@@ -73,6 +78,8 @@ int main(){using namespace B5qDp;unsigned cases=0;
  {Io io;io.deferOnce=true;Aux<Io>aux(io);uint8_t b=0;assert(aux.transfer(true,true,0,&b,1)&&io.starts==2&&b==17);}
  {Io io;io.badIndex=true;Aux<Io>aux(io);uint8_t b=0xaa;assert(!aux.transfer(true,true,0,&b,1)&&aux.error==AuxError::Index&&b==0xaa);}
  {Io io;io.online=false;Aux<Io>aux(io);uint8_t b=0;assert(!aux.transfer(true,true,0,&b,1)&&aux.error==AuxError::Detached&&io.writes.empty());}
+ {SlowIo io;io.result=0;Aux<SlowIo>aux(io);uint8_t b=0;
+  assert(!aux.transfer(true,true,0,&b,1)&&aux.error==AuxError::Timeout&&io.elapsed>=250000&&io.elapsed<350000);cases++;}
  for(unsigned n=0;n<=20;n++){Io io;Aux<Io>aux(io);uint8_t b[20]={0};bool ok=aux.transfer(true,true,0x202,b,n);assert(ok==(n>=1&&n<=16));if(!n||n>16)assert(io.writes.empty());}
  {Io io;Aux<Io>aux(io);uint8_t b[32]={0};assert(!aux.dpcd(true,0xfffff,b,2)&&io.writes.empty());assert(aux.dpcd(true,0x202,b,32)&&io.starts==2);}
  unsigned edidCases=0;

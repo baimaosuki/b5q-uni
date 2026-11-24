@@ -34,7 +34,7 @@ template<class Io>struct Session {
   bool phy(unsigned rate,unsigned lanes){
    if(!connected())return false;
    s.controller.stop();if(!s.clock.stopLink())return false;s.phy.disable();
-   return s.phy.configure(rate,lanes,s.reverse)&&s.phy.enable()&&s.clock.link()&&s.controller.source(lanes);
+   return s.io.prepareRate(rate)&&s.phy.configure(rate,lanes,s.reverse)&&s.phy.enable()&&s.clock.link()&&s.controller.source(lanes);
   }
   bool levels(unsigned voltage,unsigned pre,unsigned rate){return connected()&&s.phy.levels(voltage,pre,rate,s.io.read(Block::Ahb,0));}
   bool pattern(unsigned p){return p==0?s.controller.pattern(0):connected()&&s.controller.pattern(p);}
@@ -49,6 +49,7 @@ template<class Io>struct Session {
    io.write(Block::Aux,0x30,io.read(Block::Aux,0x30)&~1u);
   }
   if(clocksOwned)clockOk=clock.stopAux()&&clockOk;
+  if(clockOk)powerOk=io.finishRates()&&powerOk;
   if(clockOk)auxOn=clocksOwned=false;
   trained=streaming=false;selected={};rate=lanes=0;return powerOk&&clockOk;
  }

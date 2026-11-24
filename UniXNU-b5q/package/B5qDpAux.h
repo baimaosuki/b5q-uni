@@ -29,10 +29,13 @@ template<class Io> struct Aux {
   // V600 AUX hardware interrupts are cleared by its source-specific PHY
   // owner before this call; do not access oldV200 PHY offsets here.
   io.write(Block::Aux,0x38,(native?0u:(1u<<8)|(mot?1u<<11:0u))|(1u<<9));++transactions;
-  bool completed=false;
-  for(unsigned us=0;us<250000;us+=10){
+  bool completed=false;const uint64_t started=io.nowUs();
+  for(unsigned polls=0;polls<25000;polls++){
+   if(io.nowUs()-started>=250000)break;
    if(!io.connected()){error=AuxError::Detached;break;}
+   if(io.nowUs()-started>=250000)break;
    lastStatus=io.read(Block::Ahb,0x20)&auxInterrupts;
+   if(io.nowUs()-started>=250000)break;
    if(lastStatus){completed=true;break;}io.delay(10);
   }
   ack();

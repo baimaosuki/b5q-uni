@@ -61,13 +61,15 @@ enum {INTF_0=1,INTF_1,INTF_2,INTF_3,WB_0=1,DNSC_BLUR_0=1,MERGE_3D_0=1,CWB_0=1,CD
 bool test_bit(unsigned n,const unsigned long *v){return (*v>>n)&1;}
 struct Io {
  std::map<unsigned,u32> regs;std::vector<std::pair<unsigned,u32>> writes;
- bool dma=true,autoLatch=false,stuckTiming=false;unsigned barriers=0,elapsed=0;
+ bool dma=true,autoLatch=false,stuckTiming=false,runFrame=false;unsigned barriers=0,elapsed=0;
  u32 read(unsigned off){assert(!(off&3)&&off<0x84000);
   if(off==0x3526c&&stuckTiming)return 1;
+  if(off==0x3526c&&runFrame)return regs[0x35000]&1;
+  if(off==0x350ac&&runFrame&&(regs[0x35000]&1))return ++regs[off];
   if(autoLatch&&off>=0x16000&&off<0x1c000&&(off&0xfff)==0x18)regs[off]=0;
   return regs[off];}
  void write(unsigned off,u32 v){assert(!(off&3)&&off<0x84000);regs[off]=v;writes.emplace_back(off,v);}
- bool dmaAllowed(uint64_t addr,uint64_t bytes){assert(addr==0xc0000000&&bytes);return dma;}
+ bool dmaAllowed(uint64_t addr,uint64_t bytes){return dma&&addr>=0xc0000000&&addr<=0xc8000000&&bytes<=0xc8000000-addr;}
  void barrier(){barriers++;}
  void delay(unsigned us){elapsed+=us;}
 };
@@ -149,6 +151,18 @@ int main(){using namespace B5qDp;unsigned cases=0,rejected=0;std::mt19937 rng(0x
   DpuResources reusable;reusable.inspect([&](unsigned off){return actual.read(off);});assert(reusable.choose(width));
   assert(reusable.ctl==r.ctl&&reusable.lm[0]==r.lm[0]&&reusable.pipe[0]==r.pipe[0]);
   assert(plan.make(reusable,mode,0xc0000000,uint64_t(width)*4*1080,width*4)&&plan.apply(actual)&&plan.quiesce(actual));
+  assert(plan.make(reusable,mode,0xc0000000,uint64_t(width)*4*1080,width*4)&&plan.apply(actual));
+  actual.runFrame=true;assert(plan.start(actual)&&plan.started);
+  actual.runFrame=false;auto count=actual.writes.size();
+  assert(!plan.flip(actual,0xc1000000,1,width*4)&&actual.writes.size()==count);
+  assert(plan.flip(actual,0xc1000000,uint64_t(width)*4*1080,width*4)&&plan.pending);
+  assert(!plan.latched(actual));count=actual.writes.size();
+  assert(!plan.flip(actual,0xc0000000,uint64_t(width)*4*1080,width*4)&&actual.writes.size()==count);
+  actual.regs[0x350ac]++;assert(plan.latched(actual)&&!plan.pending);
+  assert(plan.flip(actual,0xc0000000,uint64_t(width)*4*1080,width*4));actual.regs[0x350ac]++;
+  assert(plan.latched(actual)&&plan.quiesce(actual));
+  assert(plan.make(reusable,mode,0xc0000000,uint64_t(width)*4*1080,width*4)&&plan.apply(actual));
+  actual.regs[0x3526c]=0;assert(!plan.start(actual)&&plan.active&&plan.started);assert(plan.quiesce(actual));
   cases++;
  }
  // Original CTL flush tables are deliberately different from fetch bits.

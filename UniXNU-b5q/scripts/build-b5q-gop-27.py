@@ -191,6 +191,10 @@ for i in range(BASE, len(slots)):
         header += f' virtual __attribute__((deprecated("Unclassified ABI: never call from source"))) void opaque{i}();\n'
 header += f'}};\nstatic_assert(sizeof(IOMobileFramebufferLegacy)=={abi["instance_size"]},"Actual original instance extent");\n'
 (OUT / 'OriginalLegacyFramebufferABI.h').write_text(header)
+if '--abi-header-only' in sys.argv:
+    # Reuse the identical qualified ABI for the independent DP backend.
+    # No driver/core/GPU build is run in this mode.
+    raise SystemExit(0)
 print(run(['python3', ROOT / 'scripts/build-arm-driver.py', 'NativeLegacyDisplay'], text=True), end='')
 
 

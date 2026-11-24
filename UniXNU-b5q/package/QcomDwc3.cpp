@@ -30,7 +30,7 @@ extern "C" bool b5q_usb_otg(bool);
 #include <IOKit/IOPlatformExpert.h>
 #include <libkern/c++/OSData.h>
 #include "B5qFeatures.h"
-extern "C" void b5q_dp_link_stop(void);
+extern "C" bool b5q_dp_link_stop(void);
 extern "C" void b5q_dp_link_update(const B5qDpPortState *);
 extern "C" {
 int armcpu_spi_attach(uint32_t, bool, void (*)(void *), void *, uint32_t *, uint64_t *);
@@ -692,7 +692,15 @@ void roleThread(void *, wait_result_t) {
         const int role = gRoleWanted;
         const uint32_t cableVersion = gCableWanted;
         IOLockUnlock(gRoleLock);
-        if(dpEnabled)b5q_dp_link_stop();
+        if(dpEnabled&&!b5q_dp_link_stop()){
+            // Keep the combo lanes and existing controller intact until
+            // DP has actually stopped clocks/scanout. A detached cable
+            // still drops our VBUS source immediately.
+            B5qMax77705::Cable current;
+            if(!b5q_usb_cable_state(&current)||!current.attached())b5q_usb_otg(false);
+            IOLog("B5qDP: combo transition deferred: previous link still owned\n");
+            IOSleep(100);continue;
+        }
         gDeviceStackAllowed = false;
         leaveRole(gRoleApplied);
         gRoleApplied = kRoleNone;

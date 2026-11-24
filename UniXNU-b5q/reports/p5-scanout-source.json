@@ -1,7 +1,7 @@
 {
   "complete_P5": false,
   "hardware_verified": false,
-  "scope": "Production DPU/plane/vsync/session/timing helpers; native owner and external display lifetime not yet implemented",
+  "scope": "Production DPU/plane/vsync/session/timing and native link/IRQ/presentation/external IOMFB adapter; retained DMA producer and end-to-end integration incomplete",
   "original_module": {
     "path": "sources/twrp-b5q/recovery/root/lib/modules/msm_drm.ko",
     "sha256": "81248f938e3ff18c71335ea535f3f5a6868e66c6005f8520571422cbedb8945a",
@@ -143,22 +143,40 @@
   ],
   "host_report": {
     "path": "artifacts/b5q-p5-work/local-regression/report.json",
-    "sha256": "4a55a06a2e7748e5e1e205b9b7f0fff0c7f9d6686425ea056bddafd081e51742",
+    "sha256": "9f02fbb2ee0de1be5ea4bda864a27f910443104b50f68b396235577e3c701dd5",
     "passed": true,
-    "groups": 17
+    "groups": 23
   },
   "target_report": {
     "path": "artifacts/b5q-p5-work/target/report.json",
-    "sha256": "71bf2e8cb05bb0cbcbadb9c5b9a607318c0ba7ea20a78948d703d9927ca46558",
+    "sha256": "516d98ffe37e3f77be15988ff03847dca104a806c5011d08726275b07b3c41f9",
     "scoped_compile_passed": true,
+    "scoped_imports_closed": true,
     "whole_P5_link_closed": false
   },
   "results": {
+    "aux": "PASS productionEDID 90 sink cases:8blocks/order/segmentreset/MOT/STOP-pointer-loss/24transactionfailures/CRC/atomicpublication ASanUBSan\nPASS productionAUX FIFO73cases/nativeI2C/readwrite1..16/8faults/bounded250mstimeout/7deferretries/shortindex/detach/overflow;ASanUBSan",
+    "board": "PASS native DP AUX switch 8193 GPIO180/183 cases/CC1CC2/active-low/readback/refusal/restore/noGPIO11 ASanUBSan",
+    "clock": "PASS SamsungDPclock 65567cases:exactMND/DP0VCOparent/RCGpreservation/4linkrates/32displayclocks/1msbounds ASanUBSan",
+    "controller": "PASS SamsungDPcontroller: 71892 exact-original MSA outputs,source/SST/reset/TPS1..4/10msvideo/1080pMSA/TU/bandwidth/invalid-inputs ASanUBSan",
+    "cta": "PASS CTA94originaltimings/127VICs/4K60advertisement/RGB-YUV420isolation ASanUBSan count=94",
+    "display": "PASS external IOMFB 23 production validation/fence/latch-tag/cancel/stale-callback cases ASanUBSan; original 53-line notification packing preserved",
     "dpu-resources": "PASS production DPU resource discovery:all retained CTL/LM/SSPP rect0/1/highbits/fetch/pairs/full/busy/bounds; no writes\nPASS 4941 DPU ownership cases ASanUBSan",
     "dpu": "PASS DP DPU 80 exact-original CTL/LM/INTF/MERGE route traces and 600 zero-write ownership/DMA failures ASanUBSan",
     "ioav": "PASS IOAV timing 2820 real macOS26C5035r getter executions/94 CTA modes/fractional refresh/no porch transform; invalid mode refused",
+    "irq-owner": "PASS actual native MDSS IRQ worker 7 scheduler/IRQ races/foreignsource isolation/callback drain/timeout/restart cases ASanUBSan",
+    "link-owner": "PASS actual native DP Owner 21 attach/HPD/polarity/linkloss/retry/failure/stop-retention cases",
+    "modes": "PASS productionDPmodes:128checksumfaults/alltruncations/CTAoverrun/1080p60DTDandbandwidth/100000randomEDIDbounds ASanUBSan",
+    "pdic": "PASS SamsungPDIC 194cases:mailboxlength0..32/endmarker/500msbound/opcode/IO/detach/CDEpin/plug-receptacle/HPD/NAK/order/truncation/100000fuzz ASanUBSan",
+    "phy": "PASS SamsungPLL 129cases:24exactoriginalfunctiontraces/4x22v11params/5boundedlockfaults/V600AUX/originalDTswing",
     "plane": "PASS SamsungDPplane 10040 exact-original BGRA/stride/crop/PE/CDP/register traces and 16 bounds failures ASanUBSan",
+    "port": "PASS 18 actual board PDIC polls:automaticVDM/poweredhub/missedIRQ/duplicates/HPD-pulse/lane-retention/exit/deadline/water/IO/malformed/lockownership ASanUBSan",
+    "presentation": "PASS DP presentation 20 scenarios, 10000 alternating flips, DMA rejection/real-latch/timeout-retention/counter-wrap ASanUBSan",
+    "rpmh": "PASS native DP MX RPMh 28 old/newlayout/busy/lock/complete/timeout/reap/ARClevel cases ASanUBSan",
     "session": "PASS production DP session 53 full AUX/EDID/PHY/clock/training/modefallback/video/detach/failure/teardown/deadline cases ASanUBSan",
+    "timing": "PASS SamsungDPUtiming 2094 exact-original write traces/DP-bottom-right/negative-sync-polarity/configpreservation/bounds ASanUBSan",
+    "training": "PASS productionDPtraining 65555cases:1-2-4lanes/rates6-10-20-30/CR-EQ-faults/downshift/IO-detach/levelsclamp/intervalbound ASanUBSan",
+    "tu": "In file included from /home/baimao/zflip5/UniXNU-b5q/package/B5qDpTu.h:13,\n                 from /tmp/b5q-dp-tu-0u6clnbp/test.cpp:5:\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h: In member function \u2018bool B5qDp::Modes::add(const B5qDp::Mode&)\u2019:\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h:29:3: warning: this \u2018if\u2019 clause does not guard... [-Wmisleading-indentation]\n   29 |   if(count==capacity)return false;values[count++]=mode;return true;\n      |   ^~\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h:29:35: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the \u2018if\u2019\n   29 |   if(count==capacity)return false;values[count++]=mode;return true;\n      |                                   ^~~~~~\nPASS SamsungTU 487 exact-reference outputs, 389 bounded rejections; original adaptive rounding, RGB24, ASanUBSan",
     "vsync": "PASS DP hardwareVSync 3236 W1C/isolation/reentry/detach/framewrap cases; no timer-generated frames ASanUBSan"
   },
   "ioav_original_binary_evidence": {
@@ -169,18 +187,21 @@
     "Little-endian BGRA bytes use the original DRM ARGB8888 unpack order, not DRM BGRA8888.",
     "Read-only resource discovery now reserves retained PP/MERGE_3D and pending CTL flush state. Each fresh DMA/ownership gate precedes all setup writes.",
     "DPU quiesce waits for actual INTF_STATUS and owned CTL flush completion. Timeout retains ownership and saved state; successful stop restores registers and permits repeated hotplug reuse.",
-    "INTF0 hardware VSync uses original MDP0+INTR_EN/STATUS/CLEAR offsets; only owned bits24/25 are acknowledged. Native ArmCpu/IOWorkLoop wiring is not implemented by this helper.",
+    "Native IRQ115 owner now uses ArmCpu shared IRQ, production Vsync helper, permanent context and real IRQ worker callbacks. Original source offsets and PAC are verified; not yet attached to an external display pipeline.",
     "Native session joins production AUX/EDID, D0/D3, PLL/clocks, CR/EQ, rate/mode fallback and bounded teardown. Modes are real EDID modes; no fabricated fallback.",
     "Actual macOS 26C5035r IOAV getter/PixelClock instructions consume produced 80-byte data for all94 CTA modes and fractional refresh variants. This does not publish an external IOMFB service."
   ],
   "remaining": [
-    "qualified Display DMA aperture and firmware producer preserving primary domain",
-    "native power/MMIO/IRQ lifetime and real link hook definitions",
-    "external IOMFB scanout/presentation/hotplug/lid integration",
-    "P5 CI and accepted ESP; final three-image handoff"
+    "source-qualified independent retained Display DMA allocation/producer preserving primary domain",
+    "end-to-end connection of native link, IRQ, presentation and IOMFB adapter; full mode/hotplug/lid lifecycle integration",
+    "complete P5 build/CI/actual ESP and final three-image recheck"
   ],
   "CI_run": null,
   "ESP": null,
   "device_access": false,
-  "EL1_apps_smmu_access": false
+  "EL1_apps_smmu_access": false,
+  "native_development_report": {
+    "path": "UniXNU-b5q/reports/p5-native-development.json",
+    "sha256": "850b85f9aeb1d7885551c5fb745f56731c45fa276c8eea10afdb815add4a11ad"
+  }
 }

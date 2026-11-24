@@ -27,6 +27,10 @@ assert at(0x19b18,8)==bytes.fromhex('e0031f2ac0035fd6')
 call,=struct.unpack('<I',at(0x133cc,4));assert call>>26==0x25
 disp=call&0x3ffffff;disp=disp-(1<<26)if disp&(1<<25)else disp
 assert 0x133cc+disp*4==0x19b18
+# The single-active-display path exposes only width*height*bytesPerPixel,
+# not the 43MiB reserved region. Its result feeds GOP.FrameBufferSize.
+assert at(0x272c,24)==bytes.fromhex('e82b57298902009029c149b9487d089b087d099be86b00f9')
+assert at(0x2994,24)==bytes.fromhex('e28f4ca9080140b9450140b9e40303aa543300b9420f02a9')
 dts=files['b5q_dts'].read_text()
 def node(text,name):
  start=text.index(name+' {');brace=text.index('{',start);depth=0
@@ -52,7 +56,10 @@ result=dict(
  complete_P5=False,hardware_verified=False,separate_DP_DMA_mapping_proven=False,
  inputs={name:dict(path=str(p.relative_to(R)),bytes=p.stat().st_size,sha256=hashlib.sha256(p.read_bytes()).hexdigest())for name,p in files.items()},
  selected_DisplayDxe=dict(caller_RVA='0x133cc',target_RVA='0x19b18',actual_words=['mov w0,wzr','ret'],
-  orphan_HAL_body='0x19b20..0x19bd4; not executed by the selected caller; does not prove a retained identity/bypass mapping'),
+  orphan_HAL_body='0x19b20..0x19bd4; not executed by the selected caller; does not prove a retained identity/bypass mapping',
+  GOP_single_display_size_RVA='0x272c..0x2740: width * height * bytesPerPixel -> sp+0xd0',
+  GOP_publish_RVA='0x2994..0x29a8: sp+0xc8/sp+0xd0 -> GOP mode FrameBufferBase/FrameBufferSize',
+  reserved_tail_advertised_by_GOP=False),
  display_IORT=rows,
  mdp_reg_names=['mdp_phys','vbif_phys','regdma_phys','ipcc_reg'],sid_phys_present=False,
  source_route='sde_plane_set_sid -> sde_hw_set_sspp_sid; no write when hw_sid absent; sid_phys is optional and absent in original b5q node',
@@ -61,7 +68,7 @@ result=dict(
  reservation_is_not_mapping='0xb8000000+0x02b00000 is a splash reservation, not proof of unused GOP allocation or DP DMA coverage',
  required='A source-qualified independently routable DP fetch stream and retained firmware mapping, or a qualified nonoverlapping scanout allocation within an actually mapped display range',
  prohibited_assumptions=['copy another board sid_phys address','reconfigure the live primary Display domain/bank','scan apps_smmu at XNU EL1','infer whole-RAM identity from a firmware success-return patch'],
- unresolved_software=['native complete hardware ownership/glue','external IOMFB scanout and hotplug/lid integration','final P5 link closure/CI/ESP'],
+ unresolved_software=['qualified retained display DMA producer','end-to-end wiring of native link/IRQ/presentation/external IOMFB and hotplug/lid','full P5 build/CI/ESP'],
  device_access=False,EL1_apps_smmu_access=False)
 out=R/'UniXNU-b5q/reports/p5-display-dma-inputs.json';out.write_text(json.dumps(result,indent=2)+'\n')
 print('PASS original static input checks; separate DP DMA route/mapping remains UNKNOWN. P5 release gate stays closed.')

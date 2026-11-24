@@ -11,7 +11,7 @@ Goal source: `/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b
 | P4A | Samsung GPIO107 lid, MAX77705 battery, inner-panel DCS0x51 backlight | HOST_VERIFIED_PENDING_HARDWARE; joint P4 CI and two actual-image readbacks PASS |
 | P4B | Samsung ADSP/AudioReach/HAL, two TFA9878 amplifiers and HAL DMA | HOST_VERIFIED_PENDING_HARDWARE; actual HAL, retained DMA, target/PAC and joint image gates PASS |
 | P4C | Iris/VPU30 original firmware, UEFI SID1940/1947 mappings, VideoToolbox | HOST_VERIFIED_PENDING_HARDWARE; actual full P4 kernel/HAL/firmware/ESP return gates PASS |
-| P5 | PD VDM, DP PHY/controller/clock/AUX/EDID/training, DPU INTF_DP and external IOMFB | INCOMPLETE; 17 protocol/scanout/session groups and arm64e/ABI/PAC checks pass; independent DMA contract, native link owner and external IOMFB remain open |
+| P5 | Native DP stack, DPU and external IOMFB | INCOMPLETE; 23hostgroups/8arm64eobjects/483IOMFB PACslots pass. Retained DisplayDMA producer and end-to-end native display integration remain open |
 | Final | All regressions, SHA256/ADT/args/fixups/APFS policy readback, boot/ESP/addon, four menu profiles, flashing/acceptance commands | NOT_STARTED |
 
 Latest user steering: finish all P0+P1 local gates before one joint CI; do not trigger separate P0 retries. Initial P0 CI45162509107 kernel passed; firmware failed before compilation on missing0005/0006 input files, now source reconstruction verified.
@@ -53,18 +53,13 @@ P2+P3 accepted stage bytes are retained in `artifacts/b5q-esp-p2-p3/esp.img` (SH
 | Two-finger tap 2->1->0 | DONE (source/host/build) | Same accepted image; production touch-p0 regression |
 | Separate P2/P3 ESP and second readback | DONE (host/build) | CI45268304105; final-recheck/images.json; SHAa537450f18d2f809649b9fbbb22bd8bcc0cdafba25120d1fda5e83eb8815c146 |
 | Separate complete P4A/B/C ESP and second readback | DONE (host/build) | CI45295645295+45296602477; p4-final-images.json; SHAfb874c56a44d2c8632609a2719ba2bc2c18d816ea263a14baf406db2676960ba |
-| Complete P5 native external display and separate accepted ESP | NOT DONE | p5-link-source.json / p5-display-dma-inputs.json; actual2 unresolved link hooks, no P5 CI or image |
+| Complete P5 native external display and separate accepted ESP | NOT DONE | p5-native-development.json / p5-display-dma-inputs.json; scoped imports closed, retainedDMA/pipeline incomplete; no P5 CI or image |
 | Combined final three-image handoff | NOT DONE | No flashing commands issued; physical qualification remains pending |
 
 P4 acceptance-only commit `c5c59d394c88864ba4e477f5ea02a8d6692acaf7` contains the actual returned-image receipt and repeatable verification changes. It includes no unfinished P5 source and touches no workflow-triggering build paths.
 
-P5's completed local scopes are protocol helpers, register arithmetic and conservative DPU resource discovery: EDID/AUX/PDIC/port/PLL/training/clocks/TU/CTA/INTF/MSA/ownership, 12 ASan/UBSan groups. The actual target check compiles SE8 and QcomDwc3 plus helper instantiations, verifies original USB vtables, IRQ and GENI PAC, and zero EL1 apps_smmu constants. It explicitly reports `_b5q_dp_link_stop` and `_b5q_dp_link_update` unresolved. This does not constitute a complete native driver, original-family external IOMFB integration or an accepted image.
+P5 local development now includes actual native link/IRQ owners, two-buffer presentation and an external IOMFB adapter. All23 production host groups pass; 8 actual arm64e objects close their scoped imports. All483 external framebuffer virtual-slot discriminators match the original26C5035r ABI, alongside actual USB/IRQ/GENI/worker/backend-callback PAC and zeroEL1apps_smmu checks. reports/p5-native-development.json records source/target hashes and exact test scopes. The original53-line macOS notification/completion implementation is reused verbatim.
 
-The Display DMA prerequisite is unresolved: selected DisplayDxe's actual caller reaches the success-return patch, not the orphan HAL setup body. The original IORT's secondary DISPLAY stream exists in metadata, but the original b5q MDP node supplies no sid_phys resource to route a plane onto it. The retained splash reservation is not evidence of an unused, mapped external scanout buffer. The exact facts/hashes are machine-checked by check-dp-display-dma-inputs.py. No primary Display bank/domain is modified and no EL1 SMMU access or phone operation is attempted.
+The independent retained Display DMA producer is unresolved. Selected DisplayDxe's caller reaches its success-return patch; its GOP size calculation exposes visible width*height*bytesPerPixel, not an unused mapped tail. IORT metadata provides a candidate secondary stream but originalb5q provides no sid_phys route for a plane. No primary Display bank/domain changes, EL1 SMMU access, phone operation or P5 CI have been attempted.
 
-
-## Latest P5 local implementation scopes
-
-Production plane/DPU ownership/quiesce, hardware-VSync register service, full AUX/PLL/clock/training/session lifecycle and actual macOS IOAV timing serialization are now implemented and checked. `reports/p5-scanout-source.json` records exact original symbols, source hashes, real IOAV instruction execution and all17 host groups. Stop timeouts retain resources; successful disconnect restores selected resources for reuse. No timer event is presented as hardware VSync.
-
-These remain helper/lifecycle scopes. The native power/MMIO/IRQ owner and two actual link hooks, retained Display DMA producer, external IOMFB presentation/hotplug/lid, P5 CI and the separate P5 ESP are still NOT DONE. Accepted P2/P3 and P4 bytes remain unchanged. No final image handoff or flashing command is issued.
+The adapter and scanout lifecycle are not yet connected into a complete native external display/hotplug/lid pipeline. Consequently P5 and final three-image delivery remain NOT DONE. Accepted P2/P3 and P4 images remain separately retained and are not a partial final handoff. No flash instructions are issued.

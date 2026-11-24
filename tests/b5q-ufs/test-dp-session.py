@@ -27,6 +27,8 @@ struct Io {
   for(unsigned b=0;b<2;b++){uint8_t sum=0;for(unsigned i=0;i<127;i++)sum+=edid[b*128+i];edid[b*128+127]=uint8_t(-sum);}
  }
  bool connected(){return online&&now<detachAt;}
+ bool prepareRate(unsigned rate){assert(rate==6||rate==10||rate==20||rate==30);return true;}
+ bool finishRates(){return true;}
  uint64_t nowUs(){return now;}void delay(unsigned us){now+=us;}
  static bool branch(unsigned off){return off==0x8058||off==0x8050||off==0x8048||off==0x8040;}
  uint32_t read(Block b,unsigned off){

@@ -51,7 +51,10 @@
       "mov w0,wzr",
       "ret"
     ],
-    "orphan_HAL_body": "0x19b20..0x19bd4; not executed by the selected caller; does not prove a retained identity/bypass mapping"
+    "orphan_HAL_body": "0x19b20..0x19bd4; not executed by the selected caller; does not prove a retained identity/bypass mapping",
+    "GOP_single_display_size_RVA": "0x272c..0x2740: width * height * bytesPerPixel -> sp+0xd0",
+    "GOP_publish_RVA": "0x2994..0x29a8: sp+0xc8/sp+0xd0 -> GOP mode FrameBufferBase/FrameBufferSize",
+    "reserved_tail_advertised_by_GOP": false
   },
   "display_IORT": [
     {
@@ -107,9 +110,9 @@
     "infer whole-RAM identity from a firmware success-return patch"
   ],
   "unresolved_software": [
-    "native complete hardware ownership/glue",
-    "external IOMFB scanout and hotplug/lid integration",
-    "final P5 link closure/CI/ESP"
+    "qualified retained display DMA producer",
+    "end-to-end wiring of native link/IRQ/presentation/external IOMFB and hotplug/lid",
+    "full P5 build/CI/ESP"
   ],
   "device_access": false,
   "EL1_apps_smmu_access": false
