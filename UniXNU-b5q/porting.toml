@@ -2924,3 +2924,27 @@ kind = "source"
 reference = "reports/p5-display-dma-inputs.json"
 command = "python3 scripts/b5q-install/check-dp-display-dma-inputs.py"
 result = "Original static input checksPASS; independent DP DMA routing/coverage remains unknown. Explicitly no release qualification or hardware success."
+
+[[area]]
+id = "p5-scanout-session-development"
+status = "planned"
+components = ["GopFramebuffer", "DarwinBoot"]
+paths = ["package/B5qDpPlane.h", "package/B5qDpDpu.h", "package/B5qDpDpuResources.h", "package/B5qDpVsync.h", "package/B5qDpSession.h", "package/B5qDpIoav.h", "package/B5qDpClock.h", "package/B5qDpAux.h", "reports/p5-scanout-source.json"]
+inputs = ["Original msm_drm.ko SHA81248f938e3ff18c71335ea535f3f5a6868e66c6005f8520571422cbedb8945a; original26C5035r kernelcache SHAd1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9; pinned Samsung source and individual hashes in p5-scanout-source.json"]
+configuration = ["Local P5 development only; accepted P2/P3 and P4 image bytes unchanged; no Display domain changes, device access or P5 CI"]
+procedure = ["Compare actual original plane/CTL/LM/INTF/merge bodies with owned register plans under ASanUBSan; real26C5035r IOAV getters under Unicorn; native session register sink tests; production arm64e instantiation and original USB/GENI/IRQ PAC checks"]
+findings = ["17 host groupsPASS. Plane10040 exactoriginal traces/16rejects; DPU80 exactoriginal routing traces/600 zero-write DMA or ownership failures plus bounded stop/reuse; resource4941cases including PP/merge/pendingflush; VSync3236cases; session53cases including D0/D3,mode/ratefallback,detach,deadline,stalledclock retention; IOAV original getters and pixelclock consume94CTA modes plusfractional refresh. Source/target hashes in p5-scanout-source.json. Genuine native power/MMIO/IRQ ownership,2 link hook definitions, Display DMA producer and externalIOMFB remain incomplete; no P5 ESP or CI result claimed."]
+completion = ["Complete native ownership, retained DMA, externalIOMFB/presentation and actual P5 CI/image gates before final three-image handoff"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE within listed scopes; wholeP5 INCOMPLETE"]
+next_action = ["Continue real native link/IRQ and external display integration; preserve primary Display domain and zeroEL1apps_smmu"]
+[[area.evidence]]
+kind = "source"
+revision = "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+reference = "reports/p5-scanout-source.json"
+command = "Original module symbols/disassembly; pinned sde_hw_sspp/ctl/lm/intf/pingpong source; real26C5035r IOAV getter instructions"
+result = "Original symbols/offsets/bytes and input hashes retained; same-source copies are not independent hardware evidence."
+[[area.evidence]]
+kind = "host"
+reference = "reports/p5-scanout-source.json"
+command = "python3 scripts/b5q-install/check-dp-local.py; python3 scripts/b5q-install/check-dp-target.py; requested USB/Wi-Fi/touch production regressions"
+result = "All scoped host groups/target/PAC/zeroMMIO PASS; actual2 undefined link hooks and missing native lifetime/DMA/IOMFB keep release gate closed."

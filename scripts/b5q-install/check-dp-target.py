@@ -31,13 +31,34 @@ with tempfile.TemporaryDirectory(prefix='b5q-dp-target-')as td:
 #include "B5qDpTraining.h"
 #include "B5qDpTiming.h"
 #include "B5qDpDpuResources.h"
+#include "B5qDpDpu.h"
+#include "B5qDpVsync.h"
+#include "B5qDpSession.h"
+#include "B5qDpIoav.h"
 using namespace B5qDp;
 struct Io {
- volatile uint32_t *blocks[12];bool online;
- bool connected(){return online;}void delay(unsigned){}
+ volatile uint32_t *blocks[12];bool online;uint64_t ticks;
+ bool connected(){return online;}void delay(unsigned us){ticks+=us;}uint64_t nowUs(){return ticks;}
  uint32_t read(Block b,unsigned off){return blocks[unsigned(b)][off/4];}
  void write(Block b,unsigned off,uint32_t v){blocks[unsigned(b)][off/4]=v;}
 };
+struct DpuIo {
+ volatile uint32_t *regs;bool authorized;uint64_t begin,end;
+ uint32_t read(unsigned off){return regs[off/4];}
+ void write(unsigned off,uint32_t value){regs[off/4]=value;}
+ bool dmaAllowed(uint64_t address,uint64_t bytes){return authorized&&address>=begin&&address<=end&&bytes<=end-address;}
+ void barrier(){asm volatile("dsb sy":::"memory");}
+ void delay(unsigned us){asm volatile(""::"r"(us):"memory");}
+ void vsync(uint32_t frame){asm volatile(""::"r"(frame):"memory");}
+};
+// Test-only instantiations: the real driver must provide its authorized
+// DMA producer, resource lock, IRQ and IOMFB lifetime owner separately.
+extern "C" bool check_dp_target_dpu(DpuIo &io,Mode &mode,unsigned address,unsigned bytes,unsigned stride){
+ DpuResources resources;resources.inspect([&](unsigned off){return io.read(off);});
+ Dpu pipe;Vsync irq;
+ if(!resources.choose(mode.width)||!pipe.make(resources,mode,address,bytes,stride)||!pipe.apply(io))return false;
+ bool armed=irq.begin(io);bool handled=irq.service(io);irq.end(io);return pipe.quiesce(io)&&armed&&handled;
+}
 extern "C" bool check_dp_target_protocol(Io &io,Mode &mode,unsigned rate,unsigned lanes){
  Controller<Io> controller(io);Phy<Io> phy(io);Clock<Io> clock(io);Aux<Io> aux(io);
  uint8_t edid[128];IntfTiming timing;DpuResources resources;
@@ -46,6 +67,13 @@ extern "C" bool check_dp_target_protocol(Io &io,Mode &mode,unsigned rate,unsigne
    controller.video()&&phy.configure(rate,lanes,false)&&phy.enable()&&clock.pixel(mode.pixelKHz,rate)&&
    aux.edidBlock(0,edid)&&timing.make(mode,0)&&resources.choose(mode.width);
 }
+extern "C" bool check_dp_target_session(Io &io,unsigned lanes,bool reverse){
+ Session<Io> session(io);
+ const bool ok=session.discover(lanes,reverse)&&session.train();
+ if(!ok)return false;
+ const bool video=session.video();return session.stop()&&video;
+}
+extern "C" bool check_dp_target_ioav(Mode &mode,IoavTiming &data){return data.make(mode);}
 ''')
  sources.append(p);objects=[]
  for source in sources:objects.append(compile_object(llvm/'clang++',options,source,out/(source.stem+'.o'),llvm))
@@ -88,7 +116,7 @@ extern "C" bool check_dp_target_protocol(Io &io,Mode &mode,unsigned rate,unsigne
   original_USB_vtable_slots=slots,USB_IRQ_PAC='IA2abe matches actual ArmCpu dispatch',EL1_apps_smmu_materializations=0,
   SE6_SE8_GENI_PAC=geniContracts,actual_GeniI2c_sha256=geniScan['sha256'],
   unresolved_integration_symbols=missing,whole_P5_link_closed=not missing,
-  remaining='Native DP hardware owner, qualified retained display DMA, external IOMFB, CI and actual P5 ESP')
+  remaining='Native DP hardware/IRQ lifetime owner, qualified retained display DMA, external IOMFB, CI and actual P5 ESP')
  (out/'report.json').write_text(json.dumps(result,indent=2)+'\n')
  print('PASS P5 protocol/SE8/USB arm64e target, originalUSB ABI and IRQ PAC, zeroEL1apps_smmu; full P5 remains incomplete')
  print('Unresolved integration:',missing)

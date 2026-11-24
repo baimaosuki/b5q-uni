@@ -30,6 +30,16 @@ template<class Io>struct Clock {
   io.write(Block::DispCc,off,io.read(Block::DispCc,off)|1);
   for(unsigned us=0;us<1000;us+=10){last=io.read(Block::DispCc,off);if(!(last&(1u<<31)))return true;io.delay(10);}failed=off;return false;
  }
+ bool disableBranch(unsigned off){
+  io.write(Block::DispCc,off,io.read(Block::DispCc,off)&~1u);
+  for(unsigned us=0;us<1000;us+=10){last=io.read(Block::DispCc,off);if(last&(1u<<31))return true;io.delay(10);}failed=off;return false;
+ }
+ bool stopLink(){
+  // Original dp_ctrl_disable_link_clock: drop child branches before PLL.
+  const bool pixel=disableBranch(0x8050),iface=disableBranch(0x8048),link=disableBranch(0x8040);
+  return pixel&&iface&&link;
+ }
+ bool stopAux(){return disableBranch(0x8058);}
  bool aux(){return update(0x81bc,1)&&branch(0x8058);}
  bool link(){return update(0x8170,0x101)&&branch(0x8040)&&branch(0x8048);}
  bool pixel(uint32_t pixelKHz,unsigned rate){

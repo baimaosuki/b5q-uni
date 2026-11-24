@@ -23,7 +23,7 @@ template<class Io> struct Aux {
   if(!bytes||!length||length>16||address>0xfffff||(!native&&address>127)){error=AuxError::Bounds;return false;}
   if(!io.connected()){error=AuxError::Detached;return false;}
   ack();const unsigned count=read?4:4+length;
-  const uint8_t header[]={uint8_t((address>>16)&15)|(uint8_t(read)<<4),uint8_t(address>>8),uint8_t(address),uint8_t(length-1)};
+  const uint8_t header[]={uint8_t(((address>>16)&15)|(uint32_t(read)<<4)),uint8_t(address>>8),uint8_t(address),uint8_t(length-1)};
   for(unsigned i=0;i<count;i++)io.write(Block::Aux,0x34,(uint32_t(i<4?header[i]:bytes[i-4])<<8)|(i?0u:1u<<31));
   io.write(Block::Aux,0x38,0);
   // V600 AUX hardware interrupts are cleared by its source-specific PHY

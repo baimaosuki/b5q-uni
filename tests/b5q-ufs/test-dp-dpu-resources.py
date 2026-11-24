@@ -43,6 +43,18 @@ int main(){unsigned cases=0;
   auto r=inspect(io);assert(r.choose(3840)==(free>=2));assert(r.choose(1920)==(free>=1));cases++;
  }
  for(unsigned off:{0x35000u,0x160f4u}){Io io;io.regs[off]=1;auto r=inspect(io);assert(r.dpBusy&&!r.choose(1920));cases++;}
+ // Enabled DSI or DP3 can retain a PP without a staged layer. Never
+ // allocate its paired LM/merge to the new external display.
+ for(unsigned intf=1;intf<4;intf++)for(unsigned pp=0;pp<6;pp++)for(bool activeCtl:{false,true}){
+  Io io;if(activeCtl)io.regs[0x160f4]=1u<<intf;else io.regs[0x35000+intf*0x1000]=1;
+  io.regs[0x3525c+intf*0x1000]=pp;auto r=inspect(io);
+  assert(r.usedPp[pp]&&r.usedLm[pp]);if(r.choose(3840))assert(r.lm[0]!=pp&&r.lm[1]!=pp);cases++;
+ }
+ for(unsigned m=0;m<3;m++)for(bool activeCtl:{false,true}){
+  Io io;if(activeCtl)io.regs[0x160e4]=1u<<m;else io.regs[DpuResources::mergeBase[m]+4]=3;
+  auto r=inspect(io);assert(r.usedMerge[m]&&r.usedPp[2*m]&&r.usedPp[2*m+1]);
+  assert(r.choose(3840)&&r.lm[0]/2!=m);cases++;
+ }
  {Io io;auto r=inspect(io);assert(!r.choose(0)&&!r.choose(5121)&&r.choose(5120));}
  puts("PASS production DPU resource discovery:all retained CTL/LM/SSPP rect0/1/highbits/fetch/pairs/full/busy/bounds; no writes");
  printf("PASS %u DPU ownership cases ASanUBSan\n",cases);
