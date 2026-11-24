@@ -24,7 +24,7 @@ for name,script in [('WiFi-board-and-network-target','check-wifi-target.py'),('o
     ('joint-symbol-PAC-zero-apps-smmu','check-wireless-target-closure.py')]:run(name,[sys.executable,R/'scripts/b5q-install'/script])
 run('all-XNU-patches',[sys.executable,R/'UniXNU-b5q/scripts/check-xnu-patches.py','--unixnu',R/'UniXNU','--source',R/'sources/UniXNU/out/feeds/xnu-3199e8bc'])
 board=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text());args=board['payload']['kernel_args']
-assert 'wifi=5'in args and 'bluetooth=1'in args and len(' '.join(args).encode())<=1000
+assert 'wifi=5'in args and 'bluetooth=1'in args and len(' '.join(args).encode())<=1023
 assert 'offline-mobile-graphics-client=1'not in args and len(board['payload']['text_fixups'])==2
 assert board['adt']['chosen']['asmb']['u64']['lp-sip0']==2
 assert board['adt']['chosen']['u32']['b5q-pcie-dma-ready']==0

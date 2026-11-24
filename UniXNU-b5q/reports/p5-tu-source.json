@@ -1,0 +1,12 @@
+{
+  "implementation_complete": false,
+  "hardware_verified": false,
+  "source_revision": "a1fdd086620bc0e2f767323c2853bcc9424e3087",
+  "dp_panel_sha256": "7ec7c5b82460a9893fe4e8731167641721946779d0b2853d5674671b7befc0da",
+  "original_tu_extraction_sha256": "a5e0020498e2413f0be2f8b1ba7532913ec3249e25a35123bc4be638918aab90",
+  "original_drm_fixed_sha256": "fd2d2a224061806a9b0b1bc938862f58ff3c60ce80a782f0d8dda73910439d6e",
+  "production_sha256": "0f250a084674cd0d433ce636144b8864624a38c15f65374b57ef3a2519fd26b5",
+  "scope": "RGB24 synchronous nonDSC/nonFEC; preserved original adaptive fixedpoint math and TU algorithm; runtime output integration remains pending",
+  "test": "PASS 487 exact original outputs and389 bounded rejections; ASanUBSan",
+  "test_sha256": "b986b3834debb35c013629be1a018a0b88ff61e13740ffbc1b1d564519968513"
+}

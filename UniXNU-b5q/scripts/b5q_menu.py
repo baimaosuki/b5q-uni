@@ -4,14 +4,15 @@ NATIVE_COMMAND_LINE_BYTES=1024
 
 def line(values,default=False):
     text=' '.join(values)
-    limit=1000 if default else NATIVE_COMMAND_LINE_BYTES-1
+    limit=NATIVE_COMMAND_LINE_BYTES-1
     if not text.isascii()or '\x00'in text or len(text.encode())>limit:
         raise ValueError('DarwinBoot/XNU command line overflow or invalid text')
     return text
 
 def profiles(arguments):
-    safe=['wifi=0'if v.startswith('wifi=')else'bluetooth=0'if v.startswith('bluetooth=')else'usb=0'if v.startswith('usb=')else v for v in arguments]
-    args={'xnu':line(arguments,True),'daily':line([*arguments,'b5q-f=0']),
+    fallback=['b5q-dp=0'if v.startswith('b5q-dp=')else v for v in arguments]
+    safe=['wifi=0'if v.startswith('wifi=')else'bluetooth=0'if v.startswith('bluetooth=')else'usb=0'if v.startswith('usb=')else v for v in fallback]
+    args={'xnu':line(arguments,True),'daily':line([*fallback,'b5q-f=0']),
         'safe':line([*safe,'b5q-f=0']),
         'ram-fallback':line(['b5q-data-ufs=0'if v.startswith('b5q-data-ufs=')else v for v in [*safe,'b5q-f=0']])}
     titles=['b5q macOS - Full selected features','b5q - Desktop + Touch / USB / BT / Wi-Fi',

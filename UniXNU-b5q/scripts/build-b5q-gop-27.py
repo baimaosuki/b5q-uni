@@ -191,6 +191,10 @@ for i in range(BASE, len(slots)):
         header += f' virtual __attribute__((deprecated("Unclassified ABI: never call from source"))) void opaque{i}();\n'
 header += f'}};\nstatic_assert(sizeof(IOMobileFramebufferLegacy)=={abi["instance_size"]},"Actual original instance extent");\n'
 (OUT / 'OriginalLegacyFramebufferABI.h').write_text(header)
+if '--abi-header-only' in sys.argv:
+    # Reuse the identical qualified ABI for the independent DP backend.
+    # No driver/core/GPU build is run in this mode.
+    raise SystemExit(0)
 print(run(['python3', ROOT / 'scripts/build-arm-driver.py', 'NativeLegacyDisplay'], text=True), end='')
 
 
@@ -244,6 +248,12 @@ for i, (name, word) in enumerate(compiled):
             f'Slot {i} ({name}) signed with IA, address diversity and the original diversity {slots[i][1]:#x}')
 family = range(*(int(x, 16) for x in abi['family_text'])) if 'family_text' in abi else range(0xfffffe000a27c000, 0xfffffe000a29a000)
 bindings = {name: int(va, 16) + slide for name, va in abi['bindings'].items()}
+# The external backend inherits these original-family entries; the primary
+# backend overrides them. Resolve from the same actual virtual slots so
+# both classes share one binding and no inferred private ABI is introduced.
+for i, (name, _) in enumerate(compiled):
+    if name.startswith('__ZN19NativeLegacyDisplay') and any(method in name for method in ('13newUserClient', '13setPowerState')):
+        bindings[name.replace('__ZN19NativeLegacyDisplay', '__ZN25IOMobileFramebufferLegacy', 1)] = slots[i][0] + slide
 owned, native = [], []
 for i, (name, _) in enumerate(compiled):
     if name.startswith(('__ZN19NativeLegacyDisplay', '__ZNK19NativeLegacyDisplay')):

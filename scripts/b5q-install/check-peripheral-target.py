@@ -121,6 +121,12 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
   for name,digest in media['objects'].items():
    path=Path(name);assert path.is_file()and hashlib.sha256(path.read_bytes()).hexdigest()==digest
    available.update(n for n,_,kind in object_symbols(path.read_bytes())if kind&1 and kind&0xe)
+ if 'b5q-dp=1'in tomllib.loads((ROOT/'UniXNU-b5q/board.toml').read_text())['payload']['kernel_args']:
+  dp=json.loads((ROOT/'artifacts/b5q-p5-work/target/report.json').read_text())
+  assert dp['target_compile_passed']and dp['scoped_link_imports_closed']
+  for name,digest in dp['actual_objects'].items():
+   path=Path(name);assert path.is_file()and hashlib.sha256(path.read_bytes()).hexdigest()==digest
+   available.update(n for n,_,kind in object_symbols(path.read_bytes())if kind&1 and kind&0xe)
  for stem,imports,exports in objects:
   missing=imports-available;results[stem]['unresolved']=sorted(missing-expected_core)
   results[stem]['expected_new_core_imports']=sorted(imports&expected_core)

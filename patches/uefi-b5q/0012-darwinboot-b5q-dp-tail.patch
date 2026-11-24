@@ -1,0 +1,138 @@
+diff --git a/DarwinBootPkg/Driver/B5qDpDma.h b/DarwinBootPkg/Driver/B5qDpDma.h
+new file mode 100644
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qDpDma.h
+@@ -0,0 +1,39 @@
++/* SPDX-License-Identifier: BSD-2-Clause-Patent */
++/* b5q original DT cont_splash/earlymap contract, explicitly selected by
++ * the owner. The producer validates real GOP/SSPP occupancy; no SMMU
++ * register access, mapping change or DisplayDxe patch is involved. */
++#ifndef B5Q_DP_DMA_H
++#define B5Q_DP_DMA_H
++#define B5Q_DP_DMA_PROTOCOL_GUID {0x16d34ec5,0x82cc,0x481e,{0xa7,0x66,0x31,0x9e,0x57,0x20,0x15,0xb5}}
++#define B5Q_DP_SPLASH_BASE 0xb8000000ULL
++#define B5Q_DP_SPLASH_END  0xbab00000ULL
++#define B5Q_DP_ALIGNMENT  0x200000ULL
++#define B5Q_DP_MIN_POOL   0x1000000ULL
++typedef struct {
++ UINT32 Version,PrimaryChecked,SidMask,Reserved;
++ UINT64 FrameBufferBase,FrameBufferBytes,PrimaryEnd,PoolBase,PoolBytes,Alignment,PrepareStatus,RetentionStatus;
++} B5Q_DP_DMA_STATE;
++STATIC_ASSERT(sizeof(B5Q_DP_DMA_STATE)==80,"DP DMA handoff ABI");
++STATIC inline BOOLEAN B5qDpPool(B5Q_DP_DMA_STATE *S,UINT64 Base,UINT64 Bytes,UINT64 PrimaryEnd)
++{
++ if(!S||Base<B5Q_DP_SPLASH_BASE||Base>=B5Q_DP_SPLASH_END||!Bytes||Bytes>B5Q_DP_SPLASH_END-Base||
++    PrimaryEnd<Base+Bytes||PrimaryEnd>B5Q_DP_SPLASH_END)return FALSE;
++ UINT64 Pool=(PrimaryEnd+B5Q_DP_ALIGNMENT-1)&~(B5Q_DP_ALIGNMENT-1);
++ if(Pool>B5Q_DP_SPLASH_END||B5Q_DP_SPLASH_END-Pool<B5Q_DP_MIN_POOL)return FALSE;
++ S->Version=1;S->PrimaryChecked=1;S->SidMask=0x00021c00;S->Reserved=0;
++ S->FrameBufferBase=Base;S->FrameBufferBytes=Bytes;S->PrimaryEnd=PrimaryEnd;
++ S->PoolBase=Pool;S->PoolBytes=B5Q_DP_SPLASH_END-Pool;S->Alignment=B5Q_DP_ALIGNMENT;
++ return TRUE;
++}
++STATIC inline BOOLEAN B5qDpPoolValid(CONST B5Q_DP_DMA_STATE *S)
++{
++ B5Q_DP_DMA_STATE Expected={0};
++ return S&&S->Version==1&&S->PrimaryChecked==1&&S->SidMask==0x00021c00&&!S->Reserved&&
++  !S->PrepareStatus&&!S->RetentionStatus&&B5qDpPool(&Expected,S->FrameBufferBase,S->FrameBufferBytes,S->PrimaryEnd)&&
++  S->PoolBase==Expected.PoolBase&&S->PoolBytes==Expected.PoolBytes&&S->Alignment==B5Q_DP_ALIGNMENT;
++}
++#ifdef EFIAPI
++typedef VOID(EFIAPI *B5Q_DP_DMA_PREPARE)(B5Q_DP_DMA_STATE *);
++typedef struct {UINT64 Revision;B5Q_DP_DMA_PREPARE Prepare;} B5Q_DP_DMA_PROTOCOL;
++#endif
++#endif
+diff --git a/DarwinBootPkg/Driver/B5qDpDmaLoader.h b/DarwinBootPkg/Driver/B5qDpDmaLoader.h
+new file mode 100644
+--- /dev/null
++++ b/DarwinBootPkg/Driver/B5qDpDmaLoader.h
+@@ -0,0 +1,51 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_DP_DMA_LOADER_H
++#define B5Q_DP_DMA_LOADER_H
++#include "B5qDpDma.h"
++typedef struct {UINTN Ready,State;} B5Q_DP_DMA_ADT;
++STATIC BOOLEAN FindDpDmaNode(CONST UINT8 *Data,UINTN Size,UINTN *At,UINTN Depth,UINTN Parent,B5Q_DP_DMA_ADT *Adt)
++{
++ if(Depth>32||*At>Size||Size-*At<8)return FALSE;
++ UINT32 Props=ReadUnaligned32((CONST UINT32*)(Data+*At)),Children=ReadUnaligned32((CONST UINT32*)(Data+*At+4));*At+=8;
++ CONST UINT8 *Node=NULL;UINTN Len=0;B5Q_DP_DMA_ADT Candidate={MAX_UINTN,MAX_UINTN};
++ for(UINT32 I=0;I<Props;I++) {
++  if(*At>Size||Size-*At<36)return FALSE;CONST CHAR8 *Name=(CONST CHAR8*)(Data+*At);
++  if(AsciiStrnLenS(Name,32)==32)return FALSE;
++  UINT32 N=ReadUnaligned32((CONST UINT32*)(Data+*At+32))&0x7fffffff;*At+=36;if(N>Size-*At)return FALSE;
++  if(AsciiStrCmp(Name,"name")==0){Node=Data+*At;Len=N;}
++  UINTN *Slot=NULL;UINTN Expected=0;
++  if(AsciiStrCmp(Name,"b5q-dp-dma-ready")==0){Slot=&Candidate.Ready;Expected=4;}
++  if(AsciiStrCmp(Name,"b5q-dp-dma-state")==0){Slot=&Candidate.State;Expected=sizeof(B5Q_DP_DMA_STATE);}
++  if(Slot){if(*Slot!=MAX_UINTN||N!=Expected||!IsZeroBuffer(Data+*At,N))return FALSE;*Slot=*At;}
++  *At+=N;if(*At>MAX_UINTN-3)return FALSE;*At=ALIGN_VALUE(*At,4);if(*At>Size)return FALSE;
++ }
++ UINTN Path=3;if(!Depth)Path=0;
++ if(Depth==1&&Parent==0&&Node&&Len==7&&CompareMem(Node,"chosen",7)==0)Path=1;
++ if(Candidate.Ready!=MAX_UINTN||Candidate.State!=MAX_UINTN){
++  if(Path!=1||Adt->Ready!=MAX_UINTN||Candidate.Ready==MAX_UINTN||Candidate.State==MAX_UINTN)return FALSE;*Adt=Candidate;
++ }
++ if(Children>(Size-*At)/8)return FALSE;
++ for(UINT32 I=0;I<Children;I++)if(!FindDpDmaNode(Data,Size,At,Depth+1,Path,Adt))return FALSE;
++ return TRUE;
++}
++STATIC VOID GetDpDmaResult(CONST CHAR8 *Args,B5Q_DP_DMA_STATE *State)
++{
++ ZeroMem(State,sizeof(*State));State->Version=1;State->PrepareStatus=State->RetentionStatus=EFI_NOT_STARTED;
++ UINT32 Enabled=0;if(!MediaUnsignedArg(Args,"b5q-dp=",&Enabled)||Enabled!=1)return;
++ EFI_GUID Guid=B5Q_DP_DMA_PROTOCOL_GUID;B5Q_DP_DMA_PROTOCOL *Protocol=NULL;
++ EFI_STATUS Status=gBS->LocateProtocol(&Guid,NULL,(VOID**)&Protocol);
++ if(!EFI_ERROR(Status)&&Protocol&&Protocol->Revision==1&&Protocol->Prepare){Protocol->Prepare(State);return;}
++ State->PrepareStatus=EFI_ERROR(Status)?Status:EFI_INCOMPATIBLE_VERSION;
++}
++STATIC VOID WriteDpDmaResult(UINT8 *Tree,CONST B5Q_DP_DMA_ADT *Adt,CONST B5Q_DP_DMA_STATE *Input,
++ CONST EFI_MEMORY_DESCRIPTOR *Map,UINTN Bytes,UINTN Stride,UINT64 Owned,UINT64 OwnedBytes)
++{
++ B5Q_DP_DMA_STATE State=*Input;UINT32 Ready=0;State.RetentionStatus=0;
++ if(B5qDpPoolValid(&State)){
++  BOOLEAN Retained=UsbDmaPagesRetained(Map,Bytes,Stride,State.PoolBase,State.PoolBytes)&&
++   (State.PoolBase+State.PoolBytes<=Owned||State.PoolBase>=Owned+OwnedBytes);
++  State.RetentionStatus=Retained?EFI_SUCCESS:EFI_COMPROMISED_DATA;Ready=Retained?1:0;
++ }else State.RetentionStatus=EFI_COMPROMISED_DATA;
++ CopyMem(Tree+Adt->Ready,&Ready,4);CopyMem(Tree+Adt->State,&State,sizeof(State));
++}
++#endif
+diff --git a/DarwinBootPkg/Driver/DarwinBoot.c b/DarwinBootPkg/Driver/DarwinBoot.c
+--- a/DarwinBootPkg/Driver/DarwinBoot.c
++++ b/DarwinBootPkg/Driver/DarwinBoot.c
+@@ -23,6 +23,7 @@
+ #include "B5qUsbDmaLoader.h"
+ #include "B5qPcieDmaLoader.h"
+ #include "B5qMediaDmaLoader.h"
++#include "B5qDpDmaLoader.h"
+ 
+ #define WINDOW_SIZE  SIZE_256MB
+ #define BLOCK_SIZE   SIZE_2MB
+@@ -835,6 +836,8 @@
+   B5Q_PCIE_DMA_RESULT              PcieResult;
+   B5Q_MEDIA_DMA_ADT                MediaAdt[2]={{MAX_UINTN,MAX_UINTN,0},{MAX_UINTN,MAX_UINTN,0}};
+   B5Q_MEDIA_DMA_RESULT             MediaResult[2];
++  B5Q_DP_DMA_ADT                   DpAdt={MAX_UINTN,MAX_UINTN};
++  B5Q_DP_DMA_STATE                 DpResult;
+   UINTN                           ExcludedCapacity;
+   UINTN                           ExcludedCount;
+   UINT8                           *Excluded;
+@@ -1065,6 +1068,9 @@
+     Status=EFI_COMPROMISED_DATA;goto Fail;
+   }
+   for(UINTN K=0;K<2;K++)if(MediaAdt[K].Ready!=MAX_UINTN)GetMediaDmaResult(CommandLine,(UINT32)K+1,MediaAdt[K].Features,&MediaResult[K]);
++  UINTN DpOffset=0;
++  if(!FindDpDmaNode((CONST UINT8 *)(UINTN)TreeAddress,TreeSize,&DpOffset,0,3,&DpAdt)||DpOffset!=TreeSize){Status=EFI_COMPROMISED_DATA;goto Fail;}
++  if(DpAdt.Ready!=MAX_UINTN)GetDpDmaResult(CommandLine,&DpResult);
+   Status = GetMap (&Map, &Capacity, &MapSize, &Key, &Stride);
+   if (EFI_ERROR (Status)) { goto Fail; }
+   Print (L"DARWINBOOT: ARM64 va=0x%lx pa=0x%lx args=0x%lx entry=0x%lx owned=0x%lx\n",
+@@ -1173,6 +1179,7 @@
+       WriteMediaDmaResult((UINT8 *)(UINTN)TreeAddress,&MediaAdt[K],&MediaResult[K],Map,MapSize,Stride,
+                          Address,WindowSize,ExcludedOffset!=MAX_UINTN,(UINT32)K+1);
+     }
++    if(DpAdt.Ready!=MAX_UINTN)WriteDpDmaResult((UINT8 *)(UINTN)TreeAddress,&DpAdt,&DpResult,Map,MapSize,Stride,Address,WindowSize);
+     Status = gBS->ExitBootServices (mImage, Key);
+     if (!EFI_ERROR (Status)) {
+       if (Excluded == NULL) {

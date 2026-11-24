@@ -20,6 +20,8 @@
 #include "LidClamshell.h"
 extern "C" bool b5q_battery_snapshot(B5qFuelGauge::Raw *,B5qMax77705::Cable *,uint8_t *);
 extern "C" void b5q_backlight_lid(bool);
+static uint32_t dpOnline;
+extern "C" void b5q_dp_lid_online(bool online){__atomic_store_n(&dpOnline,online?1u:0u,__ATOMIC_RELEASE);}
 extern kmod_info_t g_kernel_kmod_info;
 extern "C" void b5q_daily_static_init(void) __asm__("__GLOBAL__sub_I_B5qDaily.cpp");
 class B5qBattery:public IOPMPowerSource {
@@ -90,11 +92,21 @@ void lidWorker(void *,wait_result_t) {
     const uint32_t cfg=gpio[0];
     if(cfg&0x23c){IOLog("B5qLid: GPIO107 cfg=%08x is not input/GPIO; stopped\n",cfg);mapping->release();thread_terminate(current_thread());return;}
     B5qLid::State debounce;lid_clamshell publication=LID_CLAMSHELL_INIT;
+    bool externalBefore=false;
     IOLog("B5qLid: GPIO107 input active-low debounce=50ms cfg=%08x\n",cfg);
     for(;;) {
         debounce.sample((gpio[1]&1)!=0,milliseconds());
         IOPMrootDomain *root=IOService::getPMRootDomain();
         if(root&&debounce.ready) {
+            const bool external=__atomic_load_n(&dpOnline,__ATOMIC_ACQUIRE)!=0;
+            if(external!=externalBefore){
+                // Disable clamshell sleep only while a real external
+                // framebuffer is online. Physical lid/backlight state is
+                // still published, so the built-in panel becomes dark.
+                root->receivePowerNotification(external?kIOPMDisableClamshell:kIOPMEnableClamshell);
+                externalBefore=external;publication.told=-1;
+                IOLog("B5qLid: external=%u clamshell-sleep-disabled=%u\n",external,external);
+            }
             const auto message=lid_clamshell_step(&publication,debounce.stable);
             if(message!=LidClamshellNone) {
                 root->receivePowerNotification(message==LidClamshellClosed?

@@ -1,5 +1,5 @@
-name: b5q P4 complete media build
-run-name: b5q P4A+B+C / ${{ github.sha }}
+name: b5q P5 complete DisplayPort build
+run-name: b5q P5 DisplayPort / ${{ github.sha }}
 on:
   push:
     branches: [codex/b5q-p0-p5]
@@ -122,6 +122,7 @@ jobs:
           brew install --formula llvm lld mtools dtc bison ninja glslang shaderc spirv-tools pkgconf
           python3 scripts/b5q-install/install-ci-ipsw.py --out "$RUNNER_TEMP/b5q-host-tools"
           echo "$RUNNER_TEMP/b5q-host-tools" >> "$GITHUB_PATH"
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-native-command-line.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
@@ -326,6 +327,7 @@ jobs:
             UniXNU/out/b5q/**/runtime/generated.json
             UniXNU/out/b5q/**/runtime/media-runtime.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/media/**/*.json
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/displayport/**/*.json
             UniXNU/out/b5q/**/runtime/inputs.json
             UniXNU/out/b5q/**/package.manifest.json
             UniXNU/out/b5q/**/batch2-package.json
@@ -409,6 +411,8 @@ jobs:
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch"
           git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0009-b5q-media-dma.patch"
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0011-b5q-dp-splash-tail.patch"
+          git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch"
           git -C UniXNU apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch"
           git -C uefi-b5q submodule update --init --depth 1 Binaries
           UNIXNU_UEFI="$GITHUB_WORKSPACE/uefi-b5q" python3 UniXNU-b5q/scripts/check-b5q-uefi.py
@@ -441,6 +445,7 @@ jobs:
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/B5qHandoffDxe.efi
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/PcieDma.obj
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/MediaDma.obj
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/DpDma.obj
             ${{ runner.temp }}/b5q-firmware.sha256
           if-no-files-found: error
           retention-days: 14

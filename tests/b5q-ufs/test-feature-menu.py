@@ -10,8 +10,8 @@ assert entries['xnu']['args']==' '.join(args)
 for name,e in entries.items():
  values=e['args'].split();assert len(e['args'].encode())+1<=1024
  assert 'offline-mobile-graphics-client=1'not in values
- if name=='xnu':assert not any(v.startswith('b5q-f=')for v in values)
- else:assert 'b5q-f=0'in values
+ if name=='xnu':assert not any(v.startswith('b5q-f=')for v in values);assert 'b5q-dp=1'in values
+ else:assert 'b5q-dp=0'in values and 'b5q-f=0'in values
  if name in ['xnu','daily']:assert {'usb=1','wifi=5','bluetooth=1','b5q-data-ufs=2'}<=set(values)
  else:assert {'usb=0','wifi=0','bluetooth=0'}<=set(values)
  if name=='ram-fallback':assert 'b5q-data-ufs=0'in values and e['initrd']=='Payloads/scratch-data.img'
@@ -19,8 +19,8 @@ for name,e in entries.items():
 for n in range(990,1030):
  for default in [False,True]:
   try:value=line(['x'*n],default)
-  except ValueError:assert n>(1000 if default else 1023)
-  else:assert len(value)==n<=(1000 if default else 1023)
+  except ValueError:assert n>1023
+  else:assert len(value)==n<=1023
 for values in [['中'],['x\x00y']]:
  try:line(values)
  except ValueError:pass
