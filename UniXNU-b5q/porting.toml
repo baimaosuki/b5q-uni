@@ -2742,12 +2742,14 @@ command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
 result = "18 joint gate groups pass, preserving 43 P0 and 10 P1 groups; 122 arm64e target objects, 62 PAC producer/consumer contracts, zero unresolved/duplicate symbols and apps_smmu materializations. 14 original shared runtime regressions, 141 XNU patches and 8 firmware patch reconstructions pass. Native signing, full CI and returned image checks remain pending."
 
 [[area.evidence]]
+revision = "57058874364249242582c683a444f1d24404bcbb"
 kind = "host"
 reference = "reports/p2-p3-runtime-path-fix.json"
 command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
 result = "22 local groups PASS; selected macOS wireless publication after existing BT union views; actual previous successful CI image rejected by readback, new image not yet accepted."
 
 [[area.evidence]]
+revision = "57058874364249242582c683a444f1d24404bcbb"
 kind = "host"
 reference = "reports/p2-p3-final-images.json"
 command = "verify-p0-images.py --wireless; check-wireless-target-closure.py --ci; test-compiler-auth-metadata.py"
@@ -2757,15 +2759,68 @@ result = "CI45268304105SUCCESS and actual paired ESP/FAT/APFS/ADT/signature/runt
 id = "p4-stock-inputs"
 status = "planned"
 components = ["QcomIris"]
-paths = ["reports/p4-stock-inputs.json", "package/B5qFuelGauge.h"]
+paths = ["reports/p4-media-dma-source.json", "reports/p4-panel-lid-source.json", "package/B5qPanelCommand.h", "package/B5qLid.h", "reports/p4-stock-inputs.json", "package/B5qFuelGauge.h"]
 inputs = ["Offline Samsung F7310ZCS7EYF3 NON-HLOS FAT; original vendor tfa98xx.cnt and vpu30_4v.mbn; original b5q DTS and kernel modules"]
 configuration = ["Preparation only; no new P4 hardware path enabled or included in the P2/P3 CI snapshot"]
 procedure = ["Reconstruct exact original ADSP ELF container from bounded split pieces, verifying MDT header/hash-segment identity"]
-findings = ["2026-11-24 original MAX77705 read-only sample helper implemented: child address36, exact status/SOC/temp/voltage/current/capacity/cycle registers and DTS resistor5. No calibration/charging writes. ASan/UBSan exhaustively checks65536rawvoltage/current values, negative temperatures, absent battery and10read-failure atomic publication paths. This is a production helper only; IOPMPowerSource/transport and completeP4integration still pending.", "2026-11-24 preparation: 53 original ADSP/DTB split and metadata files found in offline NON-HLOS image. Source tool verifies sizes/ELF offsets/no overlap and MDT signed hash-segment identity before reconstructing containers. adsp.mbn SHA681ab07eea92eeb42ce1da35a866105851dd1dfb4f207c1c9fcb5f853be84380, adsp_dtb.mbn SHA13a0d68a97b0fb04a32c0b478d420ddec821b251e38cd656322b0acdd2cd2e90. These are derived containers with unchanged original segments, not an asserted signature-execution or hardware result. P4 driver/firmware integration remains pending."]
+findings = ["P4BSamsungTFA9878prepare/start/stop524ASanUBSanPASS for2revisions/2originalprofiles/faultstop/timeouts. NewI2C18FIFOtransport exactGCC170b0/170ac/votebit16,pins8/9/reset0/TDM126-129; retained104BUEFIaudioDMAconsumer. PinnedAudioProbe adaptedoutputonly,noCS35/noEL1SMMU/nounownedlowRAM; publishService checksactualreturn andDSPdisconnectclearsready. Target33objects inprogress; fullHAL/startup/CI/image pending; reports/p4-audio-board-source.json.", "P4current29objectrecipe100nonvtablecallbackPACsitesPASS againstsource-selectedmodulesandactualnativeXNUconsumers. ExplicitIOTimer73d8->7c11andsysctl0e2e->address/nameblendresigningproveninactualCIcore; wronggenericcallmatchingrejected.4basevtablescheckedseparately. Fullaudio/startup/CI/imagepending; reports/p4-callback-pac.json.", "P4BaudioTDMproductionencodingASanUBSanPASS6147capacityguardsand13ACDBboundsfaults; decoder16Q15->converter24in32Q27 matchedoriginalAGM. 29actualarm64eP4objects importsclosed/no duplicates/4basevtablesPAC/zeroapps_smmu PASS. Fullhardwareaudio/HAL/runtime/CI stillpending; reports/p4-audio-tdm-source.json.", "P4Baudioreachprotocol now derives exactprimaryTDMfrom originalSamsungACDB e243d8fc:28BstereoRXpayload at143876,4x32bits/slotmask3/delay1; source307MTKTrows and12TDMvariants resolved viaMTLU/MTDE/MTDO/POOL, not guesseddefaults. PinnedsharedencoderadaptedTDMsink0700100e+0800101b and24bitoutput,16bitsharedPCM. Fullaudiohardware/HAL/integrationstillincomplete; reports/p4-audio-tdm-source.json.", "P4media sources now reproducible as0009UEFI/0010DarwinBoot patches, all10baseline+media patches reconstruct exactsourcesPASS andactualEDK2targetcompilePASS. 27actualP4A/ADSP/Irisobjects have610closedimports,4basevtablesPACmatch,zeroEL1apps_smmu. Original2022userclient guardedmethod binding retained. Audio/fullcallback/startup/CI/image pending; notP4complete. reports/p4-media-dma-source.json and artifacts/b5q-p4-work/target/media-symbol-vtable-closure.json.", "P4B actual5096BPM3_01TFAcontainer discovered: physical34/35plusDSPpseudo0,defaultregister-onlyplans match independent decoder,all5096CRCcorruptions/truncations,RMWfaultstopASanUBSanPASS. VFSreader adds exact540934d3cnt whitelist,authenticates4realSamsungfiles,11failurecleanupand137BpartialreadtestsPASS; handleusespointerheap. Original resource XML1078confirmsPRIMARYTDM48k2ch24bit; no shengCS35reuse. Transport/fullAudioReach/HAL/CI remain incomplete; reports/p4-audio-container-source.json.", "P4C retained-video memory and pinned QcomIris adaptation implemented in working tree: excludes IrisMmu/Sm8550AppsSmmu/ArmSmmu4KLive entirely, uses original b5q nonsecure coherent SID1940/1947 pool and bounded input-every-QBUF/output-before-delivery copies. 128MiB extent allocator, exact client plane bounds and RSC completion failures. Target/tests being run; startup/runtime/P4B/CI/image remain incomplete, no P4 delivery. Evidence reports/p4-video-source.json.", "P4mediaUEFIproducer+DarwinBootconsumerimplementedusingoriginalIORT LPASSARID03000001/0e andVIDEO03000000/05 only; independentReservedWBIS2MiBaudio/128MiBvideo pools and32pagetables. LoaderfinalEFIdescriptorretentiongates104Bstates; nofake ready, no Display/secureVideo attachments. ActualEDK2MediaDma+DarwinBoottargetPASS; ASanUBSan33280pages+statefaults+loadertruncation/retention/HALfailuresPASS withUSBregression. NoP4firmwareCI/OSconsumer/audio/video integration yet. Sourcehashes reports/p4-media-dma-source.json.", "P4Bsource preparation: exact6c42e10ADSP transport retained with b5q59b4000length, staged-onlyb5qfirmware paths, RPMhcompletiontimeoutfailure and stage diagnostics. New VFS media reader accepts only3originalSamsungexactsize/SHA256files,no modem/partitionfallback; canonicaladsp681ab07e/dtb13a0d68a/vpu4a3b9ed9. Target/runtimeintegration/AudioReachSamsungTDM/amplifier/UEFIdomain/HALremaining; not workingaudio claim. reports/p4-panel-lid-source.json includes hashes.", "P4A targetcompilePASS 3boardobjects,0missingimports,545basevtablePACslots+3callbackPACcontracts checked against actualP1core (typedtimerAction73d8 authenticated/resigned7c11 by IOTimerEventSource::init/invokeAction),0apps_smmumaterializations. ProductionSE8initializer16threadrace+16atomicreadfaults ASanUBSanPASS; validonlysnapshotpublication and no chargereg writes. OriginalF7310merged5overlays normalcandela3729B table all match independentlycollectedruntimeDTB. Backlight/battery/lid services implemented but P4B/P4C/startup/CI/image stillpending. No P4image or hardwaresuccess.", "P4A helpers ASan/UBSanPASS4096rawlevels/completion/errors/timeout/restore andGPIO107debounce. Added actual IOPMPowerSource publisher, sharedSE8 gauge+charger snapshot, arm64e-safe backlight metaclass override with no vptr copying, native normal256entrySamsungcandela table raw4..2047/nits1..500. Service/target/PAC/integrationpending; not P4 completion. Evidence reports/p4-panel-lid-source.json includes source hashes; no hardware success claimed.", "2026-11-24 P4A production GPIO107 active-low50ms debounce and Samsung DSI FIFO DCS51 helper added. Register offsets/packets checked against original msm_drm.ko1403c0..14055c and pinned Samsung source; no command DMA/SMMU memory fetch. Source evidence reports/p4-panel-lid-source.json includes all input hashes/disassembly. Service integration, target and tests pending; no P4 image or hardware claim.", "2026-11-24 original MAX77705 read-only sample helper implemented: child address36, exact status/SOC/temp/voltage/current/capacity/cycle registers and DTS resistor5. No calibration/charging writes. ASan/UBSan exhaustively checks65536rawvoltage/current values, negative temperatures, absent battery and10read-failure atomic publication paths. This is a production helper only; IOPMPowerSource/transport and completeP4integration still pending.", "2026-11-24 preparation: 53 original ADSP/DTB split and metadata files found in offline NON-HLOS image. Source tool verifies sizes/ELF offsets/no overlap and MDT signed hash-segment identity before reconstructing containers. adsp.mbn SHA681ab07eea92eeb42ce1da35a866105851dd1dfb4f207c1c9fcb5f853be84380, adsp_dtb.mbn SHA13a0d68a97b0fb04a32c0b478d420ddec821b251e38cd656322b0acdd2cd2e90. These are derived containers with unchanged original segments, not an asserted signature-execution or hardware result. P4 driver/firmware integration remains pending."]
 completion = ["Complete P4A/B/C implementations, production tests, target/PAC/MMIO, full CI and actual images before P4 delivery"]
-limits = ["P4 is not implemented or delivered; source input preparation only"]
-next_action = ["Finish P2/P3 CI and returned image acceptance, then P4A/B/C implementation"]
+limits = ["P4 local source/production/host/target/PAC integration complete; CI/image/hardware remain pending"]
+next_action = ["Build and verify the independent P4 firmware/kernel/HAL and actual800MiBESP"]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p4-audio-board-source.json"
+result = "Original TFA/GCC/TLMM input hashes, 524 production lifecycle tests, actual board transport/retained DMA/shared service implementation; full audio HAL/runtime/CI remains incomplete."
+
+[[area.evidence]]
+revision = "d0d106f95c9aba22bc6e7ea4006ab7f45581faf0"
+kind = "host"
+reference = "reports/p4-callback-pac.json"
+command = "python3 scripts/b5q-install/check-media-callback-pac.py"
+result = "100 current non-vtable callback signatures verified against source-selected actual consumers, including native timer/sysctl resigning; full P4 audio/runtime/CI remains pending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p4-audio-tdm-source.json"
+result = "Exact original ACDB table relationships, tagged stereo payload, source revisions and numeric TDM settings; full audio is not yet complete."
+
 [[area.evidence]]
 kind = "source"
 reference = "reports/p4-stock-inputs.json"
 result = "Original offline NON-HLOS parent SHA and all extracted piece/container hashes; exact MDT header/hash equality PASS. Tool refuses block devices; no phone access."
+
+[[area]]
+id = "p5-displayport"
+status = "planned"
+components = []
+paths = ["reports/p5-source-inputs.json"]
+inputs = ["Original F7310ZCS7EYF3 merged b5q DT; original msm_drm.ko/pdic_max77705.ko; pinned Samsung display-driver source a1fdd086620bc0e2f767323c2853bcc9424e3087"]
+configuration = ["No P5 hardware path selected or included in P2/P3 CI"]
+procedure = ["Compare original DP AUX/link/PHY/clock/PDIC evidence before implementation"]
+findings = ["P5 original source inputs retained with parent hashes: DP ae90000/AUX ae90200/Link ae90400/pixel ae91000, combo88e8000,PHY88eaa00,PLL88ea000 and tx lanes88ea200/88ea600. Original pdic symbols f204configure/11780receive/1215cenable/c890discovermode/116b8selectpin identified; original msm_drm dp_aux_transfer1ef38/catalog17c1c.98pinnedSamsungTFA+DPsourcefiles downloaded with hashes. This is input preparation, not P5 implementation or external-display hardware evidence."]
+completion = ["Complete PD/PHY/AUX/link/clock/DPU/IOMFB implementation, all local gates, CI and returned image before a separate P5 ESP delivery"]
+limits = ["P5 implementation, CI and image outstanding; physical connector DP routing unqualified"]
+next_action = ["Finish P2/P3 and P4 while retaining original P5 source inputs"]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p5-source-inputs.json"
+result = "Original DT/module hashes, function offsets and pinned Samsung source identities; source inputs only"
+
+[[area]]
+id = "p4-production-integration"
+status = "implemented"
+components = ["DarwinBoot", "GopFramebuffer"]
+paths = ["scripts/b5q_media.py", "package/B5qFeatures.h", "package/LegacyDisplayProbe.cpp", "scripts/build-b5q-media-runtime.py"]
+inputs = ["Pinned sheng6c42e10; original F7310ZCS7EYF3 files and source hashes in reports/p4-integration.json"]
+configuration = ["Feature-mask63; explicit subsystem arguments and b5q-f menu override; firmware readiness remains independently observed"]
+procedure = ["Compile exact production source recipe, host fault tests, actual PAC/ABI, baseline regression, then CI and image readback"]
+completion = ["All local P4A/B/C gates plus actual CI firmware/kernel/HAL/ESP return acceptance"]
+limits = ["P4 CI/image and physical hardware validation pending; no image delivered"]
+next_action = ["Finish local gates then build and verify the independent P4 ESP"]
+findings = ["Local17P4groups/22P2P3baselinegroups/35productionarm64eobjects/6vtablePACgroups/105callbackcontracts/10firmwarepatches/142XNUpatches/4menuentries PASS. ActualEFIproducer16failurepaths and retainedpool lifetime verified. NativeAppleHALlink/sign, fullCI and actualimageacceptance remain pending; noP4delivery or hardwareclaim.", "P4 source-qualified media recipe and display-after worker integrated; loader must use same ADT feature mask as XNU or it never prepares DMA domains. Corrected selection retains explicit subsystem overrides and menu safe disable. Runtime extension preserves Data/GPU entries and original trust modules. Full CI and actual image acceptance are still pending."]
+[[area.evidence]]
+revision = "d0d106f95c9aba22bc6e7ea4006ab7f45581faf0"
+kind = "host"
+reference = "reports/p4-integration.json"
+command = "python3 tests/b5q-ufs/test-media-loader.py"
+result = "ASan/UBSan actual media loader/USB regressions and256kind-mask cases pass; hardware qualification pending. Input/source hashes are in the referenced receipt."
