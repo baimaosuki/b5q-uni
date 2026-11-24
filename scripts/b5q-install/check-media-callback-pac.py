@@ -1,14 +1,23 @@
 #!/usr/bin/env python3
 """Match every defined P4 callback with its source-selected authenticated caller."""
-import bisect,collections,hashlib,importlib.util,json,re,subprocess,sys
+import argparse,bisect,collections,hashlib,importlib.util,json,re,subprocess,sys
 from pathlib import Path
 from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
 R=Path(__file__).resolve().parents[2];sys.path[:0]=[str(R/'UniXNU-b5q/scripts'),str(R/'sources/UniXNU/kits/XnuPrelink')]
 from kc_image import Image
 s=importlib.util.spec_from_file_location('pac',R/'scripts/b5q-install/check-proctop-pac.py');pac=importlib.util.module_from_spec(s);s.loader.exec_module(pac)
-out=R/'artifacts/b5q-p4-work/target';receipt=json.loads((out/'report.json').read_text());assert receipt['passed']
-paths=[Path(p)for p in receipt['objects']]
-baseline=R/'artifacts/b5q-p3-work/ci45261064321'
+parser=argparse.ArgumentParser();parser.add_argument('--ci',type=Path);parser.add_argument('--out',type=Path);a=parser.parse_args()
+out=R/'artifacts/b5q-p4-work/target'
+if a.ci:
+    manifest,=a.ci.rglob('media-build.json');out=manifest.parent;build=json.loads(manifest.read_text());objects={}
+    for name,digest in build['objects'].items():
+        path=out/Path(name).name;assert path.is_file()and hashlib.sha256(path.read_bytes()).hexdigest()==digest
+        objects[str(path)]=digest
+    usb,=a.ci.rglob('board-input/B5qUsbBoard.o');objects[str(usb)]=hashlib.sha256(usb.read_bytes()).hexdigest()
+    receipt=dict(passed=True,objects=objects)
+else:receipt=json.loads((out/'report.json').read_text())
+assert receipt['passed'];paths=[Path(p)for p in receipt['objects']]
+baseline=a.ci or R/'artifacts/b5q-p3-work/ci45261064321'
 arm,=baseline.rglob('ArmCpu.o');geni,=baseline.rglob('GeniI2c.o');native,=baseline.rglob('mach.development.bcm2837.unstripped.noctf')
 allpaths=paths+[arm,geni];scans={p.name:pac.scan(p)for p in allpaths};assert len(scans)==len(allpaths)
 for p in paths:assert hashlib.sha256(p.read_bytes()).hexdigest()==receipt['objects'][str(p)]
@@ -112,5 +121,5 @@ assert len(contracts)>=100,'Missing selected module callbacks'
 result=dict(passed=True,hardware_verified=False,contracts=contracts,objects=receipt['objects'],
     baseline_objects={p.name:hashlib.sha256(p.read_bytes()).hexdigest()for p in [arm,geni,native]},
     scope='All defined non-vtable P4 callbacks in current35object recipe; 6 base vtables checked separately; full audio/runtime/CI remains pending')
-(out/'media-callback-pac.json').write_text(json.dumps(result,indent=2)+'\n')
+(a.out or out/'media-callback-pac.json').write_text(json.dumps(result,indent=2)+'\n')
 print('PASS',len(contracts),'actual P4callback signatures matched source-selected authenticated callers, including native thread/sysctl and timer resigning')

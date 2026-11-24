@@ -2831,3 +2831,22 @@ revision = "828009313241637d9c17a67dbc65e34518c05557"
 reference = "reports/p4-firmware-gitapply-fix.json"
 command = "python3 scripts/b5q-install/check-stage-firmware-inputs.py --media --out artifacts/b5q-p4-work/firmware-gitapply.json"
 result = "Exact git apply reconstruction10patchesPASS; firstCI firmware failedmissingnewfilemode metadata, fixed without kernel/GPU/Data rebuild. ActualfirmwareCIpending."
+
+[[area]]
+id = "p4-returned-image-acceptance"
+status = "implemented"
+components = ["DarwinBoot", "GopFramebuffer"]
+paths = ["reports/p4-final-images.json", "../scripts/b5q-install/verify-p0-images.py"]
+inputs = ["CI45295645295 kernel/HAL/ESP and CI45296602477 firmware; actual hashes in p4-final-images.json"]
+configuration = ["Four menu entries; P4 feature-mask63; safe/RAM mask0; original Data/GPU retained"]
+procedure = ["Verify actual returned35mediaobjects/105callbackPAC/6vtablegroups, wireless122objects/62callbacks, zeroEL1apps_smmu, signed/trustedaddon, pairedloader/FV,4KnFAT/APFS/ADT/policies; independent full second image readback"]
+findings = ["Both CI runs SUCCESS. Actual P4 ESP838860800B SHAfb874c56a44d2c8632609a2719ba2bc2c18d816ea263a14baf406db2676960ba; boot19120128B SHA32727e914f0b2741b2b5731ea4fa19c3b671973990bafc5dd0740b6f0dbe811f. Second full readback PASS with same bytes/hashes. NativeAppleclang weak PAC metadata explicitly distinguished from real relocations, three malicious mutations rejected. Idempotent verifier selects runtime/media-runtime.json, not its own prior acceptance report. Physical qualification remains pending."]
+completion = ["P4 host/build/returned-image gates completed; retained for requested combined three-image delivery"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; no complete P5 or physical P4 claim"]
+next_action = ["Finish P5 and overall three-image delivery gate"]
+[[area.evidence]]
+kind = "host"
+revision = "9b0653f1894d3b144acfb694dd233342890c6c5b"
+reference = "reports/p4-final-images.json"
+command = "verify-p0-images.py --media; check-media-target-closure.py --ci; test-compiler-auth-metadata.py"
+result = "Actual returned image and independent full second readback PASS; no new core/GPU/Data build or phone access."

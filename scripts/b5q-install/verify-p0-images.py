@@ -15,6 +15,7 @@ def main():
  for key in ['esp','ci','fd','out']:p.add_argument('--'+key,type=Path,required=True)
  p.add_argument('--board',type=Path,default=R/'UniXNU-b5q/board.toml',help='Source configuration for this exact image revision')
  p.add_argument('--wireless',action='store_true',help='Also verify P2/P3 runtime against the accepted GPU addon')
+ p.add_argument('--media',action='store_true',help='Verify P4 menu, media HAL, firmware and ADT slots')
  a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
  fs=load(R/'scripts/b5q-install/package-usb-dma-esp.py');fs.image_format(a.esp)
  run('fsck.fat','-n',a.esp)
@@ -28,7 +29,10 @@ def main():
   assert members==expected['members'] and sha(a.esp)==expected['esp']['sha256']
   boot=t/'files/EFI/UniXNU';assets=boot/'Payloads';board=tomllib.loads(a.board.read_text())
   menu=tomllib.loads((boot/'unixnu.toml').read_text());entries={e['id']:e for e in menu['entry']if e['type']=='xnu'}
-  assert menu['boot']['default']=='xnu' and set(entries)=={'xnu','ram-fallback'}
+  assert menu['boot']['default']=='xnu' and set(entries)==({'xnu','daily','safe','ram-fallback'}if a.media else{'xnu','ram-fallback'})
+  if a.media:
+   sys.path.insert(0,str(R/'UniXNU-b5q/scripts'));from b5q_menu import profiles as menu_profiles
+   assert list(entries.values())==menu_profiles(board['payload']['kernel_args'])
   assert entries['xnu']['args']==' '.join(board['payload']['kernel_args']) and len(entries['xnu']['args'].encode())<=1000
   assert 'b5q-data-ufs=2' in entries['xnu']['args'].split() and 'initrd' not in entries['xnu']
   assert 'offline-mobile-graphics-client' not in entries['xnu']['args']
@@ -38,16 +42,21 @@ def main():
   for name,entry in entries.items():
    kernel=boot/entry['path'];nodes=fs.adt_nodes(kernel.with_suffix('.macho.adt').read_bytes());chosen=nodes['/chosen'][2]
    assert nodes['/chosen/asmb'][2]['lp-sip0']==struct.pack('<Q',2)
-   assert chosen['darwinboot-memory-size']==struct.pack('<Q',(6 if name=='xnu' else 4)<<30)
+   assert chosen['darwinboot-memory-size']==struct.pack('<Q',(4 if name=='ram-fallback' else 6)<<30)
    assert chosen['text-fixups']==b''.join(v.encode()+b'\0'for v in board['payload']['text_fixups']) and len(board['payload']['text_fixups'])==2
    assert sum('cluster-type'in v[2]for k,v in nodes.items()if k.startswith('/cpus/'))==8
    maps=nodes['/chosen/memory-map'][2]
-   if name=='xnu':
+   if name!='ram-fallback':
     assert 'RAMDisk'not in maps and 'PackedRAMDisk'not in maps
     assert len(chosen['darwinboot-memory-excluded'])==128*16 and len(chosen['darwinboot-memory-outside'])==16*16
    else:assert 'PackedRAMDisk'in maps and 'darwinboot-memory-outside'not in chosen
+   if a.media:
+    assert chosen['b5q-feature-mask']==struct.pack('<I',0 if name=='ram-fallback' else 63)
+    for subsystem in ['audio','video']:
+     assert chosen['b5q-'+subsystem+'-dma-ready']==bytes(4)
+     assert chosen['b5q-'+subsystem+'-dma-state']==bytes(104)
    profiles[name]=dict(kernel_sha256=sha(kernel),args_bytes=len(entry['args'].encode()),lp_sip0_hex=chosen.get('lp-sip0',nodes['/chosen/asmb'][2]['lp-sip0']).hex(),RAM_seed_loaded='initrd'in entry)
-  assert profiles['xnu']['kernel_sha256']==profiles['ram-fallback']['kernel_sha256']
+  assert len({v['kernel_sha256']for v in profiles.values()})==1
   kernel=assets/'kernel.macho';raw=kernel.read_bytes();outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1]);symbols={n:v for v,names in core.symbols().items()for n in names}
   required=['_native_ram_block_provider_seed','_native_ram_block_volume_seed','_native_ram_block_volume_device','_b5q_power_start','_sheng_cpu_idle_mach','_ml_outside_memory_pages','_ml_outside_memory_refused','_native_touch_recovered','_native_touch_set_sink']
   assert all(n in symbols for n in required),[n for n in required if n not in symbols]
@@ -58,7 +67,7 @@ def main():
    assert marker in raw,marker
   run(sys.executable,R/'scripts/b5q-install/check-stage-linked-PAC.py','--kernel',kernel,'--out',a.out/'linked-PAC.json')
   assert sha(assets/'scratch-data.img')=='d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70'
-  if a.wireless:
+  if a.wireless or a.media:
    from uuid import UUID
    import plistlib
    addon=load(R/'UniXNU/scripts/addon-add-dir.py')
@@ -98,10 +107,37 @@ def main():
    required_wireless=['_b5q_wifi_probe','_b5q_bluetooth_probe','_nw_wifi_start','_b5q_wcn_power_get','_nwk_b5q_ath11k_pci_init']
    assert all(n in symbols for n in required_wireless),[n for n in required_wireless if n not in symbols]
    for marker in [b'B5qWireless: bluetooth library=',b'B5qWireless: wifi launchd=',b'B5qWifi',b'B5qBluetooth: transport=FIFO']:assert marker in raw,marker
-   for entry in entries.values():assert {'wifi=5','bluetooth=1'}<=set(entry['args'].split())
+   for name,entry in entries.items():
+    assert ({'wifi=0','bluetooth=0','usb=0'}if a.media and name in ('safe','ram-fallback')else{'wifi=5','bluetooth=1'})<=set(entry['args'].split())
    for entry in entries.values():
     chosen=fs.adt_nodes((boot/entry['path']).with_suffix('.macho.adt').read_bytes())['/chosen'][2]
     assert chosen['b5q-pcie-dma-ready']==bytes(4)and chosen['b5q-pcie-dma-state']==bytes(88)
+   if a.media:
+    # Read the build's producer manifest, never an acceptance report from an
+    # earlier run of this verifier in the same downloaded artifact tree.
+    media_path,=a.ci.rglob('runtime/media-runtime.json');media=json.loads(media_path.read_text())
+    assert media['passed']and media['preserved_addon_entries']==50 and media['new_addon_entries']==7
+    assert sha(assets/'kernel.macho.gpuaddon')==media['addon_sha256']
+    assert sha(assets/'kernel.macho.trustcache')==media['trust_sha256']
+    previous_wireless=t/'p2p3-addon'
+    run('mcopy','-i',R/'artifacts/b5q-esp-p2-p3/esp.img','::/EFI/UniXNU/Payloads/kernel.macho.gpuaddon',previous_wireless)
+    previous_content=addon.read(previous_wireless)
+    assert len(previous_content)==50 and all(content.get(n)==(m,b)for n,m,b in previous_content)
+    stock=json.loads((R/'UniXNU-b5q/reports/p4-runtime-firmware.json').read_text())
+    assert media['firmware']==stock['files']
+    for name,item in stock['files'].items():
+     mode,body=content['firmware/qcom/sm8550/b5q/'+name]
+     assert mode==0o644 and len(body)==item['bytes']and hashlib.sha256(body).hexdigest()==item['sha256']
+    hal='Library/Audio/Plug-Ins/HAL/B5qAudio.driver/'
+    for name,digest in media['audio']['files'].items():
+     mode,body=content[hal+name];assert hashlib.sha256(body).hexdigest()==digest
+    assert media['audio']['cdhash']in signed[hal+'Contents/MacOS/B5qAudio']
+    required_media=['_b5q_daily_probe','_b5q_backlight_probe','_sheng_audio_probe','_sheng_video_probe','_sheng_adsp_probe']
+    assert all(n in symbols for n in required_media),[n for n in required_media if n not in symbols]
+    for marker in [b'B5qBattery:',b'B5qLid:',b'B5qBacklight:',b'B5qAudio',b'B5qVideo:']:
+     assert marker in raw,marker
+    media_result=dict(passed=True,previous_wireless_entries_preserved=50,original_firmware_files=stock['files'],audio_cdhash=media['audio']['cdhash'],ADT_media_slots_zero=True,menu_profile_selection=True,hardware_verified=False)
+    (a.out/'media-runtime.json').write_text(json.dumps(media_result,indent=2)+'\n')
    wireless_result=dict(passed=True,baseline_addon_files_unchanged=len(preserved),new_signed_and_trusted=signed,stock_firmware_files=len(manifest['files']),native_bluetoothd_patch_sites=len(patch['patches']),PCIe_ADT_slots_initially_zero=True,hardware_verified=False)
    (a.out/'wireless-runtime.json').write_text(json.dumps(wireless_result,indent=2)+'\n')
   else:assert sha(assets/'kernel.macho.gpuaddon')=='b68e1164f7dd0ff822f20e116e97adc4606926a4204fc25eaa5241c2a966d82d'
@@ -117,7 +153,7 @@ def main():
    stream.truncate(size)
    for offset,body in extents:stream.seek(offset);stream.write(body)
   run(sys.executable,R/'scripts/b5q-install/verify-apfs-init-readback.py','--image',recovery,'--trust-cache',assets/'kernel.macho.trustcache','--out',a.out/'APFS.json')
-  result=dict(passed=True,stage='P2+P3'if a.wireless else'P0+P1',ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),FD=dict(bytes=a.fd.stat().st_size,sha256=sha(a.fd)),profiles=profiles,required_symbols={n:hex(symbols[n])for n in required},FAT_members=len(members),all_real_link_inputs_resolved=True,Data_GPU_unchanged=True,loader_matches_actual_rebuilt_FD=True,hardware_qualification='HOST_VERIFIED_PENDING_HARDWARE',physical_Data_accessed=False)
+  result=dict(passed=True,stage='P4'if a.media else'P2+P3'if a.wireless else'P0+P1',ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),FD=dict(bytes=a.fd.stat().st_size,sha256=sha(a.fd)),profiles=profiles,required_symbols={n:hex(symbols[n])for n in required},FAT_members=len(members),all_real_link_inputs_resolved=True,Data_GPU_unchanged=True,loader_matches_actual_rebuilt_FD=True,hardware_qualification='HOST_VERIFIED_PENDING_HARDWARE',physical_Data_accessed=False)
   (a.out/'images.json').write_text(json.dumps(result,indent=2)+'\n')
   print(json.dumps(result,indent=2))
 if __name__=='__main__':main()

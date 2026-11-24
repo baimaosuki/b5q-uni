@@ -35,4 +35,14 @@ with tempfile.TemporaryDirectory(prefix='b5q-auth-metadata-')as td:
   f=Path(td)/'changed.o';f.write_bytes(changed)
   try:classify(f,pac.scan(f));raise RuntimeError('accepted '+label)
   except AssertionError:pass
-print('PASS real Xcode object:2 unused compiler PAC declarations;3 mutations rejected; no weak runtime import exemption')
+media=R/'scripts/b5q-install/check-media-target-closure.py'
+other=[v for v in ast.parse(media.read_text()).body if isinstance(v,ast.FunctionDef)and v.name=='unused_auth_declarations']
+assert len(other)==1 and ast.dump(functions[0],include_attributes=False)==ast.dump(other[0],include_attributes=False)
+ci=R/'artifacts/b5q-p4-work/ci45295645295'
+manifest,=ci.rglob('media-build.json')
+import json
+build=json.loads(manifest.read_text());total=0
+for name in build['objects']:
+ f=manifest.parent/Path(name).name;total+=len(classify(f,pac.scan(f)))
+assert total==10,total
+print('PASS Xcode PAC metadata:2wireless+10media declarations (7 unique targets);3 negative mutations; identical strict classifier; no weak runtime exemption')
