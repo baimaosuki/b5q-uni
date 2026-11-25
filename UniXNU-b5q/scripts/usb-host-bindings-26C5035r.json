@@ -181,6 +181,7 @@
     "__ZN12AppleUSBXHCIC2EPK11OSMetaClass": "0xfffffff00b454978",
     "__ZN12AppleUSBXHCID2Ev": "0xfffffff00b4549e8",
     "__ZNK12AppleUSBXHCI11getWorkLoopEv": "0xfffffff00b24ac50",
-    "__ZNK12AppleUSBXHCI12handleIsOpenEPK9IOService": "0xfffffff00b24cb50"
+    "__ZNK12AppleUSBXHCI12handleIsOpenEPK9IOService": "0xfffffff00b24cb50",
+    "__ZTV12AppleUSBXHCI": "0xfffffff008a0dc60"
   }
 }

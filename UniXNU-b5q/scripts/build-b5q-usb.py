@@ -76,6 +76,10 @@ def family_bindings(raw,abi,cls,family):
  entries=object_vtable(raw,found,'__ZTV'+str(len(cls))+cls,len(slots)+1)
  require(all(entries[:len(slots)])and not entries[len(slots)],cls+'vtable length')
  slide=int(abi['collection_slide'],16);result={n:int(v,16)+slide for n,v in abi['bindings'].items()}
+ # Apple Clang can authenticate a qualified super call through the native
+ # base vtable. The fixture records its first slot, sixteen bytes after ZTV.
+ # Bind data directly, exactly as gMetaClass; never synthesize a fake vtable.
+ result['__ZTV'+family]=int(abi['vtable'],16)-16+slide
  for i,(name,word)in enumerate(entries[:len(slots)]):
   require(word>>63 and word>>48&1 and word>>49&3==0 and word>>32&0xffff==slots[i][1],f'{cls} diversity slot{i}')
   if family in name:

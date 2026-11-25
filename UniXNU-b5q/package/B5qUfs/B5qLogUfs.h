@@ -34,6 +34,9 @@ static uint64_t nabu_log_urgent_end=0;
  * Sleepable callers wait for this exact console prefix to reach stable media.
  * Interrupt/disabled-preemption callers request only; no unsafe blocking. */
 extern "C" unsigned b5q_log_sync(unsigned milliseconds) {
+  // An early USB callback must not shorten the logger's volume-open retry
+  // pacing. Urgency belongs only to an already verified writer.
+  if(nabu_log_writer_state!=2 || __atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE))return 3;
   struct nb_log_snapshot snapshot;
   if(!nabu_capture_snapshot(&snapshot))return 3;
   uint64_t wanted=__atomic_load_n(&nabu_log_urgent_end,__ATOMIC_RELAXED);

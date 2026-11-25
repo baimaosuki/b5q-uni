@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_GATES_PASS_CI_PENDING",
+  "status": "LOCAL_GATES_PASS_FINAL_CI_PENDING",
   "hardware_verified": false,
   "inputs": {
     "UniXNU-b5q/package/B5qBtFifo.c": "a9f2acb4103e070a3f70f02c5eeeb625c34f5adcbac3bf5541ace4c0181629d9",
@@ -76,10 +76,12 @@
     "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "9c185561a62971beb5ff3dad6b5ce2c3630bd3e78dba4af864a03e52c59d2448",
     "artifacts/b5q-review7-work/before/UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/B5qPcieDma.h": "00fbcf81181123e1f9161c4b2887685659c9d4fbce57051547c291b6d208ade2"
   },
-  "local_checks": 27,
-  "local_gate_sha256": "9d16f1d98ab4244c21b86f660b17c8cfaff41412aab3c8af7e814f3839a3c241",
+  "local_checks": 29,
+  "local_gate_sha256": "717ba1ed45ee89e1f8854334a0c116d0ae959017daacaa31d5b07c6ec1b08f02",
   "local_checks_names": [
-    "complete-P0-P4-retained-regressions",
+    "Bluetooth-provider",
+    "wireless-mutex-provider",
+    "pre-ci-all",
     "pre-ci-v33b",
     "touch-p0",
     "v33d-dma",
@@ -121,5 +123,19 @@
     "64MiB_retention_argument_RVA": "0x3d48",
     "old32MiB_loader_rejected": true
   },
-  "validation_note": "Supplemental returnedchecker reads actual finalPE because firmware uploads no DarwinBoot.obj; equalitybranch/retentioncall andnegativeoldloader checked. Allruntime inputs identical to CI37493ec."
+  "validation_note": "Supplemental returnedchecker reads actual finalPE because firmware uploads no DarwinBoot.obj; equalitybranch/retentioncall andnegativeoldloader checked. Allruntime inputs identical to CI37493ec.",
+  "first_CI_failure": {
+    "run": 45618191537,
+    "kernel": "failure",
+    "firmware": "success",
+    "only_missing_symbol": "__ZTV12AppleUSBXHCI",
+    "referenced_by": "QcomDwc3Xhci::setPowerState",
+    "log_sha256": "864bd21d1ea568ce2b387923ecb7c0e758744e5c34fbecf6c157bc452aaebe86",
+    "native_vtable_original": "0xfffffe0008a0dc60",
+    "fixture_first_slot": "0xfffffe0008a0dc70",
+    "native_vtable_translated": "0xfffffff008a0dc60",
+    "fix": "Originaldata binding in dual/hostinputs and productionresolver; no fakevtable/PACdisable",
+    "cache": "Completedcompilationprogress retained byCI"
+  },
+  "log_ready_guard": "Urgent requests acceptedonlywriterstate2aftervolume/token/slotvalidation; state0/1/3cannotshortenstartupbackoff orwrite. Productionnegativecases added."
 }

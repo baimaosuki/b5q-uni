@@ -120,6 +120,11 @@ int main(int argc,char**argv){
  nabu_capture_append(text.data(),text.size());
  nabu_capture_lock=1;nabu_capture_append("DROP",4);nabu_capture_lock=0;
  nb_log_snapshot snap;assert(nabu_capture_snapshot(&snap)&&snap.lost==4&&snap.length==NB_LOG_CAPACITY);
+ // Before the volume/token/slot gates finish, a diagnostic cannot request
+ // urgency or speed up the bounded startup retries.
+ const auto urgentBefore=nabu_log_urgent_end;
+ for(unsigned state:{0u,1u,3u}){nabu_log_writer_state=state;assert(b5q_log_sync(750)==3&&nabu_log_urgent_end==urgentBefore&&!writes&&!syncs);}
+ nabu_log_writer_state=0;
  try{nabuLogStart();}catch(int){}
  runningWriter=false;
  if(negative){assert(!writes&&!syncs&&nabu_log_writer_failures==1);fclose(media);return 0;}
