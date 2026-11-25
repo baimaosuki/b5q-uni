@@ -79,6 +79,13 @@ void barrier(){__asm__ volatile("dsb sy" ::: "memory");}
 uint64_t nowNs(void *){uint64_t ns;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns;}
 void wake(void *){__atomic_store_n(&bt.pending,1u,__ATOMIC_RELEASE);thread_wakeup((event_t)&bt.pending);}
 void waitUntil(void *,uint64_t deadline) {
+    // qbt_boot's command waits must honour FIFO progress just like the main
+    // executor. Once H4 bytes enter the FIFO, qbt's command queue is empty
+    // even while CTS/watermarks still owe transmission and an RX tail.
+    if(bt.uart.va && !bt.gated){
+        const uint64_t fifo=b5q_bt_fifo_deadline(&bt.geni);
+        if(fifo<deadline)deadline=fifo;
+    }
     if(__atomic_exchange_n(&bt.pending,0u,__ATOMIC_ACQ_REL))return;
     if(deadline==UINT64_MAX)assert_wait((event_t)&bt.pending,THREAD_UNINT);
     else {uint64_t absolute;nanoseconds_to_absolutetime(deadline,&absolute);assert_wait_deadline((event_t)&bt.pending,THREAD_UNINT,absolute);}
@@ -367,6 +374,13 @@ int powerOn() {
         native_bluetooth_boot_state[1]=__atomic_load_n(&native_bluetooth_boot_rx_length,__ATOMIC_ACQUIRE);
     }
     e=qbt_boot(bt.core,3200000,bt.address);bt.initializing=false;
+    if(e){
+        struct qbt_stats stats;qbt_get_stats(bt.core,&stats);
+        IOLog("B5qBluetooth: stage=boot-failed result=%d baud=%u pins=%x tlv=%llu/%llu status=%llx tx=%llu rx=%llu fifo=%u/%u busy=%u irq=%x/%x hw=%x txfifo=%x rxfifo=%x ios=%x rfr=%x\n",
+            e,bt.geni.baud,linePins(),stats.tlv_acks,stats.tlv_sent,stats.tlv_final_status,
+            bt.geni.stats.tx_bytes,bt.geni.stats.rx_bytes,bt.geni.tx_offset,bt.geni.tx_length,bt.geni.tx_busy,
+            urd(nullptr,0x610),urd(nullptr,0x640),urd(nullptr,0x40),urd(nullptr,0x800),urd(nullptr,0x804),urd(nullptr,0x908),urd(nullptr,0x2ac));
+    }
     if(bt.log>=2) {
         static const uint32_t regs[]={0x40,0x610,0x640,0x800,0x804,0x64,0x908};
         native_bluetooth_boot_state[2]=linePins();

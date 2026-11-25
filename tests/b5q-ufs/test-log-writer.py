@@ -55,6 +55,11 @@ static uint8_t dma[dmaBytes];
 static struct {bool selected=true,poisoned=false;void*lock=(void*)1;uint8_t lun=3;uint64_t capacity[8]={0,0,0,62275584};uint8_t*dma=::dma;uint64_t physical=0x900000000;uintptr_t hc=1;uint8_t opcode,commandLun;uint64_t commandLba;const char*stage;uint32_t lastOcs=0;Status status;}host;
 static FILE*media;static bool held,quarantine;static unsigned submissions,writes,syncs;static int fail_header;
 static uint64_t ticks;
+static bool runningWriter=true;
+static bool interruptContext=false;
+static bool ml_at_interrupt_context(){return interruptContext;}
+static bool ml_get_interrupts_enabled(){return true;}
+extern "C" int get_preemption_level(){return 0;}
 static uint32_t read32(uintptr_t,unsigned){return 0;}
 static void write32(uintptr_t,unsigned,uint32_t){}
 static bool IOLockTryLock(void*){if(held)return false;held=true;if(quarantine)host.poisoned=true;return true;}
@@ -91,8 +96,9 @@ static bool submit(){
 #include "B5qLogUfs.h"
 static void thread_yield_internal(int){
  ticks+=1;
- if(nabu_log_writer_rounds==1){static bool appended;if(!appended){nabu_capture_append("LATE-BOOT\n",10);appended=true;}}
- if(nabu_log_writer_rounds>=2)throw 2;
+ if(nabu_log_writer_rounds==1){static bool appended;if(!appended){nabu_capture_append("LATE-BOOT\n",10);appended=true;
+  interruptContext=true;assert(b5q_log_sync(750)==2);interruptContext=false;}}
+ if(runningWriter&&nabu_log_writer_rounds>=2)throw 2;
 }
 int main(int argc,char**argv){
  assert(argc==4);media=fopen(argv[1],"r+b");assert(media);fail_header=atoi(argv[2]);bool negative=atoi(argv[3]);
@@ -115,8 +121,12 @@ int main(int argc,char**argv){
  nabu_capture_lock=1;nabu_capture_append("DROP",4);nabu_capture_lock=0;
  nb_log_snapshot snap;assert(nabu_capture_snapshot(&snap)&&snap.lost==4&&snap.length==NB_LOG_CAPACITY);
  try{nabuLogStart();}catch(int){}
+ runningWriter=false;
  if(negative){assert(!writes&&!syncs&&nabu_log_writer_failures==1);fclose(media);return 0;}
- assert(writes>0 && syncs>=2 && !held);assert(nabu_log_writer_rounds==(fail_header?1u:2u));
+ assert(writes>0 && syncs>=2 && !held);
+ if(!fail_header){assert(b5q_log_sync(750)==0);assert(ticks<100);}
+ const unsigned before=writes; nabu_capture_append("URGENT",6);
+ assert(b5q_log_sync(2)==(fail_header?3u:1u)&&writes==before);assert(nabu_log_writer_rounds==(fail_header?1u:2u));
  assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first,1));
  for(uint64_t lba:{1ULL,3162880ULL,49692663ULL,62275574ULL,static_cast<unsigned long long>(nabu_log_volume.file_first+2051)})assert(!nb_volume_write_allowed(&nabu_log_volume,lba,1));
  assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+2050,2));
@@ -133,7 +143,7 @@ int main(int argc,char**argv){
 def main():
  results=[]
  with tempfile.TemporaryDirectory(prefix='b5q-logger-test-') as temp:
-  temp=Path(temp);(temp/'kern').mkdir();(temp/'kern/clock.h').write_text('')
+  temp=Path(temp);(temp/'kern').mkdir();(temp/'kern/clock.h').write_text('');(temp/'machine').mkdir();(temp/'machine/machine_routines.h').write_text('')
   cpp=temp/'writer.cpp';cpp.write_text(HARNESS);exe=temp/'writer'
   subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-Wno-unused-function','-Wno-misleading-indentation','-fsanitize=address,undefined','-I'+str(HEADERS),'-I'+str(temp),str(cpp),'-o',str(exe)],check=True)
   for case in ['ok','headerfail','mirror','chain','fatalias','diralias','token','gptcrc','overlap','rootbounds','damagedslots']:

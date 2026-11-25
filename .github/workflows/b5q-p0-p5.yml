@@ -446,6 +446,8 @@ jobs:
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0016-darwinboot-dma-order-inputs.patch"
           git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0017-b5q-dma-attach-flush.patch"
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0018-darwinboot-usb-coverage.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0019-b5q-pcie-64m.patch"
+          git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0020-darwinboot-pcie-64m.patch"
           git -C UniXNU apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch"
           git -C uefi-b5q submodule update --init --depth 1 Binaries
           UNIXNU_UEFI="$GITHUB_WORKSPACE/uefi-b5q" python3 UniXNU-b5q/scripts/check-b5q-uefi.py

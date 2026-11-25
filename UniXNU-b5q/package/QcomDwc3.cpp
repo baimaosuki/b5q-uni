@@ -51,6 +51,8 @@ bool sm8550_gcc_update32(volatile uint32_t *, uint32_t, uint32_t);
 volatile uint32_t native_usb_stats[54];
 }
 void dmaDiagnostics(const char *reason);
+void hostCheckpoint(const char *reason,bool force=false);
+extern "C" unsigned b5q_log_sync(unsigned);
 namespace {
 // The DWC3 global, device and OTG registers in the window Apple's class addresses: base + 0xc000.
 constexpr uint64_t kCore = 0x0a600000, kAppleWindow = kCore + 0xc000, kQscratch = kCore + 0xf8800, kGcc = 0x100000, kTcsr = 0x1fd5000,
@@ -175,6 +177,7 @@ void selectUtmiClock() {
     *cfg = *cfg | 1u << 8; barrier(); IOSleep(1);
     *cfg = *cfg | 1u | 1u << 3; barrier(); IOSleep(1);
     *cfg = *cfg & ~(1u << 8); barrier();
+    IOLog("qcom-dwc3: clock-mux QSCRATCH=%x\n",*cfg);
 }
 // Reverse the QSCRATCH UTMI-only mux after a successful hot-plug QMP start.
 // PIPE_UTMI_CLK_DIS gates the mux while PIPE_UTMI_CLK_SEL/PIPE3_PHYSTATUS_SW
@@ -184,6 +187,7 @@ void selectPipeClock() {
     *cfg = *cfg | 1u << 8; barrier(); IOSleep(1);
     *cfg = *cfg & ~(1u | 1u << 3); barrier(); IOSleep(1);
     *cfg = *cfg & ~(1u << 8); barrier();
+    IOLog("qcom-dwc3: clock-mux QSCRATCH=%x\n",*cfg);
 }
 void vbusOverride(bool on) {
     volatile uint32_t *ss = gScratch.va + 0x30 / 4, *hs = gScratch.va + 0x10 / 4;
@@ -194,6 +198,10 @@ void vbusOverride(bool on) {
 }
 // QMP USB3/DP combo PHY at 0x88e8000 in USB 3 only mode: qmp_combo_com_init and qmp_combo_usb_power_on.
 bool qmpInit(bool reverse) {
+    unsigned forceUtmi=0;
+    if(PE_parse_boot_argn("usb-utmi",&forceUtmi,sizeof(forceUtmi))&&forceUtmi==1){
+        selectUtmiClock();IOLog("qcom-dwc3: QMP forced-UTMI reverse=%u QSCRATCH=%x\n",reverse,gScratch.va[8/4]);return false;
+    }
     Region phy = {};
     if (!mapRegion(phy, 0x088e8000, 0x3000)) return false;
     volatile uint8_t *base = reinterpret_cast<volatile uint8_t *>(phy.va);
@@ -232,6 +240,7 @@ bool qmpInit(bool reverse) {
     for (unsigned i = 0; i < 1000 && !ok; ++i) {ok = !(rd(kQmpStatus) & 1u << 6); if (!ok) IODelay(200);}
     native_usb_stats[33] = rd(kQmpStatus);
     if(ok)selectPipeClock();
+    IOLog("qcom-dwc3: QMP result=%u reverse=%u status=%x QSCRATCH=%x\n",ok,reverse,native_usb_stats[33],gScratch.va[8/4]);
     phy.map->release();
     return ok;
 }
@@ -499,8 +508,16 @@ public:
     // no attach, and what wakes it on Apple's hardware is the Type-C transport's cable report, which this class does not have. The role follows
     // the port manager, so this controller exists only with a peripheral on the cable: kPowerStateOn for as long as it exists.
     uint32_t XHCI_DESIRED_POWER() override {return 3;}
+    IOReturn setPowerState(unsigned long state,IOService *device) override {
+        // Capture before Apple's saveState can touch a faulted controller.
+        hostCheckpoint("before-power-state",true);
+        IOReturn result=AppleUSBXHCI::setPowerState(state,device);
+        if(result!=kIOReturnSuccess)hostCheckpoint("power-state-result",true);
+        return result;
+    }
     // write-64-hi-lo-quirk: a 64-bit register is two 32-bit accesses, the high half written first.
     uint64_t XHCI_READ64(void *base, uint32_t offset) override {
+        hostCheckpoint("read64");
         volatile uint32_t *at = reinterpret_cast<volatile uint32_t *>(static_cast<uint8_t *>(base) + offset);
         const uint64_t low = at[0];
         return low | (uint64_t)at[1] << 32;
@@ -511,12 +528,18 @@ public:
         barrier();
         at[0] = (uint32_t)value;
         barrier();
+        hostCheckpoint("write64");
         static uint32_t writes=0;
         const unsigned count=__atomic_fetch_add(&writes,1u,__ATOMIC_RELAXED)+1;
+        if(count==1)hostCheckpoint("first-write64",true);
         if(count<=16&&(value||offset==0x30||offset==0x38)){
             uint32_t lo=at[0],hi=at[1];
             IOLog("qcom-dwc3: xhci-w64 #%u off=%x val=%llx rb=%08x:%08x\n",count,offset,value,hi,lo);
-            if(offset==0x18||offset==0x30||offset==0x38)dmaDiagnostics("write64");
+            if(offset==0x18||offset==0x30||offset==0x38){
+                dmaDiagnostics("write64");
+                // Preserve each nonzero ring pointer before Apple can run it.
+                if(value)(void)b5q_log_sync(750);
+            }
             if(value&&offset!=0x18&&!lo&&!hi){
                 at[0]=(uint32_t)value;barrier();at[1]=(uint32_t)(value>>32);barrier();
                 lo=at[0];hi=at[1];
@@ -636,7 +659,9 @@ bool setCoreRole(int role,bool forceReset=false) {
         auto *usb2=gGlobals.va+0x200/4,*usb3=gGlobals.va+0x2c0/4;
         *gctl|=1u<<11;barrier();IOSleep(100);
         *gctl&=~(1u<<11);barrier();
-        *gctl=(*gctl&~(3u<<12))|((role==kRoleHost?1u:2u)<<12);barrier();
+        // Stock b5q snps,disable-clk-gating: reset must not leave the
+        // host bus clock auto-gated while Apple probes/saves its registers.
+        *gctl=(*gctl&~(3u<<12))|((role==kRoleHost?1u:2u)<<12)|1u;barrier();
         *usb2&=~((1u<<6)|(1u<<8));*usb3&=~(1u<<17);barrier();
     }
     if(!repeater(false,role==kRoleHost))return false;
@@ -705,6 +730,7 @@ bool enterRole(int role) {
     IOLog("qcom-dwc3: role=%d power=%u vbus-source=%u external-hub=%u\n",role,cable.power(),source,role==kRoleHost&&cable.power()==1);
     const bool phyReset=followOrientation() || gPhyResetPending;gPhyResetPending=false;
     if(!setCoreRole(role,phyReset)){b5q_usb_otg(false);return false;}
+    IOLog("qcom-dwc3: host-core role=%d orientation=%d phy-reset=%u qmp=%u GCTL=%x GSBUSCFG0=%x GUCTL=%x\n",role,cable.orientation(),phyReset,gSuperSpeed,gGlobals.va[0x110/4],gGlobals.va[0x100/4],gGlobals.va[0x12c/4]);
     if (role == kRoleHost) {
         vbusOverride(false);
         enterHost();
@@ -735,7 +761,7 @@ void dmaDiagnostics(const char *reason){
     const uint64_t erst=uint64_t(ir[0x30/4])|(uint64_t(ir[0x34/4])<<32);
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
     const uint32_t hcs2=gXhciRegs.va[8/4];
-    IOLog("qcom-dwc3: host-dma-diag reason=%s HCSPARAMS2=%x scratchpads=%u GCTL=%x GUCTL=%x GSBUSCFG0=%x GSBUSCFG1=%x DCBAAP=%llx ERSTBA=%llx CRCR=%llx\n",reason,hcs2,((hcs2>>27)&31)|(((hcs2>>21)&31)<<5),gGlobals.va[0x110/4],gGlobals.va[0x12c/4],gGlobals.va[0x100/4],gGlobals.va[0x104/4],dcbaa,erst,crcr);
+    IOLog("qcom-dwc3: host-dma-diag reason=%s HCSPARAMS2=%x scratchpads=%u GCTL=%x GUCTL=%x GSBUSCFG0=%x GSBUSCFG1=%x QSCRATCH=%x QMP=%x DCBAAP=%llx ERSTBA=%llx CRCR=%llx\n",reason,hcs2,((hcs2>>27)&31)|(((hcs2>>21)&31)<<5),gGlobals.va[0x110/4],gGlobals.va[0x12c/4],gGlobals.va[0x100/4],gGlobals.va[0x104/4],gScratch.va?gScratch.va[8/4]:0,native_usb_stats[33],dcbaa,erst,crcr);
     uint64_t first=0;bool read=dmaRead64(dcbaa&~63ULL,first);
     IOLog("qcom-dwc3: host-dma-diag DCBAA[0]=%llx read=%u\n",first,read);
     const unsigned entries=ir[0x28/4]&65535;
@@ -745,13 +771,24 @@ void dmaDiagnostics(const char *reason){
         IOLog("qcom-dwc3: host-dma-diag ERST%u base=%llx words=%llx read=%u\n",i,base,details,ok);
     }
 }
+void hostCheckpoint(const char *reason,bool force){
+    if(!gXhciRegs.va)return;
+    const unsigned cap=gXhciRegs.va[0]&255;
+    if(cap+8>kXhciRegisterBytes)return;
+    const uint32_t status=gXhciRegs.va[(cap+4)/4];
+    static uint32_t seenHse=0;
+    const bool first=(status&4)&&!__atomic_exchange_n(&seenHse,1u,__ATOMIC_RELAXED);
+    if(!force&&!first)return;
+    dmaDiagnostics(first?"first-HSE":reason);
+    const unsigned saved=b5q_log_sync(750);
+    IOLog("qcom-dwc3: host-dma-diag checkpoint=%s sts=%x sync=%u\n",reason,status,saved);
+}
 void hostStats() {
     if (!gDmaReady || gCoreRole != kRoleHost) return;
     const uint32_t cap = gXhciRegs.va[0];
     const volatile uint32_t *op = gXhciRegs.va + (cap & 0xffu) / 4;
     native_usb_stats[47] = op[0]; native_usb_stats[48] = op[1];
-    static bool hseLogged=false;
-    if((native_usb_stats[48]&4)&&!hseLogged){hseLogged=true;dmaDiagnostics("first-HSE");}
+    hostCheckpoint("poll");
     native_usb_stats[49] = op[0x400 / 4]; native_usb_stats[50] = op[0x410 / 4];
     native_usb_stats[51] = gXhciRegs.va[1];
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);

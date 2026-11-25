@@ -1,0 +1,40 @@
+#!/usr/bin/env python3
+"""Check review7 features in actual returned firmware and deployment kernel."""
+import argparse,hashlib,importlib.util,json,os,subprocess,sys,tempfile
+from pathlib import Path
+R=Path(__file__).resolve().parents[2]
+p=argparse.ArgumentParser();p.add_argument('--ci',type=Path,required=True);p.add_argument('--firmware',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
+assert json.loads((a.out/'package-ready.json').read_text())['passed']
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+llvm=R/'tools/llvm21/usr/lib/llvm-21/bin';env=dict(os.environ,LD_LIBRARY_PATH=str(R/'tools/llvm21/usr/lib/x86_64-linux-gnu'))
+firmware={}
+for name in ['PcieDma','UsbDma','MediaDma','DarwinBoot']:
+ paths=list(a.firmware.rglob(name+'.obj'));assert len(paths)==1,(name,len(paths))
+ obj=paths[0];assert obj.read_bytes()[:4]==b'BC\xc0\xde'
+ ir=subprocess.check_output([str(llvm/'llvm-dis'),str(obj),'-o','-'],text=True,env=env)
+ if name in ['PcieDma','DarwinBoot']:assert '67108864'in ir,name+' lacks64MiB bound'
+ if name in ['PcieDma','UsbDma','MediaDma']:assert 'i32 5'in ir and 'HAL_TABLE'in ir,name+' lacks flush slot5'
+ if name=='UsbDma':assert '[32768 x i8]'in ir and 'AllocatePool'not in ir and 'FreePool'not in ir and '8388608'in ir
+ firmware[name]={'sha256':sha(obj),'actual_optimized_IR_checked':True}
+sys.path.insert(0,str(R/'UniXNU-b5q/scripts'));from b5q_abi import object_symbols,object_vtable
+spec=importlib.util.spec_from_file_location('fs',R/'scripts/b5q-install/package-usb-dma-esp.py');fs=importlib.util.module_from_spec(spec);spec.loader.exec_module(fs)
+with tempfile.TemporaryDirectory(prefix='b5q-review7-returned-')as td:
+ t=Path(td);kernel=t/'kernel';adt=t/'adt'
+ for path,out in [('kernel.macho',kernel),('kernel.macho.adt',adt)]:subprocess.run(['mcopy','-i',str(a.ci/'payload/payload.img'),'::/EFI/UniXNU/Payloads/'+path,str(out)],check=True)
+ raw=kernel.read_bytes();hid,=a.ci.rglob('NativeHidInput.o');needle=bytes.fromhex('a46513550e37bdd8ffff4743270000')
+ assert needle in hid.read_bytes()and needle in raw,'Actual326CPI HID missing'
+ for marker in [b'host-dma-diag checkpoint=',b'pdic-ambiguous',b'usb-utmi',b'QSCRATCH=',b'boot-failed result=',b'full_config=']:
+  assert marker in raw,marker
+ current,=a.ci.rglob('QcomDwc3.o');symbols=object_symbols(current.read_bytes())
+ imports={n for n,_,k in symbols if k==1}
+ assert '_b5q_log_sync'in imports
+ ufs,=a.ci.rglob('B5qUfs.o');assert any(n=='_b5q_log_sync'and k!=1 for n,_,k in object_symbols(ufs.read_bytes()))
+ base=R/'artifacts/b5q-review6-work/ci45600350653';old,=base.rglob('QcomDwc3.o')
+ vt=[object_vtable(o.read_bytes(),object_symbols(o.read_bytes()),'__ZTV12QcomDwc3Xhci',427)for o in [old,current]]
+ assert vt[0][421][0]==vt[1][421][0]
+ assert all((x is None and y is None)or(x is not None and y is not None and x[1]>>32==y[1]>>32)for x,y in zip(*vt)), 'XHCI PAC changed'
+ nodes=fs.adt_nodes(adt.read_bytes());chosen=nodes['/chosen'][2]
+ for name,length in [('b5q-pcie-dma-state',88),('b5q-usb-dma-diagnostics',64)]:assert chosen[name]==bytes(length)
+ assert int.from_bytes(nodes['/chosen/asmb'][2]['lp-sip0'],'little')==2
+result=dict(passed=True,hardware_verified=False,firmware=firmware,HID_326CPI_in_object_and_kernel=True,host_urgent_log_import_export_closed=True,XHCI_427_PAC_fields_and_WRITE64_slot_preserved=True,unchanged_USB_HAL_constants_checked_by_original_returned_gate=True)
+(a.out/'review7-returned.json').write_text(json.dumps(result,indent=2)+'\n');print('PASS review7 actual64MiBproducer/loader,HALslot5,326CPIHID,earlyHostlogABI/PAC and ADT')

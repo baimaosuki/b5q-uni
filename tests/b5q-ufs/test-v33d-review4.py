@@ -86,7 +86,7 @@ ROLE
 int main(){for(unsigned i=0;i<1024;i++)regs[i].index=i;
  regs[0x110/4].value=0x81400000|(2u<<12);regs[0x200/4].value=(1u<<6)|(1u<<8)|3;regs[0x2c0/4].value=(1u<<17)|5;
  assert(setCoreRole(2,true));assert((steps==std::vector<unsigned>{0x110/4,0x110/4,0x110/4,0x200/4,0x2c0/4}));
- assert(!(regs[0x110/4].value&(1u<<11))&&((regs[0x110/4].value>>12)&3)==1);
+ assert(!(regs[0x110/4].value&(1u<<11))&&((regs[0x110/4].value>>12)&3)==1&&(regs[0x110/4].value&1));
  assert(regs[0x200/4].value==3&&regs[0x2c0/4].value==5&&!gDeviceStackAllowed);
  puts("PASS actual setCoreRole:CORESOFTRESET set/wait/clear thenPRTCAPDIR; cleanUSBquirks,zeroPHYSOFTRSTbit31 afterQMP");}
 '''.replace('ROLE',role))
@@ -105,7 +105,9 @@ void Reg::operator=(uint32_t v){m->order.push_back(half);m->staged[half]=v;
  if(m->dropAll)return;
  if(!m->reverseLatch){if(half==0){m->visible[0]=m->staged[0];m->visible[1]=m->staged[1];}}
  else if(half==1){if(m->order.size()>=2&&m->order[m->order.size()-2]==0){m->visible[0]=m->staged[0];m->visible[1]=m->staged[1];}}}
-unsigned logs=0,rb2=0;void dmaDiagnostics(const char*){}
+unsigned logs=0,rb2=0,syncs=0,checkpoints=0;void dmaDiagnostics(const char*){}
+void hostCheckpoint(const char*,bool=false){checkpoints++;}
+unsigned b5q_log_sync(unsigned n){assert(n==750);syncs++;return 0;}
 void IOLog(const char *fmt,...){logs++;if(strstr(fmt,"rb2="))rb2++;}void barrier(){}
 WRITE
 int main(){uint64_t value=0x88ba04000ULL;Model normal;XHCI_WRITE64(&normal,0x30,value);assert((normal.order==std::vector<unsigned>{1,0})&&normal.visible[0]==uint32_t(value)&&normal.visible[1]==8&&logs==1&&!rb2);
@@ -115,6 +117,7 @@ int main(){uint64_t value=0x88ba04000ULL;Model normal;XHCI_WRITE64(&normal,0x30,
  Model irrelevant;XHCI_WRITE64(&irrelevant,0x10,0);assert(irrelevant.order.size()==2&&logs==5);
  for(unsigned i=5;i<16;i++){Model ok;XHCI_WRITE64(&ok,0x30,value);}assert(logs==16);
  Model after;after.reverseLatch=true;XHCI_WRITE64(&after,0x30,value);assert(after.order.size()==2&&logs==16);
+ assert(syncs==14&&checkpoints>=17);
  puts("PASS production XHCI_WRITE64:64bitPA88ba04000,hi/lo-latch andlo/hi-only-latch,originalvalue fallback,CRCR excluded,zero writes,first16calls bounded");}
 '''.replace('\nWRITE\n','\n'+write64+'\n'))
 abi=json.loads((R/'UniXNU-b5q/scripts/usb-xhci-26C5035r.json').read_text());assert abi['overrides']['421']=='XHCI_WRITE64' if 'overrides'in abi else '"421": "XHCI_WRITE64"'in json.dumps(abi)

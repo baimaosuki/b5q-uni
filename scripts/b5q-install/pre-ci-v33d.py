@@ -12,6 +12,7 @@ def py(name,path,*args):run(name,[sys.executable,R/path,*args])
 baseline=R/'artifacts/b5q-p4-work/pre-ci/report.json'
 x=json.loads(baseline.read_text())if baseline.is_file()else {}
 if not x.get('passed')or any(not(R/n).is_file()or hashlib.sha256((R/n).read_bytes()).hexdigest()!=sha for n,sha in x.get('source_sha256',{}).items()):
+ py('Bluetooth-provider','scripts/b5q-install/check-bt-target.py')
  py('wireless-mutex-provider','scripts/b5q-install/check-wifi-target.py')
  py('pre-ci-all','scripts/b5q-install/pre-ci-p4.py')
 else:
@@ -21,13 +22,13 @@ else:
  checks.append(dict(name='complete-P0-P4-retained-regressions',passed=True,receipt_sha256=hashlib.sha256(baseline.read_bytes()).hexdigest(),source_bound=True))
 # This gate has its own preserved assertions; do not alter them for a pass.
 py('pre-ci-v33b','scripts/b5q-install/pre-ci-v33b.py')
-for name in ['touch-p0','v33d-dma','v33d-usb-device','v33d-review2','v33d-wcn-init','v33d-packaging','v33d-review3','v33d-review4','v33d-reclaim-dma','review5','review5-firmware','dp-loader','dp-dpu']:py(name,'tests/b5q-ufs/test-'+name+'.py')
+for name in ['touch-p0','v33d-dma','v33d-usb-device','v33d-review2','v33d-wcn-init','v33d-packaging','v33d-review3','v33d-review4','v33d-reclaim-dma','review5','review5-firmware','review7','dp-loader','dp-dpu']:py(name,'tests/b5q-ufs/test-'+name+'.py')
 run('loader-inputs',[
  'env','PATH=/usr/lib/llvm-17/bin:'+os.environ['PATH'],
  'LD_PRELOAD=/usr/lib/llvm-17/lib/clang/17/lib/linux/libclang_rt.ubsan_standalone-x86_64.so',
  sys.executable,R/'UniXNU/drivers/DarwinBoot/Test/test-loader-inputs.py'])
 py('original-binaries','scripts/b5q-install/check-v33d-original-binaries.py')
-py('target-compile','scripts/b5q-install/check-peripheral-target.py','--sources','QcomDwc3.cpp,NativeHidInput.cpp,B5qTouch.cpp,UsbProbe.cpp,QcomRpmh.c,SoftwareAesProbe.cpp,KeyStoreProbe.cpp,ThermalLevel.cpp,B5qPower.cpp,B5qGpu.cpp,ButtonProbe.cpp,GeniI2c.c','--objects-out',W/'target','--reference',R/'artifacts/b5q-esp-v33b-repair2/esp.img')
+py('target-compile','scripts/b5q-install/check-peripheral-target.py','--sources','QcomDwc3.cpp,NativeHidInput.cpp,B5qTouch.cpp,UsbProbe.cpp,QcomRpmh.c,SoftwareAesProbe.cpp,KeyStoreProbe.cpp,ThermalLevel.cpp,B5qPower.cpp,B5qGpu.cpp,ButtonProbe.cpp,GeniI2c.c,B5qUfs.cpp','--objects-out',W/'target','--reference',R/'artifacts/b5q-esp-v33b-repair2/esp.img')
 py('firmware-reconstruction','scripts/b5q-install/check-stage-firmware-inputs.py','--media','--dp','--out',W/'firmware-inputs.json')
 py('firmware-target','scripts/b5q-install/check-pcie-uefi-target.py','--media','--dp')
 py('review4-target-proof','tests/b5q-ufs/test-v33d-review4-target.py')

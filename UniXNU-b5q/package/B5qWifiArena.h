@@ -12,7 +12,7 @@ template<unsigned Capacity> struct Arena {
     Block blocks[Capacity];unsigned count=0;uint8_t *base=nullptr;
     uint64_t iova=0;uint32_t bytes=0,used=0,peak=0,failures=0;
     bool init(void *p,uint64_t bus,uint32_t size) {
-        if(!p || !size || size>0x2000000 || (size&4095) || (bus&0x3fffff))return false;
+        if(!p || !size || size>0x4000000 || (size&4095) || (bus&0x3fffff))return false;
         base=static_cast<uint8_t*>(p);iova=bus;bytes=size;count=1;
         blocks[0]={0,size,false};used=peak=failures=0;return true;
     }

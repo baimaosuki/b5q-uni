@@ -261,6 +261,13 @@ extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *out){
  if(__atomic_exchange_n(&previous,out->signature(),__ATOMIC_RELAXED)!=out->signature())
   IOLog("qcom-dwc3: max77705 CC0=%x CC1=%x PD=%x BC=%x power=%u data=%d reverse=%d valid=%u\n",
         out->cc0,out->cc1,out->pd,out->bc,out->power(),out->role(),out->orientation(),out->valid);
+ // Valid orientation/DFP does not prove an attached CC power state. Preserve
+ // the working Device policy; log these ambiguous PDIC snapshots once each.
+ static uint32_t ambiguous=~0u;
+ const uint32_t raw=out->cc0|(uint32_t(out->cc1)<<8)|(uint32_t(out->pd)<<16);
+ if(ok&&out->valid&&!(out->cc0&7)&&(out->pd&0x80)&&
+    __atomic_exchange_n(&ambiguous,raw,__ATOMIC_RELAXED)!=raw)
+  IOLog("qcom-dwc3: pdic-ambiguous CC0=%x CC1=%x PD=%x BC=%x cc-power=0 vconn=%u DFP=1 policy=await-valid-cc\n",out->cc0,out->cc1,out->pd,out->bc,!!(out->cc0&8));
  return ok;
 }
 extern "C" int b5q_usb_cable_role(void){

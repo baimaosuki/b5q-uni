@@ -2,12 +2,12 @@
 #pragma once
 #include "B5qMouseReport.h"
 // Flip5 input is normalised to32767 on both axes by B5qTouch. Restore the
-// controller's4095 range, with conservative /8X /4Y relative scaling.
+// controller's4095 range, with review4 /5X /2Y relative scaling.
 // This object is the sole button owner; no wn8030 button/click state exists.
 struct B5qTouchMouse {
  enum Mode {Idle,CandidateTap,Moving,Scrolling,Suppressed};
  static constexpr unsigned holdMs=32,upMs=8,tapMs=300,maxFingers=10;
- static constexpr int slopX=260,slopY=140;
+ static constexpr int slopX=220,slopY=115;
  Mode mode=Idle;
  uint32_t began=0,releaseAt=0,nextPress=0,frameAt=0;
  uint32_t clicks_left=0,clicks_right=0,taps_cancelled_slop=0,taps_cancelled_time=0,lifts_seen=0;
@@ -109,7 +109,7 @@ struct B5qTouchMouse {
   }else if(!jump){
    const int dx=cx-anchorX,dy=cy-anchorY;anchorX=cx;anchorY=cy;
    if(mode==Moving){
-    const int mx=take(remainderX,dx,8,48),my=take(remainderY,dy,4,48);
+    const int mx=take(remainderX,dx,5,64),my=take(remainderY,dy,2,64);
     if(mx||my)packet(mx,my,0,0,send);
    }else if(mode==Scrolling){
     const int pan=take(scrollX,dx,100,127),wheel=take(scrollY,-dy,40,127);
