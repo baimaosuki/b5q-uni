@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_ALL_PASS_CI_PENDING",
+  "status": "CI_RETRY_LOCAL_PREFLIGHT",
   "approved_review3": "reports/v33d-review3.json",
   "approved_review3_sha256": "875c237a20b937e2a99bf828370846dc10906f13e3e452cc1c1c70ef7f556cde",
   "release_source_parent": "bbefab15224eb4d0ba65938bc76cfc8e5477b8b1",
@@ -10,9 +10,49 @@
     "artifacts/b5q-v33d-release/review3-focused.log": "70e856d3c2884fdfc2819a7c918d1e218bfd1947e45bbd172fbba803df399f43",
     "artifacts/b5q-v33d-release/ethernet-target.log": "16d3ba2e195b1f862173f84047ec44834d678283af1bc5b25c2ee97b767fc8c7"
   },
-  "CI_run": "pending",
-  "ESP": "pending",
+  "CI_run": 45537636188,
+  "ESP": "pending returned kernel/payload gates",
   "local_gate_checks": 22,
   "local_gate_receipt_sha256": "6c16ad6a452fba1bef91a89d21e1ecd0c3b84b5475dc07e9a641d4bf47abf9c6",
-  "firmware_reconstruction_sha256": "fc93c6c3ddfd2404ab5340d59e9cf1027d4fca05bb497e8c82c9abee74a7e8f9"
+  "firmware_reconstruction_sha256": "fc93c6c3ddfd2404ab5340d59e9cf1027d4fca05bb497e8c82c9abee74a7e8f9",
+  "source_commit": "5c5e1c01f12980d4f9e096d6a11fb5a8df2ad574",
+  "CI_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45537636188",
+  "firmware_transfer": {
+    "passed": true,
+    "github_digest_verified": true,
+    "run": 45537636188,
+    "source_commit": "5c5e1c01f12980d4f9e096d6a11fb5a8df2ad574",
+    "artifact_sha256": "376d123a9980f19334f37c672b770d9edf9e07640fb74038ce5d151efedfe428",
+    "FD": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-v33d-release/ci45537636188-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
+      "bytes": 3145728,
+      "sha256": "f432336002c93740746a682f1a61d821463c91dc6e9ab0efbe2282f7717902c2"
+    },
+    "files": {
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd": "f432336002c93740746a682f1a61d821463c91dc6e9ab0efbe2282f7717902c2",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/DarwinBootPkg/Driver/DarwinBoot/OUTPUT/DarwinBoot.efi": "ed36201a11836f76b21f4eb00e09069247973a87b033bc2225861aa9ebc33e5e",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/B5qHandoffDxe.efi": "d35a5b2fb22a76e55d2647fd110e83700a2441d368cce36762037ddc1ab3a032",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/DpDma.obj": "87fcb18dd1933b3d5723ca185e446e6f40104cc512f98c58550d9845911b88b7",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/MediaDma.obj": "57e5ad435c383fbd0873bc27baf3adb772bb7f7ecbb62037916369cf81987040",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/PcieDma.obj": "f170c9f89c039616c5763c3c2adf871d0fc4235a9a9b02e623dd1142a72cfaca",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/UsbDma.obj": "bb7d14493fe32f23054776ea66e3597200ef28513c033f5bd30971623024d94d",
+      "_temp/b5q-firmware.sha256": "67b66fc0f89874c0295c2ab3d202751ceb624eaeecfd59fad21a273ece4b65f9"
+    },
+    "hardware_verified": false
+  },
+  "firmware_checks": {
+    "constants": "artifacts/b5q-v33d-release/early-firmware-constants.json",
+    "FV": "artifacts/b5q-v33d-release/early-firmware-FV.json"
+  },
+  "CI_attempts": [
+    {
+      "run": 45537636188,
+      "source_commit": "5c5e1c01f12980d4f9e096d6a11fb5a8df2ad574",
+      "kernel": "failure",
+      "firmware": "success",
+      "first_failure": "B5qWcnPower.cpp:QcomQmp.h not found in CI sibling cache layout",
+      "full_log": "artifacts/b5q-v33d-release/ci45537636188-kernel-first-failure.log",
+      "log_sha256": "d81b0b30ee3c3360c0b447b30d5d9aa97bce476d86433f8b2b8689ba6d9d5cbd"
+    }
+  ]
 }

@@ -10,7 +10,7 @@ R=Path(__file__).resolve().parents[2];C=R/'sources/UniXNU-sheng/drivers/QcaBluet
 spec=importlib.util.spec_from_file_location('bt_recipe',R/'UniXNU-b5q/scripts/b5q_bluetooth.py')
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
 with tempfile.TemporaryDirectory(prefix='b5q-bt6855-') as td:
-    td=Path(td);sources,include=m.prepare(C,R/'UniXNU-b5q/package',R/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',td)
+    td=Path(td);sources,include=m.prepare(C,R/'UniXNU-b5q/package',R/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',td,R/'sources/UniXNU-sheng')
     text=(C/'tests/runtime.c').read_text().replace('WCN7850','WCN6855')
     text=text.replace('qca/hmtbtfw20.tlv','qca/hpbtfw21.tlv').replace('qca/hmtnv20.bin','qca/hpnv21.bin').replace('qca/hmtnv20.b1234','qca/hpnv21.b1234')
     text=text.replace('put16(response+9,0x0200)','put16(response+9,0x0201)').replace('put32(response+11,0x400c0200)','put32(response+11,0x400c0201)')
