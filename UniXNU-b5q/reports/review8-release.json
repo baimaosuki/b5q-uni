@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_GATES_PASS_CI_PENDING",
+  "status": "DELIVERED_HOST_VERIFIED_PENDING_HARDWARE",
   "hardware_verified": false,
   "source_parent": "e33286dc60e39f3677d960d689137e75af9c7d56",
   "inputs": {
@@ -86,5 +86,24 @@
   "local_checks": 30,
   "local_gate_sha256": "f9438ab1fd0e2f9c963acde5e4aa2e10ac20b899b45f05cc2265069bef322ad9",
   "old_returned_negative": "Legacy BSS callback still installed: originalreview7object failsnewgate asrequired",
-  "firmware_source_unchanged": true
+  "firmware_source_unchanged": true,
+  "CI_run": 45656654077,
+  "build_commit": "961b809025325dea5c60b419d329fb1d6721ab78",
+  "CI_conclusion": "success",
+  "images": {
+    "esp.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-review8/esp.img",
+      "bytes": 838860800,
+      "sha256": "ec938421e2456e2a8efb00827e8be90de0f8987d212954f54a9a6293b8ff501e"
+    },
+    "boot.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-review8/boot.img",
+      "bytes": 19124224,
+      "sha256": "20eac73c262470d43984b8edd363dde55f86e38fb75312a68b4a32610907470a"
+    }
+  },
+  "returned_gates": "PASS originalreturned+exactreview7firmwarereuse+actualath11k_opslegacyNULL/splitpair+40ms/DRPmarkers+HID/BT/QcomDwc3byteidentity+wirelessADSP",
+  "final_readback": "PASS ADT/APFS/PAC/signatures/fourmenus/800MiB4Kn/firmwarepair",
+  "review7_boot_byte_identical": true,
+  "phone_accessed": false
 }
