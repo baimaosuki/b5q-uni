@@ -38,7 +38,7 @@ body=base+r'''
 #include "B5qDpPort.h"
 using wait_result_t=int;
 #define IOLog(...) ((void)0)
-const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1;
+const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1,kMillisecondScale=1000;
 int gRoleWanted=1,gRoleApplied=0,gCoreRole=0;uint32_t gCableWanted=1,gCableApplied=0,gDpLanes=0;
 void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=false,gPhyResetPending=false;uint32_t native_usb_stats[54]={};
 unsigned polls=0,qmps=0,enters=0,retries=0;int orientation=0;

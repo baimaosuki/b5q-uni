@@ -36,10 +36,29 @@ def prepare(module,out):
     s=replace(s,'static int ath11k_pci_init(void)','int b5q_ath11k_pci_init(void)','PCI init')
     s=replace(s,'static void ath11k_pci_exit(void)','void b5q_ath11k_pci_exit(void)','PCI exit')
     s=re.sub(r'\bath11k_pci_init\b','b5q_ath11k_pci_init',s)
-    s=re.sub(r'\bath11k_pci_exit\b','b5q_ath11k_pci_exit',s);p.write_text(s)
+    s=re.sub(r'\bath11k_pci_exit\b','b5q_ath11k_pci_exit',s)
+    # A single MSI already requires ASPM off in the original driver because
+    # MHI M2 reads can hang. Do not enable firmware IMPS on that unqualified
+    # WCN6855 wake path. Multi-MSI and other hardware keep their own policy.
+    original='\t\tath11k_info(ab, "leaving PCI ASPM disabled to avoid MHI M2 problems\\n");'
+    guarded='''\t{
+\t\tif (ab->hw_rev == ATH11K_HW_WCN6855_HW21 && ab->hw_params.idle_ps) {
+\t\t\tab->hw_params.idle_ps = false;
+\t\t\tath11k_info(ab, "B5qWifi: single-MSI WCN6855 idle_ps=0; IMPS wake deferred\\n");
+\t\t}
+'''+original+'\n\t}'
+    s=replace(s,original,guarded,'single-MSI IMPS guard')
+    p.write_text(s)
     p=gen/'wmi.c';s=p.read_text()
     if s.count('wait_event_timeout(')!=2:raise ValueError('ath11k WMI ownership wait changed')
-    p.write_text(s.replace('wait_event_timeout(','wait_event_timeout_once('))
+    s=s.replace('wait_event_timeout(','wait_event_timeout_once(')
+    s=replace(s,'\t\tath11k_warn(wmi_ab->ab, "wmi command %d timeout\\n", cmd_id);',
+        '\t{\n\t\tath11k_warn(wmi_ab->ab, "wmi command %d timeout\\n", cmd_id);\n'
+        '\t\tath11k_warn(ab, "B5qWifi: credit-timeout cmd=%u eid=%u credits=%d idle_ps=%u multi-msi=%u\\n",\n'
+        '\t\t\tcmd_id, wmi->eid, ab->htc.endpoint[wmi->eid].tx_credits,\n'
+        '\t\t\tab->hw_params.idle_ps, test_bit(ATH11K_FLAG_MULTI_MSI_VECTORS, &ab->dev_flags));\n\t}',
+        'WMI credit diagnostic')
+    p.write_text(s)
     # ath11k's real unified callback also handles the split notifications the
     # same-version native mac80211 emits. Reuse the community adapter bridge.
     p=gen/'mac.c';s=p.read_text()
@@ -57,6 +76,17 @@ def prepare(module,out):
     ops=s.split('static const struct ieee80211_ops ath11k_ops = {',1)[1].split('};',1)[0]
     if re.search(r'\.bss_info_changed\s*=',ops) or any(len(re.findall(r'\.'+name+r'\s*=',ops))!=1 for name in ('link_info_changed','vif_cfg_changed')):
         raise ValueError('mac80211 split callbacks must replace the legacy BSS callback')
+    # Missing regulatory data must not be followed by vdev/WMM commands.
+    # Fail before side effects; regulatory restrictions are never bypassed.
+    start=s.index('static int ath11k_mac_op_add_interface(')
+    stop=s.index('static void ath11k_mac_op_remove_interface(',start)
+    section=s[start:stop]
+    section=replace(section,'\tmutex_lock(&ar->conf_mutex);',
+        '\tmutex_lock(&ar->conf_mutex);\n\n'
+        '\tif (!ab->default_regd[ar->pdev_idx]) {\n'
+        '\t\tath11k_warn(ab, "B5qWifi: add-interface deferred: default regd missing\\n");\n'
+        '\t\tret = -EAGAIN;\n\t\tgoto err;\n\t}', 'regdomain before vdev')
+    s=s[:start]+section+s[stop:]
     p.write_text(s)
     p=gen/'mhi.c';s=p.read_text()
     mark='\tstruct ath11k_pci *ab_pci = ath11k_pci_priv(ab);\n\n\tath11k_dbg(ab, ATH11K_DBG_BOOT, "notify status reason %s\\n",'

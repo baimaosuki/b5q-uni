@@ -3380,3 +3380,29 @@ revision = "961b809025325dea5c60b419d329fb1d6721ab78"
 reference = "reports/review8-release.json"
 command = "check-v33b-returned.py --reuse-unchanged-firmware; check-review8-returned.py; check-wireless-target-closure.py --with-adsp; package-batch2-esp.py; package-usb-dma-boot.py --physical-esp; verify-p0-images.py --wireless --media --dp --v33b"
 result = "KernelCI45656654077SUCCESS;actualath11k_opslegacyNULL+splitpairandoldinvalidnegative,active40mswait/DRPdiagnostics,unchangedHID/BT/QcomDwc3objects,156objectwirelessADSP/PAC/zeroEL1SMMU/originalWiFiplist/GPU/signaturesandfinal800MiB4KnADT/APFS/menu/bootpairreadbackPASS. FirmwareFDa98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37 andboot20eac73c262470d43984b8edd363dde55f86e38fb75312a68b4a32610907470a byteidenticalreview7. Exactimagesbytes/SHAinreport. HOST_VERIFIED_PENDING_HARDWARE;phoneunaccessed/unflashed."
+
+
+[[area]]
+id = "review9-bt-cpu-irq-zeroalloc-typec"
+status = "host-verified"
+components = ["QcomDwc3"]
+paths = ["package/B5qBtFifo.c", "package/B5qBluetooth.cpp", "package/B5qWifiBoard.cpp", "package/B5qMax77705.h", "package/B5qUsbBoard.cpp", "package/QcomDwc3.cpp", "scripts/build-b5q-wifi.py", "reports/review9-local.json", "reports/review9-local.md"]
+inputs = ["Physical review8 log SHA256 d5d79e7e7c60dda25fa07f7d04e0e3aab332f23fc584d019273f1da84e969673; review8-2 SHA256 5417e37a0693d6db1eadc9fe85490764cc11231afd8017fb0bb6f45be92f0a60; complete input and source-before SHA in artifacts/b5q-review9-local/inputs.json", "GeniI2c.c SHA256 86020cb462dd055397bf35d89f00b6114aef0cc25b4026205b6460679ef32da8 proves SE CPU bits2/3; WifiProbe.cpp SHA256 e449a40b423ed0f4b0750cb5c1edcd8139cbe9bd11b73a82d2885c8ad21060a5 allows zero-size heap allocation; pinned Linux 458c6079fc1d41d564c37679c8ace02cd83ee817 ath11k single-MSI disables ASPM due to MHI M2"]
+configuration = ["Kernel-only; FIFO SE_CPU_IRQS=(1<<2)|(1<<3), never DMA bits0/1; log-bluetooth=2 adds rate-limited tty/open/discovery/IRQ diagnostics; existing single-worker power acknowledgements preserved", "Board heap accepts n=0 with 16-byte allocation header and matching sized free; reject only overflow/OOM. Generated HW21 single-MSI PCI start disables idle_ps before mac_start IMPS command; missing default_regd rejects add_interface before vdev creation; actual HTC credits logged on timeout, no credit or IRQ fabrication", "Detached valid Type-C samples100ms, VCONN candidate50ms, stable attached or invalid bus1000ms; effective source requires valid dry pin1/2+VCONN+DFP; candidate-to-native Source signature stable despite own VBUS feedback; transientCCdiagnostics use qualifiedCCCTRL1cache and issue no blocking500msopcode; initialSourceDPdiscoverywaitsforVBUSwithoutmailboxblocking; a1/b1 Device and powered-hub data/power distinction retained"]
+procedure = ["Execute production FIFO with CPU IRQ gates, no-poll idle HCI receive, TX watermark/DONE, W1C/stop/fail/resume; ASan/UBSan real heap+WMI zero-rule parser and generated PCI/IMPS/regdomain guards; production roleThread physical Source window and unplug/Device negatives", "Run full retained local preflight, arm64e board/Bluetooth/ath11k compiles, XNU patch replay, wireless+ADSP symbol/PAC and zero EL1 SMMU; compare protected touch/firmware/loader SHA snapshot; no push, CI, ESP or phone operation"]
+findings = ["FIFO G_IRQ_EN=3 routes DMA rather than CPU M/S status; idle retry_at=0 then cannot wake on unsolicited HCI events. CPU gate0xc fixes the register cause; timer workaround not used", "Repeated power=1 logs are proactive boot plus queued tty success acknowledgements on one worker; powerOn immediately returns if already powered and requestPower is CAS-queued. No second physical power sequence is added", "Zero 6GHz rule count is legal; returning NULL prevents default regulatory construction. Review8 also has actual MHI SYS_ERR before WMI shutdown; logs contain no HTC credit or M2 snapshot, so universal timeout cause cannot be established offline", "CC0=48/88 with PD07 is a fast-sampling candidate, not sufficient evidence to source VBUS. Require DFP bit7 or native CC Source; preserve dry/Device/detach behavior. Hardware Host enumeration and wireless scanning remain pending"]
+completion = ["All31localgate groups and full retainedP0-P4 PASS;143/143 XNU patches;Bluetooth9/ath11k109/board31 arm64e objects and158-object wirelessADSP symbol/PAC/zeroEL1SMMU PASS;60 protectedinputs unchanged; no CI/IMG/device verification"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE after local gates; exact cause of existing SYS_ERR/HTC credit loss unknown from supplied log; firmware/touch immutable; no CI/IMG requested this round"]
+next_action = ["Local receipts complete in reports/review9-local.json; report hardware-pending boundaries; no push/CI/ESP/phone access"]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/review9-local.md"
+result = "Source implementation and physical-log causal audit complete; local test/arm64e/PAC results are being collected separately. Touch and firmware inputs must remain byte-identical."
+
+[[area.evidence]]
+kind = "host"
+revision = "d6c3699328a16c597e4933f31efd5795701f259c"
+reference = "reports/review9-local.json"
+command = "test-bt-fifo.py; test-review9.py; test-review8.py; test-dp-port.py; check-bt-target.py; check-wifi-target.py; build-b5q-wifi.py; pre-ci-v33d.py; check-xnu-patches.py"
+result = "PASS all31 localgate groups plus current-source-bound completeP0-P4 baseline;143/143 orderedpatches;ASanUBSan productionIRQ/zeroalloc/WMI/IMPS/Sourcewindow/Device/unplug regressions;158-objectwirelessADSP closure/PAC andzeroEL1SMMU. Revision identifies base; uncommitted tested delta and allinputs areSHA-bound in report. All60protectedtouch/firmware/loader/boardinputs and5unrelatedTWRPfiles unchanged. No push/CI/ESP/phone action;hardwarepending."

@@ -172,7 +172,7 @@ int msiTarget(uint32_t *lo,uint32_t *hi,uint32_t *data) {
     *lo=0xaffff040;*hi=0;*data=800;return 0;
 }
 void *allocate(size_t n) {
-    if(!n || n>SIZE_MAX-16)return nullptr;auto *p=static_cast<uint8_t*>(IOMallocData(n+16));
+    if(n>SIZE_MAX-16)return nullptr;auto *p=static_cast<uint8_t*>(IOMallocData(n+16));
     if(p){*reinterpret_cast<size_t*>(p)=n+16;return p+16;}return nullptr;
 }
 void release(void *p){if(p){auto *base=static_cast<uint8_t*>(p)-16;IOFreeData(base,*reinterpret_cast<size_t*>(base));}}

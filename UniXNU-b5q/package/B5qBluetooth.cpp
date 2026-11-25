@@ -491,6 +491,20 @@ void worker(void *,wait_result_t) {
             native_bluetooth_discovery[15]=stats.discovery.inquiry_results;
             native_bluetooth_discovery[16]=stats.discovery.le_reports;
             native_bluetooth_discovery[17]=stats.discovery.le_extended_reports;
+            if(bt.log>=2) {
+                static uint64_t nextLog=0;
+                if(t>=nextLog) {
+                    nextLog=t+5000000000ULL;
+                    printf("B5qBluetooth: stage=health powered=%u active=%u gated=%u irq=%llu SE_IRQ_EN=%x tty-power=%u boot-read=%u open=%u speed-requests=%u discovery=%u/%u/%u rx=%llu\n",
+                        bt.powered,bt.service,bt.gated,bt.geni.stats.interrupts,
+                        bt.clocked?urd(nullptr,0xe1c):0,
+                        __atomic_load_n(&qbt_transport_activity[0],__ATOMIC_RELAXED),
+                        __atomic_load_n(&qbt_transport_activity[1],__ATOMIC_RELAXED),
+                        __atomic_load_n(&qbt_transport_activity[2],__ATOMIC_RELAXED),
+                        __atomic_load_n(&qbt_transport_activity[3],__ATOMIC_RELAXED),
+                        stats.discovery.inquiry_results,stats.discovery.le_reports,stats.discovery.le_extended_reports,stats.rx_bytes);
+                }
+            }
             health=t+1000000000ULL;
         }
         uint64_t deadline=bt.powered?qbt_deadline(bt.core):UINT64_MAX;

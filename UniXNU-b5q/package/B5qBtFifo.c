@@ -17,6 +17,7 @@
 #define F_TX_WM 0x80cu
 #define F_HW_TX 0xe24u
 #define F_IF_DISABLE 0x64u
+#define F_SE_CPU_IRQS ((1u << 2) | (1u << 3))
 #define F_TX_WATER (1u << 30)
 #define F_RX_WATER (1u << 26)
 #define F_RX_LAST (1u << 27)
@@ -74,7 +75,7 @@ int b5q_bt_fifo_start(struct b5q_bt_fifo *g) {
     wr(g,G_M_IRQ_EN,F_M_IRQS);wr(g,G_S_IRQ_EN,F_S_IRQS);
     g->state=B5Q_BT_FIFO_RUN;
     wr(g,G_S_CMD,(1u<<27)|(1u<<7));rfr(g,true);
-    wr(g,G_IRQ_EN,3);barrier(g); // CPU M/S interrupts only, no DMA IRQs.
+    wr(g,G_IRQ_EN,F_SE_CPU_IRQS);barrier(g); // CPU M/S interrupts only, no DMA IRQs.
     __atomic_store_n(&g->irq_pending,false,__ATOMIC_RELEASE);fifoMask(g,false);return 0;
 }
 static bool discard_startup_rx(struct b5q_bt_fifo *g) {

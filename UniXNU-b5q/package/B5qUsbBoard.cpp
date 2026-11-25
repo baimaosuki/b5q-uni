@@ -224,9 +224,11 @@ struct CcControlIo {
  void delay(unsigned us){if(us>=1000)IOSleep(us/1000);else IODelay(us);}
  uint64_t nowUs(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns/1000;}
 };
+uint8_t ccControlKnown=0xff;
 void configureTypecDrp(){
  CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);B5qMax77705::DrpState state;
  const bool ok=B5qMax77705::configureDrp(*maxim,mailbox,state);
+ if(state.stage>=2)ccControlKnown=state.after;
  IOLog("qcom-dwc3: max77705 DRP stage=%u ok=%u error=%u CCCTRL1=%02x->%02x requested=%02x wrote=%u deferred=%u CC0=%02x CC1=%02x PD0=%02x PD1=%02x BC=%02x\n",
        state.stage,ok,unsigned(mailbox.error),state.before,state.after,state.requested,state.wrote,state.deferred,
        state.cable.cc0,state.cable.cc1,state.pd0,state.cable.pd,state.cable.bc);
@@ -237,12 +239,16 @@ void diagnoseTypecCc(const B5qMax77705::Cable &cable){
  static uint32_t previous=~0u;
  const uint32_t signature=cable.cc0|(uint32_t(cable.cc1)<<8)|(uint32_t(cable.pd)<<16);
  if(previous==signature)return;previous=signature;
- CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);uint8_t response[2]={},cc0=0,cc1=0,pd0=0,pd1=0;
- const bool control=mailbox.command(B5qMax77705::ccControlRead,nullptr,0,response,1);
+ CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);uint8_t response[2]={0,ccControlKnown},cc0=0,cc1=0,pd0=0,pd1=0;
+ // An opcode reply can take500ms. Never spend the Source->VBUS window
+ // waiting for diagnostics; DRP init already read back the control value.
+ const bool cached=cable.vconnCandidate();
+ const bool control=!cached&&mailbox.command(B5qMax77705::ccControlRead,nullptr,0,response,1);
+ if(control)ccControlKnown=response[1];
  const bool status=maxim->read(0x25,0x0a,cc0)&&maxim->read(0x25,0x0b,cc1)&&
                    maxim->read(0x25,0x0c,pd0)&&maxim->read(0x25,0x0d,pd1);
- IOLog("qcom-dwc3: max77705 CC-diag control=%u error=%u CCCTRL1=%02x status=%u CC_STATUS0=%02x CC_STATUS1=%02x PD_STATUS0=%02x PD_STATUS1=%02x policy=await-valid-cc\n",
-       control,unsigned(mailbox.error),control?response[1]:0xff,status,cc0,cc1,pd0,pd1);
+ IOLog("qcom-dwc3: max77705 CC-diag control=%u error=%u CCCTRL1=%02x status=%u CC_STATUS0=%02x CC_STATUS1=%02x PD_STATUS0=%02x PD_STATUS1=%02x source-candidate=%u poll-ms=%u control-cached=%u policy=require-source-or-vconn-dfp\n",
+       control,unsigned(mailbox.error),(control||cached)?response[1]:0xff,status,cc0,cc1,pd0,pd1,cable.sourceCandidate(),cable.pollIntervalMs(),cached);
 }
 }
 extern "C" bool b5q_usb_typec_init(void){
@@ -337,6 +343,12 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
  B5qMax77705::Cable cable;const bool sampled=B5qMax77705::readCable(*maxim,cable);
  PdicIo io;B5qDp::Mailbox<PdicIo> mailbox(io);bool ok=sampled;
  const uint32_t signature=sampled?cable.signature():0;
+ // Source must establish VBUS before optional DP opcode discovery can
+ // wait on the same role worker. Keep an existing active DP link intact.
+ if(sampled&&!dpStarted&&cable.sourceVbus(cable.role())&&!(cable.bc&0x80)){
+  out->attached=true;out->reverse=int8_t(cable.orientation());out->generation=dpAlt.generation;
+  IOLockUnlock(maxim->lock);return true;
+ }
  if(!sampled||!cable.attached()||cable.orientation()<0){
   if(dpStarted)mailbox.enable(false);
   dpStarted=dpFailed=false;dpCable=dpPending=0;dpAlt.reset();

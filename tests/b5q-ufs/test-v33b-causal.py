@@ -63,7 +63,7 @@ uint64_t mach_absolute_time(){return ticks*1000;}void absolutetime_to_nanosecond
 #define IOLog(...) ((void)0)
 HELPERS
 POLL
-const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1;
+const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1,kMillisecondScale=1000;
 constexpr unsigned kXhciRegisterBytes=0x8000;
 int gRoleWanted=2,gRoleApplied=2,gCoreRole=2;uint32_t gCableWanted=0,gCableApplied=0,gDpLanes=0;
 void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=true,gPhyResetPending=false;uint32_t native_usb_stats[54]={};

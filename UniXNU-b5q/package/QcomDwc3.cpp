@@ -850,9 +850,11 @@ void roleThread(void *, wait_result_t) {
         B5qDpPortState port{};
         if(dpEnabled)b5q_dp_port_poll(&port);
         const unsigned requestedDp=dpEnabled&&port.configured?port.lanes:0;
+        B5qMax77705::Cable timing;b5q_usb_cable_state(&timing);
+        const unsigned typecPollMs=timing.pollIntervalMs();
         IOLockLock(gRoleLock);
         if(__atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE)==__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE)&&gCableWanted==gCableApplied&&requestedDp==gDpLanes){
-            uint64_t deadline;clock_interval_to_deadline(1,kSecondScale,&deadline);
+            uint64_t deadline;clock_interval_to_deadline(typecPollMs,kMillisecondScale,&deadline);
             IOLockSleepDeadline(gRoleLock,&gRoleWanted,deadline,THREAD_UNINT);
             IOLockUnlock(gRoleLock);
             cableChanged();retryDevicePower();hostStats();deviceStats();

@@ -67,8 +67,8 @@ int main(){
 with tempfile.TemporaryDirectory(prefix='b5q-review8-drp-')as td:
  t=Path(td);(t/'test.cpp').write_text(body)
  subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-Wno-misleading-indentation','-fsanitize=address,undefined','-I'+str(P),str(t/'test.cpp'),'-o',str(t/'test')],check=True);subprocess.run([str(t/'test')],check=True)
-# Execute actual board wiring: both early init and ambiguous48/88 diagnostics
-# own the same SE8 lock through the complete mailbox request/response.
+# Execute actual board wiring: DRP init owns SE8 across request/response;
+# fast VCONN candidates log cached readback without a blocking opcode.
 board=(P/'B5qUsbBoard.cpp').read_text()
 def function(text,signature):
  a=text.index(signature);b=text.index('{',a)+1;depth=1
@@ -92,7 +92,7 @@ void IOLog(const char *format,...){
  if(strstr(format," DRP stage="))controls++;
  if(strstr(format,"CC-diag")){
   diagnostics++;va_list ap;va_start(ap,format);
-  assert(va_arg(ap,int));(void)va_arg(ap,unsigned);assert(va_arg(ap,int)==model.ctrl);assert(va_arg(ap,int));
+  assert(!va_arg(ap,int));(void)va_arg(ap,unsigned);assert(va_arg(ap,int)==model.ctrl);assert(va_arg(ap,int));
   for(auto &v:lastCc)v=va_arg(ap,int);va_end(ap);
  }
 }
@@ -102,14 +102,16 @@ CABLE
 bool ensureMaximReady(){return maximReady;}
 int main(){
  assert(b5q_usb_typec_init()&&maximReady&&controls==1&&!held&&model.ctrl==0xb9&&model.writes==1);
+ const auto queries=model.ctrlReads;const auto began=model.time;model.timeout=true;
  model.cc0=0x48;model.cc1=0;model.pd0=0x5a;model.pd1=7;B5qMax77705::Cable c;
  assert(b5q_usb_cable_state(&c)&&diagnostics==1&&!held);assert(lastCc[0]==0x48&&lastCc[1]==0&&lastCc[2]==0x5a&&lastCc[3]==7);
  assert(b5q_usb_cable_state(&c)&&diagnostics==1);model.cc0=0x88;
  assert(b5q_usb_cable_state(&c)&&diagnostics==2&&lastCc[0]==0x88);
+ assert(model.ctrlReads==queries&&model.time==began); // mailbox timeout cannot consume the VBUS window
  model={};model.cc0=0x49;model.bc=0x80;
  assert(b5q_usb_typec_init()&&model.writes==0&&model.ctrl==0xa0&&maximReady); // Device session preserved
  model.timeout=true;assert(b5q_usb_typec_init()&&maximReady&&model.writes==0); // mailbox error never tears down live Device
- puts("PASS actualboardinit/control/mailbox/CC48+88diagnostic underSE8lock;readbacklogged;limitduplicatequeries;liveDevicepreservedincludingopcodefailure");
+ puts("PASS actualboardinit/control/mailbox/CC48+88diagnostic underSE8lock;cachedreadback/zeroopcodewaitonVCONNtransition;limitduplicatequeries;liveDevicepreservedincludingopcodefailure");
 }
 '''
 fixture=fixture.replace('HELPERS',helpers).replace('INIT',function(board,'extern "C" bool b5q_usb_typec_init(')).replace('CABLE',function(board,'extern "C" bool b5q_usb_cable_state('))
