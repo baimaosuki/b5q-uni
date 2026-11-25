@@ -74,7 +74,8 @@ bool packet(TouchBus &bus,uint8_t &code,unsigned &length){
  return B5qTouch::continuation([&bus](uint8_t *p,unsigned n){return bus.read(p,n);},message,length);
 }
 void publish(bool fromReport=true){
- __atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);unsigned count=0;
+ __atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
+ __asm__ volatile("dmb ish" ::: "memory");unsigned count=0;
  native_touch_recovered=!fromReport;
  for(unsigned i=0;i<12;++i)if(reports.points[i].kind==1||reports.points[i].kind==2){native_touch_xs[count]=int(B5qTouch::hid(reports.points[i].x));native_touch_ys[count]=int(B5qTouch::hid(reports.points[i].y));native_touch_ids[count]=int(i);++count;}
  native_touch_count=count;__asm__ volatile("dmb ish":::"memory");__atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
@@ -115,8 +116,8 @@ bool command(TouchBus &bus,uint8_t cmd,const uint8_t *p,unsigned n,bool getConfi
    IOLog("B5qTouch: command=%02x failed=packet error=%s stop=%s\n",cmd,B5qTouchBus::name(bus.error()),B5qTouchBus::name(bus.stopError()));
    return false;
   }
-  if(code==1){if(cmd==0x20&&!B5qTouch::appInfo(message,length,maxObjects)){IOLog("B5qTouch: command=%02x failed=application-info bytes=%u\n",cmd,length);return false;}if(getConfig){if(length>sizeof(config)||!length){IOLog("B5qTouch: command=%02x failed=config-length bytes=%u\n",cmd,length);return false;}memcpy(config,message,length);configBytes=length;}return true;}
-  if(code==0x10&&cmd==2){IOLog("B5qTouch: stage=identify mode=%u bytes=%u\n",length>1?message[1]:255,length);return length>1&&message[1]==1;}
+  if(code==1){if(cmd==2){const bool ok=length>1&&message[1]==1;IOLog("B5qTouch: stage=identify mode=%u bytes=%u response=01 ok=%u\n",length>1?message[1]:255,length,ok);return ok;}if(cmd==0x20&&!B5qTouch::appInfo(message,length,maxObjects)){IOLog("B5qTouch: command=%02x failed=application-info bytes=%u\n",cmd,length);return false;}if(getConfig){if(length>sizeof(config)||!length){IOLog("B5qTouch: command=%02x failed=config-length bytes=%u\n",cmd,length);return false;}memcpy(config,message,length);configBytes=length;}return true;}
+  if(code==0x10&&cmd==2){IOLog("B5qTouch: stage=identify mode=%u bytes=%u\n",length>1?message[1]:255,length);continue;}
   report(code,length);
   if(code==0x10 || (code<0x10&&code!=0&&code!=7)){
    IOLog("B5qTouch: command=%02x failed=response code=%02x bytes=%u\n",cmd,code,length);return false;
@@ -165,7 +166,11 @@ void worker(void *,wait_result_t){
   IOLog("B5qTouch: stage=%s phase=before gpio=%u intid=%u\n",stage,B5qTouchIrq::gpio,B5qTouchIrq::intid);
   const uint32_t cfg=B5qTouchIrq::disabled(tlmmRead(B5qTouchIrq::cfg));
   tlmmWrite(B5qTouchIrq::cfg,cfg);tlmmWrite(B5qTouchIrq::status,0);
-  const int irqRc=armcpu_spi_share(B5qTouchIrq::intid,touchIrq,nullptr);
+  int irqRc=kIOReturnNotReady;
+  for(unsigned tries=0;tries<240;++tries){
+   irqRc=armcpu_spi_share(B5qTouchIrq::intid,touchIrq,nullptr);
+   if(irqRc!=kIOReturnNotReady)break;IOSleep(250);
+  }
   IOLog("B5qTouch: stage=attach-irq phase=after intid=%u rc=%d\n",B5qTouchIrq::intid,irqRc);
   if(irqRc)break;
   irqAttached=true;__atomic_store_n(&irqOnline,true,__ATOMIC_RELEASE);

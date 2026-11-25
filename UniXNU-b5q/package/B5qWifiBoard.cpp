@@ -18,6 +18,7 @@
 #include <stdarg.h>
 extern "C" bool sm8550_gcc_trigger32(volatile uint32_t *,uint32_t,unsigned);
 extern "C" ifnet_t sheng_ethernet_ifnet(void);
+extern "C" void sheng_ethernet_wifi_detach(void);
 extern "C" int b5q_wifi_publish_ready(void);
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 #include "B5qPcieCore.h"
@@ -153,13 +154,18 @@ bool cfgOffset(int off,int size,uint32_t &reg) {
     return (size==1||size==2||size==4) && !(reg&(size-1)) && reg<=4096-unsigned(size);
 }
 int cfgRead(int off,int size,uint32_t *out) {
+    if(!config.va||!dbi.va||!(dbi.va[0x72c/4]&16))return -ENXIO;
     uint32_t reg;if(!out || !cfgOffset(off,size,reg))return -EINVAL;
     uint32_t value=config.va[(reg&~3u)/4];*out=size==4?value:(value>>((reg&3)*8))&((1u<<(size*8))-1);return 0;
 }
 int cfgWrite(int off,int size,uint32_t value) {
+    if(!config.va||!dbi.va||!(dbi.va[0x72c/4]&16))return -ENXIO;
     uint32_t reg;if(!cfgOffset(off,size,reg))return -EINVAL;
-    unsigned shift=(reg&3)*8;uint32_t mask=size==4?~0u:((1u<<(size*8))-1)<<shift;
-    config.va[(reg&~3u)/4]=(config.va[(reg&~3u)/4]&~mask)|((value<<shift)&mask);barrier();return 0;
+    volatile uint8_t *base=reinterpret_cast<volatile uint8_t*>(config.va);
+    if(size==1)base[reg]=uint8_t(value);
+    else if(size==2)*reinterpret_cast<volatile uint16_t*>(base+reg)=uint16_t(value);
+    else *reinterpret_cast<volatile uint32_t*>(base+reg)=value;
+    barrier();return 0;
 }
 int msiTarget(uint32_t *lo,uint32_t *hi,uint32_t *data) {
     if(!irqAttached)return -ENXIO;
@@ -321,7 +327,7 @@ void worker(void *,wait_result_t) {
         static const lx_platform platform={nowMs,sleepMs,poll,logLine,halt,allocate,release,
             dmaAllocate,dmaRelease,dmaMap,dmaSync,fwGet,nowNs,bootNs,busyDelay,_disable_preemption,_enable_preemption};
         nw_wifi_set_platform(&platform);
-        error=controlStart();if(error)goto failed;
+        error=controlStart();if(error){if(error>0)error=-error;goto failed;}
         static nw_board board;
         board.bar=const_cast<uint32_t*>(bar.va);board.bar_len=0x200000;
         board.device_id=0x1103;board.msi_cap=uint16_t(msiCap);board.irq_base=1000;
@@ -360,12 +366,17 @@ void worker(void *,wait_result_t) {
         }
     }
 failed:
+    if(error>0)error=-error;
     native_wifi_stats[0]=uint32_t(error?error:-1);
     // Stop endpoint DMA before Linux teardown touches ring buffers. Keep all
     // retained firmware pages and mappings for the rest of this boot.
     if(irqAttached)armcpu_spi_mask(800,true);
+    if(config.va&&dbi.va&&(dbi.va[0x72c/4]&16)){
+        auto *command=reinterpret_cast<volatile uint16_t*>(reinterpret_cast<volatile uint8_t*>(config.va)+4);
+        *command=uint16_t(*command&~4u);barrier();
+    }
     if(tlmm.va){Hardware h;h.pin(94,0x201,0);IODelay(1000);}
-    if(config.va){config.va[4/4]&=~4u;barrier();}
+    sheng_ethernet_wifi_detach();
     if(stackStarted)nw_wifi_stop();
     b5q_wcn_radio_enable(B5Q_WCN_WLAN,0);b5q_wcn_power_put(B5Q_WCN_WLAN);
     native_wifi_logf(3,"stopped result=%d; boot continues; DMA pool retained",error);

@@ -21,11 +21,17 @@ def prepare(reference,out):
         '#include <kern/thread.h>\nextern "C" kern_return_t clear_wait(thread_t,wait_result_t);',
         'source-private clear_wait declaration for the SDK target checker')
     text=replace(text,'#include <sys/errno.h>',
-        '#include <sys/errno.h>\n#include "AppsSmmuLock.h"',
+        '#include <sys/errno.h>\n#include "AppsSmmuLock.h"\n#include "B5qAossQmpLock.h"',
         'shared RSC register mutex; no SMMU MMIO')
     text=replace(text,'if (gTcs < 0) {',
         'if (gTcs < 0) {\n        AppsSmmuLock guard;\n        if (!guard.ready()) return -16;',
         'serialize shared IRQ_ENABLE RMW with USB/WCN votes')
+    text=replace(text,'    qcom_qmp_init(&gQmp,',
+        '    {\n    B5qAossQmpLock guard;\n    if(!guard.ready()){fail(StLoadState, -12); release(dtb); release(adsp); return false;}\n    qcom_qmp_init(&gQmp,',
+        'serialize AOSS QMP handshake/send/wait/abandon with WCN')
+    text=replace(text,'    stage(StLoadState);',
+        '    } // Release AOSS QMP before RPMh votes.\n    stage(StLoadState);',
+        'limit shared AOSS mutex to the mailbox transaction')
     text=replace(text,'kAdspSize = 0x4680000','kAdspSize = 0x59b4000','Samsung ADSP reserved length')
     text=replace(text,'const char *sources[3] = {"modem:", "/private/var/firmware/qcom/sm8550/sheng", "/private/var/ngpu/fw"};',
         'const char *sources[1] = {"/private/var/ngpu/firmware/qcom/sm8550/b5q"};',

@@ -23,6 +23,7 @@
 #include <kern/thread.h>
 #include <sys/errno.h>
 #include <IOKit/IOUserClient.h>
+#include <IOKit/IOCommandGate.h>
 #include <IOKit/IOMemoryDescriptor.h>
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-anon-enum-enum-conversion"   // the family's headers mix anonymous enums
@@ -48,6 +49,18 @@ static int (*volatile gWifiRequest)(unsigned long, void *);
 static int (*volatile gWifiKernelRequest)(unsigned long, void *, void *, uint32_t);
 static volatile bool gWifiLink;
 
+static IOLock *gWifiLock;
+static bool wifiLockReady(){
+    if(__atomic_load_n(&gWifiLock,__ATOMIC_ACQUIRE))return true;
+    auto *made=IOLockAlloc();if(!made)return false;IOLock *expected=nullptr;
+    if(!__atomic_compare_exchange_n(&gWifiLock,&expected,made,false,__ATOMIC_RELEASE,__ATOMIC_ACQUIRE))IOLockFree(made);
+    return true;
+}
+struct WifiCallbacks {
+    IOLock *lock;
+    WifiCallbacks():lock(__atomic_load_n(&gWifiLock,__ATOMIC_ACQUIRE)){if(lock)IOLockLock(lock);}
+    ~WifiCallbacks(){if(lock)IOLockUnlock(lock);}
+};
 #define SHENG_SIOCSA80211 0x802869c8UL   // _IOW('i', 200, struct apple80211req)
 #define SHENG_SIOCGA80211 0xc02869c9UL   // _IOWR('i', 201, struct apple80211req)
 
@@ -102,7 +115,8 @@ public:
         return kIOReturnSuccess;
     }
     IOReturn request(IOExternalMethodArguments *args) {
-        int (*handler)(unsigned long, void *, void *, uint32_t) = gWifiKernelRequest;
+        WifiCallbacks callbacks;if(!callbacks.lock)return kIOReturnNotReady;
+        int (*handler)(unsigned long, void *, void *, uint32_t) = __atomic_load_n(&gWifiKernelRequest,__ATOMIC_ACQUIRE);
         if (!handler) return ENXIO;
         uint8_t *input = static_cast<uint8_t *>(IOMallocData(kInputSize));
         if (!input) return kIOReturnNoMemory;
@@ -178,7 +192,8 @@ public:
     // attached there is no radio to ask: ENXIO, as for a device that is not there.
     SInt32 performCommand(IONetworkController *controller, unsigned long cmd, void *arg0, void *arg1) override {
         if (cmd == SHENG_SIOCSA80211 || cmd == SHENG_SIOCGA80211) {
-            int (*request)(unsigned long, void *) = gWifiRequest;
+            WifiCallbacks callbacks;if(!callbacks.lock)return ENXIO;
+            int (*request)(unsigned long, void *) = __atomic_load_n(&gWifiRequest,__ATOMIC_ACQUIRE);
             return request && arg1 ? request(cmd, arg1) : ENXIO;
         }
         return IOEthernetInterface::performCommand(controller, cmd, arg0, arg1);
@@ -186,7 +201,7 @@ public:
     // Type 0 is the wireless framework's connection; the family's own types stay the family's.
     IOReturn newUserClient(task_t owningTask, void *securityID, UInt32 type, IOUserClient **handler) override {
         if (type != 0) return IOEthernetInterface::newUserClient(owningTask, securityID, type, handler);
-        if (!gWifiKernelRequest) return kIOReturnNotReady;
+        if (!__atomic_load_n(&gWifiKernelRequest,__ATOMIC_ACQUIRE)) return kIOReturnNotReady;
         ShengWifiUserClient *client = OSTypeAlloc(ShengWifiUserClient);
         if (!client || !client->initWithTask(owningTask, securityID, type)) { OSSafeReleaseNULL(client); return kIOReturnNoMemory; }
         if (!client->attach(this)) { client->release(); return kIOReturnError; }
@@ -234,24 +249,31 @@ public:
     }
     IOReturn enable(IONetworkInterface *) override {
         enabled = true;
-        link(!gWifiOutput || gWifiLink);
+        link(!__atomic_load_n(&gWifiOutput,__ATOMIC_ACQUIRE) || __atomic_load_n(&gWifiLink,__ATOMIC_ACQUIRE));
         return kIOReturnSuccess;
     }
     IOReturn disable(IONetworkInterface *) override {
-        enabled = false;
         setLinkStatus(kIONetworkLinkValid, nullptr);
+        enabled = false;
         return kIOReturnSuccess;
     }
     // To the WiFi module's queue once it attached (it takes the frame in every case); before that consumed and counted as dropped,
     // as a controller with no carrier does.
     UInt32 outputPacket(mbuf_t packet, void *) override {
-        if (int (*output)(mbuf_t) = gWifiOutput) {output(packet); return kIOReturnOutputSuccess;}
+        WifiCallbacks callbacks;
+        if(callbacks.lock)if (int (*output)(mbuf_t) = __atomic_load_n(&gWifiOutput,__ATOMIC_ACQUIRE)) {output(packet); return kIOReturnOutputSuccess;}
         freePacket(packet);
         return kIOReturnOutputDropped;
     }
-    void link(bool up) {
-        if (up) setLinkStatus(kIONetworkLinkValid | kIONetworkLinkActive, medium, 1000ULL * 1000 * 1000);
-        else setLinkStatus(kIONetworkLinkValid, nullptr);
+    static IOReturn linkAction(OSObject *owner,void *value,void *,void *,void *){
+        auto *self=static_cast<B5qEthernet*>(owner);
+        if(!self->enabled)return kIOReturnSuccess;
+        if(value)self->setLinkStatus(kIONetworkLinkValid|kIONetworkLinkActive,self->medium,1000ULL*1000*1000);
+        else self->setLinkStatus(kIONetworkLinkValid,nullptr);
+        return kIOReturnSuccess;
+    }
+    void link(bool up){
+        if(auto *gate=getCommandGate())gate->runAction(linkAction,reinterpret_cast<void*>(uintptr_t(up)));
     }
     ifnet_t bsdIfnet() const {return interface ? interface->getIfnet() : nullptr;}
     bool enabled = false;
@@ -327,19 +349,35 @@ extern "C" bool sheng_ethernet_wifi_attach(int (*output)(mbuf_t), int (*request)
 {
     B5qEthernet *controller = gController;
     if (!controller || !output) return false;
-    gWifiLink = false;
-    gWifiRequest = request;
-    gWifiKernelRequest = kernelRequest;
-    gWifiOutput = output;
-    if (controller->enabled) controller->link(false);
+    if(!wifiLockReady())return false;
+    {
+        WifiCallbacks callbacks;
+        __atomic_store_n(&gWifiLink,false,__ATOMIC_RELEASE);
+        __atomic_store_n(&gWifiRequest,request,__ATOMIC_RELEASE);
+        __atomic_store_n(&gWifiKernelRequest,kernelRequest,__ATOMIC_RELEASE);
+        __atomic_store_n(&gWifiOutput,output,__ATOMIC_RELEASE);
+    }
+    controller->link(false);
     return true;
+}
+// Taking this mutex drains every previously copied callback before Linux frees its queues.
+extern "C" void sheng_ethernet_wifi_detach(void){
+    {
+        WifiCallbacks callbacks;
+        __atomic_store_n(&gWifiOutput,nullptr,__ATOMIC_RELEASE);
+        __atomic_store_n(&gWifiRequest,nullptr,__ATOMIC_RELEASE);
+        __atomic_store_n(&gWifiKernelRequest,nullptr,__ATOMIC_RELEASE);
+        __atomic_store_n(&gWifiLink,false,__ATOMIC_RELEASE);
+    }
+    auto *controller=__atomic_load_n(&gController,__ATOMIC_ACQUIRE);
+    if(controller)controller->link(false);
 }
 // The module's link: up after a join, down when it is lost or left.
 extern "C" void sheng_ethernet_wifi_link(bool up)
 {
-    gWifiLink = up;
+    __atomic_store_n(&gWifiLink,up,__ATOMIC_RELEASE);
     B5qEthernet *controller = gController;
-    if (controller && controller->enabled) controller->link(up);
+    if (controller) controller->link(up);
 }
 // The interface's ifnet: none until the network configuration has named the interface (IONetworkStack attaches it then).
 extern "C" ifnet_t sheng_ethernet_ifnet(void)

@@ -25,12 +25,11 @@ Result brightness(Read read,Write write,Delay delay,uint32_t level) {
     if(oldPattern)return Result::Busy;
     const uint32_t oldDma=read(dmaControl),oldLength=read(length);
     // INT_CTRL mixes W1C status and enables. Acknowledge only DMA_DONE and
-    // preserve enable bits; never clear another owner's completion/errors.
+    // preserve enable bits; clear stale command error with its W1C bit.
     constexpr uint32_t enables=(1u<<1)|(1u<<9)|(1u<<11)|(1u<<13)|
         (1u<<15)|(1u<<17)|(1u<<21)|(1u<<25)|(1u<<29)|(1u<<31);
     const uint32_t oldInterrupts=read(interrupts)&enables;
-    if(read(interrupts)&error)return Result::Error;
-    write(interrupts,oldInterrupts|done);
+    write(interrupts,oldInterrupts|done|error);
     write(pattern,0x30006);
     // MSM embedded long packet: WC=3, DCS long write 0x39, LAST|LONG.
     // Payload is DCS 0x51 followed by the panel's big-endian 12-bit level.
@@ -47,7 +46,7 @@ Result brightness(Read read,Write write,Delay delay,uint32_t level) {
         if(status&done){result=Result::Ok;break;}
         delay(10);
     }
-    write(interrupts,oldInterrupts|done);
+    write(interrupts,oldInterrupts|done|error);
     write(pattern,0);
     write(fifoReset,1);delay(1);write(fifoReset,0);
     write(dmaControl,oldDma);write(length,oldLength);

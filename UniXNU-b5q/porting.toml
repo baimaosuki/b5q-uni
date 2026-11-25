@@ -3087,3 +3087,105 @@ revision = "037cd05c654f92145ef82bd86fc4c40a415bfccc"
 reference = "reports/v33b-repair2.json"
 command = "CI45443154576;check-v33b-returned.py --reuse-unchanged-firmware;package-batch2-esp.py;verify-p0-images.py twice;actualallprofileGPUADTreadback"
 result = "NativeCI/allreturnedbinaryandtwo800MiB4KnreadbackgatesPASS;all4profilescontain3correctGPUfirmwareSHA,size66844/76724/12088;lidbit1clearandnolidworker/PMnotify/backlightoverride/DSI1. Firmwareinputs/FD/bootunchangedverified. ESP SHA256 cfcdc33d75d62e35b83807298e7ecbf84580661a0cb79e1423b50430edeb1cb2. No phone or Data access;HOST_VERIFIED_PENDING_HARDWARE;actualPCIeL0causeandBTversion/USBDeviceenumremainpending."
+
+[[area]]
+id = "v33d-p0-local-review"
+status = "host-verified"
+components = ["QcomDwc3", "HidInputProbe", "Ath12kWifi"]
+paths = ["package/QcomDwc3.cpp", "package/B5qTouchMouse.h", "package/B5qMouseReport.h", "package/NativeHidInput.cpp", "reports/v33d-p0-local-review.md", "reports/v33d-p0-local-review.json"]
+inputs = ["Physical v33d XNU2LOG.BIN SHA256 8935bfebba30de71e1f555c430e6afc6218db0994bb884ba20071cad252aab1b; valid highest slot1 seq156,1765lines,locklost61; neither zero-loss nor full hardware success inferred", "Original 26C5035r kernelcache.decompressed SHA256 d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9", "Original Samsung HALIOMMUDxe.efi SHA256 a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef; raw disassembly and unmodified machine-code execution retained", "Review baseline bbefab15224eb4d0ba65938bc76cfc8e5477b8b1; firmware snapshots before local edits retained; reproducible follow-on patch0014"]
+configuration = ["USB/PCIe/media DMA AP01, normal Attr2 WB-IS, MSI Attr0Device/AP01; SCTLR00c01027 and TCR00803510; original reserved-memory guards, independent domains, cacheclean/dsb and EfiReserved tables preserved", "Device controller initially allowed; real standardBringup configurator personality and controller registerService publication; periodic8-to0 power retry stops on ACK/powerOn and never requests old Device role after unplug/Host", "Touch owns held buttons without wn8030 state; physicalXY HID push/pop isolated from scroll;4095-domain /5X /2Y remainders,180X/90Y/300ms frozen tap candidate,32msdown/8msup,staggeredrighttap; doubletapdrag disabled"]
+procedure = ["Run scripts/b5q-install/pre-ci-v33d.py locally only: source-bound retained P0-P4/v33b gates, new production-table walk/DarwinOutsideRanges and actual USB retry/QMP role tests, phone-touch ASan/UBSan, original binaries, arm64e/EDK2 compilation and cross-object PAC/zeroEL1SMMU", "Produce complete source diff against delivered metadata baseline plus firmware-before snapshots; preserve all stdout/stderr and original binary disassembly for owner review", "STOP before push/CI/ESP/phone operations until owner reviews current attachment request"]
+findings = ["Old USB leaf708 and MSI700 lacked unprivileged RW; corrected748/740. Software walks cb14d000 and9838b1000 plus every allocatable owned/outside4Kpage verify identity/AP/Attr/SH/AF; original reserved holes remain unmapped. USB/PCIe/media no-stall ASIDPNE configuration is accepted/copied by actual HAL RVA2db0; old RVA2cd0 values are defaults, not validation constraints", "Original macOS configurator start b1c47a4 calls createUSBDevice b1bcdf4, then virtual startUSBStack b1ba534 and joinPowerPlane b1b13c0 reach PMinit/joinPMtree/registerPowerDriver(5states). Real IOService c3564b8 branches to return8 atc3565fc when uninitialized. Source fixes publish configuration matching and retry8->8->0; normal/reverse QMP role-loop tests prove exactlyone initialization", "Phone tests freeze100/-40 jitter through80ms lift, produce32msleft pulses/two120ms-spacedclicks without drag or redundant releases, reanchor slop/time crossing with nojump, preserve XYremainders, righttap2->1->0, boundedqueue, identity/recovery and uint32timewrap; timer/workloop/stop PAC and serialization retained. New limited diagnostics print clicks_left/right,taps_cancelled_slop/time,lifts_seen", "Optional WiFi source audit only: Samsung gcc-kalama.c maps6b070[1:0]=0 to PHYPIPE and2 toXO; branch enable52008bit4/halt6b048. Current recipe selectsXO during setup thenPIPE after PHY, and enablesbit4. Logged pipe0 is a selector value, not proof clock is disabled; physical L0 timeout remains unproven and no speculative WiFi clock change made"]
+completion = ["Local source/host/target/PAC review only; exact receipts and file hashes in reports/v33d-p0-local-review.json and artifacts/b5q-v33d-p0-review. No new native full-kernel/UEFI CI, ESP generation, hardware validation or flashing claimed"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; actual USB DMA/enumeration, PMpowerOn and phone click feel require a later approved build and hardware run", "Latest user instruction requires review before push/CI; no phone or existing Data access"]
+next_action = ["Owner reviews complete.diff, full-test-output.txt, HAL and26C5035r original disassembly; await explicit approval before any push or CI"]
+
+[[area.evidence]]
+kind = "source"
+revision = "bbefab15224eb4d0ba65938bc76cfc8e5477b8b1"
+reference = "reports/v33d-p0-local-review.md"
+command = "check-v33d-original-binaries.py; actual HAL RVA2db0 Unicorn with48B config; original26C5035r PM/configuration/vtable disassembly"
+result = "Original HAL accepts00c01027/00803510 without restrictive SCTLR/TCR checks; null domain/config return3 and unsupportedVMSA returns21. Real macOS standardBringup present/standardMuxOnly absent; power registration and uninitialized8 path identified. Revision is review diff baseline; new edits remain local/uncommitted. All source hashes retained in review receipt; hardware result pending."
+
+[[area.evidence]]
+kind = "host"
+revision = "bbefab15224eb4d0ba65938bc76cfc8e5477b8b1"
+reference = "reports/v33d-p0-local-review.json"
+command = "python3 scripts/b5q-install/pre-ci-v33d.py"
+result = "Production DMA table/DarwinOutsideRanges, actual cable8->8->0 and roleThread/followOrientation tests, touch/descriptor/timer regressions, retained P0-P4/v33b gates, target arm64e/EDK2 compilation, PAC and zeroEL1apps_smmu checks; exact final outputs retained in local review directory. No CI/push/ESP/phone operation; hardware pending."
+
+[[area]]
+id = "v33d-review2-local-repairs"
+status = "host-verified"
+components = ["QcomDwc3", "DarwinBoot", "Adreno740", "SoftwareAES", "AppleKeyStoreState", "GopFramebuffer"]
+paths = ["package/**", "scripts/**", "reports/v33d-review2.md", "reports/v33d-review2.json"]
+inputs = ["2026-11-25 owner review rejection attachment SHA256 recorded in reports/v33d-review2.json; all P0-1..P0-9 and P1-1..P1-4 subrequirements mapped individually", "Original macOS 26C5035r kernelcache SHA256 d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9; Samsung HALIOMMUDxe SHA256 a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef", "Original Samsung b5q DT and retained gcc-kalama.c hashes, exact source snapshots, executable objects and test outputs in artifacts/b5q-v33d-review2; before.json covers554pre-edit source files"]
+configuration = ["board.toml byte-identical SHA256 967683af4c48528096e46f3bc8402881cd0cfa735fb96b48ea80a222a127c02b,1011-byte args; no new touch-mouse arg, no lid or cover display path", "0014 patch byte-identical SHA256 8111a4c0639fb89c117cc10d63eb86584e0c63f015d692923f9389f3305075e9; SCTLR00c01027,TCR00803510,TCR20003c071,MAIR00ff0400,USB748,MSI740 retained", "New0015/0016 reproducible follow-on patches preserve static USB map buffer lifetime, order PCIe/media/DP/final-map allocation before USB snapshot and forbid synthetic input-page reclamation when USB handoff is present"]
+procedure = ["Run B5Q_GATE_WORK=artifacts/b5q-v33d-review2 python3 scripts/b5q-install/pre-ci-v33d.py locally; preserve first failures and final stdout/stderr", "Reconstruct16firmware/loader patches with git apply and diff-ruN, compile actual arm64e/EDK2 objects, resolve cross-object imports and PAC without linking a deployment image", "Write complete incremental and cumulative source diffs, per-subrequirement table, source/input/output SHA manifests and complete test output in the new local review directory; stop for owner review"]
+findings = ["Correction of rejected v33d-p0-local-review: configuration-string must be OSData with trailingNUL, not OSString. Original OSData GOT89aa230/metaClass7f2ca00 plus safeMetaCastb1ade8c/getBytesNoCopyb1adeb4 proves the type. HID PhysicalMin/Max now10051centi-inch and326.007CPI, superseding the earlier828CPI claim; neutral report sent on first event-driver binding", "USB publication cleanup now precedes registration, IRQ callback state is locked/retained and drained before teardown,65536/s storm window resets on route; role flags atomic, reset ordering serialized and per-attach power counter snapshot. UsbProbe explicitly loads/matches7families with null guards", "USB map uses static32768Bbuffer with no transient AllocatePool/FreePool; failed attached domains are retained. DarwinBoot reserves independent DMA pools before USB and excludes unmapped input pages from synthetic loader reclamation. Live trees and16patch reconstruction are byte-identical with diff-ruN return0", "Touch identify ignores unsolicited10 and consumes01; IRQ NotReady retries240x250ms; producer/consumer seqlock barriers/retries and sink removal ordering fixed; C1eid!=0 preserves live slots. PMK8550GPIO3 five-register setup, original11wlan_pdc messages and shared AOSSQMP ACK/timeout handling now precede radio-enable; Bluetooth also owns smpg2", "PCIe PHY switches toPIPE before final startup writes,113table+2startup sequence retained, RCG371fmasks/branch halt verified; BCM preserves zero highwords, config writes use1/2/4native widths and link-up guards, endpoint busmaster clears beforePERST. GENI waitsDONE aftererror and drainsnullRX; Bluetooth error masks/RX/wake/defaultpins and Ethernet callback detach/commandgate fixed", "PSCI32sign extension, explicit thread returns, DPUflush-before-stop, DSIW1C/retry-generation, boundedKeyStore copying, weakthermal guard,centiKelvin temperature, GMUalignment and GPUcache-PFN/recovery/ring1/DCVS/heartbeat synchronization, audio publication/barrier and DPfeature/exclusion handoff fixed", "Reuse discovery now selects a complete successful nonexpired artifact and records hashes rather than hardcoded45047962341; uploads retain reusable GPU/Data/trust/UsbDma objects. Packedpayload decode, pairedFDmenu/loader, unconditionalGPUADTpreservation and executable SMMUconstant gates added; existing WiFireadiness AST retained. Mocked discovery and oldEFI rejection tested without network or deployment generation"]
+completion = ["All requested LOCAL repairs and review gates pass; per-subrequirement results and precise counts in reports/v33d-review2.json. No native complete kernel/firmware link, CI run, deployment ESP or hardware execution claimed"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; actual USB DMA/enumeration, wireless link, touch feel and media execution remain hardware-dependent", "Owner explicitly forbids push/CI/ESP/phone access until this new diff is reviewed; existing Data and unrelated TWRP changes untouched"]
+next_action = ["Owner reviews artifacts/b5q-v33d-review2/complete.diff, full-test-output.txt and reports/v33d-review2.md before any push or CI"]
+
+[[area.evidence]]
+kind = "source"
+revision = "0d7987483db8ec18963de5c47cc814c1c0fbe4ef"
+reference = "reports/v33d-review2.md"
+command = "Compare all current sources with review2/before snapshots; git apply --check/apply in temporary tree; reconstruct firmware patches and diff -ruN"
+result = "Uncommitted local review only. Per-file hashes and requirement table cover every P0/P1 item. OSData binary type and326CPI explicitly correct the rejected earlier report. Board/0014 and WiFi readiness assertions remain unchanged. Firmware16patches match live tree with zero drift."
+
+[[area.evidence]]
+kind = "host"
+revision = "0d7987483db8ec18963de5c47cc814c1c0fbe4ef"
+reference = "reports/v33d-review2.json"
+command = "B5Q_GATE_WORK=artifacts/b5q-v33d-review2 python3 scripts/b5q-install/pre-ci-v33d.py"
+result = "PASS source-bound retained P0-P4 and22v33b groups plus review2 production tests, ASan/UBSan, originalHAL machinecode cases, arm64e/EDK2 object compilation,124wirelessobjects/69PACcontracts,118timer-workloopcontracts,USB-GMU-extendedPAC and31boardobjects zeroEL1apps_smmu. Exact logs/hashes retained; no push/CI/ESP/phone or hardware success."
+
+[[area]]
+id = "v33d-review3-five-fixes"
+status = "host-verified"
+components = ["QcomDwc3", "Adreno740", "Ath12kWifi"]
+paths = ["package/QcomDwc3.cpp", "package/B5qWcnPower.cpp", "package/B5qAossQmpLock.h", "package/B5qGpu.cpp", "package/UsbProbe.cpp", "package/B5qEthernet.cpp", "scripts/b5q_adsp.py", "scripts/build-b5q-adreno.py", "reports/v33d-review3.md", "reports/v33d-review3.json"]
+inputs = ["Owner review3 requests exactly four P0 fixes and one P1 cleanup; baseline snapshots of562files and SHA256 manifest in artifacts/b5q-v33d-review3/before.json", "Pinned UniXNU-sheng6c42e1055ffb3b335fda991190ad221edaa7af3c WifiProbe.cpp272-289 and AdspProbe.cpp mailbox transaction; exact input hashes in reports/v33d-review3.json", "Existing51member Adreno archive and actual target-compiled GMU/B5qGpu objects; hashes and native archive replacement evidence retained in local review logs"]
+configuration = ["No board.toml/bootarg/0014/UEFI/loader changes; accepted review2 runtime code outside the five requested fixes retained", "AOSS mailbox mutex is independent of RPMh; one strong provider in B5qWcnPower and same RAII lock in WCN PDC and generated ADSP handshake/send/wait/abandon scope", "GPU archive reuse recompiles current kits/b5q/B5qGpu.cpp plus NativeAdrenoGmuService.cpp only; every other object SHA remains unchanged; b5q-build retention30days"]
+procedure = ["Run focused production IRQ/SPMI/shared-QMP/Ethernet/GPU/USB regressions with ASan/UBSan; verify actual archive replacement and returned-gate rejection of stale B5qGpu", "Rerun local pre-ci-v33d total gate including current wireless+ADSP target/symbol/PAC closure and retained review2 gates; stop before push/CI/ESP/phone", "Produce only current-round incremental diff, complete logs and five-requirement evidence table in artifacts/b5q-v33d-review3"]
+findings = ["primary no longer retains/releases owner or nub in hard IRQ; inFlight plus thread-side route/unregister drains protects lifetime. ASan regression destroys last thread-owned owner/nub refs after final IRQ unlock but before IRQ return, with hard-IRQ retain/release/free forbidden", "PMKGPIO3 discovery no longer filters APPSowner; observer reads state first, accepts already-enabled output function2 for anyowner and ignores reservedbits. Only disabled APPS-owned LV/MV pins open writechannel; fivewrites and effective-field readback verified", "WCN/ADSP shared QMP lock spans complete transaction including failure/abandon; separate RPMh mutex never held by ADSP QMP scope. Real production QMP concurrentpeer regression serializes11PDC+1ADSP messages, preserves timeout cleanup and unlocks on failures", "GPUreuse now replaces two current objects and records both member/source hashes in mmio-helper/reuse receipts; returned acceptance inspects actual uploaded libAdreno740.a. Real51member archive test keeps49hashes identical, replaces exactlytwo and rejects old boardmember; deterministic re-reuse still recompiles both. restartSecondary requires both gPreemptWanted and gSubmit.preemption()", "UsbProbe failedload explicitly returns after thread_terminate; Ethernet enabled predicate now inside gated linkAction and callers no longer read controller->enabled; buildartifact retention3to30days is the only workflow change"]
+completion = ["All five LOCAL requirements and full local gate passed; exact receipt/log hashes in reports/v33d-review3.json. No full native kernel/firmware link or hardware result claimed"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; no new CI, ESP/FD, device connection or deployment during this review round", "Final push/CI remains paused per owner instruction until review3 final approval"]
+next_action = ["Owner reviews artifacts/b5q-v33d-review3/complete.diff, full-test-output.txt and reports/v33d-review3.md"]
+
+[[area.evidence]]
+kind = "source"
+revision = "0d7987483db8ec18963de5c47cc814c1c0fbe4ef"
+reference = "reports/v33d-review3.md"
+command = "Compare review3 before snapshots; git apply --check and apply in temporary tree; verify board/0014 and unrelated TWRP byte identity"
+result = "Five requested fixes only, with their directly required host/target/return acceptance checks. Strong shared-lock provider and actual current GPU archive replacement verified; no accepted review2 firmware constants or loader behavior changed."
+
+[[area.evidence]]
+kind = "host"
+revision = "0d7987483db8ec18963de5c47cc814c1c0fbe4ef"
+reference = "reports/v33d-review3.json"
+command = "B5Q_GATE_WORK=artifacts/b5q-v33d-review3 python3 scripts/b5q-install/pre-ci-v33d.py"
+result = "PASS full retained local gate plus focused review3 ASan/UBSan, actual archive hash/rejection checks and combined158wireless/mediaobjects with80authenticated contracts,zero unresolved/duplicates/EL1apps_smmu. Exact final logs and input hashes retained; no push/CI/ESP/phone."
+
+
+[[area]]
+id = "v33d-release-ci"
+status = "host-verified"
+components = ["QcomDwc3", "Adreno740", "Ath12kWifi"]
+paths = ["package/B5qEthernet.cpp", "reports/v33d-release.json", "reports/v33d-release.md"]
+inputs = ["Owner approved review3 and authorized b5q-only commit/push/workflow build/download/returned checks/finalESP; flashing still requires final confirmation", "Approved review3 source manifest and full logs in artifacts/b5q-v33d-review3; release local logs and source commit recorded in artifacts/b5q-v33d-release"]
+configuration = ["Ethernet disable sends link-valid/down status before clearing enabled; preserves the gate-protected linkAction predicate", "No board args/0014 constants changed; GPU and Data caches retained; firmware compiled from all16reconstructed patches"]
+procedure = ["Run Ethernet lifecycle and focused disable-order production test plus actual arm64e target compile; rerun source-bound total local gate", "Create b5q-only commit atop current remote codex/b5q-p0-p5 without modifying primary index or unrelated TWRP changes; push triggers one complete workflow", "Download both ordinary Actions artifacts with SHA verification; run check-v33b-returned and actual archive/PAC/ADT/APFS checks before final ESP assembly; stop before phone operations"]
+findings = ["Ethernet production disable now calls setLinkStatus(kIONetworkLinkValid,nullptr) while enabled remains true; focused host test verifies observed flag/order and target compile passes", "Returned GPU PAC endpoints are extracted from the actual uploaded libAdreno740.a rather than old cached board glue; artifact extraction retains uploaded reusable inputs outside package.manifest prefix", "Local preflight/CI/returned gate/finalESP results are recorded as they complete in reports/v33d-release.json; pending steps are not hardware successes"]
+completion = ["Approved review3 plus final Ethernet correction locally verified; CI and returned artifact completion pending at source submission"]
+limits = ["No phone connection or flashing authorized in this release step; HOST_VERIFIED_PENDING_HARDWARE"]
+next_action = ["Follow the single approved CI through returned validation and finalESP; request confirmation only before flashing"]
+
+[[area.evidence]]
+kind = "host"
+revision = "bbefab15224eb4d0ba65938bc76cfc8e5477b8b1"
+reference = "reports/v33d-release.json"
+command = "test-ethernet-lifecycle.py; test-v33d-review3.py; check-wifi-target.py; pre-ci-v33d.py"
+result = "Ethernet host/target checks pass; original base revision records the parent of the forthcoming release commit. CI/native returned images remain pending until actual artifact checks."

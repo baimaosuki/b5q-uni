@@ -4,10 +4,10 @@
 #include <stdint.h>
 namespace B5qWcn {
 // b5q.dts six BT logical supplies share four physical VRM resources.
-// Wi-Fi AON adds smpg2; no Xiaomi smpg5/850mV or PMK8550 GPIO3.
+// Both radios require smpg2; PMK8550 GPIO3 provides the shared sleep clock.
 struct Rail {const char *name;unsigned mv;};
 constexpr Rail rails[]={{"ldob15",1800},{"smpe4",966},{"smpg6",1900},{"smpg4",1350},{"smpg2",1012}};
-constexpr uint8_t masks[]={0x1f,0x0f};
+constexpr uint8_t masks[]={0x1f,0x1f};
 struct Power {
     uint8_t owners=0,retained=0,refs[5]={};
     template<class Vote> bool get(unsigned radio,Vote vote) {

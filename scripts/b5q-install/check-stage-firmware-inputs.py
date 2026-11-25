@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Reconstruct the exact CI firmware patch inputs before spending another run."""
-import argparse,hashlib,json,os,re,subprocess,tempfile
+import argparse,hashlib,json,os,re,subprocess,tempfile,shutil
 from pathlib import Path
 R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--out',type=Path,required=True)
@@ -18,7 +18,10 @@ if a.media or a.dp:
 if a.dp:
  groups[0][2].append(patch/'0011-b5q-dp-splash-tail.patch')
  groups[0][2].append(patch/'0013-b5q-reserved-dma-guards.patch')
+ groups[0][2].append(patch/'0014-b5q-dma-unprivileged-wbis.patch')
+ groups[0][2].append(patch/'0015-b5q-usb-map-lifetime.patch')
  groups[2][2].append(patch/'0012-darwinboot-b5q-dp-tail.patch')
+ groups[2][2].append(patch/'0016-darwinboot-dma-order-inputs.patch')
 with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
  for index,(repo,revision,patches)in enumerate(groups):
   dest=Path(td)/str(index);dest.mkdir();paths=set();subprocess.run(['git','init','-q',str(dest)],check=True)
@@ -39,12 +42,17 @@ with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
    target=dest/name;actual=R/repo/name
    assert target.is_file() and actual.is_file() and target.read_bytes()==actual.read_bytes(),(repo,name)
    identities[name]=hashlib.sha256(target.read_bytes()).hexdigest()
+  mirror=Path(td)/('live-'+str(index));mirror.mkdir()
+  for name in sorted(paths):
+   target=mirror/name;target.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(R/repo/name,target)
+  diff=subprocess.run(['diff','-ruN','--exclude=.git',str(dest),str(mirror)],capture_output=True,text=True)
+  assert diff.returncode==0,(repo,diff.stdout,diff.stderr)
   if index==0:
    inf='Binaries/b5q/QcomPkg/Drivers/UFSDxe/UFSDxe.patched.efi'
    target=dest/inf;target.parent.mkdir(parents=True,exist_ok=True);target.symlink_to(R/repo/inf)
    env=dict(os.environ,UNIXNU_UEFI=str(dest),UNIXNU_DEVICE=str(Path(td)/'record'))
    subprocess.run(['python3',str(R/'UniXNU-b5q/scripts/check-b5q-uefi.py')],env=env,check=True)
-  records.append(dict(repo=repo,revision=revision,patch_sha256={f.name:hashlib.sha256(f.read_bytes()).hexdigest()for f in patches},reconstructed_source_sha256=identities))
+  records.append(dict(repo=repo,revision=revision,patch_sha256={f.name:hashlib.sha256(f.read_bytes()).hexdigest()for f in patches},reconstructed_source_sha256=identities,diff_ruN_returncode=diff.returncode,diff_ruN_stdout=diff.stdout))
 a.out.parent.mkdir(parents=True,exist_ok=True)
 a.out.write_text(json.dumps(dict(passed=True,groups=records,hardware_verified=False),indent=2)+'\n')
 print('PASS',sum(len(g[2])for g in groups),'firmware patches reconstruct exact current sources; retained DMA, UFSDxe, USB exclusion, memory reservations and direct decompressor gates')

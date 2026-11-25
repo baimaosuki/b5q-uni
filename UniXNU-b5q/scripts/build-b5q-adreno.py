@@ -10,30 +10,36 @@ if reuse:
  # submission. This is archive reuse, not a claim that it was recompiled.
  source=Path(reuse)
  shutil.copyfile(source,out/'libAdreno740.a')
- # Reuse every GPU/GMU/Turnip binary except this one register-map helper.
- # Explicit Inhibit replaces its ambiguous default; replay the real core
- # C++ record and verify that ar changed exactly the intended member.
+ # Rebuild only current board GPU glue and the register-map helper. Preserve
+ # every other archived object and replay the real core C++ compile record.
  from b5q_adreno_mmio import prepare
  original=ROOT/'drivers/Adreno740/NativeAdrenoGmuService.cpp'
  adapted=prepare(original,out/original.name)
- member='NativeAdrenoGmuService.o';target=out/member;path=out/'libAdreno740.a'
+ board=ROOT/'kits/b5q/B5qGpu.cpp'
+ rebuilt=['NativeAdrenoGmuService.o','B5qGpu.o'];path=out/'libAdreno740.a'
  # Apple ar lists its generated symbol index; llvm-ar hides it. Rebuilding
  # the index is required when the replacement object's size changes. Verify
  # every actual object, not the generated __.SYMDEF offsets into the archive.
  indexes={'__.SYMDEF','__.SYMDEF SORTED','__.SYMDEF_64','__.SYMDEF_64 SORTED'}
  def members():return [n for n in subprocess.check_output(['xcrun','ar','t',str(path)],text=True).splitlines()if n not in indexes]
- names=members();assert names.count(member)==1 and len(names)==len(set(names))
+ names=members();assert all(names.count(n)==1 for n in rebuilt) and len(names)==len(set(names))
  before={n:hashlib.sha256(subprocess.check_output(['xcrun','ar','p',str(path),n])).hexdigest()for n in names}
- compile(adapted,target,['-iquote',str(original.parent),'-I',str(ROOT/'.cache/xnu-work/osfmk')])
- subprocess.run(['xcrun','ar','r',str(path),str(target)],check=True)
+ compile(adapted,out/rebuilt[0],['-iquote',str(original.parent),'-I',str(ROOT/'.cache/xnu-work/osfmk')])
+ includes=[]
+ for name in ['kits/Sm8550Platform','kits/AdrenoFirmware','kits/AdrenoPM4','kits/ArmSmmu4K','drivers/Adreno740','.cache/xnu-work/osfmk','kits/b5q','kits/b5q/Sm8550Inputs']:
+  includes+=['-I',str(ROOT/name)]
+ compile(board,out/rebuilt[1],includes)
+ subprocess.run(['xcrun','ar','r',str(path),*[str(out/n) for n in rebuilt]],check=True)
  assert members()==names,'GPU archive object member list changed'
  after={n:hashlib.sha256(subprocess.check_output(['xcrun','ar','p',str(path),n])).hexdigest()for n in names}
- assert set(before)==set(after)and all(before[n]==after[n]for n in names if n!=member)and before[member]!=after[member]
- (out/'mmio-helper.json').write_text(json.dumps(dict(passed=True,only_recompiled_member=member,
+ assert set(before)==set(after)and all(before[n]==after[n]for n in names if n not in rebuilt)
+ assert all(after[n]==hashlib.sha256((out/n).read_bytes()).hexdigest()for n in rebuilt)
+ (out/'mmio-helper.json').write_text(json.dumps(dict(passed=True,recompiled_members=rebuilt,
      original_source_sha256=hashlib.sha256(original.read_bytes()).hexdigest(),adapted_source_sha256=hashlib.sha256(adapted.read_bytes()).hexdigest(),
+     board_source_sha256=hashlib.sha256(board.read_bytes()).hexdigest(),
      source_archive_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),members_before=before,members_after=after),indent=2)+'\n')
- (out/'reuse.json').write_text(json.dumps({'source_run':44837528408,'archive_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'source_archive_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'recompiled_members':[member],'other_members_unchanged':True},indent=2)+'\n')
- print('Reused qualified Adreno archive; only register-map cache helper recompiled')
+ (out/'reuse.json').write_text(json.dumps({'archive_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'source_archive_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'recompiled_members':rebuilt,'board_source_sha256':hashlib.sha256(board.read_bytes()).hexdigest(),'members_before':before,'members_after':after,'other_members_unchanged':True},indent=2)+'\n')
+ print('Reused qualified Adreno archive; current B5qGpu and register-map helper recompiled')
  raise SystemExit(0)
 # These are shared SoC protocol types, not Xiaomi power votes or physical reservations.
 includes=[]

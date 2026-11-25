@@ -52,6 +52,8 @@ inline bool sec(const uint8_t *data,size_t n,Point out[12],DeltaStats *stats=nul
  Point pending[12];for(unsigned i=0;i<12;++i)pending[i]=out[i];
  for (size_t at = 0; at < n; at += 16) {
   const uint8_t *p = data + at;
+  const unsigned eid = p[0] & 3;
+  if(eid != 0)continue; // Status/gesture records do not change coordinate slots.
   const unsigned id = (p[0] >> 2) & 15;
   const unsigned action = p[0] >> 6;
   // Samsung synaptics_ts_irq_thread+0x170 and sec_common_fn+0x8874:

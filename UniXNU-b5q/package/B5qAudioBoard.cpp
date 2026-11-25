@@ -103,9 +103,23 @@ struct Speakers {
     bool stop(){const bool a=bottom.quiesce(),b=top.quiesce();return a&&b;}
 };
 Speakers *speakers=nullptr;
+IOLock *speakerLock;
+struct SpeakerGuard {
+    IOLock *held=nullptr;
+    SpeakerGuard(){
+        held=__atomic_load_n(&speakerLock,__ATOMIC_ACQUIRE);
+        if(!held){auto *made=IOLockAlloc();if(!made)return;IOLock *expected=nullptr;
+            if(!__atomic_compare_exchange_n(&speakerLock,&expected,made,false,__ATOMIC_RELEASE,__ATOMIC_ACQUIRE))IOLockFree(made);
+            held=__atomic_load_n(&speakerLock,__ATOMIC_ACQUIRE);}
+        IOLockLock(held);
+    }
+    ~SpeakerGuard(){if(held)IOLockUnlock(held);}
+};
 }
 extern "C" bool b5q_audio_amps_prepare(){
-    if(speakers)return speakers->bottom.prepared()&&speakers->top.prepared();
+    SpeakerGuard guard;if(!guard.held)return false;
+    auto *current=__atomic_load_n(&speakers,__ATOMIC_ACQUIRE);
+    if(current)return current->bottom.prepared()&&current->top.prepared();
     void *file=nullptr;uint64_t bytes=0;
     const char *path="/private/var/ngpu/firmware/qcom/sm8550/b5q/tfa98xx.cnt";
     int error=sheng_fw_open(path,&file,&bytes);
@@ -123,15 +137,19 @@ extern "C" bool b5q_audio_amps_prepare(){
     if(!ok)made->stop();
     IOLog("B5qAudio: amps prepare=%u bottom=%04x/%u top=%04x/%u profiles=%u/%u\n",ok,made->bottom.revision(),unsigned(made->bottom.error),made->top.revision(),unsigned(made->top.error),bottom.count,top.count);
     IOLockUnlock(made->io.lock);
-    if(!ok){delete made;return false;}speakers=made;return true;
+    if(!ok){delete made;return false;}__atomic_store_n(&speakers,made,__ATOMIC_RELEASE);return true;
 }
 extern "C" bool b5q_audio_amps_start(){
+    SpeakerGuard guard;if(!guard.held)return false;
+    auto *speakers=__atomic_load_n(&::speakers,__ATOMIC_ACQUIRE);
     if(!speakers)return false;IOLockLock(speakers->io.lock);
     const bool ok=speakers->bottom.start()&&speakers->top.start();if(!ok)speakers->stop();
     IOLog("B5qAudio: amps start=%u bottom=%u/%04x top=%u/%04x\n",ok,unsigned(speakers->bottom.error),speakers->bottom.state,unsigned(speakers->top.error),speakers->top.state);
     IOLockUnlock(speakers->io.lock);return ok;
 }
 extern "C" bool b5q_audio_amps_stop(){
+    SpeakerGuard guard;if(!guard.held)return false;
+    auto *speakers=__atomic_load_n(&::speakers,__ATOMIC_ACQUIRE);
     if(!speakers)return true;IOLockLock(speakers->io.lock);const bool ok=speakers->stop();IOLockUnlock(speakers->io.lock);
     IOLog("B5qAudio: amps stop=%u\n",ok);return ok;
 }

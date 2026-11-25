@@ -505,7 +505,7 @@ int lineAudit(uint64_t pa, size_t bytes, uint32_t *dirty, uint32_t *stale) {
         bool written = true;
         for (unsigned i = 0; i < 8; ++i) if (d[i] != copy[i]) written = false;
         if (written) {
-            if (!*dirty && !native_adreno_audit_attr) native_adreno_audit_attr = 0x100 | (pmap_cache_attributes(unsigned(pa >> 12)) & 0xff);
+            if (!*dirty && !native_adreno_audit_attr) native_adreno_audit_attr = 0x100 | (pmap_cache_attributes(unsigned(pa >> 14)) & 0xff);
             ++*dirty;
         } else {
             ++*stale;
@@ -1647,7 +1647,22 @@ void gpuHwInit() {
 // GMU keeps running and keeps the OOB GPU_SET vote; its power-collapse cycle needs a GMU stop and warm-boot path the GMU kit does
 // not have. [0] restarts, [1] the step a failed one stopped at, [2] its status, [3] RBBM_STATUS after the reset.
 extern "C" {uint32_t native_gpu_restart[4];}
+// Recovery holds the submission gate; this independent hardware mutex is
+// never held while obtaining that gate. DCVS and heartbeat MMIO use it too.
+IOLock *gGpuHardwareLock;
+struct GpuHardwareGuard {
+    IOLock *held=nullptr;
+    GpuHardwareGuard(){
+        held=__atomic_load_n(&gGpuHardwareLock,__ATOMIC_ACQUIRE);
+        if(!held){auto *made=IOLockAlloc();if(!made)return;IOLock *expected=nullptr;
+            if(!__atomic_compare_exchange_n(&gGpuHardwareLock,&expected,made,false,__ATOMIC_RELEASE,__ATOMIC_ACQUIRE))IOLockFree(made);
+            held=__atomic_load_n(&gGpuHardwareLock,__ATOMIC_ACQUIRE);}
+        IOLockLock(held);
+    }
+    ~GpuHardwareGuard(){if(held)IOLockUnlock(held);}
+};
 IOReturn gpuRestart(void *, NativeAdrenoRing *ring, uint32_t completed) {
+    GpuHardwareGuard guard;if(!guard.held)return kIOReturnNoMemory;
     uint32_t *r = native_gpu_restart;
     r[0] = r[0] + 1;
     auto fail = [&](uint32_t step, IOReturn status) {r[1] = step; r[2] = uint32_t(status); return status ? status : kIOReturnIOError;};
@@ -1663,6 +1678,7 @@ IOReturn gpuRestart(void *, NativeAdrenoRing *ring, uint32_t completed) {
     gpuHwInit();
     status = ring->restart(completed);
     if (status) return fail(3, status);
+    if(gPreemptWanted && gSubmit.preemption()){status=gRing1.restartSecondary(completed);if(status)return fail(7,status);}
     gpuWr64(A740_CP_BV_RB_RPTR_ADDR, gGpuBuffers[2].iova + 8);
     gpuWr(A740_CP_SQE_CNTL, 1);
     // The power-up list stays as a7xx_patch_pwrup_reglist wrote it at bring-up (pwrup_reglist_emitted).
@@ -1901,15 +1917,17 @@ void gpuDcvsThread(void *, wait_result_t) {
     unsigned floor = bootArg("gpu-dcvs-min", 3);
     if (floor < 1) floor = 1;
     if (floor > kGpuTop) floor = kGpuTop;
+    unsigned cur=0;uint64_t lastBusy=0,lastT=0,idleSince=0;
+    {GpuHardwareGuard initial;if(!initial.held){IOLog("B5qGpu: stage=dcvs-hardware-lock result=no-memory\n");thread_terminate(current_thread());return;}
     io.write32(io.cookie, ShengGmuCore, kGmuReg(0x23b0e), 0xff000000u);
     uint32_t sel = 0;
     io.read32(io.cookie, ShengGmuCore, kGmuReg(0x1f841), &sel);
     io.write32(io.cookie, ShengGmuCore, kGmuReg(0x1f841), (sel & ~0xffu) | 1u << 5);
     io.write32(io.cookie, ShengGmuCore, kGmuReg(0x1f840), 1);
     io.barrier(io.cookie);
-    unsigned cur = native_gpu_perf_vote[0] ? native_gpu_perf_vote[0] : kGpuTop;
+    cur = native_gpu_perf_vote[0] ? native_gpu_perf_vote[0] : kGpuTop;
     native_gpu_dcvs[0] = 1; native_gpu_dcvs[1] = cur;
-    uint64_t lastBusy = gpuBusyTicks(), lastT = mach_absolute_time(), idleSince = lastT;
+    lastBusy=gpuBusyTicks();lastT=mach_absolute_time();idleSince=lastT;}
     uint64_t runNs = 0, winBusy = 0, winNs = 0, atLevel[kGpuTop + 1] = {};
     unsigned down = 0, hold = 0;
     unsigned span = bootArg("gpu-dcvs-span", 1);
@@ -1929,6 +1947,7 @@ void gpuDcvsThread(void *, wait_result_t) {
     const bool tracePerf=bootArg("gpu-perf",0)==1;unsigned perfTick=0;
     for (;;) {
         IOSleep(16);
+        GpuHardwareGuard guard;if(!guard.held){static unsigned failures;if(!failures++)IOLog("B5qGpu: stage=dcvs-hardware-lock result=no-memory retry=1\n");continue;}
         const uint64_t busy = gpuBusyTicks(), t = mach_absolute_time();
         if(tracePerf && !(++perfTick&1))gpuPerfTick(busy);
         uint64_t ns = 0;
@@ -2049,6 +2068,8 @@ void heartbeat() {
     // tells a live kernel from a hung one and shows whether the GPU stays idle.
     char row[64];
     for (unsigned t = 0;; t += 2) {
+        bool ringBusy=false;
+        {GpuHardwareGuard guard;if(!guard.held){static unsigned failures;if(!failures++)IOLog("B5qGpu: stage=heartbeat-hardware-lock result=no-memory retry=1\n");IOSleep(2000);continue;}
         uint32_t info = 0;
         gColdDevice.io.read32(gColdDevice.io.cookie, ShengGmuCore, kG2hInfo, &info);
         if (gxOn() && gpuRd(A740_CP_RB_RPTR) != gpuRd(A740_CP_RB_WPTR)) {
@@ -2105,9 +2126,11 @@ void heartbeat() {
             IOLog("B5qThermal: %s | %s\n",thermal,level);IOLog("B5qClock: %s\n",clock);
             IOLog("B5qInput: hid=%u/%u/%u btn=%d/%d/%d/%x touch=%u/%u\n",native_hid_input_events[0],native_hid_input_events[1],native_hid_input_events[6],native_buttons_stats[0],native_buttons_stats[1],native_buttons_stats[2],native_buttons_stats[3],native_touch_count,native_touch_hid_reports);
         }
+        ringBusy=gxOn() && gpuRd(A740_CP_RB_RPTR)!=gpuRd(A740_CP_RB_WPTR);
+        } // No hardware mutex held across submission/statistics or sleep.
         metalRows();
         registerExecObserver();
-        if (!(gxOn() && gpuRd(A740_CP_RB_RPTR) != gpuRd(A740_CP_RB_WPTR))) gicRow();
+        if(!ringBusy)gicRow();
         if (t == 4 || t == 40 || t == 120) ipiSelfTest();
         IOSleep(2000);
     }

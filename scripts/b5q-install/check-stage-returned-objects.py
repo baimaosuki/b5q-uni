@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 """Check CI-built callbacks/zero-apps_smmu against actual new core objects."""
-import argparse,hashlib,importlib.util,json,shutil,subprocess,sys
+import argparse,hashlib,importlib.util,json,os,shutil,subprocess,sys
 from pathlib import Path
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R/'UniXNU-b5q/scripts'))
 p=argparse.ArgumentParser(description=__doc__)
 for key in ['ci','out']:p.add_argument('--'+key,type=Path,required=True)
 a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
-baseline=R/'artifacts/b5q-batch2-work/pac';origins={}
+origins={}
 names=['QcomDwc3.o','ArmCpu.o','BoardClock.o','ArmDTPlatform.o','ButtonProbe.o','NativeHidInput.o','B5qTouch.o','ThermalLevel.o','IOUserClient.cpo']
 for name in names:
  matches=list(a.ci.rglob(name));assert len(matches)==1,(name,matches)
  src=matches[0];shutil.copyfile(src,a.out/name);origins[name]=dict(source='actual new CI',path=str(src),sha256=hashlib.sha256(src.read_bytes()).hexdigest())
+archive,=a.ci.rglob('libAdreno740.a')
+ar=R/'tools/llvm21/usr/lib/llvm-21/bin/llvm-ar'
+env=dict(os.environ,LD_LIBRARY_PATH=str(R/'tools/llvm21/usr/lib/x86_64-linux-gnu'))
 for name in ['B5qGpu.o','ShengGmu.kit.o']:
- src=baseline/name;shutil.copyfile(src,a.out/name);origins[name]=dict(source='unchanged reused GPU archive, prior qualified object',path=str(src),sha256=hashlib.sha256(src.read_bytes()).hexdigest())
+ data=subprocess.check_output([str(ar),'p',str(archive),name],env=env)
+ (a.out/name).write_bytes(data)
+ origins[name]=dict(source='actual returned GPU archive',path=str(archive),member=name,sha256=hashlib.sha256(data).hexdigest())
 subprocess.run([sys.executable,str(R/'scripts/b5q-install/check-usb-gmu-pac.py'),'--usb',str(a.out/'QcomDwc3.o'),
  '--armcpu',str(a.out/'ArmCpu.o'),'--gpu',str(a.out/'B5qGpu.o'),'--gmu',str(a.out/'ShengGmu.kit.o'),
  '--extended-dir',str(a.out),'--out',str(a.out/'callbacks.json')],check=True)
@@ -36,4 +41,4 @@ for path in sorted(a.ci.rglob('*.o')):
 assert len(checks)>=20
 result=dict(passed=True,origins=origins,actual_new_board_objects=checks,hardware_PAuth_execution_tested=False)
 (a.out/'report.json').write_text(json.dumps(result,indent=2)+'\n')
-print('PASS actual CI callback PAC and',len(checks),'new board objects zero apps_smmu; GPU endpoints remain explicit cache reuse')
+print('PASS actual CI callback PAC and',len(checks),'new board objects zero apps_smmu; GPU endpoints extracted from actual returned archive')

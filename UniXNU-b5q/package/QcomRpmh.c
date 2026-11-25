@@ -30,7 +30,7 @@ int qcom_cmd_db_find(const uint8_t *db, size_t bytes, const char *name, QcomRpmh
             if (!r.address || !fits(at, length, bytes)) return QcomRpmhCorrupt;
             for (size_t l = 0; l + 1 < length && r.level_count < QCOM_RPMH_MAX_LEVELS; l += 2) {
                 const uint16_t level = le16(db + at + l);
-                if (r.level_count && !level) break;  /* the list is zero padded */
+                if (le16(slave) == 3 && r.level_count && !level) break; /* ARC only; BCM contains zero high words. */
                 r.levels[r.level_count++] = level;
             }
             *out = r;

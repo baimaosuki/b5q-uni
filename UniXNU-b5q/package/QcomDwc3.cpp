@@ -59,6 +59,7 @@ struct Region {IOMemoryMap *map; volatile uint32_t *va;};
 Region gGcc, gScratch, gPhy, gTcsrMap;
 bool gSuperSpeed;
 unsigned gDpLanes;
+bool gPhyResetPending;
 void stage(int value) {native_usb_stats[0] = (uint32_t)value;IOLog("qcom-dwc3: stage=%d\n",value);}
 bool mapRegion(Region &r, uint64_t pa, uint64_t bytes) {
     IODeviceMemory *d = IODeviceMemory::withRange(pa, bytes);
@@ -204,6 +205,7 @@ bool qmpInit(bool reverse) {
         wr(kQmpComPower,1);wr(kQmpComResetOvrd,0);
         phy.map->release();return false;
     }
+    selectUtmiClock(); // The core must not consume PIPE while QMP is reset.
     volatile uint32_t *reset = gGcc.va + 0x50000 / 4, *common = gGcc.va + 0x50008 / 4;
     *reset = *reset | 1u; *common = *common | 1u; barrier(); IODelay(20);
     *reset = *reset & ~1u; *common = *common & ~1u; barrier();
@@ -274,8 +276,9 @@ bool smmuIdentity() {
 // A controller's provider: a register window and the core interrupt, in the IOService terms IOFilterInterruptEventSource uses. Device and
 // host have a nub each and share the one line: it goes to the nub of the role the core is in.
 class QcomDwc3Nub;
-static QcomDwc3Nub *volatile gActiveNub;
-static bool gLineAttached;
+static QcomDwc3Nub *gActiveNub;
+static IOSimpleLock *gInterruptLock;
+static bool gLineAttached,gLineAttaching;
 static B5qUsbIrq::Window gIrqWindow;
 static uint64_t gIrqSecond;
 static bool gIrqStormed;
@@ -285,74 +288,107 @@ class QcomDwc3Nub : public IOService {
     OSObject *target = nullptr;
     void *refcon = nullptr;
     bool enabled = false;
+    uint32_t inFlight=0;
+    static bool ensureLock(){
+        if(__atomic_load_n(&gInterruptLock,__ATOMIC_ACQUIRE))return true;
+        auto *made=IOSimpleLockAlloc();if(!made)return false;
+        IOSimpleLock *expected=nullptr;
+        if(!__atomic_compare_exchange_n(&gInterruptLock,&expected,made,false,__ATOMIC_RELEASE,__ATOMIC_ACQUIRE))IOSimpleLockFree(made);
+        return true;
+    }
     static void primary(void *) {
-        QcomDwc3Nub *self = __atomic_load_n(&gActiveNub,__ATOMIC_ACQUIRE);
         __atomic_fetch_add(&native_usb_stats[11],1u,__ATOMIC_RELAXED);
-        if(gIrqWindow.observe(mach_absolute_time(),gIrqSecond)){
-            __atomic_store_n(&gIrqStormed,true,__ATOMIC_RELEASE);
-            armcpu_spi_mask(kIrq,true);return;
+        if(!__atomic_load_n(&gInterruptLock,__ATOMIC_ACQUIRE)){armcpu_spi_mask(kIrq,true);return;}
+        const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        QcomDwc3Nub *self=gActiveNub;
+        IOInterruptAction callback=nullptr;OSObject *owner=nullptr;void *context=nullptr;
+        if(gIrqWindow.observe(mach_absolute_time(),gIrqSecond))gIrqStormed=true;
+        if(!gIrqStormed&&self&&self->enabled&&self->action){
+            owner=self->target;
+            callback=self->action;context=self->refcon;++self->inFlight;
+        }else armcpu_spi_mask(kIrq,true);
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        if(!callback)return;
+        callback(owner,context,self,0);
+        const auto done=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        --self->inFlight;
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,done);
+    }
+    void unmaskLocked(){
+        if(gActiveNub==this)armcpu_spi_mask(kIrq,gIrqStormed||!enabled);
+    }
+    void drain(){
+        for(;;){
+            const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+            const bool idle=inFlight==0;
+            IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+            if(idle)return;IOSleep(1);
         }
-        if(!self || !__atomic_load_n(&self->enabled,__ATOMIC_ACQUIRE) || !self->action){armcpu_spi_mask(kIrq,true);return;}
-        self->action(self->target,self->refcon,self,0);
     }
-    void unmask() {
-        if(gActiveNub!=this)return;
-        if(__atomic_load_n(&gIrqStormed,__ATOMIC_ACQUIRE)){armcpu_spi_mask(kIrq,true);return;}
-        armcpu_spi_mask(kIrq,!__atomic_load_n(&enabled,__ATOMIC_ACQUIRE));
-        if(__atomic_load_n(&gIrqStormed,__ATOMIC_ACQUIRE))armcpu_spi_mask(kIrq,true);
-    }
-
 public:
     static void route(QcomDwc3Nub *nub) {
-        armcpu_spi_mask(kIrq, true);
-        gActiveNub = nub;
-        __asm__ volatile("dmb ish" ::: "memory");
-        if (nub) nub->unmask();
+        armcpu_spi_mask(kIrq,true);
+        if(!ensureLock())return;
+        if(nub)nub->retain();
+        const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        auto *old=gActiveNub;gActiveNub=nub;gIrqStormed=false;gIrqWindow={};
+        if(nub)nub->unmaskLocked();
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        if(old){if(old!=nub)old->drain();old->release();}
     }
-    IOReturn getInterruptType(int source, int *type) override {
-        if (source != 0 || !type) return kIOReturnNoInterrupt;
-        *type = kIOInterruptTypeLevel;
-        return kIOReturnSuccess;
+    IOReturn getInterruptType(int source,int *type) override {
+        if(source!=0||!type)return kIOReturnNoInterrupt;
+        *type=kIOInterruptTypeLevel;return kIOReturnSuccess;
     }
-    IOReturn registerInterrupt(int source, OSObject *owner, IOInterruptAction handler, void *context) override {
-        if (source != 0 || !owner || !handler) return kIOReturnNoInterrupt;
-        if (action) return kIOReturnNoResources;
-        owner->retain();target = owner; refcon = context; action = handler; enabled = false;
-        clock_interval_to_absolutetime_interval(1000,NSEC_PER_MSEC,&gIrqSecond);
-        __asm__ volatile("dmb ish" ::: "memory");
-        if (!gLineAttached) {
-            if (armcpu_spi_attach(kIrq, false, primary, nullptr, nullptr, nullptr) != kIOReturnSuccess) {action = nullptr; return kIOReturnNoResources;}
-            armcpu_spi_mask(kIrq,true);
-            gLineAttached = true;
-        }
-        unmask();
+    IOReturn registerInterrupt(int source,OSObject *owner,IOInterruptAction handler,void *context) override {
+        if(source!=0||!owner||!handler)return kIOReturnNoInterrupt;
+        if(!ensureLock())return kIOReturnNoResources;
+        uint64_t second=0;clock_interval_to_absolutetime_interval(1000,NSEC_PER_MSEC,&second);
+        const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        if(action||gLineAttaching){IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);return kIOReturnNoResources;}
+        owner->retain();target=owner;refcon=context;action=handler;enabled=false;gIrqSecond=second;
+        const bool attach=!gLineAttached;if(attach)gLineAttaching=true;
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        int result=kIOReturnSuccess;
+        if(attach){result=armcpu_spi_attach(kIrq,false,primary,nullptr,nullptr,nullptr);armcpu_spi_mask(kIrq,true);}
+        const auto ready=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        if(attach){gLineAttaching=false;gLineAttached=result==kIOReturnSuccess;}
+        if(result==kIOReturnSuccess)unmaskLocked();
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,ready);
+        if(result!=kIOReturnSuccess){unregisterInterrupt(0);return kIOReturnNoResources;}
         return kIOReturnSuccess;
     }
     IOReturn unregisterInterrupt(int source) override {
-        if (source != 0) return kIOReturnNoInterrupt;
-        __atomic_store_n(&enabled,false,__ATOMIC_RELEASE);
-        unmask();
-        action = nullptr;
-        return kIOReturnSuccess;
+        if(source!=0)return kIOReturnNoInterrupt;
+        if(!ensureLock())return kIOReturnNoResources;
+        const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        enabled=false;unmaskLocked();auto *old=target;
+        action=nullptr;target=nullptr;refcon=nullptr;
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        drain();OSSafeReleaseNULL(old);return kIOReturnSuccess;
     }
     IOReturn enableInterrupt(int source) override {
-        if (source != 0) return kIOReturnNoInterrupt;
-        if(__atomic_load_n(&gIrqStormed,__ATOMIC_ACQUIRE))return kIOReturnNotReady;
-        __atomic_store_n(&enabled,true,__ATOMIC_RELEASE);
-        unmask();
-        return kIOReturnSuccess;
+        if(source!=0)return kIOReturnNoInterrupt;
+        if(!ensureLock())return kIOReturnNoResources;
+        const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        const bool allowed=!gIrqStormed&&action;enabled=allowed;unmaskLocked();
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        return allowed?kIOReturnSuccess:kIOReturnNotReady;
     }
     IOReturn disableInterrupt(int source) override {
-        if (source != 0) return kIOReturnNoInterrupt;
-        __atomic_store_n(&enabled,false,__ATOMIC_RELEASE);
-        unmask();
+        if(source!=0)return kIOReturnNoInterrupt;
+        if(!ensureLock())return kIOReturnNoResources;
+        const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        enabled=false;unmaskLocked();IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
         return kIOReturnSuccess;
     }
 };
 OSDefineMetaClassAndStructors(QcomDwc3Nub, IOService)
 
 // Whether the device stack may have the core: false while the core is in the host role or going there.
-static volatile bool gDeviceStackAllowed = false;
+static volatile bool gDeviceStackAllowed = true;
+static bool gDevicePowerAcknowledged;
+static uint32_t gDevicePowerOnAtAttach;
 static uint32_t gXdciDesiredCalls,gXdciDesired,gXdciCableCalls;
 class QcomDwc3Xdci : public AppleUSBXDCI {
     OSDeclareDefaultStructors(QcomDwc3Xdci)
@@ -375,10 +411,10 @@ public:
     bool XDCI_TRANSPORT_ACTIVE() override {return true;}
     // The power the family asks for at each change, including when configd's description starts the stack: off while the host role has the core.
     uint32_t XDCI_DESIRED_POWER() override {
-        const uint32_t wanted=gDeviceStackAllowed ? AppleUSBXDCI::XDCI_DESIRED_POWER() : 0;
+        const uint32_t wanted=__atomic_load_n(&gDeviceStackAllowed,__ATOMIC_ACQUIRE) ? AppleUSBXDCI::XDCI_DESIRED_POWER() : 0;
         __atomic_store_n(&gXdciDesired,wanted,__ATOMIC_RELEASE);
         if(__atomic_fetch_add(&gXdciDesiredCalls,1u,__ATOMIC_RELAXED)<4)
-            IOLog("qcom-dwc3: device stage=desired-power allowed=%u wanted=%u pwr=%u\n",gDeviceStackAllowed,wanted,getPowerState());
+            IOLog("qcom-dwc3: device stage=desired-power allowed=%u wanted=%u pwr=%u\n",__atomic_load_n(&gDeviceStackAllowed,__ATOMIC_ACQUIRE),wanted,getPowerState());
         return wanted;
     }
     IOReturn XDCI_POWER_ON() override {
@@ -426,6 +462,7 @@ public:
     IOReturn cable(bool connected) {
         __atomic_fetch_add(&gXdciCableCalls,1u,__ATOMIC_RELAXED);
         const IOReturn result=changePowerStateTo(connected ? 4 : 0);
+        gDevicePowerAcknowledged=connected && result==kIOPMAckImplied;
         IOLog("qcom-dwc3: device stage=cable-request connected=%u target=%u result=%x pwr=%u\n",connected,connected?4:0,result,getPowerState());
         return result;
     }
@@ -503,7 +540,7 @@ int gVbusOn = -1, gVbusApplied = -1;
 // One role at a time, changed on one thread: the system's start and stop paths block, and the battery work loop reports the cable.
 enum Role {kRoleNone, kRoleDevice, kRoleHost};
 IOLock *gRoleLock;
-int gRoleWanted, gRoleApplied, gCoreRole = kRoleDevice;
+int gRoleWanted,gRoleApplied,gCoreRole=kRoleDevice;
 uint32_t gCableWanted, gCableApplied;
 bool gForceHost;
 constexpr unsigned kXhciRegisterBytes=0x8000; // same bounded host window as makeHost()
@@ -513,7 +550,7 @@ QcomDwc3Xhci *gHost;
 void wantRole(int role) {
     if (!gRoleLock) return;
     IOLockLock(gRoleLock);
-    gRoleWanted = role;
+    __atomic_store_n(&gRoleWanted,role,__ATOMIC_RELEASE);
     IOLockWakeup(gRoleLock, &gRoleWanted, false);
     IOLockUnlock(gRoleLock);
 }
@@ -524,19 +561,19 @@ void cableChanged() {
     if(!gRoleLock)return;
     IOLockLock(gRoleLock);
     gCableWanted=cable.signature();
-    gRoleWanted=gForceHost?kRoleHost:cable.role();
+    __atomic_store_n(&gRoleWanted,__atomic_load_n(&gForceHost,__ATOMIC_ACQUIRE)?kRoleHost:cable.role(),__ATOMIC_RELEASE);
     IOLockWakeup(gRoleLock,&gRoleWanted,false);
     IOLockUnlock(gRoleLock);
 }
 void forceHostThread(void *seconds, wait_result_t) {
     IOSleep((uint32_t)reinterpret_cast<uintptr_t>(seconds) * 1000);
-    gForceHost = true;
+    __atomic_store_n(&gForceHost,true,__ATOMIC_RELEASE);
     cableChanged();
     // usb-back=<seconds in the host role>: then what the cable says, for an unattended run of the way back.
     unsigned back = 0;
     if (PE_parse_boot_argn("usb-back", &back, sizeof back) && back) {
         IOSleep(back * 1000);
-        gForceHost = false;
+        __atomic_store_n(&gForceHost,false,__ATOMIC_RELEASE);
         cableChanged();
     }
 }
@@ -552,43 +589,41 @@ void leaveRole(int role) {
         b5q_usb_otg(false);
         if(!gHostNub)return;
         // A removed PCI controller's path: the family stops its devices and the controller.
+        QcomDwc3Nub::route(nullptr);
         gHostNub->terminate(kIOServiceSynchronous);
         gHostNub->release();
         gHostNub = nullptr; gHost = nullptr;
-        QcomDwc3Nub::route(nullptr);
     }
 }
 // __dwc3_set_mode: a core soft reset between the roles, then the port capability.
-bool setCoreRole(int role) {
-    gDeviceStackAllowed = role == kRoleDevice;
-    if (gCoreRole == role) return repeater(false,role==kRoleHost);
-    volatile uint32_t *gctl = gGlobals.va + 0x110 / 4;
-    QcomDwc3Nub::route(nullptr);
-    *gctl = *gctl | 1u << 11;
-    barrier();
-    IOSleep(100);
-    *gctl = *gctl & ~(1u << 11);
-    barrier();
-    *gctl = (*gctl & ~(3u << 12)) | (role == kRoleHost ? 1u : 2u) << 12;
-    barrier();
-    // snps,dis_u2_susphy_quirk, snps,dis_enblslpm_quirk, as in the device reset.
-    gGlobals.va[0x200 / 4] = gGlobals.va[0x200 / 4] & ~(1u << 6 | 1u << 8);
-    gGlobals.va[0x2c0 / 4] = gGlobals.va[0x2c0 / 4] & ~(1u << 17);
-    barrier();
-    gCoreRole = role;
-    gDeviceStackAllowed = role == kRoleDevice;
-    return repeater(false, role == kRoleHost);
+bool setCoreRole(int role,bool forceReset=false) {
+    __atomic_store_n(&gDeviceStackAllowed,false,__ATOMIC_RELEASE);
+    if(gCoreRole!=role||forceReset){
+        QcomDwc3Nub::route(nullptr);
+        auto *gctl=gGlobals.va+0x110/4;
+        auto *usb2=gGlobals.va+0x200/4,*usb3=gGlobals.va+0x2c0/4;
+        *gctl|=1u<<11;*usb2|=1u<<31;*usb3|=1u<<31;barrier();IOSleep(100);
+        *usb2&=~(1u<<31);*usb3&=~(1u<<31);barrier();IOSleep(1);
+        *gctl&=~((1u<<11)|(3u<<12));*gctl|=(role==kRoleHost?1u:2u)<<12;
+        *usb2&=~((1u<<6)|(1u<<8));*usb3&=~(1u<<17);barrier();
+    }
+    if(!repeater(false,role==kRoleHost))return false;
+    gCoreRole=role;
+    __atomic_store_n(&gDeviceStackAllowed,role==kRoleDevice,__ATOMIC_RELEASE);
+    return true;
 }
 // Lanes follow Samsung PDIC CCPinStat. The role thread has already stopped
 // the previous controller before resetting a PHY on a changed connector.
-void followOrientation() {
+bool followOrientation() {
     B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
     const int reverse=cable.orientation();
-    if (gDpLanes==4) {selectUtmiClock();return;}
+    if (gDpLanes==4) {selectUtmiClock();return false;}
     if (!gSuperSpeed || uint32_t(reverse) != native_usb_stats[34]) {
         gSuperSpeed = superSpeedInit();
         if (!gSuperSpeed) selectUtmiClock();
+        return true;
     }
+    return false;
 }
 void enterHost() {
     QcomDwc3Nub *nub = OSTypeAlloc(QcomDwc3Nub);
@@ -636,8 +671,8 @@ bool enterRole(int role) {
     const bool source=cable.sourceVbus(role);
     if(!b5q_usb_otg(source)){IOLog("qcom-dwc3: power transition rejected source=%u power=%u data=%d\n",source,cable.power(),role);return false;}
     IOLog("qcom-dwc3: role=%d power=%u vbus-source=%u external-hub=%u\n",role,cable.power(),source,role==kRoleHost&&cable.power()==1);
-    followOrientation();
-    if(!setCoreRole(role)){b5q_usb_otg(false);return false;}
+    const bool phyReset=followOrientation() || gPhyResetPending;gPhyResetPending=false;
+    if(!setCoreRole(role,phyReset)){b5q_usb_otg(false);return false;}
     if (role == kRoleHost) {
         vbusOverride(false);
         enterHost();
@@ -646,6 +681,7 @@ bool enterRole(int role) {
         QcomDwc3Nub::route(gDeviceNub);
         // A USB host on the cable: lockdownd's launch event, then the family goes on the bus when configd's description arrives.
         IOService::getResourceService()->setProperty("AppleUSBCableType", "USBHost");
+        gDevicePowerOnAtAttach=native_usb_stats[12];gDevicePowerAcknowledged=false;
         native_usb_stats[20] = (uint32_t)gController->cable(true);
     }
     return true;
@@ -662,8 +698,11 @@ void hostStats() {
     const unsigned rt=(gXhciRegs.va[0x18/4]&~31u)/4;
     if(rt+0x40/4<kXhciRegisterBytes/4){
         const uint64_t erst=uint64_t(gXhciRegs.va[rt+0x30/4])|(uint64_t(gXhciRegs.va[rt+0x34/4])<<32);
+        const uint64_t erdp=uint64_t(gXhciRegs.va[rt+0x38/4])|(uint64_t(gXhciRegs.va[rt+0x3c/4])<<32);
         IOLog("qcom-dwc3: host DMA64=%u crcr=%llx dcbaa=%llx erst=%llx iman=%x routed=%u enabled=%u\n",
           gXhciRegs.va[0x10/4]&1,crcr,dcbaa,erst,gXhciRegs.va[rt+0x20/4],gActiveNub==gHostNub,gLineAttached);
+        IOLog("qcom-dwc3: host PORTSC1=%x PORTSC2=%x ERDP=%llx GSBUSCFG0=%x\n",
+              native_usb_stats[49],native_usb_stats[50],erdp,gGlobals.va?gGlobals.va[0x100/4]:0);
     }
     if (gHost) native_usb_stats[46] = (native_usb_stats[46] & 0xffff00ffu) | (uint32_t)gHost->getPowerState() << 8;
     // What the system's stack enumerated: how many devices now, the last one's vendor and product (kept after it leaves).
@@ -682,7 +721,7 @@ void hostStats() {
     OSSafeReleaseNULL(devices); OSSafeReleaseNULL(match);
 }
 void deviceStats() {
-    if(!gDmaReady || gRoleApplied!=kRoleDevice || !gGlobals.va)return;
+    if(!gDmaReady || __atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE)!=kRoleDevice || !gGlobals.va)return;
     // Reuse the upstream device-register samples; SMMU diagnostic slots stay
     // zero on b5q. The role worker owns this mapping for its entire lifetime.
     native_usb_stats[26]=gGlobals.va[0x70c/4];
@@ -692,9 +731,20 @@ void deviceStats() {
           gGlobals.va[0x704/4],native_usb_stats[26],native_usb_stats[28],native_usb_stats[31],
           native_usb_stats[12],native_usb_stats[13],native_usb_stats[11],gIrqStormed);
     IOLog("qcom-dwc3: device stage=power-path started=%u allowed=%u requests=%u wanted=%u cable-calls=%u cable-result=%x pwr=%u\n",
-          native_usb_stats[19],gDeviceStackAllowed,__atomic_load_n(&gXdciDesiredCalls,__ATOMIC_RELAXED),
+          native_usb_stats[19],__atomic_load_n(&gDeviceStackAllowed,__ATOMIC_ACQUIRE),__atomic_load_n(&gXdciDesiredCalls,__ATOMIC_RELAXED),
           __atomic_load_n(&gXdciDesired,__ATOMIC_ACQUIRE),__atomic_load_n(&gXdciCableCalls,__ATOMIC_RELAXED),
           native_usb_stats[20],gController?gController->getPowerState():0);
+}
+void retryDevicePower() {
+    // The role worker owns the controller lifecycle. Re-read connector intent
+    // after the timed wait: never retry an old device request after unplug/Host.
+    if(!gDmaReady || !gController || __atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE)!=kRoleDevice ||
+       __atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE)!=kRoleDevice || !__atomic_load_n(&gDeviceStackAllowed,__ATOMIC_ACQUIRE))return;
+    if(native_usb_stats[12]!=gDevicePowerOnAtAttach)return;
+    if(gDevicePowerAcknowledged && native_usb_stats[20]!=kIOPMNotYetInitialized)return;
+    native_usb_stats[20]=uint32_t(gController->cable(true));
+    IOLog("qcom-dwc3: device stage=power-retry result=%x on=%u acknowledged=%u\n",
+          native_usb_stats[20],native_usb_stats[12],gDevicePowerAcknowledged);
 }
 void roleThread(void *, wait_result_t) {
     const bool dpEnabled=B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)!=0;
@@ -703,20 +753,20 @@ void roleThread(void *, wait_result_t) {
         if(dpEnabled)b5q_dp_port_poll(&port);
         const unsigned requestedDp=dpEnabled&&port.configured?port.lanes:0;
         IOLockLock(gRoleLock);
-        if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied&&requestedDp==gDpLanes){
+        if(__atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE)==__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE)&&gCableWanted==gCableApplied&&requestedDp==gDpLanes){
             uint64_t deadline;clock_interval_to_deadline(1,kSecondScale,&deadline);
             IOLockSleepDeadline(gRoleLock,&gRoleWanted,deadline,THREAD_UNINT);
             IOLockUnlock(gRoleLock);
-            cableChanged();hostStats();deviceStats();
+            cableChanged();retryDevicePower();hostStats();deviceStats();
             if(dpEnabled){
                 b5q_dp_port_poll(&port);
                 if((port.configured?port.lanes:0)==gDpLanes)b5q_dp_link_update(&port);
             }
             IOLockLock(gRoleLock);
-            if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied&&
+            if(__atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE)==__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE)&&gCableWanted==gCableApplied&&
                (!dpEnabled||(port.configured?port.lanes:0)==gDpLanes)){IOLockUnlock(gRoleLock);continue;}
         }
-        const int role = gRoleWanted;
+        const int role = __atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE);
         const uint32_t cableVersion = gCableWanted;
         IOLockUnlock(gRoleLock);
         if(dpEnabled&&!b5q_dp_link_stop()){
@@ -728,26 +778,28 @@ void roleThread(void *, wait_result_t) {
             IOLog("B5qDP: combo transition deferred: previous link still owned\n");
             IOSleep(100);continue;
         }
-        gDeviceStackAllowed = false;
-        leaveRole(gRoleApplied);
-        gRoleApplied = kRoleNone;
+        __atomic_store_n(&gDeviceStackAllowed,false,__ATOMIC_RELEASE);
+        leaveRole(__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE));
+        __atomic_store_n(&gRoleApplied,kRoleNone,__ATOMIC_RELEASE);
         if(dpEnabled){
             gDpLanes=port.configured?port.lanes:0;
             B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
-            if(cable.orientation()>=0){gSuperSpeed=qmpInit(cable.orientation()!=0);if(!gSuperSpeed)selectUtmiClock();}
+            if(cable.orientation()>=0){gPhyResetPending=true;gSuperSpeed=qmpInit(cable.orientation()!=0);
+                if(gSuperSpeed)native_usb_stats[34]=uint32_t(cable.orientation());
+                else selectUtmiClock();}
             IOLog("B5qDP: combo lanes=%u reverse=%d usb3=%u generation=%u\n",gDpLanes,cable.orientation(),gSuperSpeed,port.generation);
         }
         const bool entered=enterRole(role);
         if(dpEnabled)b5q_dp_link_update(&port);
         IOLockLock(gRoleLock);
         gCableApplied=cableVersion;
-        if(entered)gRoleApplied=role;
+        if(entered)__atomic_store_n(&gRoleApplied,role,__ATOMIC_RELEASE);
         else {
-            gRoleApplied=kRoleNone;
-            if(gRoleWanted==role && gCableWanted==cableVersion)gRoleWanted=kRoleNone;
+            __atomic_store_n(&gRoleApplied,kRoleNone,__ATOMIC_RELEASE);
+            if(__atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE)==role && gCableWanted==cableVersion)__atomic_store_n(&gRoleWanted,kRoleNone,__ATOMIC_RELEASE);
         }
         IOLockUnlock(gRoleLock);
-        native_usb_stats[44] = (uint32_t)role | (uint32_t)gRoleWanted << 8 | (uint32_t)gCoreRole << 16;
+        native_usb_stats[44] = (uint32_t)role | (uint32_t)__atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE) << 8 | (uint32_t)gCoreRole << 16;
         native_usb_stats[45] = native_usb_stats[45] + 1;
         native_usb_stats[35] = ((native_usb_stats[35] & 0xffffu) + 1) | (uint32_t)(role == kRoleDevice) << 16;
         if(!entered)IOSleep(1000); // Bounded retries must not spin on a failed I2C/PHY transition.
@@ -798,51 +850,51 @@ extern "C" void qcom_dwc3_publish(void) {
         cableChanged();
         return;
     }
+    const uint32_t busNumber=0;
+    static constexpr char kConfigString[]="standardBringup";
+    OSData *zero=OSData::withBytes(&busNumber,sizeof(busNumber));
+    OSData *config=OSData::withBytes(kConfigString,sizeof(kConfigString));
+    QcomDwc3Nub *nub=OSTypeAlloc(QcomDwc3Nub);
+    QcomDwc3Xdci *controller=nullptr;
+    IOService *platform=IOService::getPlatform();
+    IODeviceMemory *range=IODeviceMemory::withRange(kAppleWindow,0x1000);
+    OSArray *ranges=range?OSArray::withObjects((const OSObject **)&range,1):nullptr;
+    bool nubAttached=false,controllerAttached=false,started=false,published=false;
     do {
-        const uint32_t busNumber=0;
-        OSData *zero = OSData::withBytes(&busNumber,sizeof(busNumber));
-        QcomDwc3Nub *nub = OSTypeAlloc(QcomDwc3Nub);
-        IOService *platform = IOService::getPlatform();
-        IODeviceMemory *range = IODeviceMemory::withRange(kAppleWindow, 0x1000);
-        OSArray *ranges = range ? OSArray::withObjects((const OSObject **)&range, 1) : nullptr;
-        if (!nub || !nub->init() || !ranges || !zero) {stage(-12); break;}
-        nub->setDeviceMemory(ranges);
-        nub->setName("usb-drd0");
-        nub->setProperty("bus-number", zero);
-        nub->setProperty("configuration-string", (void *)"standardMuxOnly", 16);
-        // snps,dis-u1-entry-quirk, snps,dis-u2-entry-quirk.
-        nub->setProperty("u1-init-disable", true);
-        nub->setProperty("u2-init-disable", true);
-        if (!nub->attach(platform)) {stage(-13); break;}
-        nub->registerService();
-        OSSafeReleaseNULL(ranges); OSSafeReleaseNULL(range); OSSafeReleaseNULL(zero);
-        stage(10);
-        QcomDwc3Xdci *controller = OSTypeAlloc(QcomDwc3Xdci);
-        if (!controller || !controller->init()) {stage(-14); break;}
-        if (!controller->attach(nub)) {stage(-15); break;}
-        const bool started = controller->start(nub);
-        native_usb_stats[19] = started;
-        if (!started) {stage(-16); break;}
-        stage(11);
-        gController = controller;
-        gDeviceNub = nub;
-        gActiveNub = nub;
-        // The core stays in the device role until a role asks otherwise: the controller's reset set it.
-        thread_t thread = nullptr;
-        // usb-host=<seconds>: the host role that long after this point, whatever is on the cable, to bring the controller up with nothing
-        // plugged in and to run the change of role.
-        unsigned forced = 0;
-        PE_parse_boot_argn("usb-host", &forced, sizeof forced);
-        gRoleLock = IOLockAlloc();
-        if (!gRoleLock || !mapRegion(gGlobals, kAppleWindow, 0x1000) || !mapRegion(gXhciRegs, kCore, kXhciRegisterBytes) ||
-            kernel_thread_start(roleThread, nullptr, &thread) != KERN_SUCCESS) {stage(-17); break;}
-        thread_deallocate(thread);
-        if (forced && kernel_thread_start(forceHostThread, reinterpret_cast<void *>((uintptr_t)forced), &thread) == KERN_SUCCESS) thread_deallocate(thread);
-        __atomic_thread_fence(__ATOMIC_RELEASE);
-        // The cable as the charger firmware reports it; it may have answered before the controller existed. With neither yet, the device
-        // role: a host needs no action from this end to be seen.
-        // Samsung CC status supplies the cable role; no Xiaomi GLINK channel.
-        cableChanged();
-        stage(12);
-    } while (false);
+        if(!nub||!nub->init()||!ranges||!zero||!config){stage(-12);break;}
+        nub->setDeviceMemory(ranges);nub->setName("usb-drd0");
+        nub->setProperty("bus-number",zero);nub->setProperty("configuration-string",config);
+        nub->setProperty("u1-init-disable",true);nub->setProperty("u2-init-disable",true);
+        if(!(nubAttached=nub->attach(platform))){stage(-13);break;}
+        stage(10);controller=OSTypeAlloc(QcomDwc3Xdci);
+        if(!controller||!controller->init()){stage(-14);break;}
+        if(!(controllerAttached=controller->attach(nub))){stage(-15);break;}
+        gRoleLock=IOLockAlloc();
+        if(!gRoleLock||!mapRegion(gGlobals,kAppleWindow,0x1000)||!mapRegion(gXhciRegs,kCore,kXhciRegisterBytes)){stage(-17);break;}
+        QcomDwc3Nub::route(nub);
+        started=controller->start(nub);native_usb_stats[19]=started;
+        if(!started){stage(-16);break;}
+        gController=controller;gDeviceNub=nub;
+        stage(11);thread_t thread=nullptr;
+        if(kernel_thread_start(roleThread,nullptr,&thread)!=KERN_SUCCESS){stage(-17);break;}
+        thread_deallocate(thread);published=true;
+        nub->registerService();controller->registerService();
+        unsigned forced=0;PE_parse_boot_argn("usb-host",&forced,sizeof(forced));
+        if(forced&&kernel_thread_start(forceHostThread,reinterpret_cast<void *>(uintptr_t(forced)),&thread)==KERN_SUCCESS)thread_deallocate(thread);
+        cableChanged();stage(12);
+    }while(false);
+    OSSafeReleaseNULL(config);OSSafeReleaseNULL(zero);OSSafeReleaseNULL(ranges);OSSafeReleaseNULL(range);
+    if(!published){
+        QcomDwc3Nub::route(nullptr);
+        gController=nullptr;gDeviceNub=nullptr;
+        if(started)controller->stop(nub);
+        if(controllerAttached)controller->detach(nub);
+        OSSafeReleaseNULL(controller);
+        if(nubAttached)nub->detach(platform);
+        OSSafeReleaseNULL(nub);
+        OSSafeReleaseNULL(gGlobals.map);gGlobals.va=nullptr;
+        OSSafeReleaseNULL(gXhciRegs.map);gXhciRegs.va=nullptr;
+        if(gRoleLock){IOLockFree(gRoleLock);gRoleLock=nullptr;}
+    }
+
 }

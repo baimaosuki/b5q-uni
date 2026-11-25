@@ -1,0 +1,18 @@
+{
+  "status": "LOCAL_ALL_PASS_CI_PENDING",
+  "approved_review3": "reports/v33d-review3.json",
+  "approved_review3_sha256": "875c237a20b937e2a99bf828370846dc10906f13e3e452cc1c1c70ef7f556cde",
+  "release_source_parent": "bbefab15224eb4d0ba65938bc76cfc8e5477b8b1",
+  "hardware_verified": false,
+  "phone_access": false,
+  "ethernet_checks": {
+    "artifacts/b5q-v33d-release/ethernet-lifecycle.log": "dce2b35142be5f4347529c848d3f021d45bc716535788a50f89055f3dcbe01f3",
+    "artifacts/b5q-v33d-release/review3-focused.log": "70e856d3c2884fdfc2819a7c918d1e218bfd1947e45bbd172fbba803df399f43",
+    "artifacts/b5q-v33d-release/ethernet-target.log": "16d3ba2e195b1f862173f84047ec44834d678283af1bc5b25c2ee97b767fc8c7"
+  },
+  "CI_run": "pending",
+  "ESP": "pending",
+  "local_gate_checks": 22,
+  "local_gate_receipt_sha256": "6c16ad6a452fba1bef91a89d21e1ecd0c3b84b5475dc07e9a641d4bf47abf9c6",
+  "firmware_reconstruction_sha256": "fc93c6c3ddfd2404ab5340d59e9cf1027d4fca05bb497e8c82c9abee74a7e8f9"
+}

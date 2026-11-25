@@ -22,14 +22,14 @@ void IOLog(const char *,const char *,int){++logs;}
 '''
 test=r'''
 int main(){
- for(int test=0;test<7;++test){
-  fail=test<5?test:-1;symbolFail=test==5;catalogueFail=test==6;gIOCatalogue=&catalogue;
+ for(int test=0;test<10;++test){
+  fail=test<7?test:-1;symbolFail=test==7;catalogueFail=test==8;gIOCatalogue=test==9?nullptr:&catalogue;
   loaded=matched=released=logs=0;names.clear();run();
-  assert(loaded==5&&logs==5);
-  int successes=fail>=0?4:5;
+  assert(loaded==7&&logs==7);
+  int successes=fail>=0?6:7;
   assert(released==(symbolFail?0:successes));assert(matched==((symbolFail||!gIOCatalogue)?0:successes));
  }
- puts("PASS production USB family loop: all5successful loads explicitly match; load/allocation/catalogue failures do not panic");
+ puts("PASS production USB family loop: all7successful loads explicitly match; load/allocation/catalogue failures do not panic");
 }
 '''
 with tempfile.TemporaryDirectory(prefix='b5q-usb-match-')as td:

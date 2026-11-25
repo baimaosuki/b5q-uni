@@ -105,11 +105,11 @@ void rxIrq(void *) {
     /* Raw status stays on after the wake is disarmed, so every UART start bit latches it again, and each pin of the
      * shared TLMM summary line calls this handler. Only the armed interrupt is a wake. */
     if(!(r[2]&1)){native_bluetooth_ibs[5]=native_bluetooth_ibs[5]+1;return;}
-    r[2]&=~1u;r[3]=0;barrier();
+    r[2]=0;r[3]=0;barrier();
     native_bluetooth_ibs[7]=native_bluetooth_ibs[7]+1;
     __atomic_store_n(&bt.rx_wake,1u,__ATOMIC_RELEASE);wake(nullptr);
 }
-void disarmRxWake(){bt.tlmm.va[(kRx*4096+8)/4]&=~1u;bt.tlmm.va[(kRx*4096+12)/4]=0;pin(kRx,kUartActive[3]);}
+void disarmRxWake(){bt.tlmm.va[(kRx*4096+8)/4]=0;bt.tlmm.va[(kRx*4096+12)/4]=0;pin(kRx,kUartActive[3]);}
 bool serialClock(bool enabled) {
     if(!sm8550_geni_uart14_vote(bt.gcc.va+0x52010/4,enabled))return false;
     if(!enabled){bt.clocked=false;return true;}
@@ -193,7 +193,7 @@ int clockVote(void *,bool enabled) {
     if(sequence!=bt.rx_sequence || qbt_transport_tx_pending()) {b5q_bt_fifo_resume(&bt.geni);return -EBUSY;}
     volatile uint32_t *r=bt.tlmm.va+kRx*4096/4;
     r[2]=0;r[3]=0;pin(kRx,1u);
-    r[2]=(3u<<5)|(2u<<2)|(1u<<4)|1u;barrier();
+    r[2]=(3u<<5)|(2u<<2)|(1u<<4)|(1u<<1)|1u;barrier();
     if(!(r[1]&1) || (r[3]&1)) {disarmRxWake();b5q_bt_fifo_resume(&bt.geni);return -EBUSY;}
     /* Leave RTS ready so the controller can send its IBS wake indication. */
     uwr(nullptr,0x2ac,0x80000001u);
@@ -389,6 +389,7 @@ int powerOff() {
     int reset=b5q_wcn_radio_enable(B5Q_WCN_BLUETOOTH,0);if(!e)e=-reset;
     int retired=bt.clocked?stopEngine():0;if(!e)e=retired;
     if(!retired)bt.gated=serialClock(false);
+    for(unsigned i=0;i<4;i++)pin(76+i,kUartDefault[i]);
     bt.powered=false;__atomic_store_n(&bt.rx_wake,0u,__ATOMIC_RELEASE);
     int released=b5q_wcn_power_put(B5Q_WCN_BLUETOOTH);if(!e)e=-released;
     return e;
@@ -419,13 +420,13 @@ void worker(void *,wait_result_t) {
         if (trace) ops.trace_hci = traceHci;
         else printf("[bluetooth hci] allocation failed\n");
     }
-    bt.core=qbt_create(&ops);if(!bt.core){native_bluetooth_stats[0]=3;IOLog("B5qBluetooth: stage=core-create result=%d\n",-ENOMEM);return;}
+    bt.core=qbt_create(&ops);if(!bt.core){native_bluetooth_stats[0]=3;IOLog("B5qBluetooth: stage=core-create result=%d\n",-ENOMEM);thread_terminate(current_thread());return;}
     struct qbt_transport_ops transport={nullptr,wake,requestPower};
-    int e=qbt_transport_init(&transport);if(e){native_bluetooth_stats[0]=3;IOLog("B5qBluetooth: stage=transport-init result=%d\n",e);return;}
+    int e=qbt_transport_init(&transport);if(e){native_bluetooth_stats[0]=3;IOLog("B5qBluetooth: stage=transport-init result=%d\n",e);thread_terminate(current_thread());return;}
     while(native_gpu_addon_stage<1)waitUntil(nullptr,nowNs(nullptr)+10000000ULL);
     /* Wi-Fi settles WLAN_EN and the shared supplies first; its failure stage is negative. */
     unsigned wifi=0;PE_parse_boot_argn("wifi",&wifi,sizeof(wifi));
-    if(wifi>=2) {
+    if(wifi) {
         uint64_t end=nowNs(nullptr)+15000000000ULL;
         while(nowNs(nullptr)<end) {
             int32_t stage=(int32_t)native_wifi_stats[0];
@@ -443,7 +444,7 @@ void worker(void *,wait_result_t) {
             if(active!=bt.service){qbt_set_service(bt.core,active);bt.service=active;closeAt=active?0:nowNs(nullptr)+500000000ULL;}
             uint8_t tx[2048];size_t room=qbt_transmit_capacity(bt.core);
             if(room>sizeof(tx))room=sizeof(tx);
-            if(room){uint32_t n=qbt_transport_tx_take(tx,(uint32_t)room);if(n && qbt_transmit(bt.core,tx,n))e=-EIO;}
+            if(room){uint32_t n=qbt_transport_tx_take(tx,(uint32_t)room);if(n){int sent=qbt_transmit(bt.core,tx,n);if(sent){e=sent<0?sent:-EIO;qbt_fail(bt.core,e);IOLog("B5qBluetooth: stage=transmit result=%d bytes=%u\n",e,n);}}}
             qbt_step(bt.core);
             struct qbt_info info;qbt_get_info(bt.core,&info);
             if(info.state==3 || bt.geni.state==B5Q_BT_FIFO_FAILED || (closeAt && nowNs(nullptr)>=closeAt)) {

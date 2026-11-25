@@ -19,7 +19,7 @@ struct Fake {
     bool openPhy(){assert(controller);if(fail==14)return false;phyOn=true;return true;}
     void parf(uint32_t reg,uint32_t clear,uint32_t set){assert(controller);registers[reg]=(registers[reg]&~clear)|set;}
     void dbi(uint32_t reg,uint32_t clear,uint32_t set){assert(controller);registers[reg]=(registers[reg]&~clear)|set;}
-    void phy(uint32_t reg,uint32_t value){assert(phyOn);auto expected=B5qPcieInputs::phy[phyWrites++];assert(reg==expected.offset&&value==expected.value);writes.push_back({reg,value});}
+    void phy(uint32_t reg,uint32_t value){assert(phyOn);if(phyWrites<113){auto expected=B5qPcieInputs::phy[phyWrites];assert(reg==expected.offset&&value==expected.value);}else{assert((registers[0x6b070]&3)==0);assert(reg==(phyWrites==113?0x200u:0x244u)&&value==(phyWrites==113?0u:3u));}phyWrites++;writes.push_back({reg,value});}
     uint32_t readPhy(uint32_t reg){assert(phyOn&&reg==0x214);return fail==24?0x40:0;}
     uint32_t readDbi(uint32_t reg){assert(controller);assert(reg==0x72c||reg==0x728);return fail==16?0:reg==0x72c?16:0x11;}
 };

@@ -32,30 +32,4 @@ def preserve(board,chosen):
 
 
 def manifest():
-    # Canonical sizes/hashes are the same original-device constants used by XNU.
-    from pathlib import Path
-    header=(Path(__file__).resolve().parents[1]/'package/B5qPeripheralHardware.h').read_text()
-    result={}
-    for short,key in [('gmu','b5q-gmu-fw'),('sqe','b5q-sqe-fw'),('zap','b5q-zap-fw')]:
-        size=int(re.search(r'constexpr uint64_t '+short+r'FirmwareBytes=(\d+);',header)[1])
-        values=re.search(short+r'FirmwareSha256\[32\]=\{([^}]+)\}',header)[1]
-        digest=bytes(int(v,16)for v in values.split(',')).hex()
-        result[key]=(size,digest)
-    return result
-
-def verify(chosen):
-    result={}
-    for name,(size,digest)in manifest().items():
-        value=chosen.get(name)
-        if not isinstance(value,bytes)or len(value)!=size:
-            raise ValueError('GPU ADT firmware missing/size mismatch: '+name)
-        if hashlib.sha256(value).hexdigest()!=digest:
-            raise ValueError('GPU ADT firmware SHA mismatch: '+name)
-        result[name]=dict(bytes=size,sha256=digest)
-    return result
-
-def preserve(board,chosen):
-    result=verify(chosen)
-    properties=board.setdefault('adt',{}).setdefault('chosen',{}).setdefault('bytes',{})
-    for name in result:properties[name]=chosen[name].hex()
-    return result
+    return expected()

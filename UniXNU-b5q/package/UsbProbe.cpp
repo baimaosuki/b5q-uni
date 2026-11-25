@@ -22,13 +22,14 @@ static void worker(void *, wait_result_t) {
         // IOUSBDeviceFamily below it, run on this load.
         const OSReturn loaded = OSKextLoadKextWithIdentifier("com.apple.driver.AppleUSBXDCI");
         native_usb_stats[21] = (uint32_t)loaded;
-        if (loaded != kOSReturnSuccess && loaded != kOSKextReturnStartStopError) {native_usb_stats[0] = (uint32_t)-9; IOLog("qcom-dwc3: stage=xdci-load result=%x\n",loaded); thread_terminate(current_thread());}
+        if (loaded != kOSReturnSuccess && loaded != kOSKextReturnStartStopError) {native_usb_stats[0] = (uint32_t)-9; IOLog("qcom-dwc3: stage=xdci-load result=%x\n",loaded); thread_terminate(current_thread()); return;}
         // The same for host mode: Apple's xHCI driver and the USB host family below it.
         qcom_dwc3_host_load((int)OSKextLoadKextWithIdentifier("com.apple.driver.usb.AppleUSBXHCI"));
-        const char *families[]={"com.apple.driver.usb.AppleUSBHub","com.apple.driver.usb.AppleUSBHostCompositeDevice","com.apple.driver.usb.IOUSBHostHIDDevice","com.apple.driver.AppleHIDKeyboard","com.apple.iokit.IOUSBMassStorageDriver"};
+        const char *families[]={
+        "com.apple.iokit.IOUSBDeviceFamily", "com.apple.driver.AppleUSBDeviceMux","com.apple.driver.usb.AppleUSBHub","com.apple.driver.usb.AppleUSBHostCompositeDevice","com.apple.driver.usb.IOUSBHostHIDDevice","com.apple.driver.AppleHIDKeyboard","com.apple.iokit.IOUSBMassStorageDriver"};
         for(const char *identifier:families){
             OSReturn rc=OSKextLoadKextWithIdentifier(identifier);
-            if(rc==kOSReturnSuccess){const OSSymbol *name=OSSymbol::withCString(identifier);if(name){gIOCatalogue->startMatching(name);name->release();}}
+            if(rc==kOSReturnSuccess){const OSSymbol *name=OSSymbol::withCString(identifier);if(name){if(gIOCatalogue && name)gIOCatalogue->startMatching(name);name->release();}}
             IOLog("qcom-dwc3: family=%s load=%x\n",identifier,rc);
         }
         void *handle = OSMetaClass::preModLoad(g_kernel_kmod_info.name);

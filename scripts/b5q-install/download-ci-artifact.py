@@ -43,7 +43,8 @@ with tempfile.TemporaryDirectory(prefix='b5q-artifact-') as tmp:
    if member.is_dir():continue
    name=Path(member.filename);assert not name.is_absolute() and '..' not in name.parts
    assert stat.S_IFMT(member.external_attr>>16)!=stat.S_IFLNK
-   rel=name.relative_to(prefix);target=dest/rel;target.parent.mkdir(parents=True,exist_ok=True)
+   rel=name.relative_to(prefix)if name.is_relative_to(prefix)else Path('extra')/name
+   target=dest/rel;assert not target.exists(),'Duplicate artifact path';target.parent.mkdir(parents=True,exist_ok=True)
    with z.open(member) as source,target.open('wb') as output:
     while block:=source.read(1024*1024):output.write(block)
    files[rel.as_posix()]={'bytes':target.stat().st_size,'sha256':sha(target)}

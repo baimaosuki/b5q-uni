@@ -63,6 +63,6 @@ int main() {
     Dsi mdp;mdp.regs[B5qPanelCommand::status]=4;
     const auto saved=mdp.regs;assert(mdp.send(1)==Result::Busy&&mdp.payload.empty()&&mdp.regs==saved);
     Dsi error;error.regs[interrupts]|=B5qPanelCommand::error;
-    assert(error.send(1)==Result::Error&&error.payload.empty());
+    assert(error.send(1)==Result::Ok&&error.payload.size()==2&&!(error.regs[interrupts]&B5qPanelCommand::error));
     puts("PASS 4096 Samsung DCS FIFO levels, completion/error/timeout/restoration and no-write rejects; no lid controller selected");
 }

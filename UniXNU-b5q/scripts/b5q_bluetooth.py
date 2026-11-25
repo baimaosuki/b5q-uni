@@ -25,4 +25,4 @@ def prepare(component,package,soc,out):
         transport='Samsung GENI FIFO; no DMA backend',
         sources={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
     (out/'sources.json').write_text(json.dumps(report,indent=2)+'\n')
-    return sources,[component/n for n in ('include','src','shim','out/linux')]
+    return sources,[component/n for n in ('include','src','shim','out/linux')]+[component.parents[1]/'package']

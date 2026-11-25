@@ -11,12 +11,12 @@ int main(){
         B5qWcn::Power p;unsigned calls=0;
         auto vote=[&](unsigned i,const B5qWcn::Rail &r){assert(i<5 && r.mv>=966);calls++;return i!=fail;};
         bool ok=p.get(first,vote);
-        bool expected=fail==5 || (first==1 && fail==4);
+        bool expected=fail==5;
         assert(ok==expected);
         if(!ok){assert(!p.owners);for(auto n:p.refs)assert(!n);}
         auto success=[](unsigned,const B5qWcn::Rail&){return true;};
         assert(p.get(first,success));assert(p.get(first^1,success));assert(p.owners==3);
-        for(unsigned i=0;i<4;i++)assert(p.refs[i]==2);assert(p.refs[4]==1);
+        for(unsigned i=0;i<4;i++)assert(p.refs[i]==2);assert(p.refs[4]==2);
         assert(p.get(first,vote)); // Already owned: idempotent, including a failing callback.
         assert(p.put(first));for(unsigned i=0;i<4;i++)assert(p.refs[i]==1);
         assert(p.put(first));assert(p.put(first^1));for(auto n:p.refs)assert(!n);

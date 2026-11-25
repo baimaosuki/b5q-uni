@@ -78,19 +78,28 @@ struct Bus {
    if(geni_i2c_timeout(&bus)!=GeniPending)return false;
   }return false;
  }
- bool read(uint8_t address,uint8_t reg,uint8_t &value){bus.address=address;if(geni_i2c_start_read(&bus,reg)||!finish())return false;value=bus.data;return true;}
+ bool idle(){
+  if(geni_i2c_busy(&bus))return false;
+  unsigned tries=0;
+  while((seRead(bus.io.ctx,GENI_STATUS)&GENI_STATUS_M_ACTIVE)&&tries++<2500)IODelay(10);
+  if(seRead(bus.io.ctx,GENI_STATUS)&GENI_STATUS_M_ACTIVE){bus.error=GeniErrBusy;bus.error_status=seRead(bus.io.ctx,GENI_M_IRQ_STATUS);return false;}
+  const uint32_t stale=seRead(bus.io.ctx,GENI_M_IRQ_STATUS);
+  if(stale)seWrite(bus.io.ctx,GENI_M_IRQ_CLEAR,stale);
+  return true;
+ }
+ bool read(uint8_t address,uint8_t reg,uint8_t &value){if(!idle())return false;bus.address=address;if(geni_i2c_start_read(&bus,reg)||!finish())return false;value=bus.data;return true;}
  bool readWord(uint8_t address,uint8_t reg,uint16_t &value){
-  uint8_t bytes[2]={};bus.address=address;
+  if(!idle())return false;uint8_t bytes[2]={};bus.address=address;
   if(geni_i2c_start_read_buffer(&bus,&reg,1,bytes,2)||!finish())return false;
   value=uint16_t(bytes[0])|(uint16_t(bytes[1])<<8);return true;
  }
- bool write(uint8_t address,uint8_t reg,uint8_t value){bus.address=address;return !geni_i2c_start_write(&bus,reg,value)&&finish();}
+ bool write(uint8_t address,uint8_t reg,uint8_t value){if(!idle())return false;bus.address=address;return !geni_i2c_start_write(&bus,reg,value)&&finish();}
  bool readBuffer(uint8_t address,uint8_t reg,uint8_t *value,unsigned bytes){
-  if(!value||!bytes||bytes>33||geni_i2c_busy(&bus)||(seRead(bus.io.ctx,GENI_STATUS)&GENI_STATUS_M_ACTIVE))return false;
+  if(!value||!bytes||bytes>33||!idle())return false;
   bus.address=address;return !geni_i2c_start_read_buffer(&bus,&reg,1,value,bytes)&&finish();
  }
  bool writeBuffer(uint8_t address,const uint8_t *value,unsigned bytes){
-  if(!value||!bytes||bytes>34||geni_i2c_busy(&bus)||(seRead(bus.io.ctx,GENI_STATUS)&GENI_STATUS_M_ACTIVE))return false;
+  if(!value||!bytes||bytes>34||!idle())return false;
   bus.address=address;return !geni_i2c_start_write_buffer(&bus,value,bytes)&&finish();
  }
  uint32_t ios() const {return seRead(bus.io.ctx,B5qUsbBoardCore::geniIos);}
@@ -208,13 +217,14 @@ extern "C" bool b5q_usb_typec_init(void){
  if(!openMaxim())return false;
  uint8_t id=0,rev=0;B5qMax77705::Cable cable;
  IOLockLock(maxim->lock);
- maximReady=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&id!=0xff&&
+ const bool ready=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&id!=0xff&&
             B5qMax77705::readCable(*maxim,cable);
  IOLockUnlock(maxim->lock);
  IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x/%x PD=%x water=%u bus-ready=%u policy=firmware-negotiated\n",
-       id,rev,cable.cc0,cable.cc1,cable.pd,cable.water(),maximReady);
+       id,rev,cable.cc0,cable.cc1,cable.pd,cable.water(),ready);
+ __atomic_store_n(&maximReady,ready,__ATOMIC_RELEASE);
  // Water blocks roles in Cable, not future dry-cable status observations.
- return maximReady;
+ return __atomic_load_n(&maximReady,__ATOMIC_ACQUIRE);
 }
 // Battery and USB share the same physical SE8 engine and lock. Read-only
 // gauge/charger sampling never changes charge policy or clears IRQ status.
@@ -232,7 +242,7 @@ extern "C" bool b5q_battery_snapshot(B5qFuelGauge::Raw *raw,
 }
 extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *out){
  if(!out)return false;
- *out={};if(!maximReady)return false;
+ *out={};if(!__atomic_load_n(&maximReady,__ATOMIC_ACQUIRE))return false;
  IOLockLock(maxim->lock);const bool ok=B5qMax77705::readCable(*maxim,*out);IOLockUnlock(maxim->lock);
  static uint32_t previous=~0u;
  if(__atomic_exchange_n(&previous,out->signature(),__ATOMIC_RELAXED)!=out->signature())
@@ -245,7 +255,7 @@ extern "C" int b5q_usb_cable_role(void){
  return cable.role();
 }
 extern "C" bool b5q_usb_otg(bool on){
- if(!maximReady)return false;IOLockLock(maxim->lock);
+ if(!__atomic_load_n(&maximReady,__ATOMIC_ACQUIRE))return false;IOLockLock(maxim->lock);
  // The caller follows the PDIC power role, independently of Host/Device.
  const bool ok=B5qMax77705::otg(*maxim,on,[](unsigned us){IODelay(us);});
  if(ok)otgOn=on;uint8_t mode=0,ilim=0,c3=0;maxim->read(0x69,0xb7,mode);maxim->read(0x69,0xb9,ilim);maxim->read(0x69,0xc3,c3);

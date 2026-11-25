@@ -29,7 +29,8 @@ class B5qBacklight:public IOService {
     IOWorkLoop *loop=nullptr;
     IOTimerEventSource *timer=nullptr;
     volatile uint32_t requested=B5qPanelLevels::maximum;
-    uint32_t written=~0u,failures=0;
+    uint32_t written=~0u,failures=0,requestSeen=0;
+    uint32_t requestGeneration=0;
     bool published=false;
     void publish(uint32_t level) {
         OSDictionary *brightness=OSDictionary::withCapacity(3),*parameters=OSDictionary::withCapacity(1);
@@ -66,16 +67,21 @@ class B5qBacklight:public IOService {
     }
     static void tick(OSObject *owner,IOTimerEventSource *) {
         auto *self=static_cast<B5qBacklight*>(owner);
+        const uint32_t generation=__atomic_load_n(&self->requestGeneration,__ATOMIC_ACQUIRE);
+        if(generation!=self->requestSeen){self->requestSeen=generation;self->failures=0;}
         const uint32_t wanted=__atomic_load_n(&self->requested,__ATOMIC_ACQUIRE);
         const uint32_t target=wanted; // Only the inner-panel brightness request controls output.
         if(self->written==target)return;
         const uint32_t raw=target?B5qPanelLevels::normal[target-1].raw:0;
+        const uint32_t stale=self->regs[B5qPanelCommand::interrupts/4];
+        if(stale&B5qPanelCommand::error)IOLog("B5qBacklight: stage=clear-stale-error W1C=01000000 status=%08x\n",stale);
         const auto result=B5qPanelCommand::brightness(
             [&](uint32_t reg){return self->regs[reg/4];},
             [&](uint32_t reg,uint32_t value){self->regs[reg/4]=value;__asm__ volatile("dsb sy":::"memory");},
             [](unsigned us){IODelay(us);},raw);
         IOLog("B5qBacklight: level=%u raw=%u inner-panel=1 completion=%u failures=%u\n",
             target,raw,unsigned(result),self->failures);
+        if(result==B5qPanelCommand::Result::Error)IOLog("B5qBacklight: stage=DSI-error W1C=01000000 status=%08x\n",self->regs[B5qPanelCommand::interrupts/4]);
         if(result!=B5qPanelCommand::Result::Ok) {
             if(++self->failures<=3)self->timer->setTimeoutMS(100);
             return;
@@ -112,7 +118,7 @@ public:
             const int32_t value=int32_t(n->unsigned32BitValue());
             level=value<0?0:uint32_t(value)>B5qPanelLevels::maximum?B5qPanelLevels::maximum:uint32_t(value);
         }else return kIOReturnSuccess;
-        __atomic_store_n(&requested,level,__ATOMIC_RELEASE);timer->setTimeoutUS(1);
+        __atomic_store_n(&requested,level,__ATOMIC_RELEASE);__atomic_fetch_add(&requestGeneration,1u,__ATOMIC_RELEASE);timer->setTimeoutUS(1);
         return kIOReturnSuccess;
     }
 };

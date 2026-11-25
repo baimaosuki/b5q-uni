@@ -17,6 +17,7 @@ bool load(const uint8_t *firmware,size_t bytes,uint64_t cacheBytes,bool owned,
  // Prove every destination before making the first MMIO or RAM store.
  for(size_t i=0;i<count;++i) {
   const auto &b=blocks[i];if(!b.bytes)continue;
+  if((b.bytes & 3) || (b.address & 3))return false;
   if(b.region_identifier==1) {
    if(b.address<0x4000 || b.address-0x4000>cacheBytes || b.bytes>cacheBytes-(b.address-0x4000))return false;
   } else {

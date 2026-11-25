@@ -186,7 +186,7 @@ bool setup() {
 
 void buttonsThread(void *, wait_result_t) {
     thread_set_thread_name(current_thread(), "buttons");
-    if (!setup()) return;
+    if (!setup()) {thread_terminate(current_thread());return;}
     uint32_t seen = gEvents, last = 0;
     for (;;) {
         uint32_t mask = pressed();

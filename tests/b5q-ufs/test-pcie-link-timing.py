@@ -4,7 +4,8 @@ from pathlib import Path
 import re,subprocess,tempfile
 R=Path(__file__).resolve().parents[2];P=R/'UniXNU-b5q/package'
 s=(R/'uefi-b5q/Resources/DTBs/b5q.dts').read_text();a=s.index('qcom,phy-status-offset = <0x214>');seq=re.search(r'qcom,phy-sequence = <([^>]+)>',s[a:])[1];raw=[int(v,16)for v in seq.split()]
-table=[tuple(int(v,0)for v in row)for row in re.findall(r'\{(0x[0-9a-f]+),(0x[0-9a-f]+),(\d+)\}',(P/'B5qPcieInputs.h').read_text())];assert table==list(zip(raw[::3],raw[1::3],raw[2::3]))and len(table)==115
+table=[tuple(int(v,0)for v in row)for row in re.findall(r'\{(0x[0-9a-f]+),(0x[0-9a-f]+),(\d+)\}',(P/'B5qPcieInputs.h').read_text())];assert table==list(zip(raw[::3],raw[1::3],raw[2::3]))[:-2] and len(table)==113
+assert list(zip(raw[::3],raw[1::3],raw[2::3]))[-2:]==[(0x200,0,0),(0x244,3,0)]
 source=r'''
 #include "B5qPcieCore.h"
 #include <cassert>
@@ -22,7 +23,7 @@ struct IO {
  uint32_t readGcc(uint32_t r){return r==0x6b004||r==0x6c000?1u<<31:regs[r];}
  bool clkref(){return true;}void delay(unsigned n){time+=n;assert(time<2000000);}
  bool openController(){assert(powerOn&&en);return true;}bool openPhy(){assert(!perst);return true;}
- void phy(unsigned off,uint32_t val){assert(!perst&&phyWrites<115);const auto &p=B5qPcieInputs::phy[phyWrites++];assert(p.offset==off&&p.value==val);}
+ void phy(unsigned off,uint32_t val){assert(!perst&&phyWrites<115);if(phyWrites<113){const auto &p=B5qPcieInputs::phy[phyWrites];assert(p.offset==off&&p.value==val);}else{assert((regs[0x6b070]&3)==0);assert(off==(phyWrites==113?0x200u:0x244u)&&val==(phyWrites==113?0u:3u));}phyWrites++;}
  uint32_t readPhy(uint32_t r){assert(r==0x214&&phyWrites==115);return 0;}
  void parf(unsigned r,uint32_t,uint32_t v){if(r==0x1b0){assert(v==256&&perst&&released&&time-released>=1000&&phyWrites==115);ltssmAt=time;}}
  void dbi(unsigned,uint32_t,uint32_t){}

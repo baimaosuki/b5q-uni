@@ -1,0 +1,65 @@
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+@@ -54,7 +54,7 @@
+  __asm__ volatile("dsb sy":::"memory");
+  R->Create=Hal->Create(&Domain);
+  if(R->Create||!Domain){Status=EFI_DEVICE_ERROR;goto Fail;}
+- HAL_CONFIG Config={0,0,Table,0,0x00ff0400,0,0x00c000e7,0x00802010,0x0003c071,0};
++ HAL_CONFIG Config={0,0,Table,0,0x00ff0400,0,0x00c01027,0x00803510,0x0003c071,0};
+  R->Configure=Hal->Configure(Domain,&Config);
+  if(R->Configure){Status=EFI_DEVICE_ERROR;goto Fail;}
+  // These original IORT tuples select only non-secure audio/video streams.
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+@@ -61,7 +61,7 @@
+   __asm__ volatile("dsb sy":::"memory");
+   mResult.Create=Hal->Create(&Domain);
+   if(mResult.Create || !Domain){Status=EFI_DEVICE_ERROR;goto Fail;}
+-  HAL_CONFIG Config={0,0,Table,0,0x00ff0400,0,0x00c000e7,0x00802010,0x0003c071,0};
++  HAL_CONFIG Config={0,0,Table,0,0x00ff0400,0,0x00c01027,0x00803510,0x0003c071,0};
+   mResult.Configure=Hal->Configure(Domain,&Config);
+   if(mResult.Configure){Status=EFI_DEVICE_ERROR;goto Fail;}
+   mResult.Attach=Hal->Attach(Domain,"PCIE0",0x03000000,0);
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
+@@ -42,7 +42,7 @@
+   if(L2==NULL)return FALSE;
+   UINT64 *L3=UsbDmaChild(Tables,&L2[(0xaffff000ULL>>21)&511]);
+   if(L3==NULL || L3[511])return FALSE;
+-  L3[511]=0x17110000ULL | (3ULL<<53) | 0x700ULL | 3ULL;
++  L3[511]=0x17110000ULL | (3ULL<<53) | 0x740ULL | 3ULL;
+   return TRUE;
+ }
+ #endif
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+@@ -196,8 +196,9 @@
+   WriteBackDataCacheRange (Tables.Pages, Tables.Used * USB_DMA_PAGE);
+   __asm__ volatile ("dsb sy" ::: "memory");
+ 
+-  // 0x2cd0 defaults for AArch64 VMSA. TCR uses a 4 KiB granule and L0 root.
+-  HAL_DOMAIN_CONFIG Config = { 0, 0, Table, 0, 0x00ff0400, 0, 0x00c000e7, 0x00802010, 0x0003c071, 0 };
++  // AArch64 VMSA: non-stalling faults and WB-IS 4 KiB/L0 table walks.
++  // HAL RVA0x2db0 copies this configuration; RVA0x2cd0 supplies defaults only.
++  HAL_DOMAIN_CONFIG Config = { 0, 0, Table, 0, 0x00ff0400, 0, 0x00c01027, 0x00803510, 0x0003c071, 0 };
+   State->Configure = Hal->Configure (Domain, &Config);
+   if (State->Configure != 0) {
+     Status = EFI_DEVICE_ERROR;
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+@@ -9,8 +9,8 @@
+ #define USB_DMA_PA_MASK 0x0000000ffffff000ULL
+ #define USB_DMA_PAGE_TYPE 3ULL
+ #define USB_DMA_BLOCK_TYPE 1ULL
+-// PXN and UXN, access flag, inner shareable, privileged RW, AttrIndx 2 (0xff).
+-#define USB_DMA_LEAF_ATTR ((3ULL << 53) | 0x708ULL)
++// PXN and UXN, access flag, inner shareable, unprivileged RW, AttrIndx 2 (0xff).
++#define USB_DMA_LEAF_ATTR ((3ULL << 53) | 0x748ULL)
+ 
+ typedef struct {
+   UINT64 *Pages;

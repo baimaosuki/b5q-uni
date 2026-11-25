@@ -42,7 +42,8 @@ public:
         setAtWarnLevel(s.present&&s.permille<=100);
         setAtCriticalLevel(s.present&&s.permille<=50);
         flag("FullyCharged",s.present&&external&&(state==3||state==4));
-        number("Temperature",s.temperatureDeciC);
+        const int32_t centiKelvin=int32_t(s.temperatureDeciC)*10+27315;
+        if(centiKelvin>=0)number("Temperature",uint32_t(centiKelvin));
         number("AppleRawCurrentCapacity",s.remainingMah);
         number("AppleRawMaxCapacity",s.fullMah);number("DesignCapacity",s.designMah);
         if(!published){published=true;registerService();}

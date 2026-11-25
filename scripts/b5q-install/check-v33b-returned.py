@@ -6,7 +6,7 @@ R=Path(__file__).resolve().parents[2]
 sys.path[:0]=[str(R/'UniXNU/scripts'),str(R/'UniXNU-b5q/scripts'),str(R/'sources/UniXNU/kits/XnuPrelink')]
 from unixnu import ramdisk
 from kc_image import Image
-p=argparse.ArgumentParser();p.add_argument('--ci',type=Path,required=True);p.add_argument('--firmware-receipt',type=Path,required=True);p.add_argument('--fd',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--reuse-unchanged-firmware',action='store_true');a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
+p=argparse.ArgumentParser();p.add_argument('--ci',type=Path,required=True);p.add_argument('--firmware-receipt',type=Path,required=True);p.add_argument('--fd',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--firmware-dir',type=Path,help='Root of returned firmware artifact containing EFI/COFF objects');p.add_argument('--reuse-unchanged-firmware',action='store_true');a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
 def sha(p):
  with p.open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
 def load(path):
@@ -32,6 +32,19 @@ fd_bytes=a.fd.read_bytes()
 for index in range(12):assert ('b5q low no-map '+str(index)).encode()+b'\0'in fd_bytes,('missing actual FD reservation',index)
 from unixnu.boot_template import loader_pe
 handoff=loader_pe(fd_bytes,'f8a45ce9-92de-48cc-8e19-e97c28b724a0')
+from b5q_smmu_binary import check as check_dma_constants
+firmware_root=a.firmware_dir or a.firmware_receipt.parent
+handoff_paths=list(firmware_root.rglob('B5qHandoffDxe.efi'))
+usb_paths=list(firmware_root.rglob('UsbDma.obj'))
+assert len(handoff_paths)==1 and len(usb_paths)==1,'Returned handoff EFI/UsbDma.obj required'
+assert handoff_paths[0].read_bytes()==handoff,'FD handoff module differs from uploaded EFI'
+firmware_constants=dict(handoff=check_dma_constants(handoff_paths[0]),usb_object=check_dma_constants(usb_paths[0],usb=True))
+for name in ['PcieDma.obj','MediaDma.obj']:
+ paths=list(firmware_root.rglob(name));assert len(paths)==1,name
+ firmware_constants[name]=check_dma_constants(paths[0],msi=name=='PcieDma.obj')
+(a.out/'firmware-SMMU-constants.json').write_text(json.dumps(firmware_constants,indent=2)+'\n')
+source_usb=(R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c').read_text()
+assert 'mUsbMapBuf[32768]'in source_usb and 'AllocatePool ('not in source_usb and 'FreePool ('not in source_usb
 for marker in [b'stock-reserved-guard=before-zero',b'stock-reserved-filter=1']:assert marker in handoff,marker
 with tempfile.TemporaryDirectory(prefix='b5q-payload-accept-')as td:
  t=Path(td);fat=payload
@@ -43,11 +56,17 @@ with tempfile.TemporaryDirectory(prefix='b5q-payload-accept-')as td:
   assert n in symbols,n
  assert '__ZTV22NativeAdrenoGmuService'in symbols
  helper,=ci.rglob('mmio-helper.json');helper_proof=json.loads(helper.read_text());assert helper_proof['passed']
- assert helper_proof['only_recompiled_member']=='NativeAdrenoGmuService.o'
+ rebuilt={'NativeAdrenoGmuService.o','B5qGpu.o'}
+ assert set(helper_proof['recompiled_members'])==rebuilt
+ assert helper_proof['board_source_sha256']==sha(R/'UniXNU-b5q/package/B5qGpu.cpp')
  assert helper_proof['members_before'].keys()==helper_proof['members_after'].keys()
- assert helper_proof['members_before']['NativeAdrenoGmuService.o']!=helper_proof['members_after']['NativeAdrenoGmuService.o']
- helper_object,=ci.rglob('NativeAdrenoGmuService.o');assert sha(helper_object)==helper_proof['members_after']['NativeAdrenoGmuService.o']
- assert all(v==helper_proof['members_after'][n]for n,v in helper_proof['members_before'].items()if n!='NativeAdrenoGmuService.o')
+ archive,=ci.rglob('libAdreno740.a')
+ ar=R/'tools/llvm21/usr/lib/llvm-21/bin/llvm-ar'
+ ar_env=dict(os.environ,LD_LIBRARY_PATH=str(R/'tools/llvm21/usr/lib/x86_64-linux-gnu'))
+ actual_members={name:hashlib.sha256(subprocess.check_output([str(ar),'p',str(archive),name],env=ar_env)).hexdigest()for name in helper_proof['members_after']}
+ assert actual_members==helper_proof['members_after'],'Returned GPU archive members differ from replacement receipt'
+ helper_object,=ci.rglob('NativeAdrenoGmuService.o');assert sha(helper_object)==actual_members['NativeAdrenoGmuService.o']
+ assert all(v==helper_proof['members_after'][n]for n,v in helper_proof['members_before'].items()if n not in rebuilt)
  for marker in [b'B5qLaunchd: stage=before-launchd',b'B5qKeyStorePlatformGrant',b'b5q-wifi-ready',b'host DMA64=',b'B5qTouch: HID mode=']:
   assert marker in raw,marker
  policy=load(R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py')

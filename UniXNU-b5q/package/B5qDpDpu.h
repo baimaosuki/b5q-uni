@@ -107,13 +107,14 @@ struct Dpu {
  template<class Io>bool quiesce(Io &io){
   if(!active)return true;
   const auto &r=resources;const uint32_t ctl=r.ctlBase[r.ctl];
-  io.write(0x35000,0);io.barrier();bool idle=false;
-  for(unsigned us=0;us<80000;us+=100){if(!(io.read(0x3526c)&1)){idle=true;break;}io.delay(100);}
-  if(!idle)return false;
+  bool idle=false;
   io.write(ctl+0xfc,0);io.write(ctl+0xf4,0);io.write(ctl+0xe4,0);
   if(r.count==2)io.write(ctl+0x100,1u<<(r.lm[0]/2));
   io.write(ctl+0x110,1);io.write(ctl+0x18,flush);io.barrier();idle=false;
   for(unsigned us=0;us<80000;us+=100){if(!(io.read(ctl+0x18)&flush)){idle=true;break;}io.delay(100);}
+  if(!idle)return false;
+  io.write(0x35000,0);io.barrier();idle=false;
+  for(unsigned us=0;us<80000;us+=100){if(!(io.read(0x3526c)&1)){idle=true;break;}io.delay(100);}
   if(!idle)return false;
   while(savedCount){const auto v=saved[--savedCount];io.write(v.offset,v.value);}
   io.barrier();active=prepared=started=pending=false;return true;

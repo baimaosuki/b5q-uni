@@ -21,7 +21,7 @@
 #define F_RX_WATER (1u << 26)
 #define F_RX_LAST (1u << 27)
 #define F_FIFO_ERRORS (3u << 24)
-#define F_M_ERRORS (G_CMD_ERRORS | (15u << 24))
+#define F_M_ERRORS (G_CMD_ERRORS | (3u << 24) | (3u << 28))
 #define F_CANCELLED (3u << 4)
 #define F_S_IRQS (G_CMD_ERRORS | F_CANCELLED | G_LINE_ERRORS | F_RX_WATER | F_RX_LAST)
 #define F_M_IRQS (F_M_ERRORS | F_CANCELLED | G_DONE | (1u << 31))
@@ -156,8 +156,13 @@ bool b5q_bt_fifo_service(struct b5q_bt_fifo *g) {
         g->fault_irq[0]=mi;g->fault_irq[1]=si;g->stats.line_errors++;fail(g,-EIO);return false;
     }
     deliver(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
-    receive_fifo(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
-    deliver(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
+    // Drain successive hardware batches, bounded by the software queue.
+    for(unsigned batch=0;batch<sizeof(g->rx)/4;batch++){
+        const uint64_t before=g->stats.rx_words;
+        receive_fifo(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
+        deliver(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
+        if(!(rd(g,F_RX_STATUS)&0x1ffffffu)||g->stats.rx_words==before)break;
+    }
     if(g->tx_busy && (mi&G_DONE)) {
         if(g->tx_offset!=g->tx_length){fail(g,-EIO);return false;}
         g->stats.tx_bytes+=g->tx_length;g->tx_busy=false;g->tx_length=g->tx_offset=0;
@@ -182,7 +187,7 @@ bool b5q_bt_fifo_service(struct b5q_bt_fifo *g) {
          * interrupt the boot CPU. The timed worker retries and reenables it. */
         wr(g,G_S_IRQ_EN,room?F_S_IRQS:F_S_IRQS&~(F_RX_WATER|F_RX_LAST));
     }
-    g->retry_at=g->rx_count?now(g)+1000000ULL:0;
+    g->retry_at=(g->rx_count || (rd(g,F_RX_STATUS)&0x1ffffffu))?now(g)+1000000ULL:0;
     barrier(g);fifoMask(g,false);return false;
 }
 bool b5q_bt_fifo_drained(struct b5q_bt_fifo *g) {

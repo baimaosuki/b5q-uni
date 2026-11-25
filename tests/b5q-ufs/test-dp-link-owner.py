@@ -27,7 +27,7 @@ start=usb.index('        if(dpEnabled&&!b5q_dp_link_stop()){');brace=usb.index('
 for at in range(brace,len(usb)):
  depth+=(usb[at]=='{')-(usb[at]=='}')
  if not depth:roleGate=usb[start:at+1];break
-assert start<usb.index('        leaveRole(gRoleApplied);',start)
+assert start<usb.index('        leaveRole(__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE));',start)
 h=r'''
 #include <cassert>
 #include <cstdint>

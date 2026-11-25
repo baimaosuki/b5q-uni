@@ -17,8 +17,8 @@ template<class IO> int train(IO &io,uint32_t *linkState=nullptr) {
     if(!(io.readGcc(0x6b004)&(1u<<31)) || !(io.readGcc(0x6c000)&(1u<<31)))return -11;
     // CMD_UPDATE is a pulse: hardware clears it on a successful switch.
     // Never verify it with the persistent RMW/readback helper.
-    if(!io.gcc(0x6b078,~0u,0) || !io.rcg(0x6b074) ||
-       !io.gcc(0x6b05c,~0u,(6u<<8)|5) || !io.rcg(0x6b058))return -12;
+    if(!io.gcc(0x6b078,0x371fu,0) || !io.rcg(0x6b074) ||
+       !io.gcc(0x6b05c,0x371fu,(6u<<8)|5) || !io.rcg(0x6b058))return -12;
     if(!io.gcc(0x6b070,3,2) || !io.gcc(0x52008,0,0x7f) ||
        !io.gcc(0x52000,0,(1u<<12)|(1u<<19)|(1u<<22)) || !io.clkref())return -12;
     io.delay(200);
@@ -40,8 +40,9 @@ template<class IO> int train(IO &io,uint32_t *linkState=nullptr) {
     if(!io.openPhy())return -14;
     for(const auto &entry:B5qPcieInputs::phy){io.phy(entry.offset,entry.value);if(entry.delayUs)io.delay(entry.delayUs);}
     if(!io.gcc(0x6b070,3,0))return -14;
+    io.phy(0x200,0);io.phy(0x244,3);io.delay(1000);
     tries=0;while((io.readPhy(0x214)&0x40) && tries++<100)io.delay(100);
-    if(io.readPhy(0x214)&0x40)return -14;
+    if((io.readPhy(0x214)&0x40) || (io.readGcc(0x6b048)&(1u<<31)))return -14;
     // Requester-ID to SID translation is PCIe PARF, never SMMU MMIO.
     // qcom_pcie_config_sid_sm8250: BDF[31:16], offset[15:8], NEXT[7:0].
     // b5q iommu-map: RID0100 -> SID1401, base1400 => offset1.
