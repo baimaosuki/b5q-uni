@@ -213,12 +213,45 @@ extern "C" bool b5q_usb_repeater(bool init,bool host){
  IOLockUnlock(ti->lock);
  return ok;
 }
+namespace {
+// Control opcodes must work while detached to turn detection on. DP's
+// attached-only PdicIo remains separate; both use the same production mailbox
+// and one SE8 lock held across request/poll/response.
+struct CcControlIo {
+ bool read(uint8_t address,uint8_t reg,uint8_t *data,unsigned size){return maxim->readBuffer(address,reg,data,size);}
+ bool write(uint8_t address,const uint8_t *data,unsigned size){return maxim->writeBuffer(address,data,size);}
+ bool connected(){B5qMax77705::Cable cable;return B5qMax77705::readCable(*maxim,cable)&&!cable.water();}
+ void delay(unsigned us){if(us>=1000)IOSleep(us/1000);else IODelay(us);}
+ uint64_t nowUs(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns/1000;}
+};
+void configureTypecDrp(){
+ CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);B5qMax77705::DrpState state;
+ const bool ok=B5qMax77705::configureDrp(*maxim,mailbox,state);
+ IOLog("qcom-dwc3: max77705 DRP stage=%u ok=%u error=%u CCCTRL1=%02x->%02x requested=%02x wrote=%u deferred=%u CC0=%02x CC1=%02x PD0=%02x PD1=%02x BC=%02x\n",
+       state.stage,ok,unsigned(mailbox.error),state.before,state.after,state.requested,state.wrote,state.deferred,
+       state.cable.cc0,state.cable.cc1,state.pd0,state.cable.pd,state.cable.bc);
+}
+void diagnoseTypecCc(const B5qMax77705::Cable &cable){
+ const unsigned pin=cable.cc0>>6;
+ if(!cable.valid||(cable.cc0&7)||(pin!=1&&pin!=2))return;
+ static uint32_t previous=~0u;
+ const uint32_t signature=cable.cc0|(uint32_t(cable.cc1)<<8)|(uint32_t(cable.pd)<<16);
+ if(previous==signature)return;previous=signature;
+ CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);uint8_t response[2]={},cc0=0,cc1=0,pd0=0,pd1=0;
+ const bool control=mailbox.command(B5qMax77705::ccControlRead,nullptr,0,response,1);
+ const bool status=maxim->read(0x25,0x0a,cc0)&&maxim->read(0x25,0x0b,cc1)&&
+                   maxim->read(0x25,0x0c,pd0)&&maxim->read(0x25,0x0d,pd1);
+ IOLog("qcom-dwc3: max77705 CC-diag control=%u error=%u CCCTRL1=%02x status=%u CC_STATUS0=%02x CC_STATUS1=%02x PD_STATUS0=%02x PD_STATUS1=%02x policy=await-valid-cc\n",
+       control,unsigned(mailbox.error),control?response[1]:0xff,status,cc0,cc1,pd0,pd1);
+}
+}
 extern "C" bool b5q_usb_typec_init(void){
  if(!openMaxim())return false;
  uint8_t id=0,rev=0;B5qMax77705::Cable cable;
  IOLockLock(maxim->lock);
  const bool ready=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&id!=0xff&&
             B5qMax77705::readCable(*maxim,cable);
+ if(ready)configureTypecDrp();
  IOLockUnlock(maxim->lock);
  IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x/%x PD=%x water=%u bus-ready=%u policy=firmware-negotiated\n",
        id,rev,cable.cc0,cable.cc1,cable.pd,cable.water(),ready);
@@ -256,7 +289,9 @@ extern "C" bool b5q_battery_snapshot(B5qFuelGauge::Raw *raw,
 extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *out){
  if(!out)return false;
  *out={};if(!ensureMaximReady())return false;
- IOLockLock(maxim->lock);const bool ok=B5qMax77705::readCable(*maxim,*out);IOLockUnlock(maxim->lock);
+ IOLockLock(maxim->lock);const bool ok=B5qMax77705::readCable(*maxim,*out);
+ if(ok)diagnoseTypecCc(*out);
+ IOLockUnlock(maxim->lock);
  static uint32_t previous=~0u;
  if(__atomic_exchange_n(&previous,out->signature(),__ATOMIC_RELAXED)!=out->signature())
   IOLog("qcom-dwc3: max77705 CC0=%x CC1=%x PD=%x BC=%x power=%u data=%d reverse=%d valid=%u\n",

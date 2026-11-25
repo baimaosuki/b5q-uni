@@ -23,6 +23,10 @@ with tempfile.TemporaryDirectory(prefix="b5q-v32-") as temporary:
         'extern "C" int b5q_usb_cable_role'])
     harness = r'''
 #include "B5qMax77705.h"
+// Existing adoption/race fixture isolates the new mailbox dependency;
+// production CC control+init+diagnostic integration runs in test-review8.
+static void configureTypecDrp(){}
+static void diagnoseTypecCc(const B5qMax77705::Cable&){}
 #include <cassert>
 #include <cstdint>
 static bool water=false,identityFailure=false,ioFailure=false;
@@ -64,4 +68,4 @@ int main(){
     subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-Wno-misleading-indentation',
                     '-fsanitize=address,undefined','-I',str(ROOT/'UniXNU-b5q/package'),str(cpp),'-o',str(exe)],check=True)
     subprocess.run([str(exe)],check=True)
-print('PASS production absentd one-shot/EndpointSecurity and Type-C native-status adoption/Sink+DFP/water recovery/identity/I2C rejection with zero vendor opcodes')
+print('PASS production absentd one-shot/EndpointSecurity and Type-C native-status adoption/Sink+DFP/water recovery/identity/I2C rejection with unchanged negotiated-role and charger policy')

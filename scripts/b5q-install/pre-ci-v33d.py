@@ -22,7 +22,7 @@ else:
  checks.append(dict(name='complete-P0-P4-retained-regressions',passed=True,receipt_sha256=hashlib.sha256(baseline.read_bytes()).hexdigest(),source_bound=True))
 # This gate has its own preserved assertions; do not alter them for a pass.
 py('pre-ci-v33b','scripts/b5q-install/pre-ci-v33b.py')
-for name in ['touch-p0','v33d-dma','v33d-usb-device','v33d-review2','v33d-wcn-init','v33d-packaging','v33d-review3','v33d-review4','v33d-reclaim-dma','review5','review5-firmware','review7','dp-loader','dp-dpu']:py(name,'tests/b5q-ufs/test-'+name+'.py')
+for name in ['touch-p0','v33d-dma','v33d-usb-device','v33d-review2','v33d-wcn-init','v33d-packaging','v33d-review3','v33d-review4','v33d-reclaim-dma','review5','review5-firmware','review7','review8','dp-loader','dp-dpu']:py(name,'tests/b5q-ufs/test-'+name+'.py')
 run('loader-inputs',[
  'env','PATH=/usr/lib/llvm-17/bin:'+os.environ['PATH'],
  'LD_PRELOAD=/usr/lib/llvm-17/lib/clang/17/lib/linux/libclang_rt.ubsan_standalone-x86_64.so',
