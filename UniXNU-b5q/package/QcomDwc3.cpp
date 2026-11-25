@@ -491,6 +491,17 @@ public:
         barrier();
         at[0] = (uint32_t)value;
         barrier();
+        static uint32_t writes=0;
+        const unsigned count=__atomic_fetch_add(&writes,1u,__ATOMIC_RELAXED)+1;
+        if(count<=16&&(value||offset==0x30||offset==0x38)){
+            uint32_t lo=at[0],hi=at[1];
+            IOLog("qcom-dwc3: xhci-w64 #%u off=%x val=%llx rb=%08x:%08x\n",count,offset,value,hi,lo);
+            if(value&&offset!=0x18&&!lo&&!hi){
+                at[0]=(uint32_t)value;barrier();at[1]=(uint32_t)(value>>32);barrier();
+                lo=at[0];hi=at[1];
+                IOLog("qcom-dwc3: xhci-w64 #%u off=%x val=%llx rb2=%08x:%08x\n",count,offset,value,hi,lo);
+            }
+        }
     }
 };
 OSDefineMetaClassAndStructors(QcomDwc3Xhci, AppleUSBXHCI)
@@ -602,9 +613,9 @@ bool setCoreRole(int role,bool forceReset=false) {
         QcomDwc3Nub::route(nullptr);
         auto *gctl=gGlobals.va+0x110/4;
         auto *usb2=gGlobals.va+0x200/4,*usb3=gGlobals.va+0x2c0/4;
-        *gctl|=1u<<11;*usb2|=1u<<31;*usb3|=1u<<31;barrier();IOSleep(100);
-        *usb2&=~(1u<<31);*usb3&=~(1u<<31);barrier();IOSleep(1);
-        *gctl&=~((1u<<11)|(3u<<12));*gctl|=(role==kRoleHost?1u:2u)<<12;
+        *gctl|=1u<<11;barrier();IOSleep(100);
+        *gctl&=~(1u<<11);barrier();
+        *gctl=(*gctl&~(3u<<12))|((role==kRoleHost?1u:2u)<<12);barrier();
         *usb2&=~((1u<<6)|(1u<<8));*usb3&=~(1u<<17);barrier();
     }
     if(!repeater(false,role==kRoleHost))return false;

@@ -116,8 +116,12 @@ bool command(TouchBus &bus,uint8_t cmd,const uint8_t *p,unsigned n,bool getConfi
    IOLog("B5qTouch: command=%02x failed=packet error=%s stop=%s\n",cmd,B5qTouchBus::name(bus.error()),B5qTouchBus::name(bus.stopError()));
    return false;
   }
-  if(code==1){if(cmd==2){const bool ok=length>1&&message[1]==1;IOLog("B5qTouch: stage=identify mode=%u bytes=%u response=01 ok=%u\n",length>1?message[1]:255,length,ok);return ok;}if(cmd==0x20&&!B5qTouch::appInfo(message,length,maxObjects)){IOLog("B5qTouch: command=%02x failed=application-info bytes=%u\n",cmd,length);return false;}if(getConfig){if(length>sizeof(config)||!length){IOLog("B5qTouch: command=%02x failed=config-length bytes=%u\n",cmd,length);return false;}memcpy(config,message,length);configBytes=length;}return true;}
-  if(code==0x10&&cmd==2){IOLog("B5qTouch: stage=identify mode=%u bytes=%u\n",length>1?message[1]:255,length);continue;}
+  if((code==1||code==0x10)&&cmd==2){
+   const bool ok=length>1&&message[1]==1;
+   IOLog("B5qTouch: stage=identify mode=%u bytes=%u response=%02x ok=%u\n",length>1?message[1]:255,length,code,ok);
+   return ok;
+  }
+  if(code==1){if(cmd==0x20&&!B5qTouch::appInfo(message,length,maxObjects)){IOLog("B5qTouch: command=%02x failed=application-info bytes=%u\n",cmd,length);return false;}if(getConfig){if(length>sizeof(config)||!length){IOLog("B5qTouch: command=%02x failed=config-length bytes=%u\n",cmd,length);return false;}memcpy(config,message,length);configBytes=length;}return true;}
   report(code,length);
   if(code==0x10 || (code<0x10&&code!=0&&code!=7)){
    IOLog("B5qTouch: command=%02x failed=response code=%02x bytes=%u\n",cmd,code,length);return false;
@@ -160,6 +164,9 @@ void worker(void *,wait_result_t){
   IOLog("B5qTouch: stage=%s phase=after ok=%u error=%s\n",stage,busReady,B5qTouchBus::name(bus.error()));
   if(!busReady)break;
   stage="identify";IOLog("B5qTouch: stage=%s phase=before\n",stage);
+  for(unsigned drained=0;drained<8&&lowAttention();++drained){
+   uint8_t c=0;unsigned len=0;if(!packet(bus,c,len))break;
+  }
   const bool identified=command(bus,2,nullptr,0);IOLog("B5qTouch: stage=%s phase=after ok=%u\n",stage,identified);if(!identified)break;
   stage="enable-report";if(!configureReports(bus))break;
   stage="attach-irq";

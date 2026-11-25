@@ -42,7 +42,7 @@ template<class Io> struct Mailbox {
   return command(0x48,message,data?9:5,response,data?14:10);
  }
  bool get(uint8_t id,uint8_t out[33]){
-  const unsigned bytes=(id==1||id==2)?31:id==4||id==5?7:11;
+  const unsigned bytes=(id==1||id==2||id==3)?31:id==4||id==5?7:11;
   for(unsigned i=0;i<33;i++)out[i]=0;
   return command(0x4b,&id,1,out,bytes);
  }
@@ -50,6 +50,7 @@ template<class Io> struct Mailbox {
 struct AltMode {
  enum class Phase:unsigned {Off,Identity,Svid,Modes,Enter,Status,Configure,Active,Failed};
  Phase phase=Phase::Off;PdError error=PdError::None;uint8_t supported=0,pin=0;bool hpd=false,hpdIrq=false,multi=false;uint32_t status=0,generation=0;
+ uint8_t modePosition=1;bool modesRequested=false;
  void reset(){const auto next=generation+(phase==Phase::Active);*this={};generation=next;}
  unsigned lanes()const{return pin==8?2:(pin==4||pin==16)?4:0;}
  static uint8_t choose(uint8_t pins,bool preferUsb){
@@ -68,7 +69,7 @@ struct AltMode {
   hpdIrq=false;if(!reply||bytes<8||bytes>33||reply[0]!=0x4b||reply[1]!=id)return reject(PdError::Packet);
   const uint32_t header=le32(reply+4);const unsigned cmd=header&31,type=(header>>6)&3,svid=header>>16;
   const unsigned expected=id==0x10?16:id==0x11?17:id;
-  if(cmd!=expected||!(header&0x8000)||svid!=(id<=2?0xff00u:0xff01u))return reject(PdError::Packet);
+  if(cmd!=expected||!(header&0x8000)||(id!=3&&svid!=(id<=2?0xff00u:0xff01u)))return reject(PdError::Packet);
   if(id!=6&&type!=1)return reject(PdError::Rejected);
   if(id==6&&type!=0)return reject(PdError::Packet);
   /* Samsung counts its message header and VDM header as two objects. */
@@ -83,20 +84,28 @@ struct AltMode {
    for(unsigned at=8;at+1<objects*4;at+=2)if((reply[at]|uint16_t(reply[at+1])<<8)==0xff01)found=true;
    if(!found)return reject(PdError::Unsupported);phase=Phase::Modes;break;}
   case 3:{
-   if(phase!=Phase::Modes||objects<3)return reject(PdError::Sequence);const uint32_t cap=le32(reply+8);
-   const unsigned port=cap&3;if(!(port&1)||!(cap&4))return reject(PdError::Unsupported);
-   supported=uint8_t(cap>>((cap&64)?16:8))&0x1c;if(!supported)return reject(PdError::Unsupported);
-   phase=Phase::Enter;ok=m.request(4,1);break;}
+   if(phase!=Phase::Modes||objects<3)return reject(PdError::Sequence);
+   if(svid!=0xff01u){
+    if(!modesRequested){modesRequested=true;if(!m.request(3))return reject(m.error);}
+    return true;
+   }
+   for(unsigned pos=1;pos<=objects-2&&(4+pos*4+4)<=bytes;++pos){
+    const uint32_t cap=le32(reply+4+pos*4);
+    const uint8_t pins=uint8_t(cap>>((cap&64)?16:8))&0x1c;
+    if((cap&1)&&(cap&4)&&pins){supported=pins;modePosition=uint8_t(pos);break;}
+   }
+   if(!supported)return reject(PdError::Unsupported);
+   phase=Phase::Enter;ok=m.request(4,modePosition);break;}
   case 4:
-   if(phase!=Phase::Enter||((header>>8)&7)!=1)return reject(PdError::Sequence);
+   if(phase!=Phase::Enter||((header>>8)&7)!=modePosition)return reject(PdError::Sequence);
    phase=Phase::Status;break;
   case 6:case 0x10:
    if((phase!=Phase::Status&&phase!=Phase::Active&&phase!=Phase::Configure)||objects<3)return reject(PdError::Sequence);
    status=le32(reply+8);hpd=status&128;hpdIrq=status&256;multi=status&16;
    if((status&(32|64))||!(status&3)){reset();return true;}
-   if(phase==Phase::Status){pin=choose(supported,multi);if(!pin)return reject(PdError::Unsupported);phase=Phase::Configure;ok=m.request(17,1,6|(uint32_t(pin)<<8),true);}break;
+   if(phase==Phase::Status){pin=choose(supported,multi);if(!pin)return reject(PdError::Unsupported);phase=Phase::Configure;ok=m.request(17,modePosition,6|(uint32_t(pin)<<8),true);}break;
   case 0x11:
-   if(phase!=Phase::Configure||((header>>8)&7)!=1)return reject(PdError::Sequence);
+   if(phase!=Phase::Configure||((header>>8)&7)!=modePosition)return reject(PdError::Sequence);
    phase=Phase::Active;++generation;break;
   case 5:reset();break;
   default:return reject(PdError::Unsupported);

@@ -125,10 +125,10 @@ bool openMaxim(){
   Bus *candidate=new Bus;
   const bool ok=candidate&&candidate->open(true);
   if(ok)maxim=candidate;else delete candidate;
-  __atomic_store_n(&maximBusState,ok?2u:3u,__ATOMIC_RELEASE);
+  __atomic_store_n(&maximBusState,ok?2u:0u,__ATOMIC_RELEASE);
   return ok;
  }
- for(unsigned i=0;i<100;++i){
+ for(unsigned i=0;i<600;++i){
   const unsigned state=__atomic_load_n(&maximBusState,__ATOMIC_ACQUIRE);
   if(state!=1)return state==2;
   IOSleep(10);
@@ -226,6 +226,19 @@ extern "C" bool b5q_usb_typec_init(void){
  // Water blocks roles in Cable, not future dry-cable status observations.
  return __atomic_load_n(&maximReady,__ATOMIC_ACQUIRE);
 }
+namespace {
+bool ensureMaximReady(){
+ if(__atomic_load_n(&maximReady,__ATOMIC_ACQUIRE))return true;
+ uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);
+ static uint64_t lastAttempt=0;
+ const uint64_t now=ns/1000000+1;
+ uint64_t last=__atomic_load_n(&lastAttempt,__ATOMIC_ACQUIRE);
+ if(__atomic_load_n(&maximBusState,__ATOMIC_ACQUIRE)!=2&&last&&now-last<1000)return false;
+ if(!__atomic_compare_exchange_n(&lastAttempt,&last,now,false,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE))
+  return __atomic_load_n(&maximReady,__ATOMIC_ACQUIRE);
+ return b5q_usb_typec_init();
+}
+}
 // Battery and USB share the same physical SE8 engine and lock. Read-only
 // gauge/charger sampling never changes charge policy or clears IRQ status.
 extern "C" bool b5q_battery_snapshot(B5qFuelGauge::Raw *raw,
@@ -242,7 +255,7 @@ extern "C" bool b5q_battery_snapshot(B5qFuelGauge::Raw *raw,
 }
 extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *out){
  if(!out)return false;
- *out={};if(!__atomic_load_n(&maximReady,__ATOMIC_ACQUIRE))return false;
+ *out={};if(!ensureMaximReady())return false;
  IOLockLock(maxim->lock);const bool ok=B5qMax77705::readCable(*maxim,*out);IOLockUnlock(maxim->lock);
  static uint32_t previous=~0u;
  if(__atomic_exchange_n(&previous,out->signature(),__ATOMIC_RELAXED)!=out->signature())
@@ -255,7 +268,7 @@ extern "C" int b5q_usb_cable_role(void){
  return cable.role();
 }
 extern "C" bool b5q_usb_otg(bool on){
- if(!__atomic_load_n(&maximReady,__ATOMIC_ACQUIRE))return false;IOLockLock(maxim->lock);
+ if(!ensureMaximReady())return false;IOLockLock(maxim->lock);
  // The caller follows the PDIC power role, independently of Host/Device.
  const bool ok=B5qMax77705::otg(*maxim,on,[](unsigned us){IODelay(us);});
  if(ok)otgOn=on;uint8_t mode=0,ilim=0,c3=0;maxim->read(0x69,0xb7,mode);maxim->read(0x69,0xb9,ilim);maxim->read(0x69,0xc3,c3);
@@ -312,11 +325,13 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
      if(dpAlt.phase==B5qDp::AltMode::Phase::Active)dpPending&=~(1u<<bit);continue;
     }
     if(bit==6&&expected<unsigned(B5qDp::AltMode::Phase::Status))continue;
-    uint8_t reply[33];ok=mailbox.get(id,reply);
-    if(ok)ok=dpAlt.event(mailbox,id,reply,(id==1||id==2)?32:id==4?8:12);
+    uint8_t reply[33]={};ok=mailbox.get(id,reply);
+    if(ok)ok=dpAlt.event(mailbox,id,reply,(id==1||id==2||id==3)?32:id==4?8:12);
     dpPending&=~(1u<<bit);dpDeadline=dpNow()+3000;
     IOLog("B5qDP: pdic id=%02x phase=%u pin=%02x lanes=%u hpd=%u irq=%u packet=%u error=%u mailbox=%u\n",
       id,unsigned(dpAlt.phase),dpAlt.pin,dpAlt.lanes(),dpAlt.hpd,dpAlt.hpdIrq,ok,unsigned(dpAlt.error),unsigned(mailbox.error));
+    if(!ok)IOLog("B5qDP: pdic-raw id=%02x bytes=%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      id,reply[0],reply[1],reply[2],reply[3],reply[4],reply[5],reply[6],reply[7],reply[8],reply[9],reply[10],reply[11],reply[12],reply[13],reply[14],reply[15]);
    }
    if(ok&&dpAlt.phase==B5qDp::AltMode::Phase::Off){
     mailbox.enable(false);dpStarted=false;dpFailed=true;dpPending=0;

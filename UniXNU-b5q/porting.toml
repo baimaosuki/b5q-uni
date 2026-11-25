@@ -3189,3 +3189,39 @@ revision = "bbefab15224eb4d0ba65938bc76cfc8e5477b8b1"
 reference = "reports/v33d-release.json"
 command = "test-ethernet-lifecycle.py; test-v33d-review3.py; check-wifi-target.py; pre-ci-v33d.py"
 result = "Ethernet host/target+22localgatePASS; sourcef6f2119kernel/payloadCI45540221549SUCCESS and firmware45537636188SUCCESSwithunchangedinputs. Actualreturned0014/staticmUsbMapBuf/noAllocatePool,51GPUmembers2changed49same,WiFi readinessplist,APFS,ADT,POST/PAC/zeroEL1SMMU and final800MiB4KnreadbackPASS. Fullresults+input/outputSHA inreports/v33d-release.json; pairedbootretainsv8raw16MiBFAT16. No phone/flash or hardware success."
+
+
+[[area]]
+id = "v33d-logpair-four-local-fixes"
+status = "host-verified"
+components = ["QcomDwc3", "DarwinBoot"]
+paths = ["package/B5qTouch.cpp", "package/B5qUsbBoard.cpp", "package/B5qDpPdic.h", "package/QcomDwc3.cpp", "reports/v33d-review4.md", "reports/v33d-review4.json"]
+inputs = ["Owner fourpoint local-only request attachment SHA recorded in reports/v33d-review4.json; no commit/push/CI/ESP/phone authorized this round", "Independently CRCdecoded logs/b5q-xnu2log-v33d/XNU2LOG.BIN SHAf3dfbedc36b99d1a683715b3b0d11874b998715e7f55c3f34307469ad0bcf98e:seq104,1518lines,lost0; v33d-2 SHA0b1d21729076e022f168179e5f41c8ffe28db21fe399da3e663b6959a13662cc:seq370,2025lines,lost0; selected payloads byte-identical to supplied text", "Pinned sheng QcomDwc3 core-only reset sequence and original b5q reserved bounds; firmware patches and input hashes in local review4 receipts. Fragmented-map scenarios are synthetic, not captured EFI maps"]
+configuration = ["No board.toml/bootargs/WiFi/BT/GPU/ADSP/0014constant or originalWiFireadinessassertion changes; previous firmware snapshot buffer remains static32768B", "Only USB table storage capacity grows256to2048pages. 32KiB/40B <=819descriptors; at mosttwoL3edges perdescriptor plus stock19rangeedges and66root/L2pages gives1742page upper bound, below2048. Register/leaf attributes unchanged; retained EfiReserved pool remains excluded from USB mapping", "Follow-on0015 regenerated to carry USB map/capacity changes after byte-identical0014; no new firmwareworkflow or loader change"]
+procedure = ["Run production TouchComm identify/drain, delayed/concurrentSE8recovery, multiSVID/multiMode PDIC, core-onlyreset and causal64bitregisterlatch regressions withASan/UBSan", "Rerun complete pre-ci-v33d locally, actualarm64e/EDK2 objects, newUsbDma staticbuffer/noAllocatePool and slot421@0xd28PAC proof,zeroEL1apps_smmu and16patch reconstruction", "Write incremental diff against review4before snapshots, complete stdout/stderr, perrequest table and SHA manifest in artifacts/b5q-v33d-review4; stop for owner review"]
+findings = ["Both physicallogs show identifyreport mode1/24B followedbyresponse timeout. The previous ignore10 rule was wrong for thisfirmware: cmd02 now accepts01or10 only after applicationmodevalidation; worker first drains atmost8pendingpackets", "v33d-2 TypeCready0 precedes later successfulSE8batteryinitialization. openMaxim now waits600x10ms andfailedopen returnsstate0; cable/OTGensureReady retries with1sthrottle or immediatelywhen busstate2; productionconcurrencytests cover1.2scompletion,6stimeout+latecompletion andfailedopenretry", "DPcachedDiscoverModes now reads31responsebytes/event32. ForeignSVID keepsModesphase andrequestsFF01modesonce; allModeVDOs inspected,firstusable UFP_D pinmask selected,modePosition retainedthroughEnter/Configure; failedreplylogs first16bytes", "Host logsts15meansHSEbit2set,EINTbit3clear; zeroDMAregisters alone do not identify the exactfaultingDMAtransaction. Firmware now maps normalBootServicesCode/Data and loaderRAMoutsideowned with unchanged aperture/reserved/self guards; actualproduction tabletests covermodeledb5qranges and819fragmentdescriptors requiring1642pages. Old256capacity failsclosed;2048passes,staticbufferoverflow andOwnsHead/Retained gates retained", "setCoreRole now uses separate GCTLbit11set/wait/clear andPRTCAPDIRwrites,thenonlyUSBquirkclears; noPHYbit31reset afterQMP. First16write64calls logeligiblewrites andboundedalternatelo/hi retry onlyfornonzero/nonCRCR allzero readback,usingoriginal value halves", "DarwinBoot MemoryWindow.h still excludes BootServices types from XNU usable RAM; this round does not alter that loader policy. Expanded USB mapping is verified, but BootServices reclamation as the actual HSEcause is not proven. New physical enumeration/touch/DP results remain pending", "2026-11-25 owner explicitly authorized starting CI after review4. Revalidated all24source-bound localgates,sourcehashes,0014/board/WiFiassertion immutability and16patchzero-drift before submission. Only approvedb5q files are submitted atop remote237e034; livefirmware edits travel through0015patch. No TWRP/artifacts or primaryindex changes"]
+completion = ["All four local repairs verified by production host/target/PAC gates; exact final receipts and limits in reports/v33d-review4.json. No full kernel/firmware linkage, CI, deployment image or hardware execution claimed"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; logs establish previous failures, not post-fix behavior. No complete physical EFI descriptor map was supplied; capacity model is explicitly synthetic", "Owner now authorizes b5q-only commit/push and kernel+UEFI CI dispatch. ESP packaging and phone operations remain outside this latest instruction"]
+next_action = ["Push approvedreview4source to codex/b5q-p0-p5, verify b5q-p0-p5.yml kernel+firmwarejobs start and report exactrunURL; do not packageESP or accessphone"]
+
+[[area.evidence]]
+kind = "source"
+revision = "f6f2119d95134d9ca977bcbaa8c581fba90c1147"
+reference = "reports/v33d-review4.md"
+command = "Independent read_xnu2log.decode_image; compare directpacket/typec/PDIC/coreReset sources and originalboardreservedranges; gitapply+diff-ruN"
+result = "Selectedlogpayloads seq104/370 byte-match originaltexts,lost0. Onlyfourrequestedpaths and directtablecapacity/tests/patch/record support changed; board0014andforbiddenmodules byte-identical. Revision denotes deployed source parent, newchangesremainlocal/uncommitted."
+
+[[area.evidence]]
+kind = "host"
+revision = "f6f2119d95134d9ca977bcbaa8c581fba90c1147"
+reference = "reports/v33d-review4.json"
+command = "B5Q_GATE_WORK=artifacts/b5q-v33d-review4 python3 scripts/b5q-install/pre-ci-v33d.py"
+result = "ProductionhosttestsASanUBSan,arm64e/EDK2compilation,PAC/slot421unchanged,zeroEL1SMMU,staticmap/noAllocatePool andpatchreconstruction receipts retained locally. Exactfinalpasscounts andtargetobjecthashes inreview4report; no CI/phone/image success claimed."
+
+
+[[area.evidence]]
+kind = "source"
+revision = "237e034cbd46b6bc50f9aeb326e30555619abffe"
+reference = "reports/v33d-review4.json"
+command = "Validate source-bound24gates and SHA256SUMS; check porting-record; b5q-only temporary Git index and push to codex/b5q-p0-p5"
+result = "Owner latest instruction authorizes startingCI. Review4sources,localoutputs,immutablemodules and16patchzero-drift recheckedPASS before commit. Revision is remoteparent; dispatchreceipt/runURL recorded locally in artifacts/b5q-v33d-review4-ci. NewCI success is not yet claimed; noESP/phone authorization inferred."

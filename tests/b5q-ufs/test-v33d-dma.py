@@ -19,10 +19,10 @@ static void check(USB_DMA_TABLES *t,UINT64 pa){
  assert(((pte&USB_DMA_PA_MASK&~mask)|(pa&mask))==pa);
 }
 int main(void){
- static UINT64 pages[256*512];USB_DMA_TABLES table={pages,0xa0c000000,0,256};UINT64 mapped=0;
+ static UINT64 pages[USB_DMA_TABLE_PAGES*512];USB_DMA_TABLES table={pages,0xa0c000000,0,USB_DMA_TABLE_PAGES};UINT64 mapped=0;
  descriptors[0]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiConventionalMemory,.PhysicalStart=0xc7cc0000,.NumberOfPages=(0xd4d00000-0xc7cc0000)/4096};
  descriptors[1]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiLoaderCode,.PhysicalStart=0x88ba04000,.NumberOfPages=0x180000000/4096};
- descriptors[2]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiReservedMemoryType,.PhysicalStart=table.PhysicalBase,.NumberOfPages=256};
+ descriptors[2]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiReservedMemoryType,.PhysicalStart=table.PhysicalBase,.NumberOfPages=USB_DMA_TABLE_PAGES};
  // Additional discontiguous safe outside RAM plus a reservation: selector must
  // exclude the latter and every selected page must have an identity leaf.
  descriptors[3]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiConventionalMemory,.PhysicalStart=0xf7b00000,.NumberOfPages=0x100000/4096};
@@ -49,8 +49,8 @@ int main(void){
  assert(!BuildUsbTables(&table,0x88ba04000,0x180000000,&mapped));
  for(UINT64 pa=0xca000000;pa<0xca200000;pa+=4096)assert(!walk(&table,pa,&shift));
  for(UINT64 pa=0xd5000000;pa<0xdd000000;pa+=4096)assert(!walk(&table,pa,&shift));
- assert(!walk(&table,0xe0000000,&shift));check(&table,0xcb14d000);check(&table,0x9838b1000);
- puts("PASS independentaudio/video pools andBootServices inputpages remainunmapped inUSBdomain");
+ check(&table,0xe0000000);check(&table,0xcb14d000);check(&table,0x9838b1000);
+ puts("PASS independentaudio/video pools remainunmapped; BootServices RAM identitymapped");
  puts("PASS production BuildUsbTables + DarwinOutsideRanges:cb14d000/9838b1000 AP01/Attr2/SH3/AF1/identity; every outside4K +6GiBowned page walked, originalreserved excluded, tablepool retained");
 }
 '''

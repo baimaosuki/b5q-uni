@@ -47,12 +47,12 @@ template<class... A>void IOLog(const char *,A...){}
 struct PdicIo{};
 unsigned enables,disables,gets;bool boxFail=false;
 std::map<unsigned,std::array<uint8_t,33>> replies;
-std::vector<unsigned> requests;
+std::vector<unsigned> requests,positions;
 struct TestMailbox {
  PdError error=PdError::None;
  explicit TestMailbox(PdicIo&){}
  bool enable(bool on){assert(locked);if(on)enables++;else disables++;error=boxFail?PdError::Io:PdError::None;return !boxFail;}
- bool request(unsigned cmd,unsigned=0,uint32_t=0,bool=false){assert(locked);requests.push_back(cmd);error=boxFail?PdError::Io:PdError::None;return !boxFail;}
+ bool request(unsigned cmd,unsigned pos=0,uint32_t=0,bool=false){assert(locked);requests.push_back(cmd);positions.push_back(pos);error=boxFail?PdError::Io:PdError::None;return !boxFail;}
  bool get(unsigned id,uint8_t out[33]){assert(locked);gets++;if(boxFail||!replies.count(id)){error=PdError::Io;return false;}
   for(unsigned i=0;i<33;i++)out[i]=replies[id][i];return true;}
 };
@@ -65,7 +65,7 @@ std::array<uint8_t,33> packet(unsigned id,uint32_t vdo=0,unsigned count=3){
 test=r'''
 void reset(bool powered=true){
  dpAlt={};dpStarted=dpFailed=false;dpCable=dpPending=0;dpDeadline=nowMs=0;
- locked=false;sampleOk=interruptOk=openOk=true;boxFail=false;enables=disables=gets=0;pdInterrupt=vdmInterrupt=0;requests.clear();
+ locked=false;sampleOk=interruptOk=openOk=true;boxFail=false;enables=disables=gets=0;pdInterrupt=vdmInterrupt=0;requests.clear();positions.clear();
  cableSample={};cableSample.cc0=0x40|(powered?1:2);cableSample.pd=128;cableSample.valid=true;
  replies={{1,packet(1)},{2,packet(2,0xff01)},{3,packet(3,5|64|(28u<<16))},{4,packet(4,0,2)},
           {0x10,packet(0x10,2|128|16)},{0x11,packet(0x11,0,2)},{6,packet(6,2|128)}};
@@ -86,6 +86,18 @@ int main(){unsigned cases=0;B5qDpPortState out{};
   replies[6]=packet(6,2|64);pdInterrupt=16;assert(b5q_dp_port_poll(&out)&&!out.configured&&!dpStarted&&dpFailed);unsigned before=enables;
   assert(b5q_dp_port_poll(&out)&&enables==before);cases++;
  }
+
+ // Real board event lengths must allow a second ModeVDO, and keep its
+ // objectposition through Enter and Configure on later polls.
+ reset();replies[3]=packet(3,2|(4u<<8),4);put32(replies[3].data()+12,5|64|(28u<<16));
+ put32(replies[4].data()+4,le32(replies[4].data()+4)+256);
+ put32(replies[0x11].data()+4,le32(replies[0x11].data()+4)+256);
+ active(out);assert(dpAlt.modePosition==2&&(positions==std::vector<unsigned>{0,2,2}));cases++;
+ reset();vdmInterrupt=7;replies[3]=packet(3,5|(4u<<8),4);put32(replies[3].data()+4,(0x04e8u<<16)|0x8000|64|3);
+ assert(b5q_dp_port_poll(&out)&&dpAlt.phase==AltMode::Phase::Modes&&dpStarted&&dpAlt.modesRequested);
+ replies[3]=packet(3,2|(4u<<8),4);put32(replies[3].data()+12,5|64|(28u<<16));
+ put32(replies[4].data()+4,le32(replies[4].data()+4)+256);put32(replies[0x11].data()+4,le32(replies[0x11].data()+4)+256);
+ vdmInterrupt=12;pdInterrupt=12;assert(b5q_dp_port_poll(&out)&&out.configured&&dpAlt.modePosition==2);cases++;
  // Coalesced/missed VDM interrupts are recovered in the native order.
  reset();vdmInterrupt=8;
  for(unsigned i=0;i<3;i++){assert(b5q_dp_port_poll(&out));nowMs+=50;}

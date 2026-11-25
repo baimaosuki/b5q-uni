@@ -17,12 +17,12 @@ struct Io {
  bool connected(){return online;}void delay(unsigned us){elapsed+=us;}uint64_t nowUs(){return elapsed;}
  bool write(uint8_t address,const uint8_t *data,unsigned n){assert(address==0x25);if(fail)return false;writes.emplace_back(data,data+n);if(data[0]==0x21)opcode=data[1];return true;}
  bool read(uint8_t address,uint8_t reg,uint8_t *out,unsigned n){assert(address==0x25);elapsed+=readCost;if(fail)return false;++reads;memset(out,0,n);
-  if(reg==2){assert(n==1);*out=reads>1&&!timeout?128:0;}else if(reg==0x51){assert(n==1);*out=wrong?0xff:opcode;}else assert(reg==0x52);return true;}
+  if(reg==2){assert(n==1);*out=reads>1&&!timeout?128:0;}else if(reg==0x51){assert(n==1);*out=wrong?0xff:opcode;}else {assert(reg==0x52);if(opcode==0x4b)assert(n==31);}return true;}
 };
 struct M {
- PdError error=PdError::None;bool fail=false;unsigned cmd=0,pos=0;uint32_t vdo=0;bool data=false;
+ PdError error=PdError::None;bool fail=false;unsigned cmd=0,pos=0,requests=0;uint32_t vdo=0;bool data=false;
  bool enable(bool){return !fail;}
- bool request(unsigned c,unsigned p=0,uint32_t v=0,bool d=false){cmd=c;pos=p;vdo=v;data=d;error=fail?PdError::Io:PdError::None;return !fail;}
+ bool request(unsigned c,unsigned p=0,uint32_t v=0,bool d=false){requests++;cmd=c;pos=p;vdo=v;data=d;error=fail?PdError::Io:PdError::None;return !fail;}
 };
 std::array<uint8_t,33> packet(uint8_t id,uint32_t vdo=0,unsigned objects=3,unsigned type=1){
  std::array<uint8_t,33>b{};b[0]=0x4b;b[1]=id;b[2]=objects;
@@ -37,6 +37,7 @@ void throughStatus(AltMode &s,M &m,uint8_t pins,bool multi,bool receptacle=true)
 int main(){unsigned cases=0;
  for(unsigned n=0;n<=32;n++){Io io;Mailbox<Io> box(io);uint8_t data[32]={},out[33];assert(box.command(0x48,data,n,out,32));assert(io.writes[0].size()==n+2&&io.writes[0][0]==0x21&&io.writes[0][1]==0x48);assert(io.writes.size()==(n==32?1u:2u));if(n<32)assert((io.writes[1]==std::vector<uint8_t>{0x41,0}));cases++;}
  {Io io;Mailbox<Io>box(io);assert(box.enable(true));assert((io.writes[0]==std::vector<uint8_t>{0x21,0x55,3}));assert(box.request(17,1,0x806,true));assert((io.writes[2]==std::vector<uint8_t>{0x21,0x48,10,17,129,1,255,6,8,0,0}));}
+ {Io io;Mailbox<Io>box(io);uint8_t out[33];assert(box.get(3,out));assert(io.reads==4);}
  for(unsigned fault=0;fault<5;fault++){Io io;io.online=fault!=0;io.fail=fault==1;io.timeout=fault==2;io.wrong=fault==3;Mailbox<Io>box(io);uint8_t out[33]={};bool ok=box.command(0x55,nullptr,fault==4?33:0,out,1);assert(!ok);if(fault==2)assert(io.elapsed==500000&&box.error==PdError::Timeout);cases++;}
  for(unsigned cost:{100u,1000u,10000u,75000u}){Io io;io.timeout=true;io.readCost=cost;Mailbox<Io>box(io);uint8_t out[2]={0xaa,0xbb};assert(!box.command(0x55,nullptr,0,out,1)&&box.error==PdError::Timeout);assert(io.elapsed>=500000&&io.elapsed<=500000+2*cost+1000&&io.reads<500&&out[0]==0xaa&&out[1]==0xbb);cases++;}
  for(unsigned pins=0;pins<64;pins++)for(bool multi:{false,true}){const uint8_t p=AltMode::choose(pins,multi);assert(p==0||(p&pins));assert(!p||p==4||p==8||p==16);cases++;}
@@ -48,8 +49,31 @@ int main(){unsigned cases=0;
  for(unsigned n=0;n<12;n++){M m;AltMode s;assert(s.start(m));auto b=packet(1);assert(!s.event(m,1,b.data(),n));}
  for(unsigned type:{0u,2u,3u}){M m;AltMode s;assert(s.start(m));auto b=packet(1,0,3,type);assert(!s.event(m,1,b.data(),12));}
  {M m;AltMode s;assert(s.start(m));event(s,m,1);event(s,m,2,0xff01);m.fail=true;auto b=packet(3,5|(4u<<8));assert(!s.event(m,3,b.data(),12)&&s.error==PdError::Io);}
+
+ // Modes may contain more than one VDO; select the second usable UFP_D.
+ {M m;AltMode s;assert(s.start(m));event(s,m,1);event(s,m,2,0xff01);
+  auto modes=packet(3,2|(4u<<8),4);put32(modes.data()+12,5|64|(28u<<16));
+  assert(!s.event(m,3,modes.data(),12)&&s.error==PdError::Packet);
+  assert(s.start(m));event(s,m,1);event(s,m,2,0xff01);
+  assert(s.event(m,3,modes.data(),16)&&s.modePosition==2&&s.supported==28&&m.cmd==4&&m.pos==2);
+  auto enter=packet(4,0,2);put32(enter.data()+4,le32(enter.data()+4)+256);
+  assert(s.event(m,4,enter.data(),8)&&s.phase==AltMode::Phase::Status);
+  event(s,m,0x10,2|128|16);assert(m.cmd==17&&m.pos==2&&s.pin==8);
+  auto configure=packet(0x11,0,2);put32(configure.data()+4,le32(configure.data()+4)+256);
+  assert(s.event(m,0x11,configure.data(),8)&&s.phase==AltMode::Phase::Active);
+  s.reset();assert(s.modePosition==1&&!s.modesRequested);cases++;
+ }
+ // A dock's vendor/DeX SVID comes before FF01: request FF01 modes only once.
+ {M m;AltMode s;assert(s.start(m));event(s,m,1);event(s,m,2,0xff01);
+  auto other=packet(3,5|(4u<<8),4);put32(other.data()+4,(0x04e8u<<16)|0x8000|64|3);unsigned requested=m.requests;
+  assert(s.event(m,3,other.data(),16)&&s.phase==AltMode::Phase::Modes&&s.modesRequested&&m.cmd==3&&m.requests==requested+1);
+  assert(s.event(m,3,other.data(),16)&&m.requests==requested+1&&s.error==PdError::None);
+  auto dp=packet(3,5,4);put32(dp.data()+12,5|(4u<<8));
+  assert(s.event(m,3,dp.data(),16)&&s.modePosition==2&&m.cmd==4&&m.pos==2);
+  auto enter=packet(4,0,2);assert(!s.event(m,4,enter.data(),8)&&s.error==PdError::Sequence);cases++;
+ }
  std::mt19937 rng(0x77705);for(unsigned i=0;i<100000;i++){uint8_t bytes[33];for(auto &v:bytes)v=uint8_t(rng());M m;AltMode s;assert(s.start(m));(void)s.event(m,uint8_t(rng()),bytes,rng()%34);}
- printf("PASS SamsungPDIC %ucases:mailboxlength0..32/endmarker/500msbound/opcode/IO/detach/CDEpin/plug-receptacle/HPD/NAK/order/truncation/100000fuzz ASanUBSan\n",cases);
+ printf("PASS SamsungPDIC %ucases:DiscoverModes31byte-read/multiModeVDO/foreignSVIDrequestonce/modePosition2EnterConfigure/mailboxlength0..32/endmarker/500msbound/opcode/IO/detach/CDEpin/plug-receptacle/HPD/NAK/order/truncation/100000fuzz ASanUBSan\n",cases);
 }
 '''
 with tempfile.TemporaryDirectory(prefix='b5q-dp-pdic-')as td:
