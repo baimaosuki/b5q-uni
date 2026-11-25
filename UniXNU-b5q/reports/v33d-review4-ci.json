@@ -1,0 +1,231 @@
+{
+  "status": "LOCAL_GATES_PASS_CI_RETRY_READY",
+  "first_run": 45557368186,
+  "source_commit": "7ac6632022fdba386b12ebd3a992b4d5abd70826",
+  "first_failure": {
+    "job": 139012592629,
+    "step": "Update existing RAM recovery seed policy without recreating APFS",
+    "log": "artifacts/b5q-v33d-review4-ci/ci45557368186-kernel-first-failure.log",
+    "sha256": "59a0d97bf3788542549ed54e922ebb0075fccf8d3e1cb5f5099998e871af64c6",
+    "cause": "Stale current seed hash excluded already migrated verified seed from CI45540221549"
+  },
+  "firmware": {
+    "passed": true,
+    "github_digest_verified": true,
+    "run": 45557368186,
+    "source_commit": "7ac6632022fdba386b12ebd3a992b4d5abd70826",
+    "artifact_sha256": "7c05460c6b68eaefc9476b343e5c4a4894a69d931fa7eabc4ce32303d7307ad5",
+    "FD": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-v33d-review4-ci/ci45557368186-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
+      "bytes": 3145728,
+      "sha256": "a1f97a70b72b60bfc851a645cec214e8279d4875a071f4ee23e94e4c141f9ef6"
+    },
+    "files": {
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd": "a1f97a70b72b60bfc851a645cec214e8279d4875a071f4ee23e94e4c141f9ef6",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/B5qHandoffDxe.efi": "6c4029b98b3470380c62bb52150364f1750b082e334d0b363e32d9db71309353",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/DpDma.obj": "87fcb18dd1933b3d5723ca185e446e6f40104cc512f98c58550d9845911b88b7",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/DarwinBootPkg/Driver/DarwinBoot/OUTPUT/DarwinBoot.efi": "ed36201a11836f76b21f4eb00e09069247973a87b033bc2225861aa9ebc33e5e",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/MediaDma.obj": "0f6e93bc0d2b3c83e8616ee7fe72e988bf4fd0b42a63e7a58e51877538ece105",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/PcieDma.obj": "4916765a666d1ccc359c6f04eeb84eb5bbf09a1fa44ff354aca672986a1b41d6",
+      "b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe/OUTPUT/UsbDma.obj": "6429e9f757f5dd5142c22dca0613848c99c6ea56a240b56acedc97d63c7bcf87",
+      "_temp/b5q-firmware.sha256": "e99dd97d5e50c8cd5c67343143849daf011dd77c88d086d0937418a6ccd43d78"
+    },
+    "hardware_verified": false
+  },
+  "seed": {
+    "source_run": 45540221549,
+    "sha256": "bb959aea0c4ece46fc7903053786825dba44184ee010c9a722e1b8811387d4d2",
+    "logical_bytes": 4294967296,
+    "no_mount_or_regeneration": true
+  },
+  "tests": {
+    "positive_reuse_pass": true,
+    "negative_cases": 6,
+    "policy_and_absentd_change_block_skip": true
+  },
+  "CI_retry_pending": true,
+  "ESP_created": false,
+  "phone_access": false,
+  "hardware_verified": false,
+  "local_gate": {
+    "checks": 25,
+    "passed": true,
+    "receipt": "artifacts/b5q-v33d-review4-ci/local-gates/v33d-local-gates.json",
+    "sha256": "1807508600271a238aad966c11d7745cdb76d8c6b5b3bbf2568c148f6d6b9122"
+  },
+  "APFS_readback": {
+    "passed": true,
+    "readback_image": "/tmp/b5q-verified-reused-seed-bs7o89eg/seed.apfs",
+    "APFS_volume_UUID": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+    "account_autologin_password_verified": true,
+    "policy_counts": {
+      "disabled.plist": 58,
+      "disabled.501.plist": 25
+    },
+    "policy_contents": {
+      "disabled.plist": {
+        "com.apple.AirPlayXPCHelper": true,
+        "com.apple.AssetCache.agent": true,
+        "com.apple.AssetCache.builtin": true,
+        "com.apple.AssetCacheLocatorService": true,
+        "com.apple.AssetCacheManagerService": true,
+        "com.apple.AssetCacheTetheratorService": true,
+        "com.apple.CommCenter": true,
+        "com.apple.ContextStoreAgent": true,
+        "com.apple.PerfPowerServices": true,
+        "com.apple.PerfPowerServicesExtended": true,
+        "com.apple.ReportCrash": true,
+        "com.apple.ReportCrash.Root": true,
+        "com.apple.ReportCrashService": true,
+        "com.apple.adid": true,
+        "com.apple.amsengagementd": true,
+        "com.apple.analyticsd": true,
+        "com.apple.appleh13camerad": true,
+        "com.apple.audioanalyticsd": true,
+        "com.apple.biomesyncd": true,
+        "com.apple.contextstored": true,
+        "com.apple.coreduetd": true,
+        "com.apple.coresymbolicationd": true,
+        "com.apple.duetexpertd": true,
+        "com.apple.email.maild": true,
+        "com.apple.financed": true,
+        "com.apple.findmy.findmybeaconingd": true,
+        "com.apple.geod": true,
+        "com.apple.geodMachServiceBridge": true,
+        "com.apple.icloud.searchpartyd": true,
+        "com.apple.identityservicesd": true,
+        "com.apple.locationd": true,
+        "com.apple.mediaanalysisd": true,
+        "com.apple.mediastream.mstreamd": true,
+        "com.apple.metadata.mds": true,
+        "com.apple.metadata.mds.index": true,
+        "com.apple.metadata.mds.index.readonly": true,
+        "com.apple.metadata.mds.scan": true,
+        "com.apple.metadata.mds.spindump": true,
+        "com.apple.mobile.obliteration": true,
+        "com.apple.mobile.softwareupdated": true,
+        "com.apple.mobile.usermanagerd": true,
+        "com.apple.modelcatalogd": true,
+        "com.apple.modelmanagerd": true,
+        "com.apple.ndoagent": true,
+        "com.apple.passd": true,
+        "com.apple.perfpowermetricd": true,
+        "com.apple.photoanalysisd": true,
+        "com.apple.rtcreportingd": true,
+        "com.apple.siriactionsd": true,
+        "com.apple.siriinferenced": true,
+        "com.apple.siriknowledged": true,
+        "com.apple.softwareupdated": true,
+        "com.apple.spindump": true,
+        "com.apple.tailspind": true,
+        "com.apple.talagent": true,
+        "com.apple.wallpaper.agent": true,
+        "com.apple.wallpaper.extension.aerials": true,
+        "com.apple.watchdogd": true
+      },
+      "disabled.501.plist": {
+        "com.apple.AssetCache.agent": true,
+        "com.apple.AssetCacheLocatorService": true,
+        "com.apple.CommCenter": true,
+        "com.apple.ContextStoreAgent": true,
+        "com.apple.ReportCrash": true,
+        "com.apple.ReportCrashService": true,
+        "com.apple.amsengagementd": true,
+        "com.apple.biomesyncd": true,
+        "com.apple.duetexpertd": true,
+        "com.apple.email.maild": true,
+        "com.apple.financed": true,
+        "com.apple.geod": true,
+        "com.apple.geodMachServiceBridge": true,
+        "com.apple.identityservicesd": true,
+        "com.apple.mediaanalysisd": true,
+        "com.apple.mediastream.mstreamd": true,
+        "com.apple.ndoagent": true,
+        "com.apple.passd": true,
+        "com.apple.photoanalysisd": true,
+        "com.apple.siriactionsd": true,
+        "com.apple.siriinferenced": true,
+        "com.apple.siriknowledged": true,
+        "com.apple.talagent": true,
+        "com.apple.wallpaper.agent": true,
+        "com.apple.wallpaper.extension.aerials": true
+      }
+    },
+    "inodes": {
+      "private/var/db/.AppleSetupDone": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "private/var/db/dslocal/nodes/Default/users/baimao.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 722
+      },
+      "private/var/db/dslocal/nodes/Default/groups/admin.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 390
+      },
+      "private/var/db/dslocal/nodes/Default/groups/staff.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 370
+      },
+      "Users/baimao": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 16872,
+        "bytes": 0
+      },
+      "Users/baimao/.skipbuddy": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "Library/Preferences/com.apple.loginwindow.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 67
+      },
+      "private/etc/kcpassword": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 12
+      },
+      "private/var/db/com.apple.xpc.launchd/disabled.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 1902
+      },
+      "private/var/db/com.apple.xpc.launchd/disabled.501.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 814
+      },
+      "private/var/db/com.apple.xpc.launchd/disabled.migrated": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "private/var/ngpu/bin/b5q-absentd": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33261,
+        "bytes": 53232
+      }
+    },
+    "absentd_SHA256_verified": true,
+    "absentd_trusted_CodeDirectories": []
+  }
+}

@@ -82,3 +82,33 @@ with tempfile.TemporaryDirectory(prefix='b5q-mixed-artifact-roots-')as td:
  assert (t/'unpacked/kernel/kernel.macho').read_bytes()==b'kernel-fixture'
  assert (t/'unpacked/extra/_temp/reuse/data.dbr').read_bytes()==b'seed-fixture'
 print('PASS production artifact extract:manifest-relative payload plus external reusable inputs retained; no files discarded')
+# Reusing the successful release must not remount/repack its already-verified
+# APFS seed (which would change the checksum on every packaging run).
+updater=module(R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py')
+prior=R/'artifacts/b5q-v33d-release/ci45540221549'
+seed=prior/'extra/_temp/b5q-stage-data/data.dbr'
+metadata=json.loads((prior/'runtime/data-seed.json').read_text());body=seed.read_bytes()
+assert updater.checked_seed(body,metadata,'current')==(updater.MIGRATED_SEED_HASH,True)
+for bad_body,bad_meta,baseline in [
+ (body+b'corrupt',metadata,'current'),
+ (body,dict(metadata,sha256=updater.CURRENT_SEED_HASH),'current'),
+ (body,dict(metadata,volume_uuid='wrong'),'current'),
+ (body,dict(metadata,logical_bytes=2**30),'current'),
+ (body,metadata,'v33'),
+ (b'untrusted',dict(metadata,sha256=hashlib.sha256(b'untrusted').hexdigest()),'current')]:
+ try:updater.checked_seed(bad_body,bad_meta,baseline)
+ except ValueError:pass
+ else:raise AssertionError('Unpinned/corrupt/wrong-identity seed accepted')
+for field,value in [('launchd_policy',{}),('launchd_policy_migrated',False),('board_stand_in',{})]:
+ assert updater.checked_seed(body,dict(metadata,**{field:value}),'current')[1]is False
+with tempfile.TemporaryDirectory(prefix='b5q-current-seed-idempotence-')as td:
+ t=Path(td);changed=t/'changed-absentd';changed.write_bytes(b'new stand-in')
+ assert updater.checked_seed(body,metadata,'current',changed)[1]is False
+ staged=t/'data.dbr';staged.write_bytes(body);(t/'data-seed.json').write_text(json.dumps(metadata))
+ for n in range(2):
+  out=t/str(n)
+  with patch.object(sys,'argv',['update-seed','--darwinboot',str(R/'UniXNU/drivers/DarwinBoot'),'--seed',str(staged),'--out',str(out),'--baseline','current']),patch.object(updater.subprocess,'run',side_effect=AssertionError('Unexpected APFS write')),patch.object(updater.subprocess,'check_output',side_effect=AssertionError('Unexpected APFS mount')):
+   updater.main()
+  assert (out/'data.dbr').read_bytes()==body
+  assert json.loads((out/'data-seed.json').read_text())==metadata
+print('PASS actual CI45540221549 seed:2 byte-identical no-mount reuses;6 corrupt/identity/unpinned negatives rejected;changed policy/absentd never skipped')
