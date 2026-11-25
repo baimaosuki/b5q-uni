@@ -22,6 +22,8 @@ if a.dp:
  groups[0][2].append(patch/'0015-b5q-usb-map-lifetime.patch')
  groups[2][2].append(patch/'0012-darwinboot-b5q-dp-tail.patch')
  groups[2][2].append(patch/'0016-darwinboot-dma-order-inputs.patch')
+ groups[0][2].append(patch/'0017-b5q-dma-attach-flush.patch')
+ groups[2][2].append(patch/'0018-darwinboot-usb-coverage.patch')
 with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
  for index,(repo,revision,patches)in enumerate(groups):
   dest=Path(td)/str(index);dest.mkdir();paths=set();subprocess.run(['git','init','-q',str(dest)],check=True)

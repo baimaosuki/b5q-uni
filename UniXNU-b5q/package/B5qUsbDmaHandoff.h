@@ -20,6 +20,13 @@ struct State {
 };
 static_assert(sizeof(State) == 48, "USB DMA handoff wire layout");
 
+struct Diagnostics {
+    uint64_t prepareStatus,tableBase,tableBytes,mappedBytes,retentionStatus;
+    uint32_t deleted,halRevision,usedPages,flush;
+    uint64_t coverageStatus;
+};
+static_assert(sizeof(Diagnostics)==64,"USB DMA diagnostics v2");
+
 constexpr bool ready(uint32_t flag, const State &state) {
     return flag == 1 && state.version == 1 && state.sid == 0x40 &&
            state.locate == 0 && state.create == 0 && state.configure == 0 &&

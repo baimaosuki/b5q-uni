@@ -306,6 +306,7 @@ void worker(void *,wait_result_t) {
         native_wifi_logf(error?3:6,"PCIe train result=%d phy-entries=%zu",error,sizeof(B5qPcieInputs::phy)/sizeof(B5qPcieInputs::phy[0]));
         native_wifi_logf(error?3:6,"stage=link-state dbi728=%08x dbi72c=%08x ltssm=%u up=%u polls=%u phy214=%08x",linkState[0],linkState[1],linkState[0]&63,!!(linkState[1]&16),linkState[2],linkState[3]);
         if(parf.va&&phy.va)native_wifi_logf(error?3:6,"stage=link-clock parf1b0=%08x cfg=%x/%x pipe=%x gdsc=%x/%x",parf.va[0x1b0/4],gccWindow.va[0x6b078/4],gccWindow.va[0x6b05c/4],gccWindow.va[0x6b070/4],gccWindow.va[0x6b004/4],gccWindow.va[0x6c000/4]);
+        if(error&&tlmm.va)native_wifi_logf(3,"stage=link-pins gpio80=%u gpio82=%u gpio94=%u gpio95=%u gpio96=%u gpio204=%u",tlmm.va[(80*0x1000+4)/4]&1u,tlmm.va[(82*0x1000+4)/4]&1u,tlmm.va[(94*0x1000+4)/4]&1u,tlmm.va[(95*0x1000+4)/4]&1u,tlmm.va[(96*0x1000+4)/4]&1u,tlmm.va[(204*0x1000+4)/4]&1u);
         if(error)goto failed;
     }
     if(!endpoint()){error=-17;goto failed;}
@@ -332,7 +333,7 @@ void worker(void *,wait_result_t) {
         board.bar=const_cast<uint32_t*>(bar.va);board.bar_len=0x200000;
         board.device_id=0x1103;board.msi_cap=uint16_t(msiCap);board.irq_base=1000;
         board.cfg_read=cfgRead;board.cfg_write=cfgWrite;board.msi_target=msiTarget;
-        error=nw_wifi_start(&platform,&board);if(error)goto failed;stackStarted=true;
+        error=nw_wifi_start(&platform,&board);if(error)goto failed;stackStarted=true;b5q_wcn_wifi_probe_done();
         nw_wifi_irq_mode(1);native_wifi_stats[0]=21;
     }
     {
@@ -379,6 +380,7 @@ failed:
     sheng_ethernet_wifi_detach();
     if(stackStarted)nw_wifi_stop();
     b5q_wcn_radio_enable(B5Q_WCN_WLAN,0);b5q_wcn_power_put(B5Q_WCN_WLAN);
+    b5q_wcn_wifi_probe_done();
     native_wifi_logf(3,"stopped result=%d; boot continues; DMA pool retained",error);
     thread_terminate(current_thread());
 }
@@ -388,8 +390,9 @@ extern "C" int sheng_wifi_file(const char *name,const uint8_t **data,size_t *siz
 extern "C" void b5q_wifi_probe() {
     unsigned enabled=0;if(!PE_parse_boot_argn("wifi",&enabled,sizeof(enabled)) || !enabled)return;
     static uint32_t once=0;if(__atomic_exchange_n(&once,1u,__ATOMIC_ACQ_REL))return;
+    b5q_wcn_wifi_probe_begin();
     thread_t thread=nullptr;
     if(kernel_thread_start(worker,nullptr,&thread)==KERN_SUCCESS)thread_deallocate(thread);
-    else {native_wifi_stats[0]=uint32_t(-7);native_wifi_logf(3,"worker allocation failed");}
+    else {b5q_wcn_wifi_probe_done();native_wifi_stats[0]=uint32_t(-7);native_wifi_logf(3,"worker allocation failed");}
 }
 

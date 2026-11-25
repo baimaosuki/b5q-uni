@@ -1,0 +1,23 @@
+{
+  "status": "LOCAL_GATES_PASS_CI_READY",
+  "source_parent": "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243",
+  "input_sha256": {
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c": "06ad265a13c80b5f30b30556921bd5622d70eb5a4b874e4a4e532980825c4d78",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c": "be9ecaa7e1756174c9b75ce1862448e0736db7ecfcc2aed4d19b586cf4d8614a",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c": "7cc7f27c979896c8bb38ce8aed911e471237298ca217546586aa6e279e7b8929",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h": "a9acc33912696675c637ed981c5bf056c9a4e89302f03dd33ad362c53445d0f7",
+    "UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/B5qUsbDma.h": "a9acc33912696675c637ed981c5bf056c9a4e89302f03dd33ad362c53445d0f7",
+    "UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/B5qUsbDmaLoader.h": "01b1e16ae078ef7fae29701a701eb9201686a5d6e1ce45e7f784e66f678f7bd9",
+    "UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/DarwinBoot.c": "f6a45ba2497e8fc87e476ffee1247022433df3e62d9908672615432d012274c8",
+    "logs/b5q-xnu2log-review4/XNU2LOG.txt": "7be6dd93b2ff0b50a4eb40a00682783da8a12021cc654d7234874e0278e22f80"
+  },
+  "hardware_status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "phone_access": false,
+  "final_ESP_pending": true,
+  "final_boot_pending": true,
+  "local_gate_checks": 27,
+  "local_gate_sha256": "53e44593f17a54c39d4e85fc2aa16062d65f20f82cd3440ba0cd90150de446b0",
+  "patches": 18,
+  "immutable_touch_TypeC_DP_0014_returned_assertions": true,
+  "CI_pending": true
+}

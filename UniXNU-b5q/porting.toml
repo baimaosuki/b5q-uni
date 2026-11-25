@@ -3235,10 +3235,10 @@ paths = ["scripts/update-b5q-launchd-seed.py", "reports/v33d-review4-ci.json"]
 inputs = ["CI45557368186 source7ac6632022fdba386b12ebd3a992b4d5abd70826; UEFI job139012592387 success, kernel job139012592629 fails before compilation at seed SHA assertion", "Successful CI45540221549 digest-verified artifact contains migrated4GiB seed SHAbb959aea0c4ece46fc7903053786825dba44184ee010c9a722e1b8811387d4d2; APFS UUID1552CFEE-78FF-48D8-8A6C-694B867D61AC and exact58/25policies/account/root-ownedinodes/absentd previously readbackPASS"]
 configuration = ["Accept only original pinned seed or independently validated exact migrated seed; metadata SHA and actual bytes must match", "Skip mount/repack only for exact migrated digest with current policy,expected UUID/size and unchanged absentd; policy or executable changes retain migration path", "Kernel retry reuses successful45557368186firmware only after exact firmware patches/pins/board/job andFD identity proof; no ESP or phone operation"]
 procedure = ["Retain complete first failedkernel joblog and firmware artifact; run production updater twice on actual returnedseed with mount/write calls forbidden", "Reject corrupt/unpinned/mismatched UUID/size/metadata seeds; changedpolicy/absentd cannot qualify for no-op", "Run complete localgate, b5q-onlycommit/push, follow CI through artifact download and unchanged returned binary assertions"]
-findings = ["Dynamic artifact selection correctly picked latest complete45540221549, but updater baseline current only pinned premigrationd2e32a5f; repeat APFS mutation would also produce a different digest. Exactverified migratedimage now reused byte-for-byte without APFS regeneration", "Focused production tests PASS:two exact no-mount copies,six corrupt/identity/unpinnednegative cases,and policy/absentd changes block no-op. Original WiFi plist and returned gates unchanged. Full local/CI/returned results recorded as completed in reports/v33d-review4-ci.json"]
-completion = ["Packaging fix,complete localgate,actualseed APFSaccount/policy/inodereadback allPASS; CI retry/returnedacceptance pending; no new hardware success claimed"]
-limits = ["HOST_VERIFIED_PENDING_HARDWARE; noESP generation or phone access"]
-next_action = ["Finish source-bound localgate, submit CI retry, retain successfulfirmware and follow through returned acceptance"]
+findings = ["Dynamic artifact selection correctly picked latest complete45540221549, but updater baseline current only pinned premigrationd2e32a5f; repeat APFS mutation would also produce a different digest. Exactverified migratedimage now reused byte-for-byte without APFS regeneration", "Focused production tests PASS:two exact no-mount copies,six corrupt/identity/unpinnednegative cases,and policy/absentd changes block no-op. Original WiFi plist and returned gates unchanged. Full local/CI/returned results recorded as completed in reports/v33d-review4-ci.json", "CI45560129024 source9e7cbeb54bbe35fba8be9ac8bc4a89f944850243 SUCCESS. Downloaded647files with GitHub artifact digest d0343279d2f251ab27978908f002f24ebb5c4d54c1ec404b93a779e02ed71cd5. Actualseed hash unchanged; returned WiFiplistexactassertions,GPU51memberhashes/2rebuilt49unchanged,ADT/APFS/NormalWB/PAC/zeroEL1SMMU/DP allPASS. ActualXHCI427PACfields incl421 unchanged; jointwirelessADSP156objects/79authenticatedcontractsPASS; firmware45557368186 exactinputreuse/static32KiBmap/2048reservedpagesPASS. NoESP/phone/hardware claim."]
+completion = ["Complete source-bound localgate,CI45560129024kernel+payload,CI45557368186firmware,ordinaryartifactdownloads and fullreturnedacceptancePASS. Exactpaths/bytes/SHA in reports/v33d-review4-ci.json; no newESP or phone operations."]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; owner now explicitly requests final IMG packaging using accepted CI inputs; phone access/flashing remains unauthorized"]
+next_action = ["Package one800MiB4KnESP and matchingphysicalESPboot.img from acceptedCI45560129024/firmware45557368186; complete unchangedfinalreadback gates; publishpaths/bytes/SHA. No compile,CI rerun or phone operation."]
 
 [[area.evidence]]
 kind = "host"
@@ -3246,3 +3246,39 @@ revision = "7ac6632022fdba386b12ebd3a992b4d5abd70826"
 reference = "reports/v33d-review4-ci.json"
 command = "test-v33d-packaging.py; pre-ci-v33d.py; check-v33b-returned.py"
 result = "Firstfailure retained in artifacts/b5q-v33d-review4-ci/ci45557368186-kernel-first-failure.log; seedpin/currentpolicypositive and adversarialnegative testsPASS; subsequentsteps pending actualcompletion. NoWiFireadinessassertion weakened."
+
+[[area.evidence]]
+kind = "host"
+revision = "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243"
+reference = "reports/v33d-review4-ci.json"
+command = "download-ci-artifact.py --run 45560129024; check-v33b-returned.py; check-wireless-target-closure.py --with-adsp; actual review4 slot421/2048page returned proof"
+result = "CI45560129024SUCCESS and allreturnedgatesPASS.647buildfiles and8firmwarefiles digestverified. Payload268435456B SHAc3bb8ffbf76f9139112185f80f8c18fc8af5ecb772ec4fc35ac2c6d72ffc46b1;FD3145728B SHAa1f97a70b72b60bfc851a645cec214e8279d4875a071f4ee23e94e4c141f9ef6. ActualData seed unchanged,newobjectsource/PAC and originalWiFiassertionsPASS. Firstfailure retained; no newESP or phone/hardware execution."
+
+
+[[area.evidence]]
+kind = "host"
+revision = "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243"
+reference = "reports/v33d-review4-ci.json"
+command = "package-batch2-esp.py; package-usb-dma-boot.py --physical-esp"
+result = "Owner requests IMG delivery and explicitly stops further checks. Generated esp.img838860800B SHAd8761418bb60abcc3663e9b5125abcd1b0f97552f90e9dcf957d74d869b4ba9c and pairedboot.img19124224B SHA04944faedb4c55e0f87c613419018087fbd082f7f18993185c97567c1b5caad7 inartifacts/b5q-esp-v33d-review4. CI/returned gates previouslyPASS; newfinalreadback stopped at first-addition50/7versusidempotent57/0media-count assumption. Actualreusedaddon SHAequalsreturnedaddon; no gate assertions changed and no completefinalreadbackPASS claimed. No phone access/flash."
+
+
+[[area]]
+id = "review5-hal-flush-qmp-wcn-coldstart"
+status = "host-verified"
+components = ["QcomDwc3", "DarwinBoot"]
+paths = ["package/QcomDwc3.cpp", "package/B5qUsbDmaHandoff.h", "package/QcomQmp.c", "package/QcomQmp.h", "package/B5qWcnPower.cpp", "package/B5qWifiBoard.cpp", "package/B5qBluetooth.cpp", "scripts/b5q_adsp.py", "reports/review5-release.json"]
+inputs = ["Physical log logs/b5q-xnu2log-review4/XNU2LOG.txt SHA in artifacts/b5q-review5-work/input-SHA256.json; includes xHCI15writes and firstHSE,GPIO/UART/PCIe symptoms; no new physical success claimed", "Original HALIOMMUDxe.efi disassembly RVA3130/3990:slot5 flush_domain issuesCB_TLBIALL618/TLBSYNC7f0; exactbinarySHA+instructions in artifacts/b5q-review5-work/HAL-flush-disassembly.txt", "Original b5qDT regulator supported-modes:ldob15pmic5LDO mode04/HPM7,smpg4pmic5FTSMPS mode01/FAST7;smpe4/smpg2/smpg6 have no modes;QMP Linuxmaxpayload excludes4Bheader, WCN64B zero-padded"]
+configuration = ["HALslot5@40 checked and flushed after each successfulUSB/PCIe/media attach;USB2048pages firstbelow4GiBthenexistingaperturefallback;fullpoolWriteBack/dsb;0014 constants unchanged", "USBprotocol revision2 and64Bdiagnostics appendUsedPages/Flush/CoverageStatus;original48Bstate unchanged. FinalEBSmap excludes/outside checked against actualretainedtable identity/Attr2/AP01/SH3/AF leaves;readyonlyaftercompletecoverage+flush", "QcomDwc3 readonlyCPU RAMdiagnostics forDCBAA/ERST and firstHSE,physicalreadallowedonlyinsideowned/outsideandoutsideexclusions;zeroEL1SMMU", "Board-ownedQcomQmp copies retainlockedreferenceidentity;sendmax96,per-messagepadded64forWCN,ADSPusesqualifiedsamecore. WCNonlyldob15/smpg4mode7,PMICobserverbefore/after,GPIO204readbackandSW82transitions;BTwaitsbounded70soutsidepowermutexforfirstWiFiinit/cleanup", "Finalverification supports exact57entryidempotentmediaaddonreuse onlyifactualuploadedinputSHAandall57entriesmatch;originalWiFiplist/trust/50baselineand7mediafilechecksretained"]
+procedure = ["ProductionASanUBSanQMPmailboxsentinels/96Bbounds/64BWCN;VRMmodefilter/XOstucklow/BT-WiFiwait;fullUSBproducerlowallocationfallback+causalstaleTLBflushsuccess/failure;actualfinalcoverage6GiB/outside/secure/tableinvalidpointer negatives", "Runallretainedlocalgates,arm64e+EDK2targetcompile,crossobjectPAC/zeroEL1SMMU and18patchreconstruction;recordfirstfailureswithoutweakeningassertions", "Submitb5q-onlysource,pushsinglejointkernel+firmwareCI,followcompletion,downloadordinaryartifactsandactualreturnedgates;directlypackage800MiB4KnESPandpairedbootwithv8raw16MiBFAT16,thenreadbackanddeliverabsoluteIMGpaths/SHA;no phone operations"]
+findings = ["Review4 firstHSEoccursafterCPUregisterwrites;these logs do not independently identify the faultingSMMUtransaction. ActualHALflushwasmissingandisnowrequired. Core/PHYcontrolflow unchanged;newdiagnosticsreadonly", "FullUSBproducerhosttestsPASSlowfirst/highfallback,attachthenflushclearsmodeledstaleTLB,flushfailure/missingpointerdenyreadyandretainpages;finalcoveragechecks everyusableowned/outsideleaf without SMMU access", "QMP production testsPASS64/96B exactbounds/zeropadding,busy/overlengthzerowrites;WCNmodefilter,XOstucklowbeforeEN,70sBTtimeoutandcompletiontestsPASS. PhysicalrailvoltageandGPIOlevels remainpendingnewhardwarelogs;observerdiagnostics printreadstatus and actualPMICbytes"]
+completion = ["All27sourceboundlocalgatesPASS inclarm64e/EDK2/18patchzero-drift/allcrossobjectPAC/zeroEL1SMMU/causalQMPandHALcoverage;CI/finalimages pending actualcompletion"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; no phoneaccess/flashing; no fabricatedphysicalvoltages/ROM/USBsuccess"]
+next_action = ["Complete gates,CI and directfinalESP/boot packagingandreadback;returnonepairedimageset"]
+
+[[area.evidence]]
+kind = "host"
+revision = "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243"
+reference = "reports/review5-release.json"
+command = "test-review5.py; test-review5-firmware.py; check-wifi-target.py; check-peripheral-target.py; check-pcie-uefi-target.py --media --dp"
+result = "FocusedproductionhostASanUBSanandinitialtargetcompilesPASS;18patchinputsreconstructexactcurrentfirmware/loader. Fullgates/CI/imageandphysicalresults remainpending. Oldfinal50/7countassumption now requiresactual57/0uploadedaddonbyteidentity;originalWiFiassertionsunchanged."

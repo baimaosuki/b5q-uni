@@ -1,0 +1,189 @@
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+@@ -13,9 +13,11 @@
+ typedef UINT32(EFIAPI *HAL_DELETE)(VOID*);
+ typedef UINT32(EFIAPI *HAL_ATTACH)(VOID*,CONST CHAR8*,UINT32,UINT32);
+ typedef UINT32(EFIAPI *HAL_CONFIGURE)(VOID*,HAL_CONFIG*);
+-typedef struct {HAL_CREATE Create;HAL_DELETE Delete;HAL_ATTACH Attach,Detach;HAL_CONFIGURE Configure;} HAL_TABLE;
++typedef UINT32(EFIAPI *HAL_FLUSH)(VOID*);
++typedef struct {HAL_CREATE Create;HAL_DELETE Delete;HAL_ATTACH Attach,Detach;HAL_CONFIGURE Configure;HAL_FLUSH FlushDomain;} HAL_TABLE;
+ typedef struct {UINT64 Revision;VOID(EFIAPI *Init)(CONST HAL_TABLE**);VOID(EFIAPI *Deinit)(VOID);} HAL_PROTOCOL;
+ STATIC_ASSERT(sizeof(HAL_CONFIG)==48,"Original HAL configure ABI");
++STATIC_ASSERT(OFFSET_OF(HAL_TABLE,FlushDomain)==40,"HAL flush slot5");
+ STATIC EFI_GUID mHalGuid={0x54b6d3b4,0x5d33,0x4f91,{0x86,0x00,0x6c,0x41,0xd5,0xde,0xb1,0x9a}};
+ STATIC EFI_GUID mMediaGuid=B5Q_MEDIA_DMA_PROTOCOL_GUID;
+ STATIC B5Q_MEDIA_DMA_RESULT mResult[2];
+@@ -28,7 +30,7 @@
+  if(EFI_ERROR(Status))return Status;
+  if(!Protocol||Protocol->Revision!=0x10002||!Protocol->Init)return EFI_INCOMPATIBLE_VERSION;
+  Protocol->Init(&Hal);
+- if(!Hal||!Hal->Create||!Hal->Delete||!Hal->Attach||!Hal->Configure)return EFI_COMPROMISED_DATA;
++ if(!Hal||!Hal->Create||!Hal->Delete||!Hal->Attach||!Hal->Configure||!Hal->FlushDomain)return EFI_COMPROMISED_DATA;
+  EFI_PHYSICAL_ADDRESS Base=0xffffffffULL;
+  UINTN Pages=(UINTN)((R->PoolBytes+0x200000)/EFI_PAGE_SIZE);
+  Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,Pages,&Base);
+@@ -63,8 +65,9 @@
+  CONST CHAR8 *Client=Audio?"LPASS":"VIDEO";
+  R->Attach[0]=Hal->Attach(Domain,Client,Audio?0x03000001:0x03000000,0);
+  if(R->Attach[0]){Status=EFI_DEVICE_ERROR;goto Fail;}
++ {UINT32 Flush=Hal->FlushDomain(Domain);DEBUG((DEBUG_ERROR,"B5Q-MEDIADMA: kind=%u attach=0 flush=%x\n",R->Kind,Flush));if(Flush){Status=EFI_DEVICE_ERROR;goto Fail;}}
+  R->Attach[1]=Hal->Attach(Domain,Client,Audio?0x0300000e:0x03000005,0);
+- if(!R->Attach[1])return EFI_SUCCESS;
++ if(!R->Attach[1]){UINT32 Flush=Hal->FlushDomain(Domain);DEBUG((DEBUG_ERROR,"B5Q-MEDIADMA: kind=%u attach=1 flush=%x\n",R->Kind,Flush));if(!Flush)return EFI_SUCCESS;}
+  Status=EFI_DEVICE_ERROR;
+ Fail:
+  // An attachment failure may leave a hardware reference. Preserve its pool
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+@@ -13,9 +13,11 @@
+ typedef UINT32(EFIAPI *HAL_DELETE)(VOID*);
+ typedef UINT32(EFIAPI *HAL_ATTACH)(VOID*,CONST CHAR8*,UINT32,UINT32);
+ typedef UINT32(EFIAPI *HAL_CONFIGURE)(VOID*,HAL_CONFIG*);
+-typedef struct {HAL_CREATE Create;HAL_DELETE Delete;HAL_ATTACH Attach,Detach;HAL_CONFIGURE Configure;} HAL_TABLE;
++typedef UINT32(EFIAPI *HAL_FLUSH)(VOID*);
++typedef struct {HAL_CREATE Create;HAL_DELETE Delete;HAL_ATTACH Attach,Detach;HAL_CONFIGURE Configure;HAL_FLUSH FlushDomain;} HAL_TABLE;
+ typedef struct {UINT64 Revision;VOID(EFIAPI *Init)(CONST HAL_TABLE**);VOID(EFIAPI *Deinit)(VOID);} HAL_PROTOCOL;
+ STATIC_ASSERT(sizeof(HAL_CONFIG)==48,"Original HAL configure ABI");
++STATIC_ASSERT(OFFSET_OF(HAL_TABLE,FlushDomain)==40,"HAL flush slot5");
+ STATIC EFI_GUID mHalGuid={0x54b6d3b4,0x5d33,0x4f91,{0x86,0x00,0x6c,0x41,0xd5,0xde,0xb1,0x9a}};
+ STATIC EFI_GUID mPcieGuid=B5Q_PCIE_DMA_PROTOCOL_GUID;
+ STATIC B5Q_PCIE_DMA_RESULT mResult;
+@@ -45,7 +47,7 @@
+   if(EFI_ERROR(Status))return Status;
+   if(!Protocol || Protocol->Revision!=0x10002 || !Protocol->Init)return EFI_INCOMPATIBLE_VERSION;
+   Protocol->Init(&Hal);
+-  if(!Hal || !Hal->Create || !Hal->Delete || !Hal->Attach || !Hal->Configure)return EFI_COMPROMISED_DATA;
++  if(!Hal || !Hal->Create || !Hal->Delete || !Hal->Attach || !Hal->Configure || !Hal->FlushDomain)return EFI_COMPROMISED_DATA;
+   Status=AllocatePoolPages();if(EFI_ERROR(Status))return Status;
+   EFI_PHYSICAL_ADDRESS Table=0xffffffffULL;
+   Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,TABLE_PAGES,&Table);
+@@ -65,7 +67,11 @@
+   mResult.Configure=Hal->Configure(Domain,&Config);
+   if(mResult.Configure){Status=EFI_DEVICE_ERROR;goto Fail;}
+   mResult.Attach=Hal->Attach(Domain,"PCIE0",0x03000000,0);
+-  if(!mResult.Attach)return EFI_SUCCESS;
++  if(!mResult.Attach){
++    UINT32 Flush=Hal->FlushDomain(Domain);
++    DEBUG((DEBUG_ERROR,"B5Q-PCIEDMA: flush=%x\n",Flush));
++    if(!Flush)return EFI_SUCCESS;
++  }
+   Status=EFI_DEVICE_ERROR;
+ Fail:
+   // A failed attach can have installed a hardware reference. Retain all pages
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+@@ -30,12 +30,15 @@
+ typedef UINT32 (EFIAPI *HAL_ATTACH)(VOID *, CONST CHAR8 *, UINT32, UINT32);
+ typedef UINT32 (EFIAPI *HAL_CONFIGURE)(VOID *, HAL_DOMAIN_CONFIG *);
+ 
++typedef UINT32 (EFIAPI *HAL_FLUSH)(VOID *);
++
+ typedef struct {
+   HAL_CREATE Create;
+   HAL_DELETE Delete;
+   HAL_ATTACH Attach;
+   HAL_ATTACH Detach;
+   HAL_CONFIGURE Configure;
++  HAL_FLUSH FlushDomain;
+ } HAL_TABLE;
+ 
+ typedef struct {
+@@ -49,6 +52,8 @@
+ STATIC_ASSERT (OFFSET_OF (HAL_DOMAIN_CONFIG, Tcr2) == 40, "HAL TCR2 offset");
+ STATIC_ASSERT (OFFSET_OF (HAL_PROTOCOL, Init) == 8, "HAL init offset");
+ STATIC_ASSERT (OFFSET_OF (HAL_TABLE, Configure) == 32, "HAL configure slot");
++
++STATIC_ASSERT (OFFSET_OF (HAL_TABLE, FlushDomain) == 40, "HAL flush slot 5");
+ 
+ STATIC EFI_GUID mHalGuid = {
+   0x54b6d3b4, 0x5d33, 0x4f91, { 0x86, 0x00, 0x6c, 0x41, 0xd5, 0xde, 0xb1, 0x9a }
+@@ -140,7 +145,7 @@
+   CONST HAL_PROTOCOL *Protocol = NULL;
+   CONST HAL_TABLE *Hal = NULL;
+   VOID *Domain = NULL;
+-  EFI_PHYSICAL_ADDRESS Table = B5Q_USB_DMA_LIMIT - 1;
++  EFI_PHYSICAL_ADDRESS Table = 0xffffffffULL;
+   EFI_STATUS Status;
+ 
+   Status = gBS->LocateProtocol (&mHalGuid, NULL, (VOID **)&Protocol);
+@@ -157,14 +162,16 @@
+   }
+   Protocol->Init (&Hal);
+   if ((Hal == NULL) || (Hal->Create == NULL) || (Hal->Delete == NULL) ||
+-      (Hal->Configure == NULL) || (Hal->Attach == NULL)) {
++      (Hal->Configure == NULL) || (Hal->Attach == NULL) || (Hal->FlushDomain == NULL)) {
+     return EFI_COMPROMISED_DATA;
+   }
+ 
+   Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType,
+                                USB_DMA_TABLE_PAGES, &Table);
+   if (EFI_ERROR (Status)) {
+-    return Status;
++    Table = B5Q_USB_DMA_LIMIT - 1;
++    Status = gBS->AllocatePages (AllocateMaxAddress, EfiReservedMemoryType, USB_DMA_TABLE_PAGES, &Table);
++    if (EFI_ERROR (Status)) { return Status; }
+   }
+   if(!B5qDmaRangeAllowed(Table,USB_DMA_RESERVED_BYTES)){gBS->FreePages(Table,USB_DMA_TABLE_PAGES);return EFI_UNSUPPORTED;}
+   Diag->TableBase = Table;
+@@ -187,7 +194,8 @@
+   if (EFI_ERROR (Status)) {
+     goto Fail;
+   }
+-  WriteBackDataCacheRange (Tables.Pages, Tables.Used * USB_DMA_PAGE);
++  Diag->UsedPages = (UINT32)Tables.Used;
++  WriteBackDataCacheRange (Tables.Pages, USB_DMA_RESERVED_BYTES);
+   __asm__ volatile ("dsb sy" ::: "memory");
+ 
+   // AArch64 VMSA: non-stalling faults and WB-IS 4 KiB/L0 table walks.
+@@ -200,7 +208,8 @@
+   }
+   State->Attach = Hal->Attach (Domain, mUsb0, USB0_ARID, 0);
+   if (State->Attach == 0) {
+-    return EFI_SUCCESS;
++    Diag->Flush = Hal->FlushDomain (Domain);
++    if (Diag->Flush == 0) { return EFI_SUCCESS; }
+   }
+   Status = EFI_DEVICE_ERROR;
+ Fail:
+@@ -223,6 +232,8 @@
+       B5Q_USB_DMA_NOT_RUN, B5Q_USB_DMA_NOT_RUN, OwnedBase, OwnedBytes
+     };
+     mResult.Diagnostics.Delete = B5Q_USB_DMA_NOT_RUN;
++    mResult.Diagnostics.Flush = B5Q_USB_DMA_NOT_RUN;
++    mResult.Diagnostics.CoverageStatus = EFI_NOT_STARTED;
+     mResult.Diagnostics.RetentionStatus = EFI_NOT_STARTED;
+     if ((OwnedBase < B5Q_USB_DMA_BASE) || (OwnedBase >= B5Q_USB_DMA_LIMIT) || (OwnedBytes == 0) ||
+         (OwnedBytes > B5Q_USB_DMA_LIMIT - OwnedBase) || (((OwnedBase | OwnedBytes) & (EFI_PAGE_SIZE - 1)) != 0)) {
+diff --git a/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h b/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h
+--- a/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h
++++ b/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h
+@@ -4,7 +4,7 @@
+ 
+ #define B5Q_USB_DMA_PROTOCOL_GUID \
+   { 0x16470a49, 0x4aa3, 0x42f0, { 0x85, 0xeb, 0xca, 0x49, 0x3b, 0xb5, 0x8a, 0x08 } }
+-#define B5Q_USB_DMA_PROTOCOL_REVISION 1
++#define B5Q_USB_DMA_PROTOCOL_REVISION 2
+ #define B5Q_USB_DMA_SID 0x40
+ #define B5Q_USB_DMA_BASE 0x80000000ULL
+ #define B5Q_USB_DMA_LIMIT 0x1000000000ULL
+@@ -31,6 +31,9 @@
+   UINT64 RetentionStatus;
+   UINT32 Delete;
+   UINT32 HalRevision;
++  UINT32 UsedPages;
++  UINT32 Flush;
++  UINT64 CoverageStatus;
+ } B5Q_USB_DMA_DIAGNOSTICS;
+ 
+ typedef struct {
+@@ -49,6 +52,6 @@
+ 
+ STATIC_ASSERT (sizeof (B5Q_USB_DMA_STATE) == 48, "XNU USB DMA state ABI");
+ STATIC_ASSERT (OFFSET_OF (B5Q_USB_DMA_STATE, OwnedBase) == 32, "XNU USB DMA range ABI");
+-STATIC_ASSERT (sizeof (B5Q_USB_DMA_DIAGNOSTICS) == 48, "USB DMA diagnostics ABI");
++STATIC_ASSERT (sizeof (B5Q_USB_DMA_DIAGNOSTICS) == 64, "USB DMA diagnostics ABI");
+ 
+ #endif

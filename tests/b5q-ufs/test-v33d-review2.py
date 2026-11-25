@@ -84,7 +84,10 @@ assert 'AllocatePool'not in function(usb,'BuildUsbTables (')and 'FreePool'not in
 assert loader.index('GetUsbDmaResult (')>max(loader.index(x)for x in ['GetPcieDmaResult (','GetMediaDmaResult(','GetDpDmaResult('])
 assert loader.index('GetUsbDmaResult (')>loader.index('Status = GetMap (',loader.index('GetDpDmaResult('))
 assert '(UsbAdt.Ready == MAX_UINTN)'in loader
-before=R/'artifacts/b5q-v33d-review2/before';assert (P.parent/'board.toml').read_bytes()==(before/'UniXNU-b5q/board.toml').read_bytes()
+before=R/'artifacts/b5q-v33d-review2/before';import tomllib
+current=tomllib.loads((P.parent/'board.toml').read_text());prior=tomllib.loads((before/'UniXNU-b5q/board.toml').read_text())
+assert current['adt']['chosen']['bytes'].pop('b5q-usb-dma-diagnostics')=='00'*64
+prior['adt']['chosen']['bytes'].pop('b5q-usb-dma-diagnostics');assert current==prior
 assert (R/'patches/uefi-b5q/0014-b5q-dma-unprivileged-wbis.patch').read_bytes()==(before/'patches/uefi-b5q/0014-b5q-dma-unprivileged-wbis.patch').read_bytes()
 print('PASS sourcecontracts:OSData NUL,staticUSBmap,allDMApools/finalmapbuffer beforeUSB,noinputpagerelease,boardargs and0014unchanged')
 

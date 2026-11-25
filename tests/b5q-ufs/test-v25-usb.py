@@ -38,13 +38,19 @@ harness = r'''
 #include <cstring>
 #include "B5qUsbDmaHandoff.h"
 const int gIODTPlane = 0;
+struct OSData{unsigned getLength(){return 0;}const void*getBytesNoCopy(){return nullptr;}};
+#define OSDynamicCast(T,v) static_cast<T*>(v)
+struct DmaRange{uint64_t base,bytes;};DmaRange gDmaRam[17],gDmaExcluded[128];unsigned gDmaRamCount,gDmaExcludedCount;
 struct IORegistryEntry {
+ void *getProperty(const char*){return nullptr;}
  static IORegistryEntry *fromPath(const char *name,int){assert(!strcmp(name,"/chosen"));static IORegistryEntry entry;return &entry;}
 };
 #define OSSafeReleaseNULL(p) ((p)=nullptr)
 uint32_t flag = 0;
 B5qUsbDmaHandoff::State firmware = {};
 bool flagPresent = false, statePresent = false;
+B5qUsbDmaHandoff::Diagnostics diagnostics={};bool diagPresent=false;
+bool readChosen(IORegistryEntry *,const char *name,B5qUsbDmaHandoff::Diagnostics &out){assert(!strcmp(name,"b5q-usb-dma-diagnostics"));out=diagnostics;return diagPresent;}
 bool readChosen(IORegistryEntry *,const char *name,uint32_t &out){assert(!strcmp(name,"b5q-usb-dma-ready"));out=flag;return flagPresent;}
 bool readChosen(IORegistryEntry *,const char *name,B5qUsbDmaHandoff::State &out){assert(!strcmp(name,"b5q-usb-dma-state"));out=firmware;return statePresent;}
 struct Map {void release(){}};
@@ -77,7 +83,10 @@ int main(){
  assert(!smmuIdentity()); // Ready alone is insufficient.
  statePresent=true;
  firmware={1,0x40,0,0,0,0,0,0x80000000,0x100000000};
+ assert(!smmuIdentity());diagPresent=true;diagnostics.usedPages=1;
  assert(smmuIdentity() && native_usb_stats[7]==0x40);
+ diagnostics.flush=1;assert(!smmuIdentity());diagnostics.flush=0;
+ diagnostics.coverageStatus=1;assert(!smmuIdentity());diagnostics.coverageStatus=0;
  firmware.attach=22;assert(!smmuIdentity());firmware.attach=0;
  firmware.locate=1ull<<63;assert(!smmuIdentity());firmware.locate=0;
  firmware.sid=0x60;assert(!smmuIdentity());firmware.sid=0x40;

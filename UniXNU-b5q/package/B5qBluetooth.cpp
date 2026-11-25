@@ -323,6 +323,7 @@ int loopbackCheck() {
 }
 int powerOn() {
     if(bt.powered)return 0;
+    int wait=b5q_wcn_wait_wifi_probe();if(wait)return -wait;
     native_bluetooth_stats[14]=1;int e=resources();if(e)return e;
     native_bluetooth_stats[14]=2;
     e=b5q_wcn_power_get(B5Q_WCN_BLUETOOTH);if(e)return -e;
