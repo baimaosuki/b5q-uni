@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_GATES_PASS_FINAL_CI_PENDING",
+  "status": "DELIVERED_HOST_VERIFIED_PENDING_HARDWARE",
   "hardware_verified": false,
   "inputs": {
     "UniXNU-b5q/package/B5qBtFifo.c": "a9f2acb4103e070a3f70f02c5eeeb625c34f5adcbac3bf5541ace4c0181629d9",
@@ -109,10 +109,10 @@
     "hid-timer-workloop-PAC",
     "all-board-zero-EL1-SMMU"
   ],
-  "CI_run": 45618191537,
-  "build_commit": "37493ec8e4895f71e6e3ff7ac941e3b9a8b3d6e2",
+  "CI_run": 45623026650,
+  "build_commit": "04018235ba36b16cf5dbe43b870b2ae42ddeb82e",
   "firmware": {
-    "path": "/home/baimao/zflip5/artifacts/b5q-review7-work/ci45618191537-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
+    "path": "/home/baimao/zflip5/artifacts/b5q-review7-work/ci45623026650-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
     "bytes": 3145728,
     "sha256": "a98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37"
   },
@@ -137,5 +137,21 @@
     "fix": "Originaldata binding in dual/hostinputs and productionresolver; no fakevtable/PACdisable",
     "cache": "Completedcompilationprogress retained byCI"
   },
-  "log_ready_guard": "Urgent requests acceptedonlywriterstate2aftervolume/token/slotvalidation; state0/1/3cannotshortenstartupbackoff orwrite. Productionnegativecases added."
+  "log_ready_guard": "Urgent requests acceptedonlywriterstate2aftervolume/token/slotvalidation; state0/1/3cannotshortenstartupbackoff orwrite. Productionnegativecases added.",
+  "CI_conclusion": "success",
+  "images": {
+    "esp.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-review7/esp.img",
+      "bytes": 838860800,
+      "sha256": "24b04838f8afba9ce4e1da238274812c1397973dbc3899e948009b5fdec46fda"
+    },
+    "boot.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-review7/boot.img",
+      "bytes": 19124224,
+      "sha256": "20eac73c262470d43984b8edd363dde55f86e38fb75312a68b4a32610907470a"
+    }
+  },
+  "returned_gates": "PASS original returned gate + supplemental actual64MiB/HID326/ABI/PAC/ADT + actualwirelessADSP",
+  "final_readback": "PASS verify-p0-images.py --wireless --media --dp --v33b",
+  "phone_accessed": false
 }

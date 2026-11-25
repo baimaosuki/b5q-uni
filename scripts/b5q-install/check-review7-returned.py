@@ -51,7 +51,21 @@ with tempfile.TemporaryDirectory(prefix='b5q-review7-returned-')as td:
  current,=a.ci.rglob('QcomDwc3.o');symbols=object_symbols(current.read_bytes())
  imports={n for n,_,k in symbols if k==1}
  assert '_b5q_log_sync'in imports
- ufs,=a.ci.rglob('B5qUfs.o');assert any(n=='_b5q_log_sync'and k!=1 for n,_,k in object_symbols(ufs.read_bytes()))
+ # The artifact contains the final linked storage implementation rather
+ # than a standalone B5qUfs.o. Require an actual executable core definition,
+ # and inspect the writer-ready guard in that deployed function.
+ sys.path.insert(0,str(R/'sources/UniXNU/kits/XnuPrelink'));from kc_image import Image
+ outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1])
+ defined={n:address for address,names in core.symbols().items()for n in names}
+ assert '_b5q_log_sync'in defined
+ sync_address=defined['_b5q_log_sync'];ins=list(Cs(CS_ARCH_ARM64,CS_MODE_ARM).disasm(core.read(sync_address,512),sync_address))
+ assert any(i.mnemonic=='cmp'and i.op_str.endswith('#2')for i in ins),'Missing actual writer-ready state2 guard'
+ guard=next(i for i in ins if i.mnemonic=='cmp'and i.op_str.endswith('#2'))
+ branch=next(i for i in ins if i.address==guard.address+4);assert branch.mnemonic=='b.ne'
+ target=int(branch.op_str.lstrip('#'),16)
+ tail=list(Cs(CS_ARCH_ARM64,CS_MODE_ARM).disasm(core.read(target,40),target))
+ assert tail[0].mnemonic=='mov'and tail[0].op_str=='w0, #3'
+ assert any(i.mnemonic=='retab'for i in tail),'Unready writer must return3 with authenticated return'
  base=R/'artifacts/b5q-review6-work/ci45600350653';old,=base.rglob('QcomDwc3.o')
  vt=[object_vtable(o.read_bytes(),object_symbols(o.read_bytes()),'__ZTV12QcomDwc3Xhci',427)for o in [old,current]]
  assert vt[0][421][0]==vt[1][421][0]

@@ -12,3 +12,10 @@
 TCR2 保留 `0x0003c071`，PASIZE=36bit 覆盖当前 64GiB 映射上限及日志所见 `0x88ba04000` 地址。原有 HAL 配置、flush、页表属性、2048 页 USB 表池及零 EL1 apps_smmu 检查保留；未因 sheng 使用 40bit 就盲改已验证 Device 配置。
 
 固件 FD 已下载并校验 SHA256：`a98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37`。最终 CI、返回门禁及配对 IMG 的精确结果记录在同目录 `review7-release.json`，只有该文件中的实际完成状态才代表交付完成。
+
+最终联合 CI：`45623026650` SUCCESS；构建提交 `04018235ba36b16cf5dbe43b870b2ae42ddeb82e`。原始 returned 门禁、补充实际二进制门禁、无线＋ADSP 联合 PAC/符号和最终 ADT/APFS/四档菜单/4Kn 回读全部 PASS。
+
+- `/home/baimao/zflip5/artifacts/b5q-esp-review7/esp.img`，838860800 字节，SHA256 `24b04838f8afba9ce4e1da238274812c1397973dbc3899e948009b5fdec46fda`。
+- `/home/baimao/zflip5/artifacts/b5q-esp-review7/boot.img`，19124224 字节，SHA256 `20eac73c262470d43984b8edd363dde55f86e38fb75312a68b4a32610907470a`。
+
+状态：`HOST_VERIFIED_PENDING_HARDWARE`。未连接或刷写手机；不需要重新初始化或覆盖 userdata/macOS Data。
