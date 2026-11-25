@@ -13,7 +13,7 @@ def sources(reference,soc,package,out):
         'B5qAudioMath/udivti3.c','B5qAudioMath/udivmodti4.c']]
     groups=[]
     for generator,name in [(adsp,'adsp'),(prepare_protocol,'audio-protocol'),(prepare_service,'audio-service')]:
-        extra,include=generator(reference,out/('generated-'+name));groups.append((extra,include))
+        extra,include=(generator(reference,out/('generated-'+name),board=package)if name=='adsp' else generator(reference,out/('generated-'+name)));groups.append((extra,include))
     extra,include=video(reference,soc,out/'generated-video');groups.append((extra,include))
     includes=[p for _,ps in groups for p in ps]
     return base+[p for ps,_ in groups for p in ps],sorted(dict.fromkeys(includes),key=lambda p:not p.is_relative_to(out))
