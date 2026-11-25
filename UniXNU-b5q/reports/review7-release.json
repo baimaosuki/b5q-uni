@@ -106,5 +106,20 @@
     "all-cross-object-PAC",
     "hid-timer-workloop-PAC",
     "all-board-zero-EL1-SMMU"
-  ]
+  ],
+  "CI_run": 45618191537,
+  "build_commit": "37493ec8e4895f71e6e3ff7ac941e3b9a8b3d6e2",
+  "firmware": {
+    "path": "/home/baimao/zflip5/artifacts/b5q-review7-work/ci45618191537-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
+    "bytes": 3145728,
+    "sha256": "a98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37"
+  },
+  "firmware_download_digest_verified": true,
+  "loader_binary_proof": {
+    "source": "returned finalDarwinBoot.efi embeddedinFD",
+    "64MiB_pool_size_equality_RVA": "0x3cd8",
+    "64MiB_retention_argument_RVA": "0x3d48",
+    "old32MiB_loader_rejected": true
+  },
+  "validation_note": "Supplemental returnedchecker reads actual finalPE because firmware uploads no DarwinBoot.obj; equalitybranch/retentioncall andnegativeoldloader checked. Allruntime inputs identical to CI37493ec."
 }

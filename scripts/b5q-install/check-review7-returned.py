@@ -8,14 +8,37 @@ assert json.loads((a.out/'package-ready.json').read_text())['passed']
 def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
 llvm=R/'tools/llvm21/usr/lib/llvm-21/bin';env=dict(os.environ,LD_LIBRARY_PATH=str(R/'tools/llvm21/usr/lib/x86_64-linux-gnu'))
 firmware={}
-for name in ['PcieDma','UsbDma','MediaDma','DarwinBoot']:
+for name in ['PcieDma','UsbDma','MediaDma']:
  paths=list(a.firmware.rglob(name+'.obj'));assert len(paths)==1,(name,len(paths))
  obj=paths[0];assert obj.read_bytes()[:4]==b'BC\xc0\xde'
  ir=subprocess.check_output([str(llvm/'llvm-dis'),str(obj),'-o','-'],text=True,env=env)
- if name in ['PcieDma','DarwinBoot']:assert '67108864'in ir,name+' lacks64MiB bound'
+ if name=='PcieDma':assert '67108864'in ir,name+' lacks64MiB bound'
  if name in ['PcieDma','UsbDma','MediaDma']:assert 'i32 5'in ir and 'HAL_TABLE'in ir,name+' lacks flush slot5'
  if name=='UsbDma':assert '[32768 x i8]'in ir and 'AllocatePool'not in ir and 'FreePool'not in ir and '8388608'in ir
  firmware[name]={'sha256':sha(obj),'actual_optimized_IR_checked':True}
+# Firmware uploads the final loader PE, not an intermediate DarwinBoot.obj.
+# Check its actual pool-size equality branch and retention-call argument, and
+# prove the loader is the module inside the returned FV.
+import pefile,re
+from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
+loader,=a.firmware.rglob('DarwinBoot.efi')
+def loader64(data):
+ pe=pefile.PE(data=data);decoder=Cs(CS_ARCH_ARM64,CS_MODE_ARM);checks=[]
+ for section in pe.sections:
+  if not(section.Characteristics&0x20000000):continue
+  code=list(decoder.disasm(section.get_data(),section.VirtualAddress))
+  for i,ins in enumerate(code[:-2]):
+   m=re.fullmatch(r'(w[0-9]+), #0x4000000',ins.op_str)if ins.mnemonic=='mov'else None
+   if m and code[i+1].mnemonic=='ccmp'and (', x'+m[1][1:]+',')in code[i+1].op_str and code[i+2].mnemonic=='b.ne':checks.append(ins.address)
+   if ins.mnemonic=='mov'and ins.op_str=='w4, #0x4000000'and code[i+1].mnemonic=='bl':checks.append(ins.address)
+ return checks
+matches=loader64(loader.read_bytes());assert len(matches)>=2,'Loader lacks64MiB equality/retention machine code'
+old,=(R/'artifacts/b5q-review5-work/ci45577883578-firmware').rglob('DarwinBoot.efi')
+assert not loader64(old.read_bytes()),'32MiB old loader must fail this64MiB check'
+sys.path.insert(0,str(R/'UniXNU/scripts'));from unixnu.boot_template import loader_pe
+receipt=json.loads((a.firmware/'firmware-transfer.json').read_text())
+assert loader.read_bytes()==loader_pe(Path(receipt['FD']['path']).read_bytes(),'1b64af87-8415-4b57-9b16-680d70913b9f')
+firmware['DarwinBoot']={'sha256':sha(loader),'64MiB_pool_equality_and_retention_RVAs':[hex(x)for x in matches],'old32MiB_loader_rejected':True,'PE_matches_FD':True}
 sys.path.insert(0,str(R/'UniXNU-b5q/scripts'));from b5q_abi import object_symbols,object_vtable
 spec=importlib.util.spec_from_file_location('fs',R/'scripts/b5q-install/package-usb-dma-esp.py');fs=importlib.util.module_from_spec(spec);spec.loader.exec_module(fs)
 with tempfile.TemporaryDirectory(prefix='b5q-review7-returned-')as td:
