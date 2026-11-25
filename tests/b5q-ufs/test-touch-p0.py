@@ -40,23 +40,26 @@ bool command(TouchBus &b,uint8_t cmd,const uint8_t *p,unsigned n,bool=false){
 }
 '''+driver[first:last]+r'''
 int main(){
- for(unsigned bits=0;bits<32;++bits){
+ for(unsigned bits=0;bits<16;++bits){
   TouchBus b;b.app=bits&1;b.config=bits&2;b.full=bits&4;b.delta=bits&8;
-  const bool prefer=bits&16;reports.mode=0xc1;reports.reconfigure=true;
-  const bool ok=configureReports(b,prefer);
-  const bool full=b.app&&b.config&&b.full&&prefer;
-  assert(ok==(b.app&&(full||b.delta)));
-  assert(reports.mode==(full?0x11:b.app&&b.delta?0xc1:0));
+  reports.mode=0xc1;reports.reconfigure=true;
+  const bool ok=configureReports(b);
+  const bool delta=b.app&&b.delta;
+  const bool full=b.app&&!delta&&b.config&&b.full;
+  assert(ok==(delta||full));
+  assert(reports.mode==(delta?0xc1:full?0x11:0));
   assert(!reports.reconfigure&&!layoutFailures);
   assert(b.commands[0]==0x2000);
   if(!b.app)assert(b.commands.size()==1);
-  if(full)assert(b.commands.back()==0x06c1);
-  else if(b.app)assert(b.commands.back()==0x05c1&&b.commands[b.commands.size()-2]==0x0611);
+  if(delta){assert(b.commands==std::vector<unsigned>({0x2000,0x05c1,0x0611}));assert(!configBytes);}
+  else if(b.app){assert(b.commands[1]==0x05c1&&b.commands[2]==0x06c1&&b.commands[3]==0x2500);if(b.config)assert(b.commands.back()==0x0511);else assert(b.commands.size()==4);}
  }
- puts("PASS production report-mode selection:32 app/config/0x11/0xc1/preference outcomes,fullframe preferred,delta fallback,reset state");
+ puts("PASS production report-mode selection:16 app/config/0x11/0xc1 outcomes,SamsungC1first,fullframeonlyafterC1failure,reset state");
 }
 '''
  src=Path(td)/'modes.cpp';src.write_text(source);exe=Path(td)/'modes'
  subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-Wno-misleading-indentation','-fsanitize=address,undefined','-I',str(root/'UniXNU-b5q/package'),str(src),'-o',str(exe)],check=True)
  subprocess.run([str(exe)],check=True)
 print('PASS all four reused Wn8030 function bodies match pinned upstream verbatim; old pointer removed; absolute digitizer guard preserved')
+
+subprocess.run(["python3",str(root/"tests/b5q-ufs/test-review6.py")],check=True)

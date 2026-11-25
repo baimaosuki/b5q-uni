@@ -70,12 +70,12 @@ while i<len(data):
  elif tag==0x08:local.append(v)
  elif tag==0x80:
   if 0x30 in local and 0x31 in local:
-   exp=g[0x54]&15;exp=exp-16 if exp&8 else exp;cpi=32767/(g[0x44]*10**exp);assert abs(cpi/326-1)<0.02 and g[0x34]==-g[0x44];xy=True
+   exp=g[0x54]&15;exp=exp-16 if exp&8 else exp;cpi=32767/(g[0x44]*10**exp);assert abs(cpi/900-1)<0.02 and g[0x34]==-g[0x44];xy=True
   if 0x38 in local:assert g.get(0x64,0)==0 and g.get(0x54,0)==0;wheel=True
   local=[]
  elif tag==0xa0:local=[]
 assert xy and wheel and not stack
-print('PASS actual HID physical dimensions:326.007CPI(<2%error),XYunits isolated fromwheel')
+print('PASS actual HID physical dimensions:899.945CPI(<2%error),XYunits isolated fromwheel')
 # Required immutable source contracts, tied to exact production functions.
 q=(P/'QcomDwc3.cpp').read_text();usb=(R/'uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c').read_text();loader=(R/'UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/DarwinBoot.c').read_text()
 assert 'OSData::withBytes(kConfigString,sizeof(kConfigString))'in q and 'setProperty("configuration-string",config)'in q

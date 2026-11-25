@@ -77,7 +77,7 @@ void publish(bool fromReport=true){
  __atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
  __asm__ volatile("dmb ish" ::: "memory");unsigned count=0;
  native_touch_recovered=!fromReport;
- for(unsigned i=0;i<12;++i)if(reports.points[i].kind==1||reports.points[i].kind==2){native_touch_xs[count]=int(B5qTouch::hid(reports.points[i].x));native_touch_ys[count]=int(B5qTouch::hid(reports.points[i].y));native_touch_ids[count]=int(i);++count;}
+ for(unsigned i=0;i<12;++i)if(reports.points[i].kind==1){native_touch_xs[count]=int(B5qTouch::hid(reports.points[i].x));native_touch_ys[count]=int(B5qTouch::hid(reports.points[i].y));native_touch_ids[count]=int(i);++count;}
  native_touch_count=count;__asm__ volatile("dmb ish":::"memory");__atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
  if(auto callback=__atomic_load_n(&sink,__ATOMIC_ACQUIRE))callback(sinkContext);
  if(fromReport){
@@ -130,18 +130,22 @@ bool command(TouchBus &bus,uint8_t cmd,const uint8_t *p,unsigned n,bool getConfi
  IOLog("B5qTouch: command=%02x failed=response-timeout gpio19=%u\n",cmd,!lowAttention());
  return false;
 }
-bool configureReports(TouchBus &bus,bool preferFull=true){
+bool configureReports(TouchBus &bus){
  reports.mode=0;reports.reconfigure=false;configBytes=0;layoutFailures=0;
  if(!command(bus,0x20,nullptr,0))return false;
- const bool got=command(bus,0x25,nullptr,0,true);
  const uint8_t full=0x11,delta=0xc1;
- bool ok11=false,okC1=false;
- if(preferFull&&got)ok11=command(bus,5,&full,1);
- if(ok11){command(bus,6,&delta,1);reports.mode=full;}
- else {command(bus,6,&full,1);okC1=command(bus,5,&delta,1);if(okC1)reports.mode=delta;}
+ bool ok11=false;
+ const bool okC1=command(bus,5,&delta,1);
+ if(okC1){command(bus,6,&full,1);reports.mode=delta;}
+ else {
+  command(bus,6,&delta,1);
+  if(command(bus,0x25,nullptr,0,true))ok11=command(bus,5,&full,1);
+  if(ok11)reports.mode=full;
+ }
  IOLog("B5qTouch: stage=enable-report mode=%02x full_config=%lu ok11=%u okC1=%u\n",reports.mode,(unsigned long)configBytes,ok11,okC1);
  return reports.mode!=0;
 }
+
 void worker(void *,wait_result_t){
  const char *stage="mapping";
  TlmmPins pins;
@@ -201,7 +205,7 @@ void worker(void *,wait_result_t){
    readErrors=0;report(code,n);
    if(reports.reconfigure || layoutFailures>=3){
     stage="report-recovery";
-    if(!configureReports(bus,layoutFailures<3))break;
+    if(!configureReports(bus))break;
    }
    // Drain a sustained interrupt in batches so another thread can run.
    if(++consecutive==128){consecutive=0;IOSleep(1);}

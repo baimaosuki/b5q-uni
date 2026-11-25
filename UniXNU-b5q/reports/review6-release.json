@@ -1,0 +1,20 @@
+{
+  "status": "LOCAL_GATES_PASS_CI_READY",
+  "source_parent": "7bac239e1e0a9304bbb4ca59852d5f8ad757326b",
+  "input_hashes": {
+    "UniXNU-b5q/package/B5qWcnPower.cpp": "9f0857a7c9cec3598122fd553b679d94d70d1d85ebd4f27a6de316e581aaa034",
+    "UniXNU-b5q/package/B5qTouch.cpp": "2378c0cae60484264c3f3aa7c6ea831520f76af834c9a7634e1cfa4123708ed2",
+    "UniXNU-b5q/package/B5qTouchMouse.h": "d5456793bb690f3fd0080e901bbbe3569b177fa61497e4461601902b5e6410d5",
+    "UniXNU-b5q/package/B5qMouseReport.h": "da876814120a94a4a9f008b2345d89da3e77afaf4af46e6687598b8646129526",
+    "logs/b5q-xnu2log-review5/XNU2LOG.txt": "783ada1114bf7852f92b3d65353a1910e7007c89b722fe881c8403a287a6fcb2",
+    "artifacts/b5q-runtime-v24-work/samsung-source/pinctrl-msm.c": "f522173e12ebf830d724b026ae2156c41b7b3d2025c0c33aa0b209f6fbdb99ea"
+  },
+  "firmware": "reuse unchanged review5 CI45577883578",
+  "physical_new_behavior": "HOST_VERIFIED_PENDING_HARDWARE",
+  "ldob15_physical_ppid": "unknown:14e lacks APID;VRM votes unchanged",
+  "phone_access": false,
+  "local_gate_checks": 27,
+  "local_gate_sha256": "8b1e21679141ba2496d68b1257eb63c305090ea64dafb9bade166d3421085b73",
+  "firmware_all_sources_and18patches_unchanged": true,
+  "CI_pending": true
+}

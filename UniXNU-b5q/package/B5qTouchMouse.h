@@ -2,14 +2,14 @@
 #pragma once
 #include "B5qMouseReport.h"
 // Flip5 input is normalised to32767 on both axes by B5qTouch. Restore the
-// controller's4095 range, then use ~12relative counts/mm on both axes.
+// controller's4095 range, with conservative /8X /4Y relative scaling.
 // This object is the sole button owner; no wn8030 button/click state exists.
 struct B5qTouchMouse {
  enum Mode {Idle,CandidateTap,Moving,Scrolling,Suppressed};
  static constexpr unsigned holdMs=32,upMs=8,tapMs=300,maxFingers=10;
- static constexpr int slopX=180,slopY=90;
+ static constexpr int slopX=260,slopY=140;
  Mode mode=Idle;
- uint32_t began=0,releaseAt=0,nextPress=0;
+ uint32_t began=0,releaseAt=0,nextPress=0,frameAt=0;
  uint32_t clicks_left=0,clicks_right=0,taps_cancelled_slop=0,taps_cancelled_time=0,lifts_seen=0;
  unsigned fingers=0,tapCount=0,tapRemaining=0,queueCount=0;
  int tapIds[2]={},startX[2]={},startY[2]={},activeIds[2]={};
@@ -46,8 +46,10 @@ struct B5qTouchMouse {
  }
  static int take(int &remainder,int delta,int scale,int limit){
   remainder+=delta;int value=remainder/scale;
-  if(value>limit)value=limit;if(value< -limit)value= -limit;
-  remainder-=value*scale;return value;
+  if(value>limit){value=limit;remainder%=scale;}
+  else if(value< -limit){value= -limit;remainder%=scale;}
+  else remainder-=value*scale;
+  return value;
  }
  template<class Send>void update(unsigned count,const int *ids,const int *xs,const int *ys,uint32_t now,bool recovered,Send send){
   if(recovered||count>maxFingers||(count&&(!ids||!xs||!ys))){cancel(send);return;}
@@ -71,6 +73,10 @@ struct B5qTouchMouse {
   const int cx=count==2?(x[0]+x[1])/2:x[0],cy=count==2?(y[0]+y[1])/2:y[0];
   bool same=count==fingers;
   for(unsigned i=0;i<count;i++)same=same&&activeIds[i]==id[i];
+  const int rawDx=cx-anchorX,rawDy=cy-anchorY;
+  const bool jump=fingers&&same&&(now-frameAt>80||rawDx>480||rawDx< -480||rawDy>260||rawDy< -260);
+  frameAt=now;
+  if(jump){anchorX=cx;anchorY=cy;clearMotion();}
   if(!fingers){
    began=now;tapCount=tapRemaining=count;mode=CandidateTap;
    for(unsigned i=0;i<count;i++){tapIds[i]=id[i];startX[i]=x[i];startY[i]=y[i];}
@@ -100,10 +106,10 @@ struct B5qTouchMouse {
    tapRemaining=count;
   }else if(!same||mode==Suppressed){
    mode=count==1?Moving:Scrolling;anchorX=cx;anchorY=cy;clearMotion();
-  }else {
+  }else if(!jump){
    const int dx=cx-anchorX,dy=cy-anchorY;anchorX=cx;anchorY=cy;
    if(mode==Moving){
-    const int mx=take(remainderX,dx,5,32767),my=take(remainderY,dy,2,32767);
+    const int mx=take(remainderX,dx,8,48),my=take(remainderY,dy,4,48);
     if(mx||my)packet(mx,my,0,0,send);
    }else if(mode==Scrolling){
     const int pan=take(scrollX,dx,100,127),wheel=take(scrollY,-dy,40,127);

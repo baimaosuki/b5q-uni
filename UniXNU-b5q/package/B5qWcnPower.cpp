@@ -125,6 +125,7 @@ void railSurvey(const char *phase) {
     for(unsigned i=0;i<5;i++) {
         int apid=-1;
         for(unsigned n=0;n<count;n++)if(((core.va[(BR_APID_MAP+4*n)/4]>>8)&0xfff)==ppids[i]){if(apid>=0){apid=-2;break;}apid=int(n);}
+        if(i==0&&apid<0)IOLog("B5qWcn: stage=rail-survey phase=%s rail=ldob15 ppid=unknown candidate=14e apid=%d vote=unchanged\n",phase,apid);
         Window obs;uint8_t type=0,sub=0,status=0,en=0,lo=0,hi=0,mode=0;
         bool ok=apid>=0&&obs.open(0xc440000+uint64_t(apid)*0x20,0x20);
         auto read=[&](unsigned reg,uint8_t &v){if(!ok)return false;obs.va[BR_CMD/4]=br_cmd(BR_OP_EXT_READL,reg,0);barrier();if(br_wait(obs.va))return false;v=uint8_t(obs.va[BR_RDATA0/4]);return true;};
@@ -245,10 +246,15 @@ extern "C" int b5q_wcn_radio_enable(unsigned radio,int enabled) {
             const unsigned before=tlmm.va[(p*0x1000+4)/4]&1u;
             const unsigned sw=tlmm.va[(82*0x1000+4)/4]&1u;
             tlmm.va[(p*0x1000+4)/4]=on?2:0;
+            const uint32_t oldCfg=tlmm.va[p*0x1000/4];
+            // TLMM EGPIO_PRESENT is read-only; EGPIO_ENABLE selects APSS ownership.
             // BT_EN default pinctrl: GPIO output, 2mA, pulldown.
             uint32_t cfg=p==80?(on?0x3c3u:0x201u):p==81?0x201u:0x200u;
+            cfg|=oldCfg&(1u<<12);
+            if(oldCfg&(1u<<11))cfg|=1u<<12;
             tlmm.va[p*0x1000/4]=cfg;barrier();
             tlmm.va[(p*0x1000+4)/4]=on?2:0;barrier();
+            IODelay(50); // Allow the pad to follow the latch before input readback.
             if(p==204)IOLog("B5qWcn: stage=xo204 xo204_cfg=%x in_before=%u in_%s=%u\n",tlmm.va[p*0x1000/4],before,on?"high":"low",tlmm.va[(p*0x1000+4)/4]&1u);
             else IOLog("B5qWcn: stage=radio-pin gpio=%u on=%u sw82-before=%u sw82-after=%u\n",p,on,sw,tlmm.va[(82*0x1000+4)/4]&1u);
         },[](unsigned us){if(us>=1000)IOSleep(us/1000);else IODelay(us);});
