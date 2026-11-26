@@ -71,6 +71,6 @@ enter=function(q,'bool enterRole(');device=enter[enter.index('} else {'):]
 assert device.index('QcomDwc3Nub::route(gDeviceNub)')<device.index('__atomic_store_n(&gDeviceStackAllowed,true')<device.index('setProperty("AppleUSBCableType"')<device.index('gController->cable(true)')
 for field in ['PORTSC1=','PORTSC2=','PORTPMSC1=','PORTPMSC2=','ERDP=','GUSB2PHYCFG=','GUSB3PIPECTL=','GUCTL1=']:assert field in q
 assert 'hostCheckpoint("read64");'in q and 'hostCheckpoint("write64");'in q
-assert 'hostCheckpoint("before-power-state",true,true);'in q and 'hostCheckpoint("poll",false,true);'in q
+assert 'hostCheckpoint("before-power-state",true,false);'in q and 'hostCheckpoint("poll",false,true);'in q
 assert '(port&3u)==3u&&(port&0x1e0u)==0x60u' in q
 print('PASS publication/configuration and host diagnostic source contracts; actual ABI compilation and original binary evidence checked separately')

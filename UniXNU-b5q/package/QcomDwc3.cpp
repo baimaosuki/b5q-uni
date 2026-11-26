@@ -31,6 +31,8 @@ extern "C" bool b5q_usb_otg(bool);
 #include <IOKit/IODeviceTreeSupport.h>
 #include <IOKit/IOPlatformExpert.h>
 #include <libkern/c++/OSData.h>
+#include <libkern/c++/OSDictionary.h>
+#include <libkern/c++/OSNumber.h>
 #include "B5qFeatures.h"
 extern "C" bool b5q_dp_link_stop(void);
 extern "C" void b5q_dp_link_update(const B5qDpPortState *);
@@ -519,7 +521,7 @@ public:
     IOReturn setPowerState(unsigned long state,IOService *device) override {
         // Capture before Apple's saveState can touch a faulted controller.
         restoreHostGlobals();
-        hostCheckpoint("before-power-state",true,true);
+        hostCheckpoint("before-power-state",true,false);
         IOReturn result=AppleUSBXHCI::setPowerState(state,device);
         restoreHostGlobals();
         if(result!=kIOReturnSuccess)hostCheckpoint("power-state-result",true);
@@ -547,8 +549,6 @@ public:
             IOLog("qcom-dwc3: xhci-w64 #%u off=%x val=%llx rb=%08x:%08x\n",count,offset,value,hi,lo);
             if(offset==0x18||offset==0x30||offset==0x38){
                 dmaDiagnostics("write64");
-                // Preserve each nonzero ring pointer before Apple can run it.
-                if(value)(void)b5q_log_sync(750);
             }
             if(value&&offset!=0x18&&!lo&&!hi){
                 at[0]=(uint32_t)value;barrier();at[1]=(uint32_t)(value>>32);barrier();
@@ -609,15 +609,23 @@ int gRoleWanted,gRoleApplied,gCoreRole=kRoleDevice;
 uint32_t gCableWanted, gCableApplied;
 bool gForceHost;
 constexpr unsigned kXhciRegisterBytes=0x8000; // same bounded host window as makeHost()
+constexpr uint32_t kGctlDisableClockGating=1u;
+constexpr uint32_t kUsb2EnableLpm=1u<<8,kUsb2SuspendPhy=1u<<6,kUsb3SuspendPhy=1u<<17;
+constexpr uint32_t kGuctlSprsCtrlTransEn=1u<<17,kGuctl1Host=(1u<<21)|(1u<<8),kGuctl2Host=1u<<16;
+constexpr uint32_t kUsbPortDebugOptions=0x40000019u;
+constexpr unsigned kHostEventDumpCount=16;
 Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
 QcomDwc3Xhci *gHost;
 void restoreHostGlobals() {
     if(!gGlobals.va)return;
-    auto *gctl=gGlobals.va+0x110/4,*usb2=gGlobals.va+0x200/4,*usb3=gGlobals.va+0x2c0/4;
-    *gctl|=1u;
-    *usb2&=~((1u<<6)|(1u<<8));
-    *usb3&=~(1u<<17);
+    auto *gctl=gGlobals.va+0x110/4,*guctl=gGlobals.va+0x12c/4,*guctl1=gGlobals.va+0x11c/4,*guctl2=gGlobals.va+0x60c/4;
+    auto *usb2=gGlobals.va+0x200/4,*usb3=gGlobals.va+0x2c0/4;
+    *gctl|=kGctlDisableClockGating;
+    *usb2&=~(kUsb2SuspendPhy|kUsb2EnableLpm);*usb3&=~kUsb3SuspendPhy;
+    *guctl|=kGuctlSprsCtrlTransEn;
+    *guctl1=(*guctl1&~(7u<<21))|kGuctl1Host;
+    *guctl2|=kGuctl2Host;
     barrier();
 }
 void wantRole(int role) {
@@ -677,15 +685,14 @@ bool setCoreRole(int role,bool forceReset=false) {
     auto *gctl=gGlobals.va+0x110/4;
     auto *usb2=gGlobals.va+0x200/4,*usb3=gGlobals.va+0x2c0/4;
     *gctl|=1u<<11;
-    *usb2|=1u<<31;*usb3|=1u<<31;barrier();IOSleep(100);
-    const bool repeaterReady=repeater(false,role==kRoleHost);
-    if(repeaterReady){phyInit();IOSleep(2);}
-    *usb3&=~(1u<<31);*usb2&=~(1u<<31);barrier();IODelay(100);
+    barrier();IOSleep(100);
     *gctl&=~(1u<<11);barrier();IOSleep(1);
     // Stock b5q snps,disable-clk-gating: reset must not leave the host bus
     // clock auto-gated while Apple probes or saves its registers.
-    *gctl=(*gctl&~(3u<<12))|((role==kRoleHost?1u:2u)<<12)|1u;
-    *usb2&=~((1u<<6)|(1u<<8));*usb3&=~(1u<<17);barrier();
+    *gctl=(*gctl&~(3u<<12))|((role==kRoleHost?1u:2u)<<12)|kGctlDisableClockGating;
+    *usb2&=~(kUsb2SuspendPhy|kUsb2EnableLpm);*usb3&=~kUsb3SuspendPhy;barrier();
+    if(role==kRoleHost)restoreHostGlobals();
+    const bool repeaterReady=repeater(false,role==kRoleHost);
     if(!repeaterReady)return false;
     gCoreRole=role;
     return true;
@@ -751,7 +758,7 @@ bool enterRole(int role) {
     IOLog("qcom-dwc3: role=%d power=%u vbus-source=%u external-hub=%u\n",role,cable.power(),source,role==kRoleHost&&cable.power()==1);
     const bool phyReset=followOrientation() || gPhyResetPending;gPhyResetPending=false;
     if(!setCoreRole(role,phyReset)){b5q_usb_otg(false);return false;}
-    IOLog("qcom-dwc3: host-core role=%d orientation=%d phy-reset=%u qmp=%u GCTL=%x GSBUSCFG0=%x GUCTL=%x\n",role,cable.orientation(),phyReset,gSuperSpeed,gGlobals.va[0x110/4],gGlobals.va[0x100/4],gGlobals.va[0x12c/4]);
+    IOLog("qcom-dwc3: host-core role=%d orientation=%d phy-reset=%u qmp=%u GCTL=%x GSBUSCFG0=%x GUCTL=%x GUCTL1=%x GUCTL2=%x\n",role,cable.orientation(),phyReset,gSuperSpeed,gGlobals.va[0x110/4],gGlobals.va[0x100/4],gGlobals.va[0x12c/4],gGlobals.va[0x11c/4],gGlobals.va[0x60c/4]);
     if (role == kRoleHost) {
         vbusOverride(false);
         enterHost();
@@ -784,7 +791,12 @@ void dmaDiagnostics(const char *reason){
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
     const uint64_t erdp=uint64_t(ir[0x38/4])|(uint64_t(ir[0x3c/4])<<32);
     const uint32_t hcs2=gXhciRegs.va[8/4];
-    IOLog("qcom-dwc3: host-dma-diag reason=%s HCSPARAMS2=%x scratchpads=%u GCTL=%x GUCTL=%x GUCTL1=%x GSBUSCFG0=%x GSBUSCFG1=%x GUSB2PHYCFG=%x GUSB3PIPECTL=%x PORTSC1=%x PORTPMSC1=%x PORTSC2=%x PORTPMSC2=%x QSCRATCH=%x QMP=%x DCBAAP=%llx ERSTBA=%llx ERDP=%llx CRCR=%llx\n",reason,hcs2,((hcs2>>27)&31)|(((hcs2>>21)&31)<<5),gGlobals.va[0x110/4],gGlobals.va[0x12c/4],gGlobals.va[0x11c/4],gGlobals.va[0x100/4],gGlobals.va[0x104/4],gGlobals.va[0x200/4],gGlobals.va[0x2c0/4],op[0x400/4],op[0x404/4],op[0x410/4],op[0x414/4],gScratch.va?gScratch.va[8/4]:0,native_usb_stats[33],dcbaa,erst,erdp,crcr);
+    IOLog("qcom-dwc3: host-dma-global reason=%s HCSPARAMS2=%x scratchpads=%u GCTL=%x GUCTL=%x GUCTL1=%x GUCTL2=%x GSBUSCFG0=%x GSBUSCFG1=%x GUSB2PHYCFG=%x GUSB3PIPECTL=%x\n",
+        reason,hcs2,((hcs2>>27)&31)|(((hcs2>>21)&31)<<5),gGlobals.va[0x110/4],gGlobals.va[0x12c/4],
+        gGlobals.va[0x11c/4],gGlobals.va[0x60c/4],gGlobals.va[0x100/4],gGlobals.va[0x104/4],gGlobals.va[0x200/4],gGlobals.va[0x2c0/4]);
+    IOLog("qcom-dwc3: host-dma-port reason=%s PORTSC1=%x PORTPMSC1=%x PORTSC2=%x PORTPMSC2=%x QSCRATCH=%x QMP=%x DCBAAP=%llx ERSTBA=%llx ERDP=%llx CRCR=%llx\n",
+        reason,op[0x400/4],op[0x404/4],op[0x410/4],op[0x414/4],gScratch.va?gScratch.va[8/4]:0,
+        native_usb_stats[33],dcbaa,erst,erdp,crcr);
     uint64_t first=0;bool read=dmaRead64(dcbaa&~63ULL,first);
     IOLog("qcom-dwc3: host-dma-diag DCBAA[0]=%llx read=%u\n",first,read);
     const unsigned entries=ir[0x28/4]&65535;
@@ -793,7 +805,7 @@ void dmaDiagnostics(const char *reason){
         bool ok=dmaRead64(pa,base)&&dmaRead64(pa+8,details);
         IOLog("qcom-dwc3: host-dma-diag ERST%u base=%llx words=%llx read=%u\n",i,base,details,ok);
     }
-    const bool eventRead=B5qUsbHostEvent::latest(erst&~63ULL,entries,erdp,4,
+    const bool eventRead=B5qUsbHostEvent::latest(erst&~63ULL,entries,erdp,kHostEventDumpCount,
         [](uint64_t pa,uint64_t &value){return dmaRead64(pa,value);},
         [reason](unsigned segment,unsigned index,const B5qUsbHostEvent::Event &event){
             IOLog("qcom-dwc3: host-event reason=%s segment=%u index=%u cc=%u type=%u slot=%u ep=%u cycle=%u parameter=%llx status=%08x control=%08x\n",
@@ -807,14 +819,33 @@ void hostCheckpoint(const char *reason,bool force,bool allowU3){
     if(cap+0x404>kXhciRegisterBytes)return;
     const uint32_t status=gXhciRegs.va[(cap+4)/4];
     const uint32_t port=gXhciRegs.va[(cap+0x400)/4];
-    static uint32_t seenHse=0,seenU3=0;
-    const bool firstHse=(status&4)&&!__atomic_exchange_n(&seenHse,1u,__ATOMIC_RELAXED);
-    const bool firstU3=allowU3&&!firstHse&&(port&3u)==3u&&(port&0x1e0u)==0x60u&&
+    static uint32_t seenHse=0,seenHce=0,seenU3=0;
+    const bool firstHse=allowU3&&(status&4)&&!__atomic_exchange_n(&seenHse,1u,__ATOMIC_RELAXED);
+    const bool firstHce=allowU3&&!firstHse&&(status&(1u<<12))&&
+        !__atomic_exchange_n(&seenHce,1u,__ATOMIC_RELAXED);
+    const bool firstU3=allowU3&&!firstHse&&!firstHce&&(port&3u)==3u&&(port&0x1e0u)==0x60u&&
         !__atomic_exchange_n(&seenU3,1u,__ATOMIC_RELAXED);
-    if(!force&&!firstHse&&!firstU3)return;
-    dmaDiagnostics(firstHse?"first-HSE":firstU3?"first-U3":reason);
-    const unsigned saved=b5q_log_sync(750);
+    if(!force&&!firstHse&&!firstHce&&!firstU3)return;
+    dmaDiagnostics(firstHse?"first-HSE":firstHce?"first-HCE":firstU3?"first-U3":reason);
+    const unsigned saved=(allowU3&&(firstHse||firstHce||firstU3))?b5q_log_sync(750):0;
     IOLog("qcom-dwc3: host-dma-diag checkpoint=%s sts=%x portsc1=%x sync=%u\n",reason,status,port,saved);
+}
+void enableHostPortDebug() {
+    if(!gHost)return;
+    OSNumber *mask=OSNumber::withNumber(kUsbPortDebugOptions,32);
+    OSDictionary *settings=mask?OSDictionary::withCapacity(1):nullptr;
+    if(settings)settings->setObject("kUSBDebugOptions",mask);
+    OSIterator *children=settings?gHost->getChildIterator(gIOServicePlane):nullptr;
+    while(OSObject *object=children?children->getNextObject():nullptr){
+        IOService *port=OSDynamicCast(IOService,object);
+        if(!port||!port->metaCast("AppleUSBHostPort")||port->getProperty("B5qPortDebugApplied"))continue;
+        const IOReturn result=port->setProperties(settings);
+        if(result==kIOReturnSuccess){
+            port->setProperty("B5qPortDebugApplied",mask);
+            IOLog("qcom-dwc3: port-debug name=%s mask=40000019 rc=%08x\n",port->getName(),result);
+        }
+    }
+    OSSafeReleaseNULL(children);OSSafeReleaseNULL(settings);OSSafeReleaseNULL(mask);
 }
 void hostStats() {
     if (!gDmaReady || gCoreRole != kRoleHost) return;
@@ -822,6 +853,7 @@ void hostStats() {
     const volatile uint32_t *op = gXhciRegs.va + (cap & 0xffu) / 4;
     native_usb_stats[47] = op[0]; native_usb_stats[48] = op[1];
     hostCheckpoint("poll",false,true);
+    enableHostPortDebug();
     native_usb_stats[49] = op[0x400 / 4]; native_usb_stats[50] = op[0x410 / 4];
     native_usb_stats[51] = gXhciRegs.va[1];
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
@@ -832,10 +864,11 @@ void hostStats() {
         const uint64_t erdp=uint64_t(gXhciRegs.va[rt+0x38/4])|(uint64_t(gXhciRegs.va[rt+0x3c/4])<<32);
         IOLog("qcom-dwc3: host DMA64=%u crcr=%llx dcbaa=%llx erst=%llx iman=%x routed=%u enabled=%u\n",
           gXhciRegs.va[0x10/4]&1,crcr,dcbaa,erst,gXhciRegs.va[rt+0x20/4],gActiveNub==gHostNub,gLineAttached);
-        IOLog("qcom-dwc3: host PORTSC1=%x PORTPMSC1=%x PORTSC2=%x PORTPMSC2=%x ERDP=%llx GSBUSCFG0=%x GUSB2PHYCFG=%x GUSB3PIPECTL=%x GUCTL1=%x\n",
+        IOLog("qcom-dwc3: host PORTSC1=%x PORTPMSC1=%x PORTSC2=%x PORTPMSC2=%x ERDP=%llx GSBUSCFG0=%x GUSB2PHYCFG=%x GUSB3PIPECTL=%x GUCTL=%x GUCTL1=%x GUCTL2=%x\n",
               native_usb_stats[49],op[0x404/4],native_usb_stats[50],op[0x414/4],erdp,
               gGlobals.va?gGlobals.va[0x100/4]:0,gGlobals.va?gGlobals.va[0x200/4]:0,
-              gGlobals.va?gGlobals.va[0x2c0/4]:0,gGlobals.va?gGlobals.va[0x11c/4]:0);
+              gGlobals.va?gGlobals.va[0x2c0/4]:0,gGlobals.va?gGlobals.va[0x12c/4]:0,
+              gGlobals.va?gGlobals.va[0x11c/4]:0,gGlobals.va?gGlobals.va[0x60c/4]:0);
     }
     if (gHost) native_usb_stats[46] = (native_usb_stats[46] & 0xffff00ffu) | (uint32_t)gHost->getPowerState() << 8;
     // What the system's stack enumerated: how many devices now, the last one's vendor and product (kept after it leaves).

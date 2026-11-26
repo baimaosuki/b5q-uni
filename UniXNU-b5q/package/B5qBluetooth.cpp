@@ -21,6 +21,7 @@
 extern "C" int armcpu_spi_attach(uint32_t,bool,void(*)(void *),void *,uint32_t *,uint64_t *);
 extern "C" int armcpu_spi_share(uint32_t,void(*)(void *),void *);
 extern "C" int armcpu_spi_mask(uint32_t,bool);
+extern "C" uint64_t qbt_transport_rx_dropped(void);
 // Private exports of the pinned XNU sched_prim.h/thread.h, absent from SDK.
 extern "C" kern_return_t clear_wait(thread_t,wait_result_t);
 extern "C" void thread_yield_to_preemption(void);
@@ -506,6 +507,17 @@ void worker(void *,wait_result_t) {
                     printf("B5qBluetooth: stage=ibs wake-ind=%llu wake-ack=%llu sleep-ind=%llu clock-reverts=%llu tx-refused=%llu rx-irq=%llu cancel-timeouts=%llu wake-irq=%llu\n",
                         native_bluetooth_ibs[0],native_bluetooth_ibs[1],native_bluetooth_ibs[2],native_bluetooth_ibs[3],
                         native_bluetooth_ibs[4],native_bluetooth_ibs[5],native_bluetooth_ibs[6],native_bluetooth_ibs[7]);
+                    printf("B5qBluetooth: stage=discovery inquiry=%u/%u/%u le-param=%u/%u/%u le-enable=%u/%u/%u ext-param=%u/%u/%u ext-enable=%u/%u/%u reports=%u/%u/%u\n",
+                        stats.discovery.sent[QBT_INQUIRY],stats.discovery.replied[QBT_INQUIRY],stats.discovery.status[QBT_INQUIRY],
+                        stats.discovery.sent[QBT_LE_SCAN_PARAMS],stats.discovery.replied[QBT_LE_SCAN_PARAMS],stats.discovery.status[QBT_LE_SCAN_PARAMS],
+                        stats.discovery.sent[QBT_LE_SCAN_ENABLE],stats.discovery.replied[QBT_LE_SCAN_ENABLE],stats.discovery.status[QBT_LE_SCAN_ENABLE],
+                        stats.discovery.sent[QBT_LE_EXT_SCAN_PARAMS],stats.discovery.replied[QBT_LE_EXT_SCAN_PARAMS],stats.discovery.status[QBT_LE_EXT_SCAN_PARAMS],
+                        stats.discovery.sent[QBT_LE_EXT_SCAN_ENABLE],stats.discovery.replied[QBT_LE_EXT_SCAN_ENABLE],stats.discovery.status[QBT_LE_EXT_SCAN_ENABLE],
+                        stats.discovery.inquiry_results,stats.discovery.le_reports,stats.discovery.le_extended_reports);
+                    printf("B5qBluetooth: stage=transport tx=%llu rx=%llu delivered=%llu malformed=%llu unmatched=%llu backpressure=%llu fifo-backpressure=%llu hardware-errors=%llu last-hardware=%llu tty-rx-dropped=%llu\n",
+                        stats.tx_bytes,stats.rx_bytes,stats.delivered_bytes,stats.malformed,stats.unmatched_events,
+                        stats.backpressure,bt.geni.stats.rx_backpressure,stats.hardware_errors,stats.last_hardware_error,
+                        qbt_transport_rx_dropped());
                 }
             }
             health=t+1000000000ULL;

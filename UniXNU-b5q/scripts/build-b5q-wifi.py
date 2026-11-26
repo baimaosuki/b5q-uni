@@ -49,16 +49,68 @@ def prepare(module,out):
 '''+original+'\n\t}'
     s=replace(s,original,guarded,'single-MSI IMPS guard')
     p.write_text(s)
+    p=gen/'pcic.c';s=p.read_text()
+    s=replace(s,'''static void ath11k_pcic_ce_tasklet(struct tasklet_struct *t)
+{
+	struct ath11k_ce_pipe *ce_pipe = from_tasklet(ce_pipe, t, intr_tq);
+	int irq_idx = ATH11K_PCI_IRQ_CE0_OFFSET + ce_pipe->pipe_num;
+
+	ath11k_ce_per_engine_service(ce_pipe->ab, ce_pipe->pipe_num);
+
+	enable_irq(ce_pipe->ab->irq_num[irq_idx]);
+}''','''static void ath11k_pcic_ce_tasklet(struct tasklet_struct *t)
+{
+	struct ath11k_ce_pipe *ce_pipe = from_tasklet(ce_pipe, t, intr_tq);
+
+	ath11k_ce_per_engine_service(ce_pipe->ab, ce_pipe->pipe_num);
+
+	ath11k_pcic_ce_irq_enable(ce_pipe->ab, ce_pipe->pipe_num);
+}''','single-MSI CE tasklet enable')
+    s=replace(s,'\tdisable_irq_nosync(ab->irq_num[irq_idx]);\n\n\ttasklet_schedule(&ce_pipe->intr_tq);',
+        '\tath11k_pcic_ce_irq_disable(ab, ce_pipe->pipe_num);\n\n\ttasklet_schedule(&ce_pipe->intr_tq);','single-MSI CE handler disable')
+    s=replace(s,'\t\tfor (i = 0; i < irq_grp->num_irq; i++)\n\t\t\tenable_irq(irq_grp->ab->irq_num[irq_grp->irqs[i]]);',
+        '\t\tath11k_pcic_ext_grp_enable(irq_grp);','single-MSI ext NAPI enable')
+    s=replace(s,'\tfor (i = 0; i < irq_grp->num_irq; i++)\n\t\tdisable_irq_nosync(irq_grp->ab->irq_num[irq_grp->irqs[i]]);\n\n\tnapi_schedule(&irq_grp->napi);',
+        '\tath11k_pcic_ext_grp_disable(irq_grp);\n\n\tnapi_schedule(&irq_grp->napi);','single-MSI ext handler disable')
+    s=replace(s,'\t\tdisable_irq_nosync(ab->irq_num[irq_idx]);\n\t\tsynchronize_irq(ab->irq_num[irq_idx]);',
+        '\t\tath11k_pcic_ce_irq_disable(ab, i);\n\t\tsynchronize_irq(ab->irq_num[irq_idx]);','single-MSI CE shutdown disable')
+    p.write_text(s)
     p=gen/'wmi.c';s=p.read_text()
     if s.count('wait_event_timeout(')!=2:raise ValueError('ath11k WMI ownership wait changed')
     s=s.replace('wait_event_timeout(','wait_event_timeout_once(')
+    s=replace(s,'int ath11k_wmi_cmd_send(struct ath11k_pdev_wmi *wmi, struct sk_buff *skb,\n\t\t\tu32 cmd_id)\n{\n',
+        'int ath11k_wmi_cmd_send(struct ath11k_pdev_wmi *wmi, struct sk_buff *skb,\n\t\t\tu32 cmd_id)\n{\n'
+        '\tb5q_ath11k_trace_tx(1u, cmd_id, skb ? skb->len : 0);\n'
+        '\tb5q_ath11k_trace_startup(1u, cmd_id, skb ? skb->len : 0, wmi->wmi_ab->ab->htc.endpoint[wmi->eid].tx_credits);\n',
+        'WMI crash history')
     s=replace(s,'\t\tath11k_warn(wmi_ab->ab, "wmi command %d timeout\\n", cmd_id);',
         '\t{\n\t\tath11k_warn(wmi_ab->ab, "wmi command %d timeout\\n", cmd_id);\n'
         '\t\tath11k_warn(ab, "B5qWifi: credit-timeout cmd=%u eid=%u credits=%d idle_ps=%u multi-msi=%u\\n",\n'
         '\t\t\tcmd_id, wmi->eid, ab->htc.endpoint[wmi->eid].tx_credits,\n'
-        '\t\t\tab->hw_params.idle_ps, test_bit(ATH11K_FLAG_MULTI_MSI_VECTORS, &ab->dev_flags));\n\t}',
+        '\t\t\tab->hw_params.idle_ps, test_bit(ATH11K_FLAG_MULTI_MSI_VECTORS, &ab->dev_flags));\n'
+        '\t\tb5q_ath11k_wmi_timeout(cmd_id);\n\t}',
         'WMI credit diagnostic')
-    p.write_text(s)
+    s=replace(s,'\tid = FIELD_GET(WMI_CMD_HDR_CMD_ID, (cmd_hdr->cmd_id));\n\n\ttrace_ath11k_wmi_event',
+        '\tid = FIELD_GET(WMI_CMD_HDR_CMD_ID, (cmd_hdr->cmd_id));\n'
+        '\tb5q_ath11k_trace_startup(4u, id, skb->len, -1);\n\n\ttrace_ath11k_wmi_event','WMI startup receive')
+    p.write_text('extern void b5q_ath11k_trace_tx(u32, u32, size_t);\nextern void b5q_ath11k_trace_startup(u32, u32, size_t, int);\nextern void b5q_ath11k_wmi_timeout(u32);\n'+s)
+    p=gen/'htc.c';s=p.read_text()
+    s=replace(s,'\tif (eid >= ATH11K_HTC_EP_COUNT) {\n'
+        '\t\tath11k_warn(ab, "Invalid endpoint id: %d\\n", eid);\n'
+        '\t\treturn -ENOENT;\n\t}\n\n\tskb_push(skb, sizeof(struct ath11k_htc_hdr));',
+        '\tif (eid >= ATH11K_HTC_EP_COUNT) {\n'
+        '\t\tath11k_warn(ab, "Invalid endpoint id: %d\\n", eid);\n'
+        '\t\treturn -ENOENT;\n\t}\n\n'
+        '\tif (ep->service_id == ATH11K_HTC_SVC_ID_HTT_DATA_MSG)\n'
+        '\t\tb5q_ath11k_trace_tx(2u, skb && skb->len ? *(u8 *)skb->data : 0xffffffffu,\n'
+        '\t\t\t\t     skb ? skb->len : 0);\n'
+        '\tb5q_ath11k_trace_startup(2u, eid, skb ? skb->len : 0, ep->tx_credits);\n\n'
+        '\tskb_push(skb, sizeof(struct ath11k_htc_hdr));',
+        'HTT crash history')
+    s=replace(s,'\tpayload_len = FIELD_GET(HTC_HDR_PAYLOADLEN, hdr->htc_info);',
+        '\tpayload_len = FIELD_GET(HTC_HDR_PAYLOADLEN, hdr->htc_info);\n'
+        '\tb5q_ath11k_trace_startup(3u, eid, payload_len, ep->tx_credits);','HTC startup receive')
+    p.write_text('extern void b5q_ath11k_trace_tx(u32, u32, size_t);\nextern void b5q_ath11k_trace_startup(u32, u32, size_t, int);\n'+s)
     # ath11k's real unified callback also handles the split notifications the
     # same-version native mac80211 emits. Reuse the community adapter bridge.
     p=gen/'mac.c';s=p.read_text()
@@ -87,6 +139,16 @@ def prepare(module,out):
         '\t\tath11k_warn(ab, "B5qWifi: add-interface deferred: default regd missing\\n");\n'
         '\t\tret = -EAGAIN;\n\t\tgoto err;\n\t}', 'regdomain before vdev')
     s=s[:start]+section+s[stop:]
+    s=replace(s,'\tarvif->ar = ar;\n\tarvif->vif = vif;\n',
+        '\tarvif->ar = ar;\n\tarvif->vif = vif;\n\n'
+        '\t/* The WMI command carries all four ACs on every conf_tx call.\n'
+        '\t * mac80211 may configure VO first, so never expose the firmware\n'
+        '\t * to the zero-filled values left by the arvif reset. */\n'
+        '\tarvif->wmm_params.ac_be = (struct wmi_wmm_params_arg){ .aifs = 3, .cwmin = 15, .cwmax = 1023 };\n'
+        '\tarvif->wmm_params.ac_bk = (struct wmi_wmm_params_arg){ .aifs = 7, .cwmin = 15, .cwmax = 1023 };\n'
+        '\tarvif->wmm_params.ac_vi = (struct wmi_wmm_params_arg){ .aifs = 2, .cwmin = 7, .cwmax = 15, .txop = 94 };\n'
+        '\tarvif->wmm_params.ac_vo = (struct wmi_wmm_params_arg){ .aifs = 2, .cwmin = 3, .cwmax = 7, .txop = 47 };\n',
+        'complete WMM defaults')
     p.write_text(s)
     p=gen/'mhi.c';s=p.read_text()
     mark='\tstruct ath11k_pci *ab_pci = ath11k_pci_priv(ab);\n\n\tath11k_dbg(ab, ATH11K_DBG_BOOT, "notify status reason %s\\n",'
@@ -101,7 +163,9 @@ def prepare(module,out):
     s=replace(s,needle,replacement,'Samsung QMI BDF filename')
     p.write_text('#include "B5qWifiFirmwareName.h"\n'+s)
     (out/'source-inputs.json').write_text(json.dumps(dict(linux_revision=revision,ath11k_original_sha256=hashes,
-        native_mac80211=True,legacy_station_linked=False,hardware_verified=False),indent=2)+'\n')
+        native_mac80211=True,legacy_station_linked=False,hardware_verified=False,
+        wcn6855_wmm_defaults='BE=3/15/1023 BK=7/15/1023 VI=2/7/15/94 VO=2/3/7/47',
+        fatal_tx_history='16 lock-free committed WMI/HTT entries plus MHI/BHI crash registers'),indent=2)+'\n')
     return gen
 
 def main():
@@ -140,6 +204,13 @@ def main():
             from b5q_wifi import select_shared
             original_src=src
             src=select_shared(src,out)
+            if name=='shim/src/lx_rt.c':
+                selected=out/'b5q_lx_rt.c';text=src.read_text()
+                text=replace(text,'void lx_enable_irq(unsigned int irq) { for (int i = 0; i < 64; i++) if (g_irq[i].used && g_irq[i].strict && g_irq[i].irq == irq && g_irq[i].disabled) g_irq[i].disabled--; }',
+                    'void lx_enable_irq(unsigned int irq) { for (int i = 0; i < 64; i++) if (g_irq[i].used && g_irq[i].strict && g_irq[i].irq == irq && g_irq[i].disabled) g_irq[i].disabled--; }\n'
+                    'int lx_irq_disabled(unsigned int irq) { int depth=0; for (int i=0;i<64;i++) if (g_irq[i].used && g_irq[i].strict && g_irq[i].irq==irq && g_irq[i].disabled>depth) depth=g_irq[i].disabled; return depth; }',
+                    'shared IRQ diagnostic depth')
+                selected.write_text(text);src=selected
             if name=='src/nw_debug.c':
                 selected=out/'b5q_ath11k_debug.c'
                 debug=src.read_text().replace('ath12k','ath11k')

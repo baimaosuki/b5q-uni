@@ -19,6 +19,9 @@ harness=r'''
 #include <cstdint>
 #include <vector>
 enum {kRoleNone,kRoleDevice,kRoleHost};
+constexpr uint32_t kGctlDisableClockGating=1u;
+constexpr uint32_t kUsb2EnableLpm=1u<<8,kUsb2SuspendPhy=1u<<6,kUsb3SuspendPhy=1u<<17;
+constexpr uint32_t kGuctlSprsCtrlTransEn=1u<<17,kGuctl1Host=(1u<<21)|(1u<<8),kGuctl2Host=1u<<16;
 bool gDmaReady=true,gSuperSpeed=false,gDeviceStackAllowed=false;
 unsigned gDpLanes=0;bool gPhyResetPending=false,gDevicePowerAcknowledged=false;uint32_t gDevicePowerOnAtAttach=0;
 int gCoreRole=kRoleDevice;unsigned powerCalls=0,hostCalls=0,deviceCalls=0,qmpCalls=0,utmi=0,eusbInit=0;
@@ -37,6 +40,7 @@ bool b5q_usb_cable_state(B5qMax77705::Cable *out){*out=current;return current.va
 bool b5q_usb_otg(bool on){++powerCalls;if(on&&powerFailure)return false;boost=on;return true;}
 bool repeater(bool,bool){return !phyFailure;}
 void barrier(){}void IOSleep(unsigned){}void IODelay(unsigned us){assert(us==100);}void phyInit(){++eusbInit;}
+void restoreHostGlobals(){registers[0x110/4]|=1;registers[0x200/4]&=~((1u<<6)|(1u<<8));registers[0x2c0/4]&=~(1u<<17);registers[0x12c/4]|=1u<<17;registers[0x11c/4]=(registers[0x11c/4]&~(7u<<21))|(1u<<21)|(1u<<8);registers[0x60c/4]|=1u<<16;}
 template<class... T>void IOLog(const char*,T...){}
 bool qmpInit(bool reverse){++qmpCalls;qmpReverse=reverse;return !phyFailure;}
 void selectUtmiClock(){++utmi;}
@@ -51,7 +55,7 @@ int main(){
   reset();current={uint8_t(power|(pin<<6)),0,uint8_t(pd),0x80,true};
   const int role=current.role();assert(enterRole(role));
   assert(boost==(power==2)&&hostCalls==unsigned(role==kRoleHost)&&deviceCalls==unsigned(role==kRoleDevice));
-  assert(gDeviceStackAllowed==(role==kRoleDevice)&&qmpCalls==1&&qmpReverse==(pin==2)&&eusbInit==1);
+  assert(gDeviceStackAllowed==(role==kRoleDevice)&&qmpCalls==1&&qmpReverse==(pin==2)&&eusbInit==0);
  }
  reset();current={0x81,0,0x80,0x80,true};powerFailure=true;
  assert(enterRole(kRoleHost)&&!boost&&hostCalls==1); // External powered Sink+DFP never requests a boost.

@@ -1,0 +1,46 @@
+{
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "base_commit": "857a2f45a155c93dc1a97fd7935ce4e9fe18a69e",
+  "scope": "kernel-only Wi-Fi SYS_ERROR attribution, DWC3 Host PHY/LPM restoration and Bluetooth discovery diagnostics",
+  "physical_input": {
+    "path": "../logs/b5q-xnu2log-review10/XNU2LOG.txt",
+    "sha256": "556bbf97b41c16a97b5a230bcdceec5cc93616aab718827ccb4548cb7441fc61",
+    "lines": 5457
+  },
+  "references": {
+    "stock_dts_sha256": "2da1b2564d55099dbc5bbb1829f7465ef88507d449509d15f6db17ab974172bb",
+    "linux_revision": "458c6079fc1d41d564c37679c8ace02cd83ee817",
+    "ath11k_mac_sha256": "c4f2dba9379546eaafd2e2bd3fccbe9dc61f7aabbc0822e5d7bd8f6a8deee4a9",
+    "linux_dwc3_core_sha256": "9afa33f80f131f24b642c46918abac52860ebbdf97536259f57b525f44aecbf2",
+    "linux_dwc3_core_h_sha256": "9ab6ae978fdfb6a3a4d36ccefd370f4c3049662730a179d84381c6d732a87183",
+    "linux_dwc3_host_sha256": "731b83b21292ff263faf4f1f2f2177f740ade63543dcad004521fc3146211508",
+    "qbt_core_sha256": "729a22a06e7ddce82eeb0000e83e0dcccd690d7be2c7f178d156022469f1c1bb",
+    "type0_sha256": "ee4f333b3fbe6c2964e222067f20991e3f4421446606ded2375d976958e7a045",
+    "macos_26C5035r_kernelcache_sha256": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9"
+  },
+  "findings": {
+    "wifi": "The first conf_tx sends all four WMM ACs after add_interface zeroed arvif. Three AC tuples were zero. All four standard EDCA defaults are now initialized before vdev creation; the upstream HW21 start sequence remains intact. Fatal callbacks dump MHI/BHI registers and a committed 16-entry WMI/HTT history before teardown.",
+    "usb": "Stock b5q has dis_u2_susphy but not dis_enblslpm. Linux restores USB2 SUSPHY=0 and ENBLSLPM=1, then enables USB3 SUSPHY after PHY initialization. The prior code cleared all three bits. First U3/HCE now dumps 16 bounded event TRBs. Apple USB2 LPM policy is an integer platform/boot-arg policy with default zero, not a Linux boolean, so no speculative property was added.",
+    "bluetooth": "The IBS wake path restores the clock before injecting the single GPIO-consumed WAKE_IND, and H4 state advances only over UART-accepted bytes. Type0 selects standard extended scan commands but does not synthesize Classic Inquiry. Health output now exposes all five discovery triplets and framing/drop/backpressure/error counters."
+  },
+  "verification": [
+    "PASS tests/b5q-ufs/test-review11.py",
+    "PASS tests/b5q-ufs/test-review10.py, test-review9.py, test-v33d-review4.py and test-v33d-usb-device.py",
+    "PASS full pinned ath11k target build",
+    "PASS 9 Bluetooth arm64e objects and Wi-Fi board objects",
+    "PASS QcomDwc3 peripheral closure with 427 xHCI slots and no unresolved symbols",
+    "PASS complete pre-ci-v33d retained P0-P4, wireless+ADSP PAC/symbol and zero EL1 apps_smmu gates",
+    "PASS ordered XNU patches 143/143"
+  ],
+  "unchanged": [
+    "Touch sources",
+    "UEFI firmware and patch inputs",
+    "64 MiB PCIe DMA firmware",
+    "USB HAL IOMMU"
+  ],
+  "hardware_verified": false,
+  "push_performed": false,
+  "ci_triggered": false,
+  "image_created": false,
+  "phone_accessed": false
+}

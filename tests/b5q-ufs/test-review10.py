@@ -121,8 +121,9 @@ int main(){constexpr unsigned cap=0x20;regs[0]=cap;auto &status=regs[(cap+4)/4];
  port=0x60;hostCheckpoint("poll",false,true);assert(!diagnostics&&!syncs);
  port=0x63;hostCheckpoint("read64",false,false);hostCheckpoint("write64",false,false);assert(!diagnostics&&!syncs);
  hostCheckpoint("poll",false,true);assert(diagnostics==1&&syncs==1&&!strcmp(last,"first-U3"));
- status=4;hostCheckpoint("read64",false,false);assert(diagnostics==2&&syncs==2&&!strcmp(last,"first-HSE"));
- puts("PASS production checkpoint keeps U3 out of READ64/WRITE64, requires CCS+PED, and retains first-HSE capture");}
+ status=4;hostCheckpoint("read64",false,false);assert(diagnostics==1&&syncs==1);hostCheckpoint("poll",false,true);assert(diagnostics==2&&syncs==2&&!strcmp(last,"first-HSE"));
+ status=1u<<12;hostCheckpoint("poll",false,true);assert(diagnostics==3&&syncs==3&&!strcmp(last,"first-HCE"));
+ puts("PASS production checkpoint keeps U3/HCE out of READ64/WRITE64, qualifies U3, and captures fatal HSE/HCE");}
 '''.replace('CHECKPOINT',checkpoint))
 
 assert 'if(!sheng_ethernet_wifi_attached())'in wifi
@@ -136,12 +137,12 @@ assert generated.count('char name[16] = "en0"')==0 and 'char name[16] = {};'in g
 board=(P/'B5qUsbBoard.cpp').read_text();bt=(P/'B5qBluetooth.cpp').read_text()
 assert 'static volatile bool gDeviceStackAllowed = false;'in usb
 publish=function(usb,'extern "C" void qcom_dwc3_publish(');assert 'QcomDwc3Nub::route(nub);'not in publish
-core=function(usb,'bool setCoreRole(');assert core.index('*gctl|=1u<<11')<core.index('*usb2|=1u<<31')<core.index('repeater(false')<core.index('phyInit()')<core.index('*usb3&=~(1u<<31)')<core.index('*gctl&=~(1u<<11)')
-assert 'phyInit();IOSleep(2);'in core and '*gctl&=~(1u<<11);barrier();IOSleep(1);'in core
+core=function(usb,'bool setCoreRole(');assert core.index('*gctl|=1u<<11')<core.index('*gctl&=~(1u<<11)')<core.index('repeater(false')
+assert '1u<<31'not in core and 'phyInit()'not in core and '*gctl&=~(1u<<11);barrier();IOSleep(1);'in core
 assert 'hostCheckpoint("read64");'in usb and 'hostCheckpoint("write64");'in usb
-assert 'hostCheckpoint("before-power-state",true,true);'in usb and 'hostCheckpoint("poll",false,true);'in usb
+assert 'hostCheckpoint("before-power-state",true,false);'in usb and 'hostCheckpoint("poll",false,true);'in usb
 assert 'else if(!releaseTiReset())return false;'in board
-for marker in ['GUSB2PHYCFG=%x','GUSB3PIPECTL=%x','PORTPMSC1=%x','PORTPMSC2=%x','host-event reason=','first-U3']:assert marker in usb
+for marker in ['GUSB2PHYCFG=%x','GUSB3PIPECTL=%x','GUCTL2=%x','PORTPMSC1=%x','PORTPMSC2=%x','host-event reason=','first-U3','first-HCE','kHostEventDumpCount=16','kUsbPortDebugOptions=0x40000019u']:assert marker in usb
 assert 'pin(kRx,3u);'in bt and '(2u<<2)|(1u<<4)|(1u<<1)|1u' in bt and 'constexpr uint32_t kUartActive[]={4u,5u,7u,4u}'in bt
 assert 'stage=ibs wake-ind='in bt
 

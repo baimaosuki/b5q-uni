@@ -689,6 +689,11 @@
       "result": "PASS"
     },
     {
+      "name": "b5q-amfi-lwcr.patch",
+      "sha256": "6296f4867430b07fa4d5089915461031b219f9246e7bbe905763ef69c132ee97",
+      "result": "PASS"
+    },
+    {
       "name": "zzye-b5q-cpu-idle.patch",
       "sha256": "95f57fb9994796c3de2429fe82b6a521620b9f13b83e29eba12185f5ada4da86",
       "result": "PASS"

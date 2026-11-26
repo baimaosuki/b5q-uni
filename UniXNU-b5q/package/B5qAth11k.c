@@ -6,6 +6,7 @@
 #include <net/mac80211.h>
 #include "core.h"
 #include "pci.h"
+#include "pcic.h"
 #include "dp_rx.h"
 #include "nw_mainline.h"
 #include "nw_cfg80211_control.h"
@@ -25,13 +26,108 @@ struct nw_wifi_stats nw_wifi_stats;
 static struct ieee80211_hw *hardware;
 static bool cfg_started,mac_started,mhi_started,qrtr_started,pci_started;
 static int firmware_error;
+static struct mhi_controller *active_mhi;
+extern int lx_irq_disabled(unsigned int);
+
+#define B5Q_TX_HISTORY_COUNT 16u
+#define B5Q_TX_WMI 1u
+#define B5Q_TX_HTT 2u
+struct b5q_tx_history_entry {
+    u64 time_ms;
+    u32 sequence,id,length,kind;
+    volatile u32 committed;
+};
+static struct b5q_tx_history_entry tx_history[B5Q_TX_HISTORY_COUNT];
+static volatile u32 tx_sequence;
+static volatile u32 startup_sequence,timeout_dumps;
+
+void b5q_ath11k_trace_tx(u32 kind,u32 id,size_t length) {
+    const u32 sequence=__atomic_add_fetch(&tx_sequence,1u,__ATOMIC_RELAXED);
+    struct b5q_tx_history_entry *entry=&tx_history[(sequence-1u)&(B5Q_TX_HISTORY_COUNT-1u)];
+    __atomic_store_n(&entry->committed,0u,__ATOMIC_RELAXED);
+    entry->time_ms=lx_now_ms();entry->sequence=sequence;entry->id=id;
+    entry->length=length>UINT32_MAX?UINT32_MAX:(u32)length;entry->kind=kind;
+    __atomic_store_n(&entry->committed,sequence,__ATOMIC_RELEASE);
+}
+void b5q_ath11k_trace_startup(u32 kind,u32 id,size_t length,int credits) {
+    const u32 sequence=__atomic_add_fetch(&startup_sequence,1u,__ATOMIC_RELAXED);
+    const char *name=kind==1?"WMI-TX":kind==2?"HTC-TX":kind==3?"HTC-RX":kind==4?"WMI-RX":"unknown";
+    if(sequence<=64)lx_log(6,"B5qWifi: startup-io seq=%u kind=%s id=%u len=%u credits=%d",
+        sequence,name,id,length>UINT32_MAX?UINT32_MAX:(u32)length,credits);
+}
+static void b5q_ath11k_trace_reset(void) {
+    memset(tx_history,0,sizeof(tx_history));
+    __atomic_store_n(&tx_sequence,0u,__ATOMIC_RELEASE);
+    __atomic_store_n(&startup_sequence,0u,__ATOMIC_RELEASE);
+    __atomic_store_n(&timeout_dumps,0u,__ATOMIC_RELEASE);
+}
+static void b5q_ath11k_trace_dump(void) {
+    const u32 end=__atomic_load_n(&tx_sequence,__ATOMIC_ACQUIRE);
+    const u32 first=end>B5Q_TX_HISTORY_COUNT?end-B5Q_TX_HISTORY_COUNT+1u:1u;
+    for(u32 sequence=first;sequence<=end;sequence++) {
+        const struct b5q_tx_history_entry *entry=&tx_history[(sequence-1u)&(B5Q_TX_HISTORY_COUNT-1u)];
+        const u32 committed=__atomic_load_n(&entry->committed,__ATOMIC_ACQUIRE);
+        if(committed!=sequence) {
+            lx_log(3,"B5qWifi: tx-history seq=%u unavailable committed=%u",sequence,committed);
+            continue;
+        }
+        lx_log(3,"B5qWifi: tx-history seq=%u kind=%s id=%u len=%u at-ms=%llu",
+            sequence,entry->kind==B5Q_TX_WMI?"WMI":entry->kind==B5Q_TX_HTT?"HTT":"unknown",
+            entry->id,entry->length,entry->time_ms);
+    }
+}
+static u32 b5q_mhi_read(struct mhi_controller *controller,void __iomem *base,u32 offset) {
+    u32 value=UINT32_MAX;
+    if(!controller || !base || !controller->read_reg ||
+       controller->read_reg(controller,(u8 __iomem *)base+offset,&value))return UINT32_MAX;
+    return value;
+}
+static u32 b5q_ring_read(volatile u32 *value) {
+    return value?*value:UINT32_MAX;
+}
+static void b5q_ce_dump(struct ath11k_base *ab,unsigned ce) {
+    if(!ab||ce>=ab->hw_params.ce_count)return;
+    struct ath11k_ce_pipe *pipe=&ab->ce.ce_pipe[ce];
+    const unsigned irq=ab->irq_num[ATH11K_PCI_IRQ_CE0_OFFSET+ce];
+    if(pipe->src_ring){
+        struct ath11k_ce_ring *ring=pipe->src_ring;
+        struct hal_srng *hal=&ab->hal.srng_list[ring->hal_ring_id];
+        lx_log(3,"B5qWifi: CE%u src sw=%u write=%u hp=%u reap=%u tp-shadow=%u tp-cached=%u hp-hw=%u irq=%u disabled=%d",
+            ce,ring->sw_index,ring->write_index,hal->u.src_ring.hp,hal->u.src_ring.reap_hp,
+            b5q_ring_read(hal->u.src_ring.tp_addr),hal->u.src_ring.cached_tp,
+            b5q_ring_read(hal->u.src_ring.hp_addr),irq,lx_irq_disabled(irq));
+    }
+    if(pipe->dest_ring){
+        struct ath11k_ce_ring *ring=pipe->dest_ring;
+        struct hal_srng *hal=&ab->hal.srng_list[ring->hal_ring_id];
+        lx_log(3,"B5qWifi: CE%u dest sw=%u write=%u tp=%u hp-shadow=%u hp-cached=%u tp-hw=%u irq=%u disabled=%d",
+            ce,ring->sw_index,ring->write_index,hal->u.dst_ring.tp,b5q_ring_read(hal->u.dst_ring.hp_addr),
+            hal->u.dst_ring.cached_hp,b5q_ring_read(hal->u.dst_ring.tp_addr),irq,lx_irq_disabled(irq));
+    }
+}
+static void b5q_ath11k_dump_state(struct mhi_controller *controller,const char *event,int reason) {
+    const u32 status=b5q_mhi_read(controller,controller?controller->regs:NULL,0x48);
+    const u32 exec=b5q_mhi_read(controller,controller?controller->bhi:NULL,0x28);
+    const u32 code=b5q_mhi_read(controller,controller?controller->bhi:NULL,0x30);
+    const u32 dbg1=b5q_mhi_read(controller,controller?controller->bhi:NULL,0x34);
+    const u32 dbg2=b5q_mhi_read(controller,controller?controller->bhi:NULL,0x38);
+    const u32 dbg3=b5q_mhi_read(controller,controller?controller->bhi:NULL,0x3c);
+    lx_log(3,"B5qWifi: diagnostic event=%s reason=%d MHI_STATUS=%08x MHI_EXEC_ENV=%08x state=%u ee=%u",
+        event,reason,status,exec,controller?(u32)controller->dev_state:UINT32_MAX,
+        controller?(u32)controller->ee:UINT32_MAX);
+    lx_log(3,"B5qWifi: diagnostic BHI_ERRCODE=%08x BHI_ERRDBG1=%08x BHI_ERRDBG2=%08x BHI_ERRDBG3=%08x",
+        code,dbg1,dbg2,dbg3);
+    b5q_ath11k_trace_dump();
+    struct ath11k_base *ab=controller&&controller->cntrl_dev?dev_get_drvdata(controller->cntrl_dev):NULL;
+    b5q_ce_dump(ab,2);b5q_ce_dump(ab,3);
+}
 
 void nw_wifi_hw_ready(struct ieee80211_hw *hw){hardware=hw;}
 int mhi_init_mmio(struct mhi_controller *);
 void nw_mhi_pre_load(struct mhi_controller *controller) {
     // Preserve the shared SM8550 boot sequence: publish real channel/event
     // contexts before the endpoint's firmware transfer doorbell.
-    lx_delay_ms(200);
+    active_mhi=controller;lx_delay_ms(200);
     int error=mhi_init_mmio(controller);
     if(error){firmware_error=error;nw_wifi_stats.last_err=error;}
     lx_log(error?3:6,"B5qWifi: MHI contexts before image result=%d",error);
@@ -39,9 +135,14 @@ void nw_mhi_pre_load(struct mhi_controller *controller) {
 void b5q_ath11k_mhi_failed(struct mhi_controller *controller,int reason) {
     if(firmware_error)return;
     firmware_error=-EIO;nw_wifi_stats.last_err=firmware_error;
-    struct ath11k_base *ab=dev_get_drvdata(controller->cntrl_dev);
+    b5q_ath11k_dump_state(controller,"MHI-fatal",reason);
+    struct ath11k_base *ab=controller&&controller->cntrl_dev?dev_get_drvdata(controller->cntrl_dev):NULL;
     if(ab)set_bit(ATH11K_FLAG_CRASH_FLUSH,&ab->dev_flags);
     lx_log(3,"B5qWifi: firmware-failed reason=%d; DMA retained until controller reset",reason);
+}
+void b5q_ath11k_wmi_timeout(u32 cmd_id) {
+    if(__atomic_fetch_add(&timeout_dumps,1u,__ATOMIC_RELAXED)<4u)
+        b5q_ath11k_dump_state(active_mhi,"WMI-timeout",(int)cmd_id);
 }
 void nw_wifi_set_platform(const struct lx_platform *platform){lx_plat=platform;}
 void nw_wifi_irq_mode(int delivered){lx_irq_polling(!delivered);}
@@ -60,7 +161,7 @@ int nw_wifi_start(const struct lx_platform *platform,const struct nw_board *boar
        !platform->fw_get || !platform->now_ms || !platform->sleep_ms || !platform->poll ||
        !platform->alloc || !platform->free || !platform->log)return -EINVAL;
     if(pci_started)return -EBUSY;
-    lx_plat=platform;nw_board=board;firmware_error=0;ath11k_debug_mask=0;
+    lx_plat=platform;nw_board=board;firmware_error=0;active_mhi=NULL;ath11k_debug_mask=0;b5q_ath11k_trace_reset();
     // Native mac80211 owns Ethernet encapsulation and SME/authentication.
     // Keep the original ath11k default frame mode; no retired nw_sta path.
     nw_wifi_buffer_pool_configure(1024*1024);lx_root_init();nw_qrtr_init();
@@ -116,7 +217,7 @@ void nw_wifi_stop(void) {
     if(mhi_started){bus_unregister(&mhi_bus_type);mhi_started=false;}
     if(mac_started){lx_exit_ieee80211_exit();mac_started=false;}
     if(cfg_started){lx_exit_cfg80211_exit();cfg_started=false;}
-    hardware=NULL;nw_wifi_buffer_pool_configure(0);
+    hardware=NULL;active_mhi=NULL;nw_wifi_buffer_pool_configure(0);
 }
 
 static int hexval(char c) { return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1; }

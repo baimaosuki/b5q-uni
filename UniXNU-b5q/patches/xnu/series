@@ -19,6 +19,9 @@ sheng-macos27-generic-runtime.patch
 # Bounded WindowServer fatal-signal user/kernel context; existing console ring.
 b5q-windowserver-signal.patch
 
+# no-lc bring-up policy also covers AMFI's runtime LWCR call 102 after the real check.
+b5q-amfi-lwcr.patch
+
 # Native recount, AMP topology and monotonic Edge matrix (in this order).
 zzye-b5q-cpu-idle.patch
 zzyf-b5q-amp.patch
