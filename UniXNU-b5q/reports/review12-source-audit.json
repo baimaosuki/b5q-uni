@@ -9,7 +9,7 @@
     "WcnPower_sha256": "81a6ed3e6e95fa2b6799ff244b1b792182ef0d95dc666f3ec4eb9b8aa19d4999"
   },
   "findings": {
-    "cpu": "Both upstream checkouts have identical ArmCpu.cpp. SPI1008..1015 share IGROUPR31/ICFGR63; existing spiIpiConfigure and GICD_CTLR updates perform unprotected RMW, startThread launches processor_start concurrently, and smp_running increments were non-atomic. The device-owned tool patch serializes distributor RMW with an early-safe atomic lock, prepares shared IPI words on CPU0, uses a sleepable start mutex and atomically counts running CPUs. No upstream checkout is edited.",
+    "cpu": "Both upstream checkouts have identical ArmCpu.cpp. SPI1008..1015 share IGROUPR31/ICFGR63; existing spiIpiConfigure and GICD_CTLR updates perform unprotected RMW, startThread launches processor_start concurrently, and smp_running increments were non-atomic. The device-owned tool patch serializes distributor RMW with an early-safe atomic lock, prepares shared IPI words on CPU0, uses a sleepable start mutex and atomically counts running CPUs. CI45877307317 exposed that a fresh UniXNU checkout lacks this separately fetched component before resolution. The workflow now applies the unchanged patch with -p3 in the resolved ArmCpu module after unixnu tree; a disposable standalone module test reproduces that exact layout. No local upstream checkout is edited.",
     "amfi": "The previous override incorrectly returned before inspecting error_out whenever the real syscall returned zero. The helper now reads the binary-qualified 0x404 output and overrides only a nonzero syscall return or output error_code. Successful calls remain untouched; copy faults are handled, messages are sanitized to at most48 bytes, and only the first32 failures are logged.",
     "usb": "The physical log captures first-U3 at line2548 before port-debug at2570 and EP0 transfer completion27. Host startup now configures this directly, late ports are covered by polling, and host/ports/devices use0x40000119. Port minimum power3 is requested outside setPowerState; duplicate success logs are suppressed and repeated failure logs cap at4 per port. The per-write full DMA dump is removed while first-HSE/HCE/U3 and16TRB capture remain.",
     "wifi": "The actual supplied log records WMI20493 at49712ms, then MHI fatal and BHI_ERRDBG2=cafecace, not0x0ab6. Line2742 is therefore not claimed as measured from this file. The requested Q6 SRAM addresses are read through the existing window_read32 operation without MHI wakeup; PC/format/line and64 little-endian message bytes are bounded and sanitized, shared by fatal and timeout diagnostics before crash flush. No WMI command is skipped."
@@ -22,7 +22,7 @@
     "PASS production SRAM helper C11 ASan/UBSan for19window reads,ASCII sanitization,64-byte termination and invalid-state guards",
     "PASS production USB configureHostPorts C++17 ASan/UBSan for immediate/late ports,idempotence,power retry and4-log cap",
     "PASS full pinned ath11k target build and standalone USB arm64e427-slot compile with no unresolved imports",
-    "PASS complete pre-ci-v33d31/31 including review12 and the exact source-bound P0-P4 receipt; P0 itself43/43. P0-P4 was rebuilt in the first aggregate attempt before the additional zeroed-resume test expectation was corrected",
+    "PASS corrected CI workflow pre-ci-v33d33/33 including fresh source-bound P0-P4 and the actual resolved-module patch layout; P0 itself43/43",
     "PASS ordered XNU patch replay144/144 and independent DP target compile with no unresolved integration symbols",
     "PASS wireless124objects/68PAC and wireless+ADSP158objects/79PAC,no unresolved symbols or EL1 apps_smmu materializations",
     "PASS new patched ArmCpu object350imports closed against the real review11 core; new ArmCpu USB/GMU/extended callback PAC passes",
@@ -47,17 +47,17 @@
     "UniXNU-b5q/patches/xnu/b5q-amfi-lwcr.patch": "3a701c7d925724718f27c4f22079d904fe65d25b8c23debcc5947f2e7b0319c0",
     "UniXNU-b5q/package/QcomDwc3.cpp": "f29c9bd8470e3f1033f2ec7513de6bfd775982ed07861eef1a47907a5e0097fe",
     "UniXNU-b5q/package/B5qAth11k.c": "e8e6e09f351b943a31783f44adb77fde1885e0b5baa693c555a0f2b1a0e655b9",
-    "tests/b5q-ufs/test-review12.py": "26600178cdfc5136d37f742dfd7b1db5b025a6b5cd1399c2cf87ba43af85b10d",
-    ".github/workflows/b5q-p0-p5.yml": "b8117602b13ad4bf804127f8b66073bc3a6e5348888ef2faf56537a48f0118b1"
+    "tests/b5q-ufs/test-review12.py": "96bf03d74a16459b6bba2a4172a14163ef27b192915e167795ff6d802a0e6cdf",
+    ".github/workflows/b5q-p0-p5.yml": "0547792846e5547e00482e19a06d8cf6f29beec65d6a37f08e993a125000e7b7"
   },
   "receipts": {
     "local_gates": {
       "path": "artifacts/b5q-review12-local/v33d-local-gates.json",
-      "sha256": "eca86f00e35575a19a9b7af7f0c681c45c7447a1533e1851e60e2fdcdef8d0a5"
+      "sha256": "1aaa1b832a68fe626eef9f0535c6202626e7dc5e7c9c307772bd1afe03847072"
     },
     "review12_tests": {
       "path": "artifacts/b5q-review12-local/review12-tests.json",
-      "sha256": "848b321c58b011e3d7ddceec40e2a89b3ff751ed55688b4749acbebd3020af9e"
+      "sha256": "f37978b095ed8b5ea60cbd66751ea517063f1a39dfdebe8a71be354c6e6a04c3"
     },
     "new_ArmCpu_PAC": {
       "path": "artifacts/b5q-review12-local/ArmCpu-PAC.json",
@@ -81,13 +81,21 @@
     },
     "DP_target": {
       "path": "artifacts/b5q-p5-work/target/report.json",
-      "sha256": "2cf9a5804972d8489237298596a3941e5ded5eba24cd607839d2c6364846da8d"
+      "sha256": "75070b899e77e17d9450ec5dcbb7258edffe27eccddb2054bda6dccc35121555"
     }
   },
   "first_failed_test": {
     "path": "artifacts/b5q-review12-local/first-review12-failure.log",
     "sha256": "e2c6d690b095b4c9bbacd27843a4d90dcf889954ffc32af98e337879e2688613",
     "cause": "The extra zeroed-resume fixture initially expected all16 ICFGR slots; SPI1008..1015 configure only the lower8 slots. Fixed expectation to0x0000aaaa for per-core resume,while CPU0 preconfiguration remains the specified0xaaaaaaaa. Production code unchanged."
+  },
+  "first_CI_failure": {
+    "run": 45877307317,
+    "commit": "803497ef56124542dff7a4c80d9efdc31b606748",
+    "path": "artifacts/b5q-review12-local/ci-first-failure.log",
+    "sha256": "ed9df50e92c7b36d15e4446fe4b85ef89070068a8c51cc086056e50ec9187383",
+    "error": "drivers/ArmCpu/ArmCpu.cpp: No such file or directory",
+    "resolution": "Apply the identical tool patch after component resolution using git -C out/b5q/macos-27.3-26C5035r/b5q_macos/tree/drivers/ArmCpu apply -p3. The resolver preserves an already pinned component checkout, so subsequent kernel/payload prepare calls keep this patch. Production driver changes are unchanged."
   },
   "kernel_args_bytes": 1023,
   "full_XNU_linked": false,

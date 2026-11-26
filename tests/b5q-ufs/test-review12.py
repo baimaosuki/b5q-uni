@@ -56,8 +56,9 @@ upstream_before = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in
 for root in ['UniXNU', 'sources/UniXNU']:
     execute(root.replace('/', '-') + '-apply-check', ['git', '-C', R / root, 'apply', '--check', patch])
 workflow = (R / '.github/workflows/b5q-p0-p5.yml').read_text()
-step = workflow.split('- name: Install upstream macOS host tools', 1)[1].split('\n      - name:', 1)[0]
-assert 'git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-armcpu-spi-ipi-lock.patch' in step
+step = workflow.split('- name: Resolve full b5q target', 1)[1].split('\n      - name:', 1)[0]
+assert step.index('./unixnu tree ') < step.index('git -C out/b5q/macos-27.3-26C5035r/b5q_macos/tree/drivers/ArmCpu apply -p3 ')
+assert '"$GITHUB_WORKSPACE/UniXNU-b5q/patches/tools/b5q-armcpu-spi-ipi-lock.patch"' in step
 
 with tempfile.TemporaryDirectory(prefix='review12-', dir=W) as td:
     t = Path(td)
@@ -67,6 +68,14 @@ with tempfile.TemporaryDirectory(prefix='review12-', dir=W) as td:
     applied = execute('ArmCpu-zero-fuzz', ['patch', '-p1', '--fuzz=0', '-d', t, '-i', patch])
     assert 'offset' not in applied and 'fuzz' not in applied
     arm = target.read_text()
+    # A clean CI resolves ArmCpu as its own checkout, not an in-tree file.
+    # Exercise exactly that layout and the workflow's -p3 application.
+    resolved = t / 'resolved-ArmCpu'
+    resolved.mkdir()
+    shutil.copyfile(R / 'UniXNU/drivers/ArmCpu/ArmCpu.cpp', resolved / 'ArmCpu.cpp')
+    subprocess.run(['git', 'init', '-q', str(resolved)], check=True)
+    execute('ArmCpu-resolved-module-apply', ['git', '-C', resolved, 'apply', '-p3', patch])
+    assert (resolved / 'ArmCpu.cpp').read_text() == arm
     prepare = function(arm, 'bool ArmCpu::prepareGic (')
     spi = function(arm, 'static void spiIpiConfigure (')
     enable = function(arm, 'void ArmCpu::enableGic (')

@@ -127,7 +127,6 @@ jobs:
           python3 scripts/b5q-install/install-ci-ipsw.py --out "$RUNNER_TEMP/b5q-host-tools"
           echo "$RUNNER_TEMP/b5q-host-tools" >> "$GITHUB_PATH"
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-native-command-line.patch
-          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-armcpu-spi-ipi-lock.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
           git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
@@ -187,6 +186,7 @@ jobs:
           set -euo pipefail
           ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
           ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
+          git -C out/b5q/macos-27.3-26C5035r/b5q_macos/tree/drivers/ArmCpu apply -p3 "$GITHUB_WORKSPACE/UniXNU-b5q/patches/tools/b5q-armcpu-spi-ipi-lock.patch"
       - name: Update existing RAM recovery seed policy without recreating APFS
         run: |
           set -euo pipefail
