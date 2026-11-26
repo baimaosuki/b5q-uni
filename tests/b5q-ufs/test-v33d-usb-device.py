@@ -62,8 +62,15 @@ int main(){for(orientation=0;orientation<2;orientation++){
  }puts("PASS actual roleThread + followOrientation:normal/reverse QMP exactlyonce; periodic retry invoked; no immediately repeated PHY reset");}
 '''
 execute('v33d-qmp-role',body.replace('FOLLOW',function(q,'bool followOrientation(')).replace('ROLE',function(q,'void roleThread(')))
-assert 'static volatile bool gDeviceStackAllowed = true;'in q
+assert 'static volatile bool gDeviceStackAllowed = false;'in q
 assert '"configuration-string",config'in q
 assert q.index('controller->registerService();')>q.index('gController=controller;')
-for field in ['PORTSC1=','PORTSC2=','ERDP=','GSBUSCFG0=']:assert field in q
+publish=function(q,'extern "C" void qcom_dwc3_publish(')
+assert 'QcomDwc3Nub::route(nub);'not in publish
+enter=function(q,'bool enterRole(');device=enter[enter.index('} else {'):]
+assert device.index('QcomDwc3Nub::route(gDeviceNub)')<device.index('__atomic_store_n(&gDeviceStackAllowed,true')<device.index('setProperty("AppleUSBCableType"')<device.index('gController->cable(true)')
+for field in ['PORTSC1=','PORTSC2=','PORTPMSC1=','PORTPMSC2=','ERDP=','GUSB2PHYCFG=','GUSB3PIPECTL=','GUCTL1=']:assert field in q
+assert 'hostCheckpoint("read64");'in q and 'hostCheckpoint("write64");'in q
+assert 'hostCheckpoint("before-power-state",true,true);'in q and 'hostCheckpoint("poll",false,true);'in q
+assert '(port&3u)==3u&&(port&0x1e0u)==0x60u' in q
 print('PASS publication/configuration and host diagnostic source contracts; actual ABI compilation and original binary evidence checked separately')

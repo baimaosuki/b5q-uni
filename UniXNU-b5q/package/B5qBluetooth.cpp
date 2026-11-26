@@ -199,7 +199,7 @@ int clockVote(void *,bool enabled) {
     int e=quiesce();if(e)return e;
     if(sequence!=bt.rx_sequence || qbt_transport_tx_pending()) {b5q_bt_fifo_resume(&bt.geni);return -EBUSY;}
     volatile uint32_t *r=bt.tlmm.va+kRx*4096/4;
-    r[2]=0;r[3]=0;pin(kRx,1u);
+    r[2]=0;r[3]=0;pin(kRx,3u);
     r[2]=(3u<<5)|(2u<<2)|(1u<<4)|(1u<<1)|1u;barrier();
     if(!(r[1]&1) || (r[3]&1)) {disarmRxWake();b5q_bt_fifo_resume(&bt.geni);return -EBUSY;}
     /* Leave RTS ready so the controller can send its IBS wake indication. */
@@ -503,6 +503,9 @@ void worker(void *,wait_result_t) {
                         __atomic_load_n(&qbt_transport_activity[2],__ATOMIC_RELAXED),
                         __atomic_load_n(&qbt_transport_activity[3],__ATOMIC_RELAXED),
                         stats.discovery.inquiry_results,stats.discovery.le_reports,stats.discovery.le_extended_reports,stats.rx_bytes);
+                    printf("B5qBluetooth: stage=ibs wake-ind=%llu wake-ack=%llu sleep-ind=%llu clock-reverts=%llu tx-refused=%llu rx-irq=%llu cancel-timeouts=%llu wake-irq=%llu\n",
+                        native_bluetooth_ibs[0],native_bluetooth_ibs[1],native_bluetooth_ibs[2],native_bluetooth_ibs[3],
+                        native_bluetooth_ibs[4],native_bluetooth_ibs[5],native_bluetooth_ibs[6],native_bluetooth_ibs[7]);
                 }
             }
             health=t+1000000000ULL;

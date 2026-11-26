@@ -87,9 +87,12 @@ for entry in sargs:
 assert {'bluetooth','wifi','vsync-fixed','usb','offline-hid-input'}<=bkeys
 svalues={x.partition('=')[0]:x.partition('=')[2]for x in sargs};bvalues={x.partition('=')[0]:x.partition('=')[2]for x in bargs}
 value_changes={k:(svalues[k],bvalues[k])for k in svalues.keys()&bvalues.keys()if svalues[k]!=bvalues[k]}
-assert value_changes=={'touch':('4','1'),'vsync':('120','60')},value_changes
+assert value_changes=={'touch':('4','1'),'vsync':('120','60'),'debug':('0x14e','334'),'log-bluetooth':('3','2')},value_changes
 value_resolutions={'touch':'Samsung S3916A touch=1 selects IRQ GPIO-I2C; Xiaomi Novatek touch=4 prohibited.',
- 'vsync':'b5q validated60Hz GOP mode, explicit vsync-fixed=1; do not copy Xiaomi120Hz panel rate.'}
+ 'vsync':'b5q validated60Hz GOP mode, explicit vsync-fixed=1; do not copy Xiaomi120Hz panel rate.',
+ 'debug':'334 is numerically identical to0x14e and saves two command-line bytes for the requested Bluetooth diagnostic.',
+ 'log-bluetooth':'Owner-requested level2 runtime/IBS diagnostics; level3 full HCI buffering from sheng is intentionally not enabled.'}
+assert int(bvalues['debug'],0)==int(svalues['debug'],0)==0x14e
 component_omissions=sorted(set(sheng['os_overrides']['macos-27.3-26C5035r']['components']['include'])-set(ctx.board['components']['include']))
 component_resolutions={'ShengPreflight':'Forbidden Xiaomi fastboot/preflight; b5q validated physical ESP/UEFI.', 'ShengUfs':'Samsung B5qUfs/B5qDataBlock authenticated exact geometry; no Xiaomi storage policy.'}
 assert all(v in component_resolutions for v in component_omissions),component_omissions

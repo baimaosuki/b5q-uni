@@ -180,7 +180,7 @@ extern "C" bool b5q_usb_repeater(bool init,bool host){
    if(!candidate->open(false)){delete candidate;return false;}
    ti=candidate;
   }
- }
+ }else if(!releaseTiReset())return false;
  if(!ti||!ti->ready)return false;
  using namespace B5qUsbBoardCore;
  IOLockLock(ti->lock);

@@ -18,6 +18,7 @@
 #include <stdarg.h>
 extern "C" bool sm8550_gcc_trigger32(volatile uint32_t *,uint32_t,unsigned);
 extern "C" ifnet_t sheng_ethernet_ifnet(void);
+extern "C" bool sheng_ethernet_wifi_attached(void);
 extern "C" void sheng_ethernet_wifi_detach(void);
 extern "C" int b5q_wifi_publish_ready(void);
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
@@ -66,6 +67,10 @@ volatile uint32_t pending,wakeCount;
 bool irqAttached,stackStarted;
 uint64_t nowNs(){uint64_t ns;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns;}
 uint64_t nowMs(){return nowNs()/1000000;}
+bool wifiReadyAccepted(int result,uint64_t now,uint64_t &nextTry){
+    if(!result||result==EEXIST)return true;
+    nextTry=now+1000;return false;
+}
 uint64_t bootNs(){uint64_t ns;absolutetime_to_nanoseconds(mach_continuous_time(),&ns);return ns;}
 void busyDelay(unsigned us){IODelay(us);}
 void sleepMs(unsigned ms){IOSleep(ms);}
@@ -337,15 +342,24 @@ void worker(void *,wait_result_t) {
         nw_wifi_irq_mode(1);native_wifi_stats[0]=21;
     }
     {
-        bool netStarted=false;uint64_t nextReport=0,slice=nowNs();
+        bool netStarted=false,readyPublished=false;unsigned readyFailures=0;
+        uint64_t nextReadyTry=0,nextReport=0,slice=nowNs();
         for(;;) {
             error=nw_wifi_step();if(error<0)goto failed;
             if(!netStarted && nw_wifi_stats.stage>=4) {
                 uint8_t mac[6];if(!boardMac(mac)){error=-18;goto failed;}
                 sheng_wifi_net_start(mac);
-                if(!sheng_ethernet_ifnet()){error=-ENXIO;native_wifi_logf(3,"stage=network-interface result=%d",error);goto failed;}
-                netStarted=true;int ready=b5q_wifi_publish_ready();
-                native_wifi_logf(ready?3:6,"stage=supplicant-ready result=%d firmware=%u interface=1",ready,nw_wifi_stats.stage);
+                if(!sheng_ethernet_wifi_attached()){error=-ENXIO;native_wifi_logf(3,"stage=network-interface result=%d callbacks=0",error);goto failed;}
+                netStarted=true;
+                native_wifi_logf(6,"stage=network-interface result=0 callbacks=1 state=%s",sheng_ethernet_ifnet()?"attached":"waiting-for-ifnet");
+            }
+            const uint64_t readyNow=nowMs();
+            if(netStarted && !readyPublished && readyNow>=nextReadyTry && sheng_ethernet_ifnet()) {
+                const int ready=b5q_wifi_publish_ready();
+                readyPublished=wifiReadyAccepted(ready,readyNow,nextReadyTry);
+                if(readyPublished||++readyFailures<=4||!(readyFailures%30))
+                    native_wifi_logf(readyPublished?6:3,"stage=supplicant-ready result=%d firmware=%u interface=1 retry-ms=%llu",
+                        ready,nw_wifi_stats.stage,(unsigned long long)(readyPublished?0:nextReadyTry-readyNow));
             }
             if(nowMs()>=nextReport) {
                 nextReport=nowMs()+30000;native_wifi_stats[1]=nw_wifi_stats.stage;
@@ -369,16 +383,16 @@ void worker(void *,wait_result_t) {
 failed:
     if(error>0)error=-error;
     native_wifi_stats[0]=uint32_t(error?error:-1);
-    // Stop endpoint DMA before Linux teardown touches ring buffers. Keep all
-    // retained firmware pages and mappings for the rest of this boot.
+    // Stop users of Linux queues while PCIe/MHI and their interrupt are still
+    // live. Only then quiesce endpoint DMA and remove power.
+    sheng_ethernet_wifi_detach();
+    if(stackStarted)nw_wifi_stop();
     if(irqAttached)armcpu_spi_mask(800,true);
     if(config.va&&dbi.va&&(dbi.va[0x72c/4]&16)){
         auto *command=reinterpret_cast<volatile uint16_t*>(reinterpret_cast<volatile uint8_t*>(config.va)+4);
         *command=uint16_t(*command&~4u);barrier();
     }
     if(tlmm.va){Hardware h;h.pin(94,0x201,0);IODelay(1000);}
-    sheng_ethernet_wifi_detach();
-    if(stackStarted)nw_wifi_stop();
     b5q_wcn_radio_enable(B5Q_WCN_WLAN,0);b5q_wcn_power_put(B5Q_WCN_WLAN);
     b5q_wcn_wifi_probe_done();
     native_wifi_logf(3,"stopped result=%d; boot continues; DMA pool retained",error);

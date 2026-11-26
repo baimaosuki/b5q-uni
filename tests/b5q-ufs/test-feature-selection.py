@@ -40,5 +40,9 @@ paths=list((R/'UniXNU/drivers/DarwinBoot').rglob('bootargs.h'))
 # Physical boot ABI used by XNU/loader:1024-byte CommandLine, trailing NUL.
 h=R/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert/pexpert/arm64/boot.h';s=h.read_text();assert re.search(r'#define\s+BOOT_LINE_LENGTH\s+1024',s)
 loader=(R/'UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/DarwinBoot.c').read_text();assert 'CommandLine[1024]'in loader
-for value in [0,63,127]:assert len(args+b' b5q-f='+str(value).encode())+1<=1024
-print('PASS existing1000B default arguments unchanged; menu override max1009B+NUL fits original1024B XNU command line')
+# The XNU entry now intentionally consumes the full 1023-byte payload budget
+# for the requested Bluetooth diagnostics. b5q-f is added only to the
+# separately generated daily/safe/ram-fallback menu profiles, not appended to
+# the XNU profile at runtime.
+assert len(args)+1<=1024
+print('PASS current board arguments fit the original 1024-byte command line with NUL; feature-mask tests remain independent')
