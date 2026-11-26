@@ -138,6 +138,7 @@ bool qmpInit(bool){return true;}void selectUtmiClock(){}void retryDevicePower(){
 void IOSleep(unsigned n){ms+=n;}
 template<class... T>void IOLog(const char*,T...){ }
 using wait_result_t=int;
+void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){
  for(unsigned pin=0;pin<2;pin++){

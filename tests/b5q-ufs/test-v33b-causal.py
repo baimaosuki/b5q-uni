@@ -81,6 +81,7 @@ bool qmpInit(bool){return true;}void selectUtmiClock(){}void retryDevicePower(){
 void clock_interval_to_deadline(unsigned,unsigned,uint64_t *p){*p=0;}
 void IOLockSleepDeadline(void*,void*,uint64_t,int){if(++polls>15)throw 1;ticks+=1000000;}
 using wait_result_t=int;
+void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){
  B5qMax77705::Cable before;assert(b5q_usb_cable_state(&before));gCableApplied=gCableWanted=before.signature();gAppliedCable=before;gAppliedOrientation=before.orientation();

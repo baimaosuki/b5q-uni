@@ -25,6 +25,7 @@ extern "C" bool b5q_usb_otg(bool);
 #include "QcomRpmh.h"
 #include "AppsSmmuLock.h"
 #include <IOKit/IOLib.h>
+#include <IOKit/pwr_mgt/IOPM.h>
 #include <kern/thread.h>
 #include <kern/clock.h>
 #include <pexpert/pexpert.h>
@@ -59,6 +60,7 @@ void dmaDiagnostics(const char *reason);
 void hostCheckpoint(const char *reason,bool force=false,bool allowU3=false);
 void restoreHostGlobals(void);
 void configureHostPorts(IOService *host);
+void releaseHostPortPowerHolds();
 extern "C" unsigned b5q_log_sync(unsigned);
 namespace {
 // The DWC3 global, device and OTG registers in the window Apple's class addresses: base + 0xc000.
@@ -507,6 +509,151 @@ public:
 };
 OSDefineMetaClassAndStructors(QcomDwc3Xdci, AppleUSBXDCI)
 
+// Public-IOPM child attached to an AppleUSBHostPort. State 1 requires and
+// offers kIOPMPowerOn, which raises the port's power floor without any private
+// forcePower/float path. It has no MMIO and no knowledge of the controller.
+class B5qUsbPortPowerHold : public IOService {
+    OSDeclareDefaultStructors(B5qUsbPortPowerHold)
+public:
+    static IOPMPowerState states[2];
+    IOReturn setPowerState(unsigned long state, IOService *device) override {
+        (void)state;(void)device;return kIOPMAckImplied;
+    }
+};
+OSDefineMetaClassAndStructors(B5qUsbPortPowerHold, IOService)
+IOPMPowerState B5qUsbPortPowerHold::states[2] = {
+    {kIOPMPowerStateVersion1,0,0,0,0,0,0,0,0,0,0,0},
+    {kIOPMPowerStateVersion1,kIOPMPowerOn,kIOPMPowerOn,kIOPMPowerOn,0,0,0,0,0,0,0,0}
+};
+
+namespace {
+struct HostPortHold { IOService *port; B5qUsbPortPowerHold *hold; bool pending; };
+HostPortHold gHostPortHolds[B5qUsbHostRole::kPortPowerHoldSlots];
+IOLock *gHostPortHoldLock;
+IOService *gHostPortHoldOwner;
+enum PortHoldResult {kPortHoldAttached,kPortHoldPending,kPortHoldFailed};
+
+IOLock *hostPortHoldLock() {
+    if(!gHostPortHoldLock)gHostPortHoldLock=IOLockAlloc();
+    return gHostPortHoldLock;
+}
+unsigned hostPortHoldCount() {
+    IOLock *lock=hostPortHoldLock();if(!lock)return 0;
+    IOLockLock(lock);unsigned count=0;
+    for(unsigned i=0;i<B5qUsbHostRole::kPortPowerHoldSlots;i++)if(gHostPortHolds[i].hold)count++;
+    IOLockUnlock(lock);return count;
+}
+PortHoldResult hostPortHoldState(IOService *port) {
+    IOLock *lock=hostPortHoldLock();if(!lock||!port)return kPortHoldFailed;
+    IOLockLock(lock);PortHoldResult result=kPortHoldFailed;
+    for(unsigned i=0;i<B5qUsbHostRole::kPortPowerHoldSlots;i++)if(gHostPortHolds[i].port==port){
+        result=gHostPortHolds[i].hold?kPortHoldAttached:(gHostPortHolds[i].pending?kPortHoldPending:kPortHoldFailed);break;
+    }
+    IOLockUnlock(lock);return result;
+}
+int reserveHostPortHold(IOService *port) {
+    IOLock *lock=hostPortHoldLock();if(!lock||!port)return -1;
+    IOLockLock(lock);int slot=-1;
+    for(unsigned i=0;i<B5qUsbHostRole::kPortPowerHoldSlots;i++)if(gHostPortHolds[i].port==port){slot=-2;break;}
+    if(slot==-1)for(unsigned i=0;i<B5qUsbHostRole::kPortPowerHoldSlots;i++)if(!gHostPortHolds[i].port){
+        gHostPortHolds[i].port=port;gHostPortHolds[i].hold=nullptr;gHostPortHolds[i].pending=true;
+        port->retain();slot=(int)i;break;
+    }
+    IOLockUnlock(lock);return slot;
+}
+bool commitHostPortHold(int slot, IOService *port, B5qUsbPortPowerHold *hold) {
+    IOLock *lock=hostPortHoldLock();if(!lock||slot<0)return false;
+    bool current=false;IOLockLock(lock);
+    if(gHostPortHolds[slot].port==port&&gHostPortHolds[slot].pending){
+        gHostPortHolds[slot].hold=hold;gHostPortHolds[slot].pending=false;current=true;
+    }
+    IOLockUnlock(lock);return current;
+}
+void abortHostPortHold(int slot, IOService *port) {
+    IOLock *lock=hostPortHoldLock();if(!lock||slot<0||!port)return;
+    bool release=false;IOLockLock(lock);
+    if(gHostPortHolds[slot].port==port&&gHostPortHolds[slot].pending){
+        gHostPortHolds[slot].port=nullptr;gHostPortHolds[slot].hold=nullptr;gHostPortHolds[slot].pending=false;release=true;
+    }
+    IOLockUnlock(lock);if(release)port->release();
+}
+PortHoldResult ensureHostPortHold(IOService *port) {
+    const PortHoldResult existing=hostPortHoldState(port);
+    if(existing!=kPortHoldFailed)return existing;
+    port->retain();
+    const int slot=reserveHostPortHold(port);
+    if(slot==-2){port->release();return hostPortHoldState(port);}
+    if(slot==-1){port->release();return kPortHoldFailed;}
+    B5qUsbPortPowerHold *hold=OSTypeAlloc(B5qUsbPortPowerHold);
+    bool attached=false;IOReturn failure=kIOReturnError;
+    if(hold&&hold->init()){
+        hold->PMinit();
+        const IOReturn reg=hold->registerPowerDriver(hold,B5qUsbPortPowerHold::states,2);
+        const IOReturn add=reg==kIOReturnSuccess?port->addPowerChild(hold):reg;
+        failure=add;
+        if(add==kIOReturnSuccess){
+            const IOReturn pin=hold->changePowerStateTo(1);
+            failure=pin;
+            if(pin==kIOReturnSuccess)attached=commitHostPortHold(slot,port,hold);
+            if(attached){
+                const IOReturn req=port->changePowerStateTo(3);
+                port->setProperty("B5qPortPowerHoldApplied",kOSBooleanTrue);
+                IOLog("qcom-dwc3: port-power-hold name=%s add=%x req=%x pwr=%lu\n",
+                      port->getName(),add,req,(unsigned long)port->getPowerState());
+            }
+        }
+        if(!attached){
+            hold->PMstop();hold->release();hold=nullptr;
+        }
+    }else OSSafeReleaseNULL(hold);
+    if(!attached){
+        abortHostPortHold(slot,port);
+        port->setProperty("B5qPortPowerHoldFailed",kOSBooleanTrue);
+        IOLog("qcom-dwc3: port-power-hold-failed name=%s rc=%x\n",port->getName(),failure);
+    }
+    port->release();
+    return attached?kPortHoldAttached:kPortHoldFailed;
+}
+}  // namespace
+
+void releaseHostPortPowerHolds() {
+    IOLock *lock=hostPortHoldLock();if(!lock)return;
+    HostPortHold held[B5qUsbHostRole::kPortPowerHoldSlots];unsigned count=0;
+    IOLockLock(lock);
+    for(unsigned i=0;i<B5qUsbHostRole::kPortPowerHoldSlots;i++)if(gHostPortHolds[i].port){
+        held[count++]=gHostPortHolds[i];
+        gHostPortHolds[i]={nullptr,nullptr,false};
+    }
+    gHostPortHoldOwner=nullptr;
+    IOLockUnlock(lock);
+    for(unsigned i=0;i<count;i++){
+        IOService *port=held[i].port;B5qUsbPortPowerHold *hold=held[i].hold;
+        if(hold){
+            hold->changePowerStateTo(0);
+            hold->PMstop();
+            // PMstop detaches the child in the IOPM workloop. Wait a bounded
+            // 50 ms until the power-plane parent is gone before dropping the
+            // last reference; no PM-gated call is made from this thread.
+            for(unsigned wait=0;wait<50u;wait++){
+                IORegistryEntry *parent=hold->copyParentEntry(gIOPowerPlane);
+                if(!parent)break;
+                parent->release();
+                IOSleep(1);
+            }
+            hold->release();
+        }
+        port->release();
+    }
+    if(count)IOLog("qcom-dwc3: port-power-hold-release count=%u\n",count);
+}
+static void setHostPortHoldOwner(IOService *host) {
+    IOLock *lock=hostPortHoldLock();if(!lock)return;
+    IOLockLock(lock);const bool changed=gHostPortHoldOwner&&gHostPortHoldOwner!=host;
+    IOLockUnlock(lock);
+    if(changed)releaseHostPortPowerHolds();
+    IOLockLock(lock);if(!gHostPortHoldOwner)gHostPortHoldOwner=host;IOLockUnlock(lock);
+}
+
 // Host mode: Apple's xHCI driver as it is on a PCI controller, with what Linux's dwc3 host glue requires of the core.
 class QcomDwc3Xhci : public AppleUSBXHCI {
     OSDeclareDefaultStructors(QcomDwc3Xhci)
@@ -677,6 +824,9 @@ void leaveRole(int role) {
         for (unsigned i = 0; i < 200 && native_usb_stats[13] == before; ++i) IOSleep(10);
     } else if (role == kRoleHost) {
         b5q_usb_otg(false);
+        // Detach the public power children before the host stack tears down;
+        // handlePMstop removes them in the PM workloop before terminate.
+        releaseHostPortPowerHolds();
         if(!gHostNub)return;
         // A removed PCI controller's path: the family stops its devices and the controller.
         QcomDwc3Nub::route(nullptr);
@@ -848,6 +998,7 @@ void hostCheckpoint(const char *reason,bool force,bool allowU3){
 }
 void configureHostPorts(IOService *host) {
     if(!host)return;
+    setHostPortHoldOwner(host);
     OSNumber *mask=OSNumber::withNumber(kUsbPortDebugOptions,32);
     OSDictionary *settings=mask?OSDictionary::withCapacity(1):nullptr;
     if(settings)settings->setObject("kUSBDebugOptions",mask);
@@ -871,30 +1022,22 @@ void configureHostPorts(IOService *host) {
                 IOLog("qcom-dwc3: port-debug name=%s mask=%x rc=%08x\n",port->getName(),kUsbPortDebugOptions,result);
             }
         }
-        if(forceSettings&&!port->getProperty("B5qPortForcePowerApplied")){
+        const PortHoldResult hold=ensureHostPortHold(port);
+        if(hold==kPortHoldAttached)port->setProperty("B5qPortPowerPinned",kOSBooleanTrue);
+        // UsbForcePower floats back to idlePowerState()==2 on this stack, so it
+        // is only a last resort when the public power child could not attach.
+        if(hold==kPortHoldFailed&&forceSettings&&!port->getProperty("B5qPortForcePowerApplied")){
             OSNumber *tryNumber=OSDynamicCast(OSNumber,port->getProperty("B5qPortForcePowerTries"));
             const unsigned tries=tryNumber?tryNumber->unsigned32BitValue():0;
             if(tries<4){
                 const IOReturn fpRc=port->setProperties(forceSettings);
                 port->setProperty("B5qPortForcePowerRc",(unsigned)fpRc,32);
                 IOLog("qcom-dwc3: port-force-power name=%s cur=%lu rc=%08x\n",port->getName(),(unsigned long)port->getPowerState(),fpRc);
-                if(fpRc==kIOReturnSuccess)port->setProperty("B5qPortForcePowerApplied",force);
-                else port->setProperty("B5qPortForcePowerTries",tries+1u,32);
+                if(fpRc==kIOReturnSuccess){
+                    port->setProperty("B5qPortForcePowerApplied",force);
+                    port->setProperty("B5qPortPowerPinned",kOSBooleanTrue);
+                } else port->setProperty("B5qPortForcePowerTries",tries+1u,32);
             }
-        }
-        const bool forceOk=port->getProperty("B5qPortForcePowerApplied")!=nullptr;
-        const bool first=!port->getProperty("B5qPortPowerPinned");
-        if(!forceOk||port->getPowerState()<3){
-            const IOReturn pwrRc=port->changePowerStateTo(3);
-            OSNumber *logs=OSDynamicCast(OSNumber,port->getProperty("B5qPortPowerLogs"));
-            const unsigned logged=logs?logs->unsigned32BitValue():0;
-            if((first||pwrRc!=kIOReturnSuccess)&&logged<4){
-                IOLog("qcom-dwc3: port-power name=%s cur=%lu req=3 rc=%08x\n",port->getName(),(unsigned long)port->getPowerState(),pwrRc);
-                port->setProperty("B5qPortPowerLogs",logged+1,32);
-            }
-            if(pwrRc==kIOReturnSuccess)port->setProperty("B5qPortPowerPinned",kOSBooleanTrue);
-        } else {
-            port->setProperty("B5qPortPowerPinned",kOSBooleanTrue);
         }
     }
     OSSafeReleaseNULL(children);OSSafeReleaseNULL(settings);OSSafeReleaseNULL(mask);
@@ -1147,6 +1290,15 @@ void roleThread(void *, wait_result_t) {
             IOLog("B5qDP: combo lanes=%u reverse=%d usb3=%u generation=%u\n",gDpLanes,cable.orientation(),gSuperSpeed,port.generation);
         }
         const bool entered=enterRole(role);
+        if(entered&&role==kRoleHost&&gHost){
+            // xHCI ports appear after start(); attach the public power child
+            // immediately and keep a 20 x 50ms window before the first U3.
+            for(unsigned i=0;i<B5qUsbHostRole::kFastPortPollAttempts;i++){
+                configureHostPorts(gHost);
+                if(!B5qUsbHostRole::fastPortPollNeeded(hostPortHoldCount()))break;
+                IOSleep(50);
+            }
+        }
         if(dpEnabled)b5q_dp_link_update(&port);
         IOLockLock(gRoleLock);
         gCableApplied=cableVersion;
@@ -1196,6 +1348,7 @@ extern "C" void qcom_dwc3_publish(void) {
         IOLog("qcom-dwc3: stage=9 controller-DMA=deferred requires=EFI_HAL_IOMMU_PROTOCOL-handoff\n");
         if (!gTypecReady || !b5q_usb_otg(false)) return;
         gRoleLock = IOLockAlloc();
+        if(!gHostPortHoldLock)gHostPortHoldLock=IOLockAlloc();
         thread_t thread = nullptr;
         if (!gRoleLock || kernel_thread_start(roleThread,nullptr,&thread) != KERN_SUCCESS) {
             IOLog("qcom-dwc3: hardware-role-thread allocation-failed\n"); return;
@@ -1227,6 +1380,7 @@ extern "C" void qcom_dwc3_publish(void) {
         if(!controller||!controller->init()){stage(-14);break;}
         if(!(controllerAttached=controller->attach(nub))){stage(-15);break;}
         gRoleLock=IOLockAlloc();
+        if(!gHostPortHoldLock)gHostPortHoldLock=IOLockAlloc();
         if(!gRoleLock||!mapRegion(gGlobals,kAppleWindow,0x1000)||!mapRegion(gXhciRegs,kCore,kXhciRegisterBytes)){stage(-17);break;}
         started=controller->start(nub);native_usb_stats[19]=started;
         if(!started){stage(-16);break;}

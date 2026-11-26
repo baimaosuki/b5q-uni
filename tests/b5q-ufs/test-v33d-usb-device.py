@@ -56,6 +56,7 @@ bool enterRole(int){enters++;followOrientation();return true;}
 void cableChanged(){}void retryDevicePower(){retries++;}void hostStats(){}void deviceStats(){}
 void clock_interval_to_deadline(unsigned,unsigned,uint64_t*p){*p=0;}
 void IOLockSleepDeadline(void*,void*,uint64_t,int){if(++polls>3)throw 1;}
+void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){for(orientation=0;orientation<2;orientation++){
  gRoleApplied=0;gCableApplied=0;gDpLanes=0;gSuperSpeed=false;native_usb_stats[34]=~0u;polls=qmps=enters=retries=0;

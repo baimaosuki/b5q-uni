@@ -75,7 +75,24 @@ def prepare(module,out):
     s=replace(s,'\t\tdisable_irq_nosync(ab->irq_num[irq_idx]);\n\t\tsynchronize_irq(ab->irq_num[irq_idx]);',
         '\t\tath11k_pcic_ce_irq_disable(ab, i);\n\t\tsynchronize_irq(ab->irq_num[irq_idx]);','single-MSI CE shutdown disable')
     p.write_text(s)
+    p=gen/'hw.c';s=p.read_text()
+    start=s.index('static void ath11k_init_wmi_config_qca6390(')
+    stop=s.index('\n}\n',start)+3
+    section=s[start:stop]
+    anchor='\tconfig->flag1 |= WMI_RSRC_CFG_FLAG1_BSS_CHANNEL_INFO_64;\n}'
+    if section.count(anchor)!=1:raise ValueError('qca6390 WMI config tail changed')
+    section=section.replace(anchor,
+        '\tconfig->twt_ap_pdev_count = ab->num_radios ? ab->num_radios : 1;\n'
+        '\tconfig->twt_ap_sta_count = 8;\n'+anchor)
+    s=s[:start]+section+s[stop:]
+    p.write_text(s)
     p=gen/'wmi.c';s=p.read_text()
+    s=replace(s,'\tmemcpy(&wmi_ab->wlan_resource_config, &config, sizeof(config));\n',
+        '\tmemcpy(&wmi_ab->wlan_resource_config, &config, sizeof(config));\n'
+        '\tath11k_info(ab, "B5qWifi: wmi-init radios=%u vdevs=%u peers=%u twt_ap_pdev=%u twt_ap_sta=%u\\n",\n'
+        '\t\t    ab->num_radios, config.num_vdevs, config.num_peers,\n'
+        '\t\t    config.twt_ap_pdev_count, config.twt_ap_sta_count);\n',
+        'WMI init twt probe')
     if s.count('wait_event_timeout(')!=2:raise ValueError('ath11k WMI ownership wait changed')
     s=s.replace('wait_event_timeout(','wait_event_timeout_once(')
     s=replace(s,'int ath11k_wmi_cmd_send(struct ath11k_pdev_wmi *wmi, struct sk_buff *skb,\n\t\t\tu32 cmd_id)\n{\n',
@@ -207,6 +224,7 @@ def prepare(module,out):
     (out/'source-inputs.json').write_text(json.dumps(dict(linux_revision=revision,ath11k_original_sha256=hashes,
         native_mac80211=True,legacy_station_linked=False,hardware_verified=False,
         wcn6855_wmm_defaults='BE=3/15/1023 BK=7/15/1023 VI=2/7/15/94 VO=2/3/7/47',
+        wcn6855_twt_ap_config='twt_ap_pdev_count=max(num_radios,1) twt_ap_sta_count=8',
         fatal_tx_history='32 lock-free committed WMI/HTT entries, a 32-entry WMI RX ring (last 16 dumped) and MHI/BHI crash registers'),indent=2)+'\n')
     return gen
 

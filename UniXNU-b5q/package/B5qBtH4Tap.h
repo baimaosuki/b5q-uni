@@ -31,6 +31,7 @@ struct B5qBtH4Stats {
     uint64_t tx_cmd, tx_acl, tx_sco, tx_iso;
     uint64_t rx_evt, rx_acl, rx_sco, rx_iso;
     uint64_t errs, smp, l2cap, desync, filtered, malformed;
+    uint64_t evt13;
     uint64_t att, att_dropped, cid, cid_dropped;
     uint32_t logged, dropped;
 };
@@ -175,7 +176,9 @@ static inline void b5q_h4_event(struct B5qBtH4Tap *tap, const struct B5qBtH4View
     } else if (evt == 0x3eu) {
         sub = b5q_h4_get8(v, payload);
         if (sub == 0x02u || sub == 0x0bu || sub == 0x0du) { tap->stats.filtered++; return; }
+        if (sub == 0x0cu && b5q_h4_get8(v, payload + 1u) != 0u) error = 1;
     } else if (evt == 0x02u || evt == 0x22u || evt == 0x2fu || evt == 0x13u) {
+        if (evt == 0x13u) tap->stats.evt13++;
         tap->stats.filtered++; return;
     }
     if (error || evt == 0x10u || evt == 0x1au) { tap->stats.errs++;error = 1; }
@@ -202,6 +205,23 @@ static inline void b5q_h4_event(struct B5qBtH4Tap *tap, const struct B5qBtH4View
         b5q_h4_text_puts(&text, " enc-change status=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload), 2);
         b5q_h4_text_puts(&text, " handle=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 1u), 4);
         b5q_h4_text_puts(&text, " enc=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload + 3u), 2);
+    } else if (evt == 0x3eu && sub == 0x06u) {
+        b5q_h4_text_puts(&text, " le-conn-param-req handle=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 1u), 4);
+        b5q_h4_text_puts(&text, " min=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 3u), 4);
+        b5q_h4_text_puts(&text, " max=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 5u), 4);
+        b5q_h4_text_puts(&text, " lat=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 7u), 4);
+        b5q_h4_text_puts(&text, " timeout=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 9u), 4);
+    } else if (evt == 0x3eu && sub == 0x07u) {
+        b5q_h4_text_puts(&text, " le-data-len handle=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 1u), 4);
+        b5q_h4_text_puts(&text, " tx_oct=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 3u), 4);
+        b5q_h4_text_puts(&text, " tx_time=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 5u), 4);
+        b5q_h4_text_puts(&text, " rx_oct=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 7u), 4);
+        b5q_h4_text_puts(&text, " rx_time=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 9u), 4);
+    } else if (evt == 0x3eu && sub == 0x0cu) {
+        b5q_h4_text_puts(&text, " le-phy status=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload + 1u), 2);
+        b5q_h4_text_puts(&text, " handle=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 2u), 4);
+        b5q_h4_text_puts(&text, " tx_phy=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload + 4u), 2);
+        b5q_h4_text_puts(&text, " rx_phy=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload + 5u), 2);
     } else if (evt == 0x3eu && (sub == 0x01u || sub == 0x0au)) {
         b5q_h4_text_puts(&text, " le-conn status=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload + 1u), 2);
         b5q_h4_text_puts(&text, " handle=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 2u), 4);

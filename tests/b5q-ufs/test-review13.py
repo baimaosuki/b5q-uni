@@ -80,12 +80,12 @@ assert 'requestedDp==gDpLanes' not in role[role.index('const unsigned liveDp='):
 configure = function(usb, 'void configureHostPorts(IOService *host) {')
 for text in ('OSDictionary *forceSettings', '"UsbForcePower"', 'OSNumber::withNumber(1u,32)',
              '"B5qPortForcePowerApplied"', '"B5qPortForcePowerRc"', '"B5qPortForcePowerTries"',
-             'if(!forceOk||port->getPowerState()<3)', 'tries<4',
-             r'qcom-dwc3: port-force-power name=%s cur=%lu rc=%08x\n', 'logged<4'):
+             'ensureHostPortHold(port)', 'tries<4',
+             r'qcom-dwc3: port-force-power name=%s cur=%lu rc=%08x\n'):
     assert text in configure, text
 assert configure.index('forceSettings->setObject("UsbForcePower"') < configure.index('port->setProperties(forceSettings)')
 assert 'kUSBDebugOptions' in configure and 'settings->setObject("kUSBDebugOptions"' in configure
-assert configure.index('if(fpRc==kIOReturnSuccess)port->setProperty("B5qPortForcePowerApplied"') < configure.index('const bool forceOk=')
+assert configure.index('if(fpRc==kIOReturnSuccess)') < configure.index('B5qPortForcePowerTries",tries+1u')
 assert configure.count('port->setProperty("B5qPortForcePowerApplied"')==1
 stats = function(usb, 'void hostStats() {')
 for text in ('host-port-edge', 'device-drop', 'dmaDiagnostics("port-edge")', 'edgeDumps<4', 'B5qUsbHostRole::portEdge',
@@ -147,6 +147,7 @@ static unsigned powerLogs,debugLogs,forceLogs;
 template<class...T>void IOLog(const char*format,T...){if(strstr(format,"port-force-power"))forceLogs++;else if(strstr(format,"port-power"))powerLogs++;else debugLogs++;}
 struct IOService:OSObject{
  std::map<std::string,OSObject*>props;std::vector<OSObject*>children;bool port=false;
+ bool holdFail=false;
  unsigned debugCalls=0,forceCalls=0,powerCalls=0,state=2,powerError=0,forceError=0;
  const char*getName(){return "test-port";}
  OSObject*getProperty(const char*n){auto it=props.find(n);return it==props.end()?nullptr:it->second;}
@@ -160,35 +161,38 @@ struct IOService:OSObject{
  unsigned long getPowerState(){return state;}
  IOReturn changePowerStateTo(unsigned long n){assert(n==3);powerCalls++;if(!powerError)state=3;return powerError;}
 };
+enum PortHoldResult{kPortHoldAttached,kPortHoldPending,kPortHoldFailed};
+static PortHoldResult ensureHostPortHold(IOService*p){return p->holdFail?kPortHoldFailed:kPortHoldAttached;}
+static void setHostPortHoldOwner(IOService*){}
 #define OSDynamicCast(T,p) dynamic_cast<T*>(p)
 #define OSSafeReleaseNULL(p) do{(p)=nullptr;}while(0)
 HELPER
 int main(){
  IOService host,port;port.port=true;host.children={&port};
  configureHostPorts(&host);
- assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==1&&port.powerCalls==1);
- assert(port.getProperty("B5qPortForcePowerApplied")&&port.getProperty("B5qPortPowerPinned"));
- assert(powerLogs==1&&debugLogs==1&&forceLogs==1);
- unsigned pc=port.powerCalls,fc=port.forceCalls,dc=port.debugCalls;
+ assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==0&&port.powerCalls==0);
+ assert(port.getProperty("B5qPortPowerPinned")&&!port.getProperty("B5qPortForcePowerApplied"));
+ assert(debugLogs==1&&forceLogs==0);
+ unsigned fc=port.forceCalls,dc=port.debugCalls;
  for(unsigned n=0;n<8;n++)configureHostPorts(&host);
- assert(port.powerCalls==pc&&port.forceCalls==fc&&port.debugCalls==dc);
- IOService retry;retry.port=true;retry.forceError=5;retry.state=3;
+ assert(port.forceCalls==fc&&port.debugCalls==dc);
+ IOService retry;retry.port=true;retry.holdFail=true;retry.forceError=5;retry.state=3;
  host.children.push_back(&retry);
  for(unsigned n=0;n<3;n++)configureHostPorts(&host);
- assert(retry.forceCalls==3&&retry.powerCalls==3&&!retry.getProperty("B5qPortForcePowerApplied"));
+ assert(retry.forceCalls==3&&!retry.getProperty("B5qPortForcePowerApplied"));
  auto*tries=dynamic_cast<OSNumber*>(retry.getProperty("B5qPortForcePowerTries"));
- assert(tries&&tries->value==3&&retry.getProperty("B5qPortPowerPinned"));
+ assert(tries&&tries->value==3&&!retry.getProperty("B5qPortPowerPinned"));
  retry.forceError=0;configureHostPorts(&host);
- assert(retry.forceCalls==4&&retry.powerCalls==3&&retry.getProperty("B5qPortForcePowerApplied"));
+ assert(retry.forceCalls==4&&retry.getProperty("B5qPortForcePowerApplied")&&retry.getProperty("B5qPortPowerPinned"));
  unsigned locked=retry.forceCalls;for(unsigned n=0;n<8;n++)configureHostPorts(&host);
  assert(retry.forceCalls==locked);
- IOService hardFail;hardFail.port=true;hardFail.forceError=5;hardFail.powerError=7;
- host.children.push_back(&hardFail);unsigned before=powerLogs;
+ IOService hardFail;hardFail.port=true;hardFail.holdFail=true;hardFail.forceError=5;
+ host.children.push_back(&hardFail);
  for(unsigned n=0;n<12;n++)configureHostPorts(&host);
- assert(hardFail.forceCalls==4&&hardFail.powerCalls==12&&powerLogs-before==4&&!hardFail.getProperty("B5qPortPowerPinned"));
+ assert(hardFail.forceCalls==4&&!hardFail.getProperty("B5qPortPowerPinned"));
  auto*hardTries=dynamic_cast<OSNumber*>(hardFail.getProperty("B5qPortForcePowerTries"));
  assert(hardTries&&hardTries->value==4&&!hardFail.getProperty("B5qPortForcePowerApplied"));
- hardFail.powerError=0;configureHostPorts(&host);assert(hardFail.getProperty("B5qPortPowerPinned"));
+ hardFail.holdFail=false;configureHostPorts(&host);assert(hardFail.getProperty("B5qPortPowerPinned"));
  return 0;}
 '''.replace('HELPER', configure), cpp=True)
 
@@ -262,14 +266,14 @@ int main(){
  reset();b5q_rddm_scan(&scan,seg,2);assert(high==1&&low==0&&hits==1);
  char many[16][64];struct B5qRddmSegment segs[16];
  for(unsigned i=0;i<16;i++){snprintf(many[i],sizeof many[i],"Asserted in crash%02u",i);segs[i]=(struct B5qRddmSegment){(const uint8_t*)many[i],(u32)strlen(many[i])};}
- reset();b5q_rddm_scan(&scan,segs,16);assert(high==12&&hits==12&&scan.dropped>=4);
+ reset();b5q_rddm_scan(&scan,segs,16);assert(high==7&&hits==7);
  char mix[42][64];struct B5qRddmSegment msegs[42];
  for(unsigned i=0;i<40;i++){snprintf(mix[i],sizeof mix[i],"Asserted in mix%02u",i);msegs[i]=(struct B5qRddmSegment){(const uint8_t*)mix[i],(u32)strlen(mix[i])};}
  snprintf(mix[40],sizeof mix[40],"wal_mix.c:1 err");snprintf(mix[41],sizeof mix[41],"wal_mix.c:1 err");
  msegs[40]=(struct B5qRddmSegment){(const uint8_t*)mix[40],(u32)strlen(mix[40])};
  msegs[41]=(struct B5qRddmSegment){(const uint8_t*)mix[41],(u32)strlen(mix[41])};
  reset();b5q_rddm_scan(&scan,msegs,42);
- assert(high==12&&low==1&&hits==13&&scan.dropped==28);
+ assert(high==7&&low==1&&hits==8);
  char lows[16][64];struct B5qRddmSegment lsegs[16];
  for(unsigned i=0;i<16;i++){snprintf(lows[i],sizeof lows[i],"wal_%02u.c:1 err",i);lsegs[i]=(struct B5qRddmSegment){(const uint8_t*)lows[i],(u32)strlen(lows[i])};}
  reset();b5q_rddm_scan(&scan,lsegs,16);assert(low==12&&hits==12);
@@ -315,7 +319,7 @@ int main(){
     power_off = function(source, 'int powerOff() {')
     assert 'b5q_bt_h4_tap_reset_session(&h4Tap)' in power_on
     assert 'b5q_bt_h4_tap_reset_streams(&h4Tap)' in power_off
-    for text in ('B5qBluetooth: stage=h4 tx-cmd=%llu tx-acl=%llu rx-evt=%llu rx-acl=%llu errs=%llu smp=%llu l2cap=%llu desync=%llu logged=%u/%u',
+    for text in ('B5qBluetooth: stage=h4 tx-cmd=%llu tx-acl=%llu rx-evt=%llu rx-acl=%llu errs=%llu smp=%llu l2cap=%llu desync=%llu evt13=%llu logged=%u/%u',
                  'process name=BluetoothUIServer pid=%u change=%u', 'static const char *const names[]={"bluetoothd","BlueTool","BluetoothUIServer"}',
                  'for(unsigned i=0;i<3;i++)', 'if(i<2) {'):
         assert text in source, text

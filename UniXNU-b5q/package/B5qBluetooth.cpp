@@ -539,9 +539,9 @@ void worker(void *,wait_result_t) {
                         stats.tx_bytes,stats.rx_bytes,stats.delivered_bytes,stats.malformed,stats.unmatched_events,
                         stats.backpressure,bt.geni.stats.rx_backpressure,stats.hardware_errors,stats.last_hardware_error,
                         qbt_transport_rx_dropped());
-                    printf("B5qBluetooth: stage=h4 tx-cmd=%llu tx-acl=%llu rx-evt=%llu rx-acl=%llu errs=%llu smp=%llu l2cap=%llu desync=%llu logged=%u/%u\n",
+                    printf("B5qBluetooth: stage=h4 tx-cmd=%llu tx-acl=%llu rx-evt=%llu rx-acl=%llu errs=%llu smp=%llu l2cap=%llu desync=%llu evt13=%llu logged=%u/%u\n",
                         h4Tap.stats.tx_cmd,h4Tap.stats.tx_acl,h4Tap.stats.rx_evt,h4Tap.stats.rx_acl,
-                        h4Tap.stats.errs,h4Tap.stats.smp,h4Tap.stats.l2cap,h4Tap.stats.desync,
+                        h4Tap.stats.errs,h4Tap.stats.smp,h4Tap.stats.l2cap,h4Tap.stats.desync,h4Tap.stats.evt13,
                         h4Tap.stats.logged,B5Q_BT_H4_QUOTA_TOTAL);
                 }
             }
@@ -566,7 +566,10 @@ int proc_pid(struct proc *);
 int processSeen(struct proc *process,void *found) {
     static const char *const names[]={"bluetoothd","BlueTool","BluetoothUIServer"};
     const char *name=proc_best_name(process);
-    for(unsigned i=0;name && i<3;i++)if(!strcmp(name,names[i]))static_cast<int *>(found)[i]=proc_pid(process);
+    for(unsigned i=0;name && i<3;i++) {
+        const bool match=i==2?!strncmp(name,"BluetoothUIServe",16):!strcmp(name,names[i]);
+        if(match)static_cast<int *>(found)[i]=proc_pid(process);
+    }
     return 0;
 }
 void processWatch(void *,wait_result_t) {

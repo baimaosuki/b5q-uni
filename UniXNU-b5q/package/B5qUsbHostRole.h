@@ -31,6 +31,13 @@ inline bool canHotSwapVbus(const View &v) {
 // transition in CSC/PEC/PLC starts a port-edge diagnostic; a PED 1->0 drop is
 // also an edge. This prevents one stuck condition from consuming all four
 // diagnostic slots.
+// The host session gets a 20 x 50ms attach window so the power hold reaches
+// both xHCI ports before their first U3. Two held ports end the fast window;
+// a single-port board still uses the full 1000ms.
+constexpr unsigned kPortPowerHoldSlots = 8;
+constexpr unsigned kFastPortPollAttempts = 20;
+inline bool fastPortPollNeeded(unsigned holds) { return holds < 2u; }
+
 inline bool portEdge(uint32_t previous, uint32_t current) {
     constexpr uint32_t kEdgeMask = (1u << 17) | (1u << 18) | (1u << 22);
     return ((previous & 2u) && !(current & 2u)) ||

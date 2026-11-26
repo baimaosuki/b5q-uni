@@ -2,7 +2,7 @@
 """Local-only v33d P0 review gate. Never builds an ESP, pushes, or calls GitHub."""
 from pathlib import Path
 import hashlib,json,os,subprocess,sys
-R=Path(__file__).resolve().parents[2];W=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33d-review2'));W.mkdir(parents=True,exist_ok=True);os.environ['B5Q_GATE_WORK']=str(W);checks=[]
+R=Path(__file__).resolve().parents[2];W=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33d-review2')).resolve();W.mkdir(parents=True,exist_ok=True);os.environ['B5Q_GATE_WORK']=str(W);checks=[]
 def run(name,command):
  log=W/(name+'.log')
  with log.open('w')as out:r=subprocess.run(list(map(str,command)),cwd=R,stdout=out,stderr=subprocess.STDOUT)
@@ -23,6 +23,7 @@ else:
 # This gate has its own preserved assertions; do not alter them for a pass.
 py('pre-ci-v33b','scripts/b5q-install/pre-ci-v33b.py')
 for name in ['touch-p0','v33d-dma','v33d-usb-device','v33d-review2','v33d-wcn-init','v33d-packaging','v33d-review3','v33d-review4','v33d-reclaim-dma','review5','review5-firmware','review7','review8','review9','review11','review12','dp-loader','dp-dpu','review13']:py(name,'tests/b5q-ufs/test-'+name+'.py')
+py('review14','scripts/b5q-install/test-review14.py')
 run('loader-inputs',[
  'env','PATH=/usr/lib/llvm-17/bin:'+os.environ['PATH'],
  'LD_PRELOAD=/usr/lib/llvm-17/lib/clang/17/lib/linux/libclang_rt.ubsan_standalone-x86_64.so',

@@ -249,33 +249,67 @@ static inline void b5q_rddm_emit(struct B5qRddmScan *scan, uint32_t seg,
     scan->emit(scan->ctx, &hit);
 }
 
-/* Two passes: assert/fatal first, then low-priority stack context. Both are
- * bounded and deduplicated; no pass allocates or writes into the segments. */
+/* Two passes: assert/fatal first, then low-priority stack context. The live
+ * crash RAM segment (seg 0) is scanned before any static firmware image, and
+ * static-image high hits are capped at six so they cannot crowd out the
+ * actual fault context. Counters are still summarized by the caller. */
+static inline uint32_t b5q_rddm_scan_high_range(struct B5qRddmScan *scan,
+                                                 const struct B5qRddmSegment *segments,
+                                                 uint32_t begin, uint32_t end,
+                                                 uint32_t limit) {
+    uint32_t added = 0;
+    for (uint32_t seg = begin; seg < end && added < limit; seg++) {
+        const uint8_t *data = segments[seg].data;
+        const uint32_t len = segments[seg].len;
+        if (!data || !len) continue;
+        for (uint32_t at = 0; at < len && added < limit; at++) {
+            if (!b5q_rddm_printable(data[at])) continue;
+            uint32_t keyword = 0;
+            if (!b5q_rddm_match_high(data, len, at, &keyword)) continue;
+            char text[B5Q_RDDM_TEXT_MAX + 1u];
+            const uint32_t length = b5q_rddm_extract(data, len, at, keyword, text, sizeof(text));
+            if (!length) continue;
+            const uint32_t before = scan->high;
+            b5q_rddm_emit(scan, seg, at, length, 0u, text);
+            if (scan->high > before) added++;
+            at += keyword - 1u;
+        }
+    }
+    return added;
+}
+
+static inline void b5q_rddm_scan_low_range(struct B5qRddmScan *scan,
+                                            const struct B5qRddmSegment *segments,
+                                            uint32_t begin, uint32_t end) {
+    for (uint32_t seg = begin; seg < end; seg++) {
+        const uint8_t *data = segments[seg].data;
+        const uint32_t len = segments[seg].len;
+        if (!data || !len) continue;
+        for (uint32_t at = 0; at < len; at++) {
+            if (!b5q_rddm_printable(data[at])) continue;
+            uint32_t keyword = 0;
+            if (!b5q_rddm_match_low(data, len, at, &keyword)) continue;
+            if (!b5q_rddm_low_context(data, len, at, keyword)) continue;
+            char text[B5Q_RDDM_TEXT_MAX + 1u];
+            const uint32_t length = b5q_rddm_extract(data, len, at, keyword, text, sizeof(text));
+            if (!length) continue;
+            b5q_rddm_emit(scan, seg, at, length, 1u, text);
+            at += keyword - 1u;
+        }
+    }
+}
+
 static inline void b5q_rddm_scan(struct B5qRddmScan *scan,
                                   const struct B5qRddmSegment *segments, uint32_t count) {
     if (!scan || !segments || !count) return;
     scan->high = scan->low = scan->dropped = 0;
     scan->seen_count = 0;
-    for (uint32_t pass = 0; pass < 2u; pass++) {
-        for (uint32_t seg = 0; seg < count; seg++) {
-            const uint8_t *data = segments[seg].data;
-            const uint32_t len = segments[seg].len;
-            if (!data || !len) continue;
-            for (uint32_t at = 0; at < len; at++) {
-                if (!b5q_rddm_printable(data[at])) continue;
-                uint32_t keyword = 0;
-                if (pass == 0u ? !b5q_rddm_match_high(data, len, at, &keyword)
-                               : !b5q_rddm_match_low(data, len, at, &keyword))
-                    continue;
-                if (pass != 0u && !b5q_rddm_low_context(data, len, at, keyword)) continue;
-                char text[B5Q_RDDM_TEXT_MAX + 1u];
-                const uint32_t length = b5q_rddm_extract(data, len, at, keyword, text, sizeof(text));
-                if (!length) continue;
-                b5q_rddm_emit(scan, seg, at, length, pass, text);
-                at += keyword - 1u;
-            }
-        }
-    }
+    // Live crash RAM first: all of its high-priority hits, then at most six
+    // high hits from the static firmware segments combined.
+    b5q_rddm_scan_high_range(scan, segments, 0u, 1u, B5Q_RDDM_HIGH_MAX);
+    if (count > 1u) b5q_rddm_scan_high_range(scan, segments, 1u, count, 6u);
+    b5q_rddm_scan_low_range(scan, segments, 0u, 1u);
+    if (count > 1u) b5q_rddm_scan_low_range(scan, segments, 1u, count);
 }
 
 #endif

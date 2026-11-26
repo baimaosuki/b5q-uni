@@ -297,8 +297,8 @@ int main(){struct pci_ops ops={read_window};struct ath11k_base ab={(void*)1,{&op
     assert 'gHost' not in start and 'gHost' not in configure
     assert 'kUsbPortDebugOptions=0x40000119u' in usb
     assert 'host->setProperties(settings)' in configure and '"B5qHostDebugApplied"' in configure
-    assert 'port->setProperties(settings)' in configure and 'port->changePowerStateTo(3)' in configure
-    assert '"B5qPortPowerPinned"' in configure and 'logged<4' in configure
+    assert 'port->setProperties(settings)' in configure and 'ensureHostPortHold(port)' in configure
+    assert '"B5qPortPowerPinned"' in configure and 'kPortHoldAttached' in configure
     stats = function(usb, 'void hostStats() {')
     assert 'configureHostPorts(gHost)' in stats and 'dev->setProperties(settings)' in stats and '"B5qDevDebugApplied"' in stats
     assert 'changePowerStateTo' not in function(xhci, 'IOReturn setPowerState(')
@@ -328,7 +328,7 @@ static OSObject yes;static OSObject*kOSBooleanTrue=&yes;static const char*gIOSer
 static unsigned powerLogs,debugLogs,forceLogs;
 template<class...T>void IOLog(const char*format,T...){if(strstr(format,"port-force-power"))forceLogs++;else if(strstr(format,"port-power"))powerLogs++;else debugLogs++;}
 struct IOService:OSObject{
- std::map<std::string,OSObject*>props;std::vector<OSObject*>children;bool port=false;
+ std::map<std::string,OSObject*>props;std::vector<OSObject*>children;bool port=false,holdFail=false;
  unsigned debugCalls=0,forceCalls=0,powerCalls=0,state=2,powerError=0,debugError=0,forceError=0;
  const char*getName(){return "test-port";}
  OSObject*getProperty(const char*n){auto it=props.find(n);return it==props.end()?nullptr:it->second;}
@@ -340,22 +340,25 @@ struct IOService:OSObject{
  unsigned long getPowerState(){return state;}
  IOReturn changePowerStateTo(unsigned long n){assert(n==3);powerCalls++;return powerError;}
 };
+enum PortHoldResult{kPortHoldAttached,kPortHoldPending,kPortHoldFailed};
+static PortHoldResult ensureHostPortHold(IOService*p){return p->holdFail?kPortHoldFailed:kPortHoldAttached;}
+static void setHostPortHoldOwner(IOService*){}
 #define OSDynamicCast(T,p) dynamic_cast<T*>(p)
 #define OSSafeReleaseNULL(p) do{(p)=nullptr;}while(0)
 HELPER
 int main(){
  configureHostPorts(nullptr);IOService host,port,other;port.port=true;host.children={&port,&other};
- configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==1&&port.powerCalls==1);
- assert(port.getProperty("B5qPortPowerPinned")&&powerLogs==1&&debugLogs==1&&forceLogs==1);
- port.state=3;configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==1&&port.powerCalls==1);
- port.state=2;configureHostPorts(&host);assert(port.powerCalls==2&&powerLogs==1);
+ configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==0&&port.powerCalls==0);
+ assert(port.getProperty("B5qPortPowerPinned")&&!port.getProperty("B5qPortForcePowerApplied")&&debugLogs==1&&forceLogs==0);
+ port.state=3;configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==0&&port.powerCalls==0);
+ port.state=2;configureHostPorts(&host);assert(port.powerCalls==0);
  IOService delayed;delayed.port=true;delayed.state=3;host.children.push_back(&delayed);
- configureHostPorts(&host);assert(delayed.debugCalls==1&&delayed.forceCalls==1&&delayed.powerCalls==0&&delayed.getProperty("B5qPortPowerPinned"));
- IOService failed;failed.port=true;failed.powerError=5;host.children.push_back(&failed);
- unsigned before=powerLogs;for(unsigned n=0;n<10;n++)configureHostPorts(&host);
- assert(!failed.getProperty("B5qPortPowerPinned")&&failed.powerCalls==10&&powerLogs-before==4);
- failed.powerError=0;failed.state=3;configureHostPorts(&host);assert(failed.getProperty("B5qPortPowerPinned"));
- unsigned tries=failed.powerCalls;configureHostPorts(&host);assert(failed.powerCalls==tries);
+ configureHostPorts(&host);assert(delayed.debugCalls==1&&delayed.forceCalls==0&&delayed.powerCalls==0&&delayed.getProperty("B5qPortPowerPinned"));
+ IOService failed;failed.port=true;failed.holdFail=true;failed.powerError=5;failed.forceError=5;host.children.push_back(&failed);
+ for(unsigned n=0;n<10;n++)configureHostPorts(&host);
+ assert(!failed.getProperty("B5qPortPowerPinned")&&failed.forceCalls==4);
+ failed.holdFail=false;failed.state=3;configureHostPorts(&host);assert(failed.getProperty("B5qPortPowerPinned"));
+ unsigned tries=failed.forceCalls;configureHostPorts(&host);assert(failed.forceCalls==tries&&failed.powerCalls==0);
  assert(!other.debugCalls&&!other.powerCalls);
 }
 '''.replace('HELPER', configure), cpp=True)
