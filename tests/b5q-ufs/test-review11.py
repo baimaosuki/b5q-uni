@@ -52,7 +52,7 @@ assert 'b5q_ce_dump(ab,2);b5q_ce_dump(ab,3);' in diagnostic and 'lx_irq_disabled
 assert fatal.index('b5q_ath11k_dump_state(')<fatal.index('ATH11K_FLAG_CRASH_FLUSH')
 assert 'event="WMI-timeout"' not in ath and '"WMI-timeout"' in fatal
 assert 'sequence<=64' in ath and 'startup-io seq=' in ath
-assert '#define B5Q_TX_HISTORY_COUNT 16u' in ath and '__ATOMIC_RELEASE' in ath and '__ATOMIC_ACQUIRE' in ath
+assert '#define B5Q_TX_HISTORY_COUNT 32u' in ath and '__ATOMIC_RELEASE' in ath and '__ATOMIC_ACQUIRE' in ath
 print('PASS review11 Wi-Fi: single-MSI CE/ext masking fixed, WMM defaults retained, timeout/fatal MHI+BHI+CE2/3 diagnostics and bounded bidirectional startup trace')
 
 usb=(P/'QcomDwc3.cpp').read_text()

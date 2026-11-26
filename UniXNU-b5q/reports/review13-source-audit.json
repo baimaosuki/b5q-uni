@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "review": "review13",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "ci_triggered": false,
+  "push_performed": false,
+  "esp_created": false,
+  "phone_accessed": false,
+  "review_fixes": {
+    "usb_live_dp": "roleThread recomputes liveDp from the post-wake port poll before canHotSwapVbus",
+    "usb_force_power": "Applied only on kIOReturnSuccess; failures retry at most4 times with one bounded log per attempt",
+    "usb_port_edge": "portEdge uses rising CSC/PEC/PLC and PED 1->0 edges, not held levels",
+    "bt_desync": "frame completion resets parser fields only; desync survives and keeps 8 per-direction prints",
+    "bt_smp": "Pairing Request/Response decode both init (protocol+5) and resp (protocol+6)",
+    "rddm": "quota checked before seen[], non-printable bytes skipped, precomputed keyword lengths remove strlen from scan"
+  },
+  "local_gate": {
+    "receipt": "artifacts/b5q-review13-local/v33d-local-gates.json",
+    "receipt_sha256": "b1c55c3ae61b2277392e5cf84ed73cc85f8535c7af0f72038df7174e7df030b0",
+    "passed": true,
+    "checks": 32,
+    "command": "python3 scripts/b5q-install/pre-ci-v33d.py"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/QcomDwc3.cpp": "698e12d14ffe79e58b45bd4f52dc2177b1035964221d3d8283b82a333160a0f1",
+    "UniXNU-b5q/package/B5qUsbHostRole.h": "154c9a408213c318a4ded4731d4ceb80e3af04560d828fec9f737ff70928ab6e",
+    "UniXNU-b5q/package/B5qAth11k.c": "f04560e892f3428ff78a7bea65d2e9150a78cd0b5b1b60e1359f8454a67fbb48",
+    "UniXNU-b5q/package/B5qAth11kRddm.h": "be9f64f5361c203fdeda5dfb0026310045adea2504a124205078ac68c81c8d89",
+    "UniXNU-b5q/package/B5qBluetooth.cpp": "a76bd08eaf6c786bcdf7a55393e5705a7f55910026b7985f65761cc258e256bd",
+    "UniXNU-b5q/package/B5qBtH4Tap.h": "8fea29d2712195ee5ef53ec4d7cfd6498c8da829fdd2a66d035154db89475969",
+    "UniXNU-b5q/scripts/build-b5q-wifi.py": "0bbc89b49d3840c969e1e249191b7a13fb4df818a11180780b0e3fc678d6718d",
+    "tests/b5q-ufs/test-review13.py": "e2d64d94eac5e1beb2657d009f4aa2628b9ac8c484294a706570229a5af146f1",
+    "tests/b5q-ufs/test-review12.py": "ad80b3e335d780cf7809d497b481c6fc1d8b9bced77acdbfced55677024071a7",
+    "tests/b5q-ufs/test-review11.py": "1268e5a6367c923a1fca44c3ff3c71377615058c5f68275fb95b2878a3fb2212",
+    "tests/b5q-ufs/test-review9.py": "b51e7bb3193b91cd04c7922bd131f74e9198b10d9d1278e4c3230d9e8625e0c8",
+    "tests/b5q-ufs/test-v33b-causal.py": "5cc0843a056a749a08855d537e5ecfd1ad83cc706fa220e4e495cf69a9bb817c",
+    "tests/b5q-ufs/test-v33d-usb-device.py": "4efaa8dd6ac7c4c2e9a5d9874b91a899c2025ea72039cec583b9682815b09795",
+    "tests/b5q-ufs/test-usb-p1.py": "78ffcb097f9c758b09d3f5452f6c46b64201d90bad735adb993f8fd0575cf288",
+    "tests/b5q-ufs/test-v25-usb.py": "da93655e72be15dcdc71a78f00891011e3a20db2b1748cf7cbb81b7dee7588a9",
+    "scripts/b5q-install/pre-ci-v33d.py": "f0032b170fce7e009203238e39a8d25fc42eac00561aee2f4b73de8882c6d2ec",
+    "UniXNU-b5q/porting.toml": "f5293af16946da1748139270e787b6be917af830ee452f20d0a769123e17e99c"
+  },
+  "source_paths": [
+    "UniXNU-b5q/package/QcomDwc3.cpp",
+    "UniXNU-b5q/package/B5qUsbHostRole.h",
+    "UniXNU-b5q/package/B5qAth11k.c",
+    "UniXNU-b5q/package/B5qAth11kRddm.h",
+    "UniXNU-b5q/package/B5qBluetooth.cpp",
+    "UniXNU-b5q/package/B5qBtH4Tap.h",
+    "UniXNU-b5q/scripts/build-b5q-wifi.py",
+    "tests/b5q-ufs/test-review13.py",
+    "tests/b5q-ufs/test-review12.py",
+    "tests/b5q-ufs/test-review11.py",
+    "tests/b5q-ufs/test-review9.py",
+    "tests/b5q-ufs/test-v33b-causal.py",
+    "tests/b5q-ufs/test-v33d-usb-device.py",
+    "tests/b5q-ufs/test-usb-p1.py",
+    "tests/b5q-ufs/test-v25-usb.py",
+    "scripts/b5q-install/pre-ci-v33d.py",
+    "UniXNU-b5q/porting.toml"
+  ],
+  "usb": {
+    "pd_power_role_swap": "VBUS-only hot update; live post-wake DP lane check; no leaveRole/PHY/xHCI restart",
+    "force_power": "separate UsbForcePower dictionary; success-only Applied; max4 attempts; bounded logs",
+    "edges": "rising-edge PORTSC CSC/PEC/PLC and PED drop; max4 dmaDiagnostics(port-edge)",
+    "target_compile": "PASS",
+    "xhci_pac_slots": 427,
+    "unresolved_imports": 0
+  },
+  "wifi": {
+    "rddm": "10ms/3000ms bounded poll; DMA_FROM_DEVICE; quota-before-seen; printable-only scan; precomputed word lengths",
+    "history": "32 TX entries plus32 WMI RX entries; latest16 WMI RX dumped",
+    "target_objects": 109,
+    "failed_objects": 0,
+    "target_build_passed": true
+  },
+  "bluetooth": {
+    "h4": "no-heap streaming parser; desync retained across frames; 8-print cap; taken-only RX; post-success TX",
+    "quota": "800 total lines with 558 key, 240 normal and two one-time summaries",
+    "smp": "init=protocol+5 and resp=protocol+6 for Pairing Request/Response",
+    "target_objects": 9,
+    "target_compile": "PASS"
+  },
+  "review13_host_checks": [
+    "USB-PD-hot-swap-and-port-contracts",
+    "usb-hot-swap-view-compile",
+    "usb-hot-swap-view-ASan-UBSan",
+    "usb-force-power-compile",
+    "usb-force-power-ASan-UBSan",
+    "RDDM-source-contracts",
+    "rddm-wait-scan-compile",
+    "rddm-wait-scan-ASan-UBSan",
+    "Wi-Fi-build-probes",
+    "Bluetooth-source-contracts",
+    "h4-parser-quota-compile",
+    "h4-parser-quota-ASan-UBSan"
+  ],
+  "red_line_zero_diff": {
+    ".github/workflows": 0,
+    "UniXNU": 0,
+    "sources": 0,
+    "UniXNU-b5q/patches": 0,
+    "UniXNU-b5q/board.toml": 0
+  },
+  "notes": [
+    "Local verification preceded commit, push, CI and ESP creation; no phone access. The porting.toml hash identifies the staged review13-only snapshot, excluding unrelated local delivery records.",
+    "Host ASan/UBSan tests directly include production headers and execute production decision functions; no fake parser copies."
+  ],
+  "review13_receipt_sha256": "83c1d438592a96352fe1707385b6730c0268e33f5587295c339ba7a79bce72da"
+}

@@ -93,6 +93,35 @@ def prepare(module,out):
     s=replace(s,'\tid = FIELD_GET(WMI_CMD_HDR_CMD_ID, (cmd_hdr->cmd_id));\n\n\ttrace_ath11k_wmi_event',
         '\tid = FIELD_GET(WMI_CMD_HDR_CMD_ID, (cmd_hdr->cmd_id));\n'
         '\tb5q_ath11k_trace_startup(4u, id, skb->len, -1);\n\n\ttrace_ath11k_wmi_event','WMI startup receive')
+    # Low-noise pre-crash configuration probes. These run only on vdev
+    # create/set-param, STA power save and WMM updates, never on TX/RX data.
+    s=replace(s,'\tether_addr_copy(cmd->vdev_macaddr.addr, macaddr);\n',
+        '\tether_addr_copy(cmd->vdev_macaddr.addr, macaddr);\n'
+        '\tath11k_info(ar->ab, "B5qWifi: vdev-create id=%u type=%u subtype=%u pdev=%u mac=%02x:%02x:%02x:%02x:%02x:%02x\\n",\n'
+        '\t\t    param->if_id, param->type, param->subtype, param->pdev_id,\n'
+        '\t\t    macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);\n',
+        'WMI vdev create probe')
+    s=replace(s,'\tret = ath11k_wmi_cmd_send(wmi, skb, WMI_VDEV_SET_PARAM_CMDID);\n',
+        '\t{ static u32 b5q_set_param; if (b5q_set_param++ < 32u) ath11k_info(ar->ab, "B5qWifi: vdev-set-param vdev=%u param=%u value=%u\\n", vdev_id, param_id, param_value); }\n'
+        '\tret = ath11k_wmi_cmd_send(wmi, skb, WMI_VDEV_SET_PARAM_CMDID);\n',
+        'WMI vdev set param probe')
+    s=replace(s,'\tret = ath11k_wmi_cmd_send(wmi, skb, WMI_STA_POWERSAVE_PARAM_CMDID);\n',
+        '\tath11k_info(ar->ab, "B5qWifi: sta-ps vdev=%u param=%u value=%u\\n", vdev_id, param, param_value);\n'
+        '\tret = ath11k_wmi_cmd_send(wmi, skb, WMI_STA_POWERSAVE_PARAM_CMDID);\n',
+        'WMI STA PS param probe')
+    s=replace(s,'\tret = ath11k_wmi_cmd_send(wmi, skb, WMI_STA_POWERSAVE_MODE_CMDID);\n',
+        '\tath11k_info(ar->ab, "B5qWifi: sta-psmode vdev=%d psmode=%u\\n", vdev_id, (u32)psmode);\n'
+        '\tret = ath11k_wmi_cmd_send(wmi, skb, WMI_STA_POWERSAVE_MODE_CMDID);\n',
+        'WMI STA PS mode probe')
+    s=replace(s,'\tret = ath11k_wmi_cmd_send(wmi, skb,\n\t\t\t\t  WMI_VDEV_SET_WMM_PARAMS_CMDID);\n',
+        '\tath11k_info(ar->ab, "B5qWifi: wmm-update vdev=%u type=%u BE=%u/%u/%u/%u/%u/%u BK=%u/%u/%u/%u/%u/%u VI=%u/%u/%u/%u/%u/%u VO=%u/%u/%u/%u/%u/%u\\n",\n'
+        '\t\t    vdev_id, (u32)wmm_param_type,\n'
+        '\t\t    param->ac_be.aifs, param->ac_be.cwmin, param->ac_be.cwmax, param->ac_be.txop, param->ac_be.acm, param->ac_be.no_ack,\n'
+        '\t\t    param->ac_bk.aifs, param->ac_bk.cwmin, param->ac_bk.cwmax, param->ac_bk.txop, param->ac_bk.acm, param->ac_bk.no_ack,\n'
+        '\t\t    param->ac_vi.aifs, param->ac_vi.cwmin, param->ac_vi.cwmax, param->ac_vi.txop, param->ac_vi.acm, param->ac_vi.no_ack,\n'
+        '\t\t    param->ac_vo.aifs, param->ac_vo.cwmin, param->ac_vo.cwmax, param->ac_vo.txop, param->ac_vo.acm, param->ac_vo.no_ack);\n'
+        '\tret = ath11k_wmi_cmd_send(wmi, skb,\n\t\t\t\t  WMI_VDEV_SET_WMM_PARAMS_CMDID);\n',
+        'WMM four-AC probe')
     p.write_text('extern void b5q_ath11k_trace_tx(u32, u32, size_t);\nextern void b5q_ath11k_trace_startup(u32, u32, size_t, int);\nextern void b5q_ath11k_wmi_timeout(u32);\n'+s)
     p=gen/'htc.c';s=p.read_text()
     s=replace(s,'\tif (eid >= ATH11K_HTC_EP_COUNT) {\n'
@@ -149,6 +178,19 @@ def prepare(module,out):
         '\tarvif->wmm_params.ac_vi = (struct wmi_wmm_params_arg){ .aifs = 2, .cwmin = 7, .cwmax = 15, .txop = 94 };\n'
         '\tarvif->wmm_params.ac_vo = (struct wmi_wmm_params_arg){ .aifs = 2, .cwmin = 3, .cwmax = 7, .txop = 47 };\n',
         'complete WMM defaults')
+    s=replace(s,'\tvif->driver_flags |= IEEE80211_VIF_SUPPORTS_UAPSD;\n\n\tmutex_lock(&ar->conf_mutex);\n',
+        '\tvif->driver_flags |= IEEE80211_VIF_SUPPORTS_UAPSD;\n\n'
+        '\t{\n\t\tstruct ieee80211_regdomain *b5q_regd = ab->default_regd[ar->pdev_idx];\n'
+        '\t\tath11k_info(ab, "B5qWifi: add-interface type=%u state=%u regd=%02x%02x dfs=%u\\n",\n'
+        '\t\t\t    (u32)vif->type, (u32)ar->state, b5q_regd ? (unsigned)(unsigned char)b5q_regd->alpha2[0] : 0,\n'
+        '\t\t\t    b5q_regd ? (unsigned)(unsigned char)b5q_regd->alpha2[1] : 0, b5q_regd ? (u32)b5q_regd->dfs_region : 0);\n'
+        '\t}\n\n\tmutex_lock(&ar->conf_mutex);\n',
+        'MAC add-interface probe')
+    s=replace(s,'\tstruct wmi_wmm_params_arg *p = NULL;\n\tint ret;\n\n\tmutex_lock(&ar->conf_mutex);\n',
+        '\tstruct wmi_wmm_params_arg *p = NULL;\n\tint ret;\n\n\tmutex_lock(&ar->conf_mutex);\n'
+        '\tath11k_info(ar->ab, "B5qWifi: conf-tx type=%u ac=%u aifs=%u cwmin=%u cwmax=%u txop=%u uapsd=%u state=%u\\n",\n'
+        '\t\t    (u32)vif->type, ac, params->aifs, params->cw_min, params->cw_max, params->txop, params->uapsd, (u32)ar->state);\n',
+        'MAC conf-tx probe')
     p.write_text(s)
     p=gen/'mhi.c';s=p.read_text()
     mark='\tstruct ath11k_pci *ab_pci = ath11k_pci_priv(ab);\n\n\tath11k_dbg(ab, ATH11K_DBG_BOOT, "notify status reason %s\\n",'
@@ -165,7 +207,7 @@ def prepare(module,out):
     (out/'source-inputs.json').write_text(json.dumps(dict(linux_revision=revision,ath11k_original_sha256=hashes,
         native_mac80211=True,legacy_station_linked=False,hardware_verified=False,
         wcn6855_wmm_defaults='BE=3/15/1023 BK=7/15/1023 VI=2/7/15/94 VO=2/3/7/47',
-        fatal_tx_history='16 lock-free committed WMI/HTT entries plus MHI/BHI crash registers'),indent=2)+'\n')
+        fatal_tx_history='32 lock-free committed WMI/HTT entries, a 32-entry WMI RX ring (last 16 dumped) and MHI/BHI crash registers'),indent=2)+'\n')
     return gen
 
 def main():

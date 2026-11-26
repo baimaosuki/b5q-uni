@@ -15,6 +15,7 @@
 #include "nw_wifi.h"
 #include "nw_control_endpoint.h"
 #include <linux/mhi.h>
+#include "B5qAth11kRddm.h"
 int b5q_ath11k_pci_init(void);
 void b5q_ath11k_pci_exit(void);
 int mhi_init_hook(void);
@@ -29,7 +30,9 @@ static int firmware_error;
 static struct mhi_controller *active_mhi;
 extern int lx_irq_disabled(unsigned int);
 
-#define B5Q_TX_HISTORY_COUNT 16u
+#define B5Q_TX_HISTORY_COUNT 32u
+#define B5Q_WMI_RX_HISTORY_COUNT 32u
+#define B5Q_WMI_RX_DUMP_COUNT 16u
 #define B5Q_TX_WMI 1u
 #define B5Q_TX_HTT 2u
 struct b5q_tx_history_entry {
@@ -38,7 +41,8 @@ struct b5q_tx_history_entry {
     volatile u32 committed;
 };
 static struct b5q_tx_history_entry tx_history[B5Q_TX_HISTORY_COUNT];
-static volatile u32 tx_sequence;
+static struct b5q_tx_history_entry wmi_rx_history[B5Q_WMI_RX_HISTORY_COUNT];
+static volatile u32 tx_sequence,wmi_rx_sequence;
 static volatile u32 startup_sequence,timeout_dumps;
 
 void b5q_ath11k_trace_tx(u32 kind,u32 id,size_t length) {
@@ -54,10 +58,20 @@ void b5q_ath11k_trace_startup(u32 kind,u32 id,size_t length,int credits) {
     const char *name=kind==1?"WMI-TX":kind==2?"HTC-TX":kind==3?"HTC-RX":kind==4?"WMI-RX":"unknown";
     if(sequence<=64)lx_log(6,"B5qWifi: startup-io seq=%u kind=%s id=%u len=%u credits=%d",
         sequence,name,id,length>UINT32_MAX?UINT32_MAX:(u32)length,credits);
+    if(kind==4u){
+        const u32 rx_sequence=__atomic_add_fetch(&wmi_rx_sequence,1u,__ATOMIC_RELAXED);
+        struct b5q_tx_history_entry *entry=&wmi_rx_history[(rx_sequence-1u)&(B5Q_WMI_RX_HISTORY_COUNT-1u)];
+        __atomic_store_n(&entry->committed,0u,__ATOMIC_RELAXED);
+        entry->time_ms=lx_now_ms();entry->sequence=rx_sequence;entry->id=id;
+        entry->length=length>UINT32_MAX?UINT32_MAX:(u32)length;entry->kind=kind;
+        __atomic_store_n(&entry->committed,rx_sequence,__ATOMIC_RELEASE);
+    }
 }
 static void b5q_ath11k_trace_reset(void) {
     memset(tx_history,0,sizeof(tx_history));
+    memset(wmi_rx_history,0,sizeof(wmi_rx_history));
     __atomic_store_n(&tx_sequence,0u,__ATOMIC_RELEASE);
+    __atomic_store_n(&wmi_rx_sequence,0u,__ATOMIC_RELEASE);
     __atomic_store_n(&startup_sequence,0u,__ATOMIC_RELEASE);
     __atomic_store_n(&timeout_dumps,0u,__ATOMIC_RELEASE);
 }
@@ -75,6 +89,18 @@ static void b5q_ath11k_trace_dump(void) {
             sequence,entry->kind==B5Q_TX_WMI?"WMI":entry->kind==B5Q_TX_HTT?"HTT":"unknown",
             entry->id,entry->length,entry->time_ms);
     }
+    const u32 rx_end=__atomic_load_n(&wmi_rx_sequence,__ATOMIC_ACQUIRE);
+    const u32 rx_first=rx_end>B5Q_WMI_RX_DUMP_COUNT?rx_end-B5Q_WMI_RX_DUMP_COUNT+1u:1u;
+    for(u32 sequence=rx_first;sequence<=rx_end;sequence++) {
+        const struct b5q_tx_history_entry *entry=&wmi_rx_history[(sequence-1u)&(B5Q_WMI_RX_HISTORY_COUNT-1u)];
+        const u32 committed=__atomic_load_n(&entry->committed,__ATOMIC_ACQUIRE);
+        if(committed!=sequence) {
+            lx_log(3,"B5qWifi: wmi-rx-history seq=%u unavailable committed=%u",sequence,committed);
+            continue;
+        }
+        lx_log(3,"B5qWifi: wmi-rx-history seq=%u id=%u len=%u at-ms=%llu",
+            sequence,entry->id,entry->length,entry->time_ms);
+    }
 }
 static u32 b5q_mhi_read(struct mhi_controller *controller,void __iomem *base,u32 offset) {
     u32 value=UINT32_MAX;
@@ -84,6 +110,73 @@ static u32 b5q_mhi_read(struct mhi_controller *controller,void __iomem *base,u32
 }
 static u32 b5q_ring_read(volatile u32 *value) {
     return value?*value:UINT32_MAX;
+}
+#define B5Q_RDDM_MAX_SEGMENTS 64u
+struct b5q_rddm_read_ctx { struct mhi_controller *controller; };
+struct b5q_rddm_emit_ctx { u32 index; };
+static u32 b5q_rddm_read_status(void *context,u32 offset) {
+    struct b5q_rddm_read_ctx *ctx=context;
+    return ctx?b5q_mhi_read(ctx->controller,ctx->controller?ctx->controller->bhie:NULL,offset):UINT32_MAX;
+}
+static void b5q_rddm_delay(void *context,unsigned ms) {
+    (void)context;
+    // A bounded busy delay keeps this callback context free of sleep locks
+    // and wait_event_timeout, which would deadlock inside MHI's state change.
+    lx_delay_ms(ms);
+}
+static void b5q_rddm_emit_hit(void *context,const struct B5qRddmHit *hit) {
+    struct b5q_rddm_emit_ctx *ctx=context;
+    if(!ctx||!hit)return;
+    lx_log(3,"B5qWifi: rddm-hit idx=%u seg=%u off=%06x text='%s'",ctx->index++,hit->seg,hit->off,hit->text);
+}
+static void b5q_rddm_dump(struct mhi_controller *controller) {
+    if(!controller||!controller->bhie||!controller->rddm_image||!controller->rddm_image->mhi_buf||
+       controller->rddm_image->entries<=1u)return;
+    const u32 entries=controller->rddm_image->entries;
+    u64 total=0;
+    for(u32 i=0;i+1u<entries;i++)total+=controller->rddm_image->mhi_buf[i].len;
+    const u32 initial=b5q_rddm_read_status(&(struct b5q_rddm_read_ctx){controller},B5Q_RDDM_RXVECSTATUS_OFFS);
+    lx_log(3,"B5qWifi: rddm-initial rxvec=%08x entries=%u bytes=%llu",initial,entries,total);
+    const struct B5qRddmWait wait=b5q_rddm_wait_rxvec(b5q_rddm_read_status,b5q_rddm_delay,
+        &(struct b5q_rddm_read_ctx){controller},B5Q_RDDM_WAIT_MAX_MS,B5Q_RDDM_WAIT_STEP_MS);
+    lx_log(3,"B5qWifi: rddm-status rxvec=%08x state=%u waited-ms=%u entries=%u",
+        wait.rxvec,wait.state,wait.waited_ms,entries);
+    struct B5qRddmSegment segments[B5Q_RDDM_MAX_SEGMENTS];
+    u32 segment_count=0,nonzero_segments=0;
+    u64 nonzero_bytes=0;
+    for(u32 i=0;i+1u<entries;i++) {
+        struct mhi_buf *buffer=&controller->rddm_image->mhi_buf[i];
+        if(!buffer->buf||!buffer->len)continue;
+        if(lx_plat&&lx_plat->dma_sync)
+            lx_plat->dma_sync(buffer->dma_addr,buffer->len,2 /* DMA_FROM_DEVICE */);
+        const u32 length=buffer->len>UINT32_MAX?UINT32_MAX:(u32)buffer->len;
+        size_t nonzero=0;
+        b5q_rddm_segment_nonzero(buffer->buf,buffer->len,&nonzero);
+        if(nonzero){
+            nonzero_segments++;nonzero_bytes+=nonzero;
+            char hex[49];unsigned used=0;
+            for(u32 j=0;j<16u&&j<length&&used+3u<sizeof(hex);j++){
+                static const char digits[]="0123456789abcdef";
+                const u8 value=((const u8 *)buffer->buf)[j];
+                hex[used++]=digits[value>>4];hex[used++]=digits[value&15u];hex[used++]=' ';
+            }
+            hex[used?used-1u:0u]=0;
+            lx_log(3,"B5qWifi: rddm-seg seg=%u len=%u nonzero=%u elf=%u first=%s",i,length,
+                nonzero>UINT32_MAX?UINT32_MAX:(u32)nonzero,b5q_rddm_is_elf(buffer->buf,length),hex);
+        }
+        if(segment_count<B5Q_RDDM_MAX_SEGMENTS)segments[segment_count++]=(struct B5qRddmSegment){buffer->buf,length};
+    }
+    if(entries-1u>B5Q_RDDM_MAX_SEGMENTS)
+        lx_log(3,"B5qWifi: rddm-segments truncated entries=%u scanned=%u",entries-1u,segment_count);
+    lx_log(3,"B5qWifi: rddm-summary segments=%u nonzero-segments=%u nonzero-bytes=%llu scanned=%u",
+        entries-1u,nonzero_segments,nonzero_bytes,segment_count);
+    if(segment_count){
+        struct B5qRddmScan scan;
+        struct b5q_rddm_emit_ctx emit={0};
+        b5q_rddm_scan_init(&scan,b5q_rddm_emit_hit,&emit);
+        b5q_rddm_scan(&scan,segments,segment_count);
+        lx_log(3,"B5qWifi: rddm-hits high=%u low=%u dropped=%u",scan.high,scan.low,scan.dropped);
+    }
 }
 #define B5Q_WCN6855_ASSERT_PC_ADDR 0x016cc148u
 #define B5Q_WCN6855_ASSERT_MSG_ADDR 0x016cc150u
@@ -141,7 +234,12 @@ static void b5q_ath11k_dump_state(struct mhi_controller *controller,const char *
     b5q_ath11k_trace_dump();
     struct ath11k_base *ab=controller&&controller->cntrl_dev?dev_get_drvdata(controller->cntrl_dev):NULL;
     b5q_ce_dump(ab,2);b5q_ce_dump(ab,3);
-    b5q_sram_assert_dump(ab,status);
+    if(exec==MHI_EE_RDDM||reason==MHI_CB_EE_RDDM){
+        b5q_rddm_dump(controller);
+        lx_log(3,"B5qWifi: sram-assert skipped/expected-zero in RDDM");
+    } else {
+        b5q_sram_assert_dump(ab,status);
+    }
 }
 
 void nw_wifi_hw_ready(struct ieee80211_hw *hw){hardware=hw;}

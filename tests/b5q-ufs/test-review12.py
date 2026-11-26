@@ -325,16 +325,16 @@ struct OSIterator:OSObject{std::vector<OSObject*>values;unsigned pos=0;
  OSObject*getNextObject(){return pos<values.size()?values[pos++]:nullptr;}};
 using IOReturn=unsigned;constexpr unsigned kIOReturnSuccess=0,kUsbPortDebugOptions=0x40000119u;
 static OSObject yes;static OSObject*kOSBooleanTrue=&yes;static const char*gIOServicePlane="service";
-static unsigned powerLogs,debugLogs;
-template<class...T>void IOLog(const char*format,T...){if(strstr(format,"port-power"))powerLogs++;else debugLogs++;}
+static unsigned powerLogs,debugLogs,forceLogs;
+template<class...T>void IOLog(const char*format,T...){if(strstr(format,"port-force-power"))forceLogs++;else if(strstr(format,"port-power"))powerLogs++;else debugLogs++;}
 struct IOService:OSObject{
  std::map<std::string,OSObject*>props;std::vector<OSObject*>children;bool port=false;
- unsigned debugCalls=0,powerCalls=0,state=2,powerError=0,debugError=0;
+ unsigned debugCalls=0,forceCalls=0,powerCalls=0,state=2,powerError=0,debugError=0,forceError=0;
  const char*getName(){return "test-port";}
  OSObject*getProperty(const char*n){auto it=props.find(n);return it==props.end()?nullptr:it->second;}
  void setProperty(const char*n,OSObject*p){props[n]=p;}
  void setProperty(const char*n,unsigned v,unsigned bits){setProperty(n,OSNumber::withNumber(v,bits));}
- IOReturn setProperties(OSDictionary*d){debugCalls++;auto*n=dynamic_cast<OSNumber*>(d->values["kUSBDebugOptions"]);assert(n&&n->value==kUsbPortDebugOptions);return debugError;}
+ IOReturn setProperties(OSDictionary*d){if(d->values.count("UsbForcePower")){forceCalls++;auto*n=dynamic_cast<OSNumber*>(d->values["UsbForcePower"]);assert(n&&n->value==1);return forceError;}debugCalls++;auto*n=dynamic_cast<OSNumber*>(d->values["kUSBDebugOptions"]);assert(n&&n->value==kUsbPortDebugOptions);return debugError;}
  OSObject*metaCast(const char*n){assert(!strcmp(n,"AppleUSBHostPort"));return port?this:nullptr;}
  OSIterator*getChildIterator(const char*plane){assert(plane==gIOServicePlane);auto*i=track(new OSIterator);i->values=children;return i;}
  unsigned long getPowerState(){return state;}
@@ -345,12 +345,12 @@ struct IOService:OSObject{
 HELPER
 int main(){
  configureHostPorts(nullptr);IOService host,port,other;port.port=true;host.children={&port,&other};
- configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.powerCalls==1);
- assert(port.getProperty("B5qPortPowerPinned")&&powerLogs==1&&debugLogs==1);
- port.state=3;configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.powerCalls==1);
+ configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==1&&port.powerCalls==1);
+ assert(port.getProperty("B5qPortPowerPinned")&&powerLogs==1&&debugLogs==1&&forceLogs==1);
+ port.state=3;configureHostPorts(&host);assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==1&&port.powerCalls==1);
  port.state=2;configureHostPorts(&host);assert(port.powerCalls==2&&powerLogs==1);
  IOService delayed;delayed.port=true;delayed.state=3;host.children.push_back(&delayed);
- configureHostPorts(&host);assert(delayed.debugCalls==1&&delayed.powerCalls==1);
+ configureHostPorts(&host);assert(delayed.debugCalls==1&&delayed.forceCalls==1&&delayed.powerCalls==0&&delayed.getProperty("B5qPortPowerPinned"));
  IOService failed;failed.port=true;failed.powerError=5;host.children.push_back(&failed);
  unsigned before=powerLogs;for(unsigned n=0;n<10;n++)configureHostPorts(&host);
  assert(!failed.getProperty("B5qPortPowerPinned")&&failed.powerCalls==10&&powerLogs-before==4);

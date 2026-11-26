@@ -51,6 +51,10 @@ body=base+r'''
 #include "B5qMax77705.h"
 #include "B5qDpPdic.h"
 #include "B5qDpPort.h"
+#include "B5qUsbHostRole.h"
+void *gHost=(void*)1;void *gHostNub=(void*)1;
+B5qMax77705::Cable gAppliedCable;
+int gAppliedOrientation=-1;
 uint64_t ticks=0;unsigned polls=0,leaves=0,otgOff=0;bool otg=true;uint8_t cc=0x4a,cc1=1,bc=0;
 struct Bus {void *lock=nullptr;uint8_t opcode=0;
  bool read(uint8_t,uint8_t reg,uint8_t &v){v=reg==0xa?cc:reg==0xb?cc1:reg==0xd?0x87:reg==8?bc:0;return true;}
@@ -60,7 +64,7 @@ struct Bus {void *lock=nullptr;uint8_t opcode=0;
 bool openMaxim(){return true;}void IOLockLock(void*){}void IOLockUnlock(void*){}
 void IODelay(unsigned us){ticks+=us;}void IOSleep(unsigned ms){ticks+=ms*1000;}
 uint64_t mach_absolute_time(){return ticks*1000;}void absolutetime_to_nanoseconds(uint64_t n,uint64_t *out){*out=n;}
-#define IOLog(...) ((void)0)
+template<class... T>void IOLog(const char*,T...){ }
 HELPERS
 POLL
 const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1,kMillisecondScale=1000;
@@ -79,7 +83,7 @@ void IOLockSleepDeadline(void*,void*,uint64_t,int){if(++polls>15)throw 1;ticks+=
 using wait_result_t=int;
 ROLE
 int main(){
- B5qMax77705::Cable before;assert(b5q_usb_cable_state(&before));gCableApplied=gCableWanted=before.signature();
+ B5qMax77705::Cable before;assert(b5q_usb_cable_state(&before));gCableApplied=gCableWanted=before.signature();gAppliedCable=before;gAppliedOrientation=before.orientation();
  b5q_usb_otg(true);B5qMax77705::Cable after;assert(b5q_usb_cable_state(&after));assert(before.signature()==after.signature());
  try{roleThread(nullptr,0);}catch(int){}
  assert(otg&&otgOff==0&&leaves==0&&dpAlt.generation==0&&dpFailed&&polls==16);

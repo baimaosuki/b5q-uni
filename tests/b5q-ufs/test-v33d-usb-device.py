@@ -36,8 +36,10 @@ execute('v33d-device-power',body.replace('CABLE',function(q,'IOReturn cable(')).
 body=base+r'''
 #include "B5qMax77705.h"
 #include "B5qDpPort.h"
+#include "B5qUsbHostRole.h"
 using wait_result_t=int;
-#define IOLog(...) ((void)0)
+template<class... T>void IOLog(const char*,T...){ }
+void *gHost=nullptr;void *gHostNub=nullptr;B5qMax77705::Cable gAppliedCable;int gAppliedOrientation=-1;
 const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1,kMillisecondScale=1000;
 int gRoleWanted=1,gRoleApplied=0,gCoreRole=0;uint32_t gCableWanted=1,gCableApplied=0,gDpLanes=0;
 void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=false,gPhyResetPending=false;uint32_t native_usb_stats[54]={};

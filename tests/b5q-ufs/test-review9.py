@@ -110,7 +110,9 @@ int main(){
 #include <initializer_list>
 #include "B5qMax77705.h"
 #include "B5qDpPort.h"
+#include "B5qUsbHostRole.h"
 using B5qMax77705::Cable;
+void*gHost=(void*)1;void*gHostNub=(void*)1;Cable gAppliedCable;int gAppliedOrientation=-1;
 uint64_t ms=0;unsigned sleeps=0,leaves=0,off=0,enters=0;bool otg=false,reverse=false,expire=false;
 Cable physical(){Cable c;c.valid=true;
  if(ms>=100&&ms<5000){
@@ -130,11 +132,11 @@ void IOLockSleepDeadline(void*,void*,uint64_t deadline,int){assert(deadline>ms&&
 void cableChanged(){auto c=physical();gCableWanted=c.signature();gRoleWanted=c.role();}
 bool b5q_usb_otg(bool on){otg=on;if(!on)off++;return true;}
 void leaveRole(int r){if(r==kRoleHost){leaves++;b5q_usb_otg(false);}}
-bool enterRole(int r){enters+=r==kRoleHost;gCoreRole=r;return r!=kRoleHost||b5q_usb_otg(true);}
+bool enterRole(int r){enters+=r==kRoleHost;gCoreRole=r;B5qMax77705::Cable c;b5q_usb_cable_state(&c);gAppliedCable=c;gAppliedOrientation=c.orientation();return r!=kRoleHost||b5q_usb_otg(true);}
 bool b5q_dp_port_poll(B5qDpPortState*){return true;}bool b5q_dp_link_stop(){return true;}void b5q_dp_link_update(const B5qDpPortState*){}
 bool qmpInit(bool){return true;}void selectUtmiClock(){}void retryDevicePower(){}void hostStats(){}void deviceStats(){}
 void IOSleep(unsigned n){ms+=n;}
-#define IOLog(...) ((void)0)
+template<class... T>void IOLog(const char*,T...){ }
 using wait_result_t=int;
 ROLE
 int main(){

@@ -12,6 +12,7 @@
 #include "B5qUsbIrq.h"
 #include "B5qUsbDmaHandoff.h"
 #include "B5qUsbHostEvent.h"
+#include "B5qUsbHostRole.h"
 #include "B5qMax77705.h"
 #include "B5qDpPort.h"
 #include <mach/mach_time.h>
@@ -33,6 +34,7 @@ extern "C" bool b5q_usb_otg(bool);
 #include <libkern/c++/OSData.h>
 #include <libkern/c++/OSDictionary.h>
 #include <libkern/c++/OSNumber.h>
+#include <libkern/c++/OSString.h>
 #include "B5qFeatures.h"
 extern "C" bool b5q_dp_link_stop(void);
 extern "C" void b5q_dp_link_update(const B5qDpPortState *);
@@ -608,6 +610,11 @@ enum Role {kRoleNone, kRoleDevice, kRoleHost};
 IOLock *gRoleLock;
 int gRoleWanted,gRoleApplied,gCoreRole=kRoleDevice;
 uint32_t gCableWanted, gCableApplied;
+// The connector state that the live role was actually entered with. A power
+// role swap that leaves orientation/water/data-role/DP unchanged only needs a
+// VBUS source update; everything else still tears the controller down.
+B5qMax77705::Cable gAppliedCable;
+int gAppliedOrientation=-1;
 bool gForceHost;
 constexpr unsigned kXhciRegisterBytes=0x8000; // same bounded host window as makeHost()
 constexpr uint32_t kGctlDisableClockGating=1u;
@@ -676,6 +683,8 @@ void leaveRole(int role) {
         gHostNub->terminate(kIOServiceSynchronous);
         gHostNub->release();
         gHostNub = nullptr; gHost = nullptr;
+        gAppliedCable=B5qMax77705::Cable{};
+        gAppliedOrientation=-1;
     }
 }
 // __dwc3_set_mode: a core soft reset between the roles, then the port capability.
@@ -749,7 +758,11 @@ bool enterRole(int role) {
         IOLog("qcom-dwc3: hardware-only role=%u dma=deferred-no-firmware-handoff\n",role);
         return true;
     }
-    if (role == kRoleNone) return b5q_usb_otg(false);
+    if (role == kRoleNone) {
+        gAppliedCable=B5qMax77705::Cable{};
+        gAppliedOrientation=-1;
+        return b5q_usb_otg(false);
+    }
     B5qMax77705::Cable cable;
     if(!b5q_usb_cable_state(&cable)||cable.water())return false;
     // Power role is independent of DFP/UFP. In particular a powered PD Hub
@@ -772,6 +785,8 @@ bool enterRole(int role) {
         gDevicePowerOnAtAttach=native_usb_stats[12];gDevicePowerAcknowledged=false;
         native_usb_stats[20] = (uint32_t)gController->cable(true);
     }
+    gAppliedCable=cable;
+    gAppliedOrientation=cable.orientation();
     return true;
 }
 // A RAM read is authorized only by the loader's usable owned/outside ranges.
@@ -836,6 +851,13 @@ void configureHostPorts(IOService *host) {
     OSNumber *mask=OSNumber::withNumber(kUsbPortDebugOptions,32);
     OSDictionary *settings=mask?OSDictionary::withCapacity(1):nullptr;
     if(settings)settings->setObject("kUSBDebugOptions",mask);
+    // AppleUSBHostPort::setProperties accepts "UsbForcePower" as an OSNumber.
+    // A nonzero value runs forcePower(kPowerStateOn,1000) and holds the port
+    // in ON. It must be its own dictionary: setProperties stops at the first
+    // recognized key, so mixing it with kUSBDebugOptions would skip one.
+    OSNumber *force=OSNumber::withNumber(1u,32);
+    OSDictionary *forceSettings=force?OSDictionary::withCapacity(1):nullptr;
+    if(forceSettings)forceSettings->setObject("UsbForcePower",force);
     if(settings&&!host->getProperty("B5qHostDebugApplied")&&host->setProperties(settings)==kIOReturnSuccess)
         host->setProperty("B5qHostDebugApplied",mask);
     OSIterator *children=settings?host->getChildIterator(gIOServicePlane):nullptr;
@@ -849,8 +871,20 @@ void configureHostPorts(IOService *host) {
                 IOLog("qcom-dwc3: port-debug name=%s mask=%x rc=%08x\n",port->getName(),kUsbPortDebugOptions,result);
             }
         }
+        if(forceSettings&&!port->getProperty("B5qPortForcePowerApplied")){
+            OSNumber *tryNumber=OSDynamicCast(OSNumber,port->getProperty("B5qPortForcePowerTries"));
+            const unsigned tries=tryNumber?tryNumber->unsigned32BitValue():0;
+            if(tries<4){
+                const IOReturn fpRc=port->setProperties(forceSettings);
+                port->setProperty("B5qPortForcePowerRc",(unsigned)fpRc,32);
+                IOLog("qcom-dwc3: port-force-power name=%s cur=%lu rc=%08x\n",port->getName(),(unsigned long)port->getPowerState(),fpRc);
+                if(fpRc==kIOReturnSuccess)port->setProperty("B5qPortForcePowerApplied",force);
+                else port->setProperty("B5qPortForcePowerTries",tries+1u,32);
+            }
+        }
+        const bool forceOk=port->getProperty("B5qPortForcePowerApplied")!=nullptr;
         const bool first=!port->getProperty("B5qPortPowerPinned");
-        if(first||port->getPowerState()<3){
+        if(!forceOk||port->getPowerState()<3){
             const IOReturn pwrRc=port->changePowerStateTo(3);
             OSNumber *logs=OSDynamicCast(OSNumber,port->getProperty("B5qPortPowerLogs"));
             const unsigned logged=logs?logs->unsigned32BitValue():0;
@@ -859,10 +893,47 @@ void configureHostPorts(IOService *host) {
                 port->setProperty("B5qPortPowerLogs",logged+1,32);
             }
             if(pwrRc==kIOReturnSuccess)port->setProperty("B5qPortPowerPinned",kOSBooleanTrue);
+        } else {
+            port->setProperty("B5qPortPowerPinned",kOSBooleanTrue);
         }
     }
     OSSafeReleaseNULL(children);OSSafeReleaseNULL(settings);OSSafeReleaseNULL(mask);
+    OSSafeReleaseNULL(forceSettings);OSSafeReleaseNULL(force);
 }
+namespace {
+// Low-noise port power edge: only a first sighting or a real getPowerState()
+// change prints. The table is reset when the host controller object changes.
+struct HostPortPower { const IOService *port; unsigned long power; };
+void hostPortPowerEdges(IOService *host) {
+    static HostPortPower seen[8];static unsigned count;static const IOService *owner;
+    if(owner!=host){owner=host;count=0;}
+    if(!host)return;
+    OSIterator *children=host->getChildIterator(gIOServicePlane);
+    while(OSObject *object=children?children->getNextObject():nullptr){
+        IOService *port=OSDynamicCast(IOService,object);
+        if(!port||!port->metaCast("AppleUSBHostPort"))continue;
+        const unsigned long power=port->getPowerState();
+        unsigned slot=0;
+        while(slot<count&&seen[slot].port!=port)slot++;
+        if(slot==count){
+            if(count<8){seen[count++]={port,power};IOLog("qcom-dwc3: host-port-edge name=%s pwr=%lu prev=unknown\n",port->getName(),power);}
+            continue;
+        }
+        if(seen[slot].power!=power){
+            IOLog("qcom-dwc3: host-port-edge name=%s pwr=%lu prev=%lu\n",port->getName(),power,seen[slot].power);
+            seen[slot].power=power;
+        }
+    }
+    OSSafeReleaseNULL(children);
+}
+void hostAscii(char *out,unsigned capacity,const char *text) {
+    unsigned n=0;
+    for(const unsigned char *p=reinterpret_cast<const unsigned char *>(text);p&&*p&&n+1<capacity;p++){
+        out[n++]=(*p>=0x20&&*p<0x7f)?(char)*p:'.';
+    }
+    out[n]=0;
+}
+}  // namespace
 void hostStats() {
     if (!gDmaReady || gCoreRole != kRoleHost) return;
     const uint32_t cap = gXhciRegs.va[0];
@@ -872,6 +943,28 @@ void hostStats() {
     configureHostPorts(gHost);
     native_usb_stats[49] = op[0x400 / 4]; native_usb_stats[50] = op[0x410 / 4];
     native_usb_stats[51] = gXhciRegs.va[1];
+    if(gHost)hostPortPowerEdges(gHost);
+    static uint32_t previousPort1,previousPort2,previousDevices;
+    static bool havePorts;static QcomDwc3Xhci *edgeOwner;static unsigned edgeDumps;
+    if(edgeOwner!=gHost){edgeOwner=gHost;havePorts=false;edgeDumps=0;previousDevices=0;}
+    const uint32_t port1=native_usb_stats[49],port2=native_usb_stats[50];
+    // CCS/PED/PR/PLS/Speed/CSC/PEC/PRC/PLC only: status-write bits and
+    // reserved bits stay out of the summary.
+    constexpr uint32_t kPortWatch=(1u<<0)|(1u<<1)|(1u<<4)|(0xfu<<5)|(0xfu<<9)|(1u<<17)|(1u<<18)|(1u<<21)|(1u<<22);
+    bool portEdge=false;
+    if(!havePorts){havePorts=true;previousPort1=port1;previousPort2=port2;}
+    else {
+        if(((previousPort1^port1)&kPortWatch)||((previousPort2^port2)&kPortWatch))
+            IOLog("qcom-dwc3: host-port-edge portsc1=%08x->%08x portsc2=%08x->%08x ccs=%u/%u ped=%u/%u pr=%u/%u pls=%u/%u speed=%u/%u csc=%u/%u pec=%u/%u prc=%u/%u plc=%u/%u\n",
+                previousPort1,port1,previousPort2,port2,
+                port1&1u,port2&1u,!!(port1&2u),!!(port2&2u),!!(port1&16u),!!(port2&16u),
+                (port1>>5)&15u,(port2>>5)&15u,(port1>>9)&15u,(port2>>9)&15u,
+                !!(port1&(1u<<17)),!!(port2&(1u<<17)),!!(port1&(1u<<18)),!!(port2&(1u<<18)),
+                !!(port1&(1u<<21)),!!(port2&(1u<<21)),!!(port1&(1u<<22)),!!(port2&(1u<<22)));
+        portEdge=B5qUsbHostRole::portEdge(previousPort1,port1)||
+            B5qUsbHostRole::portEdge(previousPort2,port2);
+        previousPort1=port1;previousPort2=port2;
+    }
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
     const uint64_t dcbaa=uint64_t(op[0x30/4])|(uint64_t(op[0x34/4])<<32);
     const unsigned rt=(gXhciRegs.va[0x18/4]&~31u)/4;
@@ -891,20 +984,69 @@ void hostStats() {
     OSDictionary *match = IOService::serviceMatching("IOUSBHostDevice");
     OSIterator *devices = match ? IOService::getMatchingServices(match) : nullptr;
     uint32_t count = 0;
+    struct HostDevice {uint64_t id;uint32_t vendor,product,bcd,cls,sub,proto,addr,speed;};
+    static HostDevice tracked[16];static unsigned trackedCount;static QcomDwc3Xhci *deviceOwner;
+    if(deviceOwner!=gHost){deviceOwner=gHost;trackedCount=0;}
     OSNumber *debugMask=OSNumber::withNumber(kUsbPortDebugOptions,32);
     OSDictionary *settings=debugMask?OSDictionary::withCapacity(1):nullptr;
     if(settings)settings->setObject("kUSBDebugOptions",debugMask);
+    uint64_t seen[16];unsigned seenCount=0;
     while (OSObject *object = devices ? devices->getNextObject() : nullptr) {
         ++count;
         IOService *dev=OSDynamicCast(IOService,object);
         if(settings&&dev&&!dev->getProperty("B5qDevDebugApplied")&&dev->setProperties(settings)==kIOReturnSuccess)
             dev->setProperty("B5qDevDebugApplied",debugMask);
         IORegistryEntry *entry = OSDynamicCast(IORegistryEntry, object);
-        OSNumber *vendor = entry ? OSDynamicCast(OSNumber, entry->getProperty("idVendor")) : nullptr;
-        OSNumber *product = entry ? OSDynamicCast(OSNumber, entry->getProperty("idProduct")) : nullptr;
-        if (vendor && product) native_usb_stats[53] = vendor->unsigned32BitValue() << 16 | (product->unsigned32BitValue() & 0xffffu);
+        auto number=[](IORegistryEntry *e,const char *name)->uint32_t{
+            OSNumber *value=e?OSDynamicCast(OSNumber,e->getProperty(name)):nullptr;
+            return value?value->unsigned32BitValue():0;
+        };
+        const uint32_t vendor = entry?number(entry,"idVendor"):0;
+        const uint32_t product = entry?number(entry,"idProduct"):0;
+        if (vendor||product) native_usb_stats[53] = vendor << 16 | (product & 0xffffu);
+        if(!entry)continue;
+        uint64_t id=entry->getRegistryEntryID();
+        if(!id)id=(uint64_t)number(entry,"locationID")|0x100000000ULL;
+        if(seenCount<16)seen[seenCount++]=id;
+        const uint32_t bcd=number(entry,"bcdDevice"),cls=number(entry,"bDeviceClass"),
+            sub=number(entry,"bDeviceSubClass"),proto=number(entry,"bDeviceProtocol"),
+            addr=number(entry,"USB Address"),speed=number(entry,"USBSpeed");
+        unsigned slot=0;
+        while(slot<trackedCount&&tracked[slot].id!=id)slot++;
+        const HostDevice value={id,vendor,product,bcd,cls,sub,proto,addr,speed};
+        bool changed=slot==trackedCount;
+        if(!changed){
+            const HostDevice &old=tracked[slot];
+            changed=old.vendor!=vendor||old.product!=product||old.bcd!=bcd||old.cls!=cls||
+                old.sub!=sub||old.proto!=proto||old.addr!=addr||old.speed!=speed;
+        }
+        if(changed&&slot<16){
+            if(slot==trackedCount&&trackedCount<16)trackedCount++;
+            tracked[slot]=value;
+            char productText[49];
+            OSString *string=OSDynamicCast(OSString,entry->getProperty("kUSBProductString"));
+            if(!string)string=OSDynamicCast(OSString,entry->getProperty("USB Product Name"));
+            hostAscii(productText,sizeof(productText),string?string->getCStringNoCopy():"");
+            IOLog("qcom-dwc3: host-port-edge device id=%llx vid=%04x pid=%04x bcd=%04x class=%02x/%02x/%02x addr=%u speed=%u pwr=%u product='%s'\n",
+                id,vendor,product,bcd,cls,sub,proto,addr,speed,dev?unsigned(dev->getPowerState()):0,productText);
+        }
+    }
+    // A drop with a replacement device keeps count unchanged, so compare the
+    // tracked set as well as the total. Each disappearance is logged once.
+    for(unsigned i=0;i<trackedCount;){
+        bool present=false;
+        for(unsigned j=0;j<seenCount;j++)if(tracked[i].id==seen[j]){present=true;break;}
+        if(present){i++;continue;}
+        IOLog("qcom-dwc3: host-port-edge device-drop id=%llx vid=%04x pid=%04x addr=%u speed=%u\n",
+            tracked[i].id,tracked[i].vendor,tracked[i].product,tracked[i].addr,tracked[i].speed);
+        portEdge=true;
+        for(unsigned j=i;j+1<trackedCount;j++)tracked[j]=tracked[j+1];
+        trackedCount--;
     }
     native_usb_stats[52] = count;
+    if(count<previousDevices)portEdge=true;
+    previousDevices=count;
+    if(portEdge&&edgeDumps<4){++edgeDumps;dmaDiagnostics("port-edge");}
     IOLog("qcom-dwc3: host cmd=%x sts=%x EINT=%u HSE=%u devs=%u irq=%u storm=%u pwr=%u\n",native_usb_stats[47],native_usb_stats[48],!!(native_usb_stats[48]&8),!!(native_usb_stats[48]&4),count,native_usb_stats[11],gIrqStormed,gHost?unsigned(gHost->getPowerState()):0);
     OSSafeReleaseNULL(settings);OSSafeReleaseNULL(debugMask);
     OSSafeReleaseNULL(devices); OSSafeReleaseNULL(match);
@@ -960,6 +1102,30 @@ void roleThread(void *, wait_result_t) {
         const int role = __atomic_load_n(&gRoleWanted,__ATOMIC_ACQUIRE);
         const uint32_t cableVersion = gCableWanted;
         IOLockUnlock(gRoleLock);
+        // A PD Power Role Swap on a powered hub changes only the VBUS source:
+        // same DFP data role, same CC orientation, no water, same DP lanes and
+        // a live controller. Rebuild the controller only for a real session
+        // change; otherwise update the boost and keep the enumerated hub.
+        {
+            const int appliedRole=__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE);
+            B5qMax77705::Cable swapCable;const bool swapValid=b5q_usb_cable_state(&swapCable);
+            const unsigned liveDp=dpEnabled&&port.configured?port.lanes:0;
+            const B5qUsbHostRole::View view={
+                appliedRole==kRoleHost,role==kRoleHost,gHost!=nullptr&&gHostNub!=nullptr,
+                !dpEnabled||liveDp==gDpLanes,swapValid,swapCable.water(),swapCable.attached(),
+                swapCable.role()==kRoleHost,swapCable.orientation()==gAppliedOrientation};
+            if(B5qUsbHostRole::canHotSwapVbus(view)){
+                const unsigned previousPower=gAppliedCable.power();
+                const bool source=swapCable.sourceVbus(role);
+                const bool ok=b5q_usb_otg(source);
+                IOLog("qcom-dwc3: host-vbus-swap power=%u->%u source=%u ok=%u\n",previousPower,swapCable.power(),source,ok);
+                if(!ok)IOLog("qcom-dwc3: host-vbus-swap-error power=%u source=%u retained=1\n",swapCable.power(),source);
+                IOLockLock(gRoleLock);
+                if(gCableWanted==cableVersion){gCableApplied=cableVersion;gAppliedCable=swapCable;gAppliedOrientation=swapCable.orientation();}
+                IOLockUnlock(gRoleLock);
+                continue;
+            }
+        }
         if(dpEnabled&&!b5q_dp_link_stop()){
             // Keep the combo lanes and existing controller intact until
             // DP has actually stopped clocks/scanout. A detached cable

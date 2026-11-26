@@ -17,6 +17,7 @@
 #include "B5qWcnPower.h"
 #include "BluetoothFirmware.h"
 #include "BluetoothHciTrace.h"
+#include "B5qBtH4Tap.h"
 
 extern "C" int armcpu_spi_attach(uint32_t,bool,void(*)(void *),void *,uint32_t *,uint64_t *);
 extern "C" int armcpu_spi_share(uint32_t,void(*)(void *),void *);
@@ -66,6 +67,7 @@ struct Bluetooth {
     bool resources,powered,gated,clocked,serial_irq,wake_irq,service,initializing,loopback;
     uint8_t loop_rx[16];unsigned loop_length;
 } bt;
+B5qBtH4Tap h4Tap;
 constexpr unsigned kRx=79,kBtEnable=81,kSwCtrl=82;
 constexpr uint32_t kUartDefault[]={0u,1u,3u,1u};
 constexpr uint32_t kUartActive[]={4u,5u,7u,4u}; // b5q.dts 3162..3298, all 2mA
@@ -78,6 +80,9 @@ bool map(Region &r,uint64_t base,size_t bytes) {
 }
 void barrier(){__asm__ volatile("dsb sy" ::: "memory");}
 uint64_t nowNs(void *){uint64_t ns;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns;}
+uint64_t h4NowMs(void *){return nowNs(nullptr)/1000000ULL;}
+void h4Line(void *,const char *text){printf("%s\n",text);}
+const B5qBtH4Sink h4Sink={h4Line,h4NowMs};
 void wake(void *){__atomic_store_n(&bt.pending,1u,__ATOMIC_RELEASE);thread_wakeup((event_t)&bt.pending);}
 void waitUntil(void *,uint64_t deadline) {
     // qbt_boot's command waits must honour FIFO progress just like the main
@@ -156,7 +161,14 @@ size_t rxBytes(void *,const uint8_t *bytes,size_t n) {
     }
     bt.rx_sequence+=n;return qbt_receive(bt.core,bytes,n);
 }
-size_t nativeRx(void *,const uint8_t *bytes,size_t n){return qbt_transport_receive(bytes,(uint32_t)n);}
+size_t nativeRx(void *,const uint8_t *bytes,size_t n) {
+    const uint32_t taken=qbt_transport_receive(bytes,(uint32_t)n);
+    // Only the accepted prefix belongs to the RX H4 stream. The transport
+    // retries the remainder after backpressure; feeding n here would
+    // duplicate bytes and lose frame sync.
+    if(bt.log>=2)b5q_bt_h4_tap_rx_taken(&h4Tap,bytes,n,taken);
+    return taken;
+}
 size_t writeUart(void *,const uint8_t *p,size_t n){return b5q_bt_fifo_write(&bt.geni,p,n);}
 bool drained(void *){return bt.gated || b5q_bt_fifo_drained(&bt.geni);}
 int flow(void *,bool enabled){b5q_bt_fifo_set_flow(&bt.geni,enabled);return 0;}
@@ -331,6 +343,7 @@ int loopbackCheck() {
 }
 int powerOn() {
     if(bt.powered)return 0;
+    b5q_bt_h4_tap_reset_session(&h4Tap);
     int wait=b5q_wcn_wait_wifi_probe();if(wait)return -wait;
     native_bluetooth_stats[14]=1;int e=resources();if(e)return e;
     native_bluetooth_stats[14]=2;
@@ -394,6 +407,7 @@ int powerOn() {
 }
 int powerOff() {
     if(!bt.powered)return 0;
+    b5q_bt_h4_tap_reset_streams(&h4Tap);
     qbt_set_service(bt.core,false);bt.service=false;
     int e=0;
     if(bt.geni.state!=B5Q_BT_FIFO_OFF) {
@@ -457,10 +471,17 @@ void worker(void *,wait_result_t) {
         if(command){e=command==1?powerOn():powerOff();if(e && command==1)(void)powerOff();powerResult(command==1,e);}
         if(bt.powered) {
             pump(nullptr);bool active=qbt_transport_active();
-            if(active!=bt.service){qbt_set_service(bt.core,active);bt.service=active;closeAt=active?0:nowNs(nullptr)+500000000ULL;}
+            if(active!=bt.service){
+                if(active&&bt.log>=2)b5q_bt_h4_tap_reset_streams(&h4Tap);
+                qbt_set_service(bt.core,active);bt.service=active;closeAt=active?0:nowNs(nullptr)+500000000ULL;
+            }
             uint8_t tx[2048];size_t room=qbt_transmit_capacity(bt.core);
             if(room>sizeof(tx))room=sizeof(tx);
-            if(room){uint32_t n=qbt_transport_tx_take(tx,(uint32_t)room);if(n){int sent=qbt_transmit(bt.core,tx,n);if(sent){e=sent<0?sent:-EIO;qbt_fail(bt.core,e);IOLog("B5qBluetooth: stage=transmit result=%d bytes=%u\n",e,n);}}}
+            if(room){uint32_t n=qbt_transport_tx_take(tx,(uint32_t)room);if(n){
+                int sent=qbt_transmit(bt.core,tx,n);
+                if(sent){e=sent<0?sent:-EIO;qbt_fail(bt.core,e);IOLog("B5qBluetooth: stage=transmit result=%d bytes=%u\n",e,n);}
+                else if(bt.log>=2)b5q_bt_h4_tap_tx(&h4Tap,tx,n);
+            }}
             qbt_step(bt.core);
             struct qbt_info info;qbt_get_info(bt.core,&info);
             if(info.state==3 || bt.geni.state==B5Q_BT_FIFO_FAILED || (closeAt && nowNs(nullptr)>=closeAt)) {
@@ -518,6 +539,10 @@ void worker(void *,wait_result_t) {
                         stats.tx_bytes,stats.rx_bytes,stats.delivered_bytes,stats.malformed,stats.unmatched_events,
                         stats.backpressure,bt.geni.stats.rx_backpressure,stats.hardware_errors,stats.last_hardware_error,
                         qbt_transport_rx_dropped());
+                    printf("B5qBluetooth: stage=h4 tx-cmd=%llu tx-acl=%llu rx-evt=%llu rx-acl=%llu errs=%llu smp=%llu l2cap=%llu desync=%llu logged=%u/%u\n",
+                        h4Tap.stats.tx_cmd,h4Tap.stats.tx_acl,h4Tap.stats.rx_evt,h4Tap.stats.rx_acl,
+                        h4Tap.stats.errs,h4Tap.stats.smp,h4Tap.stats.l2cap,h4Tap.stats.desync,
+                        h4Tap.stats.logged,B5Q_BT_H4_QUOTA_TOTAL);
                 }
             }
             health=t+1000000000ULL;
@@ -539,19 +564,28 @@ void proc_iterate(unsigned,int (*)(struct proc *,void *),void *,int (*)(struct p
 int proc_pid(struct proc *);
 }
 int processSeen(struct proc *process,void *found) {
-    static const char *const names[]={"bluetoothd","BlueTool"};
+    static const char *const names[]={"bluetoothd","BlueTool","BluetoothUIServer"};
     const char *name=proc_best_name(process);
-    for(unsigned i=0;name && i<2;i++)if(!strcmp(name,names[i]))static_cast<int *>(found)[i]=proc_pid(process);
+    for(unsigned i=0;name && i<3;i++)if(!strcmp(name,names[i]))static_cast<int *>(found)[i]=proc_pid(process);
     return 0;
 }
 void processWatch(void *,wait_result_t) {
     thread_set_thread_name(current_thread(),"b5q-bluetooth-procs");
+    static uint32_t uiPid,uiChanges;
     for(;;) {
-        int found[2]={0,0};
+        int found[3]={0,0,0};
         proc_iterate(1u|4u,processSeen,found,nullptr,nullptr);
-        for(unsigned i=0;i<2;i++) {
-            if(found[i] && (uint32_t)found[i]!=native_bluetooth_processes[i*2])native_bluetooth_processes[i*2+1]=native_bluetooth_processes[i*2+1]+1;
-            native_bluetooth_processes[i*2]=(uint32_t)found[i];
+        for(unsigned i=0;i<3;i++) {
+            // native_bluetooth_processes[4] keeps its ABI and the first two
+            // entries keep their bluetoothd/BlueTool meaning exactly.
+            if(i<2) {
+                if(found[i] && (uint32_t)found[i]!=native_bluetooth_processes[i*2])native_bluetooth_processes[i*2+1]=native_bluetooth_processes[i*2+1]+1;
+                native_bluetooth_processes[i*2]=(uint32_t)found[i];
+            } else if((uint32_t)found[i]!=uiPid) {
+                uiChanges++;
+                IOLog("B5qBluetooth: process name=BluetoothUIServer pid=%u change=%u\n",(uint32_t)found[i],uiChanges);
+                uiPid=(uint32_t)found[i];
+            }
         }
         IOSleep(2000);
     }
@@ -563,6 +597,7 @@ extern "C" void b5q_bluetooth_probe(void) {
     native_bluetooth_stats[0]=1;
     if(!address()){native_bluetooth_stats[0]=3;native_bluetooth_stats[1]=(uint64_t)(int64_t)-ENOENT;IOLog("B5qBluetooth: stage=address failed requires=/arm-io/bluetooth encoding=1 speed=3200000 identity=nonzero\n");return;}
     PE_parse_boot_argn("log-bluetooth",&bt.log,sizeof(bt.log));
+    b5q_bt_h4_tap_init(&h4Tap,&h4Sink,nullptr,bt.log>=2);
     if(bt.log>=2)native_bluetooth_boot_text=static_cast<char *>(IOMallocData(8192));
     thread_t thread=nullptr;
     if(kernel_thread_start(worker,nullptr,&thread)==KERN_SUCCESS)thread_deallocate(thread);

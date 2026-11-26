@@ -29,6 +29,8 @@ bool boost=false,powerFailure=false,phyFailure=false,hostFailure=false,qmpRevers
 uint32_t native_usb_stats[54]={},registers[1024]={};
 struct {uint32_t *va=registers;} gGlobals;
 B5qMax77705::Cable current;
+B5qMax77705::Cable gAppliedCable;
+int gAppliedOrientation=-1;
 struct QcomDwc3Nub {static void route(void*){}};
 struct Controller {int cable(bool on){assert(on);++deviceCalls;return 0;}} controller;
 Controller *gController=&controller;void *gDeviceNub=nullptr,*gHost=nullptr;
