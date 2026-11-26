@@ -56,6 +56,7 @@ volatile uint32_t native_usb_stats[54];
 void dmaDiagnostics(const char *reason);
 void hostCheckpoint(const char *reason,bool force=false,bool allowU3=false);
 void restoreHostGlobals(void);
+void configureHostPorts(IOService *host);
 extern "C" unsigned b5q_log_sync(unsigned);
 namespace {
 // The DWC3 global, device and OTG registers in the window Apple's class addresses: base + 0xc000.
@@ -510,8 +511,11 @@ class QcomDwc3Xhci : public AppleUSBXHCI {
 public:
     bool start(IOService *provider) override {
         const bool started=AppleUSBXHCI::start(provider);
-        restoreHostGlobals();
-        hostCheckpoint("after-family-start",true);
+        if(started){
+            restoreHostGlobals();
+            configureHostPorts(this);
+            hostCheckpoint("after-family-start",true);
+        }
         return started;
     }
     // Once the ports exist the family leaves the controller's power to them, and an idle port lets it fall to off: a halted controller reports
@@ -547,9 +551,6 @@ public:
         if(count<=16&&(value||offset==0x30||offset==0x38)){
             uint32_t lo=at[0],hi=at[1];
             IOLog("qcom-dwc3: xhci-w64 #%u off=%x val=%llx rb=%08x:%08x\n",count,offset,value,hi,lo);
-            if(offset==0x18||offset==0x30||offset==0x38){
-                dmaDiagnostics("write64");
-            }
             if(value&&offset!=0x18&&!lo&&!hi){
                 at[0]=(uint32_t)value;barrier();at[1]=(uint32_t)(value>>32);barrier();
                 lo=at[0];hi=at[1];
@@ -612,7 +613,7 @@ constexpr unsigned kXhciRegisterBytes=0x8000; // same bounded host window as mak
 constexpr uint32_t kGctlDisableClockGating=1u;
 constexpr uint32_t kUsb2EnableLpm=1u<<8,kUsb2SuspendPhy=1u<<6,kUsb3SuspendPhy=1u<<17;
 constexpr uint32_t kGuctlSprsCtrlTransEn=1u<<17,kGuctl1Host=(1u<<21)|(1u<<8),kGuctl2Host=1u<<16;
-constexpr uint32_t kUsbPortDebugOptions=0x40000019u;
+constexpr uint32_t kUsbPortDebugOptions=0x40000119u;
 constexpr unsigned kHostEventDumpCount=16;
 Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
@@ -830,19 +831,34 @@ void hostCheckpoint(const char *reason,bool force,bool allowU3){
     const unsigned saved=(allowU3&&(firstHse||firstHce||firstU3))?b5q_log_sync(750):0;
     IOLog("qcom-dwc3: host-dma-diag checkpoint=%s sts=%x portsc1=%x sync=%u\n",reason,status,port,saved);
 }
-void enableHostPortDebug() {
-    if(!gHost)return;
+void configureHostPorts(IOService *host) {
+    if(!host)return;
     OSNumber *mask=OSNumber::withNumber(kUsbPortDebugOptions,32);
     OSDictionary *settings=mask?OSDictionary::withCapacity(1):nullptr;
     if(settings)settings->setObject("kUSBDebugOptions",mask);
-    OSIterator *children=settings?gHost->getChildIterator(gIOServicePlane):nullptr;
+    if(settings&&!host->getProperty("B5qHostDebugApplied")&&host->setProperties(settings)==kIOReturnSuccess)
+        host->setProperty("B5qHostDebugApplied",mask);
+    OSIterator *children=settings?host->getChildIterator(gIOServicePlane):nullptr;
     while(OSObject *object=children?children->getNextObject():nullptr){
         IOService *port=OSDynamicCast(IOService,object);
-        if(!port||!port->metaCast("AppleUSBHostPort")||port->getProperty("B5qPortDebugApplied"))continue;
-        const IOReturn result=port->setProperties(settings);
-        if(result==kIOReturnSuccess){
-            port->setProperty("B5qPortDebugApplied",mask);
-            IOLog("qcom-dwc3: port-debug name=%s mask=40000019 rc=%08x\n",port->getName(),result);
+        if(!port||!port->metaCast("AppleUSBHostPort"))continue;
+        if(!port->getProperty("B5qPortDebugApplied")){
+            const IOReturn result=port->setProperties(settings);
+            if(result==kIOReturnSuccess){
+                port->setProperty("B5qPortDebugApplied",mask);
+                IOLog("qcom-dwc3: port-debug name=%s mask=%x rc=%08x\n",port->getName(),kUsbPortDebugOptions,result);
+            }
+        }
+        const bool first=!port->getProperty("B5qPortPowerPinned");
+        if(first||port->getPowerState()<3){
+            const IOReturn pwrRc=port->changePowerStateTo(3);
+            OSNumber *logs=OSDynamicCast(OSNumber,port->getProperty("B5qPortPowerLogs"));
+            const unsigned logged=logs?logs->unsigned32BitValue():0;
+            if((first||pwrRc!=kIOReturnSuccess)&&logged<4){
+                IOLog("qcom-dwc3: port-power name=%s cur=%lu req=3 rc=%08x\n",port->getName(),(unsigned long)port->getPowerState(),pwrRc);
+                port->setProperty("B5qPortPowerLogs",logged+1,32);
+            }
+            if(pwrRc==kIOReturnSuccess)port->setProperty("B5qPortPowerPinned",kOSBooleanTrue);
         }
     }
     OSSafeReleaseNULL(children);OSSafeReleaseNULL(settings);OSSafeReleaseNULL(mask);
@@ -853,7 +869,7 @@ void hostStats() {
     const volatile uint32_t *op = gXhciRegs.va + (cap & 0xffu) / 4;
     native_usb_stats[47] = op[0]; native_usb_stats[48] = op[1];
     hostCheckpoint("poll",false,true);
-    enableHostPortDebug();
+    configureHostPorts(gHost);
     native_usb_stats[49] = op[0x400 / 4]; native_usb_stats[50] = op[0x410 / 4];
     native_usb_stats[51] = gXhciRegs.va[1];
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
@@ -875,8 +891,14 @@ void hostStats() {
     OSDictionary *match = IOService::serviceMatching("IOUSBHostDevice");
     OSIterator *devices = match ? IOService::getMatchingServices(match) : nullptr;
     uint32_t count = 0;
+    OSNumber *debugMask=OSNumber::withNumber(kUsbPortDebugOptions,32);
+    OSDictionary *settings=debugMask?OSDictionary::withCapacity(1):nullptr;
+    if(settings)settings->setObject("kUSBDebugOptions",debugMask);
     while (OSObject *object = devices ? devices->getNextObject() : nullptr) {
         ++count;
+        IOService *dev=OSDynamicCast(IOService,object);
+        if(settings&&dev&&!dev->getProperty("B5qDevDebugApplied")&&dev->setProperties(settings)==kIOReturnSuccess)
+            dev->setProperty("B5qDevDebugApplied",debugMask);
         IORegistryEntry *entry = OSDynamicCast(IORegistryEntry, object);
         OSNumber *vendor = entry ? OSDynamicCast(OSNumber, entry->getProperty("idVendor")) : nullptr;
         OSNumber *product = entry ? OSDynamicCast(OSNumber, entry->getProperty("idProduct")) : nullptr;
@@ -884,6 +906,7 @@ void hostStats() {
     }
     native_usb_stats[52] = count;
     IOLog("qcom-dwc3: host cmd=%x sts=%x EINT=%u HSE=%u devs=%u irq=%u storm=%u pwr=%u\n",native_usb_stats[47],native_usb_stats[48],!!(native_usb_stats[48]&8),!!(native_usb_stats[48]&4),count,native_usb_stats[11],gIrqStormed,gHost?unsigned(gHost->getPowerState()):0);
+    OSSafeReleaseNULL(settings);OSSafeReleaseNULL(debugMask);
     OSSafeReleaseNULL(devices); OSSafeReleaseNULL(match);
 }
 void deviceStats() {

@@ -142,7 +142,7 @@ assert '1u<<31'not in core and 'phyInit()'not in core and '*gctl&=~(1u<<11);barr
 assert 'hostCheckpoint("read64");'in usb and 'hostCheckpoint("write64");'in usb
 assert 'hostCheckpoint("before-power-state",true,false);'in usb and 'hostCheckpoint("poll",false,true);'in usb
 assert 'else if(!releaseTiReset())return false;'in board
-for marker in ['GUSB2PHYCFG=%x','GUSB3PIPECTL=%x','GUCTL2=%x','PORTPMSC1=%x','PORTPMSC2=%x','host-event reason=','first-U3','first-HCE','kHostEventDumpCount=16','kUsbPortDebugOptions=0x40000019u']:assert marker in usb
+for marker in ['GUSB2PHYCFG=%x','GUSB3PIPECTL=%x','GUCTL2=%x','PORTPMSC1=%x','PORTPMSC2=%x','host-event reason=','first-U3','first-HCE','kHostEventDumpCount=16','kUsbPortDebugOptions=0x40000119u']:assert marker in usb
 assert 'pin(kRx,3u);'in bt and '(2u<<2)|(1u<<4)|(1u<<1)|1u' in bt and 'constexpr uint32_t kUartActive[]={4u,5u,7u,4u}'in bt
 assert 'stage=ibs wake-ind='in bt
 

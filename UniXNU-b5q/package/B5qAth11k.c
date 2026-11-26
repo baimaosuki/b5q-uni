@@ -85,6 +85,27 @@ static u32 b5q_mhi_read(struct mhi_controller *controller,void __iomem *base,u32
 static u32 b5q_ring_read(volatile u32 *value) {
     return value?*value:UINT32_MAX;
 }
+#define B5Q_WCN6855_ASSERT_PC_ADDR 0x016cc148u
+#define B5Q_WCN6855_ASSERT_MSG_ADDR 0x016cc150u
+#define B5Q_WCN6855_ASSERT_FMT_ADDR 0x016cc94cu
+#define B5Q_WCN6855_ASSERT_LINE_ADDR 0x016cc950u
+
+static void b5q_sram_assert_dump(struct ath11k_base *ab,u32 mhi_status) {
+    if(mhi_status==UINT32_MAX||!ab||!ab->mem||!ab->pci.ops||!ab->pci.ops->window_read32)return;
+    const u32 pc=ab->pci.ops->window_read32(ab,B5Q_WCN6855_ASSERT_PC_ADDR);
+    const u32 fmt=ab->pci.ops->window_read32(ab,B5Q_WCN6855_ASSERT_FMT_ADDR);
+    const u32 line=ab->pci.ops->window_read32(ab,B5Q_WCN6855_ASSERT_LINE_ADDR);
+    u32 words[16];char msg[65]={0};
+    for(unsigned i=0;i<16;i++)words[i]=ab->pci.ops->window_read32(ab,B5Q_WCN6855_ASSERT_MSG_ADDR+4u*i);
+    for(unsigned i=0;i<64;i++){
+        const unsigned char c=(words[i/4]>>((i%4)*8))&0xffu;
+        if(!c)break;
+        msg[i]=c>=0x20&&c<=0x7e?(char)c:'.';
+    }
+    lx_log(3,"B5qWifi: sram-assert pc=%08x line=%u fmt=%08x raw=%08x:%08x:%08x:%08x",
+        pc,line,fmt,words[0],words[1],words[2],words[3]);
+    lx_log(3,"B5qWifi: sram-assert-msg='%s'",msg);
+}
 static void b5q_ce_dump(struct ath11k_base *ab,unsigned ce) {
     if(!ab||ce>=ab->hw_params.ce_count)return;
     struct ath11k_ce_pipe *pipe=&ab->ce.ce_pipe[ce];
@@ -120,6 +141,7 @@ static void b5q_ath11k_dump_state(struct mhi_controller *controller,const char *
     b5q_ath11k_trace_dump();
     struct ath11k_base *ab=controller&&controller->cntrl_dev?dev_get_drvdata(controller->cntrl_dev):NULL;
     b5q_ce_dump(ab,2);b5q_ce_dump(ab,3);
+    b5q_sram_assert_dump(ab,status);
 }
 
 void nw_wifi_hw_ready(struct ieee80211_hw *hw){hardware=hw;}

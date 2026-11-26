@@ -1,0 +1,100 @@
+{
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "base_commit": "b474c660773f1df8cae4fa2721630bfbaf2d0119",
+  "inputs": {
+    "request_sha256": "b5a327f7f08bbaca0c52ce20d5401db2a64fdf4a617817da7ce264decf929ff7",
+    "review11_log_sha256": "3690c23686b73802dd094f30fa496fc79f5efaad3faa92ebbb2f95ee6343bd75",
+    "upstream_ArmCpu_sha256": "2518e60ea9cffce9664a1761e9280d18e6a3d9d0e0beb7756ac7b71d1b14edfd",
+    "board_toml_sha256": "db7b02ca1e4c3d6a591304e863e5d5e08415c2aa3dd6e5fae18d649d045f5dc4",
+    "WcnPower_sha256": "81a6ed3e6e95fa2b6799ff244b1b792182ef0d95dc666f3ec4eb9b8aa19d4999"
+  },
+  "findings": {
+    "cpu": "Both upstream checkouts have identical ArmCpu.cpp. SPI1008..1015 share IGROUPR31/ICFGR63; existing spiIpiConfigure and GICD_CTLR updates perform unprotected RMW, startThread launches processor_start concurrently, and smp_running increments were non-atomic. The device-owned tool patch serializes distributor RMW with an early-safe atomic lock, prepares shared IPI words on CPU0, uses a sleepable start mutex and atomically counts running CPUs. No upstream checkout is edited.",
+    "amfi": "The previous override incorrectly returned before inspecting error_out whenever the real syscall returned zero. The helper now reads the binary-qualified 0x404 output and overrides only a nonzero syscall return or output error_code. Successful calls remain untouched; copy faults are handled, messages are sanitized to at most48 bytes, and only the first32 failures are logged.",
+    "usb": "The physical log captures first-U3 at line2548 before port-debug at2570 and EP0 transfer completion27. Host startup now configures this directly, late ports are covered by polling, and host/ports/devices use0x40000119. Port minimum power3 is requested outside setPowerState; duplicate success logs are suppressed and repeated failure logs cap at4 per port. The per-write full DMA dump is removed while first-HSE/HCE/U3 and16TRB capture remain.",
+    "wifi": "The actual supplied log records WMI20493 at49712ms, then MHI fatal and BHI_ERRDBG2=cafecace, not0x0ab6. Line2742 is therefore not claimed as measured from this file. The requested Q6 SRAM addresses are read through the existing window_read32 operation without MHI wakeup; PC/format/line and64 little-endian message bytes are bounded and sanitized, shared by fatal and timeout diagnostics before crash flush. No WMI command is skipped."
+  },
+  "verification": [
+    "PASS review12 actual ArmCpu patch --fuzz=0 plus git apply --check in both upstream trees",
+    "PASS8-thread20-round GICD test with100configurations per core per round; production atomics and serialized start wrapper under ASan/UBSan",
+    "PASS complete patched ArmCpu arm64e compile using pinned source-private declarations",
+    "PASS applied AMFI helper C11 ASan/UBSan for zero-return failure, success, copy faults, policy gates and32-log cap",
+    "PASS production SRAM helper C11 ASan/UBSan for19window reads,ASCII sanitization,64-byte termination and invalid-state guards",
+    "PASS production USB configureHostPorts C++17 ASan/UBSan for immediate/late ports,idempotence,power retry and4-log cap",
+    "PASS full pinned ath11k target build and standalone USB arm64e427-slot compile with no unresolved imports",
+    "PASS complete pre-ci-v33d31/31 including review12 and the exact source-bound P0-P4 receipt; P0 itself43/43. P0-P4 was rebuilt in the first aggregate attempt before the additional zeroed-resume test expectation was corrected",
+    "PASS ordered XNU patch replay144/144 and independent DP target compile with no unresolved integration symbols",
+    "PASS wireless124objects/68PAC and wireless+ADSP158objects/79PAC,no unresolved symbols or EL1 apps_smmu materializations",
+    "PASS new patched ArmCpu object350imports closed against the real review11 core; new ArmCpu USB/GMU/extended callback PAC passes",
+    "PASS52-area porting schema,exact1023-byte arguments,unchanged redline sources andgit diff --check"
+  ],
+  "changed_files": [
+    ".github/workflows/b5q-p0-p5.yml",
+    "UniXNU-b5q/patches/tools/b5q-armcpu-spi-ipi-lock.patch",
+    "UniXNU-b5q/patches/xnu/b5q-amfi-lwcr.patch",
+    "UniXNU-b5q/package/QcomDwc3.cpp",
+    "UniXNU-b5q/package/B5qAth11k.c",
+    "tests/b5q-ufs/test-review10.py",
+    "tests/b5q-ufs/test-review11.py",
+    "tests/b5q-ufs/test-review12.py",
+    "scripts/b5q-install/pre-ci-v33d.py",
+    "UniXNU-b5q/reports/xnu-patch-application.json",
+    "UniXNU-b5q/reports/review12-source-audit.json",
+    "UniXNU-b5q/porting.toml (review12 area only)"
+  ],
+  "source_sha256": {
+    "UniXNU-b5q/patches/tools/b5q-armcpu-spi-ipi-lock.patch": "34748d77126057edae6499484fd28fb06401e6a6fbd5570c55505f7ef27494d3",
+    "UniXNU-b5q/patches/xnu/b5q-amfi-lwcr.patch": "3a701c7d925724718f27c4f22079d904fe65d25b8c23debcc5947f2e7b0319c0",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "f29c9bd8470e3f1033f2ec7513de6bfd775982ed07861eef1a47907a5e0097fe",
+    "UniXNU-b5q/package/B5qAth11k.c": "e8e6e09f351b943a31783f44adb77fde1885e0b5baa693c555a0f2b1a0e655b9",
+    "tests/b5q-ufs/test-review12.py": "26600178cdfc5136d37f742dfd7b1db5b025a6b5cd1399c2cf87ba43af85b10d",
+    ".github/workflows/b5q-p0-p5.yml": "b8117602b13ad4bf804127f8b66073bc3a6e5348888ef2faf56537a48f0118b1"
+  },
+  "receipts": {
+    "local_gates": {
+      "path": "artifacts/b5q-review12-local/v33d-local-gates.json",
+      "sha256": "eca86f00e35575a19a9b7af7f0c681c45c7447a1533e1851e60e2fdcdef8d0a5"
+    },
+    "review12_tests": {
+      "path": "artifacts/b5q-review12-local/review12-tests.json",
+      "sha256": "848b321c58b011e3d7ddceec40e2a89b3ff751ed55688b4749acbebd3020af9e"
+    },
+    "new_ArmCpu_PAC": {
+      "path": "artifacts/b5q-review12-local/ArmCpu-PAC.json",
+      "sha256": "e58ed8e5ff3a26879a7529b49863fd7563c589981c207ac8ca48207072509ec4"
+    },
+    "full_ath11k_compile": {
+      "path": "artifacts/b5q-review12-local/wifi-full/compile-result.json",
+      "sha256": "bee1dae4371250783ae6b52d830e735292f2594ec93f5729159183c78acc797e"
+    },
+    "wireless": {
+      "path": "artifacts/b5q-review12-local/wireless-closure.json",
+      "sha256": "6047b18445614d1d9b3c4c61e963d6c0aa44996890c5ef0e8d3bd54426f2948c"
+    },
+    "wireless_ADSP": {
+      "path": "artifacts/b5q-review12-local/wireless-ADSP-closure.json",
+      "sha256": "8f47430c88209189c21cdb09c16f25bfd00b7d70be92c2672fcff006b2c9aab2"
+    },
+    "XNU_patch_replay": {
+      "path": "UniXNU-b5q/reports/xnu-patch-application.json",
+      "sha256": "310fa63e4aacb9597e4b57a486f782a554417310d8305b7bf291b8cc31a2fe96"
+    },
+    "DP_target": {
+      "path": "artifacts/b5q-p5-work/target/report.json",
+      "sha256": "2cf9a5804972d8489237298596a3941e5ded5eba24cd607839d2c6364846da8d"
+    }
+  },
+  "first_failed_test": {
+    "path": "artifacts/b5q-review12-local/first-review12-failure.log",
+    "sha256": "e2c6d690b095b4c9bbacd27843a4d90dcf889954ffc32af98e337879e2688613",
+    "cause": "The extra zeroed-resume fixture initially expected all16 ICFGR slots; SPI1008..1015 configure only the lower8 slots. Fixed expectation to0x0000aaaa for per-core resume,while CPU0 preconfiguration remains the specified0xaaaaaaaa. Production code unchanged."
+  },
+  "kernel_args_bytes": 1023,
+  "full_XNU_linked": false,
+  "hardware_verified": false,
+  "commit_performed": false,
+  "push_performed": false,
+  "ci_triggered": false,
+  "image_generated": false,
+  "phone_accessed": false
+}

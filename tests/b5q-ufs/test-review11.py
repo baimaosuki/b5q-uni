@@ -64,7 +64,7 @@ for body in (restore,role):
 assert all(x in restore for x in ('*guctl|=kGuctlSprsCtrlTransEn','*guctl1=(*guctl1&~(7u<<21))|kGuctl1Host','*guctl2|=kGuctl2Host'))
 assert '1u<<31' not in role and 'phyInit()' not in role and role.index('*gctl&=~(1u<<11)')<role.index('repeater(false')
 assert 'kHostEventDumpCount=16' in usb and 'first-HCE' in usb and 'GUCTL2=%x' in usb
-assert 'kUsbPortDebugOptions=0x40000019u' in usb and '"kUSBDebugOptions"' in usb and 'metaCast("AppleUSBHostPort")' in usb
+assert 'kUsbPortDebugOptions=0x40000119u' in usb and '"kUSBDebugOptions"' in usb and 'metaCast("AppleUSBHostPort")' in usb
 set_power=usb[usb.index('IOReturn setPowerState(unsigned long state'):usb.index('// write-64-hi-lo-quirk')]
 write64=usb[usb.index('void XHCI_WRITE64('):usb.index('\n    }\n};',usb.index('void XHCI_WRITE64('))]
 assert 'b5q_log_sync' not in set_power and 'b5q_log_sync' not in write64
@@ -151,7 +151,8 @@ int main(void){struct proc p={42};struct b5q_amfi_constraint_error e={.error_cod
  struct b5q_amfi_constraint_args a={0};a.error_out=(user_addr_t)(uintptr_t)&e;a.error_out_size=sizeof(e);
  struct __mac_syscall_args u={"AMFI",102,(user_addr_t)(uintptr_t)&a};
  assert(b5q_amfi_constraint_override(&p,&u,"AMFI",5));assert(!e.error_code&&!e.message[0]);
- e.error_code=7;assert(!b5q_amfi_constraint_override(&p,&u,"AMFI",0));assert(e.error_code==7);
+ e.error_code=7;assert(b5q_amfi_constraint_override(&p,&u,"AMFI",0));assert(!e.error_code);
+ e.error_code=0;assert(!b5q_amfi_constraint_override(&p,&u,"AMFI",0));assert(!e.error_code);
  assert(!b5q_amfi_constraint_override(&p,&u,"Sandbox",5));u.call=101;assert(!b5q_amfi_constraint_override(&p,&u,"AMFI",5));
  u.call=102;a.error_out_size=4;assert(!b5q_amfi_constraint_override(&p,&u,"AMFI",5));enabled=0;a.error_out_size=0x404;assert(!b5q_amfi_constraint_override(&p,&u,"AMFI",5));
  puts("PASS applied XNU AMFI102 helper: C11/ASan/UBSan, exact64/0x404 ABI, real-call-first failure-only and bounded output clear");}

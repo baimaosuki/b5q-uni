@@ -18,7 +18,7 @@ index 1edb7baf..510b4960 100644
  #if CONFIG_MACF
  #include <security/mac.h>
  #include <security/mac_policy.h>
-@@ -118,6 +120,51 @@
+@@ -118,6 +120,68 @@
  #define MB_DEBUG
  #define DPRINTF(x)
  #endif
@@ -49,20 +49,37 @@ index 1edb7baf..510b4960 100644
 +	struct b5q_amfi_constraint_error output = { 0 };
 +	uint32_t enabled = 0;
 +
-+	if (original_error == 0 || uap->call != 102 || strcmp(target, "AMFI") != 0 ||
++	if (uap->call != 102 || strcmp(target, "AMFI") != 0 ||
 +	    !PE_parse_boot_argn("no-lc", &enabled, sizeof(enabled)) || enabled == 0 ||
 +	    copyin(uap->arg, &args, sizeof(args)) != 0 || args.error_out == 0 ||
 +	    args.error_out_size != sizeof(output)) {
 +		return false;
 +	}
-+	(void)copyin(args.error_out, &output.error_code, sizeof(output.error_code));
++	int copy_err = copyin(args.error_out, &output.error_code, sizeof(output.error_code));
++	if (copy_err != 0) {
++		if (original_error == 0) {
++			return false;
++		}
++		output.error_code = -1;
++	}
++	if (original_error == 0 && output.error_code == 0) {
++		return false;
++	}
 +	SInt32 slot = OSIncrementAtomic(&logged);
 +	if (slot < 32) {
 +		char name[MAXCOMLEN + 1] = { 0 };
 +		int pid = proc_pid(p);
 +		proc_name(pid, name, sizeof(name));
-+		printf("B5qAMFI: call=102 pid=%d name=%s ret=%d error-code=%d override=1\n",
-+		    pid, name, original_error, output.error_code);
++		char message[49] = { 0 };
++		if (copyin(args.error_out + __builtin_offsetof(struct b5q_amfi_constraint_error, message),
++		    message, sizeof(message) - 1) != 0) {
++			bzero(message, sizeof(message));
++		}
++		for (unsigned i = 0; i < sizeof(message) - 1 && message[i]; i++) {
++			if ((unsigned char)message[i] < 0x20 || (unsigned char)message[i] > 0x7e) { message[i] = '.'; }
++		}
++		printf("B5qAMFI: call=102 pid=%d name=%s ret=%d error-code=%d override=1 msg=%.48s\n",
++		    pid, name, original_error, output.error_code, message);
 +	}
 +	bzero(&output, sizeof(output));
 +	return copyout(&output, args.error_out, sizeof(output)) == 0;
@@ -70,7 +87,7 @@ index 1edb7baf..510b4960 100644
 +
  #if CONFIG_MACF
  SYSCTL_NODE(, OID_AUTO, security, CTLFLAG_RW | CTLFLAG_LOCKED, 0,
-@@ -1613,7 +1660,10 @@ __mac_syscall(proc_t p, struct __mac_syscall_args *uap, int *retv __unused)
+@@ -1613,7 +1677,10 @@ __mac_syscall(proc_t p, struct __mac_syscall_args *uap, int *retv __unused)
  		mac_policy_list_unbusy();
  	}
  
