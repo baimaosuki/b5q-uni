@@ -57,8 +57,7 @@
     "com.apple.siriactionsd",
     "com.apple.siriinferenced",
     "com.apple.siriknowledged",
-    "com.apple.talagent",
-    "com.apple.wallpaper.agent"
+    "com.apple.talagent"
   ],
   "bundled": [
     "com.apple.ReportCrashService",

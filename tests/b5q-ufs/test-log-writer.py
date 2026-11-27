@@ -69,6 +69,7 @@ static void clock_interval_to_deadline(unsigned n,int,uint64_t*d){*d=ticks+n;}
 static void thread_yield_internal(int);
 static void thread_terminate(thread_t){throw 1;}
 static thread_t current_thread(){return nullptr;}
+static void thread_set_thread_name(thread_t t,const char *name){assert(!t&&!strcmp(name,"b5q-log-ufs"));}
 static void thread_deallocate(thread_t){}
 static int kernel_thread_start(void(*f)(void*,int),void*p,thread_t*t){*t=nullptr;f(p,0);return 0;}
 static std::string bootargs="b5q-log=1 b5q-log-token=411839cbaebac4088c251c0ea57579a2";

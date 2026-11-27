@@ -58,7 +58,9 @@ def checked_seed(body, metadata, baseline, stand_in=None):
     # Only the exact APFS image already read back is eligible for a no-op.
     # Self-declared policy metadata must never qualify an arbitrary seed.
     reusable = (digest == MIGRATED_SEED_HASH
-                and metadata.get("launchd_policy") == policies()
+                and metadata.get("launchd_policy") == {
+                    name: sorted(set(labels + ["com.apple.wallpaper.agent"]))
+                    for name, labels in policies().items()}
                 and metadata.get("launchd_policy_migrated") is True
                 and metadata.get("board_stand_in") == {
                     "path": "/private/var/ngpu/bin/b5q-absentd", "sha256": ABSENTD_HASH}
@@ -87,7 +89,7 @@ def main():
     if reusable:
         shutil.copyfile(seed, out / "data.dbr")
         (out / "data-seed.json").write_text(json.dumps(metadata, indent=2) + "\n")
-        print("Reused SHA256-pinned, APFS-verified current 58/25 Data seed unchanged")
+        print("Reused SHA256-pinned, APFS-verified qualified 58/25 Data seed unchanged; pre-launchd applies current57/24 policy")
         return
     with tempfile.TemporaryDirectory(prefix="b5q-launchd-seed-") as temp:
         temp = Path(temp).resolve()

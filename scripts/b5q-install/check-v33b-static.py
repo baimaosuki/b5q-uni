@@ -100,7 +100,7 @@ sroot=read_fdt(subprocess.check_output(['dtc','-q','-I','dts','-O','dtb','-i',st
 broot=read_fdt(dtb.read_bytes());root_delta=sorted(set(n.name for n in sroot.children)-set(n.name for n in broot.children))
 assert not root_delta,root_delta
 policy=load(R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py');lists=policy.policies();assert all('com.apple.iconservices.iconservicesagent'not in v for v in lists.values())
-assert (len(lists['disabled.plist']),len(lists['disabled.501.plist']))==(58,25)
+assert (len(lists['disabled.plist']),len(lists['disabled.501.plist']))==(57,24)
 assert 'com.apple.watchdogd'in lists['disabled.plist']
 for banned in ['com.apple.WindowServer','com.apple.loginwindow','com.apple.Dock','com.apple.finder']:
  assert all(banned not in v for v in lists.values())
@@ -114,4 +114,4 @@ report=dict(passed=True,hardware_verified=False,memory_mappings=mappings,ADT_loo
  sheng_revision=subprocess.check_output(['git','-C',str(R/'sources/UniXNU-sheng'),'rev-parse','HEAD'],text=True).strip(),
  sheng_shared_value_changes={k:dict(sheng=v[0],b5q=v[1],resolution=value_resolutions[k])for k,v in value_changes.items()},adapted_MMIO_source=dict(path=str(legacy_unselected),sha256=hashlib.sha256(legacy_unselected.read_bytes()).hexdigest(),reason='Actual linked GMU register service uses explicit Inhibit through source adapter; actual returned map options checked'),source_sha256={str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},sheng_missing_args_resolved=missing,missing_root_nodes=root_delta,component_omissions={v:component_resolutions[v]for v in component_omissions},policy_counts={k:len(v)for k,v in lists.items()},iconservices_enabled=True,
  sheng_macOS_removes_ipad_launchd_environment=True,menu_args_bytes=lengths,scope='Actual compiled DTB and generated ADT, every board source map/fromPath/chosen inventory; selected component MMIO sources audited separately by target-object gates')
-a.out.write_text(json.dumps(report,indent=2)+'\n');print('PASS explicit cache/source scan, realDTB/ADT lookups, macOSshengdiff,iconservices58/25,allmenu1024Bbounds')
+a.out.write_text(json.dumps(report,indent=2)+'\n');print('PASS explicit cache/source scan, realDTB/ADT lookups, macOSshengdiff,iconservices-and-wallpaper57/24,allmenu1024Bbounds')

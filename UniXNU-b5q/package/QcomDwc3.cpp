@@ -817,11 +817,13 @@ constexpr unsigned kHostEventDumpCount=16;
 Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
 QcomDwc3Xhci *gHost;
+uint32_t gHostEpoch;
 bool gFirstCc27Seen=false;
 static thread_t gHostIrqThread;
 static volatile bool gHostIrqStop, gHostIrqRunning;
 static B5qUsbIrq::Bridge gHostIrqBridge;
 static void hostIrqBridge(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-usb-irq");
     __atomic_store_n(&gHostIrqRunning,true,__ATOMIC_RELEASE);
     unsigned logged=0;
     while(!__atomic_load_n(&gHostIrqStop,__ATOMIC_ACQUIRE)){
@@ -913,6 +915,7 @@ void cableChanged() {
     IOLockUnlock(gRoleLock);
 }
 void forceHostThread(void *seconds, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-usb-force");
     IOSleep((uint32_t)reinterpret_cast<uintptr_t>(seconds) * 1000);
     __atomic_store_n(&gForceHost,true,__ATOMIC_RELEASE);
     cableChanged();
@@ -934,18 +937,37 @@ void leaveRole(int role) {
         native_usb_stats[20] = (uint32_t)gController->cable(false);
         for (unsigned i = 0; i < 200 && native_usb_stats[13] == before; ++i) IOSleep(10);
     } else if (role == kRoleHost) {
-        b5q_usb_otg(false);
+        // Keep VBUS and all interrupt paths live through Apple's synchronous
+        // halt/endpoint teardown. Taking either away first strands its waits.
+        dmaDiagnostics("before-host-halt");
         // The bridge borrows gHostNub and the xHCI mapping. It must be gone
         // before terminate/release drops either; a stuck thread keeps the
         // host objects alive rather than risk a use-after-free.
-        if(!stopHostIrqBridge()){IOLog("qcom-dwc3: host teardown deferred: irq bridge did not stop\n");return;}
         // Detach the public power children before the host stack tears down;
         // handlePMstop removes them in the PM workloop before terminate.
         releaseHostPortPowerHolds();
-        if(!gHostNub)return;
-        // A removed PCI controller's path: the family stops its devices and the controller.
+        if(!gHostNub){b5q_usb_otg(false);return;}
+        // Retain the child while the bridge borrows it; terminate may drop
+        // the provider's child reference before the bridge has exited.
+        static QcomDwc3Xhci *retainedHost;
+        if(!retainedHost){
+            retainedHost=gHost;if(retainedHost)retainedHost->retain();
+            if(!gHostNub->terminate(kIOServiceSynchronous)){
+                if(retainedHost){retainedHost->release();retainedHost=nullptr;}
+                IOLog("qcom-dwc3: host teardown deferred: synchronous termination refused\n");return;
+            }
+        }
+        const unsigned op=gXhciRegs.va?gXhciRegs.va[0]&255u:0;
+        const uint32_t cmd=op?gXhciRegs.va[op/4]:0,sts=op?gXhciRegs.va[(op+4)/4]:0;
+        IOLog("qcom-dwc3: host-halt cmd=%x sts=%x halted=%u portsc1=%x\n",cmd,sts,!!(sts&1u),op?gXhciRegs.va[(op+0x400)/4]:0);
+        if(!stopHostIrqBridge()){
+            IOLog("qcom-dwc3: host teardown deferred: irq bridge did not stop\n");
+            // Keep retainedHost alive with the existing deferred objects.
+            return;
+        }
+        if(retainedHost){retainedHost->release();retainedHost=nullptr;}
         QcomDwc3Nub::route(nullptr);
-        gHostNub->terminate(kIOServiceSynchronous);
+        b5q_usb_otg(false);
         gHostNub->release();
         gHostNub = nullptr; gHost = nullptr;
         gAppliedCable=B5qMax77705::Cable{};
@@ -986,6 +1008,7 @@ bool followOrientation() {
     return false;
 }
 void enterHost() {
+    ++gHostEpoch;
     QcomDwc3Nub *nub = OSTypeAlloc(QcomDwc3Nub);
     // DWC3_XHCI_REGS_END: the host registers below the global ones.
     IODeviceMemory *range = IODeviceMemory::withRange(kCore, 0x8000);
@@ -1117,6 +1140,8 @@ void dmaDiagnostics(const char *reason){
             });
         if(!ok)IOLog("qcom-dwc3: host-td reason=%s base=%llx unavailable\n",reason,base);
     }
+    IOLog("qcom-dwc3: host-frame reason=%s GCTL=%x GUCTL=%x GUCTL1=%x GUCTL2=%x GFLADJ=%x GUSB2PHYCFG=%x\n",
+        reason,gGlobals.va[0x110/4],gGlobals.va[0x12c/4],gGlobals.va[0x11c/4],gGlobals.va[0x60c/4],gGlobals.va[0x630/4],gGlobals.va[0x200/4]);
     const unsigned csz=((gXhciRegs.va[0x10/4]>>2)&1u)?64u:32u;
     B5qUsbHostEvent::Slot1 ctx{};
     if(B5qUsbHostEvent::slot1(dcbaa&~63ULL,csz,
@@ -1125,6 +1150,23 @@ void dmaDiagnostics(const char *reason){
             reason,ctx.address,csz,uint32_t(ctx.slot[0]),uint32_t(ctx.slot[0]>>32),uint32_t(ctx.slot[1]),uint32_t(ctx.slot[1]>>32),
             uint32_t(ctx.ep0[0]),uint32_t(ctx.ep0[0]>>32),uint32_t(ctx.ep0[1]),uint32_t(ctx.ep0[1]>>32));
     else IOLog("qcom-dwc3: host-slot1 reason=%s unavailable dcbaa=%llx csz=%u\n",reason,dcbaa,csz);
+    B5qUsbHostEvent::Endpoint hubEp{};
+    if(B5qUsbHostEvent::endpoint(dcbaa&~63ULL,csz,1,3,[](uint64_t pa,uint64_t &v){return dmaRead64(pa,v);},hubEp))
+        IOLog("qcom-dwc3: host-hub-ep reason=%s ep=3 ctx=%llx dw=%08x:%08x:%08x:%08x\n",reason,hubEp.address,
+            uint32_t(hubEp.words[0]),uint32_t(hubEp.words[0]>>32),uint32_t(hubEp.words[1]),uint32_t(hubEp.words[1]>>32));
+    const unsigned runtime=gXhciRegs.va[0x18/4]&~31u;
+    for(unsigned index=0;index<2;index++){
+        B5qUsbHostEvent::Interrupter ir{};unsigned statuses=0;
+        if(!B5qUsbHostEvent::interrupter(runtime,index,kXhciRegisterBytes,[](unsigned off){return gXhciRegs.va[off/4];},ir))continue;
+        B5qUsbHostEvent::latest(ir.erst&~63ULL,ir.erstsz,ir.erdp,16,
+            [](uint64_t pa,uint64_t &v){return dmaRead64(pa,v);},
+            [&](unsigned,unsigned,const B5qUsbHostEvent::Event &e){
+                unsigned port=0;uint32_t status=0;
+                if(statuses<4 && B5qUsbHostEvent::hubPortStatus(e,[](uint64_t pa,uint64_t &v){return dmaRead64(pa,v);},port,status)){
+                    ++statuses;IOLog("qcom-dwc3: hub-port-status reason=%s port=%u status=%08x ir=%u\n",reason,port,status,index);
+                }
+            });
+    }
     uint64_t slot2=0,words[4]{};
     const bool slot2ok=dcbaa&&dmaRead64((dcbaa&~63ULL)+16u,slot2)&&slot2&&!(slot2&63u)&&
         slot2<=UINT64_MAX-csz-16u&&dmaRead64(slot2,words[0])&&dmaRead64(slot2+8,words[1])&&
@@ -1295,15 +1337,32 @@ void hostStats() {
     }
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
     const uint64_t dcbaa=uint64_t(op[0x30/4])|(uint64_t(op[0x34/4])<<32);
+    static uint32_t hubEpoch;static bool hubConfigured;
+    if(hubEpoch!=gHostEpoch){hubEpoch=gHostEpoch;hubConfigured=false;}
+    B5qUsbHostEvent::Endpoint ep{};
+    const unsigned csz=((gXhciRegs.va[0x10/4]>>2)&1u)?64u:32u;
+    if(!hubConfigured && B5qUsbHostEvent::endpoint(dcbaa&~63ULL,csz,1,3,
+        [](uint64_t pa,uint64_t &v){return dmaRead64(pa,v);},ep) && (ep.words[0]&7u)==1u){
+        hubConfigured=true;
+        IOLog("qcom-dwc3: hub-configured slot=1 ep=3 ctx=%llx dw=%08x:%08x:%08x:%08x dequeue=%llx\n",
+            ep.address,uint32_t(ep.words[0]),uint32_t(ep.words[0]>>32),uint32_t(ep.words[1]),uint32_t(ep.words[1]>>32),ep.words[1]&~15ULL);
+        dmaDiagnostics("hub-configured");
+    }
     const unsigned rt=gXhciRegs.va[0x18/4]&~31u;
+    static uint64_t nextHostSummary=0;static uint32_t lastSummarySts,lastSummaryCmd,summaryEpoch;
+    if(summaryEpoch!=gHostEpoch){summaryEpoch=gHostEpoch;nextHostSummary=0;}
+    uint64_t summaryNow=0;absolutetime_to_nanoseconds(mach_absolute_time(),&summaryNow);
+    const bool summary=summaryNow>=nextHostSummary || portEdge ||
+        ((lastSummarySts^native_usb_stats[48])&~8u) || lastSummaryCmd!=native_usb_stats[47];
+    if(summary){nextHostSummary=summaryNow+30000000000ULL;lastSummarySts=native_usb_stats[48];lastSummaryCmd=native_usb_stats[47];}
     for(unsigned irIndex=0;irIndex<2;irIndex++){
         B5qUsbHostEvent::Interrupter ir{};
         if(!B5qUsbHostEvent::interrupter(rt,irIndex,kXhciRegisterBytes,
            [](unsigned off){return gXhciRegs.va[off/4];},ir))continue;
-        IOLog("qcom-dwc3: host DMA64=%u crcr=%llx dcbaa=%llx erst=%llx iman=%x routed=%u enabled=%u HCSPARAMS1=%x ir=%u ERSTSZ=%u ERSTBA=%llx ERDP=%llx\n",
+        if(summary)IOLog("qcom-dwc3: host DMA64=%u crcr=%llx dcbaa=%llx erst=%llx iman=%x routed=%u enabled=%u HCSPARAMS1=%x ir=%u ERSTSZ=%u ERSTBA=%llx ERDP=%llx\n",
           gXhciRegs.va[0x10/4]&1,crcr,dcbaa,ir.erst,ir.iman,gActiveNub==gHostNub,gLineAttached,
           gXhciRegs.va[1],irIndex,ir.erstsz,ir.erst,ir.erdp);
-        IOLog("qcom-dwc3: host PORTSC1=%x PORTPMSC1=%x PORTSC2=%x PORTPMSC2=%x ERDP=%llx GSBUSCFG0=%x GUSB2PHYCFG=%x GUSB3PIPECTL=%x GUCTL=%x GUCTL1=%x GUCTL2=%x\n",
+        if(summary)IOLog("qcom-dwc3: host PORTSC1=%x PORTPMSC1=%x PORTSC2=%x PORTPMSC2=%x ERDP=%llx GSBUSCFG0=%x GUSB2PHYCFG=%x GUSB3PIPECTL=%x GUCTL=%x GUCTL1=%x GUCTL2=%x\n",
               native_usb_stats[49],op[0x404/4],native_usb_stats[50],op[0x414/4],ir.erdp,
               gGlobals.va?gGlobals.va[0x100/4]:0,gGlobals.va?gGlobals.va[0x200/4]:0,
               gGlobals.va?gGlobals.va[0x2c0/4]:0,gGlobals.va?gGlobals.va[0x12c/4]:0,
@@ -1401,15 +1460,15 @@ void hostStats() {
     }
     native_usb_stats[52] = count;
     if(count<previousDevices)portEdge=true;
-    previousDevices=count;
+    const bool deviceCountEdge=count!=previousDevices;previousDevices=count;
     if(portEdge&&edgeDumps<4){++edgeDumps;dmaDiagnostics("port-edge");}
-    IOLog("qcom-dwc3: host cmd=%x sts=%x EINT=%u HSE=%u devs=%u irq=%u storm=%u pwr=%u\n",native_usb_stats[47],native_usb_stats[48],!!(native_usb_stats[48]&8),!!(native_usb_stats[48]&4),count,native_usb_stats[11],gIrqStormed,gHost?unsigned(gHost->getPowerState()):0);
+    if(summary||deviceCountEdge)IOLog("qcom-dwc3: host cmd=%x sts=%x EINT=%u HSE=%u devs=%u irq=%u storm=%u pwr=%u\n",native_usb_stats[47],native_usb_stats[48],!!(native_usb_stats[48]&8),!!(native_usb_stats[48]&4),count,native_usb_stats[11],gIrqStormed,gHost?unsigned(gHost->getPowerState()):0);
     B5qUsbIrq::Snapshot ir0{},ir1{},ir2{};
     auto irRead=[](unsigned off){return gXhciRegs.va[off/4];};
     B5qUsbIrq::snapshot(rt,0,kXhciRegisterBytes,irRead,ir0);
     B5qUsbIrq::snapshot(rt,1,kXhciRegisterBytes,irRead,ir1);
     B5qUsbIrq::snapshot(rt,2,kXhciRegisterBytes,irRead,ir2);
-    IOLog("qcom-dwc3: host-ir ir0=%x/%llx ir1=%x/%llx ir2=%x/%llx secKicks=%u secIr1=%u secIr2=%u secNoFilter=%u secBusy=%u secDisabled=%u secBackoff=%u\n",
+    if(summary)IOLog("qcom-dwc3: host-ir ir0=%x/%llx ir1=%x/%llx ir2=%x/%llx secKicks=%u secIr1=%u secIr2=%u secNoFilter=%u secBusy=%u secDisabled=%u secBackoff=%u\n",
         ir0.iman,ir0.erdp,ir1.iman,ir1.erdp,ir2.iman,ir2.erdp,gHostIrqBridge.kicks,gHostIrqBridge.ir1,
         gHostIrqBridge.ir2,gHostIrqBridge.noFilter,gHostIrqBridge.busy,gHostIrqBridge.disabled,gHostIrqBridge.backoff);
     OSSafeReleaseNULL(settings);OSSafeReleaseNULL(debugMask);
@@ -1442,6 +1501,7 @@ void retryDevicePower() {
           native_usb_stats[20],native_usb_stats[12],gDevicePowerAcknowledged);
 }
 void roleThread(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-usb-role");
     const bool dpEnabled=B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)!=0;
     for (;;) {
         B5qDpPortState port{};
@@ -1526,6 +1586,7 @@ void roleThread(void *, wait_result_t) {
         }
         __atomic_store_n(&gDeviceStackAllowed,false,__ATOMIC_RELEASE);
         leaveRole(__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE));
+        if(gHostNub){IOSleep(100);continue;}
         __atomic_store_n(&gRoleApplied,kRoleNone,__ATOMIC_RELEASE);
         if(dpEnabled){
             gDpLanes=port.configured?port.lanes:0;

@@ -173,6 +173,7 @@ bool configureReports(TouchBus &bus){
 }
 
 void worker(void *,wait_result_t){
+    thread_set_thread_name(current_thread(),"b5q-touch");
  const char *stage="mapping";
  TlmmPins pins;
  TouchBus bus(pins);

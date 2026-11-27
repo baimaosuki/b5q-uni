@@ -10,12 +10,32 @@ def select_shared(source,out):
         replacement='static unsigned b5q_owner_logs;\nstatic void b5q_owner_trace(const char *event) {\n  if (__atomic_fetch_add(&b5q_owner_logs, 1u, __ATOMIC_RELAXED) < 64u)\n    lx_log(6, "B5qWifi: control-%s owner_connected=%u radio_enabled=%u generation=%u", event, !!owner, radio_enabled, generation);\n}\nint b5q_control_owner_connected(void) { return !!owner; }\nint b5q_control_radio_enabled(void) { return radio_enabled; }\nstatic void opened(void *unused, uint64_t session) { (void)unused; owner = session; generation++; snapshot_free(); b5q_owner_trace("opened"); }'
         if text.count(anchor)!=1:raise ValueError('Pinned control opened changed')
         text=text.replace(anchor,replacement)
+        anchor='static int native_request(void *unused, uint64_t session, const struct nw_control_view *request, struct nw_control_builder *reply) {\n  (void)unused;'
+        replacement=anchor+'''
+  static unsigned transitions;
+  unsigned op=request->header.operation;
+  if ((op==NW_CONTROL_AUTHENTICATE || op==NW_CONTROL_ASSOCIATE || op==NW_CONTROL_SET_KEY ||
+       op==NW_CONTROL_SET_PORT || op==NW_CONTROL_REPORT_RESULT) && transitions++<96)
+    lx_log(6,"B5qWifi: control-transition op=%u generation=%u",op,generation);'''
+        if text.count(anchor)!=1:raise ValueError('Pinned native request changed')
+        text=text.replace(anchor,replacement)
         anchor='  owner = 0; generation++; snapshot_free();'
         if text.count(anchor)!=1:raise ValueError('Pinned control closed changed')
         text=text.replace(anchor,anchor+' b5q_owner_trace("closed");')
         out.mkdir(parents=True,exist_ok=True);target=out/'b5q_nw_cfg80211_control.c';target.write_text(text);return target
     if source.name=='nw_mainline.c':
         text=source.read_text()
+        text=text.replace('static struct ui_request ui;', 'static struct ui_request ui;\nstatic u64 b5q_ui_since;')
+        for op in ['JOIN','DISCONNECT','SCAN']:
+            old='ui.operation = NW_CONTROL_'+op+'_REQUEST;'
+            text=text.replace(old,old+' b5q_ui_since=lx_now_ms();')
+        # An idle disconnect has nothing to stop. Avoid dev_close/dev_open and
+        # generation churn immediately before a real join.
+        text=text.replace('void nw_wifi_disconnect(void) {', '''void nw_wifi_disconnect(void) {
+  lx_shared_spin_lock(&boundary_lock);
+  bool idle=!ui.operation && !join_waiting && !scan_waiting && status.state<NW_STA_AUTH;
+  lx_shared_spin_unlock(&boundary_lock);
+  if (idle) return;''')
         anchor='void nw_wifi_disconnect(void) {'
         if text.count(anchor)!=1:raise ValueError('Pinned mainline disconnect ABI changed')
         text=text.replace(anchor,'''extern int b5q_control_owner_connected(void);
@@ -26,6 +46,18 @@ static void b5q_dispatch_trace(unsigned op,const char *where,int begin_rc,unsign
     lx_log(6, "B5qWifi: dispatch op=%u step=%s owner_connected=%u radio_enabled=%u begin_attempt_rc=%d begin_attempt_ms=%u event_send_rc=%d ui_cleared=%u reason=%s",
       op, where, b5q_control_owner_connected(), b5q_control_radio_enabled(), begin_rc, begin_ms, event_rc, cleared,
       begin_rc == -ENOTCONN ? "owner-or-interface-missing" : begin_rc == -ERFKILL ? "radio-off" : begin_rc ? "begin-attempt-failed" : begin_ms > 100u ? "slow-begin-attempt" : "ok");
+}
+extern void b5q_wifi_step_observe(unsigned op,u64 age);
+int b5q_wifi_requests_pending(void) {
+  lx_shared_spin_lock(&boundary_lock);
+  int pending=!!ui.operation || radio.pending || scan_ack_pending;
+  lx_shared_spin_unlock(&boundary_lock);return pending;
+}
+static void b5q_ui_watch(void) {
+  lx_shared_spin_lock(&boundary_lock);
+  unsigned op=ui.operation;u64 since=b5q_ui_since;
+  lx_shared_spin_unlock(&boundary_lock);
+  u64 now=lx_now_ms();if(op && now>=since && now-since>500)b5q_wifi_step_observe(op,now-since);
 }
 int nw_wifi_disconnect_pending(void) {
   lx_shared_spin_lock(&boundary_lock);
@@ -41,6 +73,8 @@ int nw_wifi_disconnect_pending(void) {
         text=text.replace('    if (!result) result = nw_cfg80211_event_send(&b);','    if (!result) result = nw_cfg80211_event_send(&b);event_rc=result;')
         text=text.replace('        memzero_explicit(&ui, sizeof(ui));','        memzero_explicit(&ui, sizeof(ui));ui_cleared=true;')
         text=text.replace('    memzero_explicit(bytes, sizeof(bytes));','    b5q_dispatch_trace(pending.operation,"after",begin_rc,begin_ms,event_rc,ui_cleared);\n    memzero_explicit(bytes, sizeof(bytes));')
+        text=text.replace('void nw_wifi_status_get(struct nw_wifi_status *out) { lx_shared_spin_lock(&boundary_lock); *out = status; lx_shared_spin_unlock(&boundary_lock); }',
+            'void nw_wifi_status_get(struct nw_wifi_status *out) { lx_shared_spin_lock(&boundary_lock); *out = status; lx_shared_spin_unlock(&boundary_lock); b5q_ui_watch(); }')
         out.mkdir(parents=True,exist_ok=True);target=out/'b5q_nw_mainline.c';target.write_text(text);return target
     if source.name!='scan.c' or source.parent.name!='cfg80211':return source
     text=source.read_text();old='!memcmp(elem->data + match_offset, match, match_len)'
@@ -101,6 +135,19 @@ static void probe_frame(const uint8_t *frame, size_t length, bool out) {
 }
 '''
     replacements=[
+        ('''    if (joinState) {
+      nw_wifi_status current; visible_status(current);
+      log(6, "wifi-net: state op %d %c ret %d sta %u pending %u res %d rssi %d", type,''',
+         '''    bool stateChanged=false;
+    if (joinState) {
+      nw_wifi_status current; visible_status(current);
+      static struct { bool valid;unsigned state,pending;int result,error; } last[256];
+      auto &previous=last[type];unsigned pending=__atomic_load_n(&gJoinPending,__ATOMIC_ACQUIRE);
+      stateChanged=!previous.valid || previous.state!=current.state || previous.pending!=pending || previous.result!=gAssocResult || previous.error!=e;
+      previous={true,current.state,pending,gAssocResult,e};
+      if (stateChanged || e) log(6, "wifi-net: state op %d %c ret %d sta %u pending %u res %d rssi %d", type,'''),
+        ('if (shown < 300 || first || joinState)',
+         'if ((type == kAssociateResult || type == kState) ? (first || stateChanged || e) : (shown < 300 || first || joinState))'),
         (log_anchor, log_anchor + probe_helpers),
         ('    const errno_t error = ifnet_input(gIf, packets, &inc);', '''    const errno_t error = ifnet_input(gIf, packets, &inc);
     // dlil's Skywalk path does not apply inc to the legacy ifnet counters.
@@ -209,7 +256,7 @@ static void probe_frame(const uint8_t *frame, size_t length, bool out) {
     (out/'network-source.json').write_text(json.dumps(dict(reference_revision=revision,
         original_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
         selected_sha256=hashlib.sha256(selected.read_bytes()).hexdigest(),
-        adaptation='Only unbuilt BootUiTrace stack/IPI diagnostics are omitted; Apple80211 events use a zero-filled live BSD interface name with en0 only as the pre-ifnet fallback; TX refreshes a delayed ifnet and guards statistics until it exists; Review16 adds bounded ifnet bind, frame, rx-flush and stall probes; Review17 accounts Skywalk RX and waits for actual queued disconnect consumption with bounded atomic leave/join probes; no fake stub or unresolved weak import; native network and real stall counters retained',
+        adaptation='Only unbuilt BootUiTrace stack/IPI diagnostics are omitted; Apple80211 events use a zero-filled live BSD interface name with en0 only as the pre-ifnet fallback; TX refreshes a delayed ifnet and guards statistics until it exists; Review16 adds bounded ifnet bind, frame, rx-flush and stall probes; Review20 bounds repeated state logs and includes UI/radio requests in the worker wake contract; Review17 accounts Skywalk RX and waits for actual queued disconnect consumption with bounded atomic leave/join probes; no fake stub or unresolved weak import; native network and real stall counters retained',
         interface_name_audit='The macOS event and runtime diagnostic paths are dynamic; remaining en0 literals are the explicit no-ifnet fallback, comments, and the non-macOS branch that allocates unit 0',
         headers={name:hashlib.sha256((out/name).read_bytes()).hexdigest()for name in headers}),indent=2)+'\n')
     return selected

@@ -1936,6 +1936,7 @@ void gpuPerfTick(uint64_t busyTicks) {
  lastBusy=busyTicks;
 }
 void gpuDcvsThread(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-gpu-dcvs");
     ShengGmuIo &io = gColdDevice.io;
     unsigned floor = bootArg("gpu-dcvs-min", 3);
     if (floor < 1) floor = 1;
@@ -2071,7 +2072,8 @@ void startGpuDcvs() {
 }
 void heartbeat();
 volatile bool gHeartbeatThread;
-void heartbeatThread(void *, wait_result_t) {heartbeat();}
+void heartbeatThread(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-gpu-hb");heartbeat();}
 // The heartbeat runs on its own thread from the end of the zap, so the GPU rows keep refreshing even if a self-test below
 // stalls (int-027's first BoAlloc never returned and froze rows 4..7).
 void startHeartbeatThread() {
@@ -2144,6 +2146,9 @@ void heartbeat() {
             char display[512]={};native_legacy_prepare_report(display,sizeof(display));
             IOLog("b5q-fb: %s fallbacks=%u last=%08x\n",display,native_legacy_gpu_fallbacks,native_legacy_gpu_last_status);
             sheng_cpufreq_poll();IOLog("B5qCpuFreq: %s\n",native_cpufreq_row);
+            const unsigned gpuLevel=native_gpu_dcvs[1];
+            IOLog("B5qGpu: dcvs busy_pct=%u level=%u mhz=%u transitions=%u errors=%u\n",native_gpu_dcvs[4],gpuLevel,
+                gpuLevel<=kGpuTop?kGpuMHz[gpuLevel]:0,native_gpu_dcvs[2],native_gpu_dcvs[3]);
             char thermal[256]={},level[256]={},clock[256]={};
             sheng_thermal_row(0,thermal,sizeof(thermal));sheng_thermal_level_row(level,sizeof(level));sheng_board_clock_row(clock,sizeof(clock));
             IOLog("B5qThermal: %s | %s\n",thermal,level);IOLog("B5qClock: %s\n",clock);
@@ -2399,6 +2404,7 @@ void gmuPrerequisites(const gpb_result &r) {
     }
 }
 void probeThread(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-gpu-probe");
     if (!b5q_gpu_firmware_bind()) {IOLog("B5qGpu: stage=Samsung-firmware-invalid\n"); thread_terminate(current_thread()); return;}
     registerExecObserver();
     unsigned mode = 0;

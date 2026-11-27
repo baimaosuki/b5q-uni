@@ -42,6 +42,28 @@ bool transfer(uint64_t base,Read read,Emit emit){
     }
     return true;
 }
+struct Endpoint {uint64_t address=0,words[2]{};};
+template<class Read>
+bool endpoint(uint64_t dcbaa,unsigned stride,unsigned slot,unsigned dci,Read read,Endpoint &out){
+    if(!dcbaa||(dcbaa&63u)||(stride!=32&&stride!=64)||!slot||slot>255||!dci||dci>31||dcbaa>UINT64_MAX-uint64_t(slot)*8u)return false;
+    uint64_t context=0;
+    if(!read(dcbaa+uint64_t(slot)*8,context)||!context||(context&63u)||context>UINT64_MAX-uint64_t(dci)*stride-16u)return false;
+    out.address=context+uint64_t(dci)*stride;
+    return read(out.address,out.words[0])&&read(out.address+8,out.words[1]);
+}
+template<class Read>
+bool hubPortStatus(const Event &e,Read read,unsigned &port,uint32_t &status){
+    // A successfully completed EP0 Status Stage identifies its preceding
+    // Data and Setup TRBs. Never read a buffer from a pending/failed transfer.
+    if(e.type!=32||e.completion!=1||e.slot!=1||e.endpoint!=1||(e.parameter&15u)||e.parameter<32||e.parameter>UINT64_MAX-8)return false;
+    uint64_t ctl=0,data=0,dc=0,setup=0,sc=0;
+    if(!read(e.parameter+8,ctl)||((ctl>>42)&63u)!=4u||
+       !read(e.parameter-16,data)||!read(e.parameter-8,dc)||((dc>>42)&63u)!=3u||(uint32_t(dc)&0x1ffffu)!=4u||
+       !read(e.parameter-32,setup)||!read(e.parameter-24,sc)||((sc>>42)&63u)!=2u||
+       (setup&0xffffu)!=0x00a3u||(setup>>48)!=4u||!data||data>UINT64_MAX-8)return false;
+    port=unsigned(setup>>32)&65535u;if(!port||port>255)return false;
+    uint64_t value=0;if(!read(data,value))return false;status=uint32_t(value);return true;
+}
 struct Slot1 {uint64_t address=0,slot[2]{},ep0[2]{};};
 template<class Read>
 bool slot1(uint64_t dcbaa,unsigned stride,Read read,Slot1 &out){

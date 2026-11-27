@@ -9,6 +9,7 @@ import argparse,hashlib,json,os,shlex,subprocess,sys,tempfile
 from pathlib import Path
 R=Path(__file__).resolve().parents[2]
 ap=argparse.ArgumentParser(description=__doc__)
+ap.add_argument('--review20',action='store_true',help='Also compile the read-only thread snapshot and process crash contexts')
 ap.add_argument('--out',type=Path,default=R/'artifacts/b5q-review19-local/cpu-target')
 a=ap.parse_args();W=a.out.resolve();W.mkdir(parents=True,exist_ok=True)
 sys.path.insert(0,str(R/'UniXNU/scripts'))
@@ -64,10 +65,52 @@ extern int proc_selfpid(void); /* Same existing declaration as thread.c. */
  assembly=run([llvm/'llvm-objdump','--disassemble',W/'cpu-burn-context.o']);assert assembly.returncode==0
  (W/'disassembly.txt').write_text(assembly.stdout)
  assert 'pacibsp' in assembly.stdout and ('retab' in assembly.stdout or 'autibsp' in assembly.stdout),'return PAC missing'
+ extra_targets={}
+ if a.review20:
+  stats=text[text.index('/* Read-only board diagnostics. task_info'):]
+  stats_source=W/'kernel-thread-snapshot.c'
+  stats_source.write_text(includes+'\n'+stats)
+  cmd=[str(llvm/'clang'),*flags,'-c',str(stats_source),'-o',str(W/'kernel-thread-snapshot.o')]
+  p=run(cmd);(W/'kernel-thread-snapshot.log').write_text(p.stdout+p.stderr)
+  if p.returncode:raise SystemExit(p.stderr)
+  assert not p.stdout and not p.stderr
+  exit_text=(x/'bsd/kern/kern_exit.c').read_text()
+  start=exit_text.index('/* Independent of the WindowServer quota/format above.')
+  end=exit_text.index('\n#endif',start)
+  crash=W/'process-crash-context.c'
+  crash.write_text('''#include <kern/misc_protos.h>
+#include <sys/param.h>
+#include <kern/thread.h>
+#include <vm/vm_protos.h>
+#include <sys/proc_internal.h>
+#include <sys/wait.h>
+#include <sys/signal.h>
+#include <sys/reason.h>
+#include <arm/thread.h>
+#include <kern/task.h>
+#include <kern/backtrace.h>
+#include <kdp/kdp_dyld.h>
+#include <libkern/copyio.h>
+#include <pexpert/pexpert.h>
+#include <stdatomic.h>
+'''+exit_text[start:end]+'\nvoid b5q_process_crash_target_check(proc_t p,int rv){b5q_process_crash_context(p,rv); }\n')
+  bsd_flags=[v for v in flags if v not in ['-DMACH_KERNEL_PRIVATE=1','-DMACH_KERNEL=1']]+['-DBSD_BUILD=1','-DBSD_KERNEL_PRIVATE=1']
+  i=bsd_flags.index(str(x/'osfmk/libsa'));del bsd_flags[i-1:i+1]
+  cmd=[str(llvm/'clang'),*bsd_flags,'-c',str(crash),'-o',str(W/'process-crash-context.o')]
+  p=run(cmd);(W/'process-crash-context.log').write_text(p.stdout+p.stderr)
+  if p.returncode:raise SystemExit(p.stderr)
+  assert not p.stdout and not p.stderr
+  for name in ['kernel-thread-snapshot','process-crash-context']:
+   obj=W/(name+'.o');sym=run([llvm/'llvm-nm','-u',obj]);assert sym.returncode==0
+   (W/(name+'-imports.txt')).write_text(sym.stdout)
+   code=run([llvm/'llvm-objdump','--disassemble',obj]);assert code.returncode==0
+   (W/(name+'-disassembly.txt')).write_text(code.stdout)
+   assert 'pacibsp' in code.stdout and ('retab' in code.stdout or 'autibsp' in code.stdout)
+   extra_targets[name]=dict(passed=True,warning_count=0,sha256=sha(obj),return_PAC=True)
  full=[str(llvm/'clang'),*flags,'-c',str(native),'-o',str(W/'thread.o')]
  (W/'full-thread-command.json').write_text(json.dumps(full,indent=2)+'\n');p=run(full);(W/'full-thread.log').write_text(p.stdout+p.stderr)
  full_result='PASS' if p.returncode==0 else 'BLOCKED_MISSING_LOCAL_MIG_HEADER'
  if p.returncode and "'mach/resource_notify.h' file not found" not in p.stderr:raise SystemExit(p.stderr)
- report=dict(passed=True,scope='Production helper target compile with real MACH_KERNEL_PRIVATE headers; not a full XNU link',hardware_verified=False,xnu_revision=revision,patches=[dict(name=p.name,sha256=sha(p)) for p in plan],patched_thread_sha256=sha(native),probe_sha256=sha(probe),object_sha256=sha(W/'cpu-burn-context.o'),warning_count=0,full_thread_compile=full_result,full_thread_first_error=p.stderr.strip() if p.returncode else None,config_sha256=sha(generated/'Makefile'),PAC_return_verified=True)
+ report=dict(passed=True,extra_targets=extra_targets,scope='Production helper target compile with real MACH_KERNEL_PRIVATE headers; not a full XNU link',hardware_verified=False,xnu_revision=revision,patches=[dict(name=p.name,sha256=sha(p)) for p in plan],patched_thread_sha256=sha(native),probe_sha256=sha(probe),object_sha256=sha(W/'cpu-burn-context.o'),warning_count=0,full_thread_compile=full_result,full_thread_first_error=p.stderr.strip() if p.returncode else None,config_sha256=sha(generated/'Makefile'),PAC_return_verified=True)
  (W/'report.json').write_text(json.dumps(report,indent=2)+'\n')
 print('PASS CPU burn helpers: arm64e, private XNU headers, imports and return PAC; full thread.c:',full_result)

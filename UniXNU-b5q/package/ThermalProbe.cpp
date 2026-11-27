@@ -174,6 +174,7 @@ void sampleDomains() {
 }
 
 void samplerThread(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-thermal");
     for (;;) {
         IOSleep(gPeriodMs);
         sheng_thermal_sample();

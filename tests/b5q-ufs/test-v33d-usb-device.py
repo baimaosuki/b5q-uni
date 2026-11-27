@@ -38,6 +38,8 @@ body=base+r'''
 #include "B5qDpPort.h"
 #include "B5qUsbHostRole.h"
 using wait_result_t=int;
+void *current_thread(){return nullptr;}
+void thread_set_thread_name(void*,const char*){}
 template<class... T>void IOLog(const char*,T...){ }
 void *gHost=nullptr;void *gHostNub=nullptr;B5qMax77705::Cable gAppliedCable;int gAppliedOrientation=-1;
 constexpr unsigned kXhciRegisterBytes=0x8000;struct{uint32_t *va=nullptr;}gXhciRegs,gGlobals;

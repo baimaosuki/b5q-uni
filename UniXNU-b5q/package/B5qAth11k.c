@@ -271,8 +271,9 @@ void nw_wifi_irq_pending(u32 vectors) {
     while(vectors){unsigned i=__builtin_ctz(vectors);vectors&=vectors-1;lx_irq_raise(nw_board->irq_base+i);}
 }
 void nw_wifi_poll(void){nw_mainline_poll();nw_wifi_control_poll();}
+extern int b5q_wifi_requests_pending(void);
 unsigned nw_wifi_wait_ms(unsigned maximum) {
-    return nw_mainline_pending()||nw_wifi_control_pending()?0:lx_next_wait_ms(maximum);
+    return b5q_wifi_requests_pending()||nw_mainline_pending()||nw_wifi_control_pending()?0:lx_next_wait_ms(maximum);
 }
 int nw_wifi_start(const struct lx_platform *platform,const struct nw_board *board) {
     if(!platform || !board || board->device_id!=0x1103 || !board->bar || board->bar_len<0x200000 ||
@@ -323,12 +324,39 @@ void nw_wifi_tx_reasons(char *text,int size) {
     snprintf(text,size,"ath11k tx-exception=%u tx-invalid-rbm=%u",
         ar->ab->soc_stats.tx_err.desc_na[0],ar->ab->soc_stats.invalid_rbm);
 }
+static unsigned b5q_step_phase,b5q_step_logs;
+static u64 b5q_step_since,b5q_step_next_log;
+extern volatile uint64_t nw_wifi_where[4];
+void b5q_wifi_step_observe(unsigned op,u64 age) {
+    const u64 now=lx_now_ms();u64 next=__atomic_load_n(&b5q_step_next_log,__ATOMIC_RELAXED);
+    if(now<next || !__atomic_compare_exchange_n(&b5q_step_next_log,&next,now+1000,0,__ATOMIC_RELAXED,__ATOMIC_RELAXED))return;
+    if(__atomic_fetch_add(&b5q_step_logs,1,__ATOMIC_RELAXED)>=96)return;
+    unsigned phase=__atomic_load_n(&b5q_step_phase,__ATOMIC_ACQUIRE);
+    u64 since=__atomic_load_n(&b5q_step_since,__ATOMIC_RELAXED);
+    lx_log(4,"B5qWifi: step-slow op=%u pending_ms=%llu phase=%u phase_ms=%llu pump=%llu fn_off=%llx depth=%llu",
+        op,age,phase,now>=since?now-since:0,nw_wifi_where[0],nw_wifi_where[1],nw_wifi_where[2]);
+}
+static void b5q_step_mark(unsigned phase) {
+    const unsigned previous=__atomic_load_n(&b5q_step_phase,__ATOMIC_RELAXED);
+    const u64 since=__atomic_load_n(&b5q_step_since,__ATOMIC_RELAXED),now=lx_now_ms();
+    if(previous && now>=since && now-since>200)b5q_wifi_step_observe(0,now-since);
+    __atomic_store_n(&b5q_step_since,now,__ATOMIC_RELAXED);
+    __atomic_store_n(&b5q_step_phase,phase,__ATOMIC_RELEASE);
+}
 int nw_wifi_step(void) {
     if(firmware_error)return firmware_error;
     static u64 signal_at;
-    nw_wifi_control_poll();lx_pump();nw_mainline_run();
+    const u64 began=lx_now_ms();
+    b5q_step_mark(1);nw_wifi_control_poll();
+    // Dispatch UI requests before potentially synchronous Linux work.
+    b5q_step_mark(3);nw_mainline_run();
+    b5q_step_mark(2);lx_pump();
+    b5q_step_mark(4);
     if(hardware && lx_now_ms()>=signal_at){signal_at=lx_now_ms()+1000;char text[128];nw_wifi_link_state(text,sizeof(text));}
-    return nw_mainline_pending()||nw_wifi_control_pending()||lx_next_wait_ms(1000)==0;
+    const u64 elapsed=lx_now_ms()-began;
+    if(elapsed>200)b5q_wifi_step_observe(0,elapsed);
+    b5q_step_mark(0);
+    return b5q_wifi_requests_pending()||nw_mainline_pending()||nw_wifi_control_pending()||lx_next_wait_ms(1000)==0;
 }
 void nw_wifi_stop(void) {
     nw_mainline_shutdown();nw_wifi_control_shutdown();

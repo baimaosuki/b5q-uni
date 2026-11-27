@@ -154,6 +154,10 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
     assembly=t/(name+'.S');assembly.write_text('.text\n.p2align 2\n.globl _b5q_abi_platform_test\n_b5q_abi_platform_test:\n ret\n')
     output=t/(name+'.o');subprocess.run([str(a.compiler),'-target','arm64e-apple-ios27.0','-c',str(assembly),'-o',str(output)],env=env,check=True);kernel_target.check_object(output.read_bytes(),name)
  expected_core={'_sheng_cpu_idle_mach'} if a.native_recount else set()
+ if not a.sources or 'B5qProcTop.c' in a.sources.split(','):
+  # New read-only helper is target-compiled and its exact80-byte ABI is
+  # checked by Review20; the pre-Review20 reference core cannot contain it.
+  expected_core.add('_b5q_kernel_thread_snapshot')
  available=defined|set(qualified['bindings'])|set().union(*(e for _,_,e in objects))
  if any(stem=='NativeLegacyDisplay' for stem,_,_ in objects):
   legacy=json.loads((ROOT/'UniXNU-b5q/scripts/legacy-display-26C5035r.json').read_text())
@@ -187,6 +191,6 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
   missing=imports-available;results[stem]['unresolved']=sorted(missing-expected_core)
   results[stem]['expected_new_core_imports']=sorted(imports&expected_core)
  for n in ['_backtrace_user','_backtrace','_task_get_all_image_info_addr','_copyin','_get_user_regs','_thread_tid','_PE_parse_boot_argn']:assert n in defined,n
-print(json.dumps(dict(passed=not duplicates and not any(v['unresolved'] for v in results.values()),duplicate_external_definitions=duplicates,XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True,new_core_linkage_pending=a.native_recount)))
+print(json.dumps(dict(passed=not duplicates and not any(v['unresolved'] for v in results.values()),duplicate_external_definitions=duplicates,XHCI_slots=427,objects=results,all_saved_context_external_helpers_present=True,new_core_linkage_pending=bool(expected_core))))
 
 if duplicates or any(v['unresolved'] for v in results.values()):raise SystemExit(1)

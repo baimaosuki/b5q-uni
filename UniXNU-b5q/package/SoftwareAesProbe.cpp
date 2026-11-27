@@ -27,6 +27,7 @@ void fail(int step)
 
 void worker(void *, wait_result_t)
 {
+    thread_set_thread_name(current_thread(),"b5q-aes-probe");
     // The family has no personality on this board; loading it makes the parent class before NativeAES registers.
     const OSReturn loaded = OSKextLoadKextWithIdentifier("com.apple.iokit.IOCryptoAcceleratorFamily");
     if (loaded != kOSReturnSuccess && loaded != kOSKextReturnStartStopError) {fail(1);return;}

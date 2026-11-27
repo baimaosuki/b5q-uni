@@ -13,6 +13,17 @@ struct vnode_attr;
 #include <security/mac_policy.h>
 #include <libkern/libkern.h>
 #include "B5qProcTopFormat.h"
+#include "B5qKernelThreads.h"
+extern unsigned b5q_kernel_thread_snapshot(struct b5q_kthread_sample *,unsigned,unsigned *);
+static void emitLine(const char *,void *);
+static struct b5q_kthread_sample kthreads[B5Q_KTHREAD_MAX];
+static struct b5q_kthread_window kthread_window;
+static void sampleKernelThreads(uint64_t elapsed_ms){
+ unsigned dropped=0,count=b5q_kernel_thread_snapshot(kthreads,B5Q_KTHREAD_MAX,&dropped);
+ b5q_kthread_update(&kthread_window,kthreads,count,elapsed_ms);
+ if(elapsed_ms){b5q_kthread_print(&kthread_window,emitLine,NULL);if(dropped)IOLog("B5qProcTop: kthread overflow=%u sampled=%u\n",dropped,count);}
+}
+
 
 // Exact pinned XNU proc_private.h contracts: exitstatus is specifically safe
 // in mpo_proc_notify_exit, after the process has left the PID lookup table.
@@ -50,6 +61,8 @@ static int cpuSample(proc_t proc,void *unused){
 }
 static void reporter(void *arg, wait_result_t result) {
     (void)arg; (void)result;
+    thread_set_thread_name(current_thread(),"b5q-proctop");
+    sampleKernelThreads(0);
     uint64_t previous=mach_absolute_time();
     b5q_cpu_begin(&cpu,0);proc_iterate(1u,cpuSample,NULL,NULL,NULL);
     for (;;) {
@@ -57,6 +70,7 @@ static void reporter(void *arg, wait_result_t result) {
         const uint64_t now=mach_absolute_time();uint64_t elapsed=0;absolutetime_to_nanoseconds(now-previous,&elapsed);previous=now;
         b5q_cpu_begin(&cpu,elapsed/1000000);proc_iterate(1u,cpuSample,NULL,NULL,NULL);
         b5q_cpu_print(&cpu,emitLine,NULL);
+        sampleKernelThreads(elapsed/1000000);
         struct b5q_proc_window w = b5q_proc_snapshot(&counts, rows);
         b5q_proc_print(w,rows,emitLine,NULL);
     }

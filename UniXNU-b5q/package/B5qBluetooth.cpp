@@ -1,3 +1,4 @@
+#include "B5qWorkerWait.h"
 /* SPDX-License-Identifier: BSD-2-Clause-Patent */
 #include <IOKit/IOLib.h>
 #include <IOKit/IOService.h>
@@ -25,7 +26,6 @@ extern "C" int armcpu_spi_mask(uint32_t,bool);
 extern "C" uint64_t qbt_transport_rx_dropped(void);
 // Private exports of the pinned XNU sched_prim.h/thread.h, absent from SDK.
 extern "C" kern_return_t clear_wait(thread_t,wait_result_t);
-extern "C" void thread_yield_to_preemption(void);
 extern "C" volatile int native_gpu_addon_stage;
 extern "C" volatile uint32_t native_wifi_stats[29];
 extern "C" {
@@ -563,8 +563,7 @@ void worker(void *,wait_result_t) {
         uint64_t deadline=bt.powered?qbt_deadline(bt.core):UINT64_MAX;
         uint64_t geni=bt.powered && !bt.gated?b5q_bt_fifo_deadline(&bt.geni):UINT64_MAX;
         if(geni<deadline)deadline=geni;if(health<deadline)deadline=health;if(closeAt && closeAt<deadline)deadline=closeAt;
-        if(!deadline){thread_yield_to_preemption();continue;}
-        waitUntil(nullptr,deadline);
+        waitUntil(nullptr,b5q_bt_worker_deadline(deadline,t));
     }
 }
 }

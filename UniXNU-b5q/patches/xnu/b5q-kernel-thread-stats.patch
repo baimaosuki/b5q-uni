@@ -1,0 +1,37 @@
+--- a/osfmk/kern/thread.c
++++ b/osfmk/kern/thread.c
+@@ -4439,3 +4439,34 @@
+ 	thread->t_dtrace_flags |= TH_DTRACE_EXECSUCCESS;
+ }
+ #endif /* CONFIG_DTRACE */
++
++/* Read-only board diagnostics. task_info(TASK_THREAD_TIMES_INFO) uses this
++ * exact task_lock -> thread_read_times order. The task lock keeps the queue,
++ * uthread and thread-name storage alive. The caller logs only after return. */
++struct b5q_kthread_sample { uint64_t tid, cpu_ns; char name[64]; };
++_Static_assert(sizeof(struct b5q_kthread_sample) == 80, "b5q kernel-thread ABI");
++unsigned b5q_kernel_thread_snapshot(struct b5q_kthread_sample *, unsigned, unsigned *);
++unsigned
++b5q_kernel_thread_snapshot(struct b5q_kthread_sample *rows, unsigned capacity, unsigned *dropped)
++{
++	unsigned count = 0, overflow = 0;
++	thread_t thread;
++	if (!rows || !dropped || capacity > 256) return 0;
++	task_lock(kernel_task);
++	queue_iterate(&kernel_task->threads, thread, thread_t, task_threads) {
++		if (thread->options & TH_OPT_IDLE_THREAD) continue;
++		if (count == capacity) { ++overflow; continue; }
++		time_value_t user, system;
++		thread_read_times(thread, &user, &system, NULL);
++		struct b5q_kthread_sample *row = &rows[count++];
++		row->tid = thread_tid(thread);
++		row->cpu_ns = ((uint64_t)user.seconds + system.seconds) * NSEC_PER_SEC +
++		    ((uint64_t)user.microseconds + system.microseconds) * NSEC_PER_USEC;
++		bzero(row->name, sizeof(row->name));
++		thread_get_thread_name(thread, row->name);
++		row->name[sizeof(row->name) - 1] = '\0';
++	}
++	task_unlock(kernel_task);
++	*dropped = overflow;
++	return count;
++}

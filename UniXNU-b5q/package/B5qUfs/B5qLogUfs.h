@@ -138,6 +138,7 @@ static int nabuLogSlot(unsigned slot,uint8_t *header) {
 }
 static void nabuLogThread(void *,wait_result_t)
 {
+    thread_set_thread_name(current_thread(),"b5q-log-ufs");
   uint8_t token[16],boot[16];
   const char *stop_reason="unspecified";
   {

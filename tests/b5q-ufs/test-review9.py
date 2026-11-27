@@ -134,13 +134,15 @@ void clock_interval_to_deadline(unsigned n,unsigned scale,uint64_t*p){assert(sca
 void IOLockSleepDeadline(void*,void*,uint64_t deadline,int){assert(deadline>ms&&deadline-ms<=1000);ms=deadline;if(++sleeps>30)throw 1;}
 void cableChanged(){auto c=physical();gCableWanted=c.signature();gRoleWanted=c.role();}
 bool b5q_usb_otg(bool on){otg=on;if(!on)off++;return true;}
-void leaveRole(int r){if(r==kRoleHost){leaves++;b5q_usb_otg(false);}}
-bool enterRole(int r){enters+=r==kRoleHost;gCoreRole=r;B5qMax77705::Cable c;b5q_usb_cable_state(&c);gAppliedCable=c;gAppliedOrientation=c.orientation();return r!=kRoleHost||b5q_usb_otg(true);}
+void leaveRole(int r){if(r==kRoleHost){leaves++;b5q_usb_otg(false);}gHostNub=nullptr;}
+bool enterRole(int r){gHostNub=r==kRoleHost?(void*)1:nullptr;enters+=r==kRoleHost;gCoreRole=r;B5qMax77705::Cable c;b5q_usb_cable_state(&c);gAppliedCable=c;gAppliedOrientation=c.orientation();return r!=kRoleHost||b5q_usb_otg(true);}
 bool b5q_dp_port_poll(B5qDpPortState*){return true;}bool b5q_dp_link_stop(){return true;}void b5q_dp_link_update(const B5qDpPortState*){}
 bool qmpInit(bool){return true;}void selectUtmiClock(){}void retryDevicePower(){}void hostStats(){}void deviceStats(){}
 void IOSleep(unsigned n){ms+=n;}
 template<class... T>void IOLog(const char*,T...){ }
 using wait_result_t=int;
+void *current_thread(){return nullptr;}
+void thread_set_thread_name(void*,const char*){}
 void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){

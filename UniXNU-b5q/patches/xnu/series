@@ -34,3 +34,9 @@ b5q-v33b-runtime-repair.patch
 
 # Bounded current-thread CPU monitor user/kernel context, no policy change.
 b5q-cpu-burn-trace.patch
+
+# macOS27 Apple80211 540-byte association result needs an mbuf cluster.
+b5q-wifi-association-event.patch
+
+# Read-only kernel_task thread CPU/name snapshot for the30s reporter.
+b5q-kernel-thread-stats.patch

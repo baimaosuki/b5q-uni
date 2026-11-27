@@ -83,6 +83,8 @@ bool qmpInit(bool){return true;}void selectUtmiClock(){}void retryDevicePower(){
 void clock_interval_to_deadline(unsigned,unsigned,uint64_t *p){*p=0;}
 void IOLockSleepDeadline(void*,void*,uint64_t,int){if(++polls>15)throw 1;ticks+=1000000;}
 using wait_result_t=int;
+void *current_thread(){return nullptr;}
+void thread_set_thread_name(void*,const char*){}
 void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){

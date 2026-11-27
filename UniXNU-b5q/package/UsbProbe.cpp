@@ -17,6 +17,7 @@ extern "C" void qcom_dwc3_static_init(void) __asm__("__GLOBAL__sub_I_QcomDwc3.cp
 extern "C" volatile uint32_t native_usb_stats[54];
 extern "C" void qcom_dwc3_host_load(int);
 static void worker(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-usb-probe");
     if (qcom_dwc3_bring_up()) {
         // AppleUSBXDCI has no personality of its own, so nothing has loaded it: its constructors and metaclasses, and those of
         // IOUSBDeviceFamily below it, run on this load.

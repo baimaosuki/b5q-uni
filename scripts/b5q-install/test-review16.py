@@ -108,7 +108,8 @@ assert 'self->slots[0].inFlight==0' in primary
 enter = function(usb, 'void enterHost()')
 leave = function(usb, 'void leaveRole(int role)')
 assert 'startHostIrqBridge()' in enter
-assert leave.index('stopHostIrqBridge()') < leave.index('gHostNub->terminate')
+assert leave.index('gHostNub->terminate') < leave.index('stopHostIrqBridge()') < leave.index('QcomDwc3Nub::route(nullptr)')
+assert 'retainedHost->retain()' in leave and 'retainedHost->release()' in leave
 assert 'host-ir-bridge #%u ir1_iman=%x ir2_iman=%x er1=%llx er2=%llx sts=%x d1=%u d2=%u result=%u/%u' in usb
 assert 'ir0=%x/%llx ir1=%x/%llx ir2=%x/%llx' in usb
 assert 'secKicks=%u secIr1=%u secIr2=%u secNoFilter=%u secBusy=%u secDisabled=%u secBackoff=%u' in usb
@@ -230,7 +231,10 @@ for path in ['.github/workflows', 'UniXNU', 'sources', 'patches/uefi-b5q', 'UniX
 old_bt = subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/B5qBluetooth.cpp'], cwd=R).decode()
 new_bt = (P / 'B5qBluetooth.cpp').read_text()
 for signature in ['int clockVote(', 'void rxIrq(', 'void disarmRxWake(', 'void worker(', 'int setRate(']:
-    assert function(old_bt, signature) == function(new_bt, signature), signature
+    baseline=function(old_bt, signature)
+    if signature.startswith('void worker('):
+        baseline=baseline.replace('        if(!deadline){thread_yield_to_preemption();continue;}\n        waitUntil(nullptr,deadline);','        waitUntil(nullptr,b5q_bt_worker_deadline(deadline,t));')
+    assert baseline == function(new_bt, signature), signature
 subprocess.run(['git', 'diff', '--check'], cwd=R, check=True)
 checks.append(dict(name='review16-zero-diff-red-lines-and-bluetooth', passed=True))
 

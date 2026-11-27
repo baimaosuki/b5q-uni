@@ -290,7 +290,8 @@ static bool mediaReady(B5qRootBlock *root,const char *uuid) {
  while(OSObject *o=iterator->getNextObject()){auto *media=OSDynamicCast(IOService,o);auto *id=media?OSDynamicCast(OSString,media->getProperty("UUID")):nullptr;if(!id||strcmp(id->getCStringNoCopy(),uuid))continue;for(IOService *p=media;p;p=p->getProvider())if(p==root)found=true;}
  iterator->release();return found;
 }
-static void publish(void *context,wait_result_t) {auto *provider=static_cast<IOService*>(context);unsigned order[]={1,2,0};
+static void publish(void *context,wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-ufs-publish");auto *provider=static_cast<IOService*>(context);unsigned order[]={1,2,0};
  // Root publication gates load_init_program(). Wait here, outside the loader
  // thread, until the one typed Data volume has all BSD identity properties.
  if(dataRequested&&!b5qDataWaitReady())fail("persistent Data media/UUID/BSD readiness timeout or duplicate UUID");

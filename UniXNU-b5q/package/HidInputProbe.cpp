@@ -154,6 +154,7 @@ static void publishDigitizer(IORegistryEntry *device,IORegistryEntry *driver) {
 // backboardd is already matching at that moment, the once-per-second check is too late and every touch is dropped for the whole boot. This
 // thread closes that window: it checks every 2 ms until the service has been registered for 10 s, at most 180 s.
 static void digitizerPairGuard(void *context,wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-hid-guard");
     IORegistryEntry *device=static_cast<IORegistryEntry *>(context);
     if(relativePointer(device)){device->release();thread_terminate(current_thread());return;}
     unsigned stopAt=180000;

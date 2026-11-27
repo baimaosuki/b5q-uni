@@ -24,6 +24,7 @@ extern "C" int b5q_wifi_publish_ready(void);
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 #include "B5qPcieCore.h"
 #include "B5qWifiDma.h"
+#include "B5qWorkerWait.h"
 #include "B5qWifiArena.h"
 #include "B5qWifiFirmwareName.h"
 #include "B5qWcnPower.h"
@@ -345,6 +346,7 @@ void worker(void *,wait_result_t) {
         bool netStarted=false,readyPublished=false;unsigned readyFailures=0;
         uint64_t nextReadyTry=0,nextReport=0,slice=nowNs();
         for(;;) {
+            const uint32_t observed=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE);
             error=nw_wifi_step();if(error<0)goto failed;
             if(!netStarted && nw_wifi_stats.stage>=4) {
                 uint8_t mac[6];if(!boardMac(mac)){error=-18;goto failed;}
@@ -367,17 +369,16 @@ void worker(void *,wait_result_t) {
                     nw_wifi_stats.stage,nw_wifi_stats.scans,nw_wifi_stats.frames,nw_wifi_stats.last_err,
                     arena->used,arena->bytes,arena->peak,arena->failures);
             }
-            if(!error) {
-                uint32_t observed=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE);
-                unsigned ms=nw_wifi_wait_ms(1000);
-                if(ms) {
-                    uint64_t deadline;clock_interval_to_deadline(ms,NSEC_PER_MSEC,&deadline);
-                    assert_wait_deadline(event_t(&wakeCount),THREAD_UNINT,deadline);
-                    if(observed!=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE))clear_wait(current_thread(),THREAD_AWAKENED);
-                    else thread_block(THREAD_CONTINUE_NULL);
-                }
+            const unsigned ms=b5q_wifi_worker_wait(error,nw_wifi_wait_ms(1000),nowNs()-slice);
+            if(ms) {
+                // scale_factor is nanoseconds per interval; NSEC_PER_MSEC is
+                // exactly the kernel's kMillisecondScale (1000000), not a bug.
+                uint64_t deadline;clock_interval_to_deadline(ms,NSEC_PER_MSEC,&deadline);
+                assert_wait_deadline(event_t(&wakeCount),THREAD_UNINT,deadline);
+                if(observed!=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE))clear_wait(current_thread(),THREAD_AWAKENED);
+                else thread_block(THREAD_CONTINUE_NULL);
                 slice=nowNs();
-            }else if(nowNs()-slice>=2000000){thread_yield_to_preemption();slice=nowNs();}
+            }
         }
     }
 failed:

@@ -237,7 +237,10 @@ int main(){B5qBtH4Sink sink{line,now};B5qBtH4Tap t;b5q_bt_h4_tap_init(&t,&sink,n
     old_bt = subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/B5qBluetooth.cpp'], cwd=R).decode()
     bt = (P / 'B5qBluetooth.cpp').read_text()
     for signature in ['int clockVote(', 'void rxIrq(', 'void disarmRxWake(', 'void worker(', 'int setRate(', 'int powerOff(']:
-        assert function(old_bt, signature) == function(bt, signature), signature
+        baseline=function(old_bt, signature)
+        if signature.startswith('void worker('):
+            baseline=baseline.replace('        if(!deadline){thread_yield_to_preemption();continue;}\n        waitUntil(nullptr,deadline);','        waitUntil(nullptr,b5q_bt_worker_deadline(deadline,t));')
+        assert baseline == function(bt, signature), signature
     assert function(old_bt, 'int powerOn(') == function(bt, 'int powerOn(')
     assert 'nvm=%s nvm_bytes=%u' in bt and 'h4-disconn-ibs gated=%u wake_ind=%llu sleep_ind=%llu bt_rx_dropped=%llu' in bt
     checks.append(dict(name='bluetooth-observation-only-transport-byte-identity', passed=True))

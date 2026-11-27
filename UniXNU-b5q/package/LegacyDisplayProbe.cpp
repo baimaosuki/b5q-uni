@@ -645,6 +645,7 @@ extern "C" void b5q_daily_probe(void),b5q_backlight_probe(void),sheng_adsp_probe
 extern "C" void sheng_cpufreq_probe(void),sheng_board_clock_probe(void),sheng_thermal_probe(void),sheng_thermal_level_probe(void),sheng_buttons_probe(void),native_hid_input_probe(void),b5q_touch_probe(void),sheng_dpu_probe(void);
 namespace {
 void b5qPeripheralWorker(void *,wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-peripherals");
     IOSleep(3000);
     IOLog("B5qPeripherals: stage=after-display\n");
     IOLog("B5qPeripherals: step=%s\n","sheng_cpufreq_probe:before");

@@ -29,6 +29,7 @@ py('review16','scripts/b5q-install/test-review16.py')
 py('review17','scripts/b5q-install/test-review17.py')
 py('review18','scripts/b5q-install/test-review18.py')
 py('review19','scripts/b5q-install/test-review19.py')
+py('review20','scripts/b5q-install/test-review20.py')
 run('loader-inputs',[
  'env','PATH=/usr/lib/llvm-17/bin:'+os.environ['PATH'],
  'LD_PRELOAD=/usr/lib/llvm-17/lib/clang/17/lib/linux/libclang_rt.ubsan_standalone-x86_64.so',

@@ -222,6 +222,7 @@ void setLevel(unsigned d, unsigned at) {
 }
 
 void governorThread(void *, wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-cpufreq");
     IOLog("B5qCpuFreq: governor-enter cpu=%d\n", cpu_number());
     uint64_t lastIdle[kCpus] = {}, lastT = mach_absolute_time();
     for (unsigned c = 0; c < kCpus; ++c) lastIdle[c] = kIdleMach((int)c);

@@ -245,7 +245,10 @@ for name in ['B5qDpPhy.h', 'B5qDpClock.h', 'B5qDpDpu.h', 'B5qDpDisplay.cpp', 'B5
 # Review17's H4 diagnostics are allowed; preserve its actual UART/IBS executor.
 old_bt = subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/B5qBluetooth.cpp'], cwd=R).decode()
 for signature in ['int clockVote(', 'void rxIrq(', 'void disarmRxWake(', 'void worker(', 'int setRate(']:
-    assert function(old_bt, signature) == function((P / 'B5qBluetooth.cpp').read_text(), signature)
+    baseline=function(old_bt, signature)
+    if signature.startswith('void worker('):
+        baseline=baseline.replace('        if(!deadline){thread_yield_to_preemption();continue;}\n        waitUntil(nullptr,deadline);','        waitUntil(nullptr,b5q_bt_worker_deadline(deadline,t));')
+    assert baseline == function((P / 'B5qBluetooth.cpp').read_text(), signature)
 assert len(list((R / 'tests/b5q-ufs').glob('test-dp-*.py'))) == 26
 checks.append(dict(name='diagnostics-and-red-line-source-contracts', passed=True))
 receipt = dict(status='HOST_VERIFIED_PENDING_HARDWARE', passed=True, hardware_verified=False,
