@@ -68,6 +68,7 @@ struct Bluetooth {
     uint8_t loop_rx[16];unsigned loop_length;
 } bt;
 B5qBtH4Tap h4Tap;
+char loadedNvm[96]{};uint32_t loadedNvmBytes=0,disconnIbsLogged=0;
 constexpr unsigned kRx=79,kBtEnable=81,kSwCtrl=82;
 constexpr uint32_t kUartDefault[]={0u,1u,3u,1u};
 constexpr uint32_t kUartActive[]={4u,5u,7u,4u}; // b5q.dts 3162..3298, all 2mA
@@ -81,7 +82,15 @@ bool map(Region &r,uint64_t base,size_t bytes) {
 void barrier(){__asm__ volatile("dsb sy" ::: "memory");}
 uint64_t nowNs(void *){uint64_t ns;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns;}
 uint64_t h4NowMs(void *){return nowNs(nullptr)/1000000ULL;}
-void h4Line(void *,const char *text){printf("%s\n",text);}
+void h4Line(void *,const char *text){
+    printf("%s\n",text);
+    static const char prefix[]="B5qBluetooth: h4-disconn-ctx ";
+    if(!strncmp(text,prefix,sizeof(prefix)-1)&&disconnIbsLogged++<32u){
+        struct qbt_stats stats{};qbt_get_stats(bt.core,&stats);
+        printf("B5qBluetooth: h4-disconn-ibs gated=%u wake_ind=%llu sleep_ind=%llu bt_rx_dropped=%llu\n",
+               bt.gated,stats.wake_ind,stats.sleep_ind,qbt_transport_rx_dropped());
+    }
+}
 const B5qBtH4Sink h4Sink={h4Line,h4NowMs};
 void wake(void *){__atomic_store_n(&bt.pending,1u,__ATOMIC_RELEASE);thread_wakeup((event_t)&bt.pending);}
 void waitUntil(void *,uint64_t deadline) {
@@ -232,7 +241,10 @@ int setRate(void *,uint32_t baud) {
 void *allocate(void *,size_t n){return IOMallocData(n);}
 void release(void *,void *p,size_t n){IOFreeData(p,n);}
 int firmware(void *,const char *name,const uint8_t **data,size_t *size) {
-    uint8_t *bytes=nullptr;int e=sheng_bt_firmware_read(name,&bytes,size);*data=bytes;return -e;
+    uint8_t *bytes=nullptr;int e=sheng_bt_firmware_read(name,&bytes,size);*data=bytes;
+    const size_t length=name?strlen(name):0;
+    if(!e&&length>=4&&!strcmp(name+length-4,".bin")){strlcpy(loadedNvm,name,sizeof(loadedNvm));loadedNvmBytes=(uint32_t)*size;}
+    return -e;
 }
 void firmwarePut(void *,const uint8_t *data,size_t size){sheng_bt_firmware_release(const_cast<uint8_t *>(data),size);}
 void log(void *,int level,const char *line){if(level<=3 || bt.log)printf("[bluetooth] %s\n",line);}
@@ -344,6 +356,7 @@ int loopbackCheck() {
 int powerOn() {
     if(bt.powered)return 0;
     b5q_bt_h4_tap_reset_session(&h4Tap);
+    loadedNvm[0]=0;loadedNvmBytes=0;disconnIbsLogged=0;
     int wait=b5q_wcn_wait_wifi_probe();if(wait)return -wait;
     native_bluetooth_stats[14]=1;int e=resources();if(e)return e;
     native_bluetooth_stats[14]=2;
@@ -438,7 +451,7 @@ void powerResult(bool enabled,int error) {
     native_bluetooth_stats[20]=(unsigned)bt.powered|((unsigned)bt.gated<<1)|((unsigned)bt.clocked<<2);
     native_bluetooth_stats[21]=b5q_wcn_power_owners();
     native_bluetooth_stats[0]=error?3:enabled?2:0;native_bluetooth_stats[1]=(uint64_t)(int64_t)error;
-    printf("B5qBluetooth: power=%u result=%d baud=%u product=%08x rom=%04x transport=FIFO\n",enabled,error,info.baud,info.product,info.rom);
+    printf("B5qBluetooth: power=%u result=%d baud=%u product=%08x rom=%04x transport=FIFO nvm=%s nvm_bytes=%u\n",enabled,error,info.baud,info.product,info.rom,loadedNvm,loadedNvmBytes);
     if(error && bt.geni.error)printf("[bluetooth uart] error=%d irq=%x/%x\n",bt.geni.error,bt.geni.fault_irq[0],bt.geni.fault_irq[1]);
 }
 void worker(void *,wait_result_t) {

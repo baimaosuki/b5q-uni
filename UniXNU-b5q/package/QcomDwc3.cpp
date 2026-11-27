@@ -324,11 +324,10 @@ static uint64_t gIrqSecond;
 static bool gIrqStormed;
 class QcomDwc3Nub : public IOService {
     OSDeclareDefaultStructors(QcomDwc3Nub)
-    IOInterruptAction action = nullptr;
-    OSObject *target = nullptr;
-    void *refcon = nullptr;
-    bool enabled = false;
-    uint32_t inFlight=0;
+    struct Slot {
+        IOInterruptAction action=nullptr;OSObject *target=nullptr;void *refcon=nullptr;
+        bool enabled=false;uint32_t inFlight=0;uint8_t logged=0;
+    } slots[3];
     static bool ensureLock(){
         if(__atomic_load_n(&gInterruptLock,__ATOMIC_ACQUIRE))return true;
         auto *made=IOSimpleLockAlloc();if(!made)return false;
@@ -343,29 +342,32 @@ class QcomDwc3Nub : public IOService {
         QcomDwc3Nub *self=gActiveNub;
         IOInterruptAction callback=nullptr;OSObject *owner=nullptr;void *context=nullptr;
         if(gIrqWindow.observe(mach_absolute_time(),gIrqSecond))gIrqStormed=true;
-        if(!gIrqStormed&&self&&self->enabled&&self->action&&self->inFlight==0){
-            owner=self->target;
-            callback=self->action;context=self->refcon;++self->inFlight;
+        if(!gIrqStormed&&self&&self->slots[0].enabled&&self->slots[0].action&&self->slots[0].inFlight==0){
+            owner=self->slots[0].target;
+            callback=self->slots[0].action;context=self->slots[0].refcon;++self->slots[0].inFlight;
         }else armcpu_spi_mask(kIrq,true);
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
         if(!callback)return;
         callback(owner,context,self,0);
         const auto done=IOSimpleLockLockDisableInterrupt(gInterruptLock);
-        --self->inFlight;
+        --self->slots[0].inFlight;
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,done);
     }
     void unmaskLocked(){
-        if(gActiveNub==this)armcpu_spi_mask(kIrq,gIrqStormed||!enabled);
+        if(gActiveNub==this)armcpu_spi_mask(kIrq,gIrqStormed||!slots[0].enabled);
     }
-    void drain(){
+    void drain(unsigned source=3){
         for(;;){
             const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
-            const bool idle=inFlight==0;
+            const bool idle=source<3?slots[source].inFlight==0:
+                slots[0].inFlight==0&&slots[1].inFlight==0&&slots[2].inFlight==0;
             IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
             if(idle)return;IOSleep(1);
         }
     }
 public:
+    unsigned maxSources=1;
+    bool validSource(int source)const{return source>=0&&unsigned(source)<maxSources&&source<3;}
     static void route(QcomDwc3Nub *nub) {
         armcpu_spi_mask(kIrq,true);
         if(!ensureLock())return;
@@ -377,76 +379,80 @@ public:
         if(old){if(old!=nub)old->drain();old->release();}
     }
     IOReturn getInterruptType(int source,int *type) override {
-        if(source!=0||!type)return kIOReturnNoInterrupt;
+        if(!validSource(source)||!type)return kIOReturnNoInterrupt;
         *type=kIOInterruptTypeLevel;return kIOReturnSuccess;
     }
     IOReturn registerInterrupt(int source,OSObject *owner,IOInterruptAction handler,void *context) override {
-        if(source!=0||!owner||!handler)return kIOReturnNoInterrupt;
+        if(!validSource(source)||!owner||!handler)return kIOReturnNoInterrupt;
         if(!ensureLock())return kIOReturnNoResources;
         uint64_t second=0;clock_interval_to_absolutetime_interval(1000,NSEC_PER_MSEC,&second);
         const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
-        if(action||gLineAttaching){IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);return kIOReturnNoResources;}
-        owner->retain();target=owner;refcon=context;action=handler;enabled=false;gIrqSecond=second;
-        const bool attach=!gLineAttached;if(attach)gLineAttaching=true;
+        Slot &slot=slots[source];
+        if(slot.action||slot.inFlight||(source==0&&gLineAttaching)){IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);return kIOReturnNoResources;}
+        owner->retain();slot.target=owner;slot.refcon=context;slot.action=handler;slot.enabled=false;
+        const bool report=maxSources==3&&!(slot.logged&1);slot.logged|=1;
+        if(source==0)gIrqSecond=second;
+        const bool attach=source==0&&!gLineAttached;if(attach)gLineAttaching=true;
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
         int result=kIOReturnSuccess;
         if(attach){result=armcpu_spi_attach(kIrq,false,primary,nullptr,nullptr,nullptr);armcpu_spi_mask(kIrq,true);}
         const auto ready=IOSimpleLockLockDisableInterrupt(gInterruptLock);
         if(attach){gLineAttaching=false;gLineAttached=result==kIOReturnSuccess;}
-        if(result==kIOReturnSuccess)unmaskLocked();
+        if(result==kIOReturnSuccess&&source==0)unmaskLocked();
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,ready);
-        if(result!=kIOReturnSuccess){unregisterInterrupt(0);return kIOReturnNoResources;}
+        if(result!=kIOReturnSuccess){unregisterInterrupt(source);return kIOReturnNoResources;}
+        if(report)IOLog("qcom-dwc3: host-irq-slot source=%u reg=%u en=%u max=%u\n",unsigned(source),1u,0u,maxSources);
         return kIOReturnSuccess;
     }
     IOReturn unregisterInterrupt(int source) override {
-        if(source!=0)return kIOReturnNoInterrupt;
+        if(!validSource(source))return kIOReturnNoInterrupt;
         if(!ensureLock())return kIOReturnNoResources;
         const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
-        enabled=false;unmaskLocked();auto *old=target;
-        action=nullptr;target=nullptr;refcon=nullptr;
+        Slot &slot=slots[source];slot.enabled=false;if(source==0)unmaskLocked();auto *old=slot.target;
+        slot.action=nullptr;slot.target=nullptr;slot.refcon=nullptr;
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
-        drain();OSSafeReleaseNULL(old);return kIOReturnSuccess;
+        drain(unsigned(source));OSSafeReleaseNULL(old);return kIOReturnSuccess;
     }
     IOReturn enableInterrupt(int source) override {
-        if(source!=0)return kIOReturnNoInterrupt;
+        if(!validSource(source))return kIOReturnNoInterrupt;
         if(!ensureLock())return kIOReturnNoResources;
         const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
-        const bool allowed=!gIrqStormed&&action;enabled=allowed;unmaskLocked();
+        Slot &slot=slots[source];const bool allowed=(source!=0||!gIrqStormed)&&slot.action;
+        slot.enabled=allowed;if(source==0)unmaskLocked();
+        const bool report=maxSources==3&&allowed&&!(slot.logged&2);slot.logged|=allowed?2:0;
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        if(report)IOLog("qcom-dwc3: host-irq-slot source=%u reg=%u en=%u max=%u\n",unsigned(source),1u,1u,maxSources);
         return allowed?kIOReturnSuccess:kIOReturnNotReady;
     }
     IOReturn disableInterrupt(int source) override {
-        if(source!=0)return kIOReturnNoInterrupt;
+        if(!validSource(source))return kIOReturnNoInterrupt;
         if(!ensureLock())return kIOReturnNoResources;
         const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
-        enabled=false;unmaskLocked();IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        slots[source].enabled=false;if(source==0)unmaskLocked();IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
         return kIOReturnSuccess;
     }
-    // IR1/IR2 have no GIC SPI. The bridge calls this from its own thread and
-    // uses the ordinary registered filter action, never a second callback.
-    B5qUsbIrq::Delivery deliverSecondary() {
+    // Software-only slots: inFlight masks recursion without holding the lock
+    // over Apple's callback. Callback disable/enable changes remain effective.
+    B5qUsbIrq::Delivery deliverSource(uint32_t source) {
+        if(source==0||!validSource(int(source)))return B5qUsbIrq::Delivery::BadSource;
         if(!ensureLock())return B5qUsbIrq::Delivery::NotEnabled;
         const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        Slot &slot=slots[source];
         B5qUsbIrq::Delivery result=B5qUsbIrq::Delivery::Delivered;
-        if(gActiveNub!=this||gIrqStormed||!enabled||!action)result=B5qUsbIrq::Delivery::NotEnabled;
-        else if(inFlight)result=B5qUsbIrq::Delivery::BusyInFlight;
+        if(!slot.action)result=B5qUsbIrq::Delivery::NotRegistered;
+        else if(slot.inFlight)result=B5qUsbIrq::Delivery::BusyInFlight;
+        else if(gActiveNub!=this||!slot.enabled)result=B5qUsbIrq::Delivery::NotEnabled;
         if(result!=B5qUsbIrq::Delivery::Delivered){
             IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);return result;
         }
-        // Mask the physical line for the whole callback. A filter that returns
-        // false must be unmasked here; one that calls disableInterrupt(0)
-        // leaves enabled=false and must stay masked until the workloop enables.
-        armcpu_spi_mask(kIrq,true);
-        ++inFlight;
-        OSObject *owner=target;IOInterruptAction callback=action;void *context=refcon;
+        ++slot.inFlight;
+        OSObject *owner=slot.target;IOInterruptAction callback=slot.action;void *context=slot.refcon;
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
-        callback(owner,context,this,0);
+        callback(owner,context,this,int(source));
         const auto done=IOSimpleLockLockDisableInterrupt(gInterruptLock);
-        --inFlight;
-        const bool stillEnabled=enabled;
-        if(stillEnabled)unmaskLocked();
+        --slot.inFlight;
         IOSimpleLockUnlockEnableInterrupt(gInterruptLock,done);
-        return stillEnabled?B5qUsbIrq::Delivery::FilterRejected:B5qUsbIrq::Delivery::Delivered;
+        return B5qUsbIrq::Delivery::Delivered;
     }
 };
 OSDefineMetaClassAndStructors(QcomDwc3Nub, IOService)
@@ -822,15 +828,17 @@ static void hostIrqBridge(void *, wait_result_t) {
         if(!active){gHostIrqBridge.idle();IOSleep(gHostIrqBridge.intervalMs());continue;}
         if (active1) ++gHostIrqBridge.ir1;
         if (active2) ++gHostIrqBridge.ir2;
-        const B5qUsbIrq::Delivery result=gHostNub->deliverSecondary();
-        const bool justThrottled=gHostIrqBridge.note(active1,ir1.erdp,active2,ir2.erdp,result);
+        const auto d1=active1?gHostNub->deliverSource(1):B5qUsbIrq::Delivery::NotEnabled;
+        const auto d2=active2?gHostNub->deliverSource(2):B5qUsbIrq::Delivery::NotEnabled;
+        const bool justThrottled=gHostIrqBridge.noteSources(active1,ir1.erdp,d1,active2,ir2.erdp,d2);
         if(logged<16){
             ++logged;
             const unsigned op = gXhciRegs.va[0] & 0xffu;
             const unsigned usbSts = ((op & 3u) == 0u && op <= kXhciRegisterBytes - 8u) ?
                 gXhciRegs.va[(op + 4u) / 4u] : 0xffffffffu;
-            IOLog("qcom-dwc3: host-ir-bridge #%u ir1_iman=%x ir2_iman=%x ir1_erdp=%llx sts=%x result=%u\n",
-                logged,have1?ir1.iman:0u,have2?ir2.iman:0u,have1?ir1.erdp:0ULL,usbSts,unsigned(result));
+            IOLog("qcom-dwc3: host-ir-bridge #%u ir1_iman=%x ir2_iman=%x er1=%llx er2=%llx sts=%x d1=%u d2=%u result=%u/%u\n",
+                logged,have1?ir1.iman:0u,have2?ir2.iman:0u,have1?ir1.erdp:0ULL,have2?ir2.erdp:0ULL,
+                usbSts,gHostIrqBridge.ir1Delivered,gHostIrqBridge.ir2Delivered,unsigned(d1),unsigned(d2));
         }
         if(justThrottled)IOLog("qcom-dwc3: host-ir-bridge backoff ir1_iman=%x ir2_iman=%x misses=%u\n",
             have1?ir1.iman:0u,have2?ir2.iman:0u,gHostIrqBridge.misses);
@@ -970,6 +978,7 @@ void enterHost() {
     OSData *zero = OSData::withBytes(&busNumber,sizeof(busNumber));
     bool done = false;
     if (nub && nub->init() && ranges && zero) {
+        nub->maxSources=3;
         nub->setDeviceMemory(ranges);
         nub->setName("usb-host0");
         nub->setProperty("bus-number", zero);
@@ -1558,6 +1567,7 @@ extern "C" void qcom_dwc3_publish(void) {
     bool nubAttached=false,controllerAttached=false,started=false,published=false;
     do {
         if(!nub||!nub->init()||!ranges||!zero||!config){stage(-12);break;}
+        nub->maxSources=1;
         nub->setDeviceMemory(ranges);nub->setName("usb-drd0");
         nub->setProperty("bus-number",zero);nub->setProperty("configuration-string",config);
         nub->setProperty("u1-init-disable",true);nub->setProperty("u2-init-disable",true);

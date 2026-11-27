@@ -29,29 +29,40 @@ bool snapshot(unsigned runtime,unsigned index,unsigned windowBytes,Read32 read,S
 // the 1 ms poll into a heat loop: only a run of active samples whose ERDPs
 // do not advance backs off to 50 ms. An ERDP advance proves the event ring is
 // being consumed even when the workloop has not yet cleared the IP bit.
-enum class Delivery:uint8_t {Delivered,FilterRejected,BusyInFlight,NotEnabled};
+enum class Delivery:uint8_t {Delivered,FilterRejected,BusyInFlight,NotEnabled,NotRegistered,BadSource};
 struct Bridge {
  static constexpr uint32_t backoffAfter=1000;
  uint32_t kicks=0,ir1=0,ir2=0,noFilter=0,busy=0,disabled=0,backoff=0,misses=0;
+ uint32_t ir1Delivered=0,ir2Delivered=0;
  bool throttled=false;
  uint64_t lastErdp1=0,lastErdp2=0;
  bool haveLast=false;
  void idle(){misses=0;throttled=false;haveLast=false;}
  unsigned intervalMs()const{return throttled?50u:1u;}
- bool note(bool active1,uint64_t erdp1,bool active2,uint64_t erdp2,Delivery result){
-  const bool active=active1||active2;
-  if(!active){idle();return false;}
+ void account(Delivery result){
   // secKicks is a successful-delivery count, not an active-sample count.
   if(result==Delivery::Delivered)++kicks;
   else if(result==Delivery::FilterRejected)++noFilter;
   else if(result==Delivery::BusyInFlight)++busy;
-  else if(result==Delivery::NotEnabled)++disabled;
+  else if(result==Delivery::NotEnabled||result==Delivery::NotRegistered||result==Delivery::BadSource)++disabled;
+ }
+ bool progress(bool active1,uint64_t erdp1,bool active2,uint64_t erdp2){
+  if(!active1&&!active2){idle();return false;}
   if(!haveLast||erdp1!=lastErdp1||erdp2!=lastErdp2){
    haveLast=true;lastErdp1=erdp1;lastErdp2=erdp2;misses=0;throttled=false;return false;
   }
   const bool justThrottled=!throttled&&++misses>=backoffAfter;
   if(justThrottled){throttled=true;++backoff;}
   return justThrottled;
+ }
+ bool note(bool active1,uint64_t erdp1,bool active2,uint64_t erdp2,Delivery result){
+  if(active1||active2)account(result);
+  return progress(active1,erdp1,active2,erdp2);
+ }
+ bool noteSources(bool active1,uint64_t erdp1,Delivery d1,bool active2,uint64_t erdp2,Delivery d2){
+  if(active1){account(d1);if(d1==Delivery::Delivered)++ir1Delivered;}
+  if(active2){account(d2);if(d2==Delivery::Delivered)++ir2Delivered;}
+  return progress(active1,erdp1,active2,erdp2);
  }
 };
 }

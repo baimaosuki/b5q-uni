@@ -14,6 +14,7 @@ stub=r'''
 #include <atomic>
 #include <chrono>
 #include "B5qUsbIrq.h"
+template<class... T>void IOLog(const char*,T...){}
 #define OSDeclareDefaultStructors(x)
 constexpr uint32_t NSEC_PER_MSEC=1000000;
 uint64_t now=0;

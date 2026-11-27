@@ -4,6 +4,18 @@ from pathlib import Path
 REVISION='6c42e1055ffb3b335fda991190ad221edaa7af3c'
 def select_shared(source,out):
     source,out=Path(source),Path(out)
+    if source.name=='nw_mainline.c':
+        text=source.read_text()
+        anchor='void nw_wifi_disconnect(void) {'
+        if text.count(anchor)!=1:raise ValueError('Pinned mainline disconnect ABI changed')
+        text=text.replace(anchor,'''int nw_wifi_disconnect_pending(void) {
+  lx_shared_spin_lock(&boundary_lock);
+  const int pending = ui.operation == NW_CONTROL_DISCONNECT_REQUEST;
+  lx_shared_spin_unlock(&boundary_lock);
+  return pending;
+}
+'''+anchor)
+        out.mkdir(parents=True,exist_ok=True);target=out/'b5q_nw_mainline.c';target.write_text(text);return target
     if source.name!='scan.c' or source.parent.name!='cfg80211':return source
     text=source.read_text();old='!memcmp(elem->data + match_offset, match, match_len)'
     if text.count(old)!=1:raise ValueError('Pinned cfg80211 empty-match ABI changed')
@@ -26,6 +38,9 @@ void log(int level, const char *fmt, ...) {
     probe_helpers = r'''
 // Public SDK omits this KERNEL_PRIVATE KPI; the pinned XNU exports it.
 extern "C" uint32_t ifnet_eflags(ifnet_t);
+extern "C" int nw_wifi_disconnect_pending(void);
+extern "C" int proc_selfpid(void);
+static uint32_t gLeaveContextLogged, gJoinContextLogged, gPreJoinDrainLogged;
 static uint32_t gIfBindLogged;
 static void log_ifnet_bind(const char *where) {
   if (!gIf || __atomic_exchange_n(&gIfBindLogged, 1u, __ATOMIC_ACQ_REL)) return;
@@ -61,6 +76,51 @@ static void probe_frame(const uint8_t *frame, size_t length, bool out) {
 '''
     replacements=[
         (log_anchor, log_anchor + probe_helpers),
+        ('    const errno_t error = ifnet_input(gIf, packets, &inc);', '''    const errno_t error = ifnet_input(gIf, packets, &inc);
+    // dlil's Skywalk path does not apply inc to the legacy ifnet counters.
+    if (!error && gIf && (ifnet_capabilities_enabled(gIf) & 0x400u)) {
+      ifnet_stat_increment_in(gIf, count, bytes, 0);
+    }'''),
+        ('    if (current.state < NW_STA_AUTH) return 0;',
+         '    if (current.state < NW_STA_AUTH && !nw_wifi_disconnect_pending()) return 0;'),
+        ('''      if (current.state >= NW_STA_AUTH) {''', '''      if (current.state >= NW_STA_AUTH || nw_wifi_disconnect_pending()) {'''),
+        ('''        int error = drain_disconnect(); if (error) return error;''', '''        const uint64_t began = continuous_ms();
+        int error = drain_disconnect();
+        if (__atomic_fetch_add(&gPreJoinDrainLogged, 1u, __ATOMIC_RELAXED) < 32u)
+          log(6, "wifi-net: pre-join-drain rc=%d waited_ms=%u prev_state=%d", error,
+              unsigned(continuous_ms() - began), int(current.state));
+        if (error) return error;'''),
+        ('''      gKeyed = hasKey; int r = nw_wifi_connect(''', '''      if (__atomic_fetch_add(&gJoinContextLogged, 1u, __ATOMIC_RELAXED) < 32u) {
+        unsigned cached_freq = 0;
+        for (int i = 0; i < nw_wifi_bss_count(); i++) {
+          nw_bss_info b{};
+          if (!nw_wifi_bss_get(i, &b) && b.ssid_len == a.ssid_length &&
+              !memcmp(b.ssid, a.ssid, a.ssid_length) && (!hasBssid || !memcmp(b.bssid, a.bssid, 6))) {
+            cached_freq = b.freq_mhz; break;
+          }
+        }
+        char prefix[17] = {};static const char hex[] = "0123456789abcdef";
+        const unsigned n = a.ssid_length < 8 ? a.ssid_length : 8;
+        for (unsigned i = 0; i < n; i++) { prefix[2*i] = hex[a.ssid[i] >> 4];prefix[2*i+1] = hex[a.ssid[i] & 15]; }
+        log(6, "wifi-net: join-ctx ssid_len=%u ssid_hex=%s has_bssid=%u cached_freq=%u", a.ssid_length, prefix, hasBssid, cached_freq);
+      }
+      gKeyed = hasKey; int r = nw_wifi_connect('''),
+        ('''    case kDisassociate: case kDeauth: log(6, "wifi-net: leave"); disconnect_user(); return 0;''', '''    case kDisassociate: case kDeauth: {
+      if (__atomic_fetch_add(&gLeaveContextLogged, 1u, __ATOMIC_RELAXED) < 32u) {
+        nw_wifi_status st{};nw_wifi_status_get(&st);
+        struct ifnet_stats_param counts{};if (gIf) ifnet_stat(gIf, &counts);
+        const uint64_t up = __atomic_load_n(&gLinkUpMs, __ATOMIC_ACQUIRE), now = continuous_ms();
+        log(6, "wifi-net: leave-ctx type=%u pid=%d state=%d link_up_ms=%llu in_pkts=%llu out_pkts=%llu",
+            type, proc_selfpid(), int(st.state), up && now >= up ? now - up : 0,
+            counts.packets_in, counts.packets_out);
+      }
+      log(6, "wifi-net: leave"); disconnect_user(); return 0; }'''),
+        ('  gLinkUpMs = up ? continuous_ms() : 0;',
+         '  __atomic_store_n(&gLinkUpMs, up ? continuous_ms() : 0, __ATOMIC_RELEASE);'),
+        ('      if (st.state != NW_STA_UP) gLinkUpMs = 0; else if (!gLinkUpMs) gLinkUpMs = now;',
+         '      if (st.state != NW_STA_UP) __atomic_store_n(&gLinkUpMs, uint64_t(0), __ATOMIC_RELEASE); else if (!__atomic_load_n(&gLinkUpMs, __ATOMIC_ACQUIRE)) __atomic_store_n(&gLinkUpMs, now, __ATOMIC_RELEASE);'),
+        ('now - gLinkUpMs, nw_wifi_bss_count()',
+         'now - __atomic_load_n(&gLinkUpMs, __ATOMIC_ACQUIRE), nw_wifi_bss_count()'),
         ('extern "C" int boot_kthread_report(const char *name, char *out, unsigned size);   // BootUiTraceProbe.c\n',''),
         ('extern "C" unsigned boot_cpu_kick(char *out, unsigned size);                      // BootUiTraceProbe.c\n',''),
         ('''    char where[240];
@@ -121,7 +181,7 @@ static void probe_frame(const uint8_t *frame, size_t length, bool out) {
     (out/'network-source.json').write_text(json.dumps(dict(reference_revision=revision,
         original_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
         selected_sha256=hashlib.sha256(selected.read_bytes()).hexdigest(),
-        adaptation='Only unbuilt BootUiTrace stack/IPI diagnostics are omitted; Apple80211 events use a zero-filled live BSD interface name with en0 only as the pre-ifnet fallback; TX refreshes a delayed ifnet and guards statistics until it exists; Review16 adds bounded ifnet bind, frame, rx-flush and stall probes; no fake stub or unresolved weak import; native network and real stall counters retained',
+        adaptation='Only unbuilt BootUiTrace stack/IPI diagnostics are omitted; Apple80211 events use a zero-filled live BSD interface name with en0 only as the pre-ifnet fallback; TX refreshes a delayed ifnet and guards statistics until it exists; Review16 adds bounded ifnet bind, frame, rx-flush and stall probes; Review17 accounts Skywalk RX and waits for actual queued disconnect consumption with bounded atomic leave/join probes; no fake stub or unresolved weak import; native network and real stall counters retained',
         interface_name_audit='The macOS event and runtime diagnostic paths are dynamic; remaining en0 literals are the explicit no-ifnet fallback, comments, and the non-macOS branch that allocates unit 0',
         headers={name:hashlib.sha256((out/name).read_bytes()).hexdigest()for name in headers}),indent=2)+'\n')
     return selected

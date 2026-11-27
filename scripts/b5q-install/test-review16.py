@@ -90,11 +90,12 @@ checks.append(dict(name='wifi-generated-bounded-probes-and-mac-path', passed=Tru
 
 # 2. USB: secondary delivery owns no storm accounting and the bridge has a bounded backoff.
 usb = (P / 'QcomDwc3.cpp').read_text()
-deliver = function(usb, 'B5qUsbIrq::Delivery deliverSecondary()')
-for marker in ['gActiveNub!=this', 'gIrqStormed', '!enabled||!action', 'inFlight', 'armcpu_spi_mask(kIrq,true)',
-               'unmaskLocked()', 'FilterRejected', 'BusyInFlight', 'NotEnabled']:
+deliver = function(usb, 'B5qUsbIrq::Delivery deliverSource(uint32_t source)')
+for marker in ['gActiveNub!=this', '!slot.enabled', '!slot.action', 'slot.inFlight', 'NotRegistered',
+               'BadSource', 'BusyInFlight', 'NotEnabled']:
     assert marker in deliver, marker
 assert 'gIrqWindow.observe' not in deliver
+assert 'armcpu_spi_mask' not in deliver and 'unmaskLocked' not in deliver
 for marker in ['const bool active1 = have1 && (ir1.iman & 3u) == 3u;',
                'const bool active2 = have2 && (ir2.iman & 3u) == 3u;',
                'if (active1) ++gHostIrqBridge.ir1;', 'if (active2) ++gHostIrqBridge.ir2;',
@@ -103,12 +104,12 @@ for marker in ['const bool active1 = have1 && (ir1.iman & 3u) == 3u;',
     assert marker in usb, marker
 assert 'const bool active=((ir1.iman&3u)==3u)||((ir2.iman&3u)==3u);' not in usb
 primary = function(usb, 'static void primary(void *)')
-assert 'self->inFlight==0' in primary
+assert 'self->slots[0].inFlight==0' in primary
 enter = function(usb, 'void enterHost()')
 leave = function(usb, 'void leaveRole(int role)')
 assert 'startHostIrqBridge()' in enter
 assert leave.index('stopHostIrqBridge()') < leave.index('gHostNub->terminate')
-assert 'host-ir-bridge #%u ir1_iman=%x ir2_iman=%x ir1_erdp=%llx sts=%x result=%u' in usb
+assert 'host-ir-bridge #%u ir1_iman=%x ir2_iman=%x er1=%llx er2=%llx sts=%x d1=%u d2=%u result=%u/%u' in usb
 assert 'ir0=%x/%llx ir1=%x/%llx ir2=%x/%llx' in usb
 assert 'secKicks=%u secIr1=%u secIr2=%u secNoFilter=%u secBusy=%u secDisabled=%u secBackoff=%u' in usb
 assert 'host-device-tree id=%llx vid=%04x pid=%04x' in usb and 'IOUSBHostInterface' not in usb
@@ -219,11 +220,15 @@ def changed(path):
 
 for path in ['.github/workflows', 'UniXNU', 'sources', 'UniXNU-b5q/patches', 'UniXNU-b5q/board.toml',
              'UniXNU-b5q/scripts/usb-xhci-26C5035r.json', 'UniXNU-b5q/scripts/usb-dual-bindings-26C5035r.json',
-             'UniXNU-b5q/package/B5qWcnPower.cpp', 'UniXNU-b5q/package/B5qBluetooth.cpp',
-             'UniXNU-b5q/package/B5qBtH4Tap.h', 'UniXNU-b5q/package/B5qBtFifo.c',
+             'UniXNU-b5q/package/B5qWcnPower.cpp', 'UniXNU-b5q/package/B5qBtFifo.c',
              'UniXNU-b5q/package/B5qTouch.cpp', 'UniXNU-b5q/package/B5qDpPdic.h',
              'UniXNU-b5q/package/B5qDpPhy.h', 'UniXNU-b5q/package/B5qDpAux.h']:
     assert not changed(path), 'red-line changed: ' + path
+# Review17 intentionally expands H4 observation; transport/power behavior stays byte-identical.
+old_bt = subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/B5qBluetooth.cpp'], cwd=R).decode()
+new_bt = (P / 'B5qBluetooth.cpp').read_text()
+for signature in ['int clockVote(', 'void rxIrq(', 'void disarmRxWake(', 'void worker(', 'int setRate(']:
+    assert function(old_bt, signature) == function(new_bt, signature), signature
 subprocess.run(['git', 'diff', '--check'], cwd=R, check=True)
 checks.append(dict(name='review16-zero-diff-red-lines-and-bluetooth', passed=True))
 

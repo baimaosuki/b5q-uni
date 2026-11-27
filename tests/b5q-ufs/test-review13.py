@@ -327,7 +327,7 @@ int main(){
                  'for(unsigned i=0;i<3;i++)', 'if(i<2) {'):
         assert text in source, text
     assert source.index('stage=transport tx=') < source.index('stage=h4 tx-cmd=')
-    for text in ('B5Q_BT_H4_QUOTA_TOTAL 800u', 'B5Q_BT_H4_QUOTA_KEY 558u', 'B5Q_BT_H4_QUOTA_NORMAL 240u',
+    for text in ('B5Q_BT_H4_QUOTA_TOTAL 1600u', 'B5Q_BT_H4_QUOTA_KEY 1100u', 'B5Q_BT_H4_QUOTA_NORMAL 496u',
                  'B5Q_BT_H4_ATT_LIMIT 160u', 'B5Q_BT_H4_CID_LIMIT 80u', 'B5Q_BT_H4_PREFIX 64u',
                  'tap->stats.desync++', 'b5q_h4_get8(v, protocol + 6u)'):
         assert text in bt, text
@@ -388,9 +388,9 @@ int main(){
  assert(quota.stats.att==200&&quota.quota.att==160&&quota.stats.att_dropped==40&&q.att_summary==1);
  uint8_t dyn[16];acl(dyn,0x40,0,2,0);for(unsigned i=0;i<100;i++)send(&quota,&q,dyn,11,0);
  assert(quota.quota.cid==80&&quota.stats.cid_dropped==20&&q.cid_summary==1);
- for(unsigned i=0;i<800;i++)send(&quota,&q,smp,16,0);
- assert(quota.quota.total==800&&quota.stats.logged==800&&quota.quota.key<=558);
- unsigned before=q.lines;send(&quota,&q,smp,16,0);assert(quota.quota.total==800&&q.lines==before);
+ for(unsigned i=0;i<B5Q_BT_H4_QUOTA_TOTAL;i++)send(&quota,&q,smp,16,0);
+ assert(quota.quota.key==B5Q_BT_H4_QUOTA_KEY&&quota.stats.logged==quota.quota.total&&quota.quota.total<=B5Q_BT_H4_QUOTA_TOTAL);
+ unsigned before=q.lines,total=quota.quota.total;send(&quota,&q,smp,16,0);assert(quota.quota.total==total&&q.lines==before);
  return 0;}
 ''', includes=[str(P / 'B5qBtH4Tap.h')])
 

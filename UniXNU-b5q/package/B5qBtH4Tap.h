@@ -16,9 +16,9 @@
 
 #define B5Q_BT_H4_PREFIX 64u
 #define B5Q_BT_H4_LINE 512u
-#define B5Q_BT_H4_QUOTA_TOTAL 800u
-#define B5Q_BT_H4_QUOTA_KEY 558u
-#define B5Q_BT_H4_QUOTA_NORMAL 240u
+#define B5Q_BT_H4_QUOTA_TOTAL 1600u
+#define B5Q_BT_H4_QUOTA_KEY 1100u
+#define B5Q_BT_H4_QUOTA_NORMAL 496u
 #define B5Q_BT_H4_ATT_LIMIT 160u
 #define B5Q_BT_H4_CID_LIMIT 80u
 
@@ -32,6 +32,7 @@ struct B5qBtH4Stats {
     uint64_t rx_evt, rx_acl, rx_sco, rx_iso;
     uint64_t errs, smp, l2cap, desync, filtered, malformed;
     uint64_t evt13;
+    uint32_t sco_commands, sco_events, role_changes, mode_changes, supervision_changes;
     uint64_t att, att_dropped, cid, cid_dropped;
     uint32_t logged, dropped;
 };
@@ -47,6 +48,12 @@ struct B5qBtH4Parser {
     uint8_t prefix[B5Q_BT_H4_PREFIX];
     uint32_t prefix_len, payload_left, total_len, payload_offset, desync;
 };
+struct B5qBtH4Handle {
+    uint8_t active,is_le,mode,last_sig_code;
+    uint16_t handle,mode_interval,sup_slots,last_tx_cid,last_rx_cid,last_psm;
+    uint64_t conn_ms,last_tx_acl_ms,last_rx_acl_ms;
+    uint32_t tx_acl,rx_acl;
+};
 
 struct B5qBtH4Tap {
     const struct B5qBtH4Sink *sink;
@@ -55,6 +62,8 @@ struct B5qBtH4Tap {
     struct B5qBtH4Parser tx, rx;
     struct B5qBtH4Stats stats;
     struct B5qBtH4Quota quota;
+    struct B5qBtH4Handle handles[8];
+    uint32_t disconnLogged;
 };
 
 struct B5qBtH4View {
@@ -160,7 +169,67 @@ static inline void b5q_h4_simple(struct B5qBtH4Tap *tap, int tx, const char *wha
     b5q_h4_send(tap, &text);
 }
 
+static inline struct B5qBtH4Handle *b5q_h4_handle(struct B5qBtH4Tap *tap,uint32_t handle,int create){
+    handle&=0x0fffu;
+    for(unsigned i=0;i<8;i++)if(tap->handles[i].active&&tap->handles[i].handle==handle)return &tap->handles[i];
+    if(!create)return NULL;
+    for(unsigned i=0;i<8;i++)if(!tap->handles[i].active){
+        struct B5qBtH4Handle *h=&tap->handles[i];memset(h,0,sizeof(*h));
+        h->active=1;h->handle=(uint16_t)handle;h->conn_ms=b5q_h4_now(tap);return h;
+    }
+    return NULL; // Never evict a live handle and misattribute its disconnect.
+}
+static inline void b5q_h4_disconnect(struct B5qBtH4Tap *tap,const struct B5qBtH4View *v){
+    const uint32_t p=v->payload_offset,handle=b5q_h4_get16(v,p+1u)&0xfffu;
+    struct B5qBtH4Handle unknown;memset(&unknown,0,sizeof(unknown));unknown.handle=(uint16_t)handle;
+    struct B5qBtH4Handle *known=b5q_h4_handle(tap,handle,0),*h=known?known:&unknown;
+    const uint64_t now=b5q_h4_now(tap);
+    if(tap->disconnLogged<32u){
+        tap->disconnLogged++;
+        struct B5qBtH4Text t;memset(&t,0,sizeof(t));
+        b5q_h4_text_puts(&t,"B5qBluetooth: h4-disconn-ctx ms=");b5q_h4_text_u(&t,now);
+        b5q_h4_text_puts(&t," handle=");b5q_h4_text_hex(&t,handle,4);
+        b5q_h4_text_puts(&t," reason=");b5q_h4_text_hex(&t,b5q_h4_get8(v,p+3u),2);
+        b5q_h4_text_puts(&t," le=");b5q_h4_text_u(&t,h->is_le);
+        b5q_h4_text_puts(&t," alive_ms=");b5q_h4_text_u(&t,known&&now>=h->conn_ms?now-h->conn_ms:0);
+        b5q_h4_text_puts(&t," since_tx_ms=");b5q_h4_text_u(&t,h->tx_acl&&now>=h->last_tx_acl_ms?now-h->last_tx_acl_ms:0);
+        b5q_h4_text_puts(&t," since_rx_ms=");b5q_h4_text_u(&t,h->rx_acl&&now>=h->last_rx_acl_ms?now-h->last_rx_acl_ms:0);
+        b5q_h4_text_puts(&t," tx_acl=");b5q_h4_text_u(&t,h->tx_acl);
+        b5q_h4_text_puts(&t," rx_acl=");b5q_h4_text_u(&t,h->rx_acl);
+        b5q_h4_text_puts(&t," tx_cid=");b5q_h4_text_hex(&t,h->last_tx_cid,4);
+        b5q_h4_text_puts(&t," rx_cid=");b5q_h4_text_hex(&t,h->last_rx_cid,4);
+        b5q_h4_text_puts(&t," mode=");b5q_h4_text_u(&t,h->mode);
+        b5q_h4_text_puts(&t," intv=");b5q_h4_text_u(&t,h->mode_interval);
+        b5q_h4_text_puts(&t," sup_slots=");b5q_h4_text_u(&t,h->sup_slots);
+        b5q_h4_text_puts(&t," last_psm=");b5q_h4_text_hex(&t,h->last_psm,4);
+        b5q_h4_send(tap,&t);
+    }
+    if(known&&b5q_h4_get8(v,p)==0)known->active=0;
+}
+static inline void b5q_h4_track_event(struct B5qBtH4Tap *tap,const struct B5qBtH4View *v){
+    const unsigned evt=b5q_h4_get8(v,1),p=v->payload_offset,sub=b5q_h4_get8(v,p);
+    struct B5qBtH4Handle *h=NULL;
+    if(evt==3u&&v->payload_len>=11u&&sub==0){
+        h=b5q_h4_handle(tap,b5q_h4_get16(v,p+1),1);
+        if(h){memset(h,0,sizeof(*h));h->active=1;h->handle=(uint16_t)(b5q_h4_get16(v,p+1)&0xfff);h->conn_ms=b5q_h4_now(tap);}
+    }else if(evt==0x3eu&&(sub==1u||sub==0x0au)&&v->payload_len>=(sub==1u?19u:31u)&&b5q_h4_get8(v,p+1)==0){
+        h=b5q_h4_handle(tap,b5q_h4_get16(v,p+2),1);
+        if(h){memset(h,0,sizeof(*h));h->active=h->is_le=1;h->handle=(uint16_t)(b5q_h4_get16(v,p+2)&0xfff);h->conn_ms=b5q_h4_now(tap);h->sup_slots=(uint16_t)b5q_h4_get16(v,p+(sub==1u?16u:28u));}
+    }else if(evt==0x3eu&&sub==3u&&v->payload_len>=10u&&b5q_h4_get8(v,p+1)==0){
+        h=b5q_h4_handle(tap,b5q_h4_get16(v,p+2),0);if(h)h->sup_slots=(uint16_t)b5q_h4_get16(v,p+8);
+    }else if(evt==0x14u&&v->payload_len>=6u){
+        tap->stats.mode_changes++;h=b5q_h4_handle(tap,b5q_h4_get16(v,p+1),0);
+        if(h&&sub==0){h->mode=(uint8_t)b5q_h4_get8(v,p+3);h->mode_interval=(uint16_t)b5q_h4_get16(v,p+4);}
+    }else if(evt==0x38u&&v->payload_len>=4u){
+        tap->stats.supervision_changes++;h=b5q_h4_handle(tap,b5q_h4_get16(v,p),0);
+        if(h)h->sup_slots=(uint16_t)b5q_h4_get16(v,p+2);
+    }else if(evt==0x12u)tap->stats.role_changes++;
+    else if(evt==0x2cu||evt==0x2du)tap->stats.sco_events++;
+    if(evt==5u&&v->payload_len>=4u)b5q_h4_disconnect(tap,v);
+}
+
 static inline void b5q_h4_event(struct B5qBtH4Tap *tap, const struct B5qBtH4View *v) {
+    b5q_h4_track_event(tap,v);
     const uint32_t evt = b5q_h4_get8(v, 1u);
     const uint32_t payload = v->payload_offset;
     uint32_t status = 0, opcode = 0, sub = 0;
@@ -201,6 +270,19 @@ static inline void b5q_h4_event(struct B5qBtH4Tap *tap, const struct B5qBtH4View
         b5q_h4_text_puts(&text, " addr=");b5q_h4_text_mac(&text, v, payload + 3u);
         b5q_h4_text_puts(&text, " link=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload + 9u), 2);
         b5q_h4_text_puts(&text, " enc=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload + 10u), 2);
+    } else if (evt == 0x14u) {
+        b5q_h4_text_puts(&text," mode-change handle=");b5q_h4_text_hex(&text,b5q_h4_get16(v,payload+1u),4);
+        b5q_h4_text_puts(&text," mode=");b5q_h4_text_u(&text,b5q_h4_get8(v,payload+3u));
+        b5q_h4_text_puts(&text," interval=");b5q_h4_text_u(&text,b5q_h4_get16(v,payload+4u));
+    } else if (evt == 0x38u) {
+        b5q_h4_text_puts(&text," supervision handle=");b5q_h4_text_hex(&text,b5q_h4_get16(v,payload),4);
+        b5q_h4_text_puts(&text," sup_slots=");b5q_h4_text_u(&text,b5q_h4_get16(v,payload+2u));
+    } else if (evt == 0x12u) {
+        b5q_h4_text_puts(&text," role-change status=");b5q_h4_text_hex(&text,b5q_h4_get8(v,payload),2);
+        b5q_h4_text_puts(&text," role=");b5q_h4_text_u(&text,b5q_h4_get8(v,payload+7u));
+    } else if (evt == 0x2cu || evt == 0x2du) {
+        b5q_h4_text_puts(&text," synchronous-link status=");b5q_h4_text_hex(&text,b5q_h4_get8(v,payload),2);
+        b5q_h4_text_puts(&text," handle=");b5q_h4_text_hex(&text,b5q_h4_get16(v,payload+1u),4);
     } else if (evt == 0x08u) {
         b5q_h4_text_puts(&text, " enc-change status=");b5q_h4_text_hex(&text, b5q_h4_get8(v, payload), 2);
         b5q_h4_text_puts(&text, " handle=");b5q_h4_text_hex(&text, b5q_h4_get16(v, payload + 1u), 4);
@@ -237,6 +319,11 @@ static inline void b5q_h4_event(struct B5qBtH4Tap *tap, const struct B5qBtH4View
 
 static inline void b5q_h4_command(struct B5qBtH4Tap *tap, const struct B5qBtH4View *v, int tx) {
     const uint32_t opcode = b5q_h4_get16(v, 1u);
+    if(opcode==0x0428u||opcode==0x0429u||opcode==0x043du||opcode==0x043eu)tap->stats.sco_commands++;
+    if(opcode==0x0c37u&&v->payload_len>=4u){
+        struct B5qBtH4Handle *h=b5q_h4_handle(tap,b5q_h4_get16(v,v->payload_offset),0);
+        if(h)h->sup_slots=(uint16_t)b5q_h4_get16(v,v->payload_offset+2u);
+    }
     if (b5q_h4_scan_opcode(opcode)) { tap->stats.filtered++; return; }
     if (!b5q_h4_key_slot(tap)) return;
     struct B5qBtH4Text text;memset(&text, 0, sizeof(text));
@@ -253,6 +340,8 @@ static inline void b5q_h4_acl(struct B5qBtH4Tap *tap, const struct B5qBtH4View *
     const uint32_t handle = b5q_h4_get16(v, 1u) & 0x0fffu;
     const uint32_t pb = (b5q_h4_get8(v, 2u) >> 4) & 3u;
     const uint32_t bc = (b5q_h4_get8(v, 2u) >> 6) & 3u;
+    struct B5qBtH4Handle *h=b5q_h4_handle(tap,handle,0);
+    if(h){if(tx){h->tx_acl++;h->last_tx_acl_ms=b5q_h4_now(tap);}else{h->rx_acl++;h->last_rx_acl_ms=b5q_h4_now(tap);}}
     if (pb == 1u) return;  /* continuation fragment: no L2CAP header */
     if (v->payload_len < 4u || v->prefix_len < v->payload_offset + 4u) {
         tap->stats.malformed++;
@@ -263,6 +352,14 @@ static inline void b5q_h4_acl(struct B5qBtH4Tap *tap, const struct B5qBtH4View *
     const uint32_t l2cap_len = b5q_h4_get16(v, v->payload_offset);
     const uint32_t cid = b5q_h4_get16(v, v->payload_offset + 2u);
     const uint32_t protocol = v->payload_offset + 4u;
+    if(h){
+        if(tx)h->last_tx_cid=(uint16_t)cid;else h->last_rx_cid=(uint16_t)cid;
+        if(cid==1u||cid==5u){
+            h->last_sig_code=(uint8_t)b5q_h4_get8(v,protocol);
+            if((h->last_sig_code==2u||h->last_sig_code==0x14u)&&v->payload_len>=10u)
+                h->last_psm=(uint16_t)b5q_h4_get16(v,protocol+4u);
+        }
+    }
     int key = 0, normal = 0;
     if (cid == 0x0006u) { key = 1;tap->stats.smp++; }
     else if (cid == 0x0001u || cid == 0x0005u) { key = 1;tap->stats.l2cap++; }
@@ -389,6 +486,7 @@ static inline void b5q_bt_h4_tap_reset_session(struct B5qBtH4Tap *tap) {
     tap->tx.desync = 0;tap->rx.desync = 0;
     memset(&tap->stats, 0, sizeof(tap->stats));
     memset(&tap->quota, 0, sizeof(tap->quota));
+    memset(tap->handles,0,sizeof(tap->handles));tap->disconnLogged=0;
 }
 static inline void b5q_bt_h4_tap_init(struct B5qBtH4Tap *tap, const struct B5qBtH4Sink *sink,
                                       void *ctx, int enabled) {

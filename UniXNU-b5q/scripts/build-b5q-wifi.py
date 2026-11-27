@@ -11,6 +11,7 @@ from pathlib import Path
 DEVICE=Path(os.environ.get('UNIXNU_DEVICE',Path(__file__).resolve().parents[1])).resolve()
 LINUX='458c6079fc1d41d564c37679c8ace02cd83ee817'
 EXPORTS=set('nw_wifi_start nw_wifi_step nw_wifi_stop nw_wifi_stats nw_wifi_set_events nw_wifi_scan nw_wifi_scan_frequencies nw_wifi_bss_count nw_wifi_bss_get nw_wifi_connect nw_wifi_disconnect nw_wifi_tx nw_wifi_status_get nw_wifi_where nw_wifi_power nw_wifi_tx_packet nw_wifi_link_state nw_wifi_tx_reasons nw_wifi_buffer_stats_get nw_wifi_buffer_pool_configure nw_wifi_buffer_pool_trim nw_wifi_irq_mode nw_wifi_irq_pending nw_wifi_wait_ms nw_wifi_poll nw_wifi_control_transport_set nw_wifi_control_attach nw_wifi_control_detach nw_wifi_control_receive nw_wifi_control_writable nw_wifi_control_stats_get nw_wifi_set_platform'.split())
+EXPORTS.add('nw_wifi_disconnect_pending')
 
 def replace(s,old,new,name):
     if s.count(old)!=1:raise ValueError('Pinned ath11k '+name+' ABI changed')

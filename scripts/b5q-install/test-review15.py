@@ -240,8 +240,12 @@ link = (P / 'B5qDpLink.cpp').read_text()
 for marker in ['stage=pool-ready', 'stage=hw-open', 'B5qDP: discover', 'train_err=', 'phy_last=', 'stage=scanout', 'B5qDP: feature b5q-dp=', 'B5qDP: port phase=']:
     assert marker in link
 for name in ['B5qDpPhy.h', 'B5qDpClock.h', 'B5qDpDpu.h', 'B5qDpDisplay.cpp', 'B5qWcnPower.cpp',
-             'B5qBluetooth.cpp', 'B5qBtH4Tap.h', 'B5qBtFifo.c', 'B5qTouch.cpp']:
+             'B5qBtFifo.c', 'B5qTouch.cpp']:
     assert (P / name).read_bytes() == subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/' + name], cwd=R), name
+# Review17's H4 diagnostics are allowed; preserve its actual UART/IBS executor.
+old_bt = subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/B5qBluetooth.cpp'], cwd=R).decode()
+for signature in ['int clockVote(', 'void rxIrq(', 'void disarmRxWake(', 'void worker(', 'int setRate(']:
+    assert function(old_bt, signature) == function((P / 'B5qBluetooth.cpp').read_text(), signature)
 assert len(list((R / 'tests/b5q-ufs').glob('test-dp-*.py'))) == 26
 checks.append(dict(name='diagnostics-and-red-line-source-contracts', passed=True))
 receipt = dict(status='HOST_VERIFIED_PENDING_HARDWARE', passed=True, hardware_verified=False,
