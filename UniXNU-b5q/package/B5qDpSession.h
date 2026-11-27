@@ -7,6 +7,7 @@
 #include "B5qDpClock.h"
 #include "B5qDpController.h"
 #include "B5qDpModes.h"
+#include <string.h>
 #include "B5qDpPhy.h"
 #include "B5qDpTraining.h"
 namespace B5qDp {
@@ -16,6 +17,9 @@ template<class Io>struct Session {
  Modes modes{};Mode selected{};LinkCaps caps{};uint8_t edid[1024]{},dpcd[16]{};
  unsigned discoverStep=0;
  unsigned edidBytes=0,rate=0,lanes=0,attempts=0;bool reverse=false,clocksOwned=false,auxOn=false,sinkPowered=false,trained=false,streaming=false;
+ // Review16: diagnostics only; these never feed a register choice.
+ uint32_t lastRate=0,lastLanes=0,clockLast=0;uint8_t trainStatus[6]{};unsigned videoStage=0;
+ uint32_t auxFailRegs[10]{};bool haveAuxFailRegs=false;
  uint64_t deadline=0;LinkError error=LinkError::None;TrainError trainError=TrainError::None;
  explicit Session(Io &owner):io(owner),aux(owner),clock(owner),controller(owner),phy(owner){}
  bool inTime(){return io.nowUs()<deadline;}
@@ -54,9 +58,22 @@ template<class Io>struct Session {
   if(clockOk)auxOn=clocksOwned=false;
   trained=streaming=false;selected={};rate=lanes=0;return powerOk&&clockOk;
  }
- bool fail(LinkError why){error=why;stop();return false;}
+ void captureAuxFailure(){
+  if(haveAuxFailRegs)return;
+  auxFailRegs[0]=io.read(Block::Ahb,0x00);auxFailRegs[1]=io.read(Block::Ahb,0x20);
+  auxFailRegs[2]=io.read(Block::Aux,0x30);auxFailRegs[3]=io.read(Block::Aux,0x38);
+  auxFailRegs[4]=io.read(Block::Aux,0x50);auxFailRegs[5]=io.read(Block::Aux,0x54);
+  auxFailRegs[6]=io.read(Block::Aux,0x58);auxFailRegs[7]=io.read(Block::DispCc,0x8058);
+  auxFailRegs[8]=io.read(Block::DispCc,0x81bc);auxFailRegs[9]=io.read(Block::Phy,0xe4);
+  haveAuxFailRegs=true;
+ }
+ bool fail(LinkError why){
+  error=why;clockLast=clock.last;
+  if(auxOn)captureAuxFailure();
+  stop();return false;
+ }
  bool discover(unsigned routeLanes,bool flipped){
-  discoverStep=0;for(auto &byte:dpcd)byte=0;
+  discoverStep=0;haveAuxFailRegs=false;for(auto &byte:dpcd)byte=0;
   if(!stop()){error=LinkError::Clock;return false;}
   modes={};caps={};edidBytes=0;attempts=0;error=LinkError::None;trainError=TrainError::None;reverse=flipped;
   if(!io.connected())return fail(LinkError::Detached);
@@ -92,6 +109,8 @@ template<class Io>struct Session {
    if(best==modes.count)break;tried|=1u<<best;
    Training<TrainIo> training(adapter);const bool ok=training.run(caps,modes.values[best]);
    attempts+=training.attempts;trainError=training.error;
+   lastRate=training.rate;lastLanes=training.lanes;clockLast=clock.last;
+   memcpy(trainStatus,training.last,6);
    if(!inTime())return fail(LinkError::Timeout);
    if(!io.connected())return fail(LinkError::Detached);
    if(ok){selected=modes.values[best];rate=training.rate;lanes=training.lanes;trained=true;error=LinkError::None;return true;}
@@ -101,8 +120,11 @@ template<class Io>struct Session {
  // Only the scanout owner calls this after its retained-DMA/resource gate
  // and DPU setup passed. A trained link alone never sends video.
  bool video(){
+  videoStage=0;
   if(!trained||!io.connected())return fail(LinkError::Detached);
-  if(!clock.pixel(selected.pixelKHz,rate)||!controller.stream(selected,rate,lanes,caps.enhanced)||!controller.video())return fail(LinkError::Stream);
+  if(!clock.pixel(selected.pixelKHz,rate)){videoStage=1;clockLast=clock.last;return fail(LinkError::Stream);}
+  if(!controller.stream(selected,rate,lanes,caps.enhanced)){videoStage=2;clockLast=clock.last;return fail(LinkError::Stream);}
+  if(!controller.video()){videoStage=3;clockLast=clock.last;return fail(LinkError::Stream);}
   streaming=true;return true;
  }
 };

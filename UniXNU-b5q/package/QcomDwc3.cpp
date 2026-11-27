@@ -33,6 +33,8 @@ extern "C" bool b5q_usb_otg(bool);
 #include <IOKit/IODeviceTreeSupport.h>
 #include <IOKit/IOPlatformExpert.h>
 #include <libkern/c++/OSData.h>
+#include <libkern/c++/OSMetaClass.h>
+#include <string.h>
 #include <libkern/c++/OSDictionary.h>
 #include <libkern/c++/OSNumber.h>
 #include <libkern/c++/OSString.h>
@@ -341,7 +343,7 @@ class QcomDwc3Nub : public IOService {
         QcomDwc3Nub *self=gActiveNub;
         IOInterruptAction callback=nullptr;OSObject *owner=nullptr;void *context=nullptr;
         if(gIrqWindow.observe(mach_absolute_time(),gIrqSecond))gIrqStormed=true;
-        if(!gIrqStormed&&self&&self->enabled&&self->action){
+        if(!gIrqStormed&&self&&self->enabled&&self->action&&self->inFlight==0){
             owner=self->target;
             callback=self->action;context=self->refcon;++self->inFlight;
         }else armcpu_spi_mask(kIrq,true);
@@ -419,6 +421,32 @@ public:
         const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
         enabled=false;unmaskLocked();IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
         return kIOReturnSuccess;
+    }
+    // IR1/IR2 have no GIC SPI. The bridge calls this from its own thread and
+    // uses the ordinary registered filter action, never a second callback.
+    B5qUsbIrq::Delivery deliverSecondary() {
+        if(!ensureLock())return B5qUsbIrq::Delivery::NotEnabled;
+        const auto state=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        B5qUsbIrq::Delivery result=B5qUsbIrq::Delivery::Delivered;
+        if(gActiveNub!=this||gIrqStormed||!enabled||!action)result=B5qUsbIrq::Delivery::NotEnabled;
+        else if(inFlight)result=B5qUsbIrq::Delivery::BusyInFlight;
+        if(result!=B5qUsbIrq::Delivery::Delivered){
+            IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);return result;
+        }
+        // Mask the physical line for the whole callback. A filter that returns
+        // false must be unmasked here; one that calls disableInterrupt(0)
+        // leaves enabled=false and must stay masked until the workloop enables.
+        armcpu_spi_mask(kIrq,true);
+        ++inFlight;
+        OSObject *owner=target;IOInterruptAction callback=action;void *context=refcon;
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,state);
+        callback(owner,context,this,0);
+        const auto done=IOSimpleLockLockDisableInterrupt(gInterruptLock);
+        --inFlight;
+        const bool stillEnabled=enabled;
+        if(stillEnabled)unmaskLocked();
+        IOSimpleLockUnlockEnableInterrupt(gInterruptLock,done);
+        return stillEnabled?B5qUsbIrq::Delivery::FilterRejected:B5qUsbIrq::Delivery::Delivered;
     }
 };
 OSDefineMetaClassAndStructors(QcomDwc3Nub, IOService)
@@ -774,6 +802,63 @@ Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
 QcomDwc3Xhci *gHost;
 bool gFirstCc27Seen=false;
+static thread_t gHostIrqThread;
+static volatile bool gHostIrqStop, gHostIrqRunning;
+static B5qUsbIrq::Bridge gHostIrqBridge;
+static void hostIrqBridge(void *, wait_result_t) {
+    __atomic_store_n(&gHostIrqRunning,true,__ATOMIC_RELEASE);
+    unsigned logged=0;
+    while(!__atomic_load_n(&gHostIrqStop,__ATOMIC_ACQUIRE)){
+        if(!gHost||!gHostNub||gCoreRole!=kRoleHost||!gXhciRegs.va)break;
+        const unsigned rt=gXhciRegs.va[0x18/4]&~31u;
+        auto read=[](unsigned off){return gXhciRegs.va[off/4];};
+        B5qUsbIrq::Snapshot ir1{},ir2{};
+        const bool have1=B5qUsbIrq::snapshot(rt,1,kXhciRegisterBytes,read,ir1);
+        const bool have2=B5qUsbIrq::snapshot(rt,2,kXhciRegisterBytes,read,ir2);
+        if(!have1&&!have2){IOSleep(1);continue;}
+        const bool active1 = have1 && (ir1.iman & 3u) == 3u;
+        const bool active2 = have2 && (ir2.iman & 3u) == 3u;
+        const bool active=active1||active2;
+        if(!active){gHostIrqBridge.idle();IOSleep(gHostIrqBridge.intervalMs());continue;}
+        if (active1) ++gHostIrqBridge.ir1;
+        if (active2) ++gHostIrqBridge.ir2;
+        const B5qUsbIrq::Delivery result=gHostNub->deliverSecondary();
+        const bool justThrottled=gHostIrqBridge.note(active1,ir1.erdp,active2,ir2.erdp,result);
+        if(logged<16){
+            ++logged;
+            const unsigned op = gXhciRegs.va[0] & 0xffu;
+            const unsigned usbSts = ((op & 3u) == 0u && op <= kXhciRegisterBytes - 8u) ?
+                gXhciRegs.va[(op + 4u) / 4u] : 0xffffffffu;
+            IOLog("qcom-dwc3: host-ir-bridge #%u ir1_iman=%x ir2_iman=%x ir1_erdp=%llx sts=%x result=%u\n",
+                logged,have1?ir1.iman:0u,have2?ir2.iman:0u,have1?ir1.erdp:0ULL,usbSts,unsigned(result));
+        }
+        if(justThrottled)IOLog("qcom-dwc3: host-ir-bridge backoff ir1_iman=%x ir2_iman=%x misses=%u\n",
+            have1?ir1.iman:0u,have2?ir2.iman:0u,gHostIrqBridge.misses);
+        IOSleep(gHostIrqBridge.intervalMs());
+    }
+    __atomic_store_n(&gHostIrqRunning,false,__ATOMIC_RELEASE);
+}
+static bool startHostIrqBridge() {
+    if(gHostIrqThread)return true;
+    if(!gHost||!gHostNub||gCoreRole!=kRoleHost||!gXhciRegs.va)return false;
+    __atomic_store_n(&gHostIrqStop,false,__ATOMIC_RELEASE);
+    __atomic_store_n(&gHostIrqRunning,true,__ATOMIC_RELEASE);
+    gHostIrqBridge.idle();
+    thread_t started=nullptr;
+    if(kernel_thread_start(hostIrqBridge,nullptr,&started)!=KERN_SUCCESS){
+        __atomic_store_n(&gHostIrqRunning,false,__ATOMIC_RELEASE);return false;
+    }
+    gHostIrqThread=started;return true;
+}
+static bool stopHostIrqBridge() {
+    if(!gHostIrqThread)return true;
+    __atomic_store_n(&gHostIrqStop,true,__ATOMIC_RELEASE);
+    for(unsigned i=0;i<5000&&__atomic_load_n(&gHostIrqRunning,__ATOMIC_ACQUIRE);i++)IOSleep(1);
+    if(__atomic_load_n(&gHostIrqRunning,__ATOMIC_ACQUIRE)){
+        IOLog("qcom-dwc3: host-ir-bridge stop-timeout\n");return false;
+    }
+    thread_t t=gHostIrqThread;gHostIrqThread=nullptr;thread_deallocate(t);return true;
+}
 void restoreHostGlobals() {
     if(!gGlobals.va)return;
     auto *gctl=gGlobals.va+0x110/4,*guctl=gGlobals.va+0x12c/4,*guctl1=gGlobals.va+0x11c/4,*guctl2=gGlobals.va+0x60c/4;
@@ -826,6 +911,10 @@ void leaveRole(int role) {
         for (unsigned i = 0; i < 200 && native_usb_stats[13] == before; ++i) IOSleep(10);
     } else if (role == kRoleHost) {
         b5q_usb_otg(false);
+        // The bridge borrows gHostNub and the xHCI mapping. It must be gone
+        // before terminate/release drops either; a stuck thread keeps the
+        // host objects alive rather than risk a use-after-free.
+        if(!stopHostIrqBridge()){IOLog("qcom-dwc3: host teardown deferred: irq bridge did not stop\n");return;}
         // Detach the public power children before the host stack tears down;
         // handlePMstop removes them in the PM workloop before terminate.
         releaseHostPortPowerHolds();
@@ -898,7 +987,10 @@ void enterHost() {
     }
     native_usb_stats[46] = (native_usb_stats[46] & 0xffff0000u) | (done ? 1u : 2u);
     OSSafeReleaseNULL(ranges); OSSafeReleaseNULL(range); OSSafeReleaseNULL(zero);
-    if (done) gHostNub = nub;
+    if (done) {
+        gHostNub = nub;
+        if(!startHostIrqBridge())IOLog("qcom-dwc3: host-ir-bridge unavailable\n");
+    }
     else if (nub) {QcomDwc3Nub::route(nullptr); nub->terminate(kIOServiceSynchronous); nub->release();}
 }
 bool enterRole(int role) {
@@ -1116,6 +1208,26 @@ void hostAscii(char *out,unsigned capacity,const char *text) {
     out[n]=0;
 }
 }  // namespace
+static void hostChildSummary(IOService *parent,unsigned depth,unsigned &count,char *out,size_t size){
+    if(!parent||depth>3)return;
+    OSIterator *it=parent->getChildIterator(gIOServicePlane);
+    if(!it)return;
+    while(OSObject *object=it->getNextObject()){
+        IOService *child=OSDynamicCast(IOService,object);
+        if(!child)continue;
+        ++count;
+        if(count<=12){
+            const OSMetaClass *meta=child->getMetaClass();
+            const char *cls=meta?meta->getClassName():"?";
+            const char *name=child->getName();
+            const size_t used=strlen(out);
+            if(used+2<size)snprintf(out+used,size-used,"%s%s%s",used?",":"",cls,name?":":"");
+            if(name){const size_t now=strlen(out);if(now+1<size)snprintf(out+now,size-now,"%s",name);}
+        }
+        if(depth<3)hostChildSummary(child,depth+1,count,out,size);
+    }
+    OSSafeReleaseNULL(it);
+}
 void hostStats() {
     if (!gDmaReady || !gHost || gCoreRole != kRoleHost) return;
     const uint32_t cap = gXhciRegs.va[0];
@@ -1179,7 +1291,9 @@ void hostStats() {
     uint32_t count = 0;
     struct HostDevice {uint64_t id;uint32_t vendor,product,bcd,cls,sub,proto,addr,speed;};
     static HostDevice tracked[16];static unsigned trackedCount;static QcomDwc3Xhci *deviceOwner;
-    if(deviceOwner!=gHost){deviceOwner=gHost;trackedCount=0;}
+    struct HostTree {uint64_t id;unsigned children;bool valid;};
+    static HostTree trees[16]{};
+    if(deviceOwner!=gHost){deviceOwner=gHost;trackedCount=0;memset(trees,0,sizeof trees);}
     OSNumber *debugMask=OSNumber::withNumber(kUsbPortDebugOptions,32);
     OSDictionary *settings=debugMask?OSDictionary::withCapacity(1):nullptr;
     if(settings)settings->setObject("kUSBDebugOptions",debugMask);
@@ -1223,6 +1337,13 @@ void hostStats() {
             IOLog("qcom-dwc3: host-port-edge device id=%llx vid=%04x pid=%04x bcd=%04x class=%02x/%02x/%02x addr=%u speed=%u pwr=%u product='%s'\n",
                 id,vendor,product,bcd,cls,sub,proto,addr,speed,dev?unsigned(dev->getPowerState()):0,productText);
         }
+        unsigned children=0;char services[160]={};hostChildSummary(dev,1,children,services,sizeof services);
+        unsigned treeSlot=0;while(treeSlot<16&&trees[treeSlot].valid&&trees[treeSlot].id!=id)treeSlot++;
+        if(treeSlot<16&&(!trees[treeSlot].valid||trees[treeSlot].children!=children)){
+            trees[treeSlot]={id,children,true};
+            IOLog("qcom-dwc3: host-device-tree id=%llx vid=%04x pid=%04x class=%02x/%02x/%02x addr=%u speed=%u config=%u children=%u services='%s'\n",
+                id,vendor,product,cls,sub,proto,addr,speed,number(entry,"bConfigurationValue"),children,services);
+        }
     }
     // A drop with a replacement device keeps count unchanged, so compare the
     // tracked set as well as the total. Each disappearance is logged once.
@@ -1241,6 +1362,14 @@ void hostStats() {
     previousDevices=count;
     if(portEdge&&edgeDumps<4){++edgeDumps;dmaDiagnostics("port-edge");}
     IOLog("qcom-dwc3: host cmd=%x sts=%x EINT=%u HSE=%u devs=%u irq=%u storm=%u pwr=%u\n",native_usb_stats[47],native_usb_stats[48],!!(native_usb_stats[48]&8),!!(native_usb_stats[48]&4),count,native_usb_stats[11],gIrqStormed,gHost?unsigned(gHost->getPowerState()):0);
+    B5qUsbIrq::Snapshot ir0{},ir1{},ir2{};
+    auto irRead=[](unsigned off){return gXhciRegs.va[off/4];};
+    B5qUsbIrq::snapshot(rt,0,kXhciRegisterBytes,irRead,ir0);
+    B5qUsbIrq::snapshot(rt,1,kXhciRegisterBytes,irRead,ir1);
+    B5qUsbIrq::snapshot(rt,2,kXhciRegisterBytes,irRead,ir2);
+    IOLog("qcom-dwc3: host-ir ir0=%x/%llx ir1=%x/%llx ir2=%x/%llx secKicks=%u secIr1=%u secIr2=%u secNoFilter=%u secBusy=%u secDisabled=%u secBackoff=%u\n",
+        ir0.iman,ir0.erdp,ir1.iman,ir1.erdp,ir2.iman,ir2.erdp,gHostIrqBridge.kicks,gHostIrqBridge.ir1,
+        gHostIrqBridge.ir2,gHostIrqBridge.noFilter,gHostIrqBridge.busy,gHostIrqBridge.disabled,gHostIrqBridge.backoff);
     OSSafeReleaseNULL(settings);OSSafeReleaseNULL(debugMask);
     OSSafeReleaseNULL(devices); OSSafeReleaseNULL(match);
 }

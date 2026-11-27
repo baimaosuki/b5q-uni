@@ -18,7 +18,49 @@ def prepare(reference,out):
     # BootUiTrace is not part of this image. Kernel final links do not permit
     # unresolved weak imports either. Omit only its optional stack/IPI
     # diagnostic calls; preserve real packet/stall counts and all networking.
+    log_anchor = '''void log(int level, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
+void log(int level, const char *fmt, ...) {
+  char line[160]; va_list ap; va_start(ap, fmt); vsnprintf(line, sizeof line, fmt, ap); va_end(ap);
+  native_wifi_logf(level, "%s", line);
+}'''
+    probe_helpers = r'''
+// Public SDK omits this KERNEL_PRIVATE KPI; the pinned XNU exports it.
+extern "C" uint32_t ifnet_eflags(ifnet_t);
+static uint32_t gIfBindLogged;
+static void log_ifnet_bind(const char *where) {
+  if (!gIf || __atomic_exchange_n(&gIfBindLogged, 1u, __ATOMIC_ACQ_REL)) return;
+  uint8_t lladdr[6] = {};
+  if (ifnet_lladdr_copy_bytes(gIf, lladdr, sizeof lladdr)) memset(lladdr, 0, sizeof lladdr);
+  log(6, "wifi-net: ifnet-bind where=%s if=%s%u flags=0x%x eflags=0x%x cap=0x%x lladdr=%02x:%02x:%02x:%02x:%02x:%02x gmac=%02x:%02x:%02x:%02x:%02x:%02x",
+      where, ifnet_name(gIf), ifnet_unit(gIf), unsigned(ifnet_flags(gIf)), ifnet_eflags(gIf), ifnet_capabilities_enabled(gIf),
+      lladdr[0], lladdr[1], lladdr[2], lladdr[3], lladdr[4], lladdr[5],
+      gMac[0], gMac[1], gMac[2], gMac[3], gMac[4], gMac[5]);
+}
+static uint32_t gFrameProbeLogged, gFrameProbeRx, gFrameProbeTx;
+static void probe_frame(const uint8_t *frame, size_t length, bool out) {
+  if (!frame || length < 14 || __atomic_load_n(&gFrameProbeLogged, __ATOMIC_RELAXED) >= 64) return;
+  const uint16_t type = uint16_t((frame[12] << 8) | frame[13]);
+  bool dhcp = false;
+  if (type == 0x0800 && length >= 34 && frame[23] == 17) {
+    const unsigned ihl = unsigned(frame[14] & 15) * 4;
+    if (ihl >= 20 && 14 + ihl + 4 <= length) {
+      const uint8_t *udp = frame + 14 + ihl;
+      const unsigned source = (udp[0] << 8) | udp[1], destination = (udp[2] << 8) | udp[3];
+      dhcp = (source == 67 || source == 68) && (destination == 67 || destination == 68);
+    }
+  }
+  uint32_t *seen = out ? &gFrameProbeTx : &gFrameProbeRx;
+  const bool limited = type != 0x0806 && !dhcp;
+  if (limited && __atomic_load_n(seen, __ATOMIC_RELAXED) >= 24) return;
+  if (__atomic_fetch_add(&gFrameProbeLogged, 1u, __ATOMIC_ACQ_REL) >= 64) return;
+  if (__atomic_fetch_add(seen, 1u, __ATOMIC_ACQ_REL) >= 24 && limited) return;
+  log(6, "wifi-net: frame dir=%s len=%zu dst=%02x:%02x:%02x:%02x:%02x:%02x src=%02x:%02x:%02x:%02x:%02x:%02x type=%04x",
+      out ? "tx" : "rx", length, frame[0], frame[1], frame[2], frame[3], frame[4], frame[5],
+      frame[6], frame[7], frame[8], frame[9], frame[10], frame[11], type);
+}
+'''
     replacements=[
+        (log_anchor, log_anchor + probe_helpers),
         ('extern "C" int boot_kthread_report(const char *name, char *out, unsigned size);   // BootUiTraceProbe.c\n',''),
         ('extern "C" unsigned boot_cpu_kick(char *out, unsigned size);                      // BootUiTraceProbe.c\n',''),
         ('''    char where[240];
@@ -39,11 +81,36 @@ def prepare(reference,out):
         ('ifnet_stat_increment_out(gIf, 1, static_cast<uint32_t>(length), 0);',
          'if (gIf) ifnet_stat_increment_out(gIf, 1, static_cast<uint32_t>(length), 0);'),
         ('int ethernet_output(mbuf_t m) { return if_output(gIf, m); }','''int ethernet_output(mbuf_t m) {
-  if (!gIf) gIf = sheng_ethernet_ifnet();
+  if (!gIf) { gIf = sheng_ethernet_ifnet(); log_ifnet_bind("tx"); }
   return if_output(gIf, m);
 }'''),
         ('wifi-net: en0 address %s','wifi-net: interface address %s'),
-        ('wifi-net: carried by en0 (ShengEthernet)','wifi-net: carried by Ethernet controller (ShengEthernet)')]
+        ('wifi-net: carried by en0 (ShengEthernet)','wifi-net: carried by Ethernet controller (ShengEthernet)'),
+        ('  gIf = sheng_ethernet_ifnet();\n  nw_wifi_set_events(&gEvents);',
+         '  gIf = sheng_ethernet_ifnet();\n  log_ifnet_bind("start");\n  nw_wifi_set_events(&gEvents);'),
+        ('#if SHENG_WIFI_ETHERNET\n    if (!gIf) { gIf = sheng_ethernet_ifnet(); if (!gIf) continue; }\n#endif',
+         '#if SHENG_WIFI_ETHERNET\n    if (!gIf) { gIf = sheng_ethernet_ifnet(); if (!gIf) continue; log_ifnet_bind("traffic"); }\n#endif'),
+        ('#if SHENG_WIFI_ETHERNET\n  if (!gIf) gIf = sheng_ethernet_ifnet();\n#endif',
+         '#if SHENG_WIFI_ETHERNET\n  if (!gIf) { gIf = sheng_ethernet_ifnet(); log_ifnet_bind("rx"); }\n#endif'),
+        ('  gIf = ifp; ifnet_set_flags(ifp, IFF_UP, IFF_UP);',
+         '  gIf = ifp; ifnet_set_flags(ifp, IFF_UP, IFF_UP); log_ifnet_bind("attach");'),
+        ('    gRxBatches++; if (count > gRxLargestBatch) gRxLargestBatch = count;\n    gRxBatchSizes[count >= 64 ? 6 : count >= 32 ? 5 : count >= 16 ? 4 : count >= 8 ? 3 : count >= 4 ? 2 : count >= 2 ? 1 : 0]++;',
+         '''    gRxBatches++; if (count > gRxLargestBatch) gRxLargestBatch = count;
+    gRxBatchSizes[count >= 64 ? 6 : count >= 32 ? 5 : count >= 16 ? 4 : count >= 8 ? 3 : count >= 4 ? 2 : count >= 2 ? 1 : 0]++;
+    if (gIf && (gRxBatches <= 16u || error)) {
+      struct ifnet_stats_param st; memset(&st, 0, sizeof st); ifnet_stat(gIf, &st);
+      log(6, "wifi-net: rx-flush batch=%u bytes=%u rc=%d if_in=%llu if_ierr=%llu if_iqdrop=%llu",
+          gRxBatches, bytes, error, st.packets_in, st.errors_in, st.dropped);
+    }'''),
+        ('void note_frame(const uint8_t *e, size_t n, bool out) {',
+         'void note_frame(const uint8_t *e, size_t n, bool out) {\n  probe_frame(e, n, out);'),
+        ('''  log(6,"wifi-net: input stalled %u s; optional stack/IPI diagnostics not included",stalled);''',
+         '''  if (gIf) {
+    struct ifnet_stats_param st; memset(&st, 0, sizeof st); ifnet_stat(gIf, &st);
+    log(6, "wifi-net: input stalled %u s if=%s%u flags=%x eflags=%x cap=%x in=%llu ierr=%llu iqdrop=%llu offered=%u",
+        stalled, ifnet_name(gIf), ifnet_unit(gIf), ifnet_flags(gIf), ifnet_eflags(gIf), ifnet_capabilities_enabled(gIf),
+        st.packets_in, st.errors_in, st.dropped, offered);
+  } else log(6, "wifi-net: input stalled %u s if=none offered=%u", stalled, offered);''')]
     for old,new in replacements:
         if text.count(old)!=1:raise ValueError('Pinned optional Wi-Fi diagnostics changed')
         text=text.replace(old,new)
@@ -54,7 +121,7 @@ def prepare(reference,out):
     (out/'network-source.json').write_text(json.dumps(dict(reference_revision=revision,
         original_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
         selected_sha256=hashlib.sha256(selected.read_bytes()).hexdigest(),
-        adaptation='Only unbuilt BootUiTrace stack/IPI diagnostics are omitted; Apple80211 events use a zero-filled live BSD interface name with en0 only as the pre-ifnet fallback; TX refreshes a delayed ifnet and guards statistics until it exists; no fake stub or unresolved weak import; native network and real stall counters retained',
+        adaptation='Only unbuilt BootUiTrace stack/IPI diagnostics are omitted; Apple80211 events use a zero-filled live BSD interface name with en0 only as the pre-ifnet fallback; TX refreshes a delayed ifnet and guards statistics until it exists; Review16 adds bounded ifnet bind, frame, rx-flush and stall probes; no fake stub or unresolved weak import; native network and real stall counters retained',
         interface_name_audit='The macOS event and runtime diagnostic paths are dynamic; remaining en0 literals are the explicit no-ifnet fallback, comments, and the non-macOS branch that allocates unit 0',
         headers={name:hashlib.sha256((out/name).read_bytes()).hexdigest()for name in headers}),indent=2)+'\n')
     return selected

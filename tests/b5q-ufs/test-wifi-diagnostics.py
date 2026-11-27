@@ -15,8 +15,10 @@ with tempfile.TemporaryDirectory(prefix='b5q-wifi-diag-')as td:
 #include <cstdio>
 #include <cstdarg>
 #include <string>
-struct ifnet_stats_param {uint64_t packets_in;};
-int gIf;uint32_t gRxFrames;uint64_t received;unsigned logs;
+struct ifnet_stats_param {uint64_t packets_in,errors_in,dropped;};
+int gIf;const char *ifnet_name(int){return "en";}unsigned ifnet_unit(int){return 1;}
+unsigned short ifnet_flags(int){return 0x8863;}unsigned ifnet_eflags(int){return 0x40;}
+unsigned ifnet_capabilities_enabled(int){return 0x10;}uint32_t gRxFrames;uint64_t received;unsigned logs;
 struct {unsigned count,kicks,cleared,longest;bool kicked;}gStall;
 void ifnet_stat(int,ifnet_stats_param *s){s->packets_in=received;}
 void log(int,const char *format,...){char line[256];va_list a;va_start(a,format);vsnprintf(line,sizeof(line),format,a);va_end(a);assert(*line);++logs;}

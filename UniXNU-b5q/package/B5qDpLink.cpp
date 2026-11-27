@@ -103,7 +103,10 @@ struct Hardware {
   dpBusy=resources.dpBusy;if(dpBusy)return openFailure("dpu-busy");
   // Original secdp_power_set_gpio, no aux-sel-inv/redriver on b5q:
   // first isolate active-low AUX enable, set CC polarity, then enable.
-  if(!pins.begin(*this,reverse))return openFailure("aux-gpio");opened=true;return true;
+  if(!pins.begin(*this,reverse))return openFailure("aux-gpio");opened=true;
+  IOLog("B5qDP: stage=hw-open ok rev=%u sel=%08x/%08x en=%08x/%08x in_mismatch=%x\n",
+    reverse,sel.va?sel.va[0]:0,sel.va?sel.va[1]:0,en.va?en.va[0]:0,en.va?en.va[1]:0,pins.inMismatch);
+  return true;
  }
  bool voteMx(uint32_t value){
   if(!rsc.va)return false;const QcomRscLayout layout=qcom_rsc_layout(rsc.va[0]);
@@ -164,7 +167,7 @@ struct Owner {
  B5qDpPortState observed{};bool haveObserved=false;
  B5Q_DP_DMA_STATE dma{};Window pool;
  IOLock *scanLock=nullptr;IOService *display=nullptr,*provider=nullptr;
- B5qDp::Presentation presentation;uint32_t scanClosing=1;uint64_t frameCount=0;
+ B5qDp::Presentation presentation;uint32_t scanClosing=1;uint64_t frameCount=0,presentCalls=0;
  struct Transfer {IOMemoryDescriptor *memory;uint64_t stride;};
  struct ScanIo {
   Owner &owner;
@@ -223,6 +226,8 @@ struct Owner {
   auto &self=*static_cast<Owner*>(context);if(__atomic_load_n(&self.scanClosing,__ATOMIC_ACQUIRE))return false;
   Transfer transfer{memory,stride};IOLockLock(self.scanLock);
   const bool ok=!__atomic_load_n(&self.scanClosing,__ATOMIC_ACQUIRE)&&self.presentation.offer(self.scan,tag,&transfer,blank);
+  if(++self.presentCalls<=3)IOLog("B5qDP: present #%llu ok=%u blank=%u stride=%llu tag=%llu\n",
+    self.presentCalls,ok,blank,(unsigned long long)stride,(unsigned long long)tag);
   IOLockUnlock(self.scanLock);return ok;
  }
  static bool drain(void *context){
@@ -273,11 +278,16 @@ struct Owner {
    if(!handle)return failure("static-init");b5q_dp_display_static_init();if(OSMetaClass::postModLoad(handle))return failure("static-init");initialized=true;}
   B5qDp::DpuResources r;r.inspect([&](unsigned off){return io.read(Block::Dpu,off);});
   if(!r.choose(m.width))return failure("dpu-choose");
+  IOLog("B5qDP: dpu-resources ctl=%u lm0=%u lm1=%u pipe0=%u pipe1=%u count=%u\n",
+    r.ctl,r.lm[0],r.lm[1],r.pipe[0],r.pipe[1],r.count);
   if(slot>dma.PoolBytes/2)return failure("pool-slot");
   const B5qDp::ScanoutBuffer buffers[2]={{dma.PoolBase,slot},{dma.PoolBase+slot,slot}};
   IOLockLock(scanLock);__atomic_store_n(&scanClosing,0u,__ATOMIC_RELEASE);
   const bool started=presentation.begin(scan,r,m,buffers,stride);IOLockUnlock(scanLock);
-  if(!started){failure("presentation-begin");drain(this);return false;}
+  if(!started){
+   IOLog("B5qDP: scanout-detail video_stage=%u clk_failed=%u clk_last=%08x ctrl_failed=%u ctrl_last=%08x streaming=%u\n",
+    session.videoStage,session.clock.failed,session.clockLast,session.controller.failed,session.controller.last,session.streaming);
+   failure("presentation-begin");drain(this);return false;}
   provider=new IOService;
   if(!provider||!provider->init()||!provider->attach(IOService::getPlatform()))return failure("provider");
   provider->setName("B5qDisplayPort");
@@ -285,6 +295,7 @@ struct Owner {
   memcpy(config.edid,session.edid,config.edidBytes);config.context=this;config.present=present;config.drain=drain;
   IOService *next=b5q_dp_display_create(provider,&config);
   IOLockLock(scanLock);display=next;IOLockUnlock(scanLock);
+  IOLog("B5qDP: iomfb-create ok=%u provider=%p display=%p\n",display!=nullptr,provider,display);
   if(!display)return failure("iomfb-create");
   return true;
  }
@@ -325,12 +336,39 @@ struct Owner {
    discovered,session.discoverStep,unsigned(session.error),unsigned(session.aux.error),session.aux.lastStatus,session.aux.transactions,
    session.caps.revision,session.caps.rate,session.caps.lanes,session.caps.enhanced,session.edidBytes,
    session.dpcd[0],session.dpcd[1],session.dpcd[2],session.dpcd[3],session.dpcd[4],session.dpcd[5],session.dpcd[6],session.dpcd[7]);
-  if(discovered){const unsigned advertised=session.modes.count;session.modes.fitPool(dma.PoolBytes);
-   IOLog("B5qDP: EDID pool-filter advertised=%u fitting=%u bytes=%llu\n",advertised,session.modes.count,dma.PoolBytes);}
+  if(!discovered||session.aux.error!=B5qDp::AuxError::None){
+   const uint32_t *f=session.auxFailRegs;
+   IOLog("B5qDP: aux-dump ahb0=%08x ahb20=%08x aux30=%08x aux38=%08x aux50=%08x aux54=%08x aux58=%08x disp8058=%08x disp81bc=%08x phy_sts=%08x sel=%08x/%08x en=%08x/%08x\n",
+    session.haveAuxFailRegs?f[0]:io.read(Block::Ahb,0x00),session.haveAuxFailRegs?f[1]:io.read(Block::Ahb,0x20),
+    session.haveAuxFailRegs?f[2]:io.read(Block::Aux,0x30),session.haveAuxFailRegs?f[3]:io.read(Block::Aux,0x38),
+    session.haveAuxFailRegs?f[4]:io.read(Block::Aux,0x50),session.haveAuxFailRegs?f[5]:io.read(Block::Aux,0x54),
+    session.haveAuxFailRegs?f[6]:io.read(Block::Aux,0x58),session.haveAuxFailRegs?f[7]:io.read(Block::DispCc,0x8058),
+    session.haveAuxFailRegs?f[8]:io.read(Block::DispCc,0x81bc),session.haveAuxFailRegs?f[9]:io.read(Block::Phy,0xe4),
+    io.sel.va?io.sel.va[0]:0,io.sel.va?io.sel.va[1]:0,io.en.va?io.en.va[0]:0,io.en.va?io.en.va[1]:0);
+  }
+  if(discovered){
+   IOLog("B5qDP: edid0-15=%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+    session.edid[0],session.edid[1],session.edid[2],session.edid[3],session.edid[4],session.edid[5],session.edid[6],session.edid[7],
+    session.edid[8],session.edid[9],session.edid[10],session.edid[11],session.edid[12],session.edid[13],session.edid[14],session.edid[15]);
+   for(unsigned i=0;i<4&&i<session.modes.count;i++)
+    IOLog("B5qDP: mode[%u] %ux%u@%u pclk=%u\n",i,session.modes.values[i].width,session.modes.values[i].height,
+     session.modes.values[i].refreshMilliHz(),session.modes.values[i].pixelKHz);
+   const unsigned advertised=session.modes.count;session.modes.fitPool(dma.PoolBytes);
+   IOLog("B5qDP: EDID pool-filter advertised=%u fitting=%u bytes=%llu\n",advertised,session.modes.count,dma.PoolBytes);
+   for(unsigned i=0;i<4&&i<session.modes.count;i++)
+    IOLog("B5qDP: fit-mode[%u] %ux%u@%u pclk=%u\n",i,session.modes.values[i].width,session.modes.values[i].height,
+     session.modes.values[i].refreshMilliHz(),session.modes.values[i].pixelKHz);
+  }
   const bool trained=discovered&&session.modes.count&&session.train()&&!io.fault;
+  if(io.connected()&&session.auxOn){
+   uint8_t status[6]{};if(session.aux.dpcd(true,0x202,status,6))memcpy(session.trainStatus,status,6);
+  }
   IOLog("B5qDP: stage=link discovered=%u trained=%u error=%u aux=%u phy=%u clock=%x rate=%u lanes=%u modes=%u attempts=%u train_err=%u phy_last=%08x\n",
         discovered,trained,unsigned(session.error),unsigned(session.aux.error),session.phy.failed,session.clock.failed,
         session.rate,session.lanes,session.modes.count,session.attempts,unsigned(session.trainError),session.phy.last);
+  IOLog("B5qDP: train-detail last_rate=%u last_lanes=%u clk_last=%08x mx_owned=%u dpcd202=%02x %02x %02x %02x %02x %02x\n",
+        session.lastRate,session.lastLanes,session.clockLast,io.mxOwned,session.trainStatus[0],session.trainStatus[1],
+        session.trainStatus[2],session.trainStatus[3],session.trainStatus[4],session.trainStatus[5]);
   if(!trained){stop();retryAt=nowUs()+1000000;return;}
   if(!startDisplay()){IOLog("B5qDP: stage=scanout failed retained=%u\n",presentation.dpu.active);stop();retryAt=nowUs()+1000000;return;}
   generation=p.generation;accepted=true;retryAt=0;
