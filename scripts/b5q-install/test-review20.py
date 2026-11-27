@@ -18,16 +18,16 @@ def host(t,name,source,c=False):
  p=t/(name+('.c'if c else'.cpp'));p.write_text(source);binary=t/name
  compiler='/usr/lib/llvm-17/bin/clang'if c else'c++'
  run(name+'-compile',[compiler,'-std=gnu11'if c else'-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-misleading-indentation','-Wno-missing-field-initializers','-fsanitize=address,undefined','-fno-sanitize-recover=all','-pthread','-I'+str(P),p,'-o',binary]);run(name+'-ASan-UBSan',[binary])
-policy=load('r20policy',R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py');labels=policy.policies();assert list(map(len,labels.values()))==[57,24]
+policy=load('r20policy',R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py');labels=policy.policies();assert list(map(len,labels.values()))==[59,25]
 for values in labels.values():assert 'com.apple.wallpaper.agent'not in values and 'com.apple.wallpaper.extension.aerials'in values
-before=json.loads((R/'artifacts/b5q-review20-local/before.json').read_text());old=json.loads(subprocess.check_output(['git','show','HEAD:UniXNU-b5q/package/b5q-launchd-lite.json'],cwd=R));new=json.loads((P/'b5q-launchd-lite.json').read_text());old['gui'].remove('com.apple.wallpaper.agent');assert old==new
+before=json.loads((R/'artifacts/b5q-review20-local/before.json').read_text());old=json.loads(subprocess.check_output(['git','show','HEAD:UniXNU-b5q/package/b5q-launchd-lite.json'],cwd=R));new=json.loads((P/'b5q-launchd-lite.json').read_text());old['gui'].remove('com.apple.wallpaper.agent') if 'com.apple.wallpaper.agent'in old['gui']else None;old['gui']=sorted(set(old['gui']+['com.apple.SoftwareUpdateNotificationManager']));old['system_enabled']=['com.openssh.sshd'];assert old==new
 for forbidden in ['wifivelocityd','sysdiagnosed','ReportCrashService','DisplayControls','calaccessd']:
  assert {n for values in new.values() for n in values if forbidden in n}=={n for values in old.values() for n in values if forbidden in n},forbidden
 # Retain the actual source-bound Data seed, despite its old policy. The kernel
 # canonical blob migration is separately exercised by test-v33b-policy.py.
 seed=R/'artifacts/b5q-review19-ci-46047273117/runtime/data-seed.json';meta=json.loads(seed.read_text())
-oldpol={name:sorted(set(values+['com.apple.wallpaper.agent']))for name,values in labels.items()};assert meta['launchd_policy']==oldpol
-checks.append(dict(name='wallpaper57-24-canonical-policy-aerial-disabled-no-expanded-denylist',passed=True))
+oldpol=policy.historical_policies();assert meta['launchd_policy']==oldpol
+checks.append(dict(name='wallpaper-sshd59-25-canonical-policy-aerial-disabled-no-expanded-denylist',passed=True))
 wifi=load('r20wifi',R/'UniXNU-b5q/scripts/b5q_wifi.py')
 with tempfile.TemporaryDirectory(prefix='review20-',dir=W)as td:
  t=Path(td)
@@ -57,6 +57,7 @@ static bool join_waiting,scan_waiting,scan_ack_pending;static unsigned epoch;sta
 static struct {unsigned state;} status;static void clear_connection(unsigned n){status.state=n;}
 #define memzero_explicit(p,n) memset(p,0,n)
 '''+pending+'\n'+disconnect+r'''
+static volatile uint64_t b5q_wifi_last_slow[4];
 static void *hardware;static int firmware_error;static unsigned phase,slow;static std::string order;
 static void b5q_step_mark(unsigned n){phase=n;}
 static void b5q_wifi_step_observe(unsigned,u64 elapsed){assert(elapsed>200);++slow;}

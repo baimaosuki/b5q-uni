@@ -86,7 +86,7 @@ def main():
     path,uid,gid,mode,size=line.split('\t');stats[path]=dict(uid=int(uid),gid=int(gid),mode=int(mode,8),bytes=int(size))
    account.verify_files(dest,stats);result={}
    for filename,labels in policy.policies().items():
-    path=policy.DIRECTORY+'/'+filename;content=(dest/path).read_bytes();values=plistlib.loads(content);assert content.startswith(b'bplist00')and values==dict.fromkeys(labels,True)
+    path=policy.DIRECTORY+'/'+filename;content=(dest/path).read_bytes();values=plistlib.loads(content);assert content.startswith(b'bplist00')and values==(dict(labels) if isinstance(labels,dict) else dict.fromkeys(labels,True))
     assert stats[path]['uid']==stats[path]['gid']==0 and stats[path]['mode']==0o100644
     result[path]=dict(stats[path],contents=values,format='bplist00')
    mark=policy.DIRECTORY+'/disabled.migrated';assert stats[mark]==dict(uid=0,gid=0,mode=0o100644,bytes=0)

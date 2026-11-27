@@ -4,6 +4,69 @@ from pathlib import Path
 REVISION='c8f92b208068eeaa4cd2b0f592671f04ee70076e'
 def select_shared(source,out):
     source,out=Path(source),Path(out)
+    if source.name=='lx_rt.c':
+        text=source.read_text()
+        def exact(old,new):
+            nonlocal text
+            if text.count(old)!=1:raise ValueError('Pinned lx_rt callback anchor changed: '+old[:80])
+            text=text.replace(old,new)
+        helper=r"""
+volatile uint64_t b5q_wifi_last_slow[4];
+extern volatile uint64_t nw_wifi_where[4];
+struct b5q_callback { uint64_t previous[4],kind,offset,began,depth; };
+static struct b5q_callback b5q_callback_begin(unsigned kind,const void *fn) {
+  struct b5q_callback c;
+  for(unsigned i=0;i<4;i++)c.previous[i]=nw_wifi_where[i];
+  c.kind=kind;c.offset=fn?(uint64_t)((uintptr_t)fn-(uintptr_t)lx_now_ms):0;
+  c.began=lx_now_ms();c.depth=g_depth;
+  nw_wifi_where[0]=kind;nw_wifi_where[1]=c.offset;nw_wifi_where[2]=c.depth;nw_wifi_where[3]=c.began;
+  return c;
+}
+void b5q_wifi_slow_note(unsigned kind,const void *fn,uint64_t began,uint64_t depth) {
+  const uint64_t now=lx_now_ms(),dur=now>=began?now-began:0;
+  if(dur>200 && dur>__atomic_load_n(&b5q_wifi_last_slow[2],__ATOMIC_RELAXED)) {
+    __atomic_store_n(&b5q_wifi_last_slow[0],kind,__ATOMIC_RELAXED);
+    __atomic_store_n(&b5q_wifi_last_slow[1],fn?(uint64_t)((uintptr_t)fn-(uintptr_t)lx_now_ms):0,__ATOMIC_RELAXED);
+    __atomic_store_n(&b5q_wifi_last_slow[3],depth,__ATOMIC_RELAXED);
+    __atomic_store_n(&b5q_wifi_last_slow[2],dur,__ATOMIC_RELEASE);
+  }
+}
+static void b5q_callback_end(const struct b5q_callback *c) {
+  b5q_wifi_slow_note((unsigned)c->kind,(const void *)((uintptr_t)lx_now_ms+c->offset),c->began,c->depth);
+  for(unsigned i=0;i<4;i++)nw_wifi_where[i]=c->previous[i];
+}
+#define B5Q_CALLBACK(kind,fn,call) do { struct b5q_callback trace=b5q_callback_begin(kind,(const void *)(fn)); call; b5q_callback_end(&trace); } while(0)
+"""
+        exact('static int g_depth;','static int g_depth;\n'+helper)
+        exact('head->func(head);','B5Q_CALLBACK(8,head->func,head->func(head));')
+        exact('t->function(t);','B5Q_CALLBACK(6,t->function,t->function(t));')
+        exact('if (t->legacy) t->legacy(t->data); else if (t->func) t->func(t);',
+              'if (t->legacy) B5Q_CALLBACK(7,t->legacy,t->legacy(t->data)); else if (t->func) B5Q_CALLBACK(7,t->func,t->func(t));')
+        exact('  lx_plat->poll();','  B5Q_CALLBACK(4,lx_plat->poll,lx_plat->poll());')
+        exact('    irqreturn_t r = g_irq[i].h ? g_irq[i].h(g_irq[i].irq, g_irq[i].id) : IRQ_WAKE_THREAD;\n    if (r == IRQ_WAKE_THREAD && g_irq[i].t) g_irq[i].t(g_irq[i].irq, g_irq[i].id);',
+              '    irqreturn_t r=IRQ_WAKE_THREAD;\n    if(g_irq[i].h) B5Q_CALLBACK(1,g_irq[i].h,r=g_irq[i].h(g_irq[i].irq,g_irq[i].id));\n    if(r==IRQ_WAKE_THREAD && g_irq[i].t) B5Q_CALLBACK(5,g_irq[i].t,g_irq[i].t(g_irq[i].irq,g_irq[i].id));')
+        exact('    enum hrtimer_restart restart = due->function(due); g_nrunning--;',
+              '    enum hrtimer_restart restart; B5Q_CALLBACK(2,due->function,restart=due->function(due)); g_nrunning--;')
+        exact('g_running[g_nrunning++] = w; if (w->func) w->func(w); g_nrunning--;',
+              'g_running[g_nrunning++] = w; if (w->func) B5Q_CALLBACK(3,w->func,w->func(w)); g_nrunning--;')
+        # Preserve true outer callback context across nested lx_pump waits.
+        exact('  int ran = 0;\n  if (g_depth > LX_MAX_DEPTH) return 0;',
+              '  uint64_t outer[4];for(unsigned i=0;i<4;i++)outer[i]=nw_wifi_where[i];\n  int ran = 0;\n  if (g_depth > LX_MAX_DEPTH) return 0;')
+        exact('  where(0, 0);','  for(unsigned i=0;i<4;i++)nw_wifi_where[i]=outer[i];')
+        out.mkdir(parents=True,exist_ok=True);target=out/'b5q_lx_rt_callbacks.c';target.write_text(text);return target
+    if source.name=='nw_net.c':
+        text=source.read_text()
+        anchor='    int weight = min((unsigned)n->weight, budget), done = n->poll(n, weight);'
+        replacement="""    extern void b5q_wifi_slow_note(unsigned,const void *,uint64_t,uint64_t);
+    extern volatile uint64_t nw_wifi_where[4];
+    uint64_t began=lx_now_ms(),previous[4];for(unsigned j=0;j<4;j++)previous[j]=nw_wifi_where[j];
+    nw_wifi_where[0]=9;nw_wifi_where[1]=(uint64_t)((uintptr_t)n->poll-(uintptr_t)lx_now_ms);nw_wifi_where[3]=began;
+    int weight = min((unsigned)n->weight, budget), done = n->poll(n, weight);
+    b5q_wifi_slow_note(9,(const void *)n->poll,began,previous[2]);
+    for(unsigned j=0;j<4;j++)nw_wifi_where[j]=previous[j];"""
+        if text.count(anchor)!=1:raise ValueError('Pinned NAPI poll changed')
+        text=text.replace(anchor,replacement);out.mkdir(parents=True,exist_ok=True)
+        target=out/'b5q_nw_net_callbacks.c';target.write_text(text);return target
     if source.name=='nw_cfg80211_control.c':
         text=source.read_text()
         anchor='static void opened(void *unused, uint64_t session) { (void)unused; owner = session; generation++; snapshot_free(); }'

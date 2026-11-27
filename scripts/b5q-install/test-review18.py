@@ -279,13 +279,13 @@ for name, digest in base['protected_sha256'].items():
 old_bt=subprocess.check_output(['git','show','HEAD:UniXNU-b5q/package/B5qBluetooth.cpp'],cwd=R).decode()
 new_bt=(P/'B5qBluetooth.cpp').read_text()
 old_bt=old_bt.replace('extern "C" void thread_yield_to_preemption(void);\n','').replace('        if(!deadline){thread_yield_to_preemption();continue;}\n        waitUntil(nullptr,deadline);','        waitUntil(nullptr,b5q_bt_worker_deadline(deadline,t));')
-assert new_bt.replace('#include "B5qWorkerWait.h"\n','')==old_bt
+assert new_bt.replace('#include "B5qWorkerWait.h"\n','')==old_bt.replace('#include "B5qWorkerWait.h"\n','')
 old_touch=subprocess.check_output(['git','show','HEAD:UniXNU-b5q/package/B5qTouch.cpp'],cwd=R).decode()
 new_touch=(P/'B5qTouch.cpp').read_text()
 new_publish=function(new_touch,'void publish(');old_publish=function(old_touch,'void publish(')
 # Normalize the Review18 declaration on both sides: HEAD may already include Review18.
 rotation_decl='extern "C" uint32_t b5q_display_rotation(void);\n'
-assert new_touch.replace('    thread_set_thread_name(current_thread(),"b5q-touch");\n','').replace(rotation_decl,'').replace(new_publish,old_publish)==old_touch.replace(rotation_decl,'')
+assert new_touch.replace('    thread_set_thread_name(current_thread(),"b5q-touch");\n','').replace(rotation_decl,'').replace(new_publish,old_publish)==old_touch.replace('    thread_set_thread_name(current_thread(),"b5q-touch");\n','').replace(rotation_decl,'')
 checks.append(dict(name='touch-protocol-worker-click-flow-unchanged-outside-coordinate-transform',passed=True))
 
 args = tomllib.loads((R / 'UniXNU-b5q/board.toml').read_text())['payload']['kernel_args']

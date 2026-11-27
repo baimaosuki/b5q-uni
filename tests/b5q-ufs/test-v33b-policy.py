@@ -69,7 +69,7 @@ int main(int argc,char **argv){assert(argc==2);root=argv[1];auto dir=root+"/priv
  assert(!b5q_launchd_policy_prepare(1,(uintptr_t)memory)&&renames==oldRenames+1&&!owners.count(gui));
  owners[file]=501;assert(b5q_launchd_policy_prepare(1,(uintptr_t)memory)==EPERM);owners.erase(file);
  ofstream(root+"/private/var/run/b5q-wifi-ready")<<"stale";chmod(dir.c_str(),0777);assert(b5q_launchd_policy_prepare(1,(uintptr_t)memory)==EPERM&&!filesystem::exists(root+"/private/var/run/b5q-wifi-ready"));chmod(dir.c_str(),0755);
- puts("PASS actual prelaunchd existingData migration:57/24 exactbinaryplists,wallpaperagent-enabled,aerial-disabled,iconenable,stalesentinelremoved,atomicrename,repeatno-op,symlink/hardlink/refused,write/renamefaultpreservesold ASanUBSan");
+ puts("PASS actual prelaunchd existingData migration:59/25 exactbinaryplists,sshd-enabled,update-notifier-disabled,wallpaperagent-enabled,aerial-disabled,iconenable,stalesentinelremoved,atomicrename,repeatno-op,symlink/hardlink/refused,write/renamefaultpreservesold ASanUBSan");
 }
 '''
 # Host flag aliases are disjoint from POSIX access-mode bits.

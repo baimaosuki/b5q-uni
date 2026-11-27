@@ -46,7 +46,10 @@ HARNESS=r'''
 using namespace B5qUfsProtocol;
 static void *IOMalloc(size_t n){return malloc(n);}
 static void IOFree(void*p,size_t){free(p);}
-typedef int IOReturn;typedef int wait_result_t;typedef void* thread_t;
+typedef int IOReturn;typedef int wait_result_t;typedef void* thread_t;typedef void* event_t;typedef int kern_return_t;
+#define THREAD_UNINT 0
+#define THREAD_AWAKENED 1
+#define THREAD_CONTINUE_NULL nullptr
 #define KERN_SUCCESS 0
 #define kMillisecondScale 1
 #define IOLog(...) std::printf(__VA_ARGS__)
@@ -56,17 +59,23 @@ static struct {bool selected=true,poisoned=false;void*lock=(void*)1;uint8_t lun=
 static FILE*media;static bool held,quarantine;static unsigned submissions,writes,syncs;static int fail_header;
 static uint64_t ticks;
 static bool runningWriter=true;
-static bool interruptContext=false;
+static bool interruptContext=false,interruptsEnabled=true;static int preemptionLevel;
 static bool ml_at_interrupt_context(){return interruptContext;}
-static bool ml_get_interrupts_enabled(){return true;}
-extern "C" int get_preemption_level(){return 0;}
+static bool ml_get_interrupts_enabled(){return interruptsEnabled;}
+extern "C" int get_preemption_level(){return preemptionLevel;}
 static uint32_t read32(uintptr_t,unsigned){return 0;}
 static void write32(uintptr_t,unsigned,uint32_t){}
 static bool IOLockTryLock(void*){if(held)return false;held=true;if(quarantine)host.poisoned=true;return true;}
 static void IOLockUnlock(void*){assert(held);held=false;}
 static uint64_t mach_absolute_time(){return ++ticks;}
 static void clock_interval_to_deadline(unsigned n,int,uint64_t*d){*d=ticks+n;}
-static void thread_yield_internal(int);
+static unsigned blocks,arms,wakes,clears,yield_count,syncRace;
+static bool armed;static event_t waiting;static uint64_t waitDeadline;
+static void waitRace();
+static int assert_wait_deadline(event_t e,int,uint64_t deadline){++arms;waiting=e;armed=true;waitDeadline=deadline;waitRace();return 0;}
+static void thread_wakeup(event_t e){++wakes;if(armed&&waiting==e)armed=false;}
+extern "C" kern_return_t clear_wait(thread_t,int){++clears;armed=false;return 0;}
+static void thread_block(void*);
 static void thread_terminate(thread_t){throw 1;}
 static thread_t current_thread(){return nullptr;}
 static void thread_set_thread_name(thread_t t,const char *name){assert(!t&&!strcmp(name,"b5q-log-ufs"));}
@@ -95,10 +104,16 @@ static bool submit(){
  auto*r=u+responseOffset;memset(r,0,512);r[0]=0x21;r[2]=3;return true;
 }
 #include "B5qLogUfs.h"
-static void thread_yield_internal(int){
- ticks+=1;
+static void waitRace(){
+ if(syncRace==1){__atomic_store_n(&nabu_log_committed_end,nabu_log_urgent_end,__ATOMIC_RELEASE);thread_wakeup((event_t)&nabu_log_committed_end);syncRace=0;}
+ if(syncRace==2){__atomic_store_n(&nabu_log_stopping,true,__ATOMIC_RELEASE);thread_wakeup((event_t)&nabu_log_committed_end);syncRace=0;}
+}
+static void thread_block(void*){
+ ++blocks;
+ if(syncRace==3){__atomic_store_n(&nabu_log_committed_end,nabu_log_urgent_end,__ATOMIC_RELEASE);thread_wakeup((event_t)&nabu_log_committed_end);syncRace=0;return;}
  if(nabu_log_writer_rounds==1){static bool appended;if(!appended){nabu_capture_append("LATE-BOOT\n",10);appended=true;
-  interruptContext=true;assert(b5q_log_sync(750)==2);interruptContext=false;}}
+  interruptContext=true;const auto before=blocks;assert(b5q_log_sync(750)==2&&blocks==before);interruptContext=false;}}
+ ticks=waitDeadline;armed=false;
  if(runningWriter&&nabu_log_writer_rounds>=2)throw 2;
 }
 int main(int argc,char**argv){
@@ -130,9 +145,19 @@ int main(int argc,char**argv){
  runningWriter=false;
  if(negative){assert(!writes&&!syncs&&nabu_log_writer_failures==1);fclose(media);return 0;}
  assert(writes>0 && syncs>=2 && !held);
- if(!fail_header){assert(b5q_log_sync(750)==0);assert(ticks<100);}
+ if(!fail_header){assert(b5q_log_sync(750)==0);assert(blocks<=3&&yield_count==0);}
  const unsigned before=writes; nabu_capture_append("URGENT",6);
  assert(b5q_log_sync(2)==(fail_header?3u:1u)&&writes==before);assert(nabu_log_writer_rounds==(fail_header?1u:2u));
+ if(!fail_header){
+  unsigned beforeBlocks=blocks;interruptContext=true;assert(b5q_log_sync(750)==2&&blocks==beforeBlocks);interruptContext=false;
+  interruptsEnabled=false;assert(b5q_log_sync(750)==2&&blocks==beforeBlocks);interruptsEnabled=true;preemptionLevel=1;assert(b5q_log_sync(750)==2&&blocks==beforeBlocks);preemptionLevel=0;
+  syncRace=1;assert(b5q_log_sync(750)==0&&blocks==beforeBlocks&&clears>0); // commit between arm and recheck
+  nabu_capture_append("NEXT",4);syncRace=3;assert(b5q_log_sync(750)==0&&blocks==beforeBlocks+1); // wake after block
+  nabu_capture_append("STOP",4);syncRace=2;assert(b5q_log_sync(750)==3&&blocks==beforeBlocks+1);nabu_log_stopping=false;
+  nabu_log_writer_state=2;const auto at=ticks;nabu_log_urgent_end=nabu_log_committed_end;beforeBlocks=blocks;nabuLogPause(4000);
+  assert(ticks>=at+4000&&blocks==beforeBlocks+1&&yield_count==0);
+  nabu_log_urgent_end=nabu_log_committed_end+1;beforeBlocks=blocks;nabuLogPause(4000);assert(blocks==beforeBlocks);nabuLogPause(4000);assert(blocks==beforeBlocks+1);assert(arms<=9&&wakes>0);
+ }
  assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first,1));
  for(uint64_t lba:{1ULL,3162880ULL,49692663ULL,62275574ULL,static_cast<unsigned long long>(nabu_log_volume.file_first+8195)})assert(!nb_volume_write_allowed(&nabu_log_volume,lba,1));
  assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+8194,2));

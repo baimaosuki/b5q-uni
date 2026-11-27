@@ -46,8 +46,8 @@ with tempfile.TemporaryDirectory(prefix='b5q-gmu-apple-ar-')as td:
  assert calls==['NativeAdrenoGmuService.cpp','B5qGpu.cpp']
  again=json.loads((t/'build/adreno740/mmio-helper.json').read_text());assert again['members_before']==again['members_after']
  gate=(R/'scripts/b5q-install/check-v33b-returned.py').read_text()
- start=gate.index(" rebuilt={'NativeAdrenoGmuService.o','B5qGpu.o'}")
- stop=gate.index(' for marker in ',start)
+ start=gate.index("  rebuilt={'NativeAdrenoGmuService.o','B5qGpu.o'}")
+ stop=gate.index('\n else:',start)
  body=compile_gate=textwrap.dedent(gate[start:stop])
  context=dict(R=R,ci=t,helper_proof=proof,sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest(),hashlib=hashlib,subprocess=subprocess,os=os)
  exec(body,context)

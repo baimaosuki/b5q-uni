@@ -233,8 +233,14 @@ def main():
                 cases.append(dict(case="actual board policy", group=group, label=label, file=filename,
                     import_flags=hex(flags), disabled=True, DisableAllowed_default=True,
                     native_disabled_rejection="0x10000449c", uid_domain_assignment=group != "system"))
+        for label in policy.get("system_enabled", []):
+            m = Machine(raw, {label: False})
+            loaded = m.load("/private/var/db/com.apple.xpc.launchd/disabled.plist")
+            assert not m.gate(loaded,label,0,True,removable,default=True,flags=0x100)
+            cases.append(dict(case="explicit enabled system override",label=label,disabled=False,plist_default_disabled=True))
         for label in ("com.apple.WindowServer", "com.apple.loginwindow", "com.apple.Dock.agent", "com.apple.Finder"):
-            merged = dict.fromkeys(sum(policy.values(), []), True)
+            merged = dict.fromkeys(sum([v for k,v in policy.items() if k != "system_enabled"], []), True)
+            merged.update(dict.fromkeys(policy.get("system_enabled", []), False))
             m = Machine(raw, merged)
             loaded = m.load("/private/var/db/com.apple.xpc.launchd/disabled.plist")
             assert not m.gate(loaded, label, 0, True, removable)

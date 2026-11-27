@@ -3695,3 +3695,27 @@ revision = "bdc43f5dd966bc641eec4edf7fddd0b415f5cf54"
 reference = "reports/review20-source-audit.json"
 command = "test-review20.py;test-v33b-policy.py;check-xnu-patches.py;check-cpu-burn-target.py --review20;check-peripheral-target.py;check-wifi-target.py;check-bt-target.py;pre-ci-v33d.py"
 result = "PASS local scoped validation:147 ordered patches;39 aggregate pre-ci entries plus final Review20 event-boundary followup;427 xHCI and483 IOMFB ABI, cross-object PAC and zero EL1 apps_smmu. Full thread.c local MIG header and native full link remain explicitly pending. Final receipts artifacts/b5q-review20-local/gates.json; hardware not verified"
+[[area]]
+id = "review21-log-sleep-metal-family-policy-observation"
+status = "host-verified"
+components = ["Adreno740", "AdrenoMetal", "Ath12kWifi", "QcomDwc3"]
+paths = ["package/B5qUfs/B5qLogUfs.h", "package/B5qGpu.cpp", "package/B5qAth11k.c", "package/b5q-launchd-lite.json", "scripts/b5q_display.py", "scripts/b5q_wifi.py", "scripts/update-b5q-launchd-seed.py", "patches/tools/b5q-review21-metal-family-cache.patch", "reports/review21-source-audit.json"]
+inputs = ["Actual Review20 XNU2LOG and SSH samples; exact SHA256 input evidence in reports/review21-source-audit.json", "Pinned XNU scheduler waitq implementation, NativeBridgeMetalFrontend and NativeAdrenoMemory diagnostics, shared lx_rt/nw_net; no direct upstream source edits"]
+configuration = ["Local only: no commit,push,CI,ESP or phone. Protected68 hashes,1023-byte arguments,147 ordered XNU patches and GPU owned-coherent default1 unchanged", "Pure host policy59/25 including explicit sshd=false and update notifier=true; preserve qualified58/25 seed bytes and use existing pre-launchd canonical migration"]
+procedure = ["Production wait/sync race sanitizer tests; actual Metal patch positive/idempotent runtime digest and target compile; policy blob decoding and migration; GPU row/memory and Wi-Fi callback regression", "Compile changed arm64e board objects, verify ABI/PAC/symbol closure, apply all147 patches and full local pre-ci; preserve first failures"]
+findings = ["Actual logger nabuLogPause4000 and sync used yield loops; use deadline waits with arm-before-recheck, wake urgent/commit events and preserve IRQ request-only behavior. Timers are initialized before b5q root/ordinary kernel-thread startup", "RenderBox supportsFamily hot path used dladdr each call. Patch dyld image callback to publish one immutable TEXT range and do PAC-stripped constant-time atomic range comparisons; unchanged family1003..1999 exception and normal delegate", "Existing canonical policy erased manual sshd=false. Generate explicit boolean mappings, assert disjoint enable/disable sets and add only the paired update notifier GUI label; immutable seed qualification retains original SHA/UUID/metadata checks", "GPU memory ownership summaries only read existing arrays; screen row refresh remains unconditional and healthy stage97 console rows are paced30s with error/status edges immediate", "lx_rt zeroed callback context before board slow-step log. Record completed callback peak before restore, preserve nested frames, include threadedIRQ/timer/tasklet/RCU/NAPI call boundaries without changing dispatcher scheduling", "Identity input is created once per fresh build and retained in both packaged profiles; XNU deterministically hashes unique-chip-id andchip-id. Same ESP has no runtime randomization;6 historical ESPs have6 distinct identity-input hashes. Exact21-directory cause remains unknown without same-image two-boot comparison; no speculative UUID/WAL changes or device access"]
+completion = ["HOST_VERIFIED_PENDING_HARDWARE; hardware_verified=false.147/147 unchanged ordered XNU patches, complete P0-P4 and40-entry pre-ci PASS; production ASan/UBSan, complete Metal arm64e TU zero warnings and PC-strip/authenticated delegate proof, board ABI/PAC/import closure PASS"]
+limits = ["No new hardware result claimed; complete frontend TU arm64e compiles locally but native final bundle link/execution is pending. Same-image UUID drift and WAL data loss are not proven."]
+next_action = ["Owner review of scoped local diff; future CI rebuilds changed board objects and NativeAdrenoMetal.bundle from the changed source digest, reuses unchanged XNU core/UEFI/qualified58-25 seed; no current CI or image operation"]
+[[area.evidence]]
+kind = "source"
+revision = "be86b03e82fea3b2baa97038366061b2ee2ffca6"
+reference = "reports/review21-source-audit.json"
+result = "PASS actual source/log hashes and local receipts;40 aggregate checks and147 unchanged patches; protected68, args1023, explicit59-25 boolean policy, no direct upstream edits; HOST_VERIFIED_PENDING_HARDWARE"
+
+[[area.evidence]]
+kind = "host"
+revision = "be86b03e82fea3b2baa97038366061b2ee2ffca6"
+reference = "reports/review21-source-audit.json"
+command = "check-xnu-patches.py;test-review21.py;check-wifi-target.py;check-peripheral-target.py;pre-ci-v33d.py;porting-record.py check"
+result = "PASS147 unchanged patches,40 aggregate gates,actual Metal arm64e TU zero warnings and PAC strip/delegate,source-bound board/ath11k objects and all retained host regressions; hardware_verified=false"

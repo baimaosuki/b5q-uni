@@ -190,8 +190,48 @@ int wr(void *, unsigned w, uint32_t off, uint32_t value) {
 }
 // Every row the probe ever set, in order (the eight shown rows are shared and overwritten): the first 40, each "<slot> <text>".
 extern "C" {volatile char native_gpu_row_log[40][52]; volatile uint32_t native_gpu_row_count;}
+// Filter only console I/O; the screen rows and first40 startup records below
+// still refresh on every call. Per-slot state is owned by the GPU worker.
+static bool gpuRowLog(unsigned stage,unsigned slot,const char *text,uint64_t ms,uint64_t errors) {
+    struct State {uint64_t next=0,errors=0,fields[4]{};unsigned stage=0;bool valid=false,abnormal=false;};
+    static State state[8];
+    if(stage!=0x97 || slot>=8)return true;
+    uint64_t fields[4]{};bool abnormal=false;
+    for(const char *p=text;*p;p++) {
+        if(p!=text && p[-1]!=' ')continue;
+        const char *v=p;
+        unsigned field;
+        if(!strncmp(v,"err=",4)){field=3;v+=4;}
+        else if(*v=='e'||*v=='F'||*v=='f'){field=*v=='e'?0:*v=='F'?1:2;++v;}
+        else continue;
+        uint64_t value=0;bool digit=false;
+        for(;*v;v++) {
+            const unsigned c=(unsigned char)*v;
+            const unsigned n=c>='0'&&c<='9'?c-'0':c>='a'&&c<='f'?c-'a'+10:c>='A'&&c<='F'?c-'A'+10:16;
+            if(n==16)break;digit=true;value=(value<<4)|n;
+        }
+        if(digit)fields[field]=value;
+    }
+    // Fault counters/status changes, including recovery, bypass heartbeat pacing.
+    for(const char *p=text;*p;p++)if(!strncmp(p,"gx-off",6)||!strncmp(p,"hang",4)||!strncmp(p,"failed",6)){abnormal=true;break;}
+    auto &old=state[slot];
+    bool changed=old.errors!=errors || old.abnormal!=abnormal;
+    for(unsigned i=0;i<4;i++){changed|=old.fields[i]!=fields[i];old.fields[i]=fields[i];}
+    const bool emit=!old.valid || old.stage!=stage || changed || ms>=old.next;
+    old.valid=true;old.stage=stage;old.errors=errors;old.abnormal=abnormal;
+    if(emit)old.next=ms+30000;
+    return emit;
+}
 void setRow(unsigned slot, const char *text) {
-    IOLog("B5qGpu: stage=%x row=%u %s\n", native_gpu_power_stage, slot, text);
+    uint64_t rowNs=0;absolutetime_to_nanoseconds(mach_absolute_time(),&rowNs);
+    const auto &diag=native_adreno_metal_diag;
+    static uint32_t previousErrors[4]{};static uint64_t errors;
+    const uint32_t currentErrors[4]={diag.bad,diag.last_status,diag.ext_status,diag.forced_unmaps};
+    bool errorEdge=false;
+    for(unsigned i=0;i<4;i++){errorEdge|=previousErrors[i]!=currentErrors[i];previousErrors[i]=currentErrors[i];}
+    if(errorEdge)++errors;
+    if(gpuRowLog(native_gpu_power_stage,slot,text,rowNs/1000000,errors))
+        IOLog("B5qGpu: stage=%x row=%u %s\n", native_gpu_power_stage, slot, text);
     const uint32_t n = __atomic_fetch_add(&native_gpu_row_count, 1, __ATOMIC_RELAXED);
     if (n < 40) {
         char *line = const_cast<char *>(native_gpu_row_log[n]);
@@ -2088,6 +2128,26 @@ unsigned sheng_thermal_row(unsigned,char *,unsigned),sheng_thermal_level_row(cha
 extern volatile uint32_t native_hid_input_events[8],native_touch_count,native_touch_hid_reports;
 extern volatile int32_t native_buttons_stats[10];
 }
+extern "C" {
+extern volatile uint32_t native_adreno_bo_memory[8],native_adreno_bo_owners[24][4];
+extern volatile uint32_t native_adreno_import_memory[4],native_adreno_import_owners[24][4];
+}
+static void gpuMemoryRow(char *out,size_t bytes) {
+    struct Owner {uint32_t pid=0,kib=0;};Owner bo[3]{},imp[2]{};
+    auto top=[](volatile uint32_t (*table)[4],Owner *rows,unsigned count) {
+        for(unsigned i=0;i<24;i++) {
+            const Owner current{table[i][0],table[i][1]};
+            for(unsigned j=0;j<count;j++)if(current.kib>rows[j].kib) {
+                for(unsigned k=count-1;k>j;k--)rows[k]=rows[k-1];rows[j]=current;break;
+            }
+        }
+    };
+    top(native_adreno_bo_owners,bo,3);top(native_adreno_import_owners,imp,2);
+    snprintf(out,bytes,"B5qGpu: mem bo_mib=%u/%u bo_n=%u kbo=%u imp_kib=%u/%u imp_n=%u bo_top=%u:%uK,%u:%uK,%u:%uK imp_top=%u:%uK,%u:%uK",
+        native_adreno_bo_memory[4],native_adreno_bo_memory[5],native_adreno_bo_memory[0],native_adreno_bo_memory[6],
+        native_adreno_import_memory[1],native_adreno_import_memory[2],native_adreno_import_memory[0],
+        bo[0].pid,bo[0].kib,bo[1].pid,bo[1].kib,bo[2].pid,bo[2].kib,imp[0].pid,imp[0].kib,imp[1].pid,imp[1].kib);
+}
 void heartbeat() {
     // Row 4 from now on: seconds since the run ended, GX state, and (only with GX on) the GPU status words, so a photo
     // tells a live kernel from a hung one and shows whether the GPU stays idle.
@@ -2149,6 +2209,7 @@ void heartbeat() {
             const unsigned gpuLevel=native_gpu_dcvs[1];
             IOLog("B5qGpu: dcvs busy_pct=%u level=%u mhz=%u transitions=%u errors=%u\n",native_gpu_dcvs[4],gpuLevel,
                 gpuLevel<=kGpuTop?kGpuMHz[gpuLevel]:0,native_gpu_dcvs[2],native_gpu_dcvs[3]);
+            char memory[320];gpuMemoryRow(memory,sizeof(memory));IOLog("%s\n",memory);
             char thermal[256]={},level[256]={},clock[256]={};
             sheng_thermal_row(0,thermal,sizeof(thermal));sheng_thermal_level_row(level,sizeof(level));sheng_board_clock_row(clock,sizeof(clock));
             IOLog("B5qThermal: %s | %s\n",thermal,level);IOLog("B5qClock: %s\n",clock);

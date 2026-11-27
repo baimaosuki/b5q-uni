@@ -42,6 +42,7 @@
     "com.apple.CommCenter",
     "com.apple.ContextStoreAgent",
     "com.apple.ReportCrash",
+    "com.apple.SoftwareUpdateNotificationManager",
     "com.apple.amsengagementd",
     "com.apple.biomesyncd",
     "com.apple.duetexpertd",
@@ -63,5 +64,8 @@
     "com.apple.ReportCrashService",
     "com.apple.geod",
     "com.apple.wallpaper.extension.aerials"
+  ],
+  "system_enabled": [
+    "com.openssh.sshd"
   ]
 }
