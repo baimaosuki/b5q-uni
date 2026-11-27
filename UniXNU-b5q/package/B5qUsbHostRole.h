@@ -32,11 +32,24 @@ inline bool canHotSwapVbus(const View &v) {
 // also an edge. This prevents one stuck condition from consuming all four
 // diagnostic slots.
 // The host session gets a 20 x 50ms attach window so the power hold reaches
-// both xHCI ports before their first U3. Two held ports end the fast window;
-// a single-port board still uses the full 1000ms.
+// connected xHCI ports before their first U3. The caller separately bounds
+// the initial wait for a port that has not appeared in PORTSC yet.
 constexpr unsigned kPortPowerHoldSlots = 8;
 constexpr unsigned kFastPortPollAttempts = 20;
-inline bool fastPortPollNeeded(unsigned holds) { return holds < 2u; }
+inline bool fastPortPollNeeded(unsigned holds,unsigned connectedPorts) {
+    return connectedPorts!=0u&&holds<connectedPorts;
+}
+inline bool portConnectedForHold(const char *name,uint32_t portsc1,uint32_t portsc2) {
+    if(!name)return false;
+    for(const char *at=name;*at;at++){
+        const char *two="AppleUSB20",*three="AppleUSB30";unsigned i=0;
+        while(at[i]&&two[i]&&at[i]==two[i])i++;
+        if(!two[i])return (portsc1&1u)!=0;
+        i=0;while(at[i]&&three[i]&&at[i]==three[i])i++;
+        if(!three[i])return (portsc2&1u)!=0;
+    }
+    return false;
+}
 
 inline bool portEdge(uint32_t previous, uint32_t current) {
     constexpr uint32_t kEdgeMask = (1u << 17) | (1u << 18) | (1u << 22);

@@ -72,8 +72,15 @@ struct AltMode {
   if(cmd!=expected||!(header&0x8000)||(id!=3&&svid!=(id<=2?0xff00u:0xff01u)))return reject(PdError::Packet);
   if(id!=6&&type!=1)return reject(PdError::Rejected);
   if(id==6&&type!=0)return reject(PdError::Packet);
-  /* Samsung counts its message header and VDM header as two objects. */
-  const unsigned objects=reply[2]&7;if(objects<2||bytes<objects*4)return reject(PdError::Packet);
+  // MAX77705 0x4b carries a 16-bit LE USB-PD header at reply[2..3].
+  // NumDataObjects excludes the four-byte opcode/id/PD-header prefix.
+  // Retain the explicit slot-count form used by the existing host fixtures.
+  unsigned objects=0;
+  if((reply[2]&0x1fu)==0x0fu){
+   const unsigned dataObjects=(reply[3]>>4)&7u;
+   objects=dataObjects?dataObjects+1u:0u;
+  }else if(reply[3]==0u&&reply[2]<=7u){objects=reply[2]&7u;}
+  if(objects<2||bytes<objects*4)return reject(PdError::Packet);
   bool ok=true;
   switch(id){
   case 1:

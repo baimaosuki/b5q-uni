@@ -53,6 +53,7 @@ body=base+r'''
 #include "B5qDpPort.h"
 #include "B5qUsbHostRole.h"
 void *gHost=(void*)1;void *gHostNub=(void*)1;
+struct{uint32_t *va=nullptr;}gXhciRegs;
 B5qMax77705::Cable gAppliedCable;
 int gAppliedOrientation=-1;
 uint64_t ticks=0;unsigned polls=0,leaves=0,otgOff=0;bool otg=true;uint8_t cc=0x4a,cc1=1,bc=0;
@@ -152,4 +153,5 @@ assert stop.index('runAction(&NativeHidInput::stopAction')<stop.index('removeEve
 # The production diagnostic must use the same32KiB register mapping as xHCI.
 assert 'mapRegion(gXhciRegs,kCore,kXhciRegisterBytes)'in q.replace(' ','')
 assert 'constexpr unsigned kXhciRegisterBytes=0x8000;'in q
-assert 'rt+0x40/4<kXhciRegisterBytes/4'in q
+assert 'B5qUsbHostEvent::interrupter(rt,irIndex,kXhciRegisterBytes,' in q
+assert 'runtime>windowBytes-(0x40u+index*0x20u)' in (P/'B5qUsbHostEvent.h').read_text()

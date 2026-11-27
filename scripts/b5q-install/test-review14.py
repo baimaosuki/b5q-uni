@@ -66,13 +66,13 @@ with tempfile.TemporaryDirectory(prefix='review14-wifi-', dir=W) as td:
     qca = function(hw, 'static void ath11k_init_wmi_config_qca6390(')
     ipq = function(hw, 'static void ath11k_init_wmi_config_ipq8074(')
     assert qca.count('twt_ap_pdev_count') == 1 and qca.count('twt_ap_sta_count') == 1
-    assert 'ab->num_radios ? ab->num_radios : 1' in qca and 'config->twt_ap_sta_count = 8;' in qca
-    assert 'ab->num_radios ? ab->num_radios : 1' not in ipq
+    assert 'ab->hw_params.max_radios ? ab->hw_params.max_radios : 3' in qca and 'config->twt_ap_sta_count = 8;' in qca
+    assert 'ab->hw_params.max_radios ? ab->hw_params.max_radios : 3' not in ipq
     assert 'config->twt_ap_pdev_count = ab->num_radios;' in ipq and 'config->twt_ap_sta_count = 1000;' in ipq
-    assert 'B5qWifi: wmi-init radios=%u vdevs=%u peers=%u twt_ap_pdev=%u twt_ap_sta=%u' in wmi
+    assert 'B5qWifi: wmi-init radios=%u max_radios=%u vdevs=%u peers=%u twt_ap_pdev=%u twt_ap_sta=%u' in wmi
     assert wmi.index('memcpy(&wmi_ab->wlan_resource_config') < wmi.index('B5qWifi: wmi-init')
     inputs = json.loads((Path(td) / 'wifi/source-inputs.json').read_text())
-    assert inputs['wcn6855_twt_ap_config'] == 'twt_ap_pdev_count=max(num_radios,1) twt_ap_sta_count=8'
+    assert inputs['wcn6855_twt_ap_config'] == 'twt_ap_pdev_count=max_radios(fallback 3) twt_ap_sta_count=8'
 checks.append(dict(name='wifi-twt-ap-and-wmi-probe', passed=True))
 
 
@@ -300,7 +300,7 @@ assert leave.index('releaseHostPortPowerHolds()') < leave.index('gHostNub->termi
 assert leave.count('releaseHostPortPowerHolds()') == 1
 role = function(usb, 'void roleThread(')
 assert 'kFastPortPollAttempts' in role and 'IOSleep(50)' in role
-assert role.index('for(unsigned i=0;i<B5qUsbHostRole::kFastPortPollAttempts') < role.index('fastPortPollNeeded(hostPortHoldCount())')
+assert role.index('for(unsigned i=0;i<B5qUsbHostRole::kFastPortPollAttempts') < role.index('fastPortPollNeeded(hostPortHoldCount(),connectedPorts)')
 assert 'kPortPowerHoldSlots = 8' in (P / 'B5qUsbHostRole.h').read_text()
 checks.append(dict(name='usb-port-power-hold-lifecycle', passed=True))
 
@@ -308,10 +308,10 @@ with tempfile.TemporaryDirectory(prefix='review14-usb-', dir=W) as td:
     model(Path(td), 'usb-host-role-helpers', r'''
 #include <assert.h>
 int main(void) {
-    assert(B5qUsbHostRole::fastPortPollNeeded(0));
-    assert(B5qUsbHostRole::fastPortPollNeeded(1));
-    assert(!B5qUsbHostRole::fastPortPollNeeded(2));
-    assert(!B5qUsbHostRole::fastPortPollNeeded(8));
+    assert(B5qUsbHostRole::fastPortPollNeeded(0,1));
+    assert(B5qUsbHostRole::fastPortPollNeeded(1,2));
+    assert(!B5qUsbHostRole::fastPortPollNeeded(2,2));
+    assert(!B5qUsbHostRole::fastPortPollNeeded(8,2));
     assert(B5qUsbHostRole::portEdge(2, 0));
     assert(B5qUsbHostRole::portEdge(0, 1u << 17));
     assert(B5qUsbHostRole::portEdge(0, 1u << 22));

@@ -113,6 +113,8 @@ int main(){
 #include "B5qUsbHostRole.h"
 using B5qMax77705::Cable;
 void*gHost=(void*)1;void*gHostNub=(void*)1;Cable gAppliedCable;int gAppliedOrientation=-1;
+constexpr unsigned kXhciRegisterBytes=0x8000;uint32_t xhciRegisters[kXhciRegisterBytes/4]{};
+struct{uint32_t *va=xhciRegisters;}gXhciRegs;
 uint64_t ms=0;unsigned sleeps=0,leaves=0,off=0,enters=0;bool otg=false,reverse=false,expire=false;
 Cable physical(){Cable c;c.valid=true;
  if(ms>=100&&ms<5000){
@@ -141,6 +143,7 @@ using wait_result_t=int;
 void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){
+ xhciRegisters[0]=0x40;xhciRegisters[(0x40+0x400)/4]=1;
  for(unsigned pin=0;pin<2;pin++){
   ms=sleeps=leaves=off=enters=0;otg=expire=false;reverse=pin;gRoleWanted=gRoleApplied=0;
   auto initial=physical();gCableWanted=gCableApplied=initial.signature();

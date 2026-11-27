@@ -10,6 +10,48 @@ struct Event {
     unsigned completion, type, slot, endpoint, cycle;
 };
 
+struct Interrupter {uint32_t iman,erstsz;uint64_t erst,erdp;};
+template<class Read32>
+bool interrupter(unsigned runtime,unsigned index,unsigned windowBytes,Read32 read,Interrupter &out){
+    if(index>1u||(runtime&31u)||windowBytes<0x40u+index*0x20u||
+       runtime>windowBytes-(0x40u+index*0x20u))return false;
+    const unsigned base=runtime+0x20u+index*0x20u;
+    out={read(base),read(base+8)&65535u,
+         uint64_t(read(base+0x10))|(uint64_t(read(base+0x14))<<32),
+         uint64_t(read(base+0x18))|(uint64_t(read(base+0x1c))<<32)};
+    return true;
+}
+
+struct TransferBases {
+    uint64_t values[2]{};unsigned count=0;
+    void observe(const Event &event){
+        if(event.type!=32u||event.completion==1u)return;
+        const uint64_t base=event.parameter&~0xffULL;
+        if(!base)return;
+        for(unsigned i=0;i<count;i++)if(values[i]==base)return;
+        if(count<2)values[count++]=base;
+    }
+};
+template<class Read,class Emit>
+bool transfer(uint64_t base,Read read,Emit emit){
+    if(!base||(base&255u)||base>UINT64_MAX-0x60u)return false;
+    for(unsigned i=0;i<6;i++){
+        uint64_t lo=0,hi=0;
+        if(!read(base+16u*i,lo)||!read(base+16u*i+8u,hi))return false;
+        emit(i,lo,hi);
+    }
+    return true;
+}
+struct Slot1 {uint64_t address=0,slot[2]{},ep0[2]{};};
+template<class Read>
+bool slot1(uint64_t dcbaa,unsigned stride,Read read,Slot1 &out){
+    if(!dcbaa||(dcbaa&63u)||dcbaa>UINT64_MAX-16u||(stride!=32&&stride!=64))return false;
+    if(!read(dcbaa+8,out.address)||!out.address||(out.address&63u)||
+       out.address>UINT64_MAX-stride-16u)return false;
+    return read(out.address,out.slot[0])&&read(out.address+8,out.slot[1])&&
+           read(out.address+stride,out.ep0[0])&&read(out.address+stride+8,out.ep0[1]);
+}
+
 // Locate ERDP in one of the bounded ERST segments and visit the most recent
 // entries preceding it. Read is the loader-qualified physical RAM reader.
 template <class Read, class Emit>

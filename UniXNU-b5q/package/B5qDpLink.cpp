@@ -45,6 +45,7 @@ struct Hardware {
  Window dp,phy,disp,gcc,dpu,sel,en,cmd,rsc;
  B5qDp::AuxPins pins;
  bool opened=false,mxOwned=false,fault=false,cablePresent=false;
+ bool dpBusy=false;
  unsigned wantedReverse=0;uint64_t sampled=0;
  QcomRpmhResource mx{};
  uint64_t nowUs(){return ::nowUs();}
@@ -82,21 +83,27 @@ struct Hardware {
  }
  uint32_t gpioRead(unsigned pin,unsigned off){auto *p=gpio(pin,off);return p?*p:0;}
  void gpioWrite(unsigned pin,unsigned off,uint32_t value){auto *p=gpio(pin,off);if(p){*p=value;barrier();}}
+ bool openFailure(const char *step){
+  IOLog("B5qDP: stage=hw-open failed step=%s gcc50018=%08x gcc39004=%08x disp9000=%08x dpBusy=%u sel=%08x/%08x en=%08x/%08x\n",
+    step,gcc.va?gcc.va[0x50018/4]:0,gcc.va?gcc.va[0x39004/4]:0,disp.va?disp.va[0x9000/4]:0,
+    dpBusy,sel.va?sel.va[0]:0,sel.va?sel.va[1]:0,en.va?en.va[0]:0,en.va?en.va[1]:0);return false;
+ }
  bool open(bool reverse){
   fault=false;wantedReverse=reverse;sampled=nowUs();cablePresent=true;
+  dpBusy=false;
   if(!dp.open(0xae90000,0x2000)||!phy.open(0x88ea000,0x1000)||
      !disp.open(0xaf00000,0x10000)||!gcc.open(0x100000,0x60000)||
      !dpu.open(0xae00000,0x84000)||!sel.open(0xf100000+180*0x1000,0x1000)||
-     !en.open(0xf100000+183*0x1000,0x1000))return false;
+     !en.open(0xf100000+183*0x1000,0x1000))return openFailure("map");
   // Original DP supplies share USB's already enabled ldoe1/ldoe3/ldof3/
   // ldob5 rails and GCC PHY GDSC. Do not become a second regulator owner.
   if(!(gcc.va[0x50018/4]&(1u<<31))||!(gcc.va[0x39004/4]&(1u<<31))||
-     !(disp.va[0x9000/4]&(1u<<31)))return false;
+     !(disp.va[0x9000/4]&(1u<<31)))return openFailure("gdsc");
   B5qDp::DpuResources resources;resources.inspect([&](unsigned off){return dpu.va[off/4];});
-  if(resources.dpBusy)return false;
+  dpBusy=resources.dpBusy;if(dpBusy)return openFailure("dpu-busy");
   // Original secdp_power_set_gpio, no aux-sel-inv/redriver on b5q:
   // first isolate active-low AUX enable, set CC polarity, then enable.
-  if(!pins.begin(*this,reverse))return false;opened=true;return true;
+  if(!pins.begin(*this,reverse))return openFailure("aux-gpio");opened=true;return true;
  }
  bool voteMx(uint32_t value){
   if(!rsc.va)return false;const QcomRscLayout layout=qcom_rsc_layout(rsc.va[0]);
@@ -154,6 +161,7 @@ struct Hardware {
 struct Owner {
  Hardware io;B5qDp::Session<Hardware> session;uint32_t generation=0;
  uint64_t retryAt=0;bool accepted=false;
+ B5qDpPortState observed{};bool haveObserved=false;
  B5Q_DP_DMA_STATE dma{};Window pool;
  IOLock *scanLock=nullptr;IOService *display=nullptr,*provider=nullptr;
  B5qDp::Presentation presentation;uint32_t scanClosing=1;uint64_t frameCount=0;
@@ -228,7 +236,8 @@ struct Owner {
   if(cancelled)IOLog("B5qDP: cancelled flip tag=%llu\n",cancelled);return ok;
  }
  bool poolReady(){
-  if(!scanLock)scanLock=IOLockAlloc();if(!scanLock)return false;
+  if(!scanLock)scanLock=IOLockAlloc();if(!scanLock){
+   IOLog("B5qDP: stage=pool-ready failed ready=0 valid=0 pe_rc=-1 pe_base=0 dma_base=0 row=0 h=0 reason=lock\n");return false;}
   auto *chosen=IORegistryEntry::fromPath("/chosen",gIODTPlane);
   auto *flag=chosen?OSDynamicCast(OSData,chosen->getProperty("b5q-dp-dma-ready")):nullptr;
   auto *state=chosen?OSDynamicCast(OSData,chosen->getProperty("b5q-dp-dma-state")):nullptr;
@@ -239,31 +248,44 @@ struct Owner {
   IOLog("B5qDP: dma-ready=%u primary=%llx..%llx pool=%llx+%llx prepare=%llx retain=%llx\n",
         ready,dma.FrameBufferBase,dma.PrimaryEnd,dma.PoolBase,dma.PoolBytes,dma.PrepareStatus,dma.RetentionStatus);
   PE_Video primary{};
-  return ready==1&&B5qDpPoolValid(&dma)&&!PE_current_console(&primary)&&
+  const bool valid=B5qDpPoolValid(&dma);
+  const int pe_rc=ready==1&&valid?PE_current_console(&primary):-1;
+  const bool ok=ready==1&&valid&&!pe_rc&&
    primary.v_baseAddr==dma.FrameBufferBase&&primary.v_rowBytes&&primary.v_height&&
    uint64_t(primary.v_rowBytes)*primary.v_height<=dma.PrimaryEnd-dma.FrameBufferBase&&
    pool.open(dma.PoolBase,unsigned(dma.PoolBytes),kIOMapCopybackCache);
+  if(!ok)IOLog("B5qDP: stage=pool-ready failed ready=%u valid=%u pe_rc=%d pe_base=%llx dma_base=%llx row=%lu h=%lu reason=%s\n",
+   ready,valid,pe_rc,uint64_t(primary.v_baseAddr),dma.FrameBufferBase,
+   (unsigned long)primary.v_rowBytes,(unsigned long)primary.v_height,
+   ready!=1?"handoff":!valid?"pool-invalid":pe_rc?"console":primary.v_baseAddr!=dma.FrameBufferBase?"console-base":
+   !primary.v_rowBytes||!primary.v_height?"console-size":
+   uint64_t(primary.v_rowBytes)*primary.v_height>dma.PrimaryEnd-dma.FrameBufferBase?"console-range":"map");
+  return ok;
  }
  bool startDisplay(){
-  static bool initialized=false;
-  if(!initialized){void *handle=OSMetaClass::preModLoad(g_kernel_kmod_info.name);
-   if(!handle)return false;b5q_dp_display_static_init();if(OSMetaClass::postModLoad(handle))return false;initialized=true;}
-  B5qDp::DpuResources r;r.inspect([&](unsigned off){return io.read(Block::Dpu,off);});
   const auto &m=session.selected;const unsigned stride=B5qDp::Modes::scanoutStride(m);
   const uint64_t slot=B5qDp::Modes::scanoutSlot(m);
-  if(!r.choose(m.width)||slot>dma.PoolBytes/2)return false;
+  auto failure=[&](const char *step){
+   IOLog("B5qDP: stage=scanout failed step=%s width=%u height=%u slot=%llu halfPool=%llu dpuActive=%u\n",
+     step,m.width,m.height,slot,dma.PoolBytes/2,presentation.dpu.active);return false;};
+  static bool initialized=false;
+  if(!initialized){void *handle=OSMetaClass::preModLoad(g_kernel_kmod_info.name);
+   if(!handle)return failure("static-init");b5q_dp_display_static_init();if(OSMetaClass::postModLoad(handle))return failure("static-init");initialized=true;}
+  B5qDp::DpuResources r;r.inspect([&](unsigned off){return io.read(Block::Dpu,off);});
+  if(!r.choose(m.width))return failure("dpu-choose");
+  if(slot>dma.PoolBytes/2)return failure("pool-slot");
   const B5qDp::ScanoutBuffer buffers[2]={{dma.PoolBase,slot},{dma.PoolBase+slot,slot}};
   IOLockLock(scanLock);__atomic_store_n(&scanClosing,0u,__ATOMIC_RELEASE);
   const bool started=presentation.begin(scan,r,m,buffers,stride);IOLockUnlock(scanLock);
-  if(!started){drain(this);return false;}
+  if(!started){failure("presentation-begin");drain(this);return false;}
   provider=new IOService;
-  if(!provider||!provider->init()||!provider->attach(IOService::getPlatform()))return false;
+  if(!provider||!provider->init()||!provider->attach(IOService::getPlatform()))return failure("provider");
   provider->setName("B5qDisplayPort");
   B5qDpDisplayConfig config{};config.mode=m;config.edidBytes=session.edidBytes;
   memcpy(config.edid,session.edid,config.edidBytes);config.context=this;config.present=present;config.drain=drain;
   IOService *next=b5q_dp_display_create(provider,&config);
   IOLockLock(scanLock);display=next;IOLockUnlock(scanLock);
-  if(!display)return false;
+  if(!display)return failure("iomfb-create");
   return true;
  }
  bool stop(){
@@ -277,6 +299,13 @@ struct Owner {
   return io.close();
  }
  void update(const B5qDpPortState &p){
+  if(!haveObserved||observed.attached!=p.attached||observed.configured!=p.configured||observed.hpd!=p.hpd||
+     observed.hpdIrq!=p.hpdIrq||observed.lanes!=p.lanes||observed.pin!=p.pin||observed.reverse!=p.reverse||
+     observed.phase!=p.phase||observed.error!=p.error||observed.generation!=p.generation){
+   IOLog("B5qDP: port phase=%u err=%u att=%u cfg=%u hpd=%u irq=%u lanes=%u pin=%02x rev=%d gen=%u\n",
+    p.phase,p.error,p.attached,p.configured,p.hpd,p.hpdIrq,p.lanes,p.pin,p.reverse,p.generation);
+   observed=p;haveObserved=true;
+  }
   if(!p.attached||!p.configured||!p.hpd||p.reverse<0||p.reverse>1||(p.lanes!=2&&p.lanes!=4)){
    stop();retryAt=0;return;
   }
@@ -289,16 +318,19 @@ struct Owner {
   }
   if(nowUs()<retryAt)return;
   if(!stop()){retryAt=nowUs()+1000000;return;}
-  if(!poolReady()||!io.open(p.reverse!=0)){
-   IOLog("B5qDP: stage=power-gpio failed fault=%u\n",io.fault);io.close();retryAt=nowUs()+1000000;return;
-  }
+  if(!poolReady()){io.close();retryAt=nowUs()+1000000;return;}
+  if(!io.open(p.reverse!=0)){io.close();retryAt=nowUs()+1000000;return;}
   const bool discovered=session.discover(p.lanes,p.reverse!=0);
+  IOLog("B5qDP: discover ok=%u step=%u err=%u aux=%u aux_sts=%08x aux_tx=%u rev=%02x rate=%u lanes=%u enh=%u edid=%u dpcd=%02x %02x %02x %02x %02x %02x %02x %02x\n",
+   discovered,session.discoverStep,unsigned(session.error),unsigned(session.aux.error),session.aux.lastStatus,session.aux.transactions,
+   session.caps.revision,session.caps.rate,session.caps.lanes,session.caps.enhanced,session.edidBytes,
+   session.dpcd[0],session.dpcd[1],session.dpcd[2],session.dpcd[3],session.dpcd[4],session.dpcd[5],session.dpcd[6],session.dpcd[7]);
   if(discovered){const unsigned advertised=session.modes.count;session.modes.fitPool(dma.PoolBytes);
    IOLog("B5qDP: EDID pool-filter advertised=%u fitting=%u bytes=%llu\n",advertised,session.modes.count,dma.PoolBytes);}
   const bool trained=discovered&&session.modes.count&&session.train()&&!io.fault;
-  IOLog("B5qDP: stage=link discovered=%u trained=%u error=%u aux=%u phy=%u clock=%x rate=%u lanes=%u modes=%u attempts=%u\n",
+  IOLog("B5qDP: stage=link discovered=%u trained=%u error=%u aux=%u phy=%u clock=%x rate=%u lanes=%u modes=%u attempts=%u train_err=%u phy_last=%08x\n",
         discovered,trained,unsigned(session.error),unsigned(session.aux.error),session.phy.failed,session.clock.failed,
-        session.rate,session.lanes,session.modes.count,session.attempts);
+        session.rate,session.lanes,session.modes.count,session.attempts,unsigned(session.trainError),session.phy.last);
   if(!trained){stop();retryAt=nowUs()+1000000;return;}
   if(!startDisplay()){IOLog("B5qDP: stage=scanout failed retained=%u\n",presentation.dpu.active);stop();retryAt=nowUs()+1000000;return;}
   generation=p.generation;accepted=true;retryAt=0;
@@ -322,7 +354,10 @@ extern "C" bool b5q_dp_link_stop(void){
 }
 extern "C" void b5q_dp_link_update(const B5qDpPortState *state){
  if(!state)return;
- if(!B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)){b5q_dp_link_stop();return;}
+ const bool enabled=B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort);
+ static uint32_t featureLogged=0;
+ if(!__atomic_exchange_n(&featureLogged,1u,__ATOMIC_RELAXED))IOLog("B5qDP: feature b5q-dp=%u\n",enabled);
+ if(!enabled){b5q_dp_link_stop();return;}
  if(!ensureLock()){static bool logged;if(!logged){logged=true;IOLog("B5qDP: stage=owner-lock result=no-memory\n");}return;}
  IOLockLock(lock);if(!owner)owner=new Owner;
  if(!owner){static bool logged;if(!logged){logged=true;IOLog("B5qDP: stage=owner-allocation result=no-memory\n");}}

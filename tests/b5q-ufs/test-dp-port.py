@@ -57,6 +57,7 @@ struct TestMailbox {
   for(unsigned i=0;i<33;i++)out[i]=replies[id][i];return true;}
 };
 B5qDp::AltMode dpAlt;bool dpStarted=false,dpFailed=false;uint32_t dpCable=0,dpPending=0;uint64_t dpDeadline=0;
+uint32_t dpDeferSignature=~0u,dpIrqBits=0;
 std::array<uint8_t,33> packet(unsigned id,uint32_t vdo=0,unsigned count=3){
  std::array<uint8_t,33>b{};b[0]=0x4b;b[1]=id;b[2]=count;
  put32(b.data()+4,(uint32_t(id<=2?0xff00:0xff01)<<16)|0x8000|(id==6?0:64)|id|((id==4||id==0x11)?256:0));put32(b.data()+8,vdo);return b;
@@ -65,6 +66,7 @@ std::array<uint8_t,33> packet(unsigned id,uint32_t vdo=0,unsigned count=3){
 test=r'''
 void reset(bool powered=true){
  dpAlt={};dpStarted=dpFailed=false;dpCable=dpPending=0;dpDeadline=nowMs=0;
+ dpDeferSignature=~0u;dpIrqBits=0;
  locked=false;sampleOk=interruptOk=openOk=true;boxFail=false;enables=disables=gets=0;pdInterrupt=vdmInterrupt=0;requests.clear();positions.clear();
  cableSample={};cableSample.cc0=0x40|(powered?1:2);cableSample.pd=128;cableSample.bc=0x80;cableSample.valid=true;
  replies={{1,packet(1)},{2,packet(2,0xff01)},{3,packet(3,5|64|(28u<<16))},{4,packet(4,0,2)},

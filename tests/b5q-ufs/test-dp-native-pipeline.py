@@ -80,9 +80,11 @@ struct Hardware{
 namespace B5qDp {
 template<class Io>struct Session {
  Io &io;bool streaming=false,trained=false;unsigned rate=20,lanes=2,attempts=1,error=0;
- struct{unsigned failed=0;}clock,phy;Modes modes;Mode selected{};uint8_t edid[128]{};unsigned edidBytes=128;
+ struct{unsigned failed=0,last=0;}clock,phy;Modes modes;Mode selected{};uint8_t edid[128]{};unsigned edidBytes=128;
+ unsigned discoverStep=6,trainError=0;uint8_t dpcd[16]{};
+ struct{unsigned revision=0x14,rate=20,lanes=2;bool enhanced=true;}caps;
  struct Controller{Session &s;void stop(){s.streaming=false;}}controller;
- struct Aux{bool dpcd(bool,unsigned,uint8_t *out,unsigned n){memset(out,0x77,n);out[2]=1;return true;}unsigned error=0;}aux;
+ struct Aux{bool dpcd(bool,unsigned,uint8_t *out,unsigned n){memset(out,0x77,n);out[2]=1;return true;}unsigned error=0,lastStatus=0,transactions=0;}aux;
  explicit Session(Io &i):io(i),controller{*this}{}
  bool stop(){streaming=trained=false;selected={};return true;}
  bool discover(unsigned n,bool){lanes=n;modes={};return modes.advertisedVic(16)&&modes.advertisedVic(97);}

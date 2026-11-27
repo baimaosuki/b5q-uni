@@ -141,7 +141,9 @@ struct OSDictionary:OSObject{std::map<std::string,OSObject*> values;
  void setObject(const char*n,OSObject*p){values[n]=p;}};
 struct OSIterator:OSObject{std::vector<OSObject*>values;unsigned pos=0;
  OSObject*getNextObject(){return pos<values.size()?values[pos++]:nullptr;}};
-using IOReturn=unsigned;constexpr unsigned kIOReturnSuccess=0,kUsbPortDebugOptions=0x40000119u;
+using IOReturn=unsigned;constexpr unsigned kIOReturnSuccess=0,kUsbPortDebugOptions=0x40000119u,kUsbHostDebugOptions=0x4000015du;
+constexpr unsigned kXhciRegisterBytes=0x8000;static uint32_t registers[kXhciRegisterBytes/4]{};
+static struct{uint32_t *va=registers;}gXhciRegs;
 static OSObject yes;static OSObject*kOSBooleanTrue=&yes;static const char*gIOServicePlane="service";
 static unsigned powerLogs,debugLogs,forceLogs;
 template<class...T>void IOLog(const char*format,T...){if(strstr(format,"port-force-power"))forceLogs++;else if(strstr(format,"port-power"))powerLogs++;else debugLogs++;}
@@ -149,13 +151,13 @@ struct IOService:OSObject{
  std::map<std::string,OSObject*>props;std::vector<OSObject*>children;bool port=false;
  bool holdFail=false;
  unsigned debugCalls=0,forceCalls=0,powerCalls=0,state=2,powerError=0,forceError=0;
- const char*getName(){return "test-port";}
+ const char*getName(){return port?"AppleUSB20XHCIPort":"host";}
  OSObject*getProperty(const char*n){auto it=props.find(n);return it==props.end()?nullptr:it->second;}
  void setProperty(const char*n,OSObject*p){props[n]=p;}
  void setProperty(const char*n,unsigned v,unsigned bits){setProperty(n,OSNumber::withNumber(v,bits));}
  IOReturn setProperties(OSDictionary*d){
   if(d->values.count("UsbForcePower")){forceCalls++;assert(d->values.size()==1);auto*n=dynamic_cast<OSNumber*>(d->values["UsbForcePower"]);assert(n&&n->value==1);return forceError;}
-  debugCalls++;assert(d->values.size()==1);auto*n=dynamic_cast<OSNumber*>(d->values["kUSBDebugOptions"]);assert(n&&n->value==kUsbPortDebugOptions);return 0;}
+  debugCalls++;assert(d->values.size()==1);auto*n=dynamic_cast<OSNumber*>(d->values["kUSBDebugOptions"]);assert(n&&n->value==(port?kUsbPortDebugOptions:kUsbHostDebugOptions));return 0;}
  OSObject*metaCast(const char*n){assert(!strcmp(n,"AppleUSBHostPort"));return port?this:nullptr;}
  OSIterator*getChildIterator(const char*plane){assert(plane==gIOServicePlane);auto*i=track(new OSIterator);i->values=children;return i;}
  unsigned long getPowerState(){return state;}
@@ -168,11 +170,12 @@ static void setHostPortHoldOwner(IOService*){}
 #define OSSafeReleaseNULL(p) do{(p)=nullptr;}while(0)
 HELPER
 int main(){
+ registers[0]=0x40;registers[(0x40+0x400)/4]=1;
  IOService host,port;port.port=true;host.children={&port};
  configureHostPorts(&host);
  assert(host.debugCalls==1&&port.debugCalls==1&&port.forceCalls==0&&port.powerCalls==0);
  assert(port.getProperty("B5qPortPowerPinned")&&!port.getProperty("B5qPortForcePowerApplied"));
- assert(debugLogs==1&&forceLogs==0);
+ assert(debugLogs==2&&forceLogs==0);
  unsigned fc=port.forceCalls,dc=port.debugCalls;
  for(unsigned n=0;n<8;n++)configureHostPorts(&host);
  assert(port.forceCalls==fc&&port.debugCalls==dc);
@@ -194,7 +197,7 @@ int main(){
  assert(hardTries&&hardTries->value==4&&!hardFail.getProperty("B5qPortForcePowerApplied"));
  hardFail.holdFail=false;configureHostPorts(&host);assert(hardFail.getProperty("B5qPortPowerPinned"));
  return 0;}
-'''.replace('HELPER', configure), cpp=True)
+'''.replace('HELPER', '#include "'+str(P/'B5qUsbHostRole.h')+'"\n'+configure), cpp=True)
 
     ath = (P / 'B5qAth11k.c').read_text()
     rddm = (P / 'B5qAth11kRddm.h').read_text()

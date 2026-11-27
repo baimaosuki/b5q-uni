@@ -13,7 +13,8 @@ namespace B5qDp {
 enum class LinkError:unsigned {None,Detached,Clock,Edid,Caps,Power,Training,Timeout,Stream};
 template<class Io>struct Session {
  Io &io;Aux<Io> aux;Clock<Io> clock;Controller<Io> controller;Phy<Io> phy;
- Modes modes{};Mode selected{};LinkCaps caps{};uint8_t edid[1024]{};
+ Modes modes{};Mode selected{};LinkCaps caps{};uint8_t edid[1024]{},dpcd[16]{};
+ unsigned discoverStep=0;
  unsigned edidBytes=0,rate=0,lanes=0,attempts=0;bool reverse=false,clocksOwned=false,auxOn=false,sinkPowered=false,trained=false,streaming=false;
  uint64_t deadline=0;LinkError error=LinkError::None;TrainError trainError=TrainError::None;
  explicit Session(Io &owner):io(owner),aux(owner),clock(owner),controller(owner),phy(owner){}
@@ -55,22 +56,24 @@ template<class Io>struct Session {
  }
  bool fail(LinkError why){error=why;stop();return false;}
  bool discover(unsigned routeLanes,bool flipped){
+  discoverStep=0;for(auto &byte:dpcd)byte=0;
   if(!stop()){error=LinkError::Clock;return false;}
   modes={};caps={};edidBytes=0;attempts=0;error=LinkError::None;trainError=TrainError::None;reverse=flipped;
   if(!io.connected())return fail(LinkError::Detached);
   if(routeLanes!=2&&routeLanes!=4)return fail(LinkError::Caps);
-  clocksOwned=true;if(!clock.aux())return fail(LinkError::Clock);
+  discoverStep=1;clocksOwned=true;if(!clock.aux())return fail(LinkError::Clock);
   controller.reset();phy.auxSetup();
   const uint32_t old=io.read(Block::Aux,0x30);
   io.write(Block::Aux,0x30,old|2);io.delay(1000);io.write(Block::Aux,0x30,(old&~2u)|1);
   io.write(Block::Aux,0x3c,0xffff);io.write(Block::Aux,0x40,0xffff);auxOn=true;aux.segmentUsed=false;
-  uint8_t dpcd[16];if(!aux.dpcd(true,0,dpcd,16)||!caps.parse(dpcd,routeLanes))return fail(LinkError::Caps);
-  if(!sinkPower(true))return fail(LinkError::Power);sinkPowered=true;
-  if(!aux.edidBlock(0,edid))return fail(LinkError::Edid);
+  discoverStep=2;if(!aux.dpcd(true,0,dpcd,16)||!caps.parse(dpcd,routeLanes))return fail(LinkError::Caps);
+  discoverStep=3;if(!sinkPower(true))return fail(LinkError::Power);sinkPowered=true;
+  discoverStep=4;if(!aux.edidBlock(0,edid))return fail(LinkError::Edid);
   const unsigned blocks=unsigned(edid[126])+1;
   if(blocks>8)return fail(LinkError::Edid);
+  if(blocks>1)discoverStep=5;
   for(unsigned i=1;i<blocks;i++)if(!aux.edidBlock(i,edid+i*128))return fail(LinkError::Edid);
-  edidBytes=blocks*128;if(!modes.parse(edid,edidBytes))return fail(LinkError::Edid);
+  discoverStep=6;edidBytes=blocks*128;if(!modes.parse(edid,edidBytes))return fail(LinkError::Edid);
   return true;
  }
  bool train(){

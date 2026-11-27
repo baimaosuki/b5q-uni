@@ -12,6 +12,7 @@ def method(signature):
 body="""struct Owner {
  Hardware io;B5qDp::Session<Hardware> session;uint32_t generation=0;
  uint64_t retryAt=0;bool accepted=false,startPass=true,poolPass=true,drainPass=true;
+ B5qDpPortState observed{};bool haveObserved=false;
  struct {uint64_t PoolBytes=0x1f00000;}dma;
  struct {void close(){}}pool;
  struct {struct{bool active=false;}dpu;bool timedOut(int){return false;}}presentation;
@@ -61,9 +62,11 @@ namespace B5qDp {
 template<class Io>struct Session {
  Io &io;bool stopPass=true,discoverPass=true,trainPass=true,healthy=true;
  unsigned stops=0,discovers=0,trains=0,lanes=2,rate=20,attempts=1;
- struct{unsigned failed=0;}clock,phy;struct{unsigned count=1;unsigned fitPool(uint64_t){return count;}}modes;
+ struct{unsigned failed=0,last=0;}clock,phy;struct{unsigned count=1;unsigned fitPool(uint64_t){return count;}}modes;
+ unsigned discoverStep=6,trainError=0,edidBytes=128;uint8_t dpcd[16]{};
+ struct{unsigned revision=0x14,rate=20,lanes=2;bool enhanced=true;}caps;
  unsigned error=0;Mode selected{148500,1920,1080,280,45,88,44,4,5,true,true};
- struct Aux {Session &s;unsigned error=0,reads=0;
+ struct Aux {Session &s;unsigned error=0,reads=0,lastStatus=0,transactions=0;
   bool dpcd(bool read,unsigned address,uint8_t *out,unsigned size){
    assert(read&&address==0x202&&size==6);reads++;memset(out,0,size);
    if(s.healthy){out[0]=out[1]=0x77;out[2]=1;}return true;
