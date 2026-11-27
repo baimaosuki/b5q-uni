@@ -3645,3 +3645,28 @@ revision = "396a09f7253b7220d27be10ef6a7dd5422a4471d"
 reference = "reports/review18-source-audit.json"
 command = "git apply --check for four tool patches; git apply -p3 --check b5q-armcpu-spi-ipi-lock.patch"
 result = "PASS5/5 clean-source checks; exact evidence artifacts/b5q-review18-release/tool-patches.json; no firmware build or phone access"
+[[area]]
+id = "review19-owned-coherent-cpu-burn"
+status = "host-verified"
+components = ["Adreno740", "ArmCpu"]
+paths = ["package/B5qGpu.cpp", "patches/xnu/b5q-cpu-burn-trace.patch", "patches/xnu/series", "scripts/check-cpu-burn-target.py", "reports/xnu-patch-application.json", "reports/review19-source-audit.json"]
+inputs = ["Review18 XNU2LOG SHA256 6c684b9b6224fc517f73dc9a85561b1b61b5e78a75319d995a425de279e90289: repeated GPU 68f2; audiomxd CPU monitor at line4177 and configd CPU samples", "Pinned XNU ac9718fb1af618d5ce8678d0dc6e8a58f252216f: ledger_ast current-thread assertion and thread_cpu_time_usage_exceeded; NativeAdrenoUserClient query and Turnip capability patch; exact file hashes in source audit"]
+configuration = ["GPU owned-coherent defaults to1 with explicit gpu-owned-coherent=0 override; query still requires the hardware IO-coherence proof", "Existing1023-byte kernel arguments and protected firmware/peripheral inputs remain byte-identical; no boot arguments added", "CPU monitor captures at most6 times per boot and2 per PID; arm64 current thread/task/process only, nonblocking quota try-lock released before walks and copyin"]
+procedure = ["Use the actual CPU monitor print location; add diagnostics after task_unlock and before the original resource notification without changing EXC_RESOURCE/termination", "Apply145 ordered XNU patches; compile B5qGpu and the actual CPU helper with arm64e PAC and real private XNU headers; execute production helper sanitizer tests and full pre-ci-v33d", "Preserve the first full thread.c compile failure caused by unavailable local MIG resource_notify.h; do not report a full XNU translation-unit build"]
+findings = ["The board default0 suppressed NativeAdrenoParamsOwnedCoherent despite the independent IO-coherence gate; default1 restores the capability request without claiming hardware proof", "Coherence skip/result and CP timer status/ticks are now logged; changed nonempty Metal report1/report2 strings share a16-line boot quota on the existing GPU worker", "Ledger AST asserts current_thread and the CPU monitor releases the task lock before reporting. The additive trace logs saved registers,16 user PCs,dyld cache metadata and8 kernel PCs while preserving original monitor behavior", "All host checks are separate from desktop/hardware acceptance; audiomxd and configd causes remain pending captured stacks"]
+completion = ["HOST_VERIFIED_PENDING_HARDWARE; hardware_verified=false.145/145 ordered patches,38 final gate entries including source-matched P0-P4 receipt reuse,production ASan/UBSan tests,arm64e helper/GPU targets and symbol/PAC/archive reuse checks pass; exact receipts and limits in reports/review19-source-audit.json"]
+limits = ["No commit,push,CI,image generation or phone access. No changes to Wi-Fi,Bluetooth,USB,DP,touch,rotation,ADSP,audio HAL mounts or UEFI", "Full thread.c compilation requires the local MIG-generated mach/resource_notify.h; only the production helper target is compiled locally with real MACH_KERNEL_PRIVATE headers. Native full XNU link and physical desktop verification are not claimed"]
+next_action = ["Owner review of the uncommitted local hotfix and receipts; future hardware logs must confirm coherent capability,timer,Metal device availability and CPU call stacks"]
+
+[[area.evidence]]
+kind = "source"
+revision = "f9f605e1908e2ed59e876c470bebcd5c655e1aa2"
+reference = "reports/review19-source-audit.json"
+result = "Actual Review18 log and pinned source/API/patch hashes recorded; no historical report used as hardware proof"
+
+[[area.evidence]]
+kind = "host"
+revision = "f9f605e1908e2ed59e876c470bebcd5c655e1aa2"
+reference = "reports/review19-source-audit.json"
+command = "check-xnu-patches.py;check-peripheral-target.py --sources B5qGpu.cpp;check-cpu-burn-target.py;test-review19.py;test-gmu-archive-index.py via pre-ci-v33d.py;porting-record.py check"
+result = "HOST_VERIFIED_PENDING_HARDWARE:145 ordered patches,38 final gate entries with source-bound P0-P4 reuse,production sanitizer and target compile/symbol/PAC checks; full-thread MIG prerequisite explicitly pending; no remote/images/device operations"

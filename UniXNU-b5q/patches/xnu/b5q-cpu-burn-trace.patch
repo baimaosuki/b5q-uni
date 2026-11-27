@@ -1,0 +1,97 @@
+--- a/osfmk/kern/thread.c
++++ b/osfmk/kern/thread.c
+@@ -154,6 +154,14 @@
+ 
+ #include <stdatomic.h>
+ 
++#if __arm64__ && defined(MACH_BSD)
++#include <arm/thread.h>
++#include <kern/backtrace.h>
++#include <kdp/kdp_dyld.h>
++#include <libkern/copyio.h>
++#include <vm/vm_protos.h>
++#endif
++
+ #if defined(HAS_APPLE_PAC)
+ #include <ptrauth.h>
+ #include <arm64/proc_reg.h>
+@@ -2577,6 +2585,68 @@
+ 	}
+ }
+ 
++#if __arm64__ && defined(MACH_BSD)
++/* Ledger AST runs on the offending thread. Never wait for another capture:
++ * the try-lock protects only the six-entry quota table, not stack walks/copyin. */
++static unsigned
++b5q_cpu_burn_claim(int pid)
++{
++	static atomic_flag busy = ATOMIC_FLAG_INIT;
++	static _Atomic unsigned captured;
++	static struct { int pid; unsigned count; } seen[6];
++	if (pid <= 0 || atomic_flag_test_and_set_explicit(&busy, memory_order_acquire)) return 0;
++	unsigned slot = atomic_load_explicit(&captured, memory_order_relaxed);
++	unsigned i;
++	if (slot >= 6) goto out;
++	for (i = 0; i < 6; ++i) {
++		if (seen[i].pid == pid || seen[i].pid == 0) break;
++	}
++	if (i == 6 || seen[i].count >= 2) goto out;
++	seen[i].pid = pid;
++	++seen[i].count;
++	atomic_store_explicit(&captured, slot + 1, memory_order_relaxed);
++	atomic_flag_clear_explicit(&busy, memory_order_release);
++	return slot + 1;
++ out:
++	atomic_flag_clear_explicit(&busy, memory_order_release);
++	return 0;
++}
++
++__attribute__((noinline)) static void
++b5q_cpu_burn_context(thread_t thread, task_t task, int pid, const char *procname)
++{
++	if (thread != current_thread() || task != current_task() || task == kernel_task ||
++	    get_threadtask(thread) != task || !current_proc() ||
++	    get_bsdtask_info(task) != current_proc() || pid <= 0 || pid != proc_selfpid()) return;
++	unsigned capture = b5q_cpu_burn_claim(pid);
++	if (!capture) return;
++	printf("B5Q-CPU-BURN: capture=%u/6 pid=%d tid=%llu proc=%s\n",
++	    capture, pid, thread_tid(thread), procname);
++	arm_saved_state_t *state = get_user_regs(current_thread());
++	if (state && is_saved_state64(state)) {
++		printf("B5Q-CPU-BURN: saved pc=0x%llx lr=0x%llx sp=0x%llx fp=0x%llx\n",
++		    get_saved_state_pc(state), get_saved_state_lr(state),
++		    get_saved_state_sp(state), get_saved_state_fp(state));
++	}
++	uintptr_t frames[16];
++	struct backtrace_user_info info = BTUINFO_INIT;
++	unsigned count = backtrace_user(frames, 16, NULL, &info);
++	printf("B5Q-CPU-BURN: user frames=%u error=%d flags=0x%x\n", count, info.btui_error, info.btui_info);
++	for (unsigned i = 0; i < count && i < 16; ++i)
++		printf("B5Q-CPU-BURN: user frame=%u pc=0x%llx\n", i, (uint64_t)frames[i]);
++	struct user64_dyld_all_image_infos images;
++	if (!copyin((user_addr_t)task_get_all_image_info_addr(current_task()), &images, sizeof(images))) {
++		printf("B5Q-CPU-BURN: dyld cache_base=0x%llx cache_slide=0x%llx images=%u\n",
++		    images.sharedCacheBaseAddress, images.sharedCacheSlide, images.infoArrayCount);
++	} else {
++		printf("B5Q-CPU-BURN: dyld image-info unavailable\n");
++	}
++	count = backtrace(frames, 8, NULL, NULL);
++	for (unsigned i = 0; i < count && i < 8; ++i)
++		printf("B5Q-CPU-BURN: kernel frame=%u pc=0x%llx\n", i, (uint64_t)frames[i]);
++}
++#endif
++
+ static void
+ thread_cpu_time_usage_exceeded(ledger_warning_t warning, const void *arg0)
+ {
+@@ -2673,6 +2743,10 @@
+ 	 *  we have logging parity, we will stop sending EXC_RESOURCE (24508922).
+ 	 */
+ 
++#if __arm64__ && defined(MACH_BSD)
++	b5q_cpu_burn_context(thread, task, pid, procname);
++#endif
++
+ 	/* RESOURCE_NOTIFY MIG specifies nanoseconds of CPU time */
+ 	lei.lei_balance = balance_ns;
+ 	absolutetime_to_nanoseconds(lei.lei_limit, &lei.lei_limit);

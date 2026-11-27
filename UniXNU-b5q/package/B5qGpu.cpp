@@ -1231,6 +1231,9 @@ void coherenceProbe(NativeAdrenoVm *vm) {
     PE_parse_boot_argn("gpu-coherent", &wanted, sizeof wanted);
     if (!wanted || !vm || !&native_adreno_io_coherent) {
         snprintf(native_gpu_coherence_row, sizeof native_gpu_coherence_row, "H skip (arg %u vm %d)", wanted, vm != nullptr);
+        IOLog("B5qGpu: coherence %s io=%u owned=%u walk=%u\n", native_gpu_coherence_row,
+              &native_adreno_io_coherent ? native_adreno_io_coherent : 0,
+              native_adreno_owned_coherent, native_adreno_walk_coherent[0]);
         return;
     }
     constexpr uint64_t kIova = 0x18000000;
@@ -1298,6 +1301,8 @@ void coherenceProbe(NativeAdrenoVm *vm) {
     native_adreno_walk_coherent[0] = pass && walk && walkProbe(vm) ? 1 : 0;
     snprintf(native_gpu_coherence_row, sizeof native_gpu_coherence_row, "H d%u/64 a%u r%u/%u w%u/%u s%x k%u -> %s", k[1], gCoherenceAttempts,
              k[2], k[3], k[4], k[5], k[6], k[0], pass ? "on" : "off");
+    IOLog("B5qGpu: coherence %s io=%u owned=%u walk=%u\n", native_gpu_coherence_row,
+          native_adreno_io_coherent, native_adreno_owned_coherent, native_adreno_walk_coherent[0]);
 }
 // qcom_scm_set_gpu_smmu_aperture(0): the secure world opens the CP's aperture to the GPU's context bank 0, so CP_SMMU_TABLE_UPDATE in
 // the ring can switch the bank's page table (per-process GPU address spaces, NativeAdrenoSubmit table mode 2). Asked first whether the
@@ -1338,6 +1343,9 @@ void publishAndWrapperTest(bool rounds) {
     native_adreno_line_audit = lineAudit;
     coherenceProbe(vm);
     const IOReturn timer = gTimer.attach(&gTimerIo, NativeAdrenoTimeCp);
+    uint64_t ticks = 0;
+    const IOReturn tstatus = gTimer.read(&ticks);
+    IOLog("B5qGpu: timer attach=%x read=%x ticks=0x%llx\n", unsigned(timer), unsigned(tstatus), (unsigned long long)ticks);
     {unsigned wc = 1; PE_parse_boot_argn("gpu-wc", &wc, sizeof wc); native_adreno_wc_enabled = wc ? 1 : 0;}
     openCpAperture();
     const unsigned ias = NativeAdrenoGpuContextInputBits ? NativeAdrenoGpuContextInputBits() : 0;
@@ -1451,6 +1459,21 @@ void metalRows() {
     // GPU7/GPU8 (wide): the raw test's report line and the Turnip phase's line (T result or W watchdog sample).
     if (d.report[0]) snprintf(b5q_gpu_progress_wide[0], sizeof b5q_gpu_progress_wide[0], "R %.63s", d.report);
     if (d.report2[0]) snprintf(b5q_gpu_progress_wide[1], sizeof b5q_gpu_progress_wide[1], "%.63s", d.report2);
+    // metalRows runs only on the GPU worker. Bound both report streams together.
+    {
+        static char previous[2][64] = {};
+        static unsigned logged = 0;
+        const char *reports[2] = {d.report, d.report2};
+        for (unsigned i = 0; i < 2 && logged < 16; ++i) {
+            char current[64];
+            snprintf(current, sizeof current, "%.63s", reports[i]);
+            if (!current[0] || !strcmp(previous[i], current)) continue;
+            snprintf(previous[i], sizeof previous[i], "%s", current);
+            ++logged;
+            if (i == 0) IOLog("B5qGpu: report1=%.63s\n", current);
+            else IOLog("B5qGpu: report2=%.63s\n", current);
+        }
+    }
     {
         // Row 5: the newest four IOServiceOpen attempts as <process><P plugin type|F other type><MACF result of the sandbox>; 0 = admitted.
         char list[48] = {};
@@ -1708,7 +1731,7 @@ void gpuStart() {
     // 1. The GPU's own context bank and buffers (arm-smmu-qcom: the GPU always gets bank 0; DT iommus SIDs 0 and 1).
     NativeAdrenoGmuContextReport &q = native_gpu_context;
     // Before the bring-up: owned BOs on the IO-coherent path are not write-combined (the mode applies once the coherence proof passes).
-    {unsigned owned = 0; PE_parse_boot_argn("gpu-owned-coherent", &owned, sizeof owned); native_adreno_owned_coherent = owned ? 1 : 0;}
+    {unsigned owned = 1; PE_parse_boot_argn("gpu-owned-coherent", &owned, sizeof owned); native_adreno_owned_coherent = owned ? 1 : 0;}
     const IOReturn ctx = NativeAdrenoGpuContextBringup(reinterpret_cast<volatile uint8_t *>(gSmmuMap->getVirtualAddress()),
         kSmmuWindow, 0, 2, 0, 0, 1, 1, gpuCtxProgress, &q);
     // Q s<step> st<IOReturn> k<program>/<attach kit status> p<phase>e<enabled> r<route phase>v<verified> n<spans>

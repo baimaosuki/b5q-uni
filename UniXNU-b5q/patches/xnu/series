@@ -31,3 +31,6 @@ b5q-media-runtime.patch
 
 # v33b real-runtime repairs: Data policy migration, host statistics capacity, owned AKS grant.
 b5q-v33b-runtime-repair.patch
+
+# Bounded current-thread CPU monitor user/kernel context, no policy change.
+b5q-cpu-burn-trace.patch

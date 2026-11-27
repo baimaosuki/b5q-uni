@@ -280,7 +280,9 @@ assert (P / 'B5qBluetooth.cpp').read_bytes() == subprocess.check_output(['git', 
 old_touch=subprocess.check_output(['git','show','HEAD:UniXNU-b5q/package/B5qTouch.cpp'],cwd=R).decode()
 new_touch=(P/'B5qTouch.cpp').read_text()
 new_publish=function(new_touch,'void publish(');old_publish=function(old_touch,'void publish(')
-assert new_touch.replace('extern "C" uint32_t b5q_display_rotation(void);\n','').replace(new_publish,old_publish)==old_touch
+# Normalize the Review18 declaration on both sides: HEAD may already include Review18.
+rotation_decl='extern "C" uint32_t b5q_display_rotation(void);\n'
+assert new_touch.replace(rotation_decl,'').replace(new_publish,old_publish)==old_touch.replace(rotation_decl,'')
 checks.append(dict(name='touch-protocol-worker-click-flow-unchanged-outside-coordinate-transform',passed=True))
 
 args = tomllib.loads((R / 'UniXNU-b5q/board.toml').read_text())['payload']['kernel_args']

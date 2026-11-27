@@ -1,0 +1,211 @@
+{
+  "review": 19,
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "base_commit": "f9f605e1908e2ed59e876c470bebcd5c655e1aa2",
+  "scope": "GPU coherent-owned default/diagnostics and additive CPU-monitor stack capture only",
+  "files": [
+    "UniXNU-b5q/package/B5qGpu.cpp",
+    "UniXNU-b5q/patches/xnu/b5q-cpu-burn-trace.patch",
+    "UniXNU-b5q/patches/xnu/series",
+    "UniXNU-b5q/scripts/check-cpu-burn-target.py",
+    "UniXNU-b5q/reports/xnu-patch-application.json",
+    "UniXNU-b5q/porting.toml",
+    "UniXNU-b5q/reports/review19-source-audit.json",
+    "scripts/b5q-install/test-review19.py",
+    "scripts/b5q-install/pre-ci-v33d.py",
+    "scripts/b5q-install/test-review18.py"
+  ],
+  "source_evidence": [
+    {
+      "path": "logs/b5q-xnu2log-review18/XNU2LOG.txt",
+      "sha256": "6c684b9b6224fc517f73dc9a85561b1b61b5e78a75319d995a425de279e90289"
+    },
+    {
+      "path": "sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk/kern/thread.c",
+      "sha256": "e9424f4236d2ff5a5b2c93bd9cef56634e06117c9e681003432eb1d1afb59cd4"
+    },
+    {
+      "path": "sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk/kern/ledger.c",
+      "sha256": "b2eb4521e9ac2b085e6f4c014eb65ff935f1977a1be167fb2eda1c4e627fc384"
+    },
+    {
+      "path": "UniXNU/drivers/Adreno740/NativeAdrenoUserClient.cpp",
+      "sha256": "5369e5ed05804d4d3421fdc369c3aa2a3129d650bceb1860189450486a05df45"
+    },
+    {
+      "path": "UniXNU/drivers/Adreno740/NativeAdrenoTimer.cpp",
+      "sha256": "281221b6fc5c1175b71d7c54fda8275bab1b08d7b9819f7c60e4e4b10026f22a"
+    },
+    {
+      "path": "UniXNU/patches/mesa/turnip-darwin-runtime-capabilities.patch",
+      "sha256": "01ced04c77815b9afac5ccbb0ab33d8f8ed26e5ae65b87948fe64a47d981ff6e"
+    },
+    {
+      "path": "UniXNU-b5q/patches/xnu/b5q-windowserver-signal.patch",
+      "sha256": "8d4328609ecf90066cfbfc520b160fe5fafbb6edd6f4975e3755bbe578607571"
+    }
+  ],
+  "findings": [
+    {
+      "area": "GPU",
+      "evidence": "B5qGpu default0; NativeAdrenoUserClient ownedCoherent requires owned && io; Turnip cached-coherent memory follows NativeAdrenoParamsOwnedCoherent; Review18 log repeated 68f2",
+      "change": "Default owned1; explicit0 override retained; no hardware proof bypass. Added coherence skip/result, one CP timer read and changed-report logs with shared16-line boot cap."
+    },
+    {
+      "area": "CPU",
+      "evidence": "ledger_ast asserts current thread; thread_cpu_time_usage_exceeded uses current_task/current_thread, releases task lock before burning-CPU report; Review18 line4177 audiomxd and repeated configd CPU samples",
+      "change": "arm64/MACH_BSD current-thread/task/proc guard; six total/two perPID nonblocking atomic quota; saved registers,16 user and8 kernel PCs,dyld metadata. Existing exception/notification/termination instructions unchanged."
+    }
+  ],
+  "validation": {
+    "ordered_XNU_patches": {
+      "passed": true,
+      "total": 145,
+      "receipt": "UniXNU-b5q/reports/xnu-patch-application.json"
+    },
+    "full_pre_ci": {
+      "passed": true,
+      "total": 38,
+      "receipt": "artifacts/b5q-review19-local/full-gate/v33d-local-gates.json",
+      "sha256": "e408886eae4ce33c06b85a6d69d194419bbc142ad4d5e71ffa99a5a60ab88539"
+    },
+    "focused": {
+      "passed": true,
+      "receipt": "artifacts/b5q-review19-local/review19-tests.json",
+      "groups": 8
+    },
+    "gpu_target": {
+      "passed": true,
+      "target": "arm64e-ios27",
+      "imports": 160,
+      "unresolved": 0,
+      "XHCI_ABI_slots": 427,
+      "object_sha256": "a324c0f2c7fd159bf109f16b4bfaeadf5890292a06099e4c8872f85cc1e491f5",
+      "log": "artifacts/b5q-review19-local/gpu-target.log"
+    },
+    "cpu_target": {
+      "passed": true,
+      "scope": "Production helper target compile with real MACH_KERNEL_PRIVATE headers; not a full XNU link",
+      "real_MACH_KERNEL_PRIVATE_headers": true,
+      "warning_count": 0,
+      "return_PAC": true,
+      "imports": 16,
+      "unresolved": 0,
+      "receipt": "artifacts/b5q-review19-local/cpu-target/report.json",
+      "full_thread_compile": "BLOCKED_MISSING_LOCAL_MIG_HEADER",
+      "full_thread_first_error": "Missing local MIG-generated mach/resource_notify.h; first complete-TU error preserved in cpu-target/full-thread.log. No full thread.o or native XNU link claimed."
+    },
+    "GPU_archive_reuse": {
+      "passed": true,
+      "members": 51,
+      "unchanged_sha256": 49,
+      "recompiled": [
+        "B5qGpu.o",
+        "NativeAdrenoGmuService.o"
+      ],
+      "receipt": "artifacts/b5q-review19-local/full-gate/gmu-archive-index.log"
+    },
+    "PAC": {
+      "passed": true,
+      "receipt": "artifacts/b5q-review19-local/full-gate/all-PAC.json"
+    },
+    "porting_record": {
+      "passed": true,
+      "areas": 69,
+      "receipt": "artifacts/b5q-review19-local/porting-check.log"
+    },
+    "diff_and_syntax": {
+      "passed": true,
+      "receipt": "artifacts/b5q-review19-local/diff-check.log"
+    }
+  },
+  "protected_inputs": {
+    "passed": true,
+    "critical_inputs": {
+      ".github/workflows/b5q-v33-incremental.yml": "91fe48a46990c4647dfd01998dc4a329340d09b2e3ff515cf8cf01d8d69fa2d8",
+      ".github/workflows/b5q-batch1-final.yml": "31eed607989e11281f5afd7ff682189bbc6f838371a7e72f222e5c4fd17a8ea4",
+      ".github/workflows/b5q-runtime.yml": "e7f9ad5ae7e38b480bdc14b838c755ac290ecd28e5dec81fb9adceb284559674",
+      ".github/workflows/b5q-v24-package.yml": "7309aeefd35c6eba7ea43eaa5f5fe9f8ae8d9e50014de35d9701f6f39f162c8b",
+      ".github/workflows/b5q-firmware.yml": "e7483ca515dcff340e69b8982509a383af6cab70e5513d86fd199ca1a0d8561b",
+      ".github/workflows/b5q-install-seed.yml": "dfb104f630eeffd04869f8ef1b0701081d08ea7794182751fdded66b9557b85e",
+      ".github/workflows/b5q-macos-only-userdata.yml": "c1da4000587416ec196b435050423e617fa573763a7c4128b468d1854a743867",
+      ".github/workflows/b5q-stage123.yml": "5359d54b38a730d3fe9a957f7f8777ec74fece83c09f8f2049043b552bccfe76",
+      ".github/workflows/b5q-v25-incremental.yml": "74aa19315479fb5513532e4ac7d61dc07d998b40067e799ff4184e091591d62f",
+      ".github/workflows/b5q-data-mount-fix.yml": "3bafcaeb2d2d40ad096e95b9d1c050ae1bbf0593b9f6f1b13531d6e73b8117bd",
+      ".github/workflows/b5q-storage-tests.yml": "c040bd74acfb5c4ce8b22952cd7d272c1f1c4ea5ebdfc1da2a58b68c4bbcc267",
+      ".github/workflows/b5q-p0-p5.yml": "50360d5872a0271fc7817db7dcc27b3afdd506ee81cc66abcee6de992ddbd2dd",
+      ".github/workflows/b5q-v27-incremental.yml": "4c9cd46a56ae18860e60ddfe8f39015e1b60be15271768492c3f2de4091dfe4b",
+      ".github/workflows/b5q-diagnostics.yml": "0fc363ae7ae658eba64f8a5b82ce4f7627ec37c9e5a0b4f44db1fb55a4fd9ada",
+      ".github/workflows/b5q-v26-incremental.yml": "26b5a31ce7a605b9dd754eba4d1d8be24a5fd1f1775aefc875757c5569ffbe7a",
+      ".github/workflows/b5q-v29-incremental.yml": "2f1efffdda93497fd864e3a2c67a7c4db907be88132a1057a7fba4a9fcf82a98",
+      ".github/workflows/b5q-v31-incremental.yml": "7e5706ed5bb4e8396cd48178c53bb39c3c9557d47ae75f69c343612387433b1d",
+      ".github/workflows/b5q-new-batch2.yml": "f32153854d48463c9d0927be685cf331719b892630666099954a5e1c2f201bc8",
+      ".github/workflows/b5q-v32-incremental.yml": "b5276607d5f8c56a46b85bd6e77ef20be9d20ce0f95d8d755901846354ae9489",
+      "patches/uefi-b5q/0020-darwinboot-pcie-64m.patch": "53584fb8d71284971aab718ebea51c34fa6a557ea744a0510375bd01311f17d8",
+      "patches/uefi-b5q/0015-b5q-usb-map-lifetime.patch": "572961ee673fb0b0b2184bf52427208bd97e94e903d5a3c40f2ce42c330d54d0",
+      "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
+      "patches/uefi-b5q/0019-b5q-pcie-64m.patch": "90030fd213f8f8ed38a840c5d1de40c96da39dff85eaa3835864bfcfd790832a",
+      "patches/uefi-b5q/0016-darwinboot-dma-order-inputs.patch": "1a5354301eb37a2347e98d6ca7cca670c6b201a1f973e689e0b5230ca025b316",
+      "patches/uefi-b5q/0013-b5q-reserved-dma-guards.patch": "22249582ec46dc5df2bcac9aa50ea73fb3667808961dbff930ee679e369ade62",
+      "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29",
+      "patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch": "00f6e3dbecd897b5d7d54b182b0ab7a3d3bc522b1f1e81bafff19cda942fdd15",
+      "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
+      "patches/uefi-b5q/0017-b5q-dma-attach-flush.patch": "663c3e010f6409a2ec298a5b656a080243a02c47dea52a3ffb2647fbb8934d7e",
+      "patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch": "7166412b0aa62093c6dc68fc4c38d810fbecf4d1b5dddd29aa860267655dae1d",
+      "patches/uefi-b5q/0011-b5q-dp-splash-tail.patch": "07316f6c87fe7f66d8bdf0b44ac7c1217fa6525c20d74a0d201354c4c8705118",
+      "patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch": "ee152149bf5395e97987de7f9e1587c8a5fec78da64ad25fb416feb416ba68b1",
+      "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
+      "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+      "patches/uefi-b5q/0005-b5q-physical-esp.patch": "45539390db2142e460c12c9d71b56f79cca88922976bac29096feb6b0aa4da11",
+      "patches/uefi-b5q/0009-b5q-media-dma.patch": "b41f5d54e4fc03f3b72bdfa300c3d81a0bf3ac8a184e5bf659fcfef7538701b6",
+      "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
+      "patches/uefi-b5q/0014-b5q-dma-unprivileged-wbis.patch": "8111a4c0639fb89c117cc10d63eb86584e0c63f015d692923f9389f3305075e9",
+      "patches/uefi-b5q/0018-darwinboot-usb-coverage.patch": "f1cd6bdb914f974e35d746c86ff9eecfee62c45fb921881ba5f1cbad36bd29f1",
+      "UniXNU-b5q/package/B5qWcnPower.cpp": "81a6ed3e6e95fa2b6799ff244b1b792182ef0d95dc666f3ec4eb9b8aa19d4999",
+      "UniXNU-b5q/package/B5qBtFifo.c": "ec31af0fb349f14e1ae14734318772afa551d828c7197caaf04e0d19e07fac35",
+      "UniXNU-b5q/package/B5qUsbInputs.h": "676e88f1b5cb9e0af19e6e819b5ea0d438c2e01d7ce3542769936b0c50503c89",
+      "UniXNU-b5q/scripts/usb-xhci-26C5035r.json": "c6d7ad3855b213b794b11f5a6efc4922cc957cf6285e000ad69dac7ab661946b",
+      "UniXNU-b5q/scripts/usb-dual-bindings-26C5035r.json": "9e30f96b7ad59b9ec7ea4430bf970a000090db9ff705f17123e85d582b4a83e3",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.fdf": "c49811d33a7e43d441898c8c582ca19aa17bf12ea0bd3a8191bbbe58723fed6c",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.dec": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/DeviceBuild.py": "621c23af3706fb0a50759ac935f9601d11e8e4d024d1585848b7f9cfa3c1bd28",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.dsc": "ae7f35e03accc44f56738e03a322fd2ba57fa5f051eedd5569b69da4db9a70aa",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/DXE.inc": "bfc8aabcf3b162093b6f8e15cb27529bd0dc60e06e65b63ef858de1a801ab8a3",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/APRIORI.inc": "403fdd1d2abcc4ef3988f2d05b5de5a89e73957a86d6922511e2346af1829517",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h": "8b40a4490e0ff0461d2a9ce0fc1ae3ac5eb88d5123cb01fc16a82a05ba0e24d3",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h": "4ad183ccfa342cf2602fcb3c69dc1d23803ca34232c6f9f18400f42d1caf5def",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h": "baed80a61a455d386b6dde580e46cb37da37f77f37683b9ac034bb01d20b2489",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qDpDma.h": "6ed7661423604bee46397903ee1223e220140f3df374d27503aaa8086da7d802",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/RAW.inc": "1bbc5f56c2cf2e427f64c04829b755e7dfe2a9f45a2260d7bd14e3385cf7008d",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h": "ec2bb043be6ff945be72a2c93a8353ad9906905f0cd40c2c5020e7e1ea791875",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c": "3f0ed80ac2b460192938c8c9d3f13890a6228cdda280f25334f29b7fe2eb218a",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c": "938150bcfcab68bde313d4a55eb2b8b3b1c8ce0d194d855106fe12d79578f551",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h": "9ebedcef081a3a7131517103aae2f71e87af0a8ba2d59b4629680de03447ee9b",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h": "325740f2c1ef3f4204c8ac3373d22677479d36322a81c3e75a256905df5d58d7",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c": "ea445a783a57523172b92c1ff54a3ac1fac7058f877762c5b743c8ac93d2f73d",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/DpDma.c": "e2db8a0f2dea26c4f3f284b356694e6fc22de69b35c2ae37186c26cc904d2e05",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf": "ae88b0a0ff6ac8e97043799d8ba1d78fc10f88e007d49b24276c332db4c1c2ec",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c": "9adf46d4715ce402cb2b5e504e34e8a92d8c0b4c6f5b22d4b315c56904d8cce4",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/ConfigurationMapLib/ConfigurationMapLib.inf": "d43514ac5ee1f0758fe3bec0e73c5ff2f4f9b31e0d3546377c54e9214cc6a7b7",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/ConfigurationMapLib/ConfigurationMapLib.c": "bd5e595e31933e337d22e4cd52bf24944eebe2a7172e551f5187f2b0af3fb83b",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.inf": "159424f05f845ecb993029636bd30ac167784697855a654bf95c7a202a3378ae",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c": "aa80b16e1c68b088f38d554bbb9b06a04c117e9ad5bc66cda9d675865bee3247"
+    },
+    "kernel_args_bytes": 1023,
+    "other_baseline_files_checked": 804
+  },
+  "test_maintenance": "Review18 touch guard now normalizes the already-committed rotation declaration on both sides; protocol/worker comparison retained. Added Review19 to full pre-ci.",
+  "actions": {
+    "commit_performed": false,
+    "push_performed": false,
+    "CI_triggered": false,
+    "ESP_created": false,
+    "phone_accessed": false,
+    "index_unchanged": true
+  },
+  "limits": [
+    "Physical desktop/coherence/timestamps/CPU-stack behavior remains unverified.",
+    "Full thread.c translation-unit compile is blocked by missing local MIG header; production trace helper compiles with real private XNU headers and PAC, and all imports resolve in the Review18 core."
+  ]
+}

@@ -722,6 +722,11 @@
       "name": "b5q-v33b-runtime-repair.patch",
       "sha256": "16e9d4691f7ff8561135ef46cd3bc72a0b6f12b9c49f9abd4e89629288a9111e",
       "result": "PASS"
+    },
+    {
+      "name": "b5q-cpu-burn-trace.patch",
+      "sha256": "b5e4b8b62b0bddac8462d5cdff4feaed74d427a5c51e3cfae1b2e307ebd9e970",
+      "result": "PASS"
     }
   ],
   "result": "PASS"
