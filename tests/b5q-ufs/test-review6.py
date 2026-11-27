@@ -36,6 +36,7 @@ run('review6-fullframe-kind2-rejected',base+r'''
 B5qTouch::Reports reports;uint32_t native_touch_seq=0,native_touch_count=0,native_touch_recovered=0,native_touch_hid_reports=0;
 int native_touch_xs[12],native_touch_ys[12],native_touch_ids[12];unsigned frames=0;void(*sink)(void*)=nullptr;void*sinkContext=nullptr;
 void IOLog(const char*,...){}
+static unsigned b5q_display_rotation(){return 0;} // this report-mode test uses portrait coordinates
 PUBLISH
 int main(){reports.mode=0x11;reports.points[0]={2467,2330,2};reports.points[1]={100,200,1};publish();assert(native_touch_count==1&&native_touch_ids[0]==1);reports.points[1]={};publish();assert(!native_touch_count);reports.mode=0xc1;reports.points[0]={100,200,1};publish();assert(native_touch_count==1);puts("PASS actualpublish:mode11kind2ghostexcluded,kind1only;emptyframepublisheslift;nativeC1kind1retained");}
 '''.replace('PUBLISH',f(t,'void publish(').replace('__asm__ volatile("dmb ish" ::: "memory");','').replace('__asm__ volatile("dmb ish":::"memory");','')))

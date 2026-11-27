@@ -5,7 +5,7 @@ firmware source policy and failure handling are board adaptations.
 """
 import hashlib,json,subprocess
 from pathlib import Path
-REVISION='6c42e1055ffb3b335fda991190ad221edaa7af3c'
+REVISION='c8f92b208068eeaa4cd2b0f592671f04ee70076e'
 CORES=['QcomMdt','QcomSmem','QcomSmp2p','QcomGlink','QcomQmp','QcomQrtr','ShengQrtr']
 
 def replace(text,old,new,meaning):

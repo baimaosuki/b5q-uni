@@ -25,16 +25,16 @@ static int read(void*,uint64_t lba,uint32_t n,uint8_t*p){
 int main(int argc,char**argv){assert(argc==3);esp=fopen(argv[1],"rb");gpt=fopen(argv[2],"rb");assert(esp&&gpt);
  uint8_t token[16]={0x41,0x18,0x39,0xcb,0xae,0xba,0xc4,0x08,0x8c,0x25,0x1c,0x0e,0xa5,0x75,0x79,0xa2};
  if(!nb_volume_open(&vol,read,nullptr,62275584,token)){fprintf(stderr,"volume proof: %s\n",nb_volume_failure_name(vol.failure));return 1;}
- assert(nb_volume_write_allowed(&vol,vol.file_first+1,2050));assert(!nb_volume_write_allowed(&vol,vol.file_first,1));assert(!nb_volume_write_allowed(&vol,vol.file_first+2050,2));
- uint8_t b[4096];for(unsigned i=1;i<2051;++i){assert(read(nullptr,vol.file_first+i,1,b));for(uint8_t c:b)assert(!c);}
+ assert(nb_volume_write_allowed(&vol,vol.file_first+1,8194));assert(!nb_volume_write_allowed(&vol,vol.file_first,1));assert(!nb_volume_write_allowed(&vol,vol.file_first+8194,2));
+ uint8_t b[4096];for(unsigned i=1;i<8195;++i){assert(read(nullptr,vol.file_first+i,1,b));for(uint8_t c:b)assert(!c);}
  printf("%llu %u %u %u\n",(unsigned long long)vol.file_first,vol.file_cluster,vol.fat_blocks,vol.reads);
 }
 ''')
   exe=tmp/'proof';subprocess.run(['c++','-std=c++17','-Wall','-Wextra','-Werror','-Wno-misleading-indentation','-fsanitize=address,undefined','-I'+str(ROOT/'UniXNU-b5q/package/B5qUfs'),str(cpp),'-o',str(exe)],check=True)
   p=subprocess.run([str(exe),str(esp),str(metadata)],capture_output=True,text=True,check=True);first,cluster,fat,reads=map(int,p.stdout.split())
   with esp.open('rb') as f:
-   f.seek((first-ESP_FIRST)*BLOCK);data=f.read(8400896)
-  report={'scope':'Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence','result':'PASS','file_bytes':len(data),'file_sha256':hashlib.sha256(data).hexdigest(),'token':TOKEN,'file_first_lba':first,'clusters':2051,'contiguous':True,'no_aliases':True,'mirrored_FAT':True,'fat_blocks_each':fat,'config_readonly':True,'write_first_lba':first+1,'write_last_lba':first+2050,'committed_slots':0,'source_GPT_entries':512,'production_volume_checker':True,'hardware_tested':False}
+   f.seek((first-ESP_FIRST)*BLOCK);data=f.read(33566720)
+  report={'scope':'Actual ESP bytes; GPT harness uses user-provided exact extents, not device evidence','result':'PASS','file_bytes':len(data),'file_sha256':hashlib.sha256(data).hexdigest(),'token':TOKEN,'file_first_lba':first,'clusters':8195,'contiguous':True,'no_aliases':True,'mirrored_FAT':True,'fat_blocks_each':fat,'config_readonly':True,'write_first_lba':first+1,'write_last_lba':first+8194,'committed_slots':0,'source_GPT_entries':512,'production_volume_checker':True,'hardware_tested':False}
   if out:Path(out).write_text(json.dumps(report,indent=2)+'\n')
   return report
 if __name__=='__main__':

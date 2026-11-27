@@ -67,6 +67,7 @@ IOService *b5q_dp_display_create(IOService *provider,const B5qDpDisplayConfig *c
 bool b5q_dp_display_disconnect(IOService*){return displayConfig.drain(displayConfig.context);}
 void b5q_dp_display_frame(IOService *,uint64_t tag,uint32_t,uint64_t){if(tag)completedTags++;}
 struct Hardware{
+ void trace(const char*){}
  bool opened=false,mxOwned=false,fault=false,cablePresent=true;unsigned wantedReverse=0;struct{unsigned failed=0,last=0;}clock;
  struct{volatile uint32_t *va=nullptr;}sel,en;std::map<unsigned,uint32_t>regs;
  bool open(bool reverse){opened=true;wantedReverse=reverse;return true;}bool close(){opened=false;return true;}

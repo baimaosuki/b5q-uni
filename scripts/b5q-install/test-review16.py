@@ -218,10 +218,12 @@ def changed(path):
     result = subprocess.run(['git', 'diff', '--quiet', 'HEAD', '--', path], cwd=R)
     return result.returncode != 0
 
-for path in ['.github/workflows', 'UniXNU', 'sources', 'UniXNU-b5q/patches', 'UniXNU-b5q/board.toml',
+# Review18 authorizes console-journal/device display patches and touch rotation.
+# UEFI patches and unchanged controller/transport files retain zero-diff checks.
+for path in ['.github/workflows', 'UniXNU', 'sources', 'patches/uefi-b5q', 'UniXNU-b5q/board.toml',
              'UniXNU-b5q/scripts/usb-xhci-26C5035r.json', 'UniXNU-b5q/scripts/usb-dual-bindings-26C5035r.json',
              'UniXNU-b5q/package/B5qWcnPower.cpp', 'UniXNU-b5q/package/B5qBtFifo.c',
-             'UniXNU-b5q/package/B5qTouch.cpp', 'UniXNU-b5q/package/B5qDpPdic.h',
+             'UniXNU-b5q/package/B5qDpPdic.h',
              'UniXNU-b5q/package/B5qDpPhy.h', 'UniXNU-b5q/package/B5qDpAux.h']:
     assert not changed(path), 'red-line changed: ' + path
 # Review17 intentionally expands H4 observation; transport/power behavior stays byte-identical.

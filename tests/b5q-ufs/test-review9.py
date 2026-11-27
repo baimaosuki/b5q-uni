@@ -115,6 +115,7 @@ using B5qMax77705::Cable;
 void*gHost=(void*)1;void*gHostNub=(void*)1;Cable gAppliedCable;int gAppliedOrientation=-1;
 constexpr unsigned kXhciRegisterBytes=0x8000;uint32_t xhciRegisters[kXhciRegisterBytes/4]{};
 struct{uint32_t *va=xhciRegisters;}gXhciRegs;
+struct{uint32_t *va=nullptr;}gGlobals;constexpr uint32_t kUsb3SuspendPhy=1u<<17;void barrier(){}
 uint64_t ms=0;unsigned sleeps=0,leaves=0,off=0,enters=0;bool otg=false,reverse=false,expire=false;
 Cable physical(){Cable c;c.valid=true;
  if(ms>=100&&ms<5000){

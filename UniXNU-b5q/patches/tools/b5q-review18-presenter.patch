@@ -1,0 +1,173 @@
+diff --git a/GpuScanoutClient.h b/GpuScanoutClient.h
+index abfd69b..6ef2b9a 100644
+--- a/GpuScanoutClient.h
++++ b/GpuScanoutClient.h
+@@ -47,7 +47,7 @@ public:
+         note(0x6710);
+         int status = transport_.call(transport_.context, NGP_METHOD_MODE, nullptr, 0, &mode, sizeof mode);
+         note(0x6711);
+-        if (status || mode.version != NGP_VERSION || mode.format != NGP_BGRX8888 || !mode.width || !mode.height ||
++        if (status || mode.version != NGP_VERSION || (mode.format & 0xffffu) != NGP_BGRX8888 || !mode.width || !mode.height ||
+             mode.stride < mode.width * 4 || mode.bytes < mode.stride * mode.height) return fail(2, status);
+         const size_t page = (size_t)getpagesize();
+         uint64_t address = 0, length = 0;
+@@ -57,7 +57,7 @@ public:
+         if (status || !address || length < mode.bytes) return fail(3, status);
+         // The mapping covers whole pages; the framebuffer allocation ends on a page boundary, the copy never writes past the last row.
+         gpupresent::Scanout scanout = {(void *)(uintptr_t)address, (size_t)((mode.bytes + page - 1) & ~(page - 1)), (size_t)mode.stride,
+-                                       (uint32_t)mode.width, (uint32_t)mode.height};
++                                       (uint32_t)mode.width, (uint32_t)mode.height, mode.format >> 16};
+         note(0x6714);
+         scanout_ = scanout;
+         presenter_ = new gpupresent::Presenter(device, scanout);
+@@ -117,9 +117,11 @@ private:
+         const volatile uint32_t *shown = (const volatile uint32_t *)scanout_.base;
+         const volatile uint32_t *surface = (const volatile uint32_t *)(uintptr_t)swap.address;
+         for (uint32_t y = 0; y < rows; ++y) {
+-            const volatile uint32_t *a = shown + (size_t)y * (scanout_.stride / 4), *b = surface + (size_t)y * (swap.stride / 4);
++            const volatile uint32_t *b = surface + (size_t)y * (swap.stride / 4);
+             for (uint32_t x = 0; x < words; ++x)
+-                if (a[x] != b[x]) {++stats_->mismatchRows; break;}
++                {const uint32_t px=scanout_.rotation==90?y:scanout_.rotation==270?swap.height-1-y:x;
++                 const uint32_t py=scanout_.rotation==90?swap.width-1-x:scanout_.rotation==270?x:y;
++                 if (shown[(size_t)py*(scanout_.stride/4)+px] != (b[x]|0xff000000u)) {++stats_->mismatchRows; break;}}
+         }
+         ++stats_->verified;
+     }
+diff --git a/GpuScanoutPresenter.h b/GpuScanoutPresenter.h
+index 8c64a98..a67ea3d 100644
+--- a/GpuScanoutPresenter.h
++++ b/GpuScanoutPresenter.h
+@@ -30,4 +30,5 @@ struct Scanout {
+     size_t bytes;     // whole extent, a multiple of the page size
+     size_t stride;    // bytes per row
+     uint32_t width, height;
++    uint32_t rotation=0; // degrees, physical scanout remains portrait
+ };
+@@ -58,7 +59,7 @@ public:
+         if (frame.format != NGP_BGRX8888) return kBadFrame;
+         const size_t page = (size_t)getpagesize(), row = (size_t)frame.width * 4;
+         if (!frame.base || ((uintptr_t)frame.base & (page - 1)) || !frame.bytes || (frame.bytes & (page - 1)) ||
+-            frame.width != scanout_.width || frame.height != scanout_.height || frame.stride < row ||
++            !frameDimensions(frame) || frame.stride < row ||
+             (size_t)frame.height > frame.bytes / frame.stride || frame.stride * (frame.height - 1) + row > frame.bytes) return kBadFrame;
+         const uint32_t rows = gHalfRows.load(std::memory_order_relaxed) ? frame.height / 2 : frame.height;
+         id<MTLBuffer> source = sourceFor(frame);
+@@ -67,7 +68,7 @@ public:
+             id<MTLCommandBuffer> commands = [queue_ commandBuffer];
+             id<MTLComputeCommandEncoder> encoder = commands ? [commands computeCommandEncoder] : nil;
+             if (!encoder) return kNoResource;
+-            const uint32_t params[4] = {frame.width, rows, (uint32_t)(frame.stride / 4), (uint32_t)(scanout_.stride / 4)};
++            const uint32_t params[4] = {frame.width, rows|(scanout_.rotation<<16), (uint32_t)(frame.stride / 4), (uint32_t)(scanout_.stride / 4)};
+             [encoder setComputePipelineState:opaque_];
+             [encoder setBuffer:source offset:0 atIndex:0];
+             [encoder setBuffer:target_ offset:0 atIndex:1];
+@@ -78,6 +79,7 @@ public:
+             [commands waitUntilCompleted];
+             return commands.status == MTLCommandBufferStatusCompleted ? kOk : kGpuFailed;
+         }
++        if(scanout_.rotation)return kNoResource; // A rotated frame requires the compute kernel.
+         id<MTLCommandBuffer> commands = [queue_ commandBuffer];
+         id<MTLBlitCommandEncoder> blit = commands ? [commands blitCommandEncoder] : nil;
+         if (!blit) return kNoResource;
+@@ -110,7 +112,7 @@ public:
+     Result convert(const Frame &frame) {
+         const size_t page = (size_t)getpagesize(), row = (size_t)frame.width * 8;
+         if (!frame.base || ((uintptr_t)frame.base & (page - 1)) || !frame.bytes || (frame.bytes & (page - 1)) ||
+-            frame.width != scanout_.width || frame.height != scanout_.height || frame.stride < row || (frame.stride & 3) ||
++            !frameDimensions(frame) || frame.stride < row || (frame.stride & 3) ||
+             (scanout_.stride & 3) || frame.stride * (frame.height - 1) + row > frame.bytes) return kBadFrame;
+         const bool encoded = frame.format == NGP_RGBA16F_ENCODED;
+         if (!pipeline(convert_, convertFailed_, @"scanout_convert") || !table(encoded)) return kNoResource;
+@@ -119,7 +121,7 @@ public:
+         id<MTLCommandBuffer> commands = [queue_ commandBuffer];
+         id<MTLComputeCommandEncoder> encoder = commands ? [commands computeCommandEncoder] : nil;
+         if (!encoder) return kNoResource;
+-        const uint32_t params[4] = {frame.width, frame.height, (uint32_t)(frame.stride / 4), (uint32_t)(scanout_.stride / 4)};
++        const uint32_t params[4] = {frame.width, frame.height|(scanout_.rotation<<16), (uint32_t)(frame.stride / 4), (uint32_t)(scanout_.stride / 4)};
+         [encoder setComputePipelineState:convert_];
+         [encoder setBuffer:source offset:0 atIndex:0];
+         [encoder setBuffer:target_ offset:0 atIndex:1];
+@@ -177,6 +179,10 @@ private:
+         if (buffer) sources_[victim] = {frame.mapping, frame.base, frame.bytes, ++uses_, buffer};
+         return buffer;
+     }
++    bool frameDimensions(const Frame &f)const{
++        return (scanout_.rotation==0&&f.width==scanout_.width&&f.height==scanout_.height)||
++          ((scanout_.rotation==90||scanout_.rotation==270)&&f.width==scanout_.height&&f.height==scanout_.width);
++    }
+     bool validScanout() const {
+         const size_t page = (size_t)getpagesize();
+         return scanout_.base && !((uintptr_t)scanout_.base & (page - 1)) && scanout_.bytes && !(scanout_.bytes & (page - 1)) &&
+diff --git a/shaders/scanout_convert.ll b/shaders/scanout_convert.ll
+index 010993b..daeffbf 100644
+--- a/shaders/scanout_convert.ll
++++ b/shaders/scanout_convert.ll
+@@ -13,7 +13,9 @@ define void @scanout_convert(ptr addrspace(1) noundef readonly "air-buffer-no-al
+ entry:
+   %w = load i32, ptr addrspace(2) %p, align 16
+   %ph = getelementptr inbounds i32, ptr addrspace(2) %p, i64 1
+-  %h = load i32, ptr addrspace(2) %ph, align 4
++  %hflags = load i32, ptr addrspace(2) %ph, align 4
++  %h = and i32 %hflags, 65535
++  %rotation = lshr i32 %hflags, 16
+   %pss = getelementptr inbounds i32, ptr addrspace(2) %p, i64 2
+   %ss = load i32, ptr addrspace(2) %pss, align 8
+   %pds = getelementptr inbounds i32, ptr addrspace(2) %p, i64 3
+@@ -55,8 +57,20 @@ body:
+   %rgb = or i32 %rg, %bv
+   %px = or i32 %rgb, -16777216
+   %ds64 = zext i32 %ds to i64
+-  %drow = mul i64 %y64, %ds64
+-  %di = add i64 %drow, %x64
++  %is90 = icmp eq i32 %rotation, 90
++  %is270 = icmp eq i32 %rotation, 270
++  %wlast = sub i32 %w, 1
++  %hlast = sub i32 %h, 1
++  %invy = sub i32 %hlast, %y
++  %invx = sub i32 %wlast, %x
++  %dx270 = select i1 %is270, i32 %invy, i32 %x
++  %dx = select i1 %is90, i32 %y, i32 %dx270
++  %dy270 = select i1 %is270, i32 %x, i32 %y
++  %dy = select i1 %is90, i32 %invx, i32 %dy270
++  %dx64 = zext i32 %dx to i64
++  %dy64 = zext i32 %dy to i64
++  %drow = mul i64 %dy64, %ds64
++  %di = add i64 %drow, %dx64
+   %dp = getelementptr inbounds i32, ptr addrspace(1) %dst, i64 %di
+   store i32 %px, ptr addrspace(1) %dp, align 4
+   br label %done
+@@ -74,7 +88,9 @@ define void @scanout_opaque(ptr addrspace(1) noundef readonly "air-buffer-no-ali
+ entry:
+   %w = load i32, ptr addrspace(2) %p, align 16
+   %ph = getelementptr inbounds i32, ptr addrspace(2) %p, i64 1
+-  %h = load i32, ptr addrspace(2) %ph, align 4
++  %hflags = load i32, ptr addrspace(2) %ph, align 4
++  %h = and i32 %hflags, 65535
++  %rotation = lshr i32 %hflags, 16
+   %pss = getelementptr inbounds i32, ptr addrspace(2) %p, i64 2
+   %ss = load i32, ptr addrspace(2) %pss, align 8
+   %pds = getelementptr inbounds i32, ptr addrspace(2) %p, i64 3
+@@ -96,8 +112,20 @@ body:
+   %v = load i32, ptr addrspace(1) %sp, align 4
+   %px = or i32 %v, -16777216
+   %ds64 = zext i32 %ds to i64
+-  %drow = mul i64 %y64, %ds64
+-  %di = add i64 %drow, %x64
++  %is90 = icmp eq i32 %rotation, 90
++  %is270 = icmp eq i32 %rotation, 270
++  %wlast = sub i32 %w, 1
++  %hlast = sub i32 %h, 1
++  %invy = sub i32 %hlast, %y
++  %invx = sub i32 %wlast, %x
++  %dx270 = select i1 %is270, i32 %invy, i32 %x
++  %dx = select i1 %is90, i32 %y, i32 %dx270
++  %dy270 = select i1 %is270, i32 %x, i32 %y
++  %dy = select i1 %is90, i32 %invx, i32 %dy270
++  %dx64 = zext i32 %dx to i64
++  %dy64 = zext i32 %dy to i64
++  %drow = mul i64 %dy64, %ds64
++  %di = add i64 %drow, %dx64
+   %dp = getelementptr inbounds i32, ptr addrspace(1) %dst, i64 %di
+   store i32 %px, ptr addrspace(1) %dp, align 4
+   br label %done

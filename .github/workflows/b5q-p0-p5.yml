@@ -62,7 +62,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: UniXNU/UniXNU
-          ref: 8542980d02b4d2cc5c32ee3542de1760b2562aac
+          ref: e7bddb9a7eecdcf81f36da9fa38bd9d4d3f155c2
           path: UniXNU
           persist-credentials: false
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -320,6 +320,7 @@ jobs:
           path: |
             UniXNU/out/b5q/**/kernel/kernel.macho
             UniXNU/out/b5q/**/tree/build/adreno740/libAdreno740.a
+            UniXNU/out/b5q/**/tree/build/adreno740/libAdreno740.json
             ${{ runner.temp }}/b5q-stage-data/data.dbr
             ${{ runner.temp }}/b5q-stage-data/gpu-addon.bin
             ${{ runner.temp }}/b5q-stage-data/owner-trust.bundle
@@ -352,6 +353,8 @@ jobs:
             UniXNU/out/b5q/**/payload/payload.json
             UniXNU/out/b5q/**/runtime/data-seed.json
             UniXNU/out/b5q/**/runtime/generated.json
+            UniXNU/out/b5q/**/runtime/*.bin
+            UniXNU/out/b5q/**/runtime/*.bundle
             UniXNU/out/b5q/**/runtime/media-runtime.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/media/**/*.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/displayport/**/*.json

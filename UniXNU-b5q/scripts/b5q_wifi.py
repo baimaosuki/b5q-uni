@@ -1,20 +1,46 @@
 """Select the pinned OS-only network adapter; no sheng hardware is copied."""
 import hashlib,json,subprocess
 from pathlib import Path
-REVISION='6c42e1055ffb3b335fda991190ad221edaa7af3c'
+REVISION='c8f92b208068eeaa4cd2b0f592671f04ee70076e'
 def select_shared(source,out):
     source,out=Path(source),Path(out)
+    if source.name=='nw_cfg80211_control.c':
+        text=source.read_text()
+        anchor='static void opened(void *unused, uint64_t session) { (void)unused; owner = session; generation++; snapshot_free(); }'
+        replacement='static unsigned b5q_owner_logs;\nstatic void b5q_owner_trace(const char *event) {\n  if (__atomic_fetch_add(&b5q_owner_logs, 1u, __ATOMIC_RELAXED) < 64u)\n    lx_log(6, "B5qWifi: control-%s owner_connected=%u radio_enabled=%u generation=%u", event, !!owner, radio_enabled, generation);\n}\nint b5q_control_owner_connected(void) { return !!owner; }\nint b5q_control_radio_enabled(void) { return radio_enabled; }\nstatic void opened(void *unused, uint64_t session) { (void)unused; owner = session; generation++; snapshot_free(); b5q_owner_trace("opened"); }'
+        if text.count(anchor)!=1:raise ValueError('Pinned control opened changed')
+        text=text.replace(anchor,replacement)
+        anchor='  owner = 0; generation++; snapshot_free();'
+        if text.count(anchor)!=1:raise ValueError('Pinned control closed changed')
+        text=text.replace(anchor,anchor+' b5q_owner_trace("closed");')
+        out.mkdir(parents=True,exist_ok=True);target=out/'b5q_nw_cfg80211_control.c';target.write_text(text);return target
     if source.name=='nw_mainline.c':
         text=source.read_text()
         anchor='void nw_wifi_disconnect(void) {'
         if text.count(anchor)!=1:raise ValueError('Pinned mainline disconnect ABI changed')
-        text=text.replace(anchor,'''int nw_wifi_disconnect_pending(void) {
+        text=text.replace(anchor,'''extern int b5q_control_owner_connected(void);
+extern int b5q_control_radio_enabled(void);
+static unsigned b5q_dispatch_logs;
+static void b5q_dispatch_trace(unsigned op,const char *where,int begin_rc,unsigned begin_ms,int event_rc,int cleared) {
+  if (__atomic_fetch_add(&b5q_dispatch_logs, 1u, __ATOMIC_RELAXED) < 64u)
+    lx_log(6, "B5qWifi: dispatch op=%u step=%s owner_connected=%u radio_enabled=%u begin_attempt_rc=%d begin_attempt_ms=%u event_send_rc=%d ui_cleared=%u reason=%s",
+      op, where, b5q_control_owner_connected(), b5q_control_radio_enabled(), begin_rc, begin_ms, event_rc, cleared,
+      begin_rc == -ENOTCONN ? "owner-or-interface-missing" : begin_rc == -ERFKILL ? "radio-off" : begin_rc ? "begin-attempt-failed" : begin_ms > 100u ? "slow-begin-attempt" : "ok");
+}
+int nw_wifi_disconnect_pending(void) {
   lx_shared_spin_lock(&boundary_lock);
   const int pending = ui.operation == NW_CONTROL_DISCONNECT_REQUEST;
   lx_shared_spin_unlock(&boundary_lock);
   return pending;
 }
 '''+anchor)
+        old='    int result = nw_cfg80211_event_begin(&b, bytes, sizeof(bytes), pending.operation, 0);'
+        if text.count(old)!=1:raise ValueError('Pinned mainline dispatch changed')
+        text=text.replace(old,'    int begin_rc=0,event_rc=0;unsigned begin_ms=0;bool ui_cleared=false;\n'+old+'\n    b5q_dispatch_trace(pending.operation,"before",0,0,0,0);')
+        text=text.replace('      result = nw_cfg80211_begin_attempt();','      { const u64 began=lx_now_ms();result=nw_cfg80211_begin_attempt();begin_rc=result;begin_ms=(unsigned)(lx_now_ms()-began);\n        b5q_dispatch_trace(pending.operation,"after-begin",begin_rc,begin_ms,0,0); }')
+        text=text.replace('    if (!result) result = nw_cfg80211_event_send(&b);','    if (!result) result = nw_cfg80211_event_send(&b);event_rc=result;')
+        text=text.replace('        memzero_explicit(&ui, sizeof(ui));','        memzero_explicit(&ui, sizeof(ui));ui_cleared=true;')
+        text=text.replace('    memzero_explicit(bytes, sizeof(bytes));','    b5q_dispatch_trace(pending.operation,"after",begin_rc,begin_ms,event_rc,ui_cleared);\n    memzero_explicit(bytes, sizeof(bytes));')
         out.mkdir(parents=True,exist_ok=True);target=out/'b5q_nw_mainline.c';target.write_text(text);return target
     if source.name!='scan.c' or source.parent.name!='cfg80211':return source
     text=source.read_text();old='!memcmp(elem->data + match_offset, match, match_len)'
@@ -81,6 +107,8 @@ static void probe_frame(const uint8_t *frame, size_t length, bool out) {
     if (!error && gIf && (ifnet_capabilities_enabled(gIf) & 0x400u)) {
       ifnet_stat_increment_in(gIf, count, bytes, 0);
     }'''),
+        ('  disconnect_user(); sheng_wifi_wake();',
+         '  if (!nw_wifi_disconnect_pending()) disconnect_user(); sheng_wifi_wake();'),
         ('    if (current.state < NW_STA_AUTH) return 0;',
          '    if (current.state < NW_STA_AUTH && !nw_wifi_disconnect_pending()) return 0;'),
         ('''      if (current.state >= NW_STA_AUTH) {''', '''      if (current.state >= NW_STA_AUTH || nw_wifi_disconnect_pending()) {'''),

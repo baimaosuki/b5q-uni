@@ -22,6 +22,10 @@ template<class Io>struct Session {
  uint32_t auxFailRegs[10]{};bool haveAuxFailRegs=false;
  uint64_t deadline=0;LinkError error=LinkError::None;TrainError trainError=TrainError::None;
  explicit Session(Io &owner):io(owner),aux(owner),clock(owner),controller(owner),phy(owner){}
+ // Optional production breadcrumb hook; pure host fixtures need no logger.
+ template<class T>static auto mark(T &owner,const char *name,int)->decltype(owner.trace(name),void()){owner.trace(name);}
+ template<class T>static void mark(T &,const char *,long){}
+ void trace(const char *name){mark(io,name,0);}
  bool inTime(){return io.nowUs()<deadline;}
  bool sinkPower(bool on){
   // Original dp_link_power_up/down: DPCD >=1.1, RMW two low bits.
@@ -78,14 +82,14 @@ template<class Io>struct Session {
   modes={};caps={};edidBytes=0;attempts=0;error=LinkError::None;trainError=TrainError::None;reverse=flipped;
   if(!io.connected())return fail(LinkError::Detached);
   if(routeLanes!=2&&routeLanes!=4)return fail(LinkError::Caps);
-  discoverStep=1;clocksOwned=true;if(!clock.aux())return fail(LinkError::Clock);
-  controller.reset();phy.auxSetup();
+  trace("clock-aux");discoverStep=1;clocksOwned=true;if(!clock.aux())return fail(LinkError::Clock);
+  trace("ctrl-reset");controller.reset();trace("phy-aux-setup");phy.auxSetup();
   const uint32_t old=io.read(Block::Aux,0x30);
   io.write(Block::Aux,0x30,old|2);io.delay(1000);io.write(Block::Aux,0x30,(old&~2u)|1);
   io.write(Block::Aux,0x3c,0xffff);io.write(Block::Aux,0x40,0xffff);auxOn=true;aux.segmentUsed=false;
-  discoverStep=2;if(!aux.dpcd(true,0,dpcd,16)||!caps.parse(dpcd,routeLanes))return fail(LinkError::Caps);
+  trace("aux-dpcd");discoverStep=2;if(!aux.dpcd(true,0,dpcd,16)||!caps.parse(dpcd,routeLanes))return fail(LinkError::Caps);
   discoverStep=3;if(!sinkPower(true))return fail(LinkError::Power);sinkPowered=true;
-  discoverStep=4;if(!aux.edidBlock(0,edid))return fail(LinkError::Edid);
+  trace("edid");discoverStep=4;if(!aux.edidBlock(0,edid))return fail(LinkError::Edid);
   const unsigned blocks=unsigned(edid[126])+1;
   if(blocks>8)return fail(LinkError::Edid);
   if(blocks>1)discoverStep=5;
@@ -94,6 +98,7 @@ template<class Io>struct Session {
   return true;
  }
  bool train(){
+  trace("phy-train");
   if(!auxOn||!modes.count)return fail(LinkError::Caps);
   if(!io.connected())return fail(LinkError::Detached);
   // Bound the entire set of mode/rate fallbacks using elapsed time. A

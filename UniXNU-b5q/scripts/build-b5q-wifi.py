@@ -115,6 +115,7 @@ def prepare(module,out):
     # create/set-param, STA power save and WMM updates, never on TX/RX data.
     s=replace(s,'\tether_addr_copy(cmd->vdev_macaddr.addr, macaddr);\n',
         '\tether_addr_copy(cmd->vdev_macaddr.addr, macaddr);\n'
+        '\tb5q_wifi_mac_context(macaddr);\n'
         '\tath11k_info(ar->ab, "B5qWifi: vdev-create id=%u type=%u subtype=%u pdev=%u mac=%02x:%02x:%02x:%02x:%02x:%02x\\n",\n'
         '\t\t    param->if_id, param->type, param->subtype, param->pdev_id,\n'
         '\t\t    macaddr[0], macaddr[1], macaddr[2], macaddr[3], macaddr[4], macaddr[5]);\n',

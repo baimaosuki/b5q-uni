@@ -67,6 +67,39 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
   from b5q_ramblock import prepare_source
   sources.append(prepare_source(ROOT/'UniXNU/drivers/RamBlock/NativeRamBlock.cpp',t/'NativeRamBlock.cpp'))
   flags+=['-iquote',str(ROOT/'UniXNU/drivers/RamBlock')]
+ if a.sources and any(n.startswith('NativeAdreno') for n in a.sources.split(',')):
+  have={p.name for p in sources}
+  sources += [p for p in (ROOT/'UniXNU/drivers/Adreno740').glob('NativeAdreno*.cpp') if p.name not in have and p.name!='NativeAdrenoAccelerator.cpp']
+  flags += ['-I',str(ROOT/'UniXNU/drivers/Adreno740'),'-I',str(ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk')]
+  # Source-kernel vm_map_t is a _vm_map pointer; SDK's public port alias
+  # would mangle doMap/doUnmap incorrectly and alter PAC diversity.
+  (t/'mach').mkdir(exist_ok=True)
+  vmtypes=(a.sdk/'System/Library/Frameworks/Kernel.framework/Headers/mach/vm_types.h').read_text()
+  vmtypes=vmtypes.replace('typedef mach_port_t             vm_map_t, vm_map_read_t, vm_map_inspect_t;',
+                         'typedef struct _vm_map *vm_map_t, *vm_map_read_t, *vm_map_inspect_t;')
+  (t/'mach/vm_types.h').write_text(vmtypes)
+  private=t/'gpu-task-private.h';private.write_text('#include <mach/mach_types.h>\n#include <sys/resource_private.h>\nextern \"C\" darwin_gpu_role_t task_get_gpu_role(task_t);\nextern \"C\" vm_map_t kernel_map;\nextern \"C\" int vm_map_page_size(vm_map_t);\nenum {kIOMemoryBufferCacheShift=28}; // pinned XNU IOMemoryDescriptor.h\n')
+  # Export the exact pinned private IOUserClient filter callback types;
+  # the public SDK strips them, but PAC type discrimination needs them.
+  filter_header=(ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/iokit/IOKit/IOUserClient.h').read_text()
+  filter_types=filter_header[filter_header.index('typedef uintptr_t io_filter_policy_t'):filter_header.index('struct IOUCFilterPolicy;')]
+  private.write_text(private.read_text()+'\n#include <IOKit/IOUserClient.h>\n'+filter_types)
+  flags += ['-include',str(private)]
+  # The SDK omits this exported preemption header. Copy its actual XNU
+  # declarations, leaving out the CPU-data layout (not used by the GPU).
+  # This retains the same _disable/_enable_preemption calls and PAC ABI.
+  cpu_header=ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk/kern/cpu_data.h'
+  (t/'kern').mkdir(exist_ok=True)
+  (t/'kern/cpu_data.h').write_text(cpu_header.read_text().replace('#include <machine/cpu_data.h>', '/* private CPU-data layout unused by this translation unit */'))
+
+ if a.sources and any(n in a.sources.split(',') for n in ['NativeLegacyDisplay.cpp','NativeGOPPresenter.cpp']):
+  import importlib.util
+  from b5q_display import prepare as prepare_display
+  prepare_display(ROOT/'UniXNU')
+  abi_env=dict(os.environ,UNIXNU_XNU_ARCH='arm64e',UNIXNU_IOS_VERSION='27.0',UNIXNU_IPSW_BUILD='26C5035r',UNIXNU_XNU_TARGET='macosx',UNIXNU_OS_PROFILE=str(ROOT/'UniXNU/profiles/os/macos-27.3-26C5035r/profile.toml'),PYTHONPATH=str(ROOT/'UniXNU/scripts'))
+  subprocess.run([sys.executable,str(ROOT/'UniXNU-b5q/scripts/build-b5q-gop-27.py'),'--abi-header-only'],env=abi_env,check=True)
+  flags+=['-I',str(ROOT/'UniXNU-b5q/build/native-legacy-display'),'-I',str(ROOT/'UniXNU/drivers/GopFramebuffer')]
+  sources += [ROOT/'UniXNU/drivers/GopFramebuffer'/n for n in ['NativeLegacyDisplay.cpp','NativeGOPPresenter.cpp']]
  if a.sources:
   selected=set(a.sources.split(','));sources=[s for s in sources if s.name in selected]
   assert {s.name for s in sources}==selected,('Unknown/uncompiled source request',selected-{s.name for s in sources})
@@ -122,6 +155,11 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
     output=t/(name+'.o');subprocess.run([str(a.compiler),'-target','arm64e-apple-ios27.0','-c',str(assembly),'-o',str(output)],env=env,check=True);kernel_target.check_object(output.read_bytes(),name)
  expected_core={'_sheng_cpu_idle_mach'} if a.native_recount else set()
  available=defined|set(qualified['bindings'])|set().union(*(e for _,_,e in objects))
+ if any(stem=='NativeLegacyDisplay' for stem,_,_ in objects):
+  legacy=json.loads((ROOT/'UniXNU-b5q/scripts/legacy-display-26C5035r.json').read_text())
+  assert legacy['kernelcache_sha256']==abi['kernelcache_sha256']
+  available.update(legacy['bindings'])
+
  # New wireless entry points are compiled by their own same-target recipe.
  # Resolve only actual hashed objects, never an allowlist of future symbols.
  for report_path in [ROOT/'artifacts/b5q-p2-work/target/report.json',ROOT/'artifacts/b5q-p3-work/board-target/report.json']:

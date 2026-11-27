@@ -3,7 +3,7 @@
 #define NABU_LOG_FORMAT_H
 #include <stdint.h>
 #define NB_LOG_BLOCK 4096u
-#define NB_LOG_CAPACITY (4u * 1024u * 1024u)
+#define NB_LOG_CAPACITY (16u * 1024u * 1024u)
 #define NB_LOG_SLOT_BYTES (NB_LOG_BLOCK + NB_LOG_CAPACITY)
 #define NB_LOG_FILE_BYTES (NB_LOG_BLOCK + 2u * NB_LOG_SLOT_BYTES)
 #define NB_LOG_NAME "XNU2LOG BIN"

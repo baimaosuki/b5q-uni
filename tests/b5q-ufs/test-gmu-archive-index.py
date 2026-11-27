@@ -5,10 +5,13 @@ import hashlib,json,os,runpy,shutil,struct,subprocess,sys,tempfile,types,textwra
 R=Path(__file__).resolve().parents[2];source=R/'artifacts/b5q-runtime-v33-work/ci-files/tree/build/adreno740/libAdreno740.a';new,= (R/'artifacts/b5q-v33b-fix-work/ci45422139387-partial-objects').rglob('NativeAdrenoGmuService.o')
 AR=R/'tools/llvm21/usr/lib/llvm-21/bin/llvm-ar';env=dict(os.environ,LD_LIBRARY_PATH=str(R/'tools/llvm21/usr/lib/x86_64-linux-gnu'));real_check=subprocess.check_output;real_run=subprocess.run
 with tempfile.TemporaryDirectory(prefix='b5q-gmu-apple-ar-')as td:
- t=Path(td);oldenv=dict(os.environ);os.environ.update(env);os.environ['B5Q_REUSE_ADRENO']=str(source)
+ t=Path(td);oldenv=dict(os.environ);os.environ.update(env);staged=t/'source.a';shutil.copyfile(source,staged);os.environ['B5Q_REUSE_ADRENO']=str(staged)
  inputs=t/'drivers/Adreno740';inputs.mkdir(parents=True);shutil.copyfile(R/'UniXNU/drivers/Adreno740/NativeAdrenoGmuService.cpp',inputs/'NativeAdrenoGmuService.cpp')
  board=t/'kits/b5q/B5qGpu.cpp';board.parent.mkdir(parents=True);shutil.copyfile(R/'UniXNU-b5q/package/B5qGpu.cpp',board)
  gpu=R/'artifacts/b5q-p0-work/pac/B5qGpu.o';assert gpu.is_file()
+ sys.path.insert(0,str(R/'UniXNU-b5q/scripts'))
+ from b5q_adreno_mmio import source_identity
+ staged.with_suffix('.json').write_text(json.dumps(dict(upstream_tree_sha256=source_identity(t),archive_sha256=hashlib.sha256(staged.read_bytes()).hexdigest())))
  calls=[]
  def compile(p,to,*args):
   calls.append(p.name)
@@ -37,7 +40,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-gmu-apple-ar-')as td:
  # Reusing an already patched archive still recompiles both current sources;
  # identical deterministic object output is legitimate, not a skipped build.
  calls.clear();os.environ['B5Q_REUSE_ADRENO']=str(t/'build/adreno740/libAdreno740.a')
- copy=t/'patched-source.a';shutil.copyfile(os.environ['B5Q_REUSE_ADRENO'],copy);os.environ['B5Q_REUSE_ADRENO']=str(copy)
+ copy=t/'patched-source.a';shutil.copyfile(Path(os.environ['B5Q_REUSE_ADRENO']).with_suffix('.json'),copy.with_suffix('.json'));shutil.copyfile(os.environ['B5Q_REUSE_ADRENO'],copy);os.environ['B5Q_REUSE_ADRENO']=str(copy)
  try:runpy.run_path(str(R/'UniXNU-b5q/scripts/build-b5q-adreno.py'),run_name='__main__')
  except SystemExit as e:assert e.code==0
  assert calls==['NativeAdrenoGmuService.cpp','B5qGpu.cpp']

@@ -40,7 +40,8 @@ body=base+r'''
 using wait_result_t=int;
 template<class... T>void IOLog(const char*,T...){ }
 void *gHost=nullptr;void *gHostNub=nullptr;B5qMax77705::Cable gAppliedCable;int gAppliedOrientation=-1;
-constexpr unsigned kXhciRegisterBytes=0x8000;struct{uint32_t *va=nullptr;}gXhciRegs;
+constexpr unsigned kXhciRegisterBytes=0x8000;struct{uint32_t *va=nullptr;}gXhciRegs,gGlobals;
+constexpr uint32_t kUsb3SuspendPhy=1u<<17;void barrier(){}
 const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1,kMillisecondScale=1000;
 int gRoleWanted=1,gRoleApplied=0,gCoreRole=0;uint32_t gCableWanted=1,gCableApplied=0,gDpLanes=0;
 void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=false,gPhyResetPending=false;uint32_t native_usb_stats[54]={};

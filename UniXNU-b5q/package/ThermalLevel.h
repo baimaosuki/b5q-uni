@@ -47,9 +47,9 @@ enum {
 static const char *const thermal_level_name[5] = {"nominal", "moderate", "heavy", "trapping", "sleeping"};
 
 /* The mapping. The inputs are the hottest core sensor of each CPU frequency domain and the hottest GPU sensor; the thresholds are the
- * trip points of those sensors' thermal zones in sm8550.dtsi, each with the zone's own hysteresis:
- *   CPU cores  90 (2) passive   95 (2) passive   110 (1) critical
- *   GPU        85 (1) passive   90 (1) hot       110 (1) critical      degrees Celsius (hysteresis)
+ * conservative b5q board pressure policy, in degrees Celsius:
+ *   CPU board policy 70 (3) moderate 80 (3) heavy 90 (2) trapping
+ *   GPU board policy 68 (2) moderate 78 (2) heavy 88 (2) trapping      degrees Celsius (hysteresis)
  * An input's level is the number of its trip points crossed: the first gives moderate, the second heavy, the critical one trapping.
  * The two lower trips are where Linux starts and then tightens its own cooling on this chip, which is what moderate and heavy ask
  * of macOS; the critical trip is where Linux shuts down, and trapping is the strongest level that asks processes to shed load.
@@ -62,8 +62,8 @@ struct thermal_level_trip {int32_t mc, hysteresis_mc;};
 static const uint8_t thermal_level_input_group[THERMAL_LEVEL_INPUTS] = {
     THERMAL_GROUP_CPU_D0, THERMAL_GROUP_CPU_D1, THERMAL_GROUP_CPU_D2, THERMAL_GROUP_GPU
 };
-static const struct thermal_level_trip thermal_level_cpu_trips[THERMAL_LEVEL_TRIPS] = {{90000, 2000}, {95000, 2000}, {110000, 1000}};
-static const struct thermal_level_trip thermal_level_gpu_trips[THERMAL_LEVEL_TRIPS] = {{85000, 1000}, {90000, 1000}, {110000, 1000}};
+static const struct thermal_level_trip thermal_level_cpu_trips[THERMAL_LEVEL_TRIPS] = {{70000, 3000}, {80000, 3000}, {90000, 2000}};
+static const struct thermal_level_trip thermal_level_gpu_trips[THERMAL_LEVEL_TRIPS] = {{68000, 2000}, {78000, 2000}, {88000, 2000}};
 static inline const struct thermal_level_trip *thermal_level_trips_of(unsigned input)
 {
     return thermal_level_input_group[input] == THERMAL_GROUP_GPU ? thermal_level_gpu_trips : thermal_level_cpu_trips;

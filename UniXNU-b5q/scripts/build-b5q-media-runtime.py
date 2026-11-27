@@ -8,6 +8,8 @@ request=json.loads(a.request.read_text());tree=Path(request['tree']);device=Path
 def sha(path):
  with path.open('rb')as f:return hashlib.file_digest(f,'sha256').hexdigest()
 def run(*args):subprocess.run(list(map(str,args)),check=True,cwd=tree)
+from b5q_display import prepare as prepare_display
+prepare_display(tree) # before any Metal/runtime cache lookup or compilation
 original_seed=sha(seed)
 run(sys.executable,tree/'scripts/build-boot-runtime.py','--request',a.request)
 generated=json.loads((out/'generated.json').read_text());base=Path(generated['gpu_addon']);trust=Path(generated['trust_cache'])

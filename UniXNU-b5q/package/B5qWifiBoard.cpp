@@ -410,3 +410,11 @@ extern "C" void b5q_wifi_probe() {
     else {b5q_wcn_wifi_probe_done();native_wifi_stats[0]=uint32_t(-7);native_wifi_logf(3,"worker allocation failed");}
 }
 
+
+extern "C" void b5q_wifi_mac_context(const uint8_t *vdev){
+ uint8_t board[6]{},ifaddr[6]{};boardMac(board);ifnet_t ifp=sheng_ethernet_ifnet();
+ const bool named=ifp&&ifnet_lladdr_copy_bytes(ifp,ifaddr,sizeof ifaddr)==0;
+ static uint32_t logs=0;if(__atomic_fetch_add(&logs,1u,__ATOMIC_RELAXED)>=32u)return;
+ native_wifi_logf(6,"vdev-mac ifnet=%u lladdr=%02x:%02x:%02x:%02x:%02x:%02x vdev=%02x:%02x:%02x:%02x:%02x:%02x board-match=%u",named,
+   ifaddr[0],ifaddr[1],ifaddr[2],ifaddr[3],ifaddr[4],ifaddr[5],vdev[0],vdev[1],vdev[2],vdev[3],vdev[4],vdev[5],!memcmp(board,vdev,6));
+}

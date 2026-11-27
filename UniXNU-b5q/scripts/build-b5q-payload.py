@@ -26,13 +26,28 @@ if not trust.is_file():raise SystemExit('Original IPSW trust bundle is missing')
 env=dict(os.environ,UNIXNU_UNIQUE_CHIP_ID=seedfile.read_text().strip(),UNIXNU_UEFI=str(font))
 # The official runtime invokes boot_shims only when it collects/pairs trust itself.
 trust_args=[] if ctx.board.get('payload',{}).get('runtime',{}).get('boot_shims') else ['--trust-cache',str(trust)]
+from b5q_display import prepare as prepare_display, runtime_reusable
+prepare_display(ctx.tree)
+addon_input=provided.with_name('gpu-addon.bin');owner_trust=provided.with_name('owner-trust.bundle')
+if a.reuse_addon and not runtime_reusable(ctx.tree,addon_input):
+ # The kernel step may already have built this exact new runtime. Prefer
+ # that completed pair before asking the official builder to rebuild it.
+ completed=runtime/'generated.json'
+ record=json.loads(completed.read_text()) if completed.is_file() else {}
+ candidate=Path(record.get('gpu_addon',''));candidate_trust=Path(record.get('trust_cache',''))
+ if candidate.is_file() and candidate_trust.is_file() and runtime_reusable(ctx.tree,candidate):
+  addon_input,owner_trust=candidate,candidate_trust
+  print('Reusing the matching runtime completed by the kernel step')
+ else:
+  print('Display/Metal sources changed; building the matching runtime from source with existing Mesa/Rust caches')
+  a.reuse_addon=False
 if a.reuse_addon:
  # Refresh the plist explicitly even when the GPU base is reused. The
  # native runtime still builds/merges wireless, media and fresh trust entries.
  refreshed=runtime/'reused-addon-current-policy.bin'
  subprocess.run([sys.executable,str(device/'scripts/refresh-b5q-addon-policy.py'),'--unixnu',str(core),
-     '--input',str(provided.with_name('gpu-addon.bin')),'--out',str(refreshed)],check=True)
- trust_args=['--gpu-addon',str(refreshed),'--owner-trust-cache',str(provided.with_name('owner-trust.bundle'))]
+     '--input',str(addon_input),'--out',str(refreshed)],check=True)
+ trust_args=['--gpu-addon',str(refreshed),'--owner-trust-cache',str(owner_trust)]
 subprocess.run([str(core/'unixnu'),'build','payload','--device',str(device),'--os','macos-27.3-26C5035r','--data-ramdisk',str(seed),*trust_args],cwd=core,env=env,check=True)
 files={'kernel.macho':work/'kernel/kernel.macho','payload.img':work/'payload/payload.img'}
 modules=feeds.resolve(ctx);plan=patches.plan(ctx,modules)

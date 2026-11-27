@@ -238,11 +238,13 @@ int main(){B5qBtH4Sink sink{line,now};B5qBtH4Tap t;b5q_bt_h4_tap_init(&t,&sink,n
     bt = (P / 'B5qBluetooth.cpp').read_text()
     for signature in ['int clockVote(', 'void rxIrq(', 'void disarmRxWake(', 'void worker(', 'int setRate(', 'int powerOff(']:
         assert function(old_bt, signature) == function(bt, signature), signature
-    assert function(old_bt, 'int powerOn(') == function(bt, 'int powerOn(').replace('    loadedNvm[0]=0;loadedNvmBytes=0;disconnIbsLogged=0;\n', '')
+    assert function(old_bt, 'int powerOn(') == function(bt, 'int powerOn(')
     assert 'nvm=%s nvm_bytes=%u' in bt and 'h4-disconn-ibs gated=%u wake_ind=%llu sleep_ind=%llu bt_rx_dropped=%llu' in bt
     checks.append(dict(name='bluetooth-observation-only-transport-byte-identity', passed=True))
 
-for name in ['B5qDpBoard.h', 'B5qDpLink.cpp', 'B5qDpSession.h', 'B5qDpPhy.h', 'B5qDpClock.h', 'B5qDpDisplay.cpp']:
+# Review18 explicitly adds clock prerequisites and breadcrumbs to Link/Session;
+# their protocol, ABI and MMIO sequencing are covered by Review18 + all26 DP groups.
+for name in ['B5qDpBoard.h', 'B5qDpPhy.h', 'B5qDpClock.h', 'B5qDpDisplay.cpp']:
     assert (P / name).read_bytes() == subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/' + name], cwd=R)
 assert len(list((R / 'tests/b5q-ufs').glob('test-dp-*.py'))) == 26
 checks.append(dict(name='dp-untouched-26-groups-and-adsp-skipped-redline', passed=True))

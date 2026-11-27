@@ -27,6 +27,18 @@ inline bool canHotSwapVbus(const View &v) {
            v.orientationUnchanged;
 }
 
+// xhci-hub.c::xhci_port_state_to_neutral, followed by PORT_PE (RW1C).
+// Preserve RO/RWS fields and leave all other W1C/reset strobes clear.
+inline uint32_t disableSuperSpeed(uint32_t port){
+    constexpr uint32_t neutral=(1u<<0)|(1u<<3)|(0xfu<<10)|(0xfu<<5)|(1u<<9)|(3u<<14)|(7u<<25);
+    return (port&neutral)|(1u<<1);
+}
+
+inline bool canReleaseSuperSpeed(const View &v,unsigned before,unsigned after){
+    return v.appliedHost&&v.wantedHost&&v.hostObjects&&v.cableValid&&!v.cableWater&&
+           v.cableAttached&&v.cableHost&&v.orientationUnchanged&&before!=4u&&after==4u;
+}
+
 // A status bit that merely stays asserted is not a new edge. Only a 0->1
 // transition in CSC/PEC/PLC starts a port-edge diagnostic; a PED 1->0 drop is
 // also an edge. This prevents one stuck condition from consuming all four

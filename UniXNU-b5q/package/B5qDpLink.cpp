@@ -24,6 +24,8 @@
 #include "QcomRpmh.h"
 extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *);
 extern kmod_info_t g_kernel_kmod_info;
+extern "C" int b5q_log_flush_urgent(unsigned);
+extern "C" bool b5q_usb_dp_phy_ready(void);
 extern "C" void b5q_dp_display_static_init(void) __asm__("__GLOBAL__sub_I_B5qDpDisplay.cpp");
 namespace {
 using B5qDp::Block;
@@ -44,8 +46,15 @@ struct Window {
 struct Hardware {
  Window dp,phy,disp,gcc,dpu,sel,en,cmd,rsc;
  B5qDp::AuxPins pins;
+ uint32_t traceCount=0;
+ void trace(const char *name){
+  if(__atomic_fetch_add(&traceCount,1u,__ATOMIC_RELAXED)>=128u)return;
+  IOLog("B5qDP: trace step=%s\n",name);
+  const int rc=b5q_log_flush_urgent(250);
+  if(rc)IOLog("B5qDP: trace-flush step=%s rc=%d\n",name,rc);
+ }
  bool opened=false,mxOwned=false,fault=false,cablePresent=false;
- bool dpBusy=false;
+ bool dpBusy=false;uint32_t dispPowerSnapshot=0;
  unsigned wantedReverse=0;uint64_t sampled=0;
  QcomRpmhResource mx{};
  uint64_t nowUs(){return ::nowUs();}
@@ -85,24 +94,41 @@ struct Hardware {
  void gpioWrite(unsigned pin,unsigned off,uint32_t value){auto *p=gpio(pin,off);if(p){*p=value;barrier();}}
  bool openFailure(const char *step){
   IOLog("B5qDP: stage=hw-open failed step=%s gcc50018=%08x gcc39004=%08x disp9000=%08x dpBusy=%u sel=%08x/%08x en=%08x/%08x\n",
-    step,gcc.va?gcc.va[0x50018/4]:0,gcc.va?gcc.va[0x39004/4]:0,disp.va?disp.va[0x9000/4]:0,
+    step,gcc.va?gcc.va[0x50018/4]:0,gcc.va?gcc.va[0x39004/4]:0,dispPowerSnapshot,
     dpBusy,sel.va?sel.va[0]:0,sel.va?sel.va[1]:0,en.va?en.va[0]:0,en.va?en.va[1]:0);return false;
  }
  bool open(bool reverse){
-  fault=false;wantedReverse=reverse;sampled=nowUs();cablePresent=true;
+  dispPowerSnapshot=0;fault=false;wantedReverse=reverse;sampled=nowUs();cablePresent=true;
   dpBusy=false;
+  trace("map");
   if(!dp.open(0xae90000,0x2000)||!phy.open(0x88ea000,0x1000)||
      !disp.open(0xaf00000,0x10000)||!gcc.open(0x100000,0x60000)||
      !dpu.open(0xae00000,0x84000)||!sel.open(0xf100000+180*0x1000,0x1000)||
      !en.open(0xf100000+183*0x1000,0x1000))return openFailure("map");
   // Original DP supplies share USB's already enabled ldoe1/ldoe3/ldof3/
   // ldob5 rails and GCC PHY GDSC. Do not become a second regulator owner.
+  trace("gdsc");
+  if(!b5q_usb_dp_phy_ready())return openFailure("qmp-clock-reset");
+  // Do not read a DISPCC/DPU register while its retained supply is off.
+  if(!(gcc.va[0x50018/4]&(1u<<31))||!(gcc.va[0x39004/4]&(1u<<31)))return openFailure("gdsc-usb");
+  auto gccBranch=[&](unsigned off){
+   gcc.va[off/4]|=1u;barrier();
+   for(unsigned us=0;us<1000;us+=10){if(!(gcc.va[off/4]&(1u<<31)))return true;IODelay(10);}return false;
+  };
+  // gcc-kalama.c critical DISP AHB/XO branches. Set no GDSC or
+  // primary display timing; fail closed if the retained domains are off.
+  if(!gccBranch(0x27004)||!gccBranch(0x27018))return openFailure("disp-gcc-clock");
+  dispPowerSnapshot=disp.va[0x9000/4];
   if(!(gcc.va[0x50018/4]&(1u<<31))||!(gcc.va[0x39004/4]&(1u<<31))||
      !(disp.va[0x9000/4]&(1u<<31)))return openFailure("gdsc");
+  B5qDp::Clock<Hardware> accessClock(*this);
+  if(!accessClock.branch(0x80a4)||!accessClock.branch(0xa020))return openFailure("disp-ahb-clock");
+  trace("dpu-inspect");
   B5qDp::DpuResources resources;resources.inspect([&](unsigned off){return dpu.va[off/4];});
   dpBusy=resources.dpBusy;if(dpBusy)return openFailure("dpu-busy");
   // Original secdp_power_set_gpio, no aux-sel-inv/redriver on b5q:
   // first isolate active-low AUX enable, set CC polarity, then enable.
+  trace("aux-gpio");
   if(!pins.begin(*this,reverse))return openFailure("aux-gpio");opened=true;
   IOLog("B5qDP: stage=hw-open ok rev=%u sel=%08x/%08x en=%08x/%08x in_mismatch=%x\n",
     reverse,sel.va?sel.va[0]:0,sel.va?sel.va[1]:0,en.va?en.va[0]:0,en.va?en.va[1]:0,pins.inMismatch);
@@ -268,6 +294,7 @@ struct Owner {
   return ok;
  }
  bool startDisplay(){
+  io.trace("scanout");
   const auto &m=session.selected;const unsigned stride=B5qDp::Modes::scanoutStride(m);
   const uint64_t slot=B5qDp::Modes::scanoutSlot(m);
   auto failure=[&](const char *step){
@@ -293,6 +320,7 @@ struct Owner {
   provider->setName("B5qDisplayPort");
   B5qDpDisplayConfig config{};config.mode=m;config.edidBytes=session.edidBytes;
   memcpy(config.edid,session.edid,config.edidBytes);config.context=this;config.present=present;config.drain=drain;
+  io.trace("iomfb");
   IOService *next=b5q_dp_display_create(provider,&config);
   IOLockLock(scanLock);display=next;IOLockUnlock(scanLock);
   IOLog("B5qDP: iomfb-create ok=%u provider=%p display=%p\n",display!=nullptr,provider,display);

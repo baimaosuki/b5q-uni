@@ -218,9 +218,18 @@ bool qmpInit(bool reverse) {
     volatile uint8_t *base = reinterpret_cast<volatile uint8_t *>(phy.va);
     auto rd = [&](uint32_t o) {return *reinterpret_cast<volatile uint32_t *>(base + o);};
     auto wr = [&](uint32_t o, uint32_t v) {*reinterpret_cast<volatile uint32_t *>(base + o) = v; barrier();};
+    // Stock GCC: common AUX survives USB3 lane release. Never touch QMP
+    // while either shared reset is asserted or its AUX branches are off.
+    if(!gGcc.va || !sm8550_gcc_update32(gGcc.va+0x50000/4,1u,0) ||
+       !sm8550_gcc_update32(gGcc.va+0x50008/4,1u,0)){
+        phy.map->release();return false;
+    }
+    if(!rcg(0x39070,0)||!branch(0x39060)||!branch(0x39064)){
+        phy.map->release();return false;
+    }
     if(gDpLanes==4){
-        // Samsung dp_catalog_ctrl_usb_reset: USB is already stopped by
-        // roleThread. Four DP lanes retain USB2 through the UTMI mux.
+        // Samsung dp_catalog_ctrl_usb_reset: the SS root port is disabled
+        // (or no host exists). USB2 remains independent through UTMI.
         wr(kQmpComResetOvrd,0x0a);wr(kQmpComMode,2);wr(kQmpComReset,1);
         wr(kQmpComTypec,reverse?3:2);wr(kQmpComSwi,0);wr(kQmpComReset,0);
         wr(kQmpComPower,1);wr(kQmpComResetOvrd,0);
@@ -801,8 +810,9 @@ constexpr unsigned kXhciRegisterBytes=0x8000; // same bounded host window as mak
 constexpr uint32_t kGctlDisableClockGating=1u;
 constexpr uint32_t kUsb2EnableLpm=1u<<8,kUsb2SuspendPhy=1u<<6,kUsb3SuspendPhy=1u<<17;
 constexpr uint32_t kGuctlSprsCtrlTransEn=1u<<17,kGuctl1Host=(1u<<21)|(1u<<8),kGuctl2Host=1u<<16;
-constexpr uint32_t kUsbPortDebugOptions=0x40000119u;
-constexpr uint32_t kUsbHostDebugOptions=0x4000015du;
+constexpr uint32_t kUsbPortDebugOptions=0u;
+constexpr uint32_t kUsbHostDebugOptions=0u;
+static uint32_t usbDebugMask(bool host){unsigned enabled=0;PE_parse_boot_argn("usb-debug",&enabled,sizeof enabled);return enabled==1?(host?0x4000015du:0x40000119u):(host?kUsbHostDebugOptions:kUsbPortDebugOptions);}
 constexpr unsigned kHostEventDumpCount=16;
 Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
@@ -825,7 +835,13 @@ static void hostIrqBridge(void *, wait_result_t) {
         const bool active1 = have1 && (ir1.iman & 3u) == 3u;
         const bool active2 = have2 && (ir2.iman & 3u) == 3u;
         const bool active=active1||active2;
-        if(!active){gHostIrqBridge.idle();IOSleep(gHostIrqBridge.intervalMs());continue;}
+        if(!active){
+            gHostIrqBridge.idle();
+            const unsigned op=gXhciRegs.va[0]&255u;
+            const bool connected=op<=kXhciRegisterBytes-0x414u&&
+              ((gXhciRegs.va[(op+0x400)/4]|gXhciRegs.va[(op+0x410)/4])&1u);
+            IOSleep(connected?gHostIrqBridge.intervalMs():20u);continue;
+        }
         if (active1) ++gHostIrqBridge.ir1;
         if (active2) ++gHostIrqBridge.ir2;
         const auto d1=active1?gHostNub->deliverSource(1):B5qUsbIrq::Delivery::NotEnabled;
@@ -1096,6 +1112,8 @@ void dmaDiagnostics(const char *reason){
             [reason,base](unsigned i,uint64_t lo,uint64_t hi){
                 IOLog("qcom-dwc3: host-td reason=%s base=%llx idx=%u lo=%016llx hi=%016llx type=%u cc_or_len=%08x ctrl=%08x\n",
                     reason,base,i,lo,hi,unsigned((hi>>42)&63u),uint32_t(hi),uint32_t(hi>>32));
+                if(((hi>>42)&63u)==2u && (hi&(1ULL<<38)))
+                    IOLog("qcom-dwc3: host-setup reason=%s trb=%llx setup8=%016llx\n",reason,base+16u*i,lo);
             });
         if(!ok)IOLog("qcom-dwc3: host-td reason=%s base=%llx unavailable\n",reason,base);
     }
@@ -1107,6 +1125,13 @@ void dmaDiagnostics(const char *reason){
             reason,ctx.address,csz,uint32_t(ctx.slot[0]),uint32_t(ctx.slot[0]>>32),uint32_t(ctx.slot[1]),uint32_t(ctx.slot[1]>>32),
             uint32_t(ctx.ep0[0]),uint32_t(ctx.ep0[0]>>32),uint32_t(ctx.ep0[1]),uint32_t(ctx.ep0[1]>>32));
     else IOLog("qcom-dwc3: host-slot1 reason=%s unavailable dcbaa=%llx csz=%u\n",reason,dcbaa,csz);
+    uint64_t slot2=0,words[4]{};
+    const bool slot2ok=dcbaa&&dmaRead64((dcbaa&~63ULL)+16u,slot2)&&slot2&&!(slot2&63u)&&
+        slot2<=UINT64_MAX-csz-16u&&dmaRead64(slot2,words[0])&&dmaRead64(slot2+8,words[1])&&
+        dmaRead64(slot2+csz,words[2])&&dmaRead64(slot2+csz+8,words[3]);
+    IOLog("qcom-dwc3: host-slot2 reason=%s read=%u ctx=%llx csz=%u slot=%08x:%08x:%08x:%08x ep0=%08x:%08x:%08x:%08x\n",
+        reason,slot2ok,slot2,csz,uint32_t(words[0]),uint32_t(words[0]>>32),uint32_t(words[1]),uint32_t(words[1]>>32),
+        uint32_t(words[2]),uint32_t(words[2]>>32),uint32_t(words[3]),uint32_t(words[3]>>32));
 }
 void hostCheckpoint(const char *reason,bool force,bool allowU3){
     if(!gXhciRegs.va)return;
@@ -1128,7 +1153,7 @@ void hostCheckpoint(const char *reason,bool force,bool allowU3){
 void configureHostPorts(IOService *host) {
     if(!host)return;
     setHostPortHoldOwner(host);
-    OSNumber *mask=OSNumber::withNumber(kUsbPortDebugOptions,32);
+    OSNumber *mask=OSNumber::withNumber(usbDebugMask(false),32);
     OSDictionary *settings=mask?OSDictionary::withCapacity(1):nullptr;
     if(settings)settings->setObject("kUSBDebugOptions",mask);
     // AppleUSBHostPort::setProperties accepts "UsbForcePower" as an OSNumber.
@@ -1138,12 +1163,12 @@ void configureHostPorts(IOService *host) {
     OSNumber *force=OSNumber::withNumber(1u,32);
     OSDictionary *forceSettings=force?OSDictionary::withCapacity(1):nullptr;
     if(forceSettings)forceSettings->setObject("UsbForcePower",force);
-    OSNumber *hostMask=OSNumber::withNumber(kUsbHostDebugOptions,32);
+    OSNumber *hostMask=OSNumber::withNumber(usbDebugMask(true),32);
     OSDictionary *hostSettings=hostMask?OSDictionary::withCapacity(1):nullptr;
     if(hostSettings)hostSettings->setObject("kUSBDebugOptions",hostMask);
-    if(hostSettings&&!host->getProperty("B5qHostDebugApplied")){
+    if(usbDebugMask(true)&&hostSettings&&!host->getProperty("B5qHostDebugApplied")){
         const IOReturn rc=host->setProperties(hostSettings);
-        IOLog("qcom-dwc3: host-debug mask=%x rc=%08x\n",kUsbHostDebugOptions,rc);
+        IOLog("qcom-dwc3: host-debug mask=%x rc=%08x\n",usbDebugMask(true),rc);
         if(rc==kIOReturnSuccess)host->setProperty("B5qHostDebugApplied",hostMask);
     }
     uint32_t portsc1=0,portsc2=0;
@@ -1153,11 +1178,11 @@ void configureHostPorts(IOService *host) {
     while(OSObject *object=children?children->getNextObject():nullptr){
         IOService *port=OSDynamicCast(IOService,object);
         if(!port||!port->metaCast("AppleUSBHostPort"))continue;
-        if(!port->getProperty("B5qPortDebugApplied")){
+        if(usbDebugMask(false)&&!port->getProperty("B5qPortDebugApplied")){
             const IOReturn result=port->setProperties(settings);
             if(result==kIOReturnSuccess){
                 port->setProperty("B5qPortDebugApplied",mask);
-                IOLog("qcom-dwc3: port-debug name=%s mask=%x rc=%08x\n",port->getName(),kUsbPortDebugOptions,result);
+                IOLog("qcom-dwc3: port-debug name=%s mask=%x rc=%08x\n",port->getName(),usbDebugMask(false),result);
             }
         }
         if(!B5qUsbHostRole::portConnectedForHold(port->getName(),portsc1,portsc2))continue;
@@ -1283,6 +1308,14 @@ void hostStats() {
               gGlobals.va?gGlobals.va[0x100/4]:0,gGlobals.va?gGlobals.va[0x200/4]:0,
               gGlobals.va?gGlobals.va[0x2c0/4]:0,gGlobals.va?gGlobals.va[0x12c/4]:0,
               gGlobals.va?gGlobals.va[0x11c/4]:0,gGlobals.va?gGlobals.va[0x60c/4]:0);
+        { static uint32_t hubDumps=0;bool hubFailure=false;
+          B5qUsbHostEvent::latest(ir.erst&~63ULL,ir.erstsz,ir.erdp,16,
+            [](uint64_t pa,uint64_t &value){return dmaRead64(pa,value);},
+            [&hubFailure](unsigned,unsigned,const B5qUsbHostEvent::Event &event){
+              if(event.type==32u&&event.slot>=2u&&event.completion!=1u)hubFailure=true;
+            });
+          if(hubFailure&&__atomic_fetch_add(&hubDumps,1u,__ATOMIC_RELAXED)<16u)dmaDiagnostics("hub-transfer-failed");
+        }
         if(irIndex==0&&!gFirstCc27Seen){
             bool stopped=false;
             B5qUsbHostEvent::latest(ir.erst&~63ULL,ir.erstsz,ir.erdp,4,
@@ -1303,14 +1336,14 @@ void hostStats() {
     struct HostTree {uint64_t id;unsigned children;bool valid;};
     static HostTree trees[16]{};
     if(deviceOwner!=gHost){deviceOwner=gHost;trackedCount=0;memset(trees,0,sizeof trees);}
-    OSNumber *debugMask=OSNumber::withNumber(kUsbPortDebugOptions,32);
+    OSNumber *debugMask=OSNumber::withNumber(usbDebugMask(false),32);
     OSDictionary *settings=debugMask?OSDictionary::withCapacity(1):nullptr;
     if(settings)settings->setObject("kUSBDebugOptions",debugMask);
     uint64_t seen[16];unsigned seenCount=0;
     while (OSObject *object = devices ? devices->getNextObject() : nullptr) {
         ++count;
         IOService *dev=OSDynamicCast(IOService,object);
-        if(settings&&dev&&!dev->getProperty("B5qDevDebugApplied")&&dev->setProperties(settings)==kIOReturnSuccess)
+        if(usbDebugMask(false)&&settings&&dev&&!dev->getProperty("B5qDevDebugApplied")&&dev->setProperties(settings)==kIOReturnSuccess)
             dev->setProperty("B5qDevDebugApplied",debugMask);
         IORegistryEntry *entry = OSDynamicCast(IORegistryEntry, object);
         auto number=[](IORegistryEntry *e,const char *name)->uint32_t{
@@ -1456,6 +1489,31 @@ void roleThread(void *, wait_result_t) {
                 IOLockUnlock(gRoleLock);
                 continue;
             }
+        }
+        const B5qUsbHostRole::View laneView={__atomic_load_n(&gRoleApplied,__ATOMIC_ACQUIRE)==kRoleHost,
+            role==kRoleHost,gHost!=nullptr&&gHostNub!=nullptr,false,true,timing.water(),timing.attached(),
+            timing.role()==kRoleHost,timing.orientation()==gAppliedOrientation};
+        if(dpEnabled&&B5qUsbHostRole::canReleaseSuperSpeed(laneView,gDpLanes,requestedDp)){
+            // The USB2 D+/D- PHY is independent of QMP. Switch the core's
+            // reference mux first, then relinquish SuperSpeed only.
+            if(!b5q_dp_link_stop()){IOSleep(100);continue;}
+            // xHCI 5.4.8 / Linux xhci-hub.c: disable only the SS
+            // root port before touching the combo PHY. USB2 PORTSC1,
+            // rings, interrupt routing and the Apple controller stay live.
+            if(gXhciRegs.va){
+                const unsigned cap=gXhciRegs.va[0]&255u;
+                if(cap>kXhciRegisterBytes-0x414u){IOSleep(100);continue;}
+                volatile uint32_t *ss=gXhciRegs.va+(cap+0x410u)/4;
+                if(*ss&2u){*ss=B5qUsbHostRole::disableSuperSpeed(*ss);barrier();}
+                unsigned waited=0;while((*ss&2u)&&waited++<100u)IOSleep(1);
+                if(*ss&2u){IOLog("qcom-dwc3: SS release deferred portsc2=%x\n",*ss);continue;}
+            }
+            selectUtmiClock();gDpLanes=4;
+            if(gGlobals.va){gGlobals.va[0x2c0/4]|=kUsb3SuspendPhy;barrier();}
+            gSuperSpeed=qmpInit(timing.orientation()!=0);
+            IOLockLock(gRoleLock);gCableApplied=cableVersion;gAppliedCable=timing;IOLockUnlock(gRoleLock);
+            IOLog("qcom-dwc3: host-usb2-retained dp-lanes=4 usb3=%u controller=%p\n",gSuperSpeed,gHost);
+            b5q_dp_link_update(&port);continue;
         }
         if(dpEnabled&&!b5q_dp_link_stop()){
             // Keep the combo lanes and existing controller intact until
@@ -1603,4 +1661,13 @@ extern "C" void qcom_dwc3_publish(void) {
         if(gRoleLock){IOLockFree(gRoleLock);gRoleLock=nullptr;}
     }
 
+}
+
+// Called by the serialized DP owner before its first PHY access. Keep the
+// QMP shared reference/AUX path powered even when USB uses UTMI only.
+extern "C" bool b5q_usb_dp_phy_ready(void){
+ if(!gGcc.va)return false;
+ return !(gGcc.va[0x50000/4]&1u)&&!(gGcc.va[0x50008/4]&1u)&&
+   branch(0x39060)&&branch(0x39064)&&!(gGcc.va[0x39060/4]&(1u<<31))&&
+   !(gGcc.va[0x39064/4]&(1u<<31));
 }

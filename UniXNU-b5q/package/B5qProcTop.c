@@ -3,6 +3,8 @@
 #include <sys/proc.h>
 #include <IOKit/IOLib.h>
 #include <kern/thread.h>
+#include <mach/task_info.h>
+#include <mach/mach_time.h>
 #include <kern/startup.h>
 struct flock;
 struct componentname;
@@ -29,10 +31,32 @@ static void exited(proc_t proc) {
     b5q_proc_exit(&counts, proc_best_name(proc), (unsigned)proc_exitstatus(proc));
 }
 static void emitLine(const char *line,void *context) {(void)context;IOLog("%s",line);}
+/* Exact exported XNU contracts, proc_iterate retains each proc and waits
+ * for exec transitions before its callback (kern_proc.c). task_info takes
+ * its own task lock; no logging occurs while an iterator callback runs.
+ * bsd_init.c inserts kernproc into allproc and binds kernel_task; PID 0
+ * is included by this iterator, not synthesized from user process totals. */
+extern void proc_iterate(unsigned,int (*)(proc_t,void *),void *,int (*)(proc_t,void *),void *);
+extern task_t proc_task(proc_t);
+extern uint64_t proc_uniqueid(proc_t);
+extern kern_return_t task_info(task_t,task_flavor_t,task_info_t,mach_msg_type_number_t *);
+static struct b5q_cpu_window cpu;
+static int cpuSample(proc_t proc,void *unused){
+ (void)unused;task_t task=proc_task(proc);if(!task)return 0;
+ task_absolutetime_info_data_t info={0};mach_msg_type_number_t count=TASK_ABSOLUTETIME_INFO_COUNT;
+ if(task_info(task,TASK_ABSOLUTETIME_INFO,(task_info_t)&info,&count)!=KERN_SUCCESS)return 0;
+ uint64_t ns=0;absolutetime_to_nanoseconds(info.total_user+info.total_system,&ns);
+ b5q_cpu_sample(&cpu,proc_pid(proc),proc_uniqueid(proc),proc_best_name(proc),ns);return 0;
+}
 static void reporter(void *arg, wait_result_t result) {
     (void)arg; (void)result;
+    uint64_t previous=mach_absolute_time();
+    b5q_cpu_begin(&cpu,0);proc_iterate(1u,cpuSample,NULL,NULL,NULL);
     for (;;) {
         IOSleep(30000);
+        const uint64_t now=mach_absolute_time();uint64_t elapsed=0;absolutetime_to_nanoseconds(now-previous,&elapsed);previous=now;
+        b5q_cpu_begin(&cpu,elapsed/1000000);proc_iterate(1u,cpuSample,NULL,NULL,NULL);
+        b5q_cpu_print(&cpu,emitLine,NULL);
         struct b5q_proc_window w = b5q_proc_snapshot(&counts, rows);
         b5q_proc_print(w,rows,emitLine,NULL);
     }

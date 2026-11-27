@@ -53,7 +53,8 @@ body=base+r'''
 #include "B5qDpPort.h"
 #include "B5qUsbHostRole.h"
 void *gHost=(void*)1;void *gHostNub=(void*)1;
-struct{uint32_t *va=nullptr;}gXhciRegs;
+struct{uint32_t *va=nullptr;}gXhciRegs,gGlobals;
+constexpr uint32_t kUsb3SuspendPhy=1u<<17;void barrier(){}
 B5qMax77705::Cable gAppliedCable;
 int gAppliedOrientation=-1;
 uint64_t ticks=0;unsigned polls=0,leaves=0,otgOff=0;bool otg=true;uint8_t cc=0x4a,cc1=1,bc=0;

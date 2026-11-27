@@ -5,7 +5,7 @@ import importlib.util,json,struct,subprocess,sys,tempfile,zlib
 ROOT=Path(__file__).resolve().parents[2];HEADERS=ROOT/'UniXNU-b5q/package/B5qUfs'
 sys.path.insert(0,str(ROOT/'tools/xnu2log/scripts'))
 from nabu_log_volume import make_config,decode_container
-TOKEN=bytes.fromhex('411839cbaebac4088c251c0ea57579a2');BLOCK=4096;ESP=3162880;ROOT_FIRST=49692663;ROOT_LAST=62275574;CAPACITY=62275584;FILE_BYTES=8400896
+TOKEN=bytes.fromhex('411839cbaebac4088c251c0ea57579a2');BLOCK=4096;ESP=3162880;ROOT_FIRST=49692663;ROOT_LAST=62275574;CAPACITY=62275584;FILE_BYTES=33566720
 
 def disk(path,case):
  count=512;stride=128;entries=bytearray(count*stride)
@@ -16,7 +16,7 @@ def disk(path,case):
  header=bytearray(BLOCK);header[:8]=b'EFI PART';struct.pack_into('<II',header,8,0x10000,92);struct.pack_into('<QQQQ',header,24,1,CAPACITY-1,265,CAPACITY-10);struct.pack_into('<QIII',header,72,2,count,stride,zlib.crc32(entries));struct.pack_into('<I',header,16,zlib.crc32(header[:92]))
  boot=bytearray(BLOCK);struct.pack_into('<H',boot,11,BLOCK);boot[13]=1;struct.pack_into('<H',boot,14,32);boot[16]=2;struct.pack_into('<II',boot,32,204800,200);struct.pack_into('<I',boot,44,2);boot[82:87]=b'FAT32';boot[510:512]=b'\x55\xaa'
  fat=bytearray(200*BLOCK);struct.pack_into('<III',fat,0,0xffffff8,0xfffffff,0xfffffff)
- for i in range(2051):struct.pack_into('<I',fat,(3+i)*4,4+i if i<2050 else 0xfffffff)
+ for i in range(8195):struct.pack_into('<I',fat,(3+i)*4,4+i if i<8194 else 0xfffffff)
  if case=='chain':struct.pack_into('<I',fat,4*4,8)
  if case=='fatalias':struct.pack_into('<I',fat,3000*4,4)
  directory=bytearray(BLOCK);directory[:11]=b'XNU2LOG BIN';directory[11]=0x20;struct.pack_into('<H',directory,26,3);struct.pack_into('<I',directory,28,FILE_BYTES)
@@ -28,7 +28,7 @@ def disk(path,case):
   if case=='mirror':f.seek((ESP+232)*BLOCK+12);f.write(bytes(4))
   if case=='gptcrc':f.seek(2*BLOCK+32);f.write(bytes(8))
   if case=='damagedslots':
-   for lba in [first+1,first+1026]:f.seek(lba*BLOCK);f.write(b'BROKEN')
+   for lba in [first+1,first+4098]:f.seek(lba*BLOCK);f.write(b'BROKEN')
  return first
 
 HARNESS=r'''
@@ -83,7 +83,7 @@ static bool submit(){
  else {
   assert(bytes==blocks*4096 && blocks<=32);assert(!fseeko(media,lba*4096,SEEK_SET));
   if(c[0]==0x2a){assert(c[1]==8 && u[1]==0x20 && (utrd[0]&(3U<<25))==(1U<<25));++writes;
-   assert(lba>3163313 && lba+blocks<=3163313+2051);
+   assert(lba>3163313 && lba+blocks<=3163313+8195);
    if(fail_header && nabu_log_writer_rounds==1 && blocks==1){host.poisoned=true;return false;}
    assert(fwrite(dma+dataOffset,1,bytes,media)==bytes);
   }else {assert(c[0]==0x28 && u[1]==0x40 && (utrd[0]&(3U<<25))==(2U<<25));
@@ -133,15 +133,15 @@ int main(int argc,char**argv){
  const unsigned before=writes; nabu_capture_append("URGENT",6);
  assert(b5q_log_sync(2)==(fail_header?3u:1u)&&writes==before);assert(nabu_log_writer_rounds==(fail_header?1u:2u));
  assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first,1));
- for(uint64_t lba:{1ULL,3162880ULL,49692663ULL,62275574ULL,static_cast<unsigned long long>(nabu_log_volume.file_first+2051)})assert(!nb_volume_write_allowed(&nabu_log_volume,lba,1));
- assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+2050,2));
- assert(nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+1,2050));
+ for(uint64_t lba:{1ULL,3162880ULL,49692663ULL,62275574ULL,static_cast<unsigned long long>(nabu_log_volume.file_first+8195)})assert(!nb_volume_write_allowed(&nabu_log_volume,lba,1));
+ assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+8194,2));
+ assert(nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+1,8194));
  assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,true,true,0,0));
  // Whole-LUN wire SYNC is still gated by the caller's proven journal extent.
  for(uint64_t lba:{0ULL,1ULL,3162880ULL,49692663ULL,static_cast<unsigned long long>(nabu_log_volume.file_first)})
   assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,lba,1025));
  assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+1,0));
- assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+2050,2));
+ assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+8194,2));
  fclose(media);return 0;
 }
 '''
@@ -161,7 +161,7 @@ def main():
     f.seek(first*BLOCK);container=f.read(FILE_BYTES)
    assert container[:BLOCK]==make_config(TOKEN if case!='token' else bytes([9])*16)
    if case in ['ok','headerfail']:
-    text,info=decode_container(container);assert info['sequence']==(1 if case=='headerfail' else 2);assert len(text)==4<<20
+    text,info=decode_container(container);assert info['sequence']==(1 if case=='headerfail' else 2);assert len(text)==16<<20
     if case=='ok':assert text.endswith(b'LATE-BOOT\n')
     saved=temp/'XNU2LOG.BIN';saved.write_bytes(container)
     subprocess.run([sys.executable,str(ROOT/'tools/xnu2log/scripts/read_xnu2log.py'),str(saved),'--out',str(temp/'console.txt')],check=True,capture_output=True)

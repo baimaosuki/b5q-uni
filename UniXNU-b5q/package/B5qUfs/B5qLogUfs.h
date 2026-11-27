@@ -51,6 +51,11 @@ extern "C" unsigned b5q_log_sync(unsigned milliseconds) {
   }while(mach_absolute_time()<deadline);
   return 1;
 }
+/* Sleepable urgent breadcrumbs reuse the single validated writer. No UFS
+ * lock is taken here; IRQ/preemption-disabled callers remain request-only. */
+extern "C" int b5q_log_flush_urgent(unsigned timeout_ms) {
+  return (int)b5q_log_sync(timeout_ms>300u?300u:timeout_ms);
+}
 /* 1 success, 0 bounded contention, -2 retryable read, -1 transport/gate failure. The existing root
  * read path stays read-only. Only this function can emit the bounded WRITE(10). */
 static int nabuLogIo(bool write,uint64_t lba,uint32_t blocks,uint8_t *data,bool sync=false)
@@ -159,7 +164,7 @@ static void nabuLogThread(void *,wait_result_t)
             nabu_log_volume.reads,host.poisoned?1u:0u,host.selected?1u:0u);
       if(host.poisoned || !host.selected) {stop_reason="transport-unavailable";break;}
       if(mach_absolute_time()>=open_deadline) {stop_reason="open-deadline";break;}
-      nabuLogPause(1000);
+      nabuLogPause(4000);
     }
     if(!opened) goto stop;
     IOLog("B5QLOG2: volume verified attempts=%u reads=%u esp=%u..%u file_first=%u\n",
@@ -202,7 +207,7 @@ static void nabuLogThread(void *,wait_result_t)
       }
       snapshot_stalls=0;
       if(sequence==~0ULL) {stop_reason="sequence-exhausted";goto stop;}
-      if(snapshot.end==last_end && snapshot.lost==last_lost) {nabuLogPause(1000);continue;}
+      if(snapshot.end==last_end && snapshot.lost==last_lost) {nabuLogPause(4000);continue;}
       bool complete=true;
       for(unsigned at=0;at<snapshot.length;at+=1024) {
         unsigned n=snapshot.length-at>1024?1024:snapshot.length-at;
@@ -254,7 +259,7 @@ static void nabuLogThread(void *,wait_result_t)
         __atomic_fetch_add(&nabu_log_writer_rounds,1u,__ATOMIC_RELAXED);
         if(first) IOLog("B5QLOG2: first snapshot committed slot=%u bytes=%u\n",slot,snapshot.length);
       }
-      nabuLogPause(1000);
+      nabuLogPause(4000);
     }
   }
 stop:

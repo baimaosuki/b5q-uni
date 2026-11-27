@@ -22,3 +22,13 @@ static inline void b5q_proc_print(struct b5q_proc_window w,
              w.rows<B5Q_PROC_TOP?w.rows:(unsigned)B5Q_PROC_TOP, (unsigned long long)w.overflow);
     emit(line,context);
 }
+
+static inline void b5q_cpu_print(const struct b5q_cpu_window *w,void (*emit)(const char *,void *),void *context){
+ char line[224];
+ for(unsigned i=0;i<B5Q_CPU_TOP;i++)if(w->top[i].delta_ms){
+  const struct b5q_cpu_rank *p=&w->top[i];
+  snprintf(line,sizeof line,"B5qProcTop: cpu TOP%u pid=%d name=%s delta_cpu_ms=%llu permille=%llu window_ms=%llu\n",i+1,p->pid,p->name,(unsigned long long)p->delta_ms,(unsigned long long)p->permille,(unsigned long long)w->elapsed_ms);emit(line,context);
+ }
+ const struct b5q_cpu_rank *p=&w->kernel;
+ snprintf(line,sizeof line,"B5qProcTop: cpu kernel_task pid=0 delta_cpu_ms=%llu permille=%llu sampled=%u overflow=%u\n",(unsigned long long)p->delta_ms,(unsigned long long)p->permille,w->used,w->overflow);emit(line,context);
+}

@@ -27,12 +27,13 @@ py('review14','scripts/b5q-install/test-review14.py')
 py('review15','scripts/b5q-install/test-review15.py')
 py('review16','scripts/b5q-install/test-review16.py')
 py('review17','scripts/b5q-install/test-review17.py')
+py('review18','scripts/b5q-install/test-review18.py')
 run('loader-inputs',[
  'env','PATH=/usr/lib/llvm-17/bin:'+os.environ['PATH'],
  'LD_PRELOAD=/usr/lib/llvm-17/lib/clang/17/lib/linux/libclang_rt.ubsan_standalone-x86_64.so',
  sys.executable,R/'UniXNU/drivers/DarwinBoot/Test/test-loader-inputs.py'])
 py('original-binaries','scripts/b5q-install/check-v33d-original-binaries.py')
-py('target-compile','scripts/b5q-install/check-peripheral-target.py','--sources','QcomDwc3.cpp,NativeHidInput.cpp,B5qTouch.cpp,UsbProbe.cpp,QcomRpmh.c,SoftwareAesProbe.cpp,KeyStoreProbe.cpp,ThermalLevel.cpp,B5qPower.cpp,B5qGpu.cpp,ButtonProbe.cpp,GeniI2c.c,B5qUfs.cpp','--objects-out',W/'target','--reference',R/'artifacts/b5q-esp-v33b-repair2/esp.img')
+py('target-compile','scripts/b5q-install/check-peripheral-target.py','--sources','QcomDwc3.cpp,LegacyDisplayProbe.cpp,NativeHidInput.cpp,B5qTouch.cpp,UsbProbe.cpp,QcomRpmh.c,SoftwareAesProbe.cpp,KeyStoreProbe.cpp,ThermalLevel.cpp,B5qPower.cpp,B5qGpu.cpp,ButtonProbe.cpp,GeniI2c.c,B5qUfs.cpp','--objects-out',W/'target','--reference',R/'artifacts/b5q-esp-v33b-repair2/esp.img')
 py('firmware-reconstruction','scripts/b5q-install/check-stage-firmware-inputs.py','--media','--dp','--out',W/'firmware-inputs.json')
 py('firmware-target','scripts/b5q-install/check-pcie-uefi-target.py','--media','--dp')
 py('review4-target-proof','tests/b5q-ufs/test-v33d-review4-target.py')

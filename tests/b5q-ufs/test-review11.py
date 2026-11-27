@@ -64,7 +64,7 @@ for body in (restore,role):
 assert all(x in restore for x in ('*guctl|=kGuctlSprsCtrlTransEn','*guctl1=(*guctl1&~(7u<<21))|kGuctl1Host','*guctl2|=kGuctl2Host'))
 assert '1u<<31' not in role and 'phyInit()' not in role and role.index('*gctl&=~(1u<<11)')<role.index('repeater(false')
 assert 'kHostEventDumpCount=16' in usb and 'first-HCE' in usb and 'GUCTL2=%x' in usb
-assert 'kUsbPortDebugOptions=0x40000119u' in usb and '"kUSBDebugOptions"' in usb and 'metaCast("AppleUSBHostPort")' in usb
+assert 'kUsbPortDebugOptions=0u' in usb and 'usb-debug' in usb and '0x40000119u' in usb and '"kUSBDebugOptions"' in usb and 'metaCast("AppleUSBHostPort")' in usb
 set_power=usb[usb.index('IOReturn setPowerState(unsigned long state'):usb.index('// write-64-hi-lo-quirk')]
 write64=usb[usb.index('void XHCI_WRITE64('):usb.index('\n    }\n};',usb.index('void XHCI_WRITE64('))]
 assert 'b5q_log_sync' not in set_power and 'b5q_log_sync' not in write64

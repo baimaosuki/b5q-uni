@@ -28,6 +28,7 @@ static inline bool of_machine_is_compatible(const char *name)
 extern "C" {
 #endif
 void nw_board_mac(u8 *a);
+void b5q_wifi_mac_context(const u8 *a);
 #ifdef __cplusplus
 }
 #endif

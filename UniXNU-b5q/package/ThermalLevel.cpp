@@ -225,7 +225,7 @@ extern "C" void sheng_thermal_level_probe(void) {
         return;
     }
     native_thermal_level_state = 1;
-    IOLog("B5qThermal: stage=ready thermal-level=%d keys=mTPL cpu-trips=90/95/110C gpu-trips=85/90/110C hysteresis=DT\n",native_thermal_level_state);
+    IOLog("B5qThermal: stage=ready thermal-level=%d keys=mTPL cpu-trips=70/80/90C gpu-trips=68/78/88C hysteresis=board-CPU3/3/2-GPU2/2/2C\n",native_thermal_level_state);
     service->release();   // the platform's attachment keeps it
 }
 

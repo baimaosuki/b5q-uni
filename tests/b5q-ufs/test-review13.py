@@ -142,6 +142,7 @@ struct OSDictionary:OSObject{std::map<std::string,OSObject*> values;
 struct OSIterator:OSObject{std::vector<OSObject*>values;unsigned pos=0;
  OSObject*getNextObject(){return pos<values.size()?values[pos++]:nullptr;}};
 using IOReturn=unsigned;constexpr unsigned kIOReturnSuccess=0,kUsbPortDebugOptions=0x40000119u,kUsbHostDebugOptions=0x4000015du;
+static unsigned usbDebugMask(bool host){return host?kUsbHostDebugOptions:kUsbPortDebugOptions;}
 constexpr unsigned kXhciRegisterBytes=0x8000;static uint32_t registers[kXhciRegisterBytes/4]{};
 static struct{uint32_t *va=registers;}gXhciRegs;
 static OSObject yes;static OSObject*kOSBooleanTrue=&yes;static const char*gIOServicePlane="service";

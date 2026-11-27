@@ -295,7 +295,7 @@ int main(){struct pci_ops ops={read_window};struct ath11k_base ab={(void*)1,{&op
     start = function(xhci, 'bool start(')
     assert start.index('if(started)') < start.index('restoreHostGlobals()') < start.index('configureHostPorts(this)')
     assert 'gHost' not in start and 'gHost' not in configure
-    assert 'kUsbPortDebugOptions=0x40000119u' in usb
+    assert 'kUsbPortDebugOptions=0u' in usb and 'usb-debug' in usb and '0x40000119u' in usb
     assert 'host->setProperties(hostSettings)' in configure and '"B5qHostDebugApplied"' in configure
     assert 'port->setProperties(settings)' in configure and 'ensureHostPortHold(port)' in configure
     assert '"B5qPortPowerPinned"' in configure and 'kPortHoldAttached' in configure
@@ -324,6 +324,7 @@ struct OSDictionary:OSObject{std::map<std::string,OSObject*> values;
 struct OSIterator:OSObject{std::vector<OSObject*>values;unsigned pos=0;
  OSObject*getNextObject(){return pos<values.size()?values[pos++]:nullptr;}};
 using IOReturn=unsigned;constexpr unsigned kIOReturnSuccess=0,kUsbPortDebugOptions=0x40000119u,kUsbHostDebugOptions=0x4000015du;
+static uint32_t usbDebugMask(bool host){return host?kUsbHostDebugOptions:kUsbPortDebugOptions;}
 constexpr unsigned kXhciRegisterBytes=0x8000;static uint32_t registers[kXhciRegisterBytes/4]{};
 static struct{uint32_t *va=registers;}gXhciRegs;
 static OSObject yes;static OSObject*kOSBooleanTrue=&yes;static const char*gIOServicePlane="service";

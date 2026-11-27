@@ -3598,3 +3598,50 @@ revision = "e4c9947bfe8d896dc354403eacde58b0e98e67ca"
 reference = "reports/review17-source-audit.json"
 command = "test-review17.py; test-review12.py through test-review16.py; check-dp-local.py; build-b5q-wifi.py; check-wifi-target.py; check-bt-target.py; check-peripheral-target.py; check-dp-target.py; B5Q_GATE_WORK=artifacts/b5q-v33d-review17 pre-ci-v33d.py"
 result = "PASS10 Review17 checks,26 DP groups,38 full local gates,109 Wi-Fi/5 board/9 BT objects,427 XHCI and483 IOMFB slots,0 scoped unresolved, wireless+ADSP/PAC/zero-EL1-SMMU. Aggregate receipt SHA256 4e762a3ccd27a32f2053e4d56611e7fce98e1b3902e35bf808ea20447ac6985c. hardware_verified=false; no commit/push/CI/image/phone."
+
+
+[[area]]
+id = "review18-local-upstream-display"
+status = "host-verified"
+components = ["Adreno740", "AdrenoMetal", "GopFramebuffer", "QcomDwc3", "Ath12kWifi", "RamBlock"]
+paths = ["package/B5qDisplayTransform.h", "package/LegacyDisplayProbe.cpp", "package/B5qTouch.cpp", "package/B5qTouchReports.h", "package/ThermalLevel.h", "package/ThermalLevel.cpp", "package/B5qProcTop*", "package/B5qUfs/B5qLog*", "package/QcomDwc3.cpp", "package/B5qUsbHostRole.h", "package/B5qWifiBoard.cpp", "package/B5qAth11kCompat/B5qAth11kCompat.h", "package/B5qDpLink.cpp", "package/B5qDpSession.h", "scripts/b5q_display.py", "scripts/b5q_wifi.py", "scripts/b5q_adsp.py", "scripts/b5q_adreno_mmio.py", "scripts/build-b5q-*.py", "patches/tools/b5q-review18-*", "patches/xnu/b5q-console-journal.patch", "reports/review18-*.json"]
+inputs = ["Review17 physical journal SHA256 3696c360ee423b1255d80087b0dde64604e232348c239ccc8ac9f2396da2de74; truncated 4MiB tail is not proof of a MAC mismatch", "Exact upstream old/new commits and commit lists in reports/review18-upstream-sync.json; protected68 inputs captured before work", "Pinned Samsung stock DTS, gcc-kalama.c, dispcc-kalama.c, XNU kern_proc/task/bsd_init and actual macOS27.3 CoreDisplay/SkyLight scale-resolutions consumer; hashes and exact source references in reports/review18-source-audit.json"]
+configuration = ["No commit/push/CI/ESP/phone access. Hardware verified false; unchanged1023-byte kernel arguments, UEFI64MiB pools, TI3e, WCN power, Bluetooth executors and workflow", "16MiB journal slots33566720-byte total,4s regular write period,250/300ms bounded urgent API; historical4MiB decoding retained", "CPU70/80/90C, GPU68/78/88C pressure and30s per-process CPU deltas including kernel_task; no fabricated CPU frequency cap", "Internal logical2640x1080, physical1080x2640; GPU90degree compute transform with matching CPU fallback/touch inverse; chosen scale2 and standard big-endian scale-resolutions mode, native timing and156x64mm EDID. External DP remains independent"]
+procedure = ["StageA upstream sync and actual baseline target checks passed before B/C; preserve source patches and pin GPU kernel/runtime identity", "Run production ASan/UBSan host tests, actual AIR execution, Review12..17, all log tests, DP26 incl100000 fuzz, full pre-ci-v33d, arm64e objects,427/483 slot ABI, symbol/PAC and official porting checker", "Record full local receipt, scoped changes and all first-failure logs; retain HOST_VERIFIED_PENDING_HARDWARE only after local checks pass"]
+findings = ["Sheng main contains only Novatek touch-pin/docs changes; no Wi-Fi wake fix exists in that delta and no Novatek code is adopted. New UniXNU GPU sources require a matching runtime; old archive/addon source identities are rejected", "Source-proven USB SS root-port disable and UTMI-only mux release preserve the existing USB2 controller during DP4lane takeover. Hub STALL cause remains unknown; bounded slot1/2,EP0,SetupTRB/event probes added without speculative park/split changes", "Duplicate pending disconnect is not requeued. Board/ifnet/vdev MAC comparison and bounded control owner/dispatch timings expose the deferred join; no unsupported mismatch claim", "DP QMP/AUX/reset and retained GDSC/DISPCC AHB prerequisites are checked before PHY/controller/DPU reads; twelve urgent breadcrumbs. Flush timeout is reported and cannot guarantee persistence after an instantaneous hardware fault", "Physical display dimensions and standard scale-resolutions publication replace invented HiDPI keys. CoreDisplay/SkyLight actual consumer disassembly and GPU/touch corner/color tests qualify host behavior; actual backing scale, power, USB Hub and DP restart results remain hardware-pending"]
+completion = ["HOST_VERIFIED_PENDING_HARDWARE: 39 full pre-CI gates and 14 focused groups pass; 109 Wi-Fi,5 board,9 BT,31 GPU,6 peripheral,4 display and DP target objects compile with scoped unresolved0. See reports/review18-source-audit.json; hardware_verified=false"]
+limits = ["No full Apple native XNU/Metal/Rust link on this Linux host; real target-object compilation, AIR host execution and exact existing ABI bindings are separate scopes", "Workflow is intentionally byte-identical and still pins older UniXNU. Any future CI must deliberately align its source checkout to the recorded new upstream; this local task does not trigger or claim that CI", "Review18 changes are isolated from pre-existing TWRP/document/release edits; source patches reproduce nested display component changes"]
+next_action = ["Complete local receipt and submit uncommitted Review18 changes for owner review; no remote or phone operations"]
+
+[[area.evidence]]
+kind = "source"
+revision = "396a09f7253b7220d27be10ef6a7dd5422a4471d"
+reference = "reports/review18-upstream-sync.json"
+result = "StageA source synchronization plus5 core tests,6 board,5 Wi-Fi and9 Bluetooth baseline target objects passed before B/C edits; all source deltas and preserved local patches listed. Hardware false"
+
+[[area.evidence]]
+kind = "host"
+revision = "396a09f7253b7220d27be10ef6a7dd5422a4471d"
+reference = "reports/review18-source-audit.json"
+command = "test-review18.py; test-review12..17.py; test-log-*.py; check-dp-local.py; check-dp-target.py; check-peripheral-target.py; check-xnu-patches.py; pre-ci-v33d.py; porting-record.py check"
+result = "PASS 39 full pre-CI gates, 14 focused groups, Review12..17/log regressions,26 DP groups incl100000 fuzz,144/144 ordered XNU patches,427/483 ABI, source-qualified PAC and zero unresolved. Hardware not verified"
+
+
+[[area]]
+id = "review18-ci-alignment"
+status = "host-verified"
+components = ["Adreno740", "AdrenoMetal", "GopFramebuffer"]
+paths = ["reports/review18-source-audit.json", "scripts/b5q_display.py"]
+inputs = ["Owner explicitly authorized Review18 release on codex/b5q-review9-arm-ci; exact upstream e7bddb9a7eecdcf81f36da9fa38bd9d4d3f155c2"]
+configuration = ["Only authorized workflow kernel source pin and additive GPU JSON/runtime bin/bundle uploads change; unchanged UEFI/BT/board inputs"]
+procedure = ["Five tool patches clean-apply locally, source-bound local gates, exact staged-file review, ARM CI, returned binaries, local4KnESP with33566720-byte journal"]
+findings = ["All four core tool patches and resolved ArmCpu patch apply --check cleanly on the pinned upstream sources; no patch changes necessary"]
+completion = ["Local release preparation verified; CI and returned acceptance recorded separately; hardware_verified=false"]
+limits = ["No phone access or flash authorization. Physical qualification pending"]
+next_action = ["Run the authorized CI and local ESP packaging"]
+[[area.evidence]]
+kind = "host"
+revision = "396a09f7253b7220d27be10ef6a7dd5422a4471d"
+reference = "reports/review18-source-audit.json"
+command = "git apply --check for four tool patches; git apply -p3 --check b5q-armcpu-spi-ipi-lock.patch"
+result = "PASS5/5 clean-source checks; exact evidence artifacts/b5q-review18-release/tool-patches.json; no firmware build or phone access"

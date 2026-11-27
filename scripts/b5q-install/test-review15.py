@@ -219,7 +219,7 @@ int main(){for(unsigned fault=0;fault<5;fault++){
 usb = (P / 'QcomDwc3.cpp').read_text()
 stats = function(usb, 'void hostStats() {')
 assert 'if (!gDmaReady || !gHost || gCoreRole != kRoleHost) return;' in stats
-assert 'kUsbHostDebugOptions=0x4000015du' in usb and 'kUsbPortDebugOptions=0x40000119u' in usb
+assert 'kUsbHostDebugOptions=0u' in usb and 'kUsbPortDebugOptions=0u' in usb and 'usb-debug' in usb and '0x4000015du' in usb and '0x40000119u' in usb
 configure = function(usb, 'void configureHostPorts(IOService *host) {')
 assert configure.index('portConnectedForHold') < configure.index('ensureHostPortHold(port)')
 assert 'host->setProperties(hostSettings)' in configure and 'port->setProperties(settings)' in configure
@@ -240,7 +240,7 @@ link = (P / 'B5qDpLink.cpp').read_text()
 for marker in ['stage=pool-ready', 'stage=hw-open', 'B5qDP: discover', 'train_err=', 'phy_last=', 'stage=scanout', 'B5qDP: feature b5q-dp=', 'B5qDP: port phase=']:
     assert marker in link
 for name in ['B5qDpPhy.h', 'B5qDpClock.h', 'B5qDpDpu.h', 'B5qDpDisplay.cpp', 'B5qWcnPower.cpp',
-             'B5qBtFifo.c', 'B5qTouch.cpp']:
+             'B5qBtFifo.c']:
     assert (P / name).read_bytes() == subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/' + name], cwd=R), name
 # Review17's H4 diagnostics are allowed; preserve its actual UART/IBS executor.
 old_bt = subprocess.check_output(['git', 'show', 'HEAD:UniXNU-b5q/package/B5qBluetooth.cpp'], cwd=R).decode()

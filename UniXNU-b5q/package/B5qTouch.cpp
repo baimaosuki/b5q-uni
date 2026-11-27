@@ -70,11 +70,12 @@ bool packet(TouchBus &bus,uint8_t &code,unsigned &length){
  if(length)IODelay(100);
  return B5qTouch::continuation([&bus](uint8_t *p,unsigned n){return bus.read(p,n);},message,length);
 }
+extern "C" uint32_t b5q_display_rotation(void);
 void publish(bool fromReport=true){
  __atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
  __asm__ volatile("dmb ish" ::: "memory");unsigned count=0;
  native_touch_recovered=!fromReport;
- for(unsigned i=0;i<12;++i)if(reports.points[i].kind==1){native_touch_xs[count]=int(B5qTouch::hid(reports.points[i].x));native_touch_ys[count]=int(B5qTouch::hid(reports.points[i].y));native_touch_ids[count]=int(i);++count;}
+ for(unsigned i=0;i<12;++i)if(reports.points[i].kind==1){unsigned x=0,y=0;B5qTouch::displayPoint(reports.points[i].x,reports.points[i].y,b5q_display_rotation(),x,y);native_touch_xs[count]=int(B5qTouch::hid(x));native_touch_ys[count]=int(B5qTouch::hid(y));native_touch_ids[count]=int(i);++count;}
  native_touch_count=count;__asm__ volatile("dmb ish":::"memory");__atomic_fetch_add(&native_touch_seq,1u,__ATOMIC_RELEASE);
  if(auto callback=__atomic_load_n(&sink,__ATOMIC_ACQUIRE))callback(sinkContext);
  if(fromReport){

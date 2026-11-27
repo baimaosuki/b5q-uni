@@ -35,7 +35,8 @@ static const char*nabu_log_io_reason;
 static IOReturn nabu_log_io_result;
 static uint32_t nabu_log_io_scsi;
 static unsigned calls,failures;static int condition;static bool held,contended;
-static uint64_t ticks;
+static uint64_t ticks,nabu_log_urgent_end,nabu_log_committed_end;
+static uint32_t nabu_log_stopping;
 static unsigned read32(uintptr_t,unsigned){return 0;}
 static void write32(uintptr_t,unsigned,unsigned){}
 static bool IOLockTryLock(int){assert(!held);if(contended)return false;held=true;return true;}
