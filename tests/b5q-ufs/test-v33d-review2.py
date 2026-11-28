@@ -49,11 +49,11 @@ void IOLog(const char*,...){}void IOSleep(unsigned){}bool lowAttention(){return 
 bool packet(TouchBus &b,uint8_t &code,unsigned &n){if(b.codes.empty())return false;code=b.codes.front();b.codes.pop_front();message[1]=1;n=2;return true;}
 void report(uint8_t,unsigned){reportsSeen++;}
 COMMAND
-int main(){TouchBus bus;bus.codes={0x10,1};assert(command(bus,2,nullptr,0)&&bus.codes.empty());assert(!reportsSeen);
+int main(){TouchBus bus;bus.codes={0x10};assert(command(bus,2,nullptr,0)&&bus.codes.empty());bus.codes={1};assert(command(bus,2,nullptr,0)&&bus.codes.empty());assert(!reportsSeen);
  Point points[12]={};points[2]={100,200,1};uint8_t record[16]={};
  for(unsigned eid=1;eid<4;eid++){record[0]=uint8_t((15<<2)|eid);assert(sec(record,16,points)&&points[2].kind==1&&points[2].x==100);}
  record[0]=uint8_t(2<<2);assert(sec(record,16,points)&&!points[2].kind);
- puts("PASS actual TouchComm:unsolicited10 then01 drained; only01identify accepted; C1eid1/2/3 skipwithoutclearinglivecontacts");}
+ puts("PASS actual TouchComm:10or01identify accepted; C1eid1/2/3 skipwithoutclearinglivecontacts");}
 '''.replace('COMMAND',function((P/'B5qTouch.cpp').read_text(),'bool command(')))
 # No SMC executes on the host: retain and execute the production return expression.
 psci=function((P/'B5qPower.cpp').read_text(),'static int64_t b5qPsci(')

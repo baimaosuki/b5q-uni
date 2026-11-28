@@ -1,11 +1,15 @@
 diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
 --- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
 +++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
-@@ -57,27 +57,18 @@
+@@ -57,27 +57,22 @@
  STATIC CONST CHAR8 mUsb0[] = "USB0";
  STATIC BOOLEAN mAttempted;
  STATIC B5Q_USB_DMA_RESULT mResult;
 +STATIC UINT8 mUsbMapBuf[32768] __attribute__((aligned(8)));
++STATIC_ASSERT (USB_DMA_TABLE_PAGES >= 66 + 2 *
++               (sizeof (mUsbMapBuf) / sizeof (EFI_MEMORY_DESCRIPTOR) +
++                sizeof (mB5qReservedRanges) / sizeof (mB5qReservedRanges[0])),
++               "USB tables must cover the full static-map fragmentation bound");
  
  STATIC EFI_STATUS
  BuildUsbTables (USB_DMA_TABLES *Tables, UINT64 OwnedBase, UINT64 OwnedBytes, UINT64 *MappedBytes)
@@ -36,7 +40,27 @@ diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms
    if ((Stride < sizeof (*Map)) || (Size % Stride != 0) ||
        (UsbDmaNewTable (Tables) == NULL)) {
      Status = EFI_COMPROMISED_DATA;
-@@ -134,7 +125,6 @@
+@@ -98,13 +93,13 @@
+         (End >= Tables->PhysicalBase + USB_DMA_RESERVED_BYTES)) {
+       Retained = TRUE;
+     }
+-    // DarwinBoot marks its allocated window or sparse head as loader code.
+-    // Conventional RAM below the window also covers the low-address DMA pool.
++    // Normal loader and boot-services RAM can outlive this snapshot and be
++    // reused by the OS. Cover it throughout the aperture, not only the owned
++    // window; reserved/runtime/MMIO types and stock no-map spans stay excluded.
+     if ((Desc->Type == EfiLoaderCode) || (Desc->Type == EfiLoaderData)) {
+-      Start = MAX (Start, OwnedBase);
+-      End = MIN (End, OwnedBase + OwnedBytes);
+-      OwnsHead |= (Start == OwnedBase) && (End > Start) && B5qDmaRangeAllowed(Start,EFI_PAGE_SIZE);
+-    } else if (Desc->Type != EfiConventionalMemory) {
++      OwnsHead |= (Start <= OwnedBase) && (End > OwnedBase) && B5qDmaRangeAllowed(OwnedBase,EFI_PAGE_SIZE);
++    } else if ((Desc->Type != EfiConventionalMemory) &&
++               (Desc->Type != EfiBootServicesCode) && (Desc->Type != EfiBootServicesData)) {
+       continue;
+     }
+     Start = MAX (Start, B5Q_USB_DMA_BASE);
+@@ -134,7 +129,6 @@
    DEBUG((DEBUG_ERROR,"B5Q-USBDMA: stock-reserved-filter=1 mapped=%lx\n",*MappedBytes));
    Status = (OwnsHead && Retained) ? EFI_SUCCESS : EFI_COMPROMISED_DATA;
  Done:
@@ -44,7 +68,7 @@ diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms
    return Status;
  }
  
-@@ -210,11 +200,10 @@
+@@ -210,11 +204,10 @@
    }
    Status = EFI_DEVICE_ERROR;
  Fail:
@@ -59,3 +83,18 @@ diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms
      gBS->FreePages (Table, USB_DMA_TABLE_PAGES);
    }
    return Status;
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+@@ -3,7 +3,10 @@
+ #define B5Q_USB_DMA_TABLES_H
+ 
+ #define USB_DMA_PAGE 4096U
+-#define USB_DMA_TABLE_PAGES 256U
++// 32 KiB map: at most81940-byte descriptors, two partial2MiB edges each,
++// plus stock reservation edges,64L2tables and the L0/L1 roots. 8MiB retains
++// enough table pages for every disjoint descriptor map that fits the buffer.
++#define USB_DMA_TABLE_PAGES 2048U
+ #define USB_DMA_RESERVED_BYTES (USB_DMA_PAGE * USB_DMA_TABLE_PAGES)
+ #define USB_DMA_GIB (1ULL << 30)
+ #define USB_DMA_PA_MASK 0x0000000ffffff000ULL

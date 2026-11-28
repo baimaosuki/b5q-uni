@@ -12,7 +12,7 @@ def function(text,signature):
 source=(D/'UsbDma.c').read_text();body=function(source,'BuildUsbTables (')
 body='static EFI_STATUS '+body
 fixture=(R/'tests/b5q-ufs/test-usb-firmware-dma.c').read_text();fixture=fixture[:fixture.index('int main(void)')]
-fixture=fixture.replace('#define EfiReservedMemoryType 0','#define EfiReservedMemoryType 0\n#define EfiLoaderCode 1\n#define EfiLoaderData 2\n#define EFI_BUFFER_TOO_SMALL 5\n#define EFI_DEVICE_ERROR 7\n#define EFI_OUT_OF_RESOURCES 9\n#define EFI_ERROR(v) ((v)!=0)\n#define MIN(a,b) ((a)<(b)?(a):(b))\n#define MAX(a,b) ((a)>(b)?(a):(b))')
+fixture=fixture.replace('#define EfiReservedMemoryType 0','#define EfiReservedMemoryType 0\n#define EfiBootServicesCode 3\n#define EfiLoaderCode 1\n#define EfiLoaderData 2\n#define EFI_BUFFER_TOO_SMALL 5\n#define EFI_DEVICE_ERROR 7\n#define EFI_OUT_OF_RESOURCES 9\n#define EFI_ERROR(v) ((v)!=0)\n#define MIN(a,b) ((a)<(b)?(a):(b))\n#define MAX(a,b) ((a)>(b)?(a):(b))')
 a=fixture.index('static struct { EFI_STATUS (*LocateProtocol)');b=fixture.index('#include "B5qUsbDmaLoader.h"',a)
 fixture=fixture[:a]+r'''
 #include <stdlib.h>
@@ -34,10 +34,10 @@ int main(void){
  }
  assert(!B5qDmaRangeAllowed(UINT64_MAX-4095,8192));assert(!B5qDmaRangeAllowed(0xc8000001,4096));
  assert(B5qDmaRangeAllowed(0xc8200000,128*1024*1024));
- static UINT64 pages[256*512];USB_DMA_TABLES table={pages,0xa0c000000,0,256};UINT64 mapped=0;
+ static UINT64 pages[USB_DMA_TABLE_PAGES*512];USB_DMA_TABLES table={pages,0xa0c000000,0,USB_DMA_TABLE_PAGES};UINT64 mapped=0;
  descriptors[0]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiConventionalMemory,.PhysicalStart=0xf3700000,.NumberOfPages=0x4400000/4096};
  descriptors[1]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiLoaderCode,.PhysicalStart=0x88ba04000,.NumberOfPages=0x180000000/4096};
- descriptors[2]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiReservedMemoryType,.PhysicalStart=table.PhysicalBase,.NumberOfPages=256};
+ descriptors[2]=(EFI_MEMORY_DESCRIPTOR){.Type=EfiReservedMemoryType,.PhysicalStart=table.PhysicalBase,.NumberOfPages=USB_DMA_TABLE_PAGES};
  assert(!BuildUsbTables(&table,0x88ba04000,0x180000000,&mapped));unsigned shift;
  for(UINT64 a=0xf3700000;a<0xf7b00000;a+=4096){UINT64 e=walk(&table,a,&shift);assert((e!=0)==B5qDmaRangeAllowed(a,4096));}
  for(UINT64 a=0x88ba04000;a<0xa0ba04000;a+=4096){UINT64 e=walk(&table,a,&shift);assert((e!=0)==B5qDmaRangeAllowed(a,4096));}

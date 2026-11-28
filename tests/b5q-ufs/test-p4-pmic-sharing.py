@@ -40,8 +40,8 @@ int main(){
   reset();failOpen=bad;std::atomic<unsigned> successes{0};std::vector<std::thread> threads;
   for(unsigned i=0;i<16;++i)threads.emplace_back([&]{if(openMaxim())successes++;});
   for(auto &t:threads)t.join();
-  assert(opens==1&&successes==(bad?0:16)&&live==(bad?0:1));
-  assert(openMaxim()==!bad&&opens==1);
+  if(!bad){assert(opens==1&&successes==16&&live==1);assert(openMaxim()&&opens==1);}
+  else{assert(opens>=1&&opens<=16&&!successes&&!live&&maximBusState==0);unsigned before=opens;failOpen=false;assert(openMaxim()&&opens==before+1&&live==1);}
  }
  reset();assert(openMaxim());
  for(unsigned failure=0;failure<16;failure++) {

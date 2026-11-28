@@ -18,7 +18,8 @@ with tempfile.TemporaryDirectory(prefix="b5q-v32-") as temporary:
         while depth:depth+=(board[end]=='{')-(board[end]=='}');end+=1
         return board[start:end]
     init='\n'.join(function(n)for n in ['bool openMaxim()',
-        'extern "C" bool b5q_usb_typec_init','extern "C" bool b5q_usb_cable_state',
+        'extern "C" bool b5q_usb_typec_init','bool ensureMaximReady()',
+        'extern "C" bool b5q_usb_cable_state',
         'extern "C" int b5q_usb_cable_role'])
     harness = r'''
 #include "B5qMax77705.h"
@@ -43,6 +44,8 @@ static Bus *maxim;
 static bool maximReady=false;
 static volatile unsigned maximBusState=0;
 static void IOSleep(unsigned){}
+static uint64_t mach_absolute_time(){return 1000000000;}
+static void absolutetime_to_nanoseconds(uint64_t n,uint64_t *out){*out=n;}
 static void IOLockLock(int*){}
 static void IOLockUnlock(int*){}
 template<class... Args>void IOLog(const char*,Args...){++logs;}
