@@ -35,9 +35,9 @@ with tempfile.TemporaryDirectory(prefix='b5q-batch2-package-')as td:
  ram['payload']['adt']['owned_memory_size']='0x100000000'
  ram['payload']['adt'].pop('owned_memory_outside_ranges',None);ram['payload']['adt'].pop('owned_memory_outside_reserved',None)
  (fallback/'kernel.macho.adt').write_bytes(generate(dtb,ram,unique_chip_id=seed,data=True,trust=True,addon=True,root_policies=False))
- args=check_args(ctx.board['payload']['kernel_args']);ramargs=check_args([v if v!='b5q-data-ufs=1'else'b5q-data-ufs=0'for v in ctx.board['payload']['kernel_args']])
+ args=check_args(ctx.board['payload']['kernel_args']);ramargs=check_args(['b5q-data-ufs=0'if v.startswith('b5q-data-ufs=')else v for v in ctx.board['payload']['kernel_args']])
  (boot/'unixnu.toml').write_text('version = 1\n[boot]\ntimeout = 3\ndefault = "xnu"\n[kits]\nautoload = false\n[[driver]]\npath = "Drivers/DarwinBoot.efi"\n'+
-  '[[entry]]\nid = "xnu"\ntitle = "b5q New Batch 2 - Persistent Data"\ntype = "xnu"\npath = "Payloads/kernel.macho"\nargs = '+json.dumps(args)+'\n'+
+  '[[entry]]\nid = "xnu"\ntitle = "b5q macOS - Persistent Data"\ntype = "xnu"\npath = "Payloads/kernel.macho"\nargs = '+json.dumps(args)+'\n'+
   '[[entry]]\nid = "ram-fallback"\ntitle = "b5q - Original 4 GiB RAM Data recovery"\ntype = "xnu"\npath = "Payloads/RAM/kernel.macho"\ninitrd = "Payloads/scratch-data.img"\nargs = '+json.dumps(ramargs)+'\n'+
   '[[entry]]\nid = "reset"\ntitle = "Restart"\ntype = "action"\naction = "reset"\n[[entry]]\nid = "shutdown"\ntitle = "Power off"\ntype = "action"\naction = "shutdown"\n')
  (stage/'startup.nsh').write_text('\\EFI\\BOOT\\BOOTAA64.EFI\r\n')

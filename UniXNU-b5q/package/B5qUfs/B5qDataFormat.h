@@ -7,7 +7,9 @@ using namespace B5qFormat;
 constexpr uint64_t sector=4096,guardBytes=256ULL<<20,rootTotal=17603493888ULL;
 constexpr uint64_t tailFirst=lastLba+1-(30ULL<<30)/sector;
 constexpr uint64_t headerBlocks=256; // immutable 1 MiB initialization envelope
-constexpr uint32_t tailMode=1,partitionMode=2;
+constexpr uint32_t tailMode=1,partitionMode=2,userdataMode=3;
+// User-authorized macOS-only reuse; GPT name and bounds stay unchanged.
+constexpr uint64_t userdataFirst=3406336,userdataLast=47595510;
 static const uint8_t rootHeaderSha[32]={0xd9,0x3a,0x00,0xb5,0x89,0xd6,0x4b,0x7e,0x07,0x57,0xaa,0x40,0x28,0x8a,0xaa,0x92,0x7a,0x53,0x64,0x38,0x2e,0xc5,0xa0,0xdd,0x08,0xfa,0xa3,0x62,0x9d,0x9a,0x7d,0x8b};
 static const uint8_t expectedVolumeUuid[16]={0x15,0x52,0xcf,0xee,0x78,0xff,0x48,0xd8,0x8a,0x6c,0x69,0x4b,0x86,0x7d,0x61,0xac};
 struct Identity { uint64_t first=0,last=0;uint8_t disk[16]={},partition[16]={};uint32_t mode=0; };
@@ -17,6 +19,7 @@ inline bool validIdentity(const Identity &id,uint64_t capacity) {
  if(!nonzero(id.disk,16)||!nonzero(id.partition,16)||id.last>=capacity||id.last>UINT32_MAX||id.last<=id.first||id.last-id.first+1<=headerBlocks)return false;
  if(id.mode==tailMode)return id.first==tailFirst && id.last==lastLba &&
   id.first-firstLba>=(rootTotal+guardBytes)/sector;
+ if(id.mode==userdataMode)return id.first==userdataFirst && id.last==userdataLast;
  if(id.mode!=partitionMode || id.first<265 || (id.first<=lastLba && firstLba<=id.last))return false;
  // GPT overlap and protected-name checks must precede construction of Identity.
  return true;
@@ -25,16 +28,19 @@ inline bool partitionName(const uint8_t *entry,const char *name) {
  unsigned i=0;for(;name[i];++i)if(i>=35 || entry[56+2*i]!=uint8_t(name[i]) || entry[57+2*i])return false;
  return !entry[56+2*i] && !entry[57+2*i];
 }
-inline bool select(const uint8_t *h,const uint8_t *table,const Gpt &g,bool separate,
+inline bool selectMode(const uint8_t *h,const uint8_t *table,const Gpt &g,uint32_t mode,
                    uint64_t capacity,Identity &out) {
- out={};if(!target(table,g))return false;
+ out={};if(mode!=tailMode && mode!=partitionMode && mode!=userdataMode)return false;
+ if(!target(table,g))return false;
+ const bool separate=mode!=tailMode;
+ const char *name=mode==userdataMode?"userdata":separate?"macosdata":"macosroot";
  unsigned found=0,index=0;
  for(unsigned i=0;i<g.count;++i) {
   const uint8_t *e=table+size_t(i)*g.stride;
-  if(!nonzero(e,16)||!partitionName(e,separate?"macosdata":"macosroot"))continue;
+  if(!nonzero(e,16)||!partitionName(e,name))continue;
   if(++found!=1 || !nonzero(e+16,16))return false;
   index=i;out.first=separate?le64(e+32):tailFirst;out.last=le64(e+40);
-  out.mode=separate?partitionMode:tailMode;
+  out.mode=mode;
   for(unsigned j=0;j<16;++j) {out.disk[j]=h[56+j];out.partition[j]=e[16+j];}
  }
  if(found!=1 || !validIdentity(out,capacity) || out.first<le64(h+40) || out.last>le64(h+48))return false;
@@ -43,6 +49,10 @@ inline bool select(const uint8_t *h,const uint8_t *table,const Gpt &g,bool separ
   if(equal(e+16,out.partition,16) || (le64(e+32)<=out.last && out.first<=le64(e+40)))return false;
  }
  return true;
+}
+inline bool select(const uint8_t *h,const uint8_t *table,const Gpt &g,bool separate,
+                   uint64_t capacity,Identity &out) {
+ return selectMode(h,table,g,separate?partitionMode:tailMode,capacity,out);
 }
 inline bool open(const uint8_t h[4096],const Identity &id,uint64_t capacity,Volume &v) {
  v={};

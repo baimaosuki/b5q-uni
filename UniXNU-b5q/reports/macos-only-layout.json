@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "state": "minimal-layout-selected; images not yet built",
+  "sector_bytes": 4096,
+  "source": {
+    "kind": "user-pasted GPT listing, 2026-11-19; not independently read from a disk",
+    "fresh_device_read": false,
+    "live_disk_and_partition_GUIDs": "unknown until installer verifies actual GPT"
+  },
+  "design": "Keep every GPT entry and name byte-identical; reuse only original userdata contents for macOS Data. No system move, no GPT edits.",
+  "partitions": {
+    "boot": {
+      "number": 21,
+      "first_lba": 152448,
+      "last_lba": 177023,
+      "size_bytes": 100663296,
+      "byte_offset": 624427008,
+      "type_code": "FFFF",
+      "name": "boot"
+    },
+    "esp": {
+      "number": 29,
+      "first_lba": 3162880,
+      "last_lba": 3367679,
+      "size_bytes": 838860800,
+      "byte_offset": 12955156480,
+      "type_code": "EF00",
+      "name": "esp"
+    },
+    "macosroot": {
+      "number": 37,
+      "first_lba": 49692663,
+      "last_lba": 62275574,
+      "size_bytes": 51539607552,
+      "byte_offset": 203541147648,
+      "type_code": "AF0A",
+      "name": "macosroot"
+    },
+    "userdata": {
+      "number": 36,
+      "first_lba": 3406336,
+      "last_lba": 47595510,
+      "size_bytes": 180998860800,
+      "byte_offset": 13952352256,
+      "type_code": "A03A",
+      "name": "userdata"
+    }
+  },
+  "GPT_entries_unchanged": 37,
+  "GPT_write_count": 0,
+  "root": {
+    "existing_image_bytes": 17603493888,
+    "existing_header_SHA256": "d93a00b589d64b7e0757aa40288aaa927a5364382ec5a0dd08faa3629d9a7d8b",
+    "partition_bytes": 51539607552,
+    "reflash_required": false,
+    "read_only": true
+  },
+  "Data": {
+    "physical_partition": "userdata",
+    "partition_bytes": 180998860800,
+    "partition_GiB": 168.5683250427246,
+    "envelope_first_lba": 3406336,
+    "envelope_blocks": 256,
+    "APFS_first_lba": 3406592,
+    "APFS_last_lba": 47595510,
+    "APFS_blocks": 44188919,
+    "APFS_bytes": 180997812224,
+    "APFS_GiB": 168.5673484802246,
+    "kernel_arg": "b5q-data-ufs=2",
+    "format": "B5QDATA1 1MiB envelope + APFS exposed by B5qDataBlock; GPT name userdata retained"
+  },
+  "unused": {
+    "existing_gap_bytes": 8589934592,
+    "old_root_tail_remains_unmodified": true,
+    "reason": "Using these areas would add GPT changes/move existing system; user explicitly requested least work"
+  },
+  "existing_Android_data": "Discarded during explicit first-install conversion; no preservation requested",
+  "build": {
+    "board_objects": [
+      "B5qRamStorage.cpp",
+      "B5qUfs/B5qUfs.cpp"
+    ],
+    "core_GPU_Mesa_UEFI_rebuild": false,
+    "existing_root_reflash": false,
+    "ESP_update": true,
+    "Data": "grow verified Batch1 seed to exact original userdata capacity minus1MiB; preserve account/SIP2/59+26policies"
+  },
+  "install": {
+    "connected_device_access": false,
+    "flash_performed": false,
+    "scope": "User-run TWRP tool validates b5q+LUN0+4Kn+GPTCRC/name/UUID/exactbounds+root hash; requires userdata explicitly unmounted and explicit replacement flag; existing APFS/macOS envelope refused",
+    "required_images": [
+      "esp.img",
+      "data-ufs.img"
+    ]
+  },
+  "input_hashes": {
+    "source_GPT_listing_SHA256": "f03c7b4e6349ac7d7d1a92c387fccb9566c940af0efd407a21821d346489a644",
+    "planner_SHA256": "1fc5fa480b1b14edcad1cb534bd2d48ecfe79aaf7cd237b6963b9d268e43b9ba"
+  }
+}

@@ -1,9 +1,6 @@
 name: b5q New Batch 2 persistent Data, memory and input
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - codex/b5q-new-batch2
 permissions:
   contents: read
   actions: read
