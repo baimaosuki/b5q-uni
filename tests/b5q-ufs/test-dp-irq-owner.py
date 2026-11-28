@@ -34,6 +34,7 @@ void IOSleep(unsigned ms){ticks+=ms*1000;}
 void IOLockLock(IOLock*){assert(!locks);locks++;}
 void IOLockUnlock(IOLock*){assert(locks==1);locks--;}
 void*current_thread(){return nullptr;}
+void thread_set_thread_name(void*,const char *name){assert(!strcmp(name,"b5q-dp-irq"));}
 void assert_wait(event_t,int){waiting=true;if(inject){auto action=inject;inject=nullptr;action();}}
 void clear_wait(void*,int){assert(waiting);waiting=false;clears++;}
 void thread_block(int){assert(waiting);waiting=false;blocks++;throw End{};}

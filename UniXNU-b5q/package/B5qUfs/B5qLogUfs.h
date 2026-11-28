@@ -14,7 +14,7 @@
 #include <kern/clock.h>
 #include <machine/machine_routines.h>
 extern "C" int get_preemption_level(void);
-extern "C" void thread_yield_internal(unsigned int);
+extern "C" kern_return_t clear_wait(thread_t,wait_result_t);
 static const uint8_t nabu_log_build_id[32]="b5q-log-v12-26C5035r";
 
 static bool nabu_log_stopping=false;
@@ -41,15 +41,29 @@ extern "C" unsigned b5q_log_sync(unsigned milliseconds) {
   if(!nabu_capture_snapshot(&snapshot))return 3;
   uint64_t wanted=__atomic_load_n(&nabu_log_urgent_end,__ATOMIC_RELAXED);
   while(wanted<snapshot.end && !__atomic_compare_exchange_n(&nabu_log_urgent_end,&wanted,snapshot.end,false,__ATOMIC_RELEASE,__ATOMIC_RELAXED)){}
+  // XNU thread_wakeup uses scheduler waitq locks under splsched; it does
+  // not sleep and is valid from IRQ/preemption-disabled producers.
+  thread_wakeup((event_t)&nabu_log_urgent_end);
   if(ml_at_interrupt_context() || !ml_get_interrupts_enabled() || get_preemption_level())return 2;
   if(milliseconds>1000)milliseconds=1000;
   uint64_t deadline;clock_interval_to_deadline(milliseconds,kMillisecondScale,&deadline);
   do {
     if(__atomic_load_n(&nabu_log_committed_end,__ATOMIC_ACQUIRE)>=snapshot.end)return 0;
     if(__atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE) || nabu_log_writer_state!=2)return 3;
-    thread_yield_internal(1);
+    assert_wait_deadline((event_t)&nabu_log_committed_end,THREAD_UNINT,deadline);
+    // Arm before rechecking: commit/stop before or after arming cannot lose
+    // its wake. No UFS mutex is held by this caller.
+    if(__atomic_load_n(&nabu_log_committed_end,__ATOMIC_ACQUIRE)>=snapshot.end ||
+       __atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE) || nabu_log_writer_state!=2)
+      clear_wait(current_thread(),THREAD_AWAKENED);
+    else thread_block(THREAD_CONTINUE_NULL);
   }while(mach_absolute_time()<deadline);
   return 1;
+}
+/* Sleepable urgent breadcrumbs reuse the single validated writer. No UFS
+ * lock is taken here; IRQ/preemption-disabled callers remain request-only. */
+extern "C" int b5q_log_flush_urgent(unsigned timeout_ms) {
+  return (int)b5q_log_sync(timeout_ms>300u?300u:timeout_ms);
 }
 /* 1 success, 0 bounded contention, -2 retryable read, -1 transport/gate failure. The existing root
  * read path stays read-only. Only this function can emit the bounded WRITE(10). */
@@ -83,19 +97,27 @@ static int nabuLogIo(bool write,uint64_t lba,uint32_t blocks,uint8_t *data,bool 
   nabu_log_io_reason=result==1?"ok":result==-2?"retryable-read":"transport";
   IOLockUnlock(host.lock);return result;
 }
-/* Keep the counter deadline, but give each priority depression an expiry.
- * XNU's zero-ms yield has no restoration timer and can starve forever under
- * continuous single-CPU load, before this loop gets to check its deadline. */
+/* Started by b5q_ufs_start on an ordinary kernel thread, after scheduler
+ * timers already service root/media readiness sleeps. Both opening retries
+ * and lock contention use deadlines, never priority-yield busy loops. */
 static void nabuLogPause(unsigned milliseconds)
 {
-  uint64_t deadline;
-  clock_interval_to_deadline(milliseconds,kMillisecondScale,&deadline);
-  unsigned budget=milliseconds>1000?1000000:milliseconds*1000;
-  do {
-    thread_yield_internal(1);
-  } while(budget-- && mach_absolute_time()<deadline &&
-      __atomic_load_n(&nabu_log_urgent_end,__ATOMIC_ACQUIRE)<=
-      __atomic_load_n(&nabu_log_committed_end,__ATOMIC_ACQUIRE));
+  const uint64_t urgent=__atomic_load_n(&nabu_log_urgent_end,__ATOMIC_ACQUIRE);
+  const bool periodic=nabu_log_writer_state==2 && milliseconds>=100;
+  // Never sleep past a new request that arrived before arming the wait.
+  // An unchanged pending request gets a100ms backoff after one immediate
+  // retry, so contended UFS/capture failures cannot turn urgency into a spin.
+  static uint64_t retriedUrgent=0;
+  if(periodic && urgent>__atomic_load_n(&nabu_log_committed_end,__ATOMIC_ACQUIRE)) {
+    if(urgent!=retriedUrgent){retriedUrgent=urgent;return;}
+    if(milliseconds>100)milliseconds=100;
+  }
+  uint64_t deadline;clock_interval_to_deadline(milliseconds,kMillisecondScale,&deadline);
+  assert_wait_deadline((event_t)&nabu_log_urgent_end,THREAD_UNINT,deadline);
+  if(__atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE) ||
+     (periodic && urgent!=__atomic_load_n(&nabu_log_urgent_end,__ATOMIC_ACQUIRE)))
+    clear_wait(current_thread(),THREAD_AWAKENED);
+  else thread_block(THREAD_CONTINUE_NULL);
 }
 static int nabuLogRead(void *,uint64_t lba,uint32_t blocks,uint8_t *data)
 {
@@ -133,6 +155,7 @@ static int nabuLogSlot(unsigned slot,uint8_t *header) {
 }
 static void nabuLogThread(void *,wait_result_t)
 {
+    thread_set_thread_name(current_thread(),"b5q-log-ufs");
   uint8_t token[16],boot[16];
   const char *stop_reason="unspecified";
   {
@@ -143,8 +166,7 @@ static void nabuLogThread(void *,wait_result_t)
     }
   }
   nabu_log_writer_state=1;
-  IOLog("B5QLOG2: writer entered; counter-paced scheduling; opening volume\n");
-  thread_yield_internal(1); /* finite priority depression while root I/O runs */
+  IOLog("B5QLOG2: writer entered; deadline-blocked scheduling; opening volume\n");
   {
     bool opened=false;
     uint64_t open_deadline;
@@ -159,7 +181,7 @@ static void nabuLogThread(void *,wait_result_t)
             nabu_log_volume.reads,host.poisoned?1u:0u,host.selected?1u:0u);
       if(host.poisoned || !host.selected) {stop_reason="transport-unavailable";break;}
       if(mach_absolute_time()>=open_deadline) {stop_reason="open-deadline";break;}
-      nabuLogPause(1000);
+      nabuLogPause(4000);
     }
     if(!opened) goto stop;
     IOLog("B5QLOG2: volume verified attempts=%u reads=%u esp=%u..%u file_first=%u\n",
@@ -202,7 +224,7 @@ static void nabuLogThread(void *,wait_result_t)
       }
       snapshot_stalls=0;
       if(sequence==~0ULL) {stop_reason="sequence-exhausted";goto stop;}
-      if(snapshot.end==last_end && snapshot.lost==last_lost) {nabuLogPause(1000);continue;}
+      if(snapshot.end==last_end && snapshot.lost==last_lost) {nabuLogPause(4000);continue;}
       bool complete=true;
       for(unsigned at=0;at<snapshot.length;at+=1024) {
         unsigned n=snapshot.length-at>1024?1024:snapshot.length-at;
@@ -251,14 +273,16 @@ static void nabuLogThread(void *,wait_result_t)
         bool first=nabu_log_writer_rounds==0;
         newest=slot;sequence++;last_end=snapshot.end;last_lost=snapshot.lost;
         __atomic_store_n(&nabu_log_committed_end,snapshot.end,__ATOMIC_RELEASE);
+        thread_wakeup((event_t)&nabu_log_committed_end);
         __atomic_fetch_add(&nabu_log_writer_rounds,1u,__ATOMIC_RELAXED);
         if(first) IOLog("B5QLOG2: first snapshot committed slot=%u bytes=%u\n",slot,snapshot.length);
       }
-      nabuLogPause(1000);
+      nabuLogPause(4000);
     }
   }
 stop:
   nabu_log_writer_state=3;__atomic_fetch_add(&nabu_log_writer_failures,1u,__ATOMIC_RELAXED);
+  thread_wakeup((event_t)&nabu_log_committed_end);
   IOLog("B5QLOG2: writer stopped reason=%s; RAM capture continues; no fallback write window\n",stop_reason);
   thread_terminate(current_thread());
 }
@@ -290,6 +314,7 @@ static void nabuLogStart(void) {
   }
   else {
     nabu_log_writer_state=3;__atomic_fetch_add(&nabu_log_writer_failures,1u,__ATOMIC_RELAXED);
+  thread_wakeup((event_t)&nabu_log_committed_end);
     IOLog("B5QLOG2: writer thread start failed; RAM capture continues\n");
   }
 }

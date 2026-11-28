@@ -2,7 +2,7 @@
 """Local-only v33d P0 review gate. Never builds an ESP, pushes, or calls GitHub."""
 from pathlib import Path
 import hashlib,json,os,subprocess,sys
-R=Path(__file__).resolve().parents[2];W=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33d-review2'));W.mkdir(parents=True,exist_ok=True);os.environ['B5Q_GATE_WORK']=str(W);checks=[]
+R=Path(__file__).resolve().parents[2];W=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33d-review2')).resolve();W.mkdir(parents=True,exist_ok=True);os.environ['B5Q_GATE_WORK']=str(W);checks=[]
 def run(name,command):
  log=W/(name+'.log')
  with log.open('w')as out:r=subprocess.run(list(map(str,command)),cwd=R,stdout=out,stderr=subprocess.STDOUT)
@@ -22,13 +22,23 @@ else:
  checks.append(dict(name='complete-P0-P4-retained-regressions',passed=True,receipt_sha256=hashlib.sha256(baseline.read_bytes()).hexdigest(),source_bound=True))
 # This gate has its own preserved assertions; do not alter them for a pass.
 py('pre-ci-v33b','scripts/b5q-install/pre-ci-v33b.py')
-for name in ['touch-p0','v33d-dma','v33d-usb-device','v33d-review2','v33d-wcn-init','v33d-packaging','v33d-review3','v33d-review4','v33d-reclaim-dma','review5','review5-firmware','review7','review8','dp-loader','dp-dpu']:py(name,'tests/b5q-ufs/test-'+name+'.py')
+for name in ['touch-p0','v33d-dma','v33d-usb-device','v33d-review2','v33d-wcn-init','v33d-packaging','v33d-review3','v33d-review4','v33d-reclaim-dma','review5','review5-firmware','review7','review8','review9','review11','review12','dp-loader','dp-dpu','review13']:py(name,'tests/b5q-ufs/test-'+name+'.py')
+py('review14','scripts/b5q-install/test-review14.py')
+py('review15','scripts/b5q-install/test-review15.py')
+py('review16','scripts/b5q-install/test-review16.py')
+py('review17','scripts/b5q-install/test-review17.py')
+py('review18','scripts/b5q-install/test-review18.py')
+py('review19','scripts/b5q-install/test-review19.py')
+py('review20','scripts/b5q-install/test-review20.py')
+py('review21','scripts/b5q-install/test-review21.py')
+py('review22','scripts/b5q-install/test-review22.py')
+py('review23','scripts/b5q-install/test-review23.py')
 run('loader-inputs',[
  'env','PATH=/usr/lib/llvm-17/bin:'+os.environ['PATH'],
  'LD_PRELOAD=/usr/lib/llvm-17/lib/clang/17/lib/linux/libclang_rt.ubsan_standalone-x86_64.so',
  sys.executable,R/'UniXNU/drivers/DarwinBoot/Test/test-loader-inputs.py'])
 py('original-binaries','scripts/b5q-install/check-v33d-original-binaries.py')
-py('target-compile','scripts/b5q-install/check-peripheral-target.py','--sources','QcomDwc3.cpp,NativeHidInput.cpp,B5qTouch.cpp,UsbProbe.cpp,QcomRpmh.c,SoftwareAesProbe.cpp,KeyStoreProbe.cpp,ThermalLevel.cpp,B5qPower.cpp,B5qGpu.cpp,ButtonProbe.cpp,GeniI2c.c,B5qUfs.cpp','--objects-out',W/'target','--reference',R/'artifacts/b5q-esp-v33b-repair2/esp.img')
+py('target-compile','scripts/b5q-install/check-peripheral-target.py','--sources','QcomDwc3.cpp,LegacyDisplayProbe.cpp,NativeHidInput.cpp,B5qTouch.cpp,UsbProbe.cpp,QcomRpmh.c,SoftwareAesProbe.cpp,KeyStoreProbe.cpp,ThermalLevel.cpp,B5qPower.cpp,B5qGpu.cpp,ButtonProbe.cpp,GeniI2c.c,B5qUfs.cpp','--objects-out',W/'target','--reference',R/'artifacts/b5q-esp-v33b-repair2/esp.img')
 py('firmware-reconstruction','scripts/b5q-install/check-stage-firmware-inputs.py','--media','--dp','--out',W/'firmware-inputs.json')
 py('firmware-target','scripts/b5q-install/check-pcie-uefi-target.py','--media','--dp')
 py('review4-target-proof','tests/b5q-ufs/test-v33d-review4-target.py')

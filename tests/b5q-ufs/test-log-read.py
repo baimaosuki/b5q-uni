@@ -35,7 +35,17 @@ static const char*nabu_log_io_reason;
 static IOReturn nabu_log_io_result;
 static uint32_t nabu_log_io_scsi;
 static unsigned calls,failures;static int condition;static bool held,contended;
-static uint64_t ticks;
+static uint64_t ticks,nabu_log_urgent_end,nabu_log_committed_end;
+static uint32_t nabu_log_stopping;
+static unsigned nabu_log_writer_state;
+using event_t=void*;
+#define THREAD_UNINT 0
+#define THREAD_AWAKENED 1
+#define THREAD_CONTINUE_NULL nullptr
+static uint64_t waitDeadline;static void *current_thread(){return nullptr;}
+static void assert_wait_deadline(event_t,int,uint64_t d){assert(!held);waitDeadline=d;}
+static void clear_wait(void*,int){}
+static void thread_block(void*){assert(!held);ticks=waitDeadline;}
 static unsigned read32(uintptr_t,unsigned){return 0;}
 static void write32(uintptr_t,unsigned,unsigned){}
 static bool IOLockTryLock(int){assert(!held);if(contended)return false;held=true;return true;}
@@ -44,7 +54,7 @@ static void IOLockUnlock(int){assert(held);held=false;
  host.status={};host.status.exact=true;host.status.scsi=0;}
 static uint64_t mach_absolute_time(){return ++ticks;}
 static void clock_interval_to_deadline(unsigned n,unsigned,uint64_t*d){*d=ticks+n;}
-static void thread_yield_internal(int n){assert(n==1&&!held);++ticks;}
+
 static bool submit(){assert(held);++calls;auto*u=dma+commandOffset;auto*r=u+responseOffset;
  r[0]=0x21;r[2]=3;
  if(calls<=failures){

@@ -24,8 +24,21 @@ static inline bool of_property_present(const struct device_node *node, const cha
 { (void)node; (void)name; return false; }
 static inline bool of_machine_is_compatible(const char *name)
 { return name && (!strcmp(name, "qcom,kalama") || !strcmp(name, "samsung,b5q")); }
+#ifdef __cplusplus
+extern "C" {
+#endif
+void nw_board_mac(u8 *a);
+void b5q_wifi_mac_context(const u8 *a);
+#ifdef __cplusplus
+}
+#endif
 static inline int device_get_mac_address(struct device *device, u8 *address)
-{ (void)device; memset(address, 0, 6); return -ENODEV; }
+{
+ if (!address) return -EINVAL;
+ (void)device;
+ nw_board_mac(address);
+ return 0;
+}
 #define resource_size(r) ((r)->end - (r)->start + 1)
 static inline int of_reserved_mem_region_to_resource(struct device_node *node, int i, struct resource *r)
 { (void)node; (void)i; (void)r; return -ENODEV; }

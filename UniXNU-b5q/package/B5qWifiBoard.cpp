@@ -18,11 +18,13 @@
 #include <stdarg.h>
 extern "C" bool sm8550_gcc_trigger32(volatile uint32_t *,uint32_t,unsigned);
 extern "C" ifnet_t sheng_ethernet_ifnet(void);
+extern "C" bool sheng_ethernet_wifi_attached(void);
 extern "C" void sheng_ethernet_wifi_detach(void);
 extern "C" int b5q_wifi_publish_ready(void);
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 #include "B5qPcieCore.h"
 #include "B5qWifiDma.h"
+#include "B5qWorkerWait.h"
 #include "B5qWifiArena.h"
 #include "B5qWifiFirmwareName.h"
 #include "B5qWcnPower.h"
@@ -66,6 +68,10 @@ volatile uint32_t pending,wakeCount;
 bool irqAttached,stackStarted;
 uint64_t nowNs(){uint64_t ns;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns;}
 uint64_t nowMs(){return nowNs()/1000000;}
+bool wifiReadyAccepted(int result,uint64_t now,uint64_t &nextTry){
+    if(!result||result==EEXIST)return true;
+    nextTry=now+1000;return false;
+}
 uint64_t bootNs(){uint64_t ns;absolutetime_to_nanoseconds(mach_continuous_time(),&ns);return ns;}
 void busyDelay(unsigned us){IODelay(us);}
 void sleepMs(unsigned ms){IOSleep(ms);}
@@ -172,7 +178,7 @@ int msiTarget(uint32_t *lo,uint32_t *hi,uint32_t *data) {
     *lo=0xaffff040;*hi=0;*data=800;return 0;
 }
 void *allocate(size_t n) {
-    if(!n || n>SIZE_MAX-16)return nullptr;auto *p=static_cast<uint8_t*>(IOMallocData(n+16));
+    if(n>SIZE_MAX-16)return nullptr;auto *p=static_cast<uint8_t*>(IOMallocData(n+16));
     if(p){*reinterpret_cast<size_t*>(p)=n+16;return p+16;}return nullptr;
 }
 void release(void *p){if(p){auto *base=static_cast<uint8_t*>(p)-16;IOFreeData(base,*reinterpret_cast<size_t*>(base));}}
@@ -337,15 +343,25 @@ void worker(void *,wait_result_t) {
         nw_wifi_irq_mode(1);native_wifi_stats[0]=21;
     }
     {
-        bool netStarted=false;uint64_t nextReport=0,slice=nowNs();
+        bool netStarted=false,readyPublished=false;unsigned readyFailures=0;
+        uint64_t nextReadyTry=0,nextReport=0,slice=nowNs();
         for(;;) {
+            const uint32_t observed=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE);
             error=nw_wifi_step();if(error<0)goto failed;
             if(!netStarted && nw_wifi_stats.stage>=4) {
                 uint8_t mac[6];if(!boardMac(mac)){error=-18;goto failed;}
                 sheng_wifi_net_start(mac);
-                if(!sheng_ethernet_ifnet()){error=-ENXIO;native_wifi_logf(3,"stage=network-interface result=%d",error);goto failed;}
-                netStarted=true;int ready=b5q_wifi_publish_ready();
-                native_wifi_logf(ready?3:6,"stage=supplicant-ready result=%d firmware=%u interface=1",ready,nw_wifi_stats.stage);
+                if(!sheng_ethernet_wifi_attached()){error=-ENXIO;native_wifi_logf(3,"stage=network-interface result=%d callbacks=0",error);goto failed;}
+                netStarted=true;
+                native_wifi_logf(6,"stage=network-interface result=0 callbacks=1 state=%s",sheng_ethernet_ifnet()?"attached":"waiting-for-ifnet");
+            }
+            const uint64_t readyNow=nowMs();
+            if(netStarted && !readyPublished && readyNow>=nextReadyTry && sheng_ethernet_ifnet()) {
+                const int ready=b5q_wifi_publish_ready();
+                readyPublished=wifiReadyAccepted(ready,readyNow,nextReadyTry);
+                if(readyPublished||++readyFailures<=4||!(readyFailures%30))
+                    native_wifi_logf(readyPublished?6:3,"stage=supplicant-ready result=%d firmware=%u interface=1 retry-ms=%llu",
+                        ready,nw_wifi_stats.stage,(unsigned long long)(readyPublished?0:nextReadyTry-readyNow));
             }
             if(nowMs()>=nextReport) {
                 nextReport=nowMs()+30000;native_wifi_stats[1]=nw_wifi_stats.stage;
@@ -353,32 +369,31 @@ void worker(void *,wait_result_t) {
                     nw_wifi_stats.stage,nw_wifi_stats.scans,nw_wifi_stats.frames,nw_wifi_stats.last_err,
                     arena->used,arena->bytes,arena->peak,arena->failures);
             }
-            if(!error) {
-                uint32_t observed=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE);
-                unsigned ms=nw_wifi_wait_ms(1000);
-                if(ms) {
-                    uint64_t deadline;clock_interval_to_deadline(ms,NSEC_PER_MSEC,&deadline);
-                    assert_wait_deadline(event_t(&wakeCount),THREAD_UNINT,deadline);
-                    if(observed!=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE))clear_wait(current_thread(),THREAD_AWAKENED);
-                    else thread_block(THREAD_CONTINUE_NULL);
-                }
+            const unsigned ms=b5q_wifi_worker_wait(error,nw_wifi_wait_ms(1000),nowNs()-slice);
+            if(ms) {
+                // scale_factor is nanoseconds per interval; NSEC_PER_MSEC is
+                // exactly the kernel's kMillisecondScale (1000000), not a bug.
+                uint64_t deadline;clock_interval_to_deadline(ms,NSEC_PER_MSEC,&deadline);
+                assert_wait_deadline(event_t(&wakeCount),THREAD_UNINT,deadline);
+                if(observed!=__atomic_load_n(&wakeCount,__ATOMIC_ACQUIRE))clear_wait(current_thread(),THREAD_AWAKENED);
+                else thread_block(THREAD_CONTINUE_NULL);
                 slice=nowNs();
-            }else if(nowNs()-slice>=2000000){thread_yield_to_preemption();slice=nowNs();}
+            }
         }
     }
 failed:
     if(error>0)error=-error;
     native_wifi_stats[0]=uint32_t(error?error:-1);
-    // Stop endpoint DMA before Linux teardown touches ring buffers. Keep all
-    // retained firmware pages and mappings for the rest of this boot.
+    // Stop users of Linux queues while PCIe/MHI and their interrupt are still
+    // live. Only then quiesce endpoint DMA and remove power.
+    sheng_ethernet_wifi_detach();
+    if(stackStarted)nw_wifi_stop();
     if(irqAttached)armcpu_spi_mask(800,true);
     if(config.va&&dbi.va&&(dbi.va[0x72c/4]&16)){
         auto *command=reinterpret_cast<volatile uint16_t*>(reinterpret_cast<volatile uint8_t*>(config.va)+4);
         *command=uint16_t(*command&~4u);barrier();
     }
     if(tlmm.va){Hardware h;h.pin(94,0x201,0);IODelay(1000);}
-    sheng_ethernet_wifi_detach();
-    if(stackStarted)nw_wifi_stop();
     b5q_wcn_radio_enable(B5Q_WCN_WLAN,0);b5q_wcn_power_put(B5Q_WCN_WLAN);
     b5q_wcn_wifi_probe_done();
     native_wifi_logf(3,"stopped result=%d; boot continues; DMA pool retained",error);
@@ -396,3 +411,11 @@ extern "C" void b5q_wifi_probe() {
     else {b5q_wcn_wifi_probe_done();native_wifi_stats[0]=uint32_t(-7);native_wifi_logf(3,"worker allocation failed");}
 }
 
+
+extern "C" void b5q_wifi_mac_context(const uint8_t *vdev){
+ uint8_t board[6]{},ifaddr[6]{};boardMac(board);ifnet_t ifp=sheng_ethernet_ifnet();
+ const bool named=ifp&&ifnet_lladdr_copy_bytes(ifp,ifaddr,sizeof ifaddr)==0;
+ static uint32_t logs=0;if(__atomic_fetch_add(&logs,1u,__ATOMIC_RELAXED)>=32u)return;
+ native_wifi_logf(6,"vdev-mac ifnet=%u lladdr=%02x:%02x:%02x:%02x:%02x:%02x vdev=%02x:%02x:%02x:%02x:%02x:%02x board-match=%u",named,
+   ifaddr[0],ifaddr[1],ifaddr[2],ifaddr[3],ifaddr[4],ifaddr[5],vdev[0],vdev[1],vdev[2],vdev[3],vdev[4],vdev[5],!memcmp(board,vdev,6));
+}

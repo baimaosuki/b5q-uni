@@ -195,6 +195,8 @@ if '--abi-header-only' in sys.argv:
     # Reuse the identical qualified ABI for the independent DP backend.
     # No driver/core/GPU build is run in this mode.
     raise SystemExit(0)
+from b5q_display import prepare as prepare_b5q_display
+prepare_b5q_display(ROOT)
 display_source=ROOT/'drivers/GopFramebuffer/NativeLegacyDisplay.cpp'
 display_original=display_source.read_text()
 display_patch=display_original.replace('primary && hz>60 && hz<=240','primary && hz>=60 && hz<=240').replace('if(hz<=60 || hz>240)return true;','if(hz<60 || hz>240)return true;')

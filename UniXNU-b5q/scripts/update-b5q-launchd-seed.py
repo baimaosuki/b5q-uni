@@ -29,11 +29,23 @@ DIRECTORY = "private/var/db/com.apple.xpc.launchd"
 
 def policies():
     policy = json.loads(POLICY.read_text())
-    assert all(re.fullmatch(r"com\.apple\.[\w.-]+", job) for group in policy.values() for job in group)
+    assert all(re.fullmatch(r"com\.(?:apple|openssh)\.[\w.-]+", job) for group in policy.values() for job in group)
+    disabled = set(policy["sheng_lite"] + policy["system"] + policy["gui"] + policy.get("bundled", []))
+    enabled = set(policy.get("system_enabled", []))
+    assert disabled.isdisjoint(enabled), "Enabled and disabled system labels overlap"
+    system = dict.fromkeys(sorted(disabled), True)
+    system.update(dict.fromkeys(sorted(enabled), False))
     return {
-        "disabled.plist": sorted(set(policy["sheng_lite"] + policy["system"] + policy["gui"] + policy.get("bundled", []))),
-        "disabled.501.plist": sorted(set(policy["sheng_lite"] + policy["gui"] + policy.get("bundled", []))),
+        "disabled.plist": system,
+        "disabled.501.plist": dict.fromkeys(sorted(set(policy["sheng_lite"] + policy["gui"] + policy.get("bundled", []))), True),
     }
+
+
+def historical_policies():
+    # The SHA-pinned58/25 seed predates both wallpaper enable and the explicit
+    # sshd/update-notifier policy. Its old metadata is never the runtime policy.
+    return {name: sorted((set(values) - {"com.openssh.sshd", "com.apple.SoftwareUpdateNotificationManager"}) |
+                         {"com.apple.wallpaper.agent"}) for name, values in policies().items()}
 
 
 def merge(original, disabled):
@@ -43,7 +55,7 @@ def merge(original, disabled):
     # These are board-owned files in the hash-qualified RAM seed. Replace the
     # old policy completely so wrong/iOS-only Labels and EndpointSecurity do
     # not survive a merge. Account and all other seed files are unchanged.
-    return plistlib.dumps(dict.fromkeys(disabled, True), fmt=plistlib.FMT_BINARY, sort_keys=True)
+    return plistlib.dumps(dict(disabled) if isinstance(disabled, dict) else dict.fromkeys(disabled, True), fmt=plistlib.FMT_BINARY, sort_keys=True)
 
 
 def checked_seed(body, metadata, baseline, stand_in=None):
@@ -58,7 +70,7 @@ def checked_seed(body, metadata, baseline, stand_in=None):
     # Only the exact APFS image already read back is eligible for a no-op.
     # Self-declared policy metadata must never qualify an arbitrary seed.
     reusable = (digest == MIGRATED_SEED_HASH
-                and metadata.get("launchd_policy") == policies()
+                and metadata.get("launchd_policy") == historical_policies()
                 and metadata.get("launchd_policy_migrated") is True
                 and metadata.get("board_stand_in") == {
                     "path": "/private/var/ngpu/bin/b5q-absentd", "sha256": ABSENTD_HASH}
@@ -87,7 +99,7 @@ def main():
     if reusable:
         shutil.copyfile(seed, out / "data.dbr")
         (out / "data-seed.json").write_text(json.dumps(metadata, indent=2) + "\n")
-        print("Reused SHA256-pinned, APFS-verified current 58/25 Data seed unchanged")
+        print("Reused SHA256-pinned, APFS-verified qualified 58/25 Data seed unchanged; pre-launchd applies current59/25 policy")
         return
     with tempfile.TemporaryDirectory(prefix="b5q-launchd-seed-") as temp:
         temp = Path(temp).resolve()

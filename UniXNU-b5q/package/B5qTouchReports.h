@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause-Patent
 #pragma once
 #include "B5qTouchProtocol.h"
+#include "B5qDisplayTransform.h"
 namespace B5qTouch {
+inline void displayPoint(unsigned x,unsigned y,unsigned angle,unsigned &outX,unsigned &outY){
+ x=x>4095?4095:x;y=y>4095?4095:y;B5qDisplay::fromPhysical(x,y,4096,4096,angle,outX,outY);
+}
 enum class ReportResult {Ignore,Frame,Released};
 // Own the complete contact set. Error/status packets cannot bypass release
 // by arriving with a code different from the selected coordinate report.

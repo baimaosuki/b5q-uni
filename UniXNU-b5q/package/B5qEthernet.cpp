@@ -330,7 +330,7 @@ static void ethernetWorker(void *,wait_result_t) {
                 if(!controller || !controller->init(nullptr) || !parent)b5q_ethernet_state=-4;
                 else if(!(attached=controller->attach(parent)))b5q_ethernet_state=-5;
                 else if(!controller->start(parent))b5q_ethernet_state=-6;
-                else {controller->registerService();controller->retain();gController=controller;b5q_ethernet_state=1;}
+                else {controller->registerService();controller->retain();__atomic_store_n(&gController,controller,__ATOMIC_RELEASE);b5q_ethernet_state=1;}
                 if(b5q_ethernet_state!=1 && attached)controller->detach(parent);
                 OSSafeReleaseNULL(controller);
             }
@@ -347,7 +347,7 @@ static void ethernetWorker(void *,wait_result_t) {
 extern "C" bool sheng_ethernet_wifi_attach(int (*output)(mbuf_t), int (*request)(unsigned long, void *),
                                            int (*kernelRequest)(unsigned long, void *, void *, uint32_t))
 {
-    B5qEthernet *controller = gController;
+    B5qEthernet *controller = __atomic_load_n(&gController,__ATOMIC_ACQUIRE);
     if (!controller || !output) return false;
     if(!wifiLockReady())return false;
     {
@@ -376,14 +376,21 @@ extern "C" void sheng_ethernet_wifi_detach(void){
 extern "C" void sheng_ethernet_wifi_link(bool up)
 {
     __atomic_store_n(&gWifiLink,up,__ATOMIC_RELEASE);
-    B5qEthernet *controller = gController;
+    B5qEthernet *controller = __atomic_load_n(&gController,__ATOMIC_ACQUIRE);
     if (controller) controller->link(up);
 }
 // The interface's ifnet: none until the network configuration has named the interface (IONetworkStack attaches it then).
 extern "C" ifnet_t sheng_ethernet_ifnet(void)
 {
-    B5qEthernet *controller = gController;
+    B5qEthernet *controller = __atomic_load_n(&gController,__ATOMIC_ACQUIRE);
     return controller ? controller->bsdIfnet() : nullptr;
+}
+// The radio callbacks are installed before configd gives the interface its BSD
+// name. This state is sufficient for Wi-Fi to keep the PCIe radio alive.
+extern "C" bool sheng_ethernet_wifi_attached(void)
+{
+    return __atomic_load_n(&gController,__ATOMIC_ACQUIRE) != nullptr &&
+           __atomic_load_n(&gWifiOutput,__ATOMIC_ACQUIRE) != nullptr;
 }
 
 // The board entry (LegacyDisplayProbe.cpp's late probes), macOS only: ethernet=1.

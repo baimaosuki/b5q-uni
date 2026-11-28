@@ -140,7 +140,7 @@ def main():
             assert stats[name]["mode"] == 0o100644
         for name, labels in policy.policies().items():
             overrides = plistlib.loads((extracted / prefix / name).read_bytes())
-            assert overrides == dict.fromkeys(labels, True)
+            assert overrides == (dict(labels) if isinstance(labels,dict) else dict.fromkeys(labels,True))
         assert (extracted / prefix / "disabled.migrated").stat().st_size == 0
 
         # Reuse the production signature verifier's functions without its CLI.

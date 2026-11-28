@@ -92,3 +92,26 @@ static inline struct b5q_proc_window b5q_proc_snapshot(struct b5q_proc_top *top,
     }
     return w;
 }
+
+/* Single reporter owns CPU samples. PID reuse is separated by uniqueid;
+ * absent processes free slots each window, so long boots do not fill it. */
+enum {B5Q_CPU_ROWS=1024,B5Q_CPU_TOP=5};
+struct b5q_cpu_entry {uint64_t unique,cpu_ns,seen;int pid;char name[B5Q_PROC_NAME];};
+struct b5q_cpu_rank {int pid;char name[B5Q_PROC_NAME];uint64_t delta_ms,permille;};
+struct b5q_cpu_window {struct b5q_cpu_entry entries[B5Q_CPU_ROWS];struct b5q_cpu_rank top[B5Q_CPU_TOP],kernel;uint64_t round,elapsed_ms;unsigned used,overflow;};
+static inline void b5q_cpu_begin(struct b5q_cpu_window *s,uint64_t elapsed_ms){
+ s->round++;s->elapsed_ms=elapsed_ms;s->used=s->overflow=0;
+ for(unsigned i=0;i<B5Q_CPU_TOP;i++)s->top[i]=(struct b5q_cpu_rank){0,{0},0,0};
+ s->kernel=(struct b5q_cpu_rank){0,{0},0,0};
+}
+static inline void b5q_cpu_sample(struct b5q_cpu_window *s,int pid,uint64_t unique,const char *name,uint64_t cpu_ns){
+ struct b5q_cpu_entry *entry=NULL;
+ for(unsigned i=0;i<B5Q_CPU_ROWS;i++)if(s->entries[i].unique==unique&&s->entries[i].pid==pid&&s->entries[i].seen){entry=&s->entries[i];break;}
+ if(!entry)for(unsigned i=0;i<B5Q_CPU_ROWS;i++)if(s->entries[i].seen+1<s->round||!s->entries[i].seen){entry=&s->entries[i];entry->seen=0;break;}
+ if(!entry){s->overflow++;return;}
+ uint64_t delta=entry->seen+1==s->round&&cpu_ns>=entry->cpu_ns?(cpu_ns-entry->cpu_ns)/1000000:0;
+ entry->unique=unique;entry->pid=pid;entry->cpu_ns=cpu_ns;entry->seen=s->round;b5q_proc_name(entry->name,name);s->used++;
+ struct b5q_cpu_rank row={pid,{0},delta,s->elapsed_ms?delta*1000/s->elapsed_ms:0};b5q_proc_name(row.name,name);
+ if(pid==0)s->kernel=row;
+ for(unsigned i=0;i<B5Q_CPU_TOP;i++)if(delta>s->top[i].delta_ms){for(unsigned j=B5Q_CPU_TOP-1;j>i;j--)s->top[j]=s->top[j-1];s->top[i]=row;break;}
+}

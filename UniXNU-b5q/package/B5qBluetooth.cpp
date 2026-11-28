@@ -1,3 +1,4 @@
+#include "B5qWorkerWait.h"
 /* SPDX-License-Identifier: BSD-2-Clause-Patent */
 #include <IOKit/IOLib.h>
 #include <IOKit/IOService.h>
@@ -17,13 +18,14 @@
 #include "B5qWcnPower.h"
 #include "BluetoothFirmware.h"
 #include "BluetoothHciTrace.h"
+#include "B5qBtH4Tap.h"
 
 extern "C" int armcpu_spi_attach(uint32_t,bool,void(*)(void *),void *,uint32_t *,uint64_t *);
 extern "C" int armcpu_spi_share(uint32_t,void(*)(void *),void *);
 extern "C" int armcpu_spi_mask(uint32_t,bool);
+extern "C" uint64_t qbt_transport_rx_dropped(void);
 // Private exports of the pinned XNU sched_prim.h/thread.h, absent from SDK.
 extern "C" kern_return_t clear_wait(thread_t,wait_result_t);
-extern "C" void thread_yield_to_preemption(void);
 extern "C" volatile int native_gpu_addon_stage;
 extern "C" volatile uint32_t native_wifi_stats[29];
 extern "C" {
@@ -65,6 +67,8 @@ struct Bluetooth {
     bool resources,powered,gated,clocked,serial_irq,wake_irq,service,initializing,loopback;
     uint8_t loop_rx[16];unsigned loop_length;
 } bt;
+B5qBtH4Tap h4Tap;
+char loadedNvm[96]{};uint32_t loadedNvmBytes=0,disconnIbsLogged=0;
 constexpr unsigned kRx=79,kBtEnable=81,kSwCtrl=82;
 constexpr uint32_t kUartDefault[]={0u,1u,3u,1u};
 constexpr uint32_t kUartActive[]={4u,5u,7u,4u}; // b5q.dts 3162..3298, all 2mA
@@ -77,6 +81,17 @@ bool map(Region &r,uint64_t base,size_t bytes) {
 }
 void barrier(){__asm__ volatile("dsb sy" ::: "memory");}
 uint64_t nowNs(void *){uint64_t ns;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns;}
+uint64_t h4NowMs(void *){return nowNs(nullptr)/1000000ULL;}
+void h4Line(void *,const char *text){
+    printf("%s\n",text);
+    static const char prefix[]="B5qBluetooth: h4-disconn-ctx ";
+    if(!strncmp(text,prefix,sizeof(prefix)-1)&&disconnIbsLogged++<32u){
+        struct qbt_stats stats{};qbt_get_stats(bt.core,&stats);
+        printf("B5qBluetooth: h4-disconn-ibs gated=%u wake_ind=%llu sleep_ind=%llu bt_rx_dropped=%llu\n",
+               bt.gated,stats.wake_ind,stats.sleep_ind,qbt_transport_rx_dropped());
+    }
+}
+const B5qBtH4Sink h4Sink={h4Line,h4NowMs};
 void wake(void *){__atomic_store_n(&bt.pending,1u,__ATOMIC_RELEASE);thread_wakeup((event_t)&bt.pending);}
 void waitUntil(void *,uint64_t deadline) {
     // qbt_boot's command waits must honour FIFO progress just like the main
@@ -155,7 +170,14 @@ size_t rxBytes(void *,const uint8_t *bytes,size_t n) {
     }
     bt.rx_sequence+=n;return qbt_receive(bt.core,bytes,n);
 }
-size_t nativeRx(void *,const uint8_t *bytes,size_t n){return qbt_transport_receive(bytes,(uint32_t)n);}
+size_t nativeRx(void *,const uint8_t *bytes,size_t n) {
+    const uint32_t taken=qbt_transport_receive(bytes,(uint32_t)n);
+    // Only the accepted prefix belongs to the RX H4 stream. The transport
+    // retries the remainder after backpressure; feeding n here would
+    // duplicate bytes and lose frame sync.
+    if(bt.log>=2)b5q_bt_h4_tap_rx_taken(&h4Tap,bytes,n,taken);
+    return taken;
+}
 size_t writeUart(void *,const uint8_t *p,size_t n){return b5q_bt_fifo_write(&bt.geni,p,n);}
 bool drained(void *){return bt.gated || b5q_bt_fifo_drained(&bt.geni);}
 int flow(void *,bool enabled){b5q_bt_fifo_set_flow(&bt.geni,enabled);return 0;}
@@ -199,7 +221,7 @@ int clockVote(void *,bool enabled) {
     int e=quiesce();if(e)return e;
     if(sequence!=bt.rx_sequence || qbt_transport_tx_pending()) {b5q_bt_fifo_resume(&bt.geni);return -EBUSY;}
     volatile uint32_t *r=bt.tlmm.va+kRx*4096/4;
-    r[2]=0;r[3]=0;pin(kRx,1u);
+    r[2]=0;r[3]=0;pin(kRx,3u);
     r[2]=(3u<<5)|(2u<<2)|(1u<<4)|(1u<<1)|1u;barrier();
     if(!(r[1]&1) || (r[3]&1)) {disarmRxWake();b5q_bt_fifo_resume(&bt.geni);return -EBUSY;}
     /* Leave RTS ready so the controller can send its IBS wake indication. */
@@ -219,7 +241,10 @@ int setRate(void *,uint32_t baud) {
 void *allocate(void *,size_t n){return IOMallocData(n);}
 void release(void *,void *p,size_t n){IOFreeData(p,n);}
 int firmware(void *,const char *name,const uint8_t **data,size_t *size) {
-    uint8_t *bytes=nullptr;int e=sheng_bt_firmware_read(name,&bytes,size);*data=bytes;return -e;
+    uint8_t *bytes=nullptr;int e=sheng_bt_firmware_read(name,&bytes,size);*data=bytes;
+    const size_t length=name?strlen(name):0;
+    if(!e&&length>=4&&!strcmp(name+length-4,".bin")){strlcpy(loadedNvm,name,sizeof(loadedNvm));loadedNvmBytes=(uint32_t)*size;}
+    return -e;
 }
 void firmwarePut(void *,const uint8_t *data,size_t size){sheng_bt_firmware_release(const_cast<uint8_t *>(data),size);}
 void log(void *,int level,const char *line){if(level<=3 || bt.log)printf("[bluetooth] %s\n",line);}
@@ -330,6 +355,8 @@ int loopbackCheck() {
 }
 int powerOn() {
     if(bt.powered)return 0;
+    b5q_bt_h4_tap_reset_session(&h4Tap);
+    loadedNvm[0]=0;loadedNvmBytes=0;disconnIbsLogged=0;
     int wait=b5q_wcn_wait_wifi_probe();if(wait)return -wait;
     native_bluetooth_stats[14]=1;int e=resources();if(e)return e;
     native_bluetooth_stats[14]=2;
@@ -393,6 +420,7 @@ int powerOn() {
 }
 int powerOff() {
     if(!bt.powered)return 0;
+    b5q_bt_h4_tap_reset_streams(&h4Tap);
     qbt_set_service(bt.core,false);bt.service=false;
     int e=0;
     if(bt.geni.state!=B5Q_BT_FIFO_OFF) {
@@ -423,7 +451,7 @@ void powerResult(bool enabled,int error) {
     native_bluetooth_stats[20]=(unsigned)bt.powered|((unsigned)bt.gated<<1)|((unsigned)bt.clocked<<2);
     native_bluetooth_stats[21]=b5q_wcn_power_owners();
     native_bluetooth_stats[0]=error?3:enabled?2:0;native_bluetooth_stats[1]=(uint64_t)(int64_t)error;
-    printf("B5qBluetooth: power=%u result=%d baud=%u product=%08x rom=%04x transport=FIFO\n",enabled,error,info.baud,info.product,info.rom);
+    printf("B5qBluetooth: power=%u result=%d baud=%u product=%08x rom=%04x transport=FIFO nvm=%s nvm_bytes=%u\n",enabled,error,info.baud,info.product,info.rom,loadedNvm,loadedNvmBytes);
     if(error && bt.geni.error)printf("[bluetooth uart] error=%d irq=%x/%x\n",bt.geni.error,bt.geni.fault_irq[0],bt.geni.fault_irq[1]);
 }
 void worker(void *,wait_result_t) {
@@ -456,10 +484,17 @@ void worker(void *,wait_result_t) {
         if(command){e=command==1?powerOn():powerOff();if(e && command==1)(void)powerOff();powerResult(command==1,e);}
         if(bt.powered) {
             pump(nullptr);bool active=qbt_transport_active();
-            if(active!=bt.service){qbt_set_service(bt.core,active);bt.service=active;closeAt=active?0:nowNs(nullptr)+500000000ULL;}
+            if(active!=bt.service){
+                if(active&&bt.log>=2)b5q_bt_h4_tap_reset_streams(&h4Tap);
+                qbt_set_service(bt.core,active);bt.service=active;closeAt=active?0:nowNs(nullptr)+500000000ULL;
+            }
             uint8_t tx[2048];size_t room=qbt_transmit_capacity(bt.core);
             if(room>sizeof(tx))room=sizeof(tx);
-            if(room){uint32_t n=qbt_transport_tx_take(tx,(uint32_t)room);if(n){int sent=qbt_transmit(bt.core,tx,n);if(sent){e=sent<0?sent:-EIO;qbt_fail(bt.core,e);IOLog("B5qBluetooth: stage=transmit result=%d bytes=%u\n",e,n);}}}
+            if(room){uint32_t n=qbt_transport_tx_take(tx,(uint32_t)room);if(n){
+                int sent=qbt_transmit(bt.core,tx,n);
+                if(sent){e=sent<0?sent:-EIO;qbt_fail(bt.core,e);IOLog("B5qBluetooth: stage=transmit result=%d bytes=%u\n",e,n);}
+                else if(bt.log>=2)b5q_bt_h4_tap_tx(&h4Tap,tx,n);
+            }}
             qbt_step(bt.core);
             struct qbt_info info;qbt_get_info(bt.core,&info);
             if(info.state==3 || bt.geni.state==B5Q_BT_FIFO_FAILED || (closeAt && nowNs(nullptr)>=closeAt)) {
@@ -491,13 +526,44 @@ void worker(void *,wait_result_t) {
             native_bluetooth_discovery[15]=stats.discovery.inquiry_results;
             native_bluetooth_discovery[16]=stats.discovery.le_reports;
             native_bluetooth_discovery[17]=stats.discovery.le_extended_reports;
+            if(bt.log>=2) {
+                static uint64_t nextLog=0;
+                if(t>=nextLog) {
+                    nextLog=t+5000000000ULL;
+                    printf("B5qBluetooth: stage=health powered=%u active=%u gated=%u irq=%llu SE_IRQ_EN=%x tty-power=%u boot-read=%u open=%u speed-requests=%u discovery=%u/%u/%u rx=%llu\n",
+                        bt.powered,bt.service,bt.gated,bt.geni.stats.interrupts,
+                        bt.clocked?urd(nullptr,0xe1c):0,
+                        __atomic_load_n(&qbt_transport_activity[0],__ATOMIC_RELAXED),
+                        __atomic_load_n(&qbt_transport_activity[1],__ATOMIC_RELAXED),
+                        __atomic_load_n(&qbt_transport_activity[2],__ATOMIC_RELAXED),
+                        __atomic_load_n(&qbt_transport_activity[3],__ATOMIC_RELAXED),
+                        stats.discovery.inquiry_results,stats.discovery.le_reports,stats.discovery.le_extended_reports,stats.rx_bytes);
+                    printf("B5qBluetooth: stage=ibs wake-ind=%llu wake-ack=%llu sleep-ind=%llu clock-reverts=%llu tx-refused=%llu rx-irq=%llu cancel-timeouts=%llu wake-irq=%llu\n",
+                        native_bluetooth_ibs[0],native_bluetooth_ibs[1],native_bluetooth_ibs[2],native_bluetooth_ibs[3],
+                        native_bluetooth_ibs[4],native_bluetooth_ibs[5],native_bluetooth_ibs[6],native_bluetooth_ibs[7]);
+                    printf("B5qBluetooth: stage=discovery inquiry=%u/%u/%u le-param=%u/%u/%u le-enable=%u/%u/%u ext-param=%u/%u/%u ext-enable=%u/%u/%u reports=%u/%u/%u\n",
+                        stats.discovery.sent[QBT_INQUIRY],stats.discovery.replied[QBT_INQUIRY],stats.discovery.status[QBT_INQUIRY],
+                        stats.discovery.sent[QBT_LE_SCAN_PARAMS],stats.discovery.replied[QBT_LE_SCAN_PARAMS],stats.discovery.status[QBT_LE_SCAN_PARAMS],
+                        stats.discovery.sent[QBT_LE_SCAN_ENABLE],stats.discovery.replied[QBT_LE_SCAN_ENABLE],stats.discovery.status[QBT_LE_SCAN_ENABLE],
+                        stats.discovery.sent[QBT_LE_EXT_SCAN_PARAMS],stats.discovery.replied[QBT_LE_EXT_SCAN_PARAMS],stats.discovery.status[QBT_LE_EXT_SCAN_PARAMS],
+                        stats.discovery.sent[QBT_LE_EXT_SCAN_ENABLE],stats.discovery.replied[QBT_LE_EXT_SCAN_ENABLE],stats.discovery.status[QBT_LE_EXT_SCAN_ENABLE],
+                        stats.discovery.inquiry_results,stats.discovery.le_reports,stats.discovery.le_extended_reports);
+                    printf("B5qBluetooth: stage=transport tx=%llu rx=%llu delivered=%llu malformed=%llu unmatched=%llu backpressure=%llu fifo-backpressure=%llu hardware-errors=%llu last-hardware=%llu tty-rx-dropped=%llu\n",
+                        stats.tx_bytes,stats.rx_bytes,stats.delivered_bytes,stats.malformed,stats.unmatched_events,
+                        stats.backpressure,bt.geni.stats.rx_backpressure,stats.hardware_errors,stats.last_hardware_error,
+                        qbt_transport_rx_dropped());
+                    printf("B5qBluetooth: stage=h4 tx-cmd=%llu tx-acl=%llu rx-evt=%llu rx-acl=%llu errs=%llu smp=%llu l2cap=%llu desync=%llu evt13=%llu logged=%u/%u\n",
+                        h4Tap.stats.tx_cmd,h4Tap.stats.tx_acl,h4Tap.stats.rx_evt,h4Tap.stats.rx_acl,
+                        h4Tap.stats.errs,h4Tap.stats.smp,h4Tap.stats.l2cap,h4Tap.stats.desync,h4Tap.stats.evt13,
+                        h4Tap.stats.logged,B5Q_BT_H4_QUOTA_TOTAL);
+                }
+            }
             health=t+1000000000ULL;
         }
         uint64_t deadline=bt.powered?qbt_deadline(bt.core):UINT64_MAX;
         uint64_t geni=bt.powered && !bt.gated?b5q_bt_fifo_deadline(&bt.geni):UINT64_MAX;
         if(geni<deadline)deadline=geni;if(health<deadline)deadline=health;if(closeAt && closeAt<deadline)deadline=closeAt;
-        if(!deadline){thread_yield_to_preemption();continue;}
-        waitUntil(nullptr,deadline);
+        waitUntil(nullptr,b5q_bt_worker_deadline(deadline,t));
     }
 }
 }
@@ -510,19 +576,31 @@ void proc_iterate(unsigned,int (*)(struct proc *,void *),void *,int (*)(struct p
 int proc_pid(struct proc *);
 }
 int processSeen(struct proc *process,void *found) {
-    static const char *const names[]={"bluetoothd","BlueTool"};
+    static const char *const names[]={"bluetoothd","BlueTool","BluetoothUIServer"};
     const char *name=proc_best_name(process);
-    for(unsigned i=0;name && i<2;i++)if(!strcmp(name,names[i]))static_cast<int *>(found)[i]=proc_pid(process);
+    for(unsigned i=0;name && i<3;i++) {
+        const bool match=i==2?!strncmp(name,"BluetoothUIServe",16):!strcmp(name,names[i]);
+        if(match)static_cast<int *>(found)[i]=proc_pid(process);
+    }
     return 0;
 }
 void processWatch(void *,wait_result_t) {
     thread_set_thread_name(current_thread(),"b5q-bluetooth-procs");
+    static uint32_t uiPid,uiChanges;
     for(;;) {
-        int found[2]={0,0};
+        int found[3]={0,0,0};
         proc_iterate(1u|4u,processSeen,found,nullptr,nullptr);
-        for(unsigned i=0;i<2;i++) {
-            if(found[i] && (uint32_t)found[i]!=native_bluetooth_processes[i*2])native_bluetooth_processes[i*2+1]=native_bluetooth_processes[i*2+1]+1;
-            native_bluetooth_processes[i*2]=(uint32_t)found[i];
+        for(unsigned i=0;i<3;i++) {
+            // native_bluetooth_processes[4] keeps its ABI and the first two
+            // entries keep their bluetoothd/BlueTool meaning exactly.
+            if(i<2) {
+                if(found[i] && (uint32_t)found[i]!=native_bluetooth_processes[i*2])native_bluetooth_processes[i*2+1]=native_bluetooth_processes[i*2+1]+1;
+                native_bluetooth_processes[i*2]=(uint32_t)found[i];
+            } else if((uint32_t)found[i]!=uiPid) {
+                uiChanges++;
+                IOLog("B5qBluetooth: process name=BluetoothUIServer pid=%u change=%u\n",(uint32_t)found[i],uiChanges);
+                uiPid=(uint32_t)found[i];
+            }
         }
         IOSleep(2000);
     }
@@ -534,6 +612,7 @@ extern "C" void b5q_bluetooth_probe(void) {
     native_bluetooth_stats[0]=1;
     if(!address()){native_bluetooth_stats[0]=3;native_bluetooth_stats[1]=(uint64_t)(int64_t)-ENOENT;IOLog("B5qBluetooth: stage=address failed requires=/arm-io/bluetooth encoding=1 speed=3200000 identity=nonzero\n");return;}
     PE_parse_boot_argn("log-bluetooth",&bt.log,sizeof(bt.log));
+    b5q_bt_h4_tap_init(&h4Tap,&h4Sink,nullptr,bt.log>=2);
     if(bt.log>=2)native_bluetooth_boot_text=static_cast<char *>(IOMallocData(8192));
     thread_t thread=nullptr;
     if(kernel_thread_start(worker,nullptr,&thread)==KERN_SUCCESS)thread_deallocate(thread);

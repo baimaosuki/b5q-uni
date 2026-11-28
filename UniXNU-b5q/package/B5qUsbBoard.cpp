@@ -180,7 +180,7 @@ extern "C" bool b5q_usb_repeater(bool init,bool host){
    if(!candidate->open(false)){delete candidate;return false;}
    ti=candidate;
   }
- }
+ }else if(!releaseTiReset())return false;
  if(!ti||!ti->ready)return false;
  using namespace B5qUsbBoardCore;
  IOLockLock(ti->lock);
@@ -224,9 +224,11 @@ struct CcControlIo {
  void delay(unsigned us){if(us>=1000)IOSleep(us/1000);else IODelay(us);}
  uint64_t nowUs(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns/1000;}
 };
+uint8_t ccControlKnown=0xff;
 void configureTypecDrp(){
  CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);B5qMax77705::DrpState state;
  const bool ok=B5qMax77705::configureDrp(*maxim,mailbox,state);
+ if(state.stage>=2)ccControlKnown=state.after;
  IOLog("qcom-dwc3: max77705 DRP stage=%u ok=%u error=%u CCCTRL1=%02x->%02x requested=%02x wrote=%u deferred=%u CC0=%02x CC1=%02x PD0=%02x PD1=%02x BC=%02x\n",
        state.stage,ok,unsigned(mailbox.error),state.before,state.after,state.requested,state.wrote,state.deferred,
        state.cable.cc0,state.cable.cc1,state.pd0,state.cable.pd,state.cable.bc);
@@ -237,12 +239,16 @@ void diagnoseTypecCc(const B5qMax77705::Cable &cable){
  static uint32_t previous=~0u;
  const uint32_t signature=cable.cc0|(uint32_t(cable.cc1)<<8)|(uint32_t(cable.pd)<<16);
  if(previous==signature)return;previous=signature;
- CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);uint8_t response[2]={},cc0=0,cc1=0,pd0=0,pd1=0;
- const bool control=mailbox.command(B5qMax77705::ccControlRead,nullptr,0,response,1);
+ CcControlIo io;B5qDp::Mailbox<CcControlIo> mailbox(io);uint8_t response[2]={0,ccControlKnown},cc0=0,cc1=0,pd0=0,pd1=0;
+ // An opcode reply can take500ms. Never spend the Source->VBUS window
+ // waiting for diagnostics; DRP init already read back the control value.
+ const bool cached=cable.vconnCandidate();
+ const bool control=!cached&&mailbox.command(B5qMax77705::ccControlRead,nullptr,0,response,1);
+ if(control)ccControlKnown=response[1];
  const bool status=maxim->read(0x25,0x0a,cc0)&&maxim->read(0x25,0x0b,cc1)&&
                    maxim->read(0x25,0x0c,pd0)&&maxim->read(0x25,0x0d,pd1);
- IOLog("qcom-dwc3: max77705 CC-diag control=%u error=%u CCCTRL1=%02x status=%u CC_STATUS0=%02x CC_STATUS1=%02x PD_STATUS0=%02x PD_STATUS1=%02x policy=await-valid-cc\n",
-       control,unsigned(mailbox.error),control?response[1]:0xff,status,cc0,cc1,pd0,pd1);
+ IOLog("qcom-dwc3: max77705 CC-diag control=%u error=%u CCCTRL1=%02x status=%u CC_STATUS0=%02x CC_STATUS1=%02x PD_STATUS0=%02x PD_STATUS1=%02x source-candidate=%u poll-ms=%u control-cached=%u policy=require-source-or-vconn-dfp\n",
+       control,unsigned(mailbox.error),(control||cached)?response[1]:0xff,status,cc0,cc1,pd0,pd1,cable.sourceCandidate(),cable.pollIntervalMs(),cached);
 }
 }
 extern "C" bool b5q_usb_typec_init(void){
@@ -328,6 +334,9 @@ struct PdicIo {
 };
 B5qDp::AltMode dpAlt;bool dpStarted=false,dpFailed=false;uint32_t dpCable=0,dpPending=0;
 uint64_t dpDeadline=0;
+uint64_t dpRetryAt=0,dpStatusAt=0;
+unsigned dpStartAttempts=0,dpStatusAttempts=0;
+uint32_t dpDeferSignature=~0u,dpIrqBits=0;
 uint64_t dpNow(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns/1000000;}
 }
 extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
@@ -336,22 +345,56 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
  IOLockLock(maxim->lock);
  B5qMax77705::Cable cable;const bool sampled=B5qMax77705::readCable(*maxim,cable);
  PdicIo io;B5qDp::Mailbox<PdicIo> mailbox(io);bool ok=sampled;
- const uint32_t signature=sampled?cable.signature():0;
+ const uint32_t signature=sampled?cable.dpSessionSignature():0;
+ // Source must establish VBUS before optional DP opcode discovery can
+ // wait on the same role worker. Keep an existing active DP link intact.
+ if(sampled&&!dpStarted&&cable.sourceVbus(cable.role())&&!(cable.bc&0x80)){
+  if(dpDeferSignature!=signature){dpDeferSignature=signature;
+   IOLog("B5qDP: pdic-defer reason=await-vbus role=%d power=%u bc=%02x cc0=%02x cc1=%02x\n",
+     cable.role(),cable.power(),cable.bc,cable.cc0,cable.cc1);}
+  out->attached=true;out->reverse=int8_t(cable.orientation());out->generation=dpAlt.generation;
+  IOLockUnlock(maxim->lock);return true;
+ }
  if(!sampled||!cable.attached()||cable.orientation()<0){
   if(dpStarted)mailbox.enable(false);
   dpStarted=dpFailed=false;dpCable=dpPending=0;dpAlt.reset();
+  dpDeferSignature=~0u;dpIrqBits=0;
+  dpRetryAt=dpStatusAt=0;dpStartAttempts=dpStatusAttempts=0;
  }else{
   if(signature!=dpCable){
    if(dpStarted)mailbox.enable(false);
    dpAlt.reset();dpStarted=dpFailed=false;dpCable=signature;dpPending=0;
+   dpIrqBits=0;
+   dpRetryAt=dpStatusAt=0;dpStartAttempts=dpStatusAttempts=0;
   }
-  if(!dpStarted&&!dpFailed){
-   dpStarted=dpAlt.start(mailbox,cable.power()==1&&cable.role()==2);dpFailed=!dpStarted;dpDeadline=dpNow()+3000;ok=dpStarted;
+  if(!dpStarted&&!dpFailed&&dpNow()>=dpRetryAt){
+   ++dpStartAttempts;
+   dpStarted=dpAlt.start(mailbox,cable.power()==1&&cable.role()==2);
+   dpFailed=!dpStarted&&(dpAlt.error!=B5qDp::PdError::Timeout||dpStartAttempts>=3);
+   dpRetryAt=dpNow()+1000;dpDeadline=dpNow()+3000;ok=dpStarted;
+   IOLog("B5qDP: pdic-start ok=%u sinkDfp=%u role=%d power=%u sig=%x err=%u mbx=%u\n",
+     dpStarted,cable.power()==1&&cable.role()==2,cable.role(),cable.power(),signature,unsigned(dpAlt.error),unsigned(mailbox.error));
   }
   if(dpStarted){
    uint8_t pd=0,vdm=0;
    ok=maxim->read(0x25,4,pd)&&maxim->read(0x25,5,vdm);
-   if(ok)dpPending|=(vdm&15)|((uint32_t(pd)&0x1c)<<2);
+   // Samsung max77705-irq.c: PD bits2/3/4 are Status/Configure/Attention;
+   // bit5 is DataRole, never an Attention packet. Keep the reported VDM bit4
+   // compatibility indication too; preserve every raw bit in the diagnostic.
+   if(ok)dpPending|=(vdm&15)|((uint32_t(pd)&0x1c)<<2)|((uint32_t(vdm)&0x10)<<2);
+   const uint32_t irqBits=uint32_t(vdm)|(uint32_t(pd)<<8);
+   if(ok&&irqBits&&irqBits!=dpIrqBits)
+    IOLog("B5qDP: pdic-irq pd=%02x vdm=%02x pending=%02x phase=%u\n",pd,vdm,dpPending,unsigned(dpAlt.phase));
+   if(ok)dpIrqBits=irqBits;
+   if(ok&&dpAlt.phase==B5qDp::AltMode::Phase::Active&&!dpAlt.hpd&&
+      dpStatusAttempts<6&&dpNow()>=dpStatusAt){
+    ++dpStatusAttempts;dpStatusAt=dpNow()+500;
+    // Bounded DP Status Update (DFP_D connected), not an Attention request.
+    // A missed HPD interrupt must not permanently strand an active Alt Mode.
+    const bool requested=mailbox.request(16,dpAlt.modePosition,1,true);
+    if(requested)dpPending|=1u<<4;
+    IOLog("B5qDP: pdic-status-retry attempt=%u ok=%u err=%u\n",dpStatusAttempts,requested,unsigned(mailbox.error));
+   }
    // Firmware can omit an earlier VDM interrupt. Recover its cached packet
    // in the same order as Samsung max77705_receive_alternate_message.
    const unsigned awaited=unsigned(dpAlt.phase);
@@ -368,17 +411,22 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
     }
     if(bit==6&&expected<unsigned(B5qDp::AltMode::Phase::Status))continue;
     uint8_t reply[33]={};ok=mailbox.get(id,reply);
+    IOLog("B5qDP: pdic-raw id=%02x ok=%u bytes=%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      id,ok,reply[0],reply[1],reply[2],reply[3],reply[4],reply[5],reply[6],reply[7],reply[8],reply[9],reply[10],reply[11],reply[12],reply[13],reply[14],reply[15]);
+    bool tail=false;for(unsigned i=16;i<32;i++)tail|=reply[i]!=0;
+    if(id<=3&&tail)IOLog("B5qDP: pdic-raw2 id=%02x bytes=%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      id,reply[16],reply[17],reply[18],reply[19],reply[20],reply[21],reply[22],reply[23],reply[24],reply[25],reply[26],reply[27],reply[28],reply[29],reply[30],reply[31]);
     if(ok)ok=dpAlt.event(mailbox,id,reply,(id==1||id==2||id==3)?32:id==4?8:12);
     dpPending&=~(1u<<bit);dpDeadline=dpNow()+3000;
     IOLog("B5qDP: pdic id=%02x phase=%u pin=%02x lanes=%u hpd=%u irq=%u packet=%u error=%u mailbox=%u\n",
       id,unsigned(dpAlt.phase),dpAlt.pin,dpAlt.lanes(),dpAlt.hpd,dpAlt.hpdIrq,ok,unsigned(dpAlt.error),unsigned(mailbox.error));
-    if(!ok)IOLog("B5qDP: pdic-raw id=%02x bytes=%02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x\n",
-      id,reply[0],reply[1],reply[2],reply[3],reply[4],reply[5],reply[6],reply[7],reply[8],reply[9],reply[10],reply[11],reply[12],reply[13],reply[14],reply[15]);
    }
    if(ok&&dpAlt.phase==B5qDp::AltMode::Phase::Off){
     mailbox.enable(false);dpStarted=false;dpFailed=true;dpPending=0;
    }
-   if(dpAlt.phase!=B5qDp::AltMode::Phase::Active&&dpNow()>dpDeadline){ok=false;dpAlt.reject(B5qDp::PdError::Timeout);}
+   if(dpAlt.phase!=B5qDp::AltMode::Phase::Active&&dpNow()>dpDeadline){
+    IOLog("B5qDP: pdic-timeout phase=%u pending=%02x pd=%02x vdm=%02x\n",unsigned(dpAlt.phase),dpPending,pd,vdm);
+    ok=false;dpAlt.reject(B5qDp::PdError::Timeout);}
    if(!ok||dpAlt.phase==B5qDp::AltMode::Phase::Failed){
     mailbox.enable(false);dpStarted=false;dpFailed=true;
    }
@@ -394,5 +442,6 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
 extern "C" void b5q_dp_port_stop(void){
  if(!openMaxim())return;IOLockLock(maxim->lock);
  if(dpStarted){PdicIo io;B5qDp::Mailbox<PdicIo> mailbox(io);mailbox.enable(false);}
- dpStarted=dpFailed=false;dpPending=dpCable=0;dpAlt.reset();IOLockUnlock(maxim->lock);
+ dpStarted=dpFailed=false;dpPending=dpCable=0;dpAlt.reset();dpDeferSignature=~0u;dpIrqBits=0;
+ dpRetryAt=dpStatusAt=0;dpStartAttempts=dpStatusAttempts=0;IOLockUnlock(maxim->lock);
 }

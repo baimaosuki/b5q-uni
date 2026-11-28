@@ -17,11 +17,30 @@ def prepare(component,package,soc,out,reference):
     upstream=component/'src/qbt_linux.c';text=upstream.read_text()
     if text.count('QCA_WCN7850')!=2:raise ValueError('Shared QCA startup selection ABI changed')
     selected=out/'qbt_linux.c';selected.write_text(text.replace('QCA_WCN7850','QCA_WCN6855'))
+    tty_upstream=component/'src/qbt_tty.c';tty_text=tty_upstream.read_text()
+    tty_needle='''bool qbt_transport_active(void)
+{
+    lck_mtx_lock(&bt_tty_lock);
+    bool active=bt_tty.open && !bt_tty.closing && !bt_tty.boot;
+    lck_mtx_unlock(&bt_tty_lock);return active;
+}
+'''
+    if tty_text.count(tty_needle)!=1:raise ValueError('QBT TTY diagnostics ABI changed')
+    tty_selected=out/'qbt_tty.c'
+    tty_selected.write_text(tty_text.replace(tty_needle,tty_needle+'''uint64_t qbt_transport_rx_dropped(void)
+{
+    lck_mtx_lock(&bt_tty_lock);
+    uint64_t count=bt_tty.rx_dropped;
+    lck_mtx_unlock(&bt_tty_lock);return count;
+}
+'''))
     sources=[package/n for n in ('B5qBluetooth.cpp','B5qBtFifo.c','B5qWcnPower.cpp','BluetoothFirmware.c')]
-    sources += [component/n for n in ('src/qbt_core.c','src/qbt_tty.c','out/linux/btqca.c')]
+    sources += [component/n for n in ('src/qbt_core.c','out/linux/btqca.c')]
+    sources += [tty_selected]
     sources += [selected,soc/'Sm8550GeniUart.c']
     report=dict(status='SOURCE_PREPARED',hardware_verified=False,component_revision=revision,
-        original_adapter_sha256=hashlib.sha256(upstream.read_bytes()).hexdigest(),selection='QCA_WCN6855',
+        original_adapter_sha256=hashlib.sha256(upstream.read_bytes()).hexdigest(),
+        original_tty_sha256=hashlib.sha256(tty_upstream.read_bytes()).hexdigest(),selection='QCA_WCN6855',
         transport='Samsung GENI FIFO; no DMA backend',
         sources={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
     (out/'sources.json').write_text(json.dumps(report,indent=2)+'\n')

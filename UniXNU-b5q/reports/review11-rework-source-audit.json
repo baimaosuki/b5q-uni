@@ -1,0 +1,46 @@
+{
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "scope": "review11 rework: Bluetooth platform trust and AMFI LWCR, Samsung DWC3 Host state, single-MSI ath11k IRQ correctness and bounded diagnostics",
+  "inputs": {
+    "request_sha256": "5fc6aaa8765b0429eb3f3d7f1b53bd938df15e4c5ef586dc0ca5299973f97257",
+    "review10_log_sha256": "556bbf97b41c16a97b5a230bcdceec5cc93616aab718827ccb4548cb7441fc61",
+    "kernelcache_sha256": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9",
+    "amss20_sha256": "989f652bc5f176634db256dd99690f93df9841adb05f5a2274444a0db53e050b",
+    "original_bluetoothd_arm64e_sha256": "82e244d5dcafbc150e820416ac7037debc9def106eae043ee51ed4e2c84e7721",
+    "review10_bluetoothd_sha256": "a7723f275f095c5d6892ab046b320ccb50ddededd1078fa3455d19c0e3fbbde5",
+    "review10_trust_bundle_sha256": "7699222f26b18d3a26b83016861ead8a1c58720fd82337aa93c282ca8debe33f"
+  },
+  "findings": {
+    "bluetooth": "Direct parsing proves Apple arm64e bluetoothd platform=27 flags=0 CDHash 729fad33b073d2f2df623d3fec33472e8d070d79, while review10 carries platform=0 flags=2 CDHash 0a15e3a72da18bc7b2443a7e676e30a72a09d028 in a v2 02/00/00/00 entry. The device runtime now changes platform before CDHash collection, verifies every code page hash, and changes exactly that generated v2 entry to category 1. Kernelcache disassembly proves AMFI call 102 copies 0x40 bytes and uses the error pointer/size at 0x30/0x38 with a 0x404 output.",
+    "usb": "The initial review11 ENBLSLPM and USB3 SUSPHY settings are reverted. Core role switching no longer asserts PHY soft reset or reruns phyInit without the GCC QUSB2PHY BCR. Host restoration clears all three sleep bits and applies Samsung GUCTL bit17, GUCTL1 bits21/8 and GUCTL2 bit16. UFS log sync is restricted to background first HSE/HCE/U3 polling. AppleUSBHostPort receives debug mask 0x40000019 once per registered port.",
+    "wifi": "Pinned ath11k pcic.c directly masked the shared single MSI from CE and ext interrupt paths despite guarded helpers. All CE/ext tasklet, handler, NAPI and shutdown paths now use the guarded helpers. WCN6855 hw2.1 parameters, QMI host-cap/wlan_cfg/mem segments, ASPM disable and existing idle_ps override match the pinned source; no speculative power change was made. Fatal and timeout diagnostics include MHI/BHI, WMI/HTT16, CE2/CE3 software and hardware/shadow indices and strict IRQ depth, plus a 64-entry startup TX/RX trace budget."
+  },
+  "verification": [
+    "PASS real review10 bluetoothd CodeDirectory parsing, 3064 SHA-256 code slots, platform 27 CDHash transition and v2 category 1 model",
+    "PASS review11/review10/review9, USB role/reset/device and WCN6855 host regressions",
+    "PASS full pinned ath11k target build and separate Wi-Fi/Bluetooth arm64e objects",
+    "PASS QcomDwc3 arm64e target with 427 xHCI slots and no unresolved imports",
+    "PASS wireless 124-object and wireless+ADSP 158-object closure, 68/79 PAC contracts, zero EL1 apps_smmu",
+    "PASS ordered XNU patch application 144/144",
+    "PASS complete local pre-ci-v33d 32/32 checks with exact source-bound P0-P4 receipt reuse; receipt SHA256 c6f24ff88bc2adb7d3f4cc2e4a4959b9cc11970b1cdf341c3de52b986cacabc2"
+  ],
+  "receipts": {
+    "local_gates": "artifacts/b5q-review11-rework-local/v33d-local-gates.json",
+    "local_gates_sha256": "c6f24ff88bc2adb7d3f4cc2e4a4959b9cc11970b1cdf341c3de52b986cacabc2",
+    "bluetooth_signature_model": "artifacts/b5q-review11-rework-local/bluetooth-signature-model.json",
+    "bluetooth_signature_model_sha256": "9cb9b825997aaf731b0b8336bfc401b3d28dd4f2808da658a51760f2fa579cdf"
+  },
+  "unchanged": [
+    "B5qTouch sources",
+    "UEFI Platforms/Samsung/b5qPkg and B5qHandoffDxe",
+    "64 MiB PCIe DMA layout",
+    "USB HAL IOMMU",
+    "B5qUsbInputs.h TI3e overrides",
+    "board.toml kernel arguments remain 1023 bytes"
+  ],
+  "hardware_verified": false,
+  "push_performed": false,
+  "ci_triggered": false,
+  "image_created": false,
+  "phone_accessed": false
+}

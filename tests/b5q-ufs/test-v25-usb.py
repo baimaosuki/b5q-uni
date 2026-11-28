@@ -69,6 +69,9 @@ bool powerRails(){return power;}bool gdsc(unsigned,unsigned){return true;}bool c
 bool b5q_usb_typec_init(){return typec;}
 bool repeater(bool,bool){++repeaterCalls;return rep;}
 void phyInit(){}void IOSleep(unsigned){}
+namespace B5qMax77705 { struct Cable{}; }
+B5qMax77705::Cable gAppliedCable;
+int gAppliedOrientation=-1;
 bool superSpeedInit(){return ss;}void selectUtmiClock(){++utmi;}
 bool b5q_usb_otg(bool on){++otgCalls;otgOn=on;return true;}
 void followOrientation(){}

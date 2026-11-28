@@ -53,7 +53,7 @@ spec = importlib.util.spec_from_file_location('seed', ROOT / 'UniXNU-b5q/scripts
 seed = importlib.util.module_from_spec(spec); spec.loader.exec_module(seed)
 for labels in seed.policies().values():
     encoded = seed.merge(plistlib.dumps({'com.apple.endpointsecurity.endpointsecurityd': True}), labels)
-    assert encoded.startswith(b'bplist00') and plistlib.loads(encoded) == dict.fromkeys(labels, True)
+    assert encoded.startswith(b'bplist00') and plistlib.loads(encoded) == (dict(labels) if isinstance(labels,dict) else dict.fromkeys(labels,True))
     assert not set(labels) & {'com.apple.WindowServer', 'com.apple.loginwindow', 'com.apple.Dock.agent', 'com.apple.Finder', 'com.apple.endpointsecurity.endpointsecurityd'}
     assert {'com.apple.geod', 'com.apple.ReportCrashService', 'com.apple.wallpaper.extension.aerials'} <= set(labels)
 workflow = yaml.safe_load((ROOT / '.github/workflows/b5q-batch1-final.yml').read_text())

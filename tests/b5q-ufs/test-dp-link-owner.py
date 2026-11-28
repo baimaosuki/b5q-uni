@@ -12,6 +12,7 @@ def method(signature):
 body="""struct Owner {
  Hardware io;B5qDp::Session<Hardware> session;uint32_t generation=0;
  uint64_t retryAt=0;bool accepted=false,startPass=true,poolPass=true,drainPass=true;
+ B5qDpPortState observed{};bool haveObserved=false;
  struct {uint64_t PoolBytes=0x1f00000;}dma;
  struct {void close(){}}pool;
  struct {struct{bool active=false;}dpu;bool timedOut(int){return false;}}presentation;
@@ -36,7 +37,9 @@ h=r'''
 #include <initializer_list>
 #include "B5qDpPort.h"
 #include "B5qDpModes.h"
+#include "B5qDpAux.h"
 #include "B5qMax77705.h"
+using B5qDp::Block;
 uint64_t tick=0;uint64_t nowUs(){return tick;}
 template<class...Args>void log(const char *,Args...args){((void)args,...);}
 #define IOLog(...) log(__VA_ARGS__)
@@ -52,18 +55,22 @@ void b5q_dp_lid_online(bool){}
 void IOLockLock(int*){}void IOLockUnlock(int*){}
 struct Hardware {
  bool opened=false,mxOwned=false,fault=false,openPass=true,closePass=true;
- unsigned wantedReverse=0,opens=0,closes=0;
+ unsigned wantedReverse=0,opens=0,closes=0;struct{volatile uint32_t *va=nullptr;}sel,en;
  bool connected(){return opened;}
+ uint32_t read(B5qDp::Block,unsigned){return 0;}
  bool open(bool reverse){opens++;wantedReverse=reverse;opened=true;return openPass;}
  bool close(){closes++;if(!closePass)return false;opened=false;return true;}
 };
 namespace B5qDp {
 template<class Io>struct Session {
- Io &io;bool stopPass=true,discoverPass=true,trainPass=true,healthy=true;
- unsigned stops=0,discovers=0,trains=0,lanes=2,rate=20,attempts=1;
- struct{unsigned failed=0;}clock,phy;struct{unsigned count=1;unsigned fitPool(uint64_t){return count;}}modes;
+ Io &io;bool stopPass=true,discoverPass=true,trainPass=true,healthy=true,streaming=false,auxOn=true;
+ unsigned stops=0,discovers=0,trains=0,lanes=2,rate=20,attempts=1,lastRate=0,lastLanes=0,clockLast=0,videoStage=0;
+ uint8_t edid[128]{},trainStatus[6]{};uint32_t auxFailRegs[10]{};bool haveAuxFailRegs=false;
+ struct{unsigned failed=0,last=0;}clock,phy,controller;struct{unsigned count=1;Mode values[1]{};unsigned fitPool(uint64_t){return count;}}modes;
+ unsigned discoverStep=6,trainError=0,edidBytes=128;uint8_t dpcd[16]{};
+ struct{unsigned revision=0x14,rate=20,lanes=2;bool enhanced=true;}caps;
  unsigned error=0;Mode selected{148500,1920,1080,280,45,88,44,4,5,true,true};
- struct Aux {Session &s;unsigned error=0,reads=0;
+ struct Aux {Session &s;AuxError error=AuxError::None;unsigned reads=0,lastStatus=0,transactions=0;
   bool dpcd(bool read,unsigned address,uint8_t *out,unsigned size){
    assert(read&&address==0x202&&size==6);reads++;memset(out,0,size);
    if(s.healthy){out[0]=out[1]=0x77;out[2]=1;}return true;
@@ -81,7 +88,7 @@ test=r'''
 int main(){unsigned cases=0;
  auto port=[](){B5qDpPortState p{};p.attached=p.configured=p.hpd=true;p.lanes=2;p.reverse=0;p.generation=1;p.pin=8;return p;};
  {Owner o;auto p=port();o.update(p);assert(o.accepted&&o.io.opens==1&&o.session.trains==1);
-  o.update(p);assert(o.accepted&&o.io.opens==1&&o.session.trains==1&&o.session.aux.reads==1);
+  o.update(p);assert(o.accepted&&o.io.opens==1&&o.session.trains==1&&o.session.aux.reads==2);
   o.session.healthy=false;o.update(p);assert(o.accepted&&o.io.opens==2&&o.session.trains==2);
   o.session.healthy=true;p.hpdIrq=true;o.update(p);assert(o.accepted&&o.io.opens==3);
   p.hpdIrq=false;p.hpd=false;o.update(p);assert(!o.accepted&&!o.io.opened);

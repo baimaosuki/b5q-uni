@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "review": "review14",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "ci_triggered": false,
+  "push_performed": false,
+  "esp_created": false,
+  "phone_accessed": false,
+  "review_fixes": {
+    "wifi_twt_ap": "qca6390 WMI resource config initializes twt_ap_pdev_count=max(num_radios,1) and twt_ap_sta_count=8; ipq8074 remains unchanged",
+    "wmi_probe": "ath11k_wmi_cmd_init logs radios/vdevs/peers/twt_ap_pdev/twt_ap_sta before sending WMI init",
+    "rddm_seg0": "live segment0 high hits are scanned first; static segment>=1 high hits are capped at6; low scan follows",
+    "bt_le_mask": "thin arm64e UUID01204E5C... sites0x95d54b and0x193648 patched to0x187f, re-signed and platform27 applied",
+    "bt_h4_probes": "LE conn-param request/data-length/PHY decoded; ET0x13 counted as evt13; BluetoothUIServe p_comm truncation matched",
+    "usb_power_hold": "public IOPM child pins AppleUSBHostPort at kIOPMPowerOn; release precedes terminate; UsbForcePower is fallback-only; 20x50ms fast attach",
+    "usb_pmstop_gate": "Removed direct port->removePowerChild() calls; release relies on PMstop handlePMstop and waits up to 50x1ms for copyParentEntry(gIOPowerPlane) to clear before hold release and host terminate",
+    "usb_slot_race": "ensureHostPortHold handles reserve -2 by releasing the local ref and returning hostPortHoldState(port), preventing a spurious UsbForcePower fallback",
+    "bt_phy_error": "LE PHY Update Complete with nonzero status sets error=1 and increments stats.errs while retaining the decoded line"
+  },
+  "local_gate": {
+    "receipt": "artifacts/b5q-v33d-review14-fix1/v33d-local-gates.json",
+    "receipt_sha256": "3de59e217bf4dcc0dae30036c0ae6cf494f366e4a7551619c10b0b80739585fa",
+    "passed": true,
+    "checks": 35,
+    "command": "B5Q_GATE_WORK=/home/baimao/zflip5/artifacts/b5q-v33d-review14-fix1 python3 scripts/b5q-install/pre-ci-v33d.py"
+  },
+  "source_sha256": {
+    "UniXNU-b5q/package/QcomDwc3.cpp": "d374dde4f1b4a4515110ad8d92ef4e0ee5ec4cdc7c1e28f2495f1a327931da63",
+    "UniXNU-b5q/package/B5qUsbHostRole.h": "48e2c68daf1b97e3fff3cc4e1a06f56cf70682356eaa6bec46cada0baf6cad16",
+    "UniXNU-b5q/package/B5qAth11kRddm.h": "4bf56be46be786b1fba1c5773ea8a2abacce1e79ff5687f30de64d58f40c6b90",
+    "UniXNU-b5q/package/B5qBluetooth.cpp": "793ffce6ee1749629fb169ce043560d9d61e9029af666dbbde09327af8dceba4",
+    "UniXNU-b5q/package/B5qBtH4Tap.h": "455a5d0ae2915234021c4167fd708fdc2f2dab1c4827bc3c2b0ac9c80efc8b03",
+    "UniXNU-b5q/scripts/build-b5q-wifi.py": "6c3dc8b24290a6b4895306a9c33cbc0245a13dc6550acc4e53bbf49209acfe2b",
+    "UniXNU-b5q/scripts/b5q_bt_le_mask.py": "9a03dad75f47bb842c86b4b187956f04831894803ce5c41bcbfa2344e61c35f0",
+    "UniXNU-b5q/scripts/build-b5q-bluetooth-userspace.py": "18d98a84c411d8928187558b35a6022070b1d699e0139d40fb32f722d79ed805",
+    "tests/b5q-ufs/test-review14.py": "fa30f953045c53e394368db4067469c49cc175cdc159072f9a8e2411fc7816d9",
+    "scripts/b5q-install/test-review14.py": "60b40fbab7f75cbd29f08184c3f7b8cb2de2a4ba2fe2ebe1a1c1b688a4132ec0",
+    "tests/b5q-ufs/test-review13.py": "fa6f4e77474856f5ff12d2401ce793073bdd4827b7ec7aa2a09752922d0470f7",
+    "tests/b5q-ufs/test-review12.py": "000099168ab2457d8d1d355345962c34d8cedade048c3bd3e0242a223dffca38",
+    "tests/b5q-ufs/test-review9.py": "6918aa04d74ec0abfdf97f9628826aedeafd7713b1adb04a35c4c2e6a70a39bf",
+    "tests/b5q-ufs/test-v33b-causal.py": "203cd01df5ac916071513c1798b42ff85456b2876b6adec8e10ec797e2cefeee",
+    "tests/b5q-ufs/test-v33d-usb-device.py": "dcd2e0caa00c48426f064abf9b9259b97a91c1885eb1cdcdea54d1a24c7d6db1",
+    "scripts/b5q-install/pre-ci-v33d.py": "3b3a2159d1d1d43f8f076cf014282719ceeea0332f75e842e4a7edab73d75fae",
+    "UniXNU-b5q/porting.toml": "3cce89a8dcd42432515ff94c93d8377239c3e5c5f766e43baf822728daf6641f"
+  },
+  "source_paths": [
+    "UniXNU-b5q/package/QcomDwc3.cpp",
+    "UniXNU-b5q/package/B5qUsbHostRole.h",
+    "UniXNU-b5q/package/B5qAth11kRddm.h",
+    "UniXNU-b5q/package/B5qBluetooth.cpp",
+    "UniXNU-b5q/package/B5qBtH4Tap.h",
+    "UniXNU-b5q/scripts/build-b5q-wifi.py",
+    "UniXNU-b5q/scripts/b5q_bt_le_mask.py",
+    "UniXNU-b5q/scripts/build-b5q-bluetooth-userspace.py",
+    "tests/b5q-ufs/test-review14.py",
+    "scripts/b5q-install/test-review14.py",
+    "tests/b5q-ufs/test-review13.py",
+    "tests/b5q-ufs/test-review12.py",
+    "tests/b5q-ufs/test-review9.py",
+    "tests/b5q-ufs/test-v33b-causal.py",
+    "tests/b5q-ufs/test-v33d-usb-device.py",
+    "scripts/b5q-install/pre-ci-v33d.py",
+    "UniXNU-b5q/porting.toml"
+  ],
+  "inputs": {
+    "physical_review13_xnu2log_sha256": "dfe1b624004a6560e595a81eb37504c0ada5b8c1294666001cea2605c44c3231",
+    "bluetoothd_fat_sha256": "eb0d4a8566365f95df5b6bc42537cef2cc1cec785834e507a55df9930c0dd539",
+    "bluetoothd_arm64e_slice_sha256": "82e244d5dcafbc150e820416ac7037debc9def106eae043ee51ed4e2c84e7721",
+    "bluetoothd_uuid": "01204E5C-F295-35D8-9ED6-62ECF79D62DF",
+    "bluetoothd_arm64e_slice_offset": 12795904,
+    "bluetoothd_arm64e_slice_size": 12475696,
+    "amss20_sha256": "989f652bc5f176634db256dd99690f93df9841adb05f5a2274444a0db53e050b",
+    "board_kernel_args_bytes": 1023
+  },
+  "wifi": {
+    "target_objects": 109,
+    "failed": 0,
+    "generated_hw": "artifacts/b5q-p3-work/target/ath11k/hw.c",
+    "generated_wmi": "artifacts/b5q-p3-work/target/ath11k/wmi.c",
+    "source_inputs": "artifacts/b5q-p3-work/target/source-inputs.json",
+    "generated_hw_sha256": "4a5c89bdb265c8fdb309a241e5c8613c32690fd149b9471117554da486ffe69b",
+    "generated_wmi_sha256": "8f576d3e663ac5ec8b5ba060faf466aa29d4f540cf450ab31af0bb6b40fcb93c",
+    "source_inputs_sha256": "04c7b29d33e534e46ad7fbf43b288f85934903c26803a50becb3568da7e91a2d"
+  },
+  "bluetooth": {
+    "target_objects": 9,
+    "failed": 0,
+    "patch_module": "UniXNU-b5q/scripts/b5q_bt_le_mask.py",
+    "old_mask": 4127,
+    "new_mask": 6271,
+    "site1_offset": 9819467,
+    "site2_offset": 1652296,
+    "codesign_available": false
+  },
+  "usb": {
+    "xhci_slots": 427,
+    "unresolved": 0,
+    "power_child": "B5qUsbPortPowerHold",
+    "table_slots": 8,
+    "fast_attempts": 20,
+    "fast_interval_ms": 50
+  },
+  "review14_host_checks": {
+    "passed": true,
+    "hardware_verified": false,
+    "review": 14,
+    "checks": [
+      {
+        "name": "wifi-twt-ap-and-wmi-probe",
+        "passed": true
+      },
+      {
+        "name": "rddm-seg0-priority-compile",
+        "passed": true,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "rddm-seg0-priority-ASan-UBSan",
+        "passed": true,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "rddm-real-crash-slice-seg0-priority",
+        "passed": true,
+        "real_input": "logs/b5q-xnu2log-review13/XNU2LOG.txt:1433"
+      },
+      {
+        "name": "macos27-bluetoothd-le-mask-real-slice",
+        "passed": true,
+        "real_input": "artifacts/b5q-p2-work/os-root/usr/sbin/bluetoothd",
+        "uuid": "01204E5C-F295-35D8-9ED6-62ECF79D62DF",
+        "old_mask": 4127,
+        "new_mask": 6271,
+        "slice_offset": 12795904,
+        "slice_size": 12475696
+      },
+      {
+        "name": "h4-le-events-compile",
+        "passed": true,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "h4-le-events-ASan-UBSan",
+        "passed": true,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "h4-le-events-and-real-conn-slice",
+        "passed": true,
+        "real_input": "logs/b5q-xnu2log-review13/XNU2LOG.txt:2031"
+      },
+      {
+        "name": "bt-kernel-probes-and-health",
+        "passed": true
+      },
+      {
+        "name": "usb-port-power-hold-lifecycle",
+        "passed": true
+      },
+      {
+        "name": "usb-host-role-helpers-compile",
+        "passed": true,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "usb-host-role-helpers-ASan-UBSan",
+        "passed": true,
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      },
+      {
+        "name": "usb-fast-attach-state-helper",
+        "passed": true
+      }
+    ],
+    "real_device_inputs": [
+      "logs/b5q-xnu2log-review13/XNU2LOG.txt:1433",
+      "logs/b5q-xnu2log-review13/XNU2LOG.txt:2031",
+      "artifacts/b5q-p2-work/os-root/usr/sbin/bluetoothd"
+    ],
+    "bluetoothd_sha256": "eb0d4a8566365f95df5b6bc42537cef2cc1cec785834e507a55df9930c0dd539",
+    "bluetoothd_slice_offset": 12795904,
+    "bluetoothd_slice_size": 12475696,
+    "le_event_mask": 6271,
+    "sanitizer": "address,undefined",
+    "host_only": true,
+    "push_performed": false,
+    "CI_triggered": false,
+    "ESP_created": false,
+    "phone_accessed": false
+  },
+  "red_line_zero_diff": {
+    ".github/workflows": true,
+    "UniXNU": true,
+    "sources": true,
+    "UniXNU-b5q/patches": true,
+    "UniXNU-b5q/board.toml": true
+  },
+  "notes": [
+    "Local-only review14; no commit, push, CI, ESP, image or phone access.",
+    "macOS codesign/lipo are unavailable on this Linux host, so the production Bluetooth userspace re-sign path was not executed; the byte patch was tested on the actual arm64e slice.",
+    "Hardware verification remains pending."
+  ],
+  "host_test_receipt": "artifacts/b5q-v33d-review14-fix1/review14-tests.json",
+  "review14_fix_round": {
+    "date": "2026-11-27",
+    "items": [
+      "PM-gated child detach via PMstop + bounded copyParentEntry wait",
+      "reserve slot -2 race returns hostPortHoldState",
+      "failed LE PHY Update counts stats.errs and err=1"
+    ],
+    "status": "host-tested"
+  }
+}

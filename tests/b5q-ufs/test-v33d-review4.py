@@ -75,25 +75,33 @@ int main(){
  reset();assert(!lives);
  puts("PASS production MAXIM recovery:concurrent1.2sSE8open,6sboundedtimeout,latebusready auto-recovers cable andOTG; failedopen returnsstate0,1sthrottle and retry succeed");}
 '''.replace('OPEN',f(board,'bool openMaxim(')).replace('INIT',f(board,'extern "C" bool b5q_usb_typec_init(')).replace('ENSURE',f(board,'bool ensureMaximReady(')).replace('CABLE',f(board,'extern "C" bool b5q_usb_cable_state(')).replace('\nOTG\n','\n'+f(board,'extern "C" bool b5q_usb_otg(')+'\n'))
-q=(P/'QcomDwc3.cpp').read_text();role=f(q,'bool setCoreRole(')
+q=(P/'QcomDwc3.cpp').read_text();role=f(q,'bool setCoreRole(');restore=f(q,'void restoreHostGlobals() {')
 run('core-only-reset',base+r'''
-constexpr int kRoleHost=2,kRoleDevice=1;bool gDeviceStackAllowed=true;int gCoreRole=1;
-std::vector<unsigned> steps;
+constexpr int kRoleHost=2,kRoleDevice=1;bool gDeviceStackAllowed=false;int gCoreRole=1;
+constexpr uint32_t kGctlDisableClockGating=1u;
+constexpr uint32_t kUsb2EnableLpm=1u<<8,kUsb2SuspendPhy=1u<<6,kUsb3SuspendPhy=1u<<17;
+constexpr uint32_t kGuctlSprsCtrlTransEn=1u<<17,kGuctl1Host=(1u<<21)|(1u<<8),kGuctl2Host=1u<<16;
+std::vector<unsigned> steps,sleeps;
 struct Reg{unsigned index=0;uint32_t value=0;operator uint32_t()const{return value;}
- Reg&operator=(uint32_t v){if(index==0x200/4||index==0x2c0/4)assert(!(v&(1u<<31)));value=v;steps.push_back(index);return *this;}
+ Reg&operator=(uint32_t v){value=v;steps.push_back(index);return *this;}
  void operator|=(uint32_t v){*this=value|v;}void operator&=(uint32_t v){*this=value&v;}};
 Reg regs[1024];struct{Reg*va=regs;}gGlobals;
 struct QcomDwc3Nub{static void route(void*p){assert(!p);}};
-void barrier(){}void IOSleep(unsigned ms){assert(ms==100);assert(regs[0x110/4].value&(1u<<11));}
-bool repeater(bool,bool){return true;}
+void barrier(){}void IOSleep(unsigned ms){sleeps.push_back(ms);
+ if(ms==100)assert(regs[0x110/4].value&(1u<<11));
+ else {assert(ms==1);assert(!(regs[0x110/4].value&(1u<<11)));}}
+bool repeater(bool,bool){assert(!(regs[0x110/4].value&(1u<<11)));assert(!(regs[0x200/4].value&((1u<<6)|(1u<<8))));assert(!(regs[0x2c0/4].value&(1u<<17)));return true;}
+RESTORE
 ROLE
 int main(){for(unsigned i=0;i<1024;i++)regs[i].index=i;
  regs[0x110/4].value=0x81400000|(2u<<12);regs[0x200/4].value=(1u<<6)|(1u<<8)|3;regs[0x2c0/4].value=(1u<<17)|5;
- assert(setCoreRole(2,true));assert((steps==std::vector<unsigned>{0x110/4,0x110/4,0x110/4,0x200/4,0x2c0/4}));
+ assert(setCoreRole(2,true));assert((steps==std::vector<unsigned>{0x110/4,0x110/4,0x110/4,0x200/4,0x2c0/4,0x110/4,0x200/4,0x2c0/4,0x12c/4,0x11c/4,0x60c/4}));
+ assert((sleeps==std::vector<unsigned>{100,1}));
  assert(!(regs[0x110/4].value&(1u<<11))&&((regs[0x110/4].value>>12)&3)==1&&(regs[0x110/4].value&1));
- assert(regs[0x200/4].value==3&&regs[0x2c0/4].value==5&&!gDeviceStackAllowed);
- puts("PASS actual setCoreRole:CORESOFTRESET set/wait/clear thenPRTCAPDIR; cleanUSBquirks,zeroPHYSOFTRSTbit31 afterQMP");}
-'''.replace('ROLE',role))
+ assert(regs[0x200/4].value==3u&&regs[0x2c0/4].value==5u&&regs[0x12c/4].value==(1u<<17));
+ assert(regs[0x11c/4].value==((1u<<21)|(1u<<8))&&regs[0x60c/4].value==(1u<<16)&&!gDeviceStackAllowed);
+ puts("PASS actual setCoreRole: core-only reset, all PHY sleep bits clear, Samsung GUCTL/GUCTL1/GUCTL2 Host restoration");}
+'''.replace('RESTORE',restore).replace('ROLE',role))
 write64=f(q,'void XHCI_WRITE64(').replace(' override','')
 write64=write64.replace('volatile uint32_t *at = reinterpret_cast<volatile uint32_t *>(static_cast<uint8_t *>(base) + offset);','Reg *at = static_cast<Model *>(base)->at(offset);')
 run('xhci-write64-causal',base+r'''
@@ -110,7 +118,7 @@ void Reg::operator=(uint32_t v){m->order.push_back(half);m->staged[half]=v;
  if(!m->reverseLatch){if(half==0){m->visible[0]=m->staged[0];m->visible[1]=m->staged[1];}}
  else if(half==1){if(m->order.size()>=2&&m->order[m->order.size()-2]==0){m->visible[0]=m->staged[0];m->visible[1]=m->staged[1];}}}
 unsigned logs=0,rb2=0,syncs=0,checkpoints=0;void dmaDiagnostics(const char*){}
-void hostCheckpoint(const char*,bool=false){checkpoints++;}
+void hostCheckpoint(const char*,bool=false,bool=false){checkpoints++;}
 unsigned b5q_log_sync(unsigned n){assert(n==750);syncs++;return 0;}
 void IOLog(const char *fmt,...){logs++;if(strstr(fmt,"rb2="))rb2++;}void barrier(){}
 WRITE
@@ -121,10 +129,10 @@ int main(){uint64_t value=0x88ba04000ULL;Model normal;XHCI_WRITE64(&normal,0x30,
  Model irrelevant;XHCI_WRITE64(&irrelevant,0x10,0);assert(irrelevant.order.size()==2&&logs==5);
  for(unsigned i=5;i<16;i++){Model ok;XHCI_WRITE64(&ok,0x30,value);}assert(logs==16);
  Model after;after.reverseLatch=true;XHCI_WRITE64(&after,0x30,value);assert(after.order.size()==2&&logs==16);
- assert(syncs==14&&checkpoints>=17);
+ assert(syncs==0&&checkpoints>=17);
  puts("PASS production XHCI_WRITE64:64bitPA88ba04000,hi/lo-latch andlo/hi-only-latch,originalvalue fallback,CRCR excluded,zero writes,first16calls bounded");}
 '''.replace('\nWRITE\n','\n'+write64+'\n'))
 abi=json.loads((R/'UniXNU-b5q/scripts/usb-xhci-26C5035r.json').read_text());assert abi['overrides']['421']=='XHCI_WRITE64' if 'overrides'in abi else '"421": "XHCI_WRITE64"'in json.dumps(abi)
-assert '(1u<<31)'not in role and '1u << 31'not in role
+assert '1u<<31' not in role and 'phyInit()' not in role and role.index('*gctl&=~(1u<<11)')<role.index('repeater(false')
 assert '(id==1||id==2||id==3)?32'in board and 'pdic-raw id=%02x'in board
 print('PASS sourcecontracts:DiscoverModes32bytes,raw16bytefailurelog,write64signature preserved atslot421/0xd28')

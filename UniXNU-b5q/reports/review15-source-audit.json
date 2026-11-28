@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "review": "review15",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "ci_triggered": false,
+  "push_performed": false,
+  "commit_performed": false,
+  "esp_created": false,
+  "phone_accessed": false,
+  "source_base_commit": "8ab66aa7cb477d1a9fe9c7ac5e39b8a65363edee",
+  "source_paths": [
+    "UniXNU-b5q/package/B5qDpLink.cpp",
+    "UniXNU-b5q/package/B5qDpPdic.h",
+    "UniXNU-b5q/package/B5qDpSession.h",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp",
+    "UniXNU-b5q/package/B5qUsbHostEvent.h",
+    "UniXNU-b5q/package/B5qUsbHostRole.h",
+    "UniXNU-b5q/package/QcomDwc3.cpp",
+    "UniXNU-b5q/scripts/build-b5q-wifi.py",
+    "scripts/b5q-install/pre-ci-v33d.py",
+    "scripts/b5q-install/test-review14.py",
+    "scripts/b5q-install/test-review15.py",
+    "tests/b5q-ufs/test-dp-link-owner.py",
+    "tests/b5q-ufs/test-dp-native-pipeline.py",
+    "tests/b5q-ufs/test-dp-port.py",
+    "tests/b5q-ufs/test-review12.py",
+    "tests/b5q-ufs/test-review13.py",
+    "tests/b5q-ufs/test-review15.py",
+    "tests/b5q-ufs/test-review9.py",
+    "tests/b5q-ufs/test-v33b-causal.py",
+    "tests/b5q-ufs/test-v33d-usb-device.py",
+    "UniXNU-b5q/porting.toml"
+  ],
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qDpLink.cpp": "d0e2a9a48824be604506b697e462a0e68bd90219544affe3e9b6e9c4bd23a172",
+    "UniXNU-b5q/package/B5qDpPdic.h": "623151dfc17bb923a75a38c766a0075354140bac8a1870940850024d0fce560d",
+    "UniXNU-b5q/package/B5qDpSession.h": "6ac07d9c7a69c0faea6e4f7990a0cea36e248cb0e8cb8d6c3bebda17241b7626",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp": "e776db6ccf50636b051f4f4a644f60dcf515c010d32927cce9dee54abf259626",
+    "UniXNU-b5q/package/B5qUsbHostEvent.h": "c3c4110ce52d3cbaa61a863a643092f3562dc56daa92ca35428b802d4183d287",
+    "UniXNU-b5q/package/B5qUsbHostRole.h": "96fbd4897fa18a0b0b709b182a62db0d5c4ea7ac287fb717e9f9251bd34edd5b",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "b87bf6d7fbd2feaf19c538b841f8d99be4e43ddffbba1712371063c35db02fc7",
+    "UniXNU-b5q/scripts/build-b5q-wifi.py": "66c57858cdfb03c739ac8ce769084c3a55335cb3721b80f44173ffc43851c468",
+    "scripts/b5q-install/pre-ci-v33d.py": "48b2fb2befd1b41a2e91fc426ec64ae2ed4b2a9b49ba678b743a4ecfd5b67b55",
+    "scripts/b5q-install/test-review14.py": "3914c55b387c4b5a304ba799f7917ea82c1967cb676558736750ffe94f3c4f65",
+    "scripts/b5q-install/test-review15.py": "8637a27a9d4e1cba15cdb4722b8d26225ca737ad007de5840351b607f13b8216",
+    "tests/b5q-ufs/test-dp-link-owner.py": "38a08af3fae5d7d460a0ea5d3ecb8510695671d17282db16e590b8fc61cfd716",
+    "tests/b5q-ufs/test-dp-native-pipeline.py": "0eb77592277732d6f79b6bcf160971b5948e08e7dad696bc4ac285eb00f00ce9",
+    "tests/b5q-ufs/test-dp-port.py": "b60a449aa0cb00dff8c132c4335008d946e645383df89dd6ec1d51354b544f40",
+    "tests/b5q-ufs/test-review12.py": "63cfc92637d5ace0e86b3bf265ba2553efe77afd2b59f8a72be718e9b1060761",
+    "tests/b5q-ufs/test-review13.py": "5a6b40fa855c3275b79bc597a34a73fe01e8804af0e2136003edc3ad29590e8a",
+    "tests/b5q-ufs/test-review15.py": "7f3477fc342b68d7e0532641ef07a21269a15446a4e68cd345545195429e5d09",
+    "tests/b5q-ufs/test-review9.py": "e3527875eeb8d9acb90a49682d6ff15977f2fd1ddde702a68fa74989d12a8827",
+    "tests/b5q-ufs/test-v33b-causal.py": "f9d21d63e4100029a8c9bac70e27aa4fd60a4d4af936c3621b5eac37f260f226",
+    "tests/b5q-ufs/test-v33d-usb-device.py": "9a78ef9cd590a15e9881d27524ffe70f4c2cc22c028c13c9b6d2b32262dbcf86",
+    "UniXNU-b5q/porting.toml": "8382ad7f22299310f88df58cdb1aa64c099b08833ad056e7465db7814ffb1944"
+  },
+  "local_gate": {
+    "receipt": "artifacts/b5q-v33d-review15/v33d-local-gates.json",
+    "receipt_sha256": "32a94d722bcd37e2897bc62839c2d2ecb1250a6f2c6a74c58e6ce47eadaa8c6a",
+    "passed": true,
+    "checks": 34,
+    "command": "B5Q_GATE_WORK=/home/baimao/zflip5/artifacts/b5q-v33d-review15 TMPDIR=/home/baimao/zflip5/artifacts/b5q-v33d-review15/tmp python3 scripts/b5q-install/pre-ci-v33d.py",
+    "log": "artifacts/b5q-v33d-review15/pre-ci-v33d.log"
+  },
+  "review_fixes": {
+    "wifi": "qca6390 twt_ap_pdev_count=hw_params.max_radios(fallback3),sta_count8; wmi-init logs num_radios/max_radios; ipq8074 unchanged",
+    "usb": "no hostStats after gHost cleared; connected-only power holds; connected-count fast window; separate4000015d controller debug; IR0/IR1 HCSPARAMS1+16events each,2TDx6TRB,CSZ Slot1/EP0 andonce/session first-cc27; all physical reads use existing dmaRead64 whitelist",
+    "dp": "16bitLE PD NumDataObjects decode with synthetic fixture compatibility; PDIC/feature/port/pool/open/AUX/DPCD/EDID/training/scanout probes; diagnostic Session cache only"
+  },
+  "real_inputs_sha256": {
+    "logs/b5q-xnu2log-review14/XNU2LOG.txt": "03bc20b846876479f13e0062fd7eab06b2bb266b58fcfa0842148fb4e1b74064",
+    "logs/b5q-xnu2log-review10/XNU2LOG.txt": "556bbf97b41c16a97b5a230bcdceec5cc93616aab718827ccb4548cb7441fc61",
+    "logs/b5q-xnu2log-review12/XNU2LOG.txt": "ec6e1b91ba311e29764fdcc918815efa02502e96fc02fae2d85b406145ff0d4e",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/firmware/qca6490/amss20.bin": "989f652bc5f176634db256dd99690f93df9841adb05f5a2274444a0db53e050b"
+  },
+  "firmware_crash_decoder": {
+    "receipt": "artifacts/b5q-review15-local/amss20-twt-segment.json",
+    "receipt_sha256": "43d345c1680bda06b7bd54ecf4165efc021382debfd8100c39bdcbbff87fa3d9",
+    "log": "artifacts/b5q-review15-local/amss20-twt-hexagon.log",
+    "log_sha256": "179cf7abfff053e61a8928ea8b646557d2b58e9236a236dda022b26ee794b147",
+    "packet_pc": "0x017be7d0",
+    "observed_instruction": "r3 = memub(r3+##1544)",
+    "scope": "Raw Hexagon bytes decoded with llvm-mc; original ELF has an ARM machine tag, default objdump output is not used as evidence"
+  },
+  "focused_checks": [
+    {
+      "name": "wifi-all-bands-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "wifi-all-bands-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "usb-hold-ir1-td-context-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "usb-hold-ir1-td-context-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-real-pd-headers-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-real-pd-headers-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-discovery-cache-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-discovery-cache-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-session-before-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-session-before-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "9dc41d4904ce55d2332004f7fc05534e7926937264d3a29c2d4ca23dee38da87"
+    },
+    {
+      "name": "dp-session-after-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-session-after-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "9dc41d4904ce55d2332004f7fc05534e7926937264d3a29c2d4ca23dee38da87"
+    },
+    {
+      "name": "dp-identical-physical-programming-traces",
+      "passed": true,
+      "trace_sha256": "9dc41d4904ce55d2332004f7fc05534e7926937264d3a29c2d4ca23dee38da87"
+    },
+    {
+      "name": "diagnostics-and-red-line-source-contracts",
+      "passed": true
+    }
+  ],
+  "focused_receipt": "artifacts/b5q-v33d-review15/review15-tests.json",
+  "focused_receipt_sha256": "85e4d244c11c4547ca28967746ead6d7b2779f6c381134864e408e780c597f4b",
+  "wifi": {
+    "target_objects": 109,
+    "failed": [],
+    "core_only": false,
+    "target_build_passed": true,
+    "generated_hw_sha256": "d66ee0da84480fae6372d551ac0ff5f5f82a66cc1a76a95ceda8071e18db75ab",
+    "generated_wmi_sha256": "02d23553b208818dde04b67ec142f491eb9a5c3c075225304274a0043f17edab",
+    "source_inputs_sha256": "17f106934bf273e9dd3c794edee2efc8c55a87db9391dcb8903bbc88f47c401f",
+    "receipt": "artifacts/b5q-p3-work/target/compile-result.json",
+    "receipt_sha256": "87017f29fed784f87bb04bfcadc80cc12971f39cdc1536b9b544aa6fecf6e80f"
+  },
+  "bluetooth": {
+    "source_unchanged": true,
+    "mixed_review14_Bluetooth_RDDM_test_section_sha256": "42e596ca81c97e113300ba64890fc0388996b367ecfd4515fc5d86fb96b8c5d2",
+    "target_objects": 9,
+    "target_compile": "PASS",
+    "receipt": "artifacts/b5q-p2-work/target/report.json",
+    "receipt_sha256": "7e95a04a13e32ec7be3023a171b8d08ee62ea8f9f9bb1c980581dbd13e9285c6"
+  },
+  "usb": {
+    "xhci_slots": 427,
+    "unresolved_imports": 0,
+    "public_IOPM_release_byte_identical": true,
+    "log": "artifacts/b5q-review15-local/usb-target.log",
+    "log_sha256": "42cde902574d0fde93dc571dd15f6e634e9423a50e9ca6a9aad0533ab837263b"
+  },
+  "dp": {
+    "host_groups": 26,
+    "host_passed": true,
+    "fuzz_packets": 100000,
+    "target_compile_passed": true,
+    "iomfb_slots": 483,
+    "unresolved": [],
+    "host_receipt": "artifacts/b5q-p5-work/local-regression/report.json",
+    "host_receipt_sha256": "03de516f9390ee7d77fe8422a46901642a4374009f2c4053fc26a9ae360e5b4c",
+    "target_receipt": "artifacts/b5q-p5-work/target/report.json",
+    "target_receipt_sha256": "47b5834a18d4645f36da0927a52e62e3f04e7e83d5aa2c003276591d8c8930da",
+    "new_dp_test_files": 0,
+    "actual_packets": [
+      "4b 04 8f 18 44 a9 01 ff",
+      "4b 04 8f 1f 44 a9 01 ff"
+    ]
+  },
+  "protected_source_sha256": {
+    "UniXNU-b5q/package/B5qTouchBus.h": "57efea31d69dfaf878b31f6eb40700a8d87da322d3181a4dde47912a02fe1a83",
+    "tests/b5q-ufs/test-touch-p0.cpp": "4e74a09422f859be8db8a4f8995adb320bcb8f2abe8da5ac0bc78c647e805f4c",
+    "UniXNU-b5q/package/BluetoothFirmware.c": "22303d9f960580e2a7173a52ffdb3c1bbf9fa77e093ed07ab977646bbf0403c1",
+    "UniXNU-b5q/package/B5qTouch.cpp": "1805f9cc76e94f8a724c0bfe5339f4c528c71a9034ac9c23f5b0216e1993588c",
+    "tests/b5q-ufs/test-touch-bus.cpp": "e2f4f7d6c40aefb7f72a36e5c0d11b157d7869655100508ea9132c9a25831b02",
+    "UniXNU-b5q/package/B5qTouchMouse.h": "6754bceeb5a61b87f3b28899bdc6ade7a712471bc9ff952fd304481a441a9cd8",
+    "UniXNU-b5q/package/B5qBluetooth.cpp": "793ffce6ee1749629fb169ce043560d9d61e9029af666dbbde09327af8dceba4",
+    "UniXNU-b5q/package/B5qTouchPower.h": "1d4a07f2ba3f57ba175ff7562dd83b265d208b37a5bc0ab22f4428bde51fac75",
+    "UniXNU-b5q/package/B5qBtFifo.c": "ec31af0fb349f14e1ae14734318772afa551d828c7197caaf04e0d19e07fac35",
+    "UniXNU-b5q/package/B5qTouchReports.h": "46104f4b59e72c7d81a87de1b607e57873aa458d82576fd185a739ec23a1f1be",
+    "UniXNU-b5q/package/B5qTouchClock.h": "f8945a0803b00bf64a78e2d3d8b938c19e965f33c3c460ac99944e6f54ae6fa1",
+    "UniXNU-b5q/package/B5qBtH4Tap.h": "455a5d0ae2915234021c4167fd708fdc2f2dab1c4827bc3c2b0ac9c80efc8b03",
+    "tests/b5q-ufs/test-touch-power.cpp": "5fbf371de5a26fac7cb85bc1f360f3ae19d6551ad6a78fab3a341e0f90ce26eb",
+    "UniXNU-b5q/scripts/b5q_bluetooth.py": "1d9545073fc026fb604b1b0a0fbab71cc039e147cac8522a38f1007c26122d24",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "6fbf6ffbe09ebc1dd971116e006f8f1d11045853b77e71daabf12bea9e16e3dc",
+    "UniXNU-b5q/package/B5qBtFifo.h": "0082dd23bf2059010b4c68fac0b7873de25c76fff59d4bd58d0896c565c4c67d",
+    "UniXNU-b5q/package/BluetoothHciTrace.h": "2da1fdea981f2c1fb04428ace43a6e63721c9dac17782d51707db194d7561d74",
+    "tests/b5q-ufs/test-touch.py": "bffed606a28889468a73864052739e736f23dfbea4bf8cad4fc3664b4112c396",
+    "UniXNU-b5q/scripts/b5q_bt_le_mask.py": "9a03dad75f47bb842c86b4b187956f04831894803ce5c41bcbfa2344e61c35f0",
+    "tests/b5q-ufs/test-touch-p0.py": "963561d72b58d758cf102beb52bf88c137397d10ba74bcb35eafc34be469d6c3",
+    "UniXNU-b5q/package/B5qTouchIrq.h": "82068375f2cb5f145630d8da2708d70c4c3445e28d01516f0403892e3d4e0eb1",
+    "tests/b5q-ufs/test-touch.cpp": "29919bae2b478e5d9f535ec4922a143696733e1042d636bf07dce67df70d4c3e",
+    "UniXNU-b5q/package/B5qBtFirmwareName.h": "930d1182594266f4d6faef660ed730a160c6d22fe45bcdb3f071beee0f33bae0",
+    "tests/b5q-ufs/test-touch-wait.py": "841dfc62d91587d7fec31733693f91f8bcfafbc1160b57a0504aa3372f197328",
+    "UniXNU-b5q/scripts/build-b5q-bluetooth-userspace.py": "18d98a84c411d8928187558b35a6022070b1d699e0139d40fb32f722d79ed805",
+    "UniXNU-b5q/package/BluetoothFirmware.h": "f7de07a08ae060645a36a5d543ce29ba130166d1700858bacccb4d2f1c736014",
+    "UniXNU-b5q/package/B5qDpPhy.h": "e2c4133af82818a5a6107dfb5c4898b1bdf685884c60166c8d515ae8f8d5ebc9",
+    "UniXNU-b5q/package/B5qDpClock.h": "26a95a62f147baee1d49713eca3b9e862f4d6d987caabdff58ecccf7c543d6a9",
+    "UniXNU-b5q/package/B5qDpDpu.h": "b90cec8262883e1a16eb3c307d3364f33272f7300ed273597e60a000afe1ba02",
+    "UniXNU-b5q/package/B5qDpDisplay.cpp": "d67d7404fb6a5d639de7460b91e908f46866493d0c4d411ed722fb4ea75af586",
+    "UniXNU-b5q/package/B5qWcnPower.cpp": "81a6ed3e6e95fa2b6799ff244b1b792182ef0d95dc666f3ec4eb9b8aa19d4999",
+    "UniXNU-b5q/board.toml": "db7b02ca1e4c3d6a591304e863e5d5e08415c2aa3dd6e5fae18d649d045f5dc4"
+  },
+  "red_line_zero_diff": true,
+  "kernel_args_bytes": 1023,
+  "first_errors": [
+    {
+      "log": "artifacts/b5q-review15-local/dp-local-first.log",
+      "reason": "Old DP port fixture lacked new diagnostic-only globals; declarations added, all original assertions preserved"
+    },
+    {
+      "log": "artifacts/b5q-v33d-review15/causal-first.log",
+      "reason": "Old role-loop fixture lacked PORTSC register view; current bounded IR0/IR1 guard and original physical loop assertions retained"
+    },
+    {
+      "log": "artifacts/b5q-v33d-review15/wrapper-log-collision.log",
+      "reason": "Outer harness log collided with retained-gate filename; outer output moved to pre-ci-v33d.log; original gate creates its own retained receipt log"
+    }
+  ],
+  "notes": [
+    "Local-only changes; no git commit/push, CI, ESP or phone action.",
+    "All source changes are in the requested production files or corresponding regression fixtures/gate wiring.",
+    "Existing dp test mocks only gain read-only diagnostic fields. New DP cases are in Review15; 26 groups retained.",
+    "Canonical existing test paths are tests/b5q-ufs and scripts/b5q-install; no duplicate UniXNU-b5q/tests tree was created.",
+    "porting.toml source hash identifies the staged review-only snapshot."
+  ]
+}

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause-Patent
 // Bounded offline original lifecycle instrument; no desktop claim.
 #include <IOKit/IOPlatformExpert.h>
+#include "B5qDisplayTransform.h"
+extern "C" uint32_t b5q_display_rotation(void);
 #include <IOKit/IODeviceMemory.h>
 #include <IOKit/IODeviceTreeSupport.h>
 #include <IOKit/IOLib.h>
@@ -469,6 +471,7 @@ void native_legacy_client_observed(IOReturn status,IOUserClient *client) {
     if(client)strlcpy(native_legacy_client_class,client->getMetaClass()->getClassName(),sizeof(native_legacy_client_class));
     native_legacy_client_checkpoint();
 }
+static bool b5qLogicalVideo(const PE_Video &v,unsigned w,unsigned h){return B5qDisplay::dimensions(v.v_width,v.v_height,w,h,b5q_display_rotation());}
 __attribute__((noinline)) bool native_legacy_gop_mapping_observed(IOService *object,IOMemoryMap *mapping,uint32_t width,uint32_t height) {
     if((uintptr_t)object!=native_legacy_object)panic("NativeLegacyDisplay: wrong mapping owner");
     native_legacy_gop_map=(uintptr_t)mapping;native_legacy_gop_virtual=mapping->getVirtualAddress();
@@ -478,10 +481,10 @@ __attribute__((noinline)) bool native_legacy_gop_mapping_observed(IOService *obj
         PE_Video anchorVideo={};
         if(!PE_current_console(&anchorVideo) && anchorVideo.v_depth==32 &&
            anchorVideo.v_rowBytes<=65536 &&
-           anchorVideo.v_width==width && anchorVideo.v_height==height &&
+           b5qLogicalVideo(anchorVideo,width,height) &&
            anchorVideo.v_baseAddr==mapping->getPhysicalAddress() && !anchorVideo.v_rotate) {
             mapping->retain();
-            if(boot_progress_pulse_anchor(mapping->getVirtualAddress(),mapping->getLength(),width,height,
+            if(boot_progress_pulse_anchor(mapping->getVirtualAddress(),mapping->getLength(),(unsigned)anchorVideo.v_width,(unsigned)anchorVideo.v_height,
                 (unsigned)anchorVideo.v_rowBytes))diagnosticAnchorMapping=mapping;
             else mapping->release();
         }
@@ -495,7 +498,7 @@ __attribute__((noinline)) bool native_legacy_gop_mapping_observed(IOService *obj
     // The value is the UI scale: logical points = actual scanout pixels / scale (1..3). It changes
     // only the published display-scale; the scanout copy still moves one actual pixel per pixel.
     if(enabled<1 || enabled>3 || phase!=4 || unitScaleChosen || PE_current_console(&video) ||
-       video.v_width!=width || video.v_height!=height || video.v_rotate ||
+       !b5qLogicalVideo(video,width,height) || !B5qDisplay::supported(video.v_rotate) ||
        mapping->getPhysicalAddress()!=video.v_baseAddr) {
         IOLog("B5qDisplay: mapping-failed unit-scale-status=%d stage=preconditions\n",native_legacy_unit_scale_status);return false;
     }
@@ -504,7 +507,7 @@ __attribute__((noinline)) bool native_legacy_gop_mapping_observed(IOService *obj
     // panel timing, an Apple device identity or a synthesized mode list.
     unitScaleChosen=IORegistryEntry::fromPath("/chosen",gIODTPlane);
     if(!unitScaleChosen || !publishOrMatchWord(unitScaleChosen,"display-scale",enabled,unitScaleAdded) ||
-       !publishOrMatchWord(unitScaleChosen,"display-rotation",video.v_rotate,unitRotationAdded)) {
+       !publishOrMatchWord(unitScaleChosen,"display-rotation",b5q_display_rotation(),unitRotationAdded)) {
         IOLog("B5qDisplay: mapping-failed unit-scale-status=%d\n",native_legacy_unit_scale_status);
         finishUnitScalePolicy(false);return false;
     }
@@ -517,7 +520,7 @@ __attribute__((noinline)) bool native_legacy_gop_mapping_observed(IOService *obj
     }
     memcpy(&actualScale,scale->getBytesNoCopy(),4);memcpy(&actualRotation,rotation->getBytesNoCopy(),4);
     native_legacy_chosen_scale=actualScale;native_legacy_chosen_rotation=actualRotation;
-    native_legacy_unit_scale_status=actualScale==enabled && actualRotation==video.v_rotate?0:2;
+    native_legacy_unit_scale_status=actualScale==enabled && actualRotation==b5q_display_rotation()?0:2;
     if(native_legacy_unit_scale_status){IOLog("B5qDisplay: mapping-failed unit-scale-status=%d\n",native_legacy_unit_scale_status);
         finishUnitScalePolicy(false);return false;}
     return true;
@@ -542,7 +545,7 @@ void native_legacy_display_probe(void) {
     if(native_legacy_meta_status){native_legacy_display_checkpoint();return;}
     PE_Video video={};native_legacy_stage=2;
     if(PE_current_console(&video) || !video.v_baseAddr || !video.v_width || !video.v_height || video.v_depth!=32
-        || video.v_rotate || video.v_width>16384 || video.v_height>16384 || video.v_rowBytes<video.v_width*4
+        || !B5qDisplay::supported(video.v_rotate) || video.v_width>16384 || video.v_height>16384 || video.v_rowBytes<video.v_width*4
         || video.v_rowBytes>UINT64_MAX/video.v_height){native_legacy_display_checkpoint();return;}
     IOService *display=native_legacy_display_allocate();native_legacy_object=(uintptr_t)display;
     if(!display){native_legacy_display_checkpoint();return;}
@@ -642,6 +645,7 @@ extern "C" void b5q_daily_probe(void),b5q_backlight_probe(void),sheng_adsp_probe
 extern "C" void sheng_cpufreq_probe(void),sheng_board_clock_probe(void),sheng_thermal_probe(void),sheng_thermal_level_probe(void),sheng_buttons_probe(void),native_hid_input_probe(void),b5q_touch_probe(void),sheng_dpu_probe(void);
 namespace {
 void b5qPeripheralWorker(void *,wait_result_t) {
+    thread_set_thread_name(current_thread(),"b5q-peripherals");
     IOSleep(3000);
     IOLog("B5qPeripherals: stage=after-display\n");
     IOLog("B5qPeripherals: step=%s\n","sheng_cpufreq_probe:before");
@@ -720,7 +724,7 @@ void native_legacy_display_late_probe(void) {
     PE_Video video={};
     if(!native_legacy_surface_status && native_legacy_surface_found && !PE_current_console(&video)
         && video.v_baseAddr && video.v_width && video.v_height && video.v_depth==32
-        && !video.v_rotate && video.v_width<=16384 && video.v_height<=16384
+        && B5qDisplay::supported(video.v_rotate) && video.v_width<=16384 && video.v_height<=16384
         && video.v_rowBytes>=video.v_width*4 && video.v_rowBytes<=UINT64_MAX/video.v_height) {
         native_legacy_video_base=video.v_baseAddr;native_legacy_video_bytes=video.v_rowBytes*video.v_height;
         // A real firmware framebuffer resource, with addresses and extent
@@ -797,4 +801,13 @@ void native_legacy_display_late_probe(void) {
     native_legacy_stage=7;display->release();native_legacy_released=1;native_legacy_stage=8;
     native_legacy_display_checkpoint();
 }
+}
+
+extern "C" uint32_t b5q_display_rotation(void){
+ static uint32_t selected=0xffffffffu;
+ uint32_t value=__atomic_load_n(&selected,__ATOMIC_ACQUIRE);if(value!=0xffffffffu)return value;
+ PE_Video v{};unsigned angle=90;PE_parse_boot_argn("b5q-rotation",&angle,sizeof angle);
+ if(PE_current_console(&v)||v.v_width!=1080||v.v_height!=2640||!B5qDisplay::supported(angle))angle=0;
+ uint32_t empty=0xffffffffu;__atomic_compare_exchange_n(&selected,&empty,angle,false,__ATOMIC_RELEASE,__ATOMIC_ACQUIRE);
+ return __atomic_load_n(&selected,__ATOMIC_ACQUIRE);
 }

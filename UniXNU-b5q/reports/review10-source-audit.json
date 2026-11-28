@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "inputs": {
+    "review9_log": {
+      "path": "logs/b5q-xnu2log-review9/XNU2LOG.txt",
+      "sha256": "aa4ea9d577f559fd7a17100d6151874413bf3e306fb70e7d0a280bed6a6c5558"
+    },
+    "samsung_repeater_disassembly": {
+      "path": "artifacts/b5q-p1-work/eusb2_repeater_init.txt",
+      "sha256": "b41382eba98342dce35add677495a905b1bce6f13ac1f9bdf684eabbe1dbc90d"
+    },
+    "samsung_stock_dts": {
+      "path": "artifacts/b5q-firstboot/samsung-stock.dts",
+      "sha256": "2da1b2564d55099dbc5bbb1829f7465ef88507d449509d15f6db17ab974172bb"
+    },
+    "samsung_pinctrl_msm": {
+      "path": "artifacts/b5q-runtime-v24-work/samsung-source/pinctrl-msm.c",
+      "sha256": "f522173e12ebf830d724b026ae2156c41b7b3d2025c0c33aa0b209f6fbdb99ea"
+    },
+    "usb_runtime_input_record": {
+      "path": "UniXNU-b5q/reports/usb-inputs-v24.json",
+      "sha256": "9f5398b785a00b0b8406d0e563c71da9d5be61d3e91803996328ada41c4acefe"
+    },
+    "bluetoothd_signer": {
+      "path": "sources/UniXNU-sheng/drivers/QcaBluetooth/tools/build-userland.py",
+      "sha256": "a953f3aa0479514838ef4a58611b5aa7db383041536f69cc462ed6dbd11a667d"
+    },
+    "btqca_source": {
+      "path": "sources/UniXNU-sheng/drivers/QcaBluetooth/out/linux/btqca.c",
+      "sha256": "1c703048b005aa407e32bfecaedccf1c28f6a78e1e4a384d51215abfcdec6d16"
+    }
+  },
+  "firmware_fallback": {
+    "hpbtfw21.tlv_sha256": "618cb892c016d5e0e2180703558fc93f9c97ce7ba4261ebeb7ac658496d85bde",
+    "hpnv21g.bin_sha256": "d56de1f3baf193a90dda6b115c8cff77d4448e69e2b4a2e8b24b1e3445f01a60"
+  },
+  "findings": [
+    "nw_wifi_stop destroys ath11k PCI, QRTR, MHI, mac80211 and cfg80211 and therefore must run before INTID800, Bus Master and PERST are removed.",
+    "The runtime b5q TI Host and Device override bytes are identical; the original repeater module separately exposes a reset GPIO operation.",
+    "The stock DWC3 node requires disable-clk-gating, dis_u2_susphy and USB2 LPM disable. No unrelated PHY field is guessed.",
+    "SM8550 falling-edge GPIO configuration uses detection value 2 and polarity bit 1. UART14 active RX is bias-disable while IBS wake GPIO must idle high.",
+    "The userland build preserves and compares original bluetoothd entitlements. WCN6855 hw2.1 corrected-name failure intentionally falls back to the present legacy firmware pair.",
+    "Apple80211 event names are zero-filled for the complete fixed 16-byte kev payload; delayed TX refreshes gIf and skips ifnet statistics until the BSD interface exists.",
+    "Wi-Fi readiness accepts only zero or EEXIST and retries all other vnode errors once per second without blocking nw_wifi_step.",
+    "U3 capture requires CCS and PED and can be consumed only from the role thread poll or setPowerState path; xHCI READ64/WRITE64 retain first-HSE capture but cannot trigger first-U3 disk synchronization.",
+    "Role reset keeps USB2/USB3 PHY reset asserted for the eUSB2 initialization plus 2 ms and waits 1 ms after releasing CORESOFTRESET before restoring role and clock fields."
+  ],
+  "local_checks": {
+    "focused_review10": "PASS zero-filled en1/en0 kev payload, delayed-ifnet TX null safety, 0/EEXIST ready acceptance with 1s retry, bounded ERST/ERDP, context-gated CCS+PED U3 versus first-HSE, 100/2/1ms USB reset ordering, Bluetooth TLMM/IBS and menu bounds",
+    "bluetooth_target": "PASS 9 arm64e objects",
+    "wifi_target": "PASS board objects and full pinned ath11k target build",
+    "usb_target": "PASS QcomDwc3+B5qUsbBoard+B5qUfs arm64e closure; 427-slot xHCI ABI; no unresolved symbols; QcomDwc3.o f77cb811252feaaa69982c6ee96e82e6e62ef21ecead7809de1bd3d317e66498",
+    "wifi_close_objects": "B5qWifiBoard.o 2301ac37e12a2a4ff0749c4611ed228628f1b640d3cde0d6f5883f425b53efae; generated WifiNet.o ad8acb92b744cba6b846c4c0a3f1233e0ed0578cb74c4a651f443069196e5b37",
+    "wireless_adsp": "PASS 158 objects, 79 authenticated producer/consumer contracts, no duplicates, zero EL1 apps_smmu; receipt 3af25641273c8b41a0ac465f1c1a07c748bcebaa5705a7c64eba0a0b7fd6331e",
+    "xnu_patches": "PASS 143/143 ordered patches",
+    "preflight": "PASS complete local pre-ci-v33d P0-P4 retained gate",
+    "preflight_receipt_sha256": "ac33674c969947648f7cdf1442ecad1a7b8d2f261ee4cd459ffdba91d16bf050"
+  },
+  "limits": [
+    "HOST_VERIFIED_PENDING_HARDWARE",
+    "ARM CI and image packaging authorized after local gates; no device access or flashing"
+  ]
+}

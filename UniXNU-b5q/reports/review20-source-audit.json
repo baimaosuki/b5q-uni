@@ -1,0 +1,501 @@
+{
+  "review": 20,
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "base_commit": "bdc43f5dd966bc641eec4edf7fddd0b415f5cf54",
+  "scope": "Local source/host/arm64e compile and ABI/PAC validation; no native full kernel link or new hardware validation",
+  "evidence_root": "artifacts/b5q-review20-local",
+  "input_evidence": {
+    "physical_log": {
+      "source": "logs/b5q-xnu2log-review19/XNU2LOG.txt",
+      "sha256": "fc968a8d681602cdf926afbbfddd2f5b70ac47a53474869d1b09e856b67375f7",
+      "evidence": {
+        "gpu_coherence": {
+          "count": 1,
+          "samples": [
+            {
+              "line": 1084,
+              "text": "B5qGpu: coherence H d64/64 a1 r1024/0 w1024/1024 s0 k6 -> on io=1 owned=1 walk=0"
+            }
+          ]
+        },
+        "wifi_event_EMSGSIZE": {
+          "count": 4,
+          "samples": [
+            {
+              "line": 3251,
+              "text": "B5qWifi[6]: wifi-net: event 9 bytes 540 -> 40"
+            },
+            {
+              "line": 5203,
+              "text": "B5qWifi[6]: wifi-net: event 9 bytes 540 -> 40"
+            },
+            {
+              "line": 6456,
+              "text": "B5qWifi[6]: wifi-net: event 9 bytes 540 -> 40"
+            },
+            {
+              "line": 9164,
+              "text": "B5qWifi[6]: wifi-net: event 9 bytes 540 -> 40"
+            }
+          ]
+        },
+        "kernel_task_CPU": {
+          "count": 12,
+          "samples": [
+            {
+              "line": 1760,
+              "text": "B5qProcTop: cpu kernel_task pid=0 delta_cpu_ms=0 permille=0 sampled=267 overflow=0"
+            },
+            {
+              "line": 2093,
+              "text": "B5qProcTop: cpu kernel_task pid=0 delta_cpu_ms=21681 permille=712 sampled=408 overflow=0"
+            },
+            {
+              "line": 3350,
+              "text": "B5qProcTop: cpu kernel_task pid=0 delta_cpu_ms=26952 permille=898 sampled=461 overflow=0"
+            },
+            {
+              "line": 10360,
+              "text": "B5qProcTop: cpu kernel_task pid=0 delta_cpu_ms=22338 permille=744 sampled=538 overflow=0"
+            },
+            {
+              "line": 11110,
+              "text": "B5qProcTop: cpu kernel_task pid=0 delta_cpu_ms=25261 permille=842 sampled=584 overflow=0"
+            }
+          ]
+        },
+        "hotspot_crashes": {
+          "count": 7,
+          "samples": [
+            {
+              "line": 2096,
+              "text": "B5qProcTop: TOP1..5 TOP2 calaccessd:2(exit=0/sig=6)"
+            },
+            {
+              "line": 2101,
+              "text": "B5qProcTop: TOP6..10 TOP7 WindowManagerControlsExtension:1(exit=0/sig=5)"
+            },
+            {
+              "line": 2135,
+              "text": "AMFI: Denying core dump for pid 571 (ScreenshotContro)Process[571] crashed: ScreenshotContro. Too many corpses being created."
+            },
+            {
+              "line": 3353,
+              "text": "B5qProcTop: TOP1..5 TOP2 DisplayControls:2(exit=0/sig=5)"
+            },
+            {
+              "line": 3361,
+              "text": "B5qProcTop: TOP6..10 TOP10 WindowManagerControlsExtension:1(exit=0/sig=5)"
+            }
+          ]
+        },
+        "hub_interrupt_endpoint": {
+          "count": 30,
+          "samples": [
+            {
+              "line": 3506,
+              "text": "qcom-dwc3: host-slot1 reason=first-write64 unavailable dcbaa=0 csz=64"
+            },
+            {
+              "line": 3507,
+              "text": "qcom-dwc3: host-slot2 reason=first-write64 read=0 ctx=0 csz=64 slot=00000000:00000000:00000000:00000000 ep0=00000000:00000000:00000000:00000000"
+            },
+            {
+              "line": 3555,
+              "text": "qcom-dwc3: host-slot1 reason=after-family-start unavailable dcbaa=0 csz=64"
+            },
+            {
+              "line": 11292,
+              "text": "qcom-dwc3: host-slot1 reason=before-power-state ctx=914cdb000 csz=64 slot=0c300000:04010000:00030000:00000000 ep0=00000000:00000000:00000000:00000000"
+            },
+            {
+              "line": 11293,
+              "text": "qcom-dwc3: host-slot2 reason=before-power-state read=1 ctx=91301c000 csz=64 slot=00000000:00000000:00000000:00000000 ep0=00000000:00000000:00000000:00000000"
+            }
+          ]
+        }
+      }
+    },
+    "actual_sources_sha256": {
+      "sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk/kern/clock.c": "0a7781f478b3bd8d209a69f8c74fe31e4aab9ed46fdd08b88a7bacac4a665a34",
+      "sources/UniXNU-sheng/drivers/Ath12kWifi/src/nw_mainline.c": "2b9d6ee7815e2eb748e30af977b3768c9745d47be56989b9273be3c01f0973e2",
+      "sources/UniXNU-sheng/drivers/Ath12kWifi/shim/src/lx_rt.c": "edb649e378d1c1121435c4aa2c06cc8a61239d278b7d9a3b86040252f852da12",
+      "sources/UniXNU-sheng/drivers/Ath12kWifi/src/nw_control.c": "9bb985a99dc54eceaa9cf9b6e537ca93cd7a461378c4729f9ebe3f29a968004b",
+      "sources/UniXNU-sheng/drivers/Ath12kWifi/src/nw_cfg80211_control.c": "db58651619b8d41b5020f92e809f87923783c75c040713128ea12a72495ee9be",
+      "sources/UniXNU-sheng/drivers/Ath12kWifi/userspace/driver_sheng.c": "f9d9e52dceefe2889f69d9a4a1e8f69cc0c2cac74d03a2c3349352301ce64e3e",
+      "sources/UniXNU-sheng/drivers/Ath12kWifi/userspace/nw_supplicant_frontend.c": "a63b31d65c2c92a24c4ffe0355f1aa50ebb478c7ffbc6a7477eb1b7cb1ac8c26",
+      "sources/UniXNU-sheng/drivers/Ath12kWifi/userspace/nw_control_client.c": "9443823ce06bed2155e34c314da7ac95fe90a574dabe136b6f758c98dbe6a7ab",
+      "sources/UniXNU-sheng/drivers/QcaBluetooth/src/qbt_core.c": "729a22a06e7ddce82eeb0000e83e0dcccd690d7be2c7f178d156022469f1c1bb",
+      "UniXNU-b5q/package/B5qBtFifo.c": "ec31af0fb349f14e1ae14734318772afa551d828c7197caaf04e0d19e07fac35",
+      "UniXNU/drivers/Adreno740/NativeAdrenoPublish.cpp": "03067df65b0b21f9327778b634e5672acdba7712c94bacaf0b56288fb91e85de"
+    },
+    "linux_dwc3_reference": [
+      {
+        "source": "https://raw.githubusercontent.com/torvalds/linux/v6.12/drivers/usb/dwc3/core.c",
+        "sha256": "74bb63d884584f0d6f7a45724ba022ba461d48b46afa05ca7a0024d83fbd1c2e"
+      },
+      {
+        "source": "https://raw.githubusercontent.com/torvalds/linux/v6.12/drivers/usb/dwc3/core.h",
+        "sha256": "a68158690b09c2b6f117b214b6c5caf7bd7048db1d4aca68f4654cfd78638e9c"
+      }
+    ],
+    "kev_binary": {
+      "reference": "artifacts/b5q-review19-ci-46047273117/kernel/kernel.macho",
+      "reference_sha256": "1ca237fcb40513cf947454898630a214d54091bf00e97f6c54a5aa063350b224",
+      "symbol": "_kev_post_msg_internal",
+      "comparison_and_errno": [
+        "0xfffffff00bee4ac8: cmp w8, #0x121",
+        "0xfffffff00bee4acc: b.lo #0xfffffff00bee4ae8",
+        "0xfffffff00bee4ad0: adrp x8, #0xfffffff00c967000",
+        "0xfffffff00bee4ad4: add x8, x8, #0x4f8",
+        "0xfffffff00bee4ad8: mov w9, #1",
+        "0xfffffff00bee4adc: ldadd x9, x8, [x8]",
+        "0xfffffff00bee4ae0: mov w0, #0x28",
+        "0xfffffff00bee4ae4: b #0xfffffff00bee4d30"
+      ],
+      "maximum_total_bytes": 288,
+      "first_rejected_total_bytes": 289,
+      "EMSGSIZE": 40,
+      "original_implementation": "24-byte KEV header plus dv lengths; compares total with 0x121, accepts unsigned total below289; no cluster allocation",
+      "association_event": {
+        "header_bytes": 24,
+        "interface_bytes": 16,
+        "payload_bytes": 540,
+        "total_bytes": 580
+      },
+      "repair": "Apple vendor IEEE80211 class6 only: MCLBYTES2048 cluster, checked remaining bounds, other classes remain MLEN288",
+      "source": "sources/UniXNU/out/feeds/xnu-3199e8bc/bsd/kern/kern_event.c",
+      "source_sha256": "b2238ee5d4cce2625e9f2bc1bd22b73e90b6594de76a56a3de46a2c7ec428253",
+      "disassembly_sha256": "db5315e4729db8bd75f29fc690939f8b8c78e986c27a7908cdd3bdc1e6adce25",
+      "boundary_regression": "test-review20.py: real patched copy path, ordinary total288 accepted and289 rejected; association580 succeeds; overflow/OOM negative tests; ASan/UBSan PASS"
+    }
+  },
+  "findings": {
+    "wallpaper": {
+      "confirmed": "Canonical GUI overrides disabled com.apple.wallpaper.agent. Removed that label only; aerial extension stays disabled; no service-denylist expansion.",
+      "canonical_counts": {
+        "bundled": 57,
+        "gui": 24
+      },
+      "migration": "Existing pre-launchd production B5qLaunchdPolicy applies both canonical plists atomically/idempotently; actual tests verify updated writes then no-op. Pinned APFS Data seed58/25 is accepted only with original SHA/identity/size/metadata gates and remains byte-identical; new57/24 policy is applied at boot.",
+      "tests": "test-v33b-policy.py exercises actual helper POSIX calls, failures/ownership/link safety; test-review20.py extracts qualified seed read-only then verifies exact production checked_seed."
+    },
+    "wifi_worker": {
+      "confirmed": [
+        "nw_mainline_pending is a TX predicate and omits ui.operation/radio.pending/scan_ack_pending. A separate locked UI predicate is required; changing the TX predicate would break TX/shutdown loops.",
+        "Wake generation was sampled after nw_wifi_step; a wake in that step could be lost before the sleep decision.",
+        "nw_wifi_step ran potentially synchronous lx_pump before dispatching mainline UI. Dispatch is now before pump.",
+        "Repeated ready work used yield-only after2ms. It now actually blocks1ms, while pending IRQ/control wake still interrupts the wait.",
+        "Idle disconnect with no pending/join/scan and state below AUTH previously queued dev_close/dev_open. It is now a no-op only in that precise idle case."
+      ],
+      "scale_factor": "Actual osfmk/kern/clock.c confirms nanoseconds per interval. NSEC_PER_MSEC equals kMillisecondScale1000000; original deadline unit is correct and preserved.",
+      "timers": "lx_next_wait_ms correctly excludes running work and handles expired timers; no proven abandoned-expired-timer defect, shared runtime unchanged.",
+      "diagnostics": "UI age>500ms or phase/step>200ms: phase, nested work function offset/depth, bounded96 and1s throttle; AUTH/ASSOC/SET_KEY/SET_PORT/REPORT_RESULT transitions bounded96. No password/key contents added.",
+      "remaining": "Exact20-30s synchronous callback that stalled Review19 is UNKNOWN until hardware runs the new phase/nested-work probes; no claim it is fully resolved."
+    },
+    "wifi_event9": {
+      "confirmed": "Review19 binary compares total against0x121 and returns40 for total>=289. Original maximum288; 24-byte KEV header+16 interface+540 association=580.",
+      "repair": "Adopt exact generic source-proven sheng-wifi-association-event.patch: Apple vendor IEEE80211 class6 may allocate MCLBYTES2048 cluster. Other classes retain MLEN; check each vector against remaining bound before adding.",
+      "validation": "Actual patched code host ASan/UBSan:580-byte event encoding/copy, ordinary288 accept/289 reject, UINT32 overflow/oversize/OOM. Full ordered patch application passes."
+    },
+    "supplicant_name": {
+      "confirmed": "driver_sheng.c::sheng_init explicitly accepts logical singleton en0 only. nw_supplicant_frontend/native control use session/generation/MAC, no BSD ifindex match. Actual BSD ifnet event name is already dynamic en1.",
+      "decision": "Keep -ien0; changing only launch arg to en1 would reject initialization. No control/credential path inconsistency proved."
+    },
+    "wifi_state_noise": {
+      "repair": "Exact generated WifiNet request/state filtering emits first/state/pending/result/error transitions and every error;1000 identical successful state polls add zero lines.",
+      "serialization": "Real Ethernet ioctl and userclient callback entry paths share existing WifiCallbacks mutex. No new lock ordering introduced."
+    },
+    "cpu": {
+      "confirmed": "Yield-only board worker paths can keep runnable under deferred work. Wi-Fi uses bounded2ms slice/1ms block; Bluetooth terminal zero/expired deadline is clamped1ms. qbt_deadline0 also means legitimate queued work; not asserted an idle bug.",
+      "bluetooth_transport": "Only terminal scheduling changed. FIFO/UART14/IBS/power/firmware logic unchanged; FIFO retry renews only while TX/RX pending.",
+      "thread_top": "New80-byte fixed ABI snapshot exports up to256 live non-idle kernel_task threads. Actual task_lock->thread_read_times order matches task_info(TASK_THREAD_TIMES_INFO). Name storage kept alive by thread queue ownership; no allocation or logging under task lock. Per-TID deltas/TOP5 computed and printed after unlock every30s; new/reset counters excluded; overflow reported.",
+      "names": "Named only previously unnamed board threads: CPU/thermal/GPU DCVS+heartbeat+probe/USB bridge+role+forced-host/Touch/DP IRQ/UFS logger+publisher/HID guard/AES/USB probe/peripheral worker. No touch or DP hardware flow change.",
+      "gpu": "DCVS summary is read-only in existing30s block. coherenceProbe,publishAndWrapperTest,metalRows,gpuStart,gpuPerfTick and default owned1 remain byte-identical. NativeAdrenoPublish1ms mailbox poll remains because shared-store protocol has no observed doorbell; measure TOP5 before changing it.",
+      "remaining": "Kernel thread hotspot and physical CPU reduction await hardware; do not identify a specific thread as measured culprit yet."
+    },
+    "process_crashes": {
+      "repair": "Independent B5Q-PROC-CRASH collector in proc_prepareexit: calaccessd/DisplayControls/WindowManagerCon/ScreenshotContro16-byte names; ABRT/TRAP/SEGV/BUS/ILL; current_proc only; same existing b5q-ws-signal flag; global8/per-name2/busy bits reserved in one packed CAS with16 retry bound, no lock wait.",
+      "context": "pid/tid/name/signal/exit namespace+code; saved pc/lr/sp/fp/far/esr; up to16 user PCs and dyld cache base/slide/images. Uses saved exception state, never live ESR.",
+      "windowserver": "Existing complete B5Q-WS-SIGNAL function/log formats and independent8 quota are byte-identical.",
+      "static_dependencies": "Available calaccessd launch plist is enabled and MachServices retained. Four actual hotspot binaries/dependency graph are not present in the extracted local skeleton; no direct missing-service/entitlement assertion cause proven. No speculative disables or dependency edits.",
+      "remaining": "Actual crash causes UNKNOWN until next hardware saved stacks; not claimed fixed."
+    },
+    "usb": {
+      "confirmed": "Old leaveRole cut VBUS/stopped secondary IRQ bridge/unrouted before synchronous xHCI termination, potentially stranding endpoint/halt waits.",
+      "repair": "Keep VBUS/routing/secondary interrupt delivery live through synchronous termination. Retain child until bridge exits; defer on terminate refusal or bridge drain timeout; core/PHY role change waits while host nub remains. Then release retained child, unroute, turn off VBUS, release nub.",
+      "regression": "Real production leaveRole compiled/executed with termination refusal and delayed bridge drain; references and VBUS/route order checked under ASan/UBSan.",
+      "probes": "One-shot configured slot1EP3 context4DW; bounded successful GET_PORT_STATUS decode from allowed DMA reads only; pre-halt USBCMD/USBSTS/HCH/PORTSC; GFLADJ read-only. Host generation resets one-shots even on object-address reuse. Normal summaries30s or meaningful state/port/device edges.",
+      "frame_and_irq": "Compared actual b5q stock DTS and Linuxv6.12. No stock fladj override; Linux skips adjustment when absent, SOFITPSYNC is revision-specific2.10a-2.50a. No evidence for new timing write. Secondary bridge IRQ/IP/ERDP routing logic unchanged.",
+      "remaining": "Hub Interrupt-IN silence/SOF physical cause UNKNOWN; next hardware probes required. No speculative GFLADJ/PHY/UEFI/SMMU modifications."
+    }
+  },
+  "validation": {
+    "commands": [
+      {
+        "command": "python3 UniXNU-b5q/scripts/check-xnu-patches.py",
+        "result": "PASS 147/147 ordered patches",
+        "log": "artifacts/b5q-review20-local/xnu-patches.log",
+        "log_sha256": "6656fabbea26dfcb4ad16d61973bf7926e580c0300b215a684b541da3b82c4bd"
+      },
+      {
+        "command": "python3 scripts/b5q-install/pre-ci-p4.py",
+        "result": "PASS complete P0-P4; 257 source hashes unchanged",
+        "log": "artifacts/b5q-review20-local/P0-P4-final.log",
+        "log_sha256": "cd2c98948d68db6f56b9ea74248325161c91234dd3ae099d72e797a52682331d"
+      },
+      {
+        "command": "python3 scripts/b5q-install/pre-ci-v33d.py",
+        "result": "PASS 39 aggregate entries, including source-bound P0-P4 reuse and prior Review12-19 regressions",
+        "log": "artifacts/b5q-review20-local/pre-ci-final2.log",
+        "log_sha256": "c33af5854e94118173658ec047acc8ce26dc895ec5081a2c25bfe25e1a81f88e"
+      },
+      {
+        "command": "python3 scripts/b5q-install/test-review20.py",
+        "result": "PASS 22 final focused entries; added real MLEN288/289 boundary verification after aggregate; production unchanged",
+        "log": "artifacts/b5q-review20-local/review20-final.log",
+        "log_sha256": "8ef35abea452bae42f3425f73813e72f45969357a88540a30a1e30b7e46db48d"
+      },
+      {
+        "command": "python3 UniXNU-b5q/scripts/check-cpu-burn-target.py --review20 --out artifacts/b5q-review20-local/core-target",
+        "result": "PASS real private-header production helper arm64e/PAC/import probes, zero warnings; full thread.c separately BLOCKED by missing mach/resource_notify.h",
+        "log": "artifacts/b5q-review20-local/core-target3.log",
+        "log_sha256": "515d8a337f4dcb5518ddae7177861013b394e2be283bfc4edf8ecbc2c457d152"
+      },
+      {
+        "command": "python3 scripts/b5q-install/check-wifi-target.py",
+        "result": "PASS board/network arm64e; complete Linux target compile also included in P0-P4",
+        "log": "artifacts/b5q-review20-local/wifi-target.log",
+        "log_sha256": "16d3ba2e195b1f862173f84047ec44834d678283af1bc5b25c2ee97b767fc8c7"
+      },
+      {
+        "command": "python3 scripts/b5q-install/check-bt-target.py",
+        "result": "PASS 9 Bluetooth arm64e objects",
+        "log": "artifacts/b5q-review20-local/bt-target.log",
+        "log_sha256": "005ec8df46077af0ea4138dbe600f51d0a4b610519546cc753024238496f671e"
+      },
+      {
+        "command": "python3 scripts/b5q-install/check-peripheral-target.py (selected board objects and complete P0-P4 production selection)",
+        "result": "PASS current sources arm64e; 427-slot xHCI; no unexpected unresolved imports; new snapshot helper explicitly requires native core link",
+        "log": "artifacts/b5q-review20-local/board-target3.log",
+        "log_sha256": "eb6d1502503e968d4007d6c0f9ae8bccf85026602086cbc6817bbaa574c02832"
+      },
+      {
+        "command": "python3 scripts/b5q-install/check-proctop-pac.py (current observer and real mac_process/startup/cswitch objects)",
+        "result": "PASS 4 actual callback contracts; exact inputs in proctop-PAC.json",
+        "log": "artifacts/b5q-review20-local/proctop-PAC.log",
+        "log_sha256": "624252940c0f38306e680f94af6f82ad19ba4371cba26729f56523e3faa4ee2b"
+      },
+      {
+        "command": "python3 UniXNU/scripts/porting-record.py check --device UniXNU-b5q",
+        "result": "PASS 70 structured areas",
+        "log": "artifacts/b5q-review20-local/porting-check.log",
+        "log_sha256": "d28cbade9b926848cd18ccf1039ff3c789d037ec4fb09562a656422d288d7798"
+      },
+      {
+        "command": "git diff --check -- <Review20 tracked source/test paths; patch contents separately checked by ordered XNU application>",
+        "result": "PASS",
+        "log": "artifacts/b5q-review20-local/diff-check.log",
+        "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      }
+    ],
+    "receipts": [
+      {
+        "path": "artifacts/b5q-p4-work/pre-ci/report.json",
+        "sha256": "6008c090946a68f096987a046bfa7467c4d481aeba0025f142193a7e77a714f3"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/full-gate/local-gates.json",
+        "sha256": "df876e11575f2dfed948f1895b0a1006cf57e0989f5cee1660d2ea7a04a9cbfc"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/full-gate/v33d-local-gates.json",
+        "sha256": "d5b4793f0ffeea4b321ef55c54f0b34d3265d0caf6886220659cc32b621a41cc"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/review20-tests.json",
+        "sha256": "8b7a014acb67024743a0050b4c5baaaf065b04ad7d6d83be7871d53334dad768"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/core-target/report.json",
+        "sha256": "66ec37fa69742a0b403b97fc7bd1bdf37acbdaacb075f75ade541c9fb9ff827c"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/core-target/import-closure.json",
+        "sha256": "5013ebfb5c9c174ac07826c70175c107b4f25b6983c4e3fb4b56780a4a5ae473"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/proctop-PAC.json",
+        "sha256": "59ba899b5f54631f7f2b5d0ef5c1640bde23f8059c932cd153334bd09c02ee26"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/full-gate/all-PAC.json",
+        "sha256": "42878b7511d2f49d069fefabee62e4dd33b6004b10269eb1535ccb842e0e7b3f"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/full-gate/wireless-closure.json",
+        "sha256": "c9f6c25948e648c8cbb97a967a07554ac96f479fa3c87547824bf772b7b14848"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/full-gate/wireless-ADSP-closure.json",
+        "sha256": "0c0ae70a21ac8dcdbb65035f9c77c19003373c6f59da29b2dec4fc32fcd093be"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/full-gate/hid-timer-PAC.json",
+        "sha256": "a6d7485927e52a9126297d0a1b626ff4b6556b669fbb230567fdd1dc2bce32b7"
+      },
+      {
+        "path": "artifacts/b5q-review20-local/full-gate/zero-EL1-SMMU.json",
+        "sha256": "055e8018a1c7a8e5d6eaf7c338554fb8020cec7fdf2c89afd1148cb13c219558"
+      },
+      {
+        "path": "UniXNU-b5q/reports/xnu-patch-application.json",
+        "sha256": "a3f6727ef2aeda0cedc62f1c2b166de417188d69ebe2e91f079f5304f0a554ee"
+      }
+    ],
+    "patches": {
+      "count": 147,
+      "all_passed": true
+    },
+    "focused_checks": 22,
+    "aggregate_checks": 39,
+    "final_boundary_followup": {
+      "changed_after_aggregate": [
+        "scripts/b5q-install/test-review20.py"
+      ],
+      "reason": "Strengthened host test from mockMLEN224 to binary-proven288 and added288/289 exact boundary; no production changes; final focused22 checks pass",
+      "old_test_sha256": "8657e7b7deed460378795b97d6cd52be8eadecaed85f484e2412c7039ee4b18a",
+      "final_test_sha256": "e424b821ab2e627550e0465f8c7047e9e5b383ce97f165a2970505b53fafa621"
+    },
+    "target_scope": {
+      "board": "All changed board TUs covered by full P0-P4 target and final selected Qcom/GPU/Touch/UFS etc; Wi-Fi/Linux and Bluetooth production targets compiled.",
+      "xnu_helpers": {
+        "kernel-thread-snapshot": {
+          "passed": true,
+          "warning_count": 0,
+          "sha256": "7f1f9c50644263b52d3a74dacfe8032c572a5cf2360d734e605d72da27ad5e63",
+          "return_PAC": true
+        },
+        "process-crash-context": {
+          "passed": true,
+          "warning_count": 0,
+          "sha256": "fff671601213f3672538cdb6ef68386f3d58f2957fd1d25401d3a40e88ddef55",
+          "return_PAC": true
+        }
+      },
+      "full_thread_compile": "BLOCKED_MISSING_LOCAL_MIG_HEADER",
+      "first_error_log": "artifacts/b5q-review20-local/core-target/full-thread.log",
+      "native_full_link": "PENDING_NOT_RUN: local helper compile does not establish full kernel link; new_b5q_kernel_thread_snapshot explicitly declared as new core import, not ignored or faked"
+    },
+    "abi": {
+      "xhci_slots": 427,
+      "iomfb_slots": 483,
+      "wireless_objects": 124,
+      "wireless_PAC_contracts": 70,
+      "with_adsp_objects": 158,
+      "with_adsp_PAC_contracts": 81,
+      "media_callback_contracts": 118,
+      "zero_EL1_apps_smmu_objects": 31
+    },
+    "archive": "test-gmu-archive-index:51 real members,49 unchanged hashes; current B5qGpu and GMU helper recompiled and __.SYMDEF regenerated; stale member negative test passes",
+    "previous_failed_attempts": "Original first-error logs retained. Outdated name mocks/exact old scheduling comparisons updated narrowly; no production failures concealed."
+  },
+  "invariants": {
+    "passed": true,
+    "protected_input_count": 68,
+    "protected_sha256": {
+      ".github/workflows/b5q-v33-incremental.yml": "91fe48a46990c4647dfd01998dc4a329340d09b2e3ff515cf8cf01d8d69fa2d8",
+      ".github/workflows/b5q-batch1-final.yml": "31eed607989e11281f5afd7ff682189bbc6f838371a7e72f222e5c4fd17a8ea4",
+      ".github/workflows/b5q-runtime.yml": "e7f9ad5ae7e38b480bdc14b838c755ac290ecd28e5dec81fb9adceb284559674",
+      ".github/workflows/b5q-v24-package.yml": "7309aeefd35c6eba7ea43eaa5f5fe9f8ae8d9e50014de35d9701f6f39f162c8b",
+      ".github/workflows/b5q-firmware.yml": "e7483ca515dcff340e69b8982509a383af6cab70e5513d86fd199ca1a0d8561b",
+      ".github/workflows/b5q-install-seed.yml": "dfb104f630eeffd04869f8ef1b0701081d08ea7794182751fdded66b9557b85e",
+      ".github/workflows/b5q-macos-only-userdata.yml": "c1da4000587416ec196b435050423e617fa573763a7c4128b468d1854a743867",
+      ".github/workflows/b5q-stage123.yml": "5359d54b38a730d3fe9a957f7f8777ec74fece83c09f8f2049043b552bccfe76",
+      ".github/workflows/b5q-v25-incremental.yml": "74aa19315479fb5513532e4ac7d61dc07d998b40067e799ff4184e091591d62f",
+      ".github/workflows/b5q-data-mount-fix.yml": "3bafcaeb2d2d40ad096e95b9d1c050ae1bbf0593b9f6f1b13531d6e73b8117bd",
+      ".github/workflows/b5q-storage-tests.yml": "c040bd74acfb5c4ce8b22952cd7d272c1f1c4ea5ebdfc1da2a58b68c4bbcc267",
+      ".github/workflows/b5q-p0-p5.yml": "50360d5872a0271fc7817db7dcc27b3afdd506ee81cc66abcee6de992ddbd2dd",
+      ".github/workflows/b5q-v27-incremental.yml": "4c9cd46a56ae18860e60ddfe8f39015e1b60be15271768492c3f2de4091dfe4b",
+      ".github/workflows/b5q-diagnostics.yml": "0fc363ae7ae658eba64f8a5b82ce4f7627ec37c9e5a0b4f44db1fb55a4fd9ada",
+      ".github/workflows/b5q-v26-incremental.yml": "26b5a31ce7a605b9dd754eba4d1d8be24a5fd1f1775aefc875757c5569ffbe7a",
+      ".github/workflows/b5q-v29-incremental.yml": "2f1efffdda93497fd864e3a2c67a7c4db907be88132a1057a7fba4a9fcf82a98",
+      ".github/workflows/b5q-v31-incremental.yml": "7e5706ed5bb4e8396cd48178c53bb39c3c9557d47ae75f69c343612387433b1d",
+      ".github/workflows/b5q-new-batch2.yml": "f32153854d48463c9d0927be685cf331719b892630666099954a5e1c2f201bc8",
+      ".github/workflows/b5q-v32-incremental.yml": "b5276607d5f8c56a46b85bd6e77ef20be9d20ce0f95d8d755901846354ae9489",
+      "patches/uefi-b5q/0020-darwinboot-pcie-64m.patch": "53584fb8d71284971aab718ebea51c34fa6a557ea744a0510375bd01311f17d8",
+      "patches/uefi-b5q/0015-b5q-usb-map-lifetime.patch": "572961ee673fb0b0b2184bf52427208bd97e94e903d5a3c40f2ce42c330d54d0",
+      "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
+      "patches/uefi-b5q/0019-b5q-pcie-64m.patch": "90030fd213f8f8ed38a840c5d1de40c96da39dff85eaa3835864bfcfd790832a",
+      "patches/uefi-b5q/0016-darwinboot-dma-order-inputs.patch": "1a5354301eb37a2347e98d6ca7cca670c6b201a1f973e689e0b5230ca025b316",
+      "patches/uefi-b5q/0013-b5q-reserved-dma-guards.patch": "22249582ec46dc5df2bcac9aa50ea73fb3667808961dbff930ee679e369ade62",
+      "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29",
+      "patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch": "00f6e3dbecd897b5d7d54b182b0ab7a3d3bc522b1f1e81bafff19cda942fdd15",
+      "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
+      "patches/uefi-b5q/0017-b5q-dma-attach-flush.patch": "663c3e010f6409a2ec298a5b656a080243a02c47dea52a3ffb2647fbb8934d7e",
+      "patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch": "7166412b0aa62093c6dc68fc4c38d810fbecf4d1b5dddd29aa860267655dae1d",
+      "patches/uefi-b5q/0011-b5q-dp-splash-tail.patch": "07316f6c87fe7f66d8bdf0b44ac7c1217fa6525c20d74a0d201354c4c8705118",
+      "patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch": "ee152149bf5395e97987de7f9e1587c8a5fec78da64ad25fb416feb416ba68b1",
+      "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
+      "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+      "patches/uefi-b5q/0005-b5q-physical-esp.patch": "45539390db2142e460c12c9d71b56f79cca88922976bac29096feb6b0aa4da11",
+      "patches/uefi-b5q/0009-b5q-media-dma.patch": "b41f5d54e4fc03f3b72bdfa300c3d81a0bf3ac8a184e5bf659fcfef7538701b6",
+      "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
+      "patches/uefi-b5q/0014-b5q-dma-unprivileged-wbis.patch": "8111a4c0639fb89c117cc10d63eb86584e0c63f015d692923f9389f3305075e9",
+      "patches/uefi-b5q/0018-darwinboot-usb-coverage.patch": "f1cd6bdb914f974e35d746c86ff9eecfee62c45fb921881ba5f1cbad36bd29f1",
+      "UniXNU-b5q/package/B5qWcnPower.cpp": "81a6ed3e6e95fa2b6799ff244b1b792182ef0d95dc666f3ec4eb9b8aa19d4999",
+      "UniXNU-b5q/package/B5qBtFifo.c": "ec31af0fb349f14e1ae14734318772afa551d828c7197caaf04e0d19e07fac35",
+      "UniXNU-b5q/package/B5qUsbInputs.h": "676e88f1b5cb9e0af19e6e819b5ea0d438c2e01d7ce3542769936b0c50503c89",
+      "UniXNU-b5q/scripts/usb-xhci-26C5035r.json": "c6d7ad3855b213b794b11f5a6efc4922cc957cf6285e000ad69dac7ab661946b",
+      "UniXNU-b5q/scripts/usb-dual-bindings-26C5035r.json": "9e30f96b7ad59b9ec7ea4430bf970a000090db9ff705f17123e85d582b4a83e3",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.fdf": "c49811d33a7e43d441898c8c582ca19aa17bf12ea0bd3a8191bbbe58723fed6c",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.dec": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/DeviceBuild.py": "621c23af3706fb0a50759ac935f9601d11e8e4d024d1585848b7f9cfa3c1bd28",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.dsc": "ae7f35e03accc44f56738e03a322fd2ba57fa5f051eedd5569b69da4db9a70aa",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/DXE.inc": "bfc8aabcf3b162093b6f8e15cb27529bd0dc60e06e65b63ef858de1a801ab8a3",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/APRIORI.inc": "403fdd1d2abcc4ef3988f2d05b5de5a89e73957a86d6922511e2346af1829517",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h": "8b40a4490e0ff0461d2a9ce0fc1ae3ac5eb88d5123cb01fc16a82a05ba0e24d3",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h": "4ad183ccfa342cf2602fcb3c69dc1d23803ca34232c6f9f18400f42d1caf5def",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h": "baed80a61a455d386b6dde580e46cb37da37f77f37683b9ac034bb01d20b2489",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qDpDma.h": "6ed7661423604bee46397903ee1223e220140f3df374d27503aaa8086da7d802",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/RAW.inc": "1bbc5f56c2cf2e427f64c04829b755e7dfe2a9f45a2260d7bd14e3385cf7008d",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h": "ec2bb043be6ff945be72a2c93a8353ad9906905f0cd40c2c5020e7e1ea791875",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c": "3f0ed80ac2b460192938c8c9d3f13890a6228cdda280f25334f29b7fe2eb218a",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c": "938150bcfcab68bde313d4a55eb2b8b3b1c8ce0d194d855106fe12d79578f551",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h": "9ebedcef081a3a7131517103aae2f71e87af0a8ba2d59b4629680de03447ee9b",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h": "325740f2c1ef3f4204c8ac3373d22677479d36322a81c3e75a256905df5d58d7",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c": "ea445a783a57523172b92c1ff54a3ac1fac7058f877762c5b743c8ac93d2f73d",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/DpDma.c": "e2db8a0f2dea26c4f3f284b356694e6fc22de69b35c2ae37186c26cc904d2e05",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf": "ae88b0a0ff6ac8e97043799d8ba1d78fc10f88e007d49b24276c332db4c1c2ec",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c": "9adf46d4715ce402cb2b5e504e34e8a92d8c0b4c6f5b22d4b315c56904d8cce4",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/ConfigurationMapLib/ConfigurationMapLib.inf": "d43514ac5ee1f0758fe3bec0e73c5ff2f4f9b31e0d3546377c54e9214cc6a7b7",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/ConfigurationMapLib/ConfigurationMapLib.c": "bd5e595e31933e337d22e4cd52bf24944eebe2a7172e551f5187f2b0af3fb83b",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.inf": "159424f05f845ecb993029636bd30ac167784697855a654bf95c7a202a3378ae",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c": "aa80b16e1c68b088f38d554bbb9b06a04c117e9ad5bc66cda9d675865bee3247"
+    },
+    "protected_changed": [],
+    "kernel_args_bytes": 1023,
+    "board_sha256": "db7b02ca1e4c3d6a591304e863e5d5e08415c2aa3dd6e5fae18d649d045f5dc4",
+    "HEAD": "bdc43f5dd966bc641eec4edf7fddd0b415f5cf54",
+    "index_tree": "f00898aebfceacd1506a61c3c1557bfa058f64e0",
+    "staged_paths": [],
+    "initial_unrelated_dirty_preserved": true,
+    "review20_changed_count": 47,
+    "commit_performed": false,
+    "push_performed": false,
+    "ci_triggered": false,
+    "image_created": false,
+    "phone_accessed": false
+  },
+  "deliverables": {
+    "changed_files": "artifacts/b5q-review20-local/changed-files.json",
+    "incremental_diff": "artifacts/b5q-review20-local/incremental.diff",
+    "gates": "artifacts/b5q-review20-local/gates.json"
+  },
+  "commit_performed": false,
+  "push_performed": false,
+  "ci_triggered": false,
+  "final_ESP_created": false,
+  "phone_accessed": false
+}

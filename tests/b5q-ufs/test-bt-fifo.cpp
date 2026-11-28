@@ -52,8 +52,38 @@ struct Model {
     void start(){assert(!prepare());assert(!b5q_bt_fifo_set_rate(&g,115200,7372800,16));assert(!b5q_bt_fifo_start(&g));}
     void drain(){if(!ctsLow)return;while(!pendingWire.empty()){output.push_back(pendingWire.front());pendingWire.pop_front();}queuedWords=0;regs[0x610/4]|=1u<<30;if(!commandLeft){regs[0x610/4]|=1;regs[0x40/4]&=~1u;}}
     void inject(const std::vector<uint8_t>& v){assert(input.empty());input.insert(input.end(),v.begin(),v.end());regs[0x640/4]|=1u<<27;}
+    // Model the hardware IRQ routing, independently of the FIFO driver:
+    // DMA gate bits0/1 cannot route M/S CPU status to UART14 INTID493.
+    bool cpuIrq(){
+        const uint32_t gate=regs[0xe1c/4];
+        if(masked || !(((gate&(1u<<2)) && (regs[0x610/4]&regs[0x614/4])) ||
+                       ((gate&(1u<<3)) && (regs[0x640/4]&regs[0x644/4]))))return false;
+        b5q_bt_fifo_irq(&g);return true;
+    }
 };
 int main(){
+    {Model m;m.start();assert(m.regs[0xe1c/4]==0xc && !m.g.retry_at);
+     m.inject({4,0x3e,2,1,0}); // unsolicited LE event while worker sleeps
+     m.regs[0xe1c/4]=3;assert(!m.cpuIrq()&&!m.wakes&&m.received.empty());
+     m.regs[0xe1c/4]=0xc;
+     const auto mask=m.regs[0x644/4];m.regs[0x644/4]=0;
+     assert(!m.cpuIrq());m.regs[0x644/4]=mask;
+     assert(m.cpuIrq()&&m.wakes==1&&m.masked);assert(!m.cpuIrq());
+     b5q_bt_fifo_service(&m.g);
+     assert((m.received==std::vector<uint8_t>{4,0x3e,2,1,0}));
+     assert(!m.regs[0x640/4]&&!m.masked&&!m.g.retry_at&&m.g.stats.interrupts==1);
+     // TX advances only via real watermark/DONE CPU IRQs, without polling.
+     std::vector<uint8_t> cmd(249,0x5a);assert(b5q_bt_fifo_write(&m.g,cmd.data(),cmd.size())==cmd.size());
+     unsigned irqs=0;
+     while(m.g.tx_busy){assert(++irqs<8);m.drain();assert(m.cpuIrq());b5q_bt_fifo_service(&m.g);}
+     assert(m.output==cmd&&!m.regs[0x610/4]);
+     assert(b5q_bt_fifo_quiesce(&m.g)==-EINPROGRESS);m.regs[0x40/4]=0;
+     m.regs[0x640/4]|=1u<<4;assert(m.cpuIrq());b5q_bt_fifo_service(&m.g);
+     assert(m.g.state==B5Q_BT_FIFO_STOPPED&&m.regs[0xe1c/4]==0&&m.masked);
+     assert(!b5q_bt_fifo_resume(&m.g)&&m.regs[0xe1c/4]==0xc&&!m.masked);
+     m.regs[0x640/4]=1u<<9;assert(m.cpuIrq());b5q_bt_fifo_service(&m.g);
+     assert(m.g.state==B5Q_BT_FIFO_FAILED&&m.regs[0xe1c/4]==0&&m.masked&&!m.regs[0x640/4]);
+     puts("PASS CPU M/S IRQ causal routing: DMA-only negative, unsolicited idle HCI RX without timer, TX watermark/DONE, W1C, stop/resume/failure gates");}
     {Model m;m.regs[0x64/4]=1;assert(m.prepare()==-ENOTSUP && !m.writes && m.masked);}
     {Model m;m.regs[0x68/4]=0x103;assert(m.prepare()==-ENXIO && !m.writes);}
     {Model m;m.regs[0x40/4]=1;assert(m.prepare()==-EBUSY && !m.writes);}

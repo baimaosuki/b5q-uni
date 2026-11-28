@@ -10,7 +10,11 @@ def line(values,default=False):
     return text
 
 def profiles(arguments):
-    fallback=['b5q-dp=0'if v.startswith('b5q-dp=')else v for v in arguments]
+    # Runtime Bluetooth tracing is a full-profile diagnostic. Leave it out of
+    # fallback entries so their explicit b5q-f=0 selector still fits XNU's
+    # fixed 1024-byte command line without weakening the length check.
+    fallback=['b5q-dp=0'if v.startswith('b5q-dp=')else v for v in arguments
+              if not v.startswith('log-bluetooth=')]
     safe=['wifi=0'if v.startswith('wifi=')else'bluetooth=0'if v.startswith('bluetooth=')else'usb=0'if v.startswith('usb=')else v for v in fallback]
     args={'xnu':line(arguments,True),'daily':line([*fallback,'b5q-f=0']),
         'safe':line([*safe,'b5q-f=0']),

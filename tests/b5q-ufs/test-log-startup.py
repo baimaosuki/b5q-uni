@@ -47,13 +47,13 @@ static void POLICY
 vm_guard_object_slab_t SLAB
 static unsigned allocations,promotions,observed_phase,observed_range;static uint8_t buffer;
 static int kmem_alloc(vm_map_t map,vm_offset_t*address,unsigned bytes,unsigned flags,unsigned tag){
- assert(map==kernel_map&&bytes==0x400000&&tag==VM_KERN_MEMORY_DIAG);
+ assert(map==kernel_map&&bytes==0x1000000&&tag==VM_KERN_MEMORY_DIAG);
  assert(flags==(KMA_PERMANENT|KMA_KOBJECT|KMA_DATA));++allocations;
  observed_phase=startup_phase;vm_map_kernel_flags_t vmk={};kmem_apply_security_policy(map,flags,{},&vmk);observed_range=vmk.vmkf_range_id;
  (void)kmem_slab(vmk);*address=(uintptr_t)&buffer;return KERN_SUCCESS;
 }
 static int nabu_capture_expand(uint8_t*p){assert(p==&buffer);++promotions;return 1;}
-#define NB_LOG_CAPACITY 0x400000
+#define NB_LOG_CAPACITY 0x1000000
 static void ALLOCATOR
 void SCHEDULER
 static void invoke(void*){b5q_console_capture_init();}

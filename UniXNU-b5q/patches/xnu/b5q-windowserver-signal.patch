@@ -11,7 +11,7 @@
  #include <machine/psl.h>
  #include <stdatomic.h>
  
-@@ -2032,6 +2036,55 @@
+@@ -2032,6 +2036,116 @@
  	}
  }
  
@@ -62,18 +62,80 @@
 +	for (unsigned i = 0; i < count; ++i)
 +		printf("B5Q-WS-SIGNAL: kernel frame=%u pc=0x%llx\n", i, (uint64_t)frames[i]);
 +}
++/* Independent of the WindowServer quota/format above. One packed CAS reserves
++ * both per-name and global quotas; busy bits prevent reentrant same-name walks. */
++static _Atomic uint32_t b5q_proc_crash_slots;
++static int
++b5q_proc_crash_kind(const char *name)
++{
++	static const char *const names[] = { "calaccessd", "DisplayControls",
++	    "WindowManagerCon", "ScreenshotContro" };
++	for (unsigned i = 0; i < 4; ++i)
++		if (!strncmp(name, names[i], MAXCOMLEN)) return (int)i;
++	return -1;
++}
++static unsigned
++b5q_proc_crash_claim(unsigned kind)
++{
++	if (kind >= 4) return 0;
++	uint32_t old = atomic_load_explicit(&b5q_proc_crash_slots, memory_order_relaxed);
++	const unsigned shift = 4 + kind * 2, busy = 1u << (16 + kind);
++	for (unsigned retry = 0; retry < 16; ++retry) {
++		if ((old & 15u) >= 8 || ((old >> shift) & 3u) >= 2 || (old & busy)) return 0;
++		uint32_t next = old + 1 + (1u << shift);
++		next |= busy;
++		if (atomic_compare_exchange_weak_explicit(&b5q_proc_crash_slots, &old, next,
++		    memory_order_acq_rel, memory_order_relaxed)) return (old & 15u) + 1;
++	}
++	return 0;
++}
++__attribute__((noinline)) static void
++b5q_process_crash_context(proc_t p, int rv)
++{
++	unsigned enabled = 0;
++	int signal = WTERMSIG(rv);
++	if (p != current_proc() || (signal != SIGABRT && signal != SIGTRAP &&
++	    signal != SIGSEGV && signal != SIGBUS && signal != SIGILL) ||
++	    !PE_parse_boot_argn("b5q-ws-signal", &enabled, sizeof(enabled)) || enabled != 1) return;
++	int kind = b5q_proc_crash_kind(p->p_name);
++	if (kind < 0) return;
++	unsigned capture = b5q_proc_crash_claim((unsigned)kind);
++	if (!capture) return;
++	printf("B5Q-PROC-CRASH: capture=%u/8 pid=%d tid=%llu proc=%s signal=%d namespace=%u code=0x%llx\n",
++	    capture, proc_getpid(p), thread_tid(current_thread()), p->p_name, signal,
++	    p->p_exit_reason ? p->p_exit_reason->osr_namespace : 0,
++	    p->p_exit_reason ? p->p_exit_reason->osr_code : 0);
++	arm_saved_state_t *state = get_user_regs(current_thread());
++	if (state && is_saved_state64(state))
++		printf("B5Q-PROC-CRASH: saved pc=0x%llx lr=0x%llx sp=0x%llx fp=0x%llx far=0x%llx esr=0x%llx\n",
++		    get_saved_state_pc(state), get_saved_state_lr(state), get_saved_state_sp(state),
++		    get_saved_state_fp(state), get_saved_state_far(state), (uint64_t)get_saved_state_esr(state));
++	uintptr_t frames[16];
++	struct backtrace_user_info info = BTUINFO_INIT;
++	unsigned count = backtrace_user(frames, 16, NULL, &info);
++	printf("B5Q-PROC-CRASH: user frames=%u error=%d flags=0x%x\n", count, info.btui_error, info.btui_info);
++	for (unsigned i = 0; i < count && i < 16; ++i)
++		printf("B5Q-PROC-CRASH: user frame=%u pc=0x%llx\n", i, (uint64_t)frames[i]);
++	struct user64_dyld_all_image_infos images;
++	if (!copyin((user_addr_t)task_get_all_image_info_addr(current_task()), &images, sizeof(images)))
++		printf("B5Q-PROC-CRASH: dyld cache_base=0x%llx cache_slide=0x%llx images=%u\n",
++		    images.sharedCacheBaseAddress, images.sharedCacheSlide, images.infoArrayCount);
++	else printf("B5Q-PROC-CRASH: dyld image-info unavailable\n");
++	atomic_fetch_and_explicit(&b5q_proc_crash_slots, ~(1u << (16 + kind)), memory_order_release);
++}
 +#endif
 +
  void
  proc_prepareexit(proc_t p, int rv, boolean_t perf_notify)
  {
-@@ -2051,6 +2104,10 @@
+@@ -2051,6 +2165,11 @@
  	boot_progress_exit(proc_getpid(p),p->p_name,rv,
  	    p->p_exit_reason ? p->p_exit_reason->osr_namespace : 0,
  	    p->p_exit_reason ? p->p_exit_reason->osr_code : 0);
 +
 +#if __arm64__
 +	b5q_windowserver_signal_context(p, rv);
++	b5q_process_crash_context(p, rv);
 +#endif
  
  	if (p->p_crash_behavior != 0 || p == initproc) {

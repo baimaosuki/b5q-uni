@@ -31,7 +31,6 @@
     "com.apple.modelmanagerd",
     "com.apple.perfpowermetricd",
     "com.apple.rtcreportingd",
-    "com.apple.softwareupdated",
     "com.apple.spindump",
     "com.apple.tailspind",
     "com.apple.watchdogd"
@@ -42,6 +41,7 @@
     "com.apple.CommCenter",
     "com.apple.ContextStoreAgent",
     "com.apple.ReportCrash",
+    "com.apple.SoftwareUpdateNotificationManager",
     "com.apple.amsengagementd",
     "com.apple.biomesyncd",
     "com.apple.duetexpertd",
@@ -57,12 +57,15 @@
     "com.apple.siriactionsd",
     "com.apple.siriinferenced",
     "com.apple.siriknowledged",
-    "com.apple.talagent",
-    "com.apple.wallpaper.agent"
+    "com.apple.talagent"
   ],
   "bundled": [
     "com.apple.ReportCrashService",
     "com.apple.geod",
     "com.apple.wallpaper.extension.aerials"
+  ],
+  "system_enabled": [
+    "com.apple.softwareupdated",
+    "com.openssh.sshd"
   ]
 }

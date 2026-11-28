@@ -67,11 +67,12 @@ IOService *b5q_dp_display_create(IOService *provider,const B5qDpDisplayConfig *c
 bool b5q_dp_display_disconnect(IOService*){return displayConfig.drain(displayConfig.context);}
 void b5q_dp_display_frame(IOService *,uint64_t tag,uint32_t,uint64_t){if(tag)completedTags++;}
 struct Hardware{
- bool opened=false,mxOwned=false,fault=false,cablePresent=true;unsigned wantedReverse=0;struct{unsigned failed=0;}clock;
- std::map<unsigned,uint32_t>regs;
+ void trace(const char*){}
+ bool opened=false,mxOwned=false,fault=false,cablePresent=true;unsigned wantedReverse=0;struct{unsigned failed=0,last=0;}clock;
+ struct{volatile uint32_t *va=nullptr;}sel,en;std::map<unsigned,uint32_t>regs;
  bool open(bool reverse){opened=true;wantedReverse=reverse;return true;}bool close(){opened=false;return true;}
  bool connected(){return opened&&cablePresent;}
- uint32_t read(B5qDp::Block b,unsigned off){assert(b==B5qDp::Block::Dpu);return regs[off];}
+ uint32_t read(B5qDp::Block b,unsigned off){assert(b==B5qDp::Block::Dpu||b==B5qDp::Block::DispCc||b==B5qDp::Block::Phy||b==B5qDp::Block::Aux||b==B5qDp::Block::Ahb);return regs[off];}
  void write(B5qDp::Block b,unsigned off,uint32_t v){assert(b==B5qDp::Block::Dpu);regs[off]=v;}
  void delay(unsigned us){tick+=us;regs[0x3526c]=regs[0x35000]&1;if(regs[0x35000]&1)regs[0x350ac]++;
   for(unsigned c=0;c<6;c++)regs[B5qDp::DpuResources::ctlBase[c]+0x18]=0;
@@ -79,10 +80,13 @@ struct Hardware{
 };
 namespace B5qDp {
 template<class Io>struct Session {
- Io &io;bool streaming=false,trained=false;unsigned rate=20,lanes=2,attempts=1,error=0;
- struct{unsigned failed=0;}clock,phy;Modes modes;Mode selected{};uint8_t edid[128]{};unsigned edidBytes=128;
- struct Controller{Session &s;void stop(){s.streaming=false;}}controller;
- struct Aux{bool dpcd(bool,unsigned,uint8_t *out,unsigned n){memset(out,0x77,n);out[2]=1;return true;}unsigned error=0;}aux;
+ Io &io;bool streaming=false,trained=false,auxOn=true;unsigned rate=20,lanes=2,attempts=1,error=0;
+ unsigned lastRate=0,lastLanes=0,clockLast=0,videoStage=0;uint8_t trainStatus[6]{};uint32_t auxFailRegs[10]{};bool haveAuxFailRegs=false;
+ struct{unsigned failed=0,last=0;}clock,phy;Modes modes;Mode selected{};uint8_t edid[128]{};unsigned edidBytes=128;
+ unsigned discoverStep=6,trainError=0;uint8_t dpcd[16]{};
+ struct{unsigned revision=0x14,rate=20,lanes=2;bool enhanced=true;}caps;
+ struct Controller{Session &s;unsigned failed=0,last=0;void stop(){s.streaming=false;}}controller;
+ struct Aux{bool dpcd(bool,unsigned,uint8_t *out,unsigned n){memset(out,0x77,n);out[2]=1;return true;}AuxError error=AuxError::None;unsigned lastStatus=0,transactions=0;}aux;
  explicit Session(Io &i):io(i),controller{*this}{}
  bool stop(){streaming=trained=false;selected={};return true;}
  bool discover(unsigned n,bool){lanes=n;modes={};return modes.advertisedVic(16)&&modes.advertisedVic(97);}

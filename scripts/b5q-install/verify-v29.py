@@ -122,7 +122,7 @@ def main():
             assert stats[name]["mode"] == 0o100644
         for name, labels in policy.policies().items():
             overrides = plistlib.loads((extracted / prefix / name).read_bytes())
-            assert all(overrides.get(label) is True for label in labels)
+            assert all(overrides.get(label) is value for label,value in labels.items())
         assert (extracted / prefix / "disabled.migrated").stat().st_size == 0
 
         geometry = {"bytes": esp.stat().st_size, "sha256": digest(esp)}

@@ -1,0 +1,98 @@
+diff --git a/drivers/ArmCpu/ArmCpu.cpp b/drivers/ArmCpu/ArmCpu.cpp
+--- a/drivers/ArmCpu/ArmCpu.cpp
++++ b/drivers/ArmCpu/ArmCpu.cpp
+@@ -161,6 +161,19 @@
+ 
+ static const uint32_t kIpiSpiBase = 1008;   // INTIDs 1008..1015 stand for 'IPI to logical core 0..7'
+ 
++// Shared distributor RMWs also run on secondary startup and resume before IRQs.
++static volatile uint32_t gDistLock = 0;
++static IOLock *gSmpStartLock = nullptr;
++static inline void distLock (void)
++{
++  while (__atomic_exchange_n (&gDistLock, 1U, __ATOMIC_ACQUIRE)) {
++    __asm__ volatile ("yield" ::: "memory");
++  }
++}
++static inline void distUnlock (void)
++{
++  __atomic_store_n (&gDistLock, 0U, __ATOMIC_RELEASE);
++}
+ // Device registers. The hypervisor traps and emulates the GIC, and it can decode only a single load or store of one register without
+ // writeback; any other form (a post-indexed load the compiler picks for a loop over a register file, a pair) comes back as a
+ // synchronous external abort. Each access is therefore one instruction with its address in a register (tools/check-mmio-access.py).
+@@ -203,14 +216,16 @@
+ // Distributor side of the software IPI of logical core `core`: group 1, edge-triggered, priority 0x80, routed to affinity `aff`, enabled.
+ static void spiIpiConfigure (uintptr_t dist, uint32_t core, uint64_t aff)
+ {
++  distLock ();
+   const uint32_t id = kIpiSpiBase + core;
+   write32 (dist, 0x80 + (id / 32) * 4, read32 (dist, 0x80 + (id / 32) * 4) | (1U << (id % 32)));
+   write32 (dist, 0xc00 + (id / 16) * 4, read32 (dist, 0xc00 + (id / 16) * 4) | (2U << ((id % 16) * 2)));
+   write32 (dist, 0x400 + (id / 4) * 4, 0x80808080);
+   write64 (dist, 0x6000 + 8 * id, aff & 0xff00ffffffULL);
+   __asm__ volatile ("dsb sy" ::: "memory");
+   write32 (dist, 0x100 + (id / 32) * 4, 1U << (id % 32));
+   __asm__ volatile ("dsb sy" ::: "memory");
++  distUnlock ();
+ }
+ 
+ static void spiIpiSend (uintptr_t dist, uint32_t core)
+@@ -504,6 +519,18 @@
+ bool ArmCpu::prepareGic (void)
+ {
+   if (!mapGic () || !initDistributor () || !wakeRedistributor (true)) { return false; }
++  if (gSpiIpi) {
++    // CPU0 prepares the shared words before any pending secondary can start.
++    distLock ();
++    const unsigned group = 0x80 + (kIpiSpiBase / 32) * 4;
++    const unsigned config = 0xc00 + (kIpiSpiBase / 16) * 4;
++    write32 (dist, group, read32 (dist, group) | 0x00ff0000U);
++    write32 (dist, config, read32 (dist, config) | 0xaaaaaaaaU);
++    write32 (dist, 0x400 + (kIpiSpiBase / 4) * 4, 0x80808080U);
++    write32 (dist, 0x400 + ((kIpiSpiBase + 4) / 4) * 4, 0x80808080U);
++    __asm__ volatile ("dsb sy" ::: "memory");
++    distUnlock ();
++  }
+   gGicShared = 1;
+   return true;
+ }
+@@ -526,7 +553,10 @@
+   if (!secondary) { gBootAffinity = affinity & 0xff00ffffffULL; }
+   if (!secondary || !gRemoteGic) {
+     write32 (redist + 0x10000, 0x100, kSgiPpiEnable);
++    distLock ();
+     write32 (dist, 0, read32 (dist, 0) | 0x12U);
++    __asm__ volatile ("dsb sy" ::: "memory");
++    distUnlock ();
+   }
+   value = 1;
+   __asm__ volatile ("msr icc_igrpen1_el1, %0\n\tdsb sy\n\tisb" :: "r" (value) : "memory");
+@@ -586,6 +616,8 @@
+     if (gBootRegistered != 0) { drainPending (); }
+     return true;
+   } else {
++    gSmpStartLock = IOLockAlloc ();
++    if (!gSmpStartLock) { panic ("ArmCpu: SMP start lock allocation failed"); }
+     uint64_t bootMpidr;
+     __asm__ volatile ("mrs %0, mpidr_el1" : "=r" (bootMpidr));
+     armcpu_boot_mpidr = static_cast<uint32_t> (bootMpidr);
+@@ -716,7 +748,9 @@
+   armcpu_smp_step[self->logicalId] = 3;
+   // Kernels that leave the start to the driver block here until the new core reaches the scheduler; a core that never arrives only
+   // stalls this helper thread. Kernels that start a core when it registers return at once.
++  if (gSmpStartLock) { IOLockLock (gSmpStartLock); }
+   processor_start (self->machProcessor);
++  if (gSmpStartLock) { IOLockUnlock (gSmpStartLock); }
+   // Once every secondary core has started, the scheduler sets up its cluster edges (Edge migration and steal rules).
+   static uint32_t started = 0;
+   // armcpu-edge=0 leaves the Edge matrix all-disallowed (no thread moves between clusters). On iPadOS 27 the matrix fails the scheduler's
+@@ -761,7 +795,7 @@
+     enableCPUTimeBase (true);
+     setCPUState (kIOCPUStateRunning);
+     armcpu_smp_step[logicalId] = 7;
+-    if (boot) { armcpu_smp_running = armcpu_smp_running + 1; }
++    if (boot) { __atomic_add_fetch (&armcpu_smp_running, 1U, __ATOMIC_RELAXED); }
+     // XNU clears SIGPdisabled for a core the first time that core takes an IPI, and cpu_signal() silently skips a core until then; Apple's
+     // CPU driver provokes it with a self-IPI from initCPU (osfmk/kern/machine.c, processor_up).
+     // Back from platform sleep the self-IPI is sent whatever armcpu-self-ipi says: processor_cpu_reinit waits for it.

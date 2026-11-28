@@ -136,6 +136,11 @@ def main():
    else:assert job['KeepAlive']is True
    assert job['ProgramArguments'][0]=='/private/var/ngpu/bin/unixnu-wpa_supplicant'
    daemon=Image(content['sbin/bluetoothd'][1])
+   code=load(R/'UniXNU-b5q/scripts/b5q_codesign.py')
+   directories=code.inspect_code_directories(content['sbin/bluetoothd'][1])
+   assert len(directories)==1 and directories[0]['platform']==27 and directories[0]['page_hashes_valid']
+   trust_entry=code.inspect_trust_entry((assets/'kernel.macho.trustcache').read_bytes(),directories[0]['cdhash'])
+   assert trust_entry['hash_type']==2 and trust_entry['flags']==0 and trust_entry['constraint_category']==1
    patch=json.loads((R/'artifacts/b5q-p2-work/native-macos27.json').read_text())['patch']
    assert daemon.data.count(UUID(patch['input_uuid']).bytes)==1
    for row in patch['patches']:

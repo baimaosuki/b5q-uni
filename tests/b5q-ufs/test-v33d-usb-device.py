@@ -36,9 +36,15 @@ execute('v33d-device-power',body.replace('CABLE',function(q,'IOReturn cable(')).
 body=base+r'''
 #include "B5qMax77705.h"
 #include "B5qDpPort.h"
+#include "B5qUsbHostRole.h"
 using wait_result_t=int;
-#define IOLog(...) ((void)0)
-const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1;
+void *current_thread(){return nullptr;}
+void thread_set_thread_name(void*,const char*){}
+template<class... T>void IOLog(const char*,T...){ }
+void *gHost=nullptr;void *gHostNub=nullptr;B5qMax77705::Cable gAppliedCable;int gAppliedOrientation=-1;
+constexpr unsigned kXhciRegisterBytes=0x8000;struct{uint32_t *va=nullptr;}gXhciRegs,gGlobals;
+constexpr uint32_t kUsb3SuspendPhy=1u<<17;void barrier(){}
+const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1,kMillisecondScale=1000;
 int gRoleWanted=1,gRoleApplied=0,gCoreRole=0;uint32_t gCableWanted=1,gCableApplied=0,gDpLanes=0;
 void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=false,gPhyResetPending=false;uint32_t native_usb_stats[54]={};
 unsigned polls=0,qmps=0,enters=0,retries=0;int orientation=0;
@@ -54,6 +60,7 @@ bool enterRole(int){enters++;followOrientation();return true;}
 void cableChanged(){}void retryDevicePower(){retries++;}void hostStats(){}void deviceStats(){}
 void clock_interval_to_deadline(unsigned,unsigned,uint64_t*p){*p=0;}
 void IOLockSleepDeadline(void*,void*,uint64_t,int){if(++polls>3)throw 1;}
+void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){for(orientation=0;orientation<2;orientation++){
  gRoleApplied=0;gCableApplied=0;gDpLanes=0;gSuperSpeed=false;native_usb_stats[34]=~0u;polls=qmps=enters=retries=0;
@@ -62,8 +69,15 @@ int main(){for(orientation=0;orientation<2;orientation++){
  }puts("PASS actual roleThread + followOrientation:normal/reverse QMP exactlyonce; periodic retry invoked; no immediately repeated PHY reset");}
 '''
 execute('v33d-qmp-role',body.replace('FOLLOW',function(q,'bool followOrientation(')).replace('ROLE',function(q,'void roleThread(')))
-assert 'static volatile bool gDeviceStackAllowed = true;'in q
+assert 'static volatile bool gDeviceStackAllowed = false;'in q
 assert '"configuration-string",config'in q
 assert q.index('controller->registerService();')>q.index('gController=controller;')
-for field in ['PORTSC1=','PORTSC2=','ERDP=','GSBUSCFG0=']:assert field in q
+publish=function(q,'extern "C" void qcom_dwc3_publish(')
+assert 'QcomDwc3Nub::route(nub);'not in publish
+enter=function(q,'bool enterRole(');device=enter[enter.index('} else {'):]
+assert device.index('QcomDwc3Nub::route(gDeviceNub)')<device.index('__atomic_store_n(&gDeviceStackAllowed,true')<device.index('setProperty("AppleUSBCableType"')<device.index('gController->cable(true)')
+for field in ['PORTSC1=','PORTSC2=','PORTPMSC1=','PORTPMSC2=','ERDP=','GUSB2PHYCFG=','GUSB3PIPECTL=','GUCTL1=']:assert field in q
+assert 'hostCheckpoint("read64");'in q and 'hostCheckpoint("write64");'in q
+assert 'hostCheckpoint("before-power-state",true,false);'in q and 'hostCheckpoint("poll",false,true);'in q
+assert '(port&3u)==3u&&(port&0x1e0u)==0x60u' in q
 print('PASS publication/configuration and host diagnostic source contracts; actual ABI compilation and original binary evidence checked separately')

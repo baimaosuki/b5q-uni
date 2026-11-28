@@ -19,7 +19,7 @@ struct Io {
  uint64_t now=0,detachAt=~0ULL;unsigned segment=0,offset=0,rx=0,starts=0,rate=0;
  unsigned nackAt=0,dropAbove=0,slowUs=0,auxControl=0,powerAccesses=0;uint32_t auxState=0;
  uint8_t power=0xa2,revision=0x14;
- bool pending=false,online=true,clockFault=false,haltFault=false,pllFault=false,videoFault=false,eqOnly=false,corruptEdid=false;
+ bool pending=false,online=true,clockFault=false,haltFault=false,pllFault=false,videoFault=false,eqOnly=false,corruptEdid=false,auxClosed=false;
  Io(){
   edid.resize(256);const uint8_t magic[]={0,255,255,255,255,255,255,0};memcpy(edid.data(),magic,8);
   edid[18]=1;edid[19]=4;edid[20]=128;edid[126]=1;
@@ -32,7 +32,7 @@ struct Io {
  uint64_t nowUs(){return now;}void delay(unsigned us){now+=us;}
  static bool branch(unsigned off){return off==0x8058||off==0x8050||off==0x8048||off==0x8040;}
  uint32_t read(Block b,unsigned off){
-  if(b==Block::Ahb&&off==0)return 0x10020003;
+  if(b==Block::Ahb&&off==0)return auxClosed?0xdead0000u:0x10020003;
   if(b==Block::Ahb&&off==0x20)return pending?(nackAt==starts?auxNack:auxDone):0;
   if(b==Block::Aux&&off==0x30)return auxControl;
   if(b==Block::Aux&&off==0x38)return auxState;
@@ -41,7 +41,7 @@ struct Io {
   if(b==Block::DispCc&&(off==0x81bc||off==0x8170||off==0x818c))return clockFault?1:regs[{b,off}]&~1u;
   if(b==Block::Pll&&off==0x1f8)return pllFault?0:1;
   if(b==Block::Pll&&off==0x1d0)return pllFault?0:3;
-  if(b==Block::Phy&&off==0xe4)return pllFault?0:3;
+  if(b==Block::Phy&&off==0xe4)return auxClosed?0:(pllFault?0:3);
   if(b==Block::Link&&off==0x40){uint32_t p=regs[{b,4}];return p==128?(videoFault?0:1):p<<3;}
   return regs[{b,off}];
  }
@@ -52,7 +52,7 @@ struct Io {
    regs[{b,off}]&=~(1u<<31);return;
   }
   if(b==Block::Ahb&&off==0x20){pending=false;return;}
-  if(b==Block::Aux&&off==0x30){auxControl=value;return;}
+  if(b==Block::Aux&&off==0x30){auxControl=value;auxClosed=!(value&1u);return;}
   if(b==Block::Aux&&off==0x34){
    if(value==((1u<<31)|1u)){rx=0;return;}
    if(value&(1u<<31))fifo.clear();fifo.push_back(uint8_t(value>>8));return;
@@ -106,6 +106,10 @@ int main(){unsigned cases=0;
   assert(!ok&&!s.trained&&!s.streaming&&!s.auxOn&&!s.clocksOwned);assert(s.error==LinkError::Caps||s.error==LinkError::Edid||s.error==LinkError::Power);cases++;
  }
  {Io io;io.corruptEdid=true;Session<Io>s(io);assert(!s.discover(4,false)&&s.error==LinkError::Edid&&!s.auxOn);cases++;}
+ {Io io;io.nackAt=1;Session<Io>s(io);assert(!s.discover(4,false)&&s.error==LinkError::Caps);
+  assert(s.haveAuxFailRegs&&s.auxFailRegs[0]==0x10020003&&s.auxFailRegs[9]==3);
+  assert(io.auxClosed&&io.read(Block::Ahb,0)==0xdead0000&&io.read(Block::Phy,0xe4)==0);
+  assert(s.clockLast!=0);cases++;}
  {Io io;io.online=false;Session<Io>s(io);assert(!s.discover(4,false)&&s.error==LinkError::Detached&&io.regs.empty());cases++;}
  {Io io;Session<Io>s(io);assert(!s.discover(1,false)&&s.error==LinkError::Caps&&io.regs.empty());cases++;}
  {Io io;io.clockFault=true;Session<Io>s(io);assert(!s.discover(4,false)&&s.error==LinkError::Clock&&!s.streaming);cases++;}

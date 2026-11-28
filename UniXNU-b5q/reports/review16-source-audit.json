@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "review": "review16",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "ci_triggered": false,
+  "push_performed": false,
+  "commit_performed": false,
+  "esp_created": false,
+  "phone_accessed": false,
+  "source_base_commit": "c46174457e312bb789bc2452f93ec174eb59c207",
+  "source_paths": [
+    "UniXNU-b5q/package/B5qAth11kCompat/B5qAth11kCompat.h",
+    "UniXNU-b5q/package/B5qDpBoard.h",
+    "UniXNU-b5q/package/B5qDpLink.cpp",
+    "UniXNU-b5q/package/B5qDpSession.h",
+    "UniXNU-b5q/package/B5qUsbIrq.h",
+    "UniXNU-b5q/package/QcomDwc3.cpp",
+    "UniXNU-b5q/scripts/b5q_wifi.py",
+    "scripts/b5q-install/pre-ci-v33d.py",
+    "scripts/b5q-install/test-review16.py",
+    "tests/b5q-ufs/test-review16.py",
+    "tests/b5q-ufs/test-dp-board.py",
+    "UniXNU-b5q/porting.toml",
+    "tests/b5q-ufs/test-dp-link-owner.py",
+    "tests/b5q-ufs/test-dp-native-pipeline.py",
+    "tests/b5q-ufs/test-wifi-diagnostics.py",
+    "tests/b5q-ufs/test-dp-session.py"
+  ],
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qAth11kCompat/B5qAth11kCompat.h": "d9a06f83e86779b555d80de8b07eae73835ac3c291d3fc47fc8cfc6fe7a091a5",
+    "UniXNU-b5q/package/B5qDpBoard.h": "f88423249714f7416629b681768900a7849a0a7846c10ae872f43c074b45ca6c",
+    "UniXNU-b5q/package/B5qDpLink.cpp": "72636f4ef0cf1639b24a96a380b77e740cb7d5dd86376e5617cd2f8b9bbeb049",
+    "UniXNU-b5q/package/B5qDpSession.h": "83c711d0747465d34e008c67a2146c54636ce9db98a4458277f45458d2b9337d",
+    "UniXNU-b5q/package/B5qUsbIrq.h": "90fe3a56c67427512245935719cceb12aac22335c2e73c544215166d00b8d3ff",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "3001c3f54291aaacca7ddf78284cb74f01c6bb46f6e8daefce95a8719aab9e47",
+    "UniXNU-b5q/scripts/b5q_wifi.py": "a6ec714b567394ab699a1c8800bc425de1772a40d011ad6f03e0b3f8c7b57d0e",
+    "scripts/b5q-install/pre-ci-v33d.py": "9d6037d7cbc049adbda4b8f5383a8b1ee868bcb7c36399d737a8aadb657c2a3d",
+    "scripts/b5q-install/test-review16.py": "e72d14f8c19415b47f2713f3877720eac2568a2418a93662d45bf6b1b0330df0",
+    "tests/b5q-ufs/test-review16.py": "1b3ace4b90d62ef42050bfa1109e70f05324cf91ada75766ac8b0fca77d31678",
+    "tests/b5q-ufs/test-dp-board.py": "5132e26e9dd9a307140285e85b85f6014867005f91ca3fa7b152424f09574cb8",
+    "UniXNU-b5q/porting.toml": "2a6bfc82cc3ad4f30321ae8feeb47e8ae36c3a43d1180f9506888d793b638d6c",
+    "tests/b5q-ufs/test-dp-link-owner.py": "e4d7ad2ef8c90611f4e484e1391a88df13e6325f59c47da8c6add4251ce9f6f5",
+    "tests/b5q-ufs/test-dp-native-pipeline.py": "1eac574c4e030101080c6137cd98971593d51226876b19c4e2925c3523d80d74",
+    "tests/b5q-ufs/test-wifi-diagnostics.py": "925e9cdb7f18020263fe2b9d65d4c16534f538446f345b7e645fe182153fac56",
+    "tests/b5q-ufs/test-dp-session.py": "fb08d9c5e0def25b686f847dbaa687e2e8b29e89cd588294caa47f72d6397cd4"
+  },
+  "real_inputs_sha256": {
+    "logs/b5q-xnu2log-review15/XNU2LOG.txt": "aa0913521f30b94429baa2506d395d733f982bc39be71feb95b7ec97dbade151",
+    "sources/UniXNU-sheng/drivers/Ath12kWifi/out/source-identity.json": "15d0aad76781964b1743ea2385ac6f8b4321fb11513553fc407944c2d6469418",
+    "UniXNU-b5q/package/B5qEthernet.cpp": "bc8fbf069ad98c889cf02d2272df54db9111804eb855ab717e146ea1f77ed974",
+    "UniXNU-b5q/package/B5qAth11k.c": "f04560e892f3428ff78a7bea65d2e9150a78cd0b5b1b60e1359f8454a67fbb48"
+  },
+  "wifi": {
+    "target_objects": 109,
+    "failed": [],
+    "core_only": false,
+    "target_build_passed": true,
+    "board_target_objects": 5,
+    "board_target_passed": true,
+    "generated_wifinet_sha256": "bc390deb431a42cec460e542629b44fe8090e935bf5aacc4ab61be5dd0e7848f",
+    "mac_expected": "7e:42:58:7e:ba:60",
+    "old_ath11k_fallback": "00:03:7f:12:7a:52",
+    "receipt": "artifacts/b5q-review16-local/wifi/compile-result.json",
+    "receipt_sha256": "db294f0fc84dc75ebffa576b32a1a9e2e3a68f127d65138fcb6dca424c16825a",
+    "board_receipt": "artifacts/b5q-p3-work/board-target/report.json",
+    "board_receipt_sha256": "ca805a57efa5d535cdde8253a6226f5c7e77a0e327218ff1642e88b290ef949e",
+    "bind_paths": [
+      "start",
+      "attach",
+      "tx",
+      "traffic",
+      "rx"
+    ]
+  },
+  "usb": {
+    "xhci_slots": 427,
+    "unresolved_imports": 0,
+    "public_IOPM_release_byte_identical": true,
+    "ir1_ir2_secondary_delivery_software_driven": true,
+    "bridge_backoff_after_samples": 1000,
+    "bridge_throttled_interval_ms": 50,
+    "log": "artifacts/b5q-review16-local/peripheral-all.log",
+    "log_sha256": "c8d9bbf96265c9700a4589a897cd189863c7a9a39467180181c83ff5a51aac4b",
+    "bridge_erdp_progress_resets": true,
+    "seckicks_delivered_only": true
+  },
+  "dp": {
+    "host_groups": 26,
+    "host_passed": true,
+    "target_compile_passed": true,
+    "iomfb_slots": 483,
+    "unresolved": [],
+    "new_dp_test_files": 0,
+    "receipt": "artifacts/b5q-p5-work/target/report.json",
+    "receipt_sha256": "378fba2e969b818a1b296721d84fb8a7fd7048a0d9bf374fca6fc9cbaf429910",
+    "dp_test_log": "artifacts/b5q-review16-local/dp-tests.log",
+    "dp_test_log_sha256": "e7f07562b31c532dcb8a4899f1e546d988f0079f5ca95bc0b9e4ada3c2a0ce7e",
+    "failure_snapshot_before_stop": true
+  },
+  "bluetooth": {
+    "objects": 9,
+    "passed": true,
+    "log": "artifacts/b5q-review16-local/bt-target.log",
+    "log_sha256": "005ec8df46077af0ea4138dbe600f51d0a4b610519546cc753024238496f671e"
+  },
+  "focused_receipt": "artifacts/b5q-review16-local/review16-tests.json",
+  "focused_receipt_sha256": "1666d542eefdc71e86b7c491bf82bbef99938c9005643ffda04ecde0631cc302",
+  "focused_checks": [
+    {
+      "name": "wifi-board-mac-symbol-and-fallback",
+      "passed": true
+    },
+    {
+      "name": "wifi-generated-bounded-probes-and-mac-path",
+      "passed": true
+    },
+    {
+      "name": "usb-secondary-delivery-bridge-enumeration-427-abi",
+      "passed": true,
+      "xhci_slots": 427
+    },
+    {
+      "name": "usb-ir-bridge-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "usb-ir-bridge-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "usb-ir1-ir2-snapshot-and-backoff-model",
+      "passed": true
+    },
+    {
+      "name": "dp-aux-latch-compile",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-aux-latch-ASan-UBSan",
+      "passed": true,
+      "log_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "dp-auxpins-latch-in-mismatch-rollback",
+      "passed": true
+    },
+    {
+      "name": "dp-discover-failure-snapshot",
+      "passed": true,
+      "log_sha256": "566aa3a1db2a3019d95bb71c35440c1a4f108e296c4141adb2097d5bf0d92a27"
+    },
+    {
+      "name": "dp-link-diagnostics-aux-edid-training-scanout",
+      "passed": true
+    },
+    {
+      "name": "review16-zero-diff-red-lines-and-bluetooth",
+      "passed": true
+    }
+  ],
+  "review_fixes": [
+    "Wi-Fi: B5qAth11kCompat device_get_mac_address now calls board nw_board_mac() instead of returning a local random address; generated WifiNet adds ifnet bind flags/eflags/cap/lladdr/GMAC and bounded 64-frame/24-per-direction ARP/DHCP probes, RX flush and input stall counters.",
+    "USB: IR1/IR2 have no GIC SPI; QcomDwc3::deliverSecondary() delivers through the filter under the existing IRQ lock without gIrqWindow storm accounting. A 1ms/50ms backoff bridge snapshots IMAN/ERDP, preserves the 427-slot XHCI ABI, and is joined before host teardown. Enumeration/child-service probes are bounded.",
+    "DisplayPort: AuxPins success now follows the latched CFG/OUT value, while GPIO180 IN bit0 is diagnostic (inMismatch). Failed CFG/OUT restores the mux and clears owned. Link probes cover hardware open, AUX dump, EDID/fitting modes, DPCD 0x202..0x207, training, DPU resources, scanout failure stage and the first three presents.",
+    "Tests: new ASan/UBSan Review16 gate and wrapper; DP board test models latch success, IN mismatch, rollback and restore; 26 DP test files retained; pre-ci runs Review16 after Review15."
+  ],
+  "first_errors": [
+    "Wi-Fi target initially could not find xcrun/brew in this Linux host; rerun with tools/llvm21 and explicit libLLVM path.",
+    "QcomDwc3 first compile rejected void hostIrqBridge(void*) because kernel_thread_start requires thread_continue_t(void*,int); signature corrected.",
+    "WifiNet first target compile rejected KERNEL_PRIVATE ifnet_eflags absent from the public SDK; generated C++ now declares the pinned XNU KPI explicitly.",
+    "The initial DP board test modeled IN bit0 without a shift and expected old IN-based failure; test now models CFG/OUT latch success plus diagnostic IN mismatch.",
+    "First full local gate stopped at wifi-diagnostics because the Review16 stall probe added ifnet_name/eflags/capabilities and errors_in/dropped fields absent from that old mock; mock fields were added and the complete chain was rerun."
+  ],
+  "red_line_zero_diff": true,
+  "protected_source_sha256": {
+    "UniXNU-b5q/package/B5qTouch.cpp": "1805f9cc76e94f8a724c0bfe5339f4c528c71a9034ac9c23f5b0216e1993588c",
+    "UniXNU-b5q/package/B5qTouchBus.h": "57efea31d69dfaf878b31f6eb40700a8d87da322d3181a4dde47912a02fe1a83",
+    "UniXNU-b5q/package/B5qTouchClock.h": "f8945a0803b00bf64a78e2d3d8b938c19e965f33c3c460ac99944e6f54ae6fa1",
+    "UniXNU-b5q/package/B5qTouchIrq.h": "82068375f2cb5f145630d8da2708d70c4c3445e28d01516f0403892e3d4e0eb1",
+    "UniXNU-b5q/package/B5qTouchMouse.h": "6754bceeb5a61b87f3b28899bdc6ade7a712471bc9ff952fd304481a441a9cd8",
+    "UniXNU-b5q/package/B5qTouchPower.h": "1d4a07f2ba3f57ba175ff7562dd83b265d208b37a5bc0ab22f4428bde51fac75",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "6fbf6ffbe09ebc1dd971116e006f8f1d11045853b77e71daabf12bea9e16e3dc",
+    "UniXNU-b5q/package/B5qTouchReports.h": "46104f4b59e72c7d81a87de1b607e57873aa458d82576fd185a739ec23a1f1be",
+    "UniXNU-b5q/package/B5qBluetooth.cpp": "793ffce6ee1749629fb169ce043560d9d61e9029af666dbbde09327af8dceba4",
+    "UniXNU-b5q/package/B5qBtH4Tap.h": "455a5d0ae2915234021c4167fd708fdc2f2dab1c4827bc3c2b0ac9c80efc8b03",
+    "UniXNU-b5q/package/B5qBtFifo.c": "ec31af0fb349f14e1ae14734318772afa551d828c7197caaf04e0d19e07fac35",
+    "UniXNU-b5q/package/B5qBtFifo.h": "0082dd23bf2059010b4c68fac0b7873de25c76fff59d4bd58d0896c565c4c67d",
+    "UniXNU-b5q/package/BluetoothFirmware.c": "22303d9f960580e2a7173a52ffdb3c1bbf9fa77e093ed07ab977646bbf0403c1",
+    "UniXNU-b5q/package/BluetoothFirmware.h": "f7de07a08ae060645a36a5d543ce29ba130166d1700858bacccb4d2f1c736014",
+    "UniXNU-b5q/package/B5qWcnPower.cpp": "81a6ed3e6e95fa2b6799ff244b1b792182ef0d95dc666f3ec4eb9b8aa19d4999",
+    "UniXNU-b5q/scripts/b5q_bluetooth.py": "1d9545073fc026fb604b1b0a0fbab71cc039e147cac8522a38f1007c26122d24",
+    "UniXNU-b5q/scripts/b5q_bt_le_mask.py": "9a03dad75f47bb842c86b4b187956f04831894803ce5c41bcbfa2344e61c35f0",
+    "UniXNU-b5q/scripts/build-b5q-bluetooth-userspace.py": "18d98a84c411d8928187558b35a6022070b1d699e0139d40fb32f722d79ed805",
+    "UniXNU-b5q/package/B5qDpPdic.h": "623151dfc17bb923a75a38c766a0075354140bac8a1870940850024d0fce560d",
+    "UniXNU-b5q/package/B5qDpPhy.h": "e2c4133af82818a5a6107dfb5c4898b1bdf685884c60166c8d515ae8f8d5ebc9",
+    "UniXNU-b5q/package/B5qDpAux.h": "c0c0664a078376490f19ec5c8a5d9b26bebf61c4a82bdd18729a0fda3e318414",
+    "UniXNU-b5q/package/B5qDpClock.h": "26a95a62f147baee1d49713eca3b9e862f4d6d987caabdff58ecccf7c543d6a9",
+    "UniXNU-b5q/package/B5qDpController.h": "527044b476d5cb0459b586231c10b83242626c6f704ca3761733f5ab22456779",
+    "UniXNU-b5q/package/B5qDpTraining.h": "7d847cd573571ce79bf25d70d3dac32a87326e9053c51f5c3e9b6519a41985ed",
+    "UniXNU-b5q/package/B5qDpModes.h": "a761609e73c5e4fa49726dbb01e9c6c7f5979534f5c0268b5050e2c0f70cf2d1",
+    "UniXNU-b5q/package/B5qDpDpuResources.h": "a5d22e79cc89e34cb3395ffbce8c65029596a491747d3d87fd849507c082e4d9",
+    "UniXNU-b5q/package/B5qDpDisplay.cpp": "d67d7404fb6a5d639de7460b91e908f46866493d0c4d411ed722fb4ea75af586",
+    "UniXNU-b5q/package/B5qDpIrq.cpp": "330bd6523a3a7b37e528df6a3f32a15a6b9f9dbd58dbae383f3b187cba4f94bb",
+    "UniXNU-b5q/package/B5qDpDma.h": "407d306701495bb15a4d63c5ca03f80453b8e59286355795d81b8d72c5781154",
+    "UniXNU-b5q/scripts/usb-xhci-26C5035r.json": "c6d7ad3855b213b794b11f5a6efc4922cc957cf6285e000ad69dac7ab661946b",
+    "UniXNU-b5q/scripts/usb-dual-bindings-26C5035r.json": "9e30f96b7ad59b9ec7ea4430bf970a000090db9ff705f17123e85d582b4a83e3",
+    "UniXNU-b5q/board.toml": "db7b02ca1e4c3d6a591304e863e5d5e08415c2aa3dd6e5fae18d649d045f5dc4"
+  },
+  "notes": [
+    "Local-only changes; no commit/push, CI, ESP generation, image delivery or phone access.",
+    "All results are HOST_VERIFIED_PENDING_HARDWARE with hardware_verified=false.",
+    "The 427-slot XHCI ABI and 483-slot IOMFB ABI are unchanged; USB/DP JSON inputs are byte-identical.",
+    "Review15 Bluetooth files and Review14 RDDM changes are retained unchanged; Bluetooth 9-object target compile passes.",
+    "The earlier 37/37 full local gate receipt predates these targeted fixes; after the owner no-CI direction only targeted tests and compiles were rerun. The audit local_gate status records that distinction.",
+    "Owner authorized immediate ARM CI; current targeted checks passed, complete local gates will run alongside CI before returned-image acceptance. porting.toml hash identifies staged review16-only records."
+  ],
+  "local_gate": {
+    "status": "not_run_after_targeted_fixes",
+    "reason": "Owner directed no CI/full-chain run; targeted local gates and compiles were run instead.",
+    "previous_passed_receipt": "artifacts/b5q-review16-gate2/v33d-local-gates.json",
+    "previous_checks": 37,
+    "previous_receipt_sha256": "13e8a4e94ec2f07f482ce77f686b89f05c924c3001dd8afe57598611ff82cd4c",
+    "targeted_checks": [
+      "test-review16.py 12/12",
+      "test-dp-*.py 26/26",
+      "Wi-Fi 109+5",
+      "Bluetooth 9",
+      "peripheral 427 XHCI",
+      "DP 483 IOMFB"
+    ]
+  }
+}

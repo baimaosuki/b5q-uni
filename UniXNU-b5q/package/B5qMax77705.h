@@ -12,7 +12,16 @@ struct Cable {
  uint8_t cc0=0,cc1=0,pd=0,bc=0;
  bool valid=false;
  bool water() const {return (cc1&2)!=0;}
- unsigned power() const {return valid&&!water()?(cc0&7):0;}
+ bool vconnCandidate() const {
+  const unsigned pin=cc0>>6;
+  return valid&&!water()&&!(cc0&7)&&(cc0&8)&&(pin==1||pin==2);
+ }
+ bool sourceCandidate() const {return vconnCandidate()&&(pd&0x80);}
+ unsigned power() const {return valid&&!water()?((cc0&7)?(cc0&7):sourceCandidate()?2u:0u):0;}
+ unsigned pollIntervalMs() const {
+  // A quiet detached port still samples within the Source->VBUS window.
+  return !valid?1000u:vconnCandidate()?50u:attached()?1000u:100u;
+ }
  bool attached() const {return power()==1 || power()==2;}
  int role() const {return attached()?((pd&0x80)?2:1):0;}
  int orientation() const {
@@ -23,8 +32,14 @@ struct Cable {
  // VBUS is an output while sourcing OTG. Its BC_STATUS feedback is not
  // a cable/role change; CC power/data/orientation/water remain significant.
  uint32_t signature() const {
-  return valid?0x80000000u|(cc0&0xc7u)|(uint32_t(cc1&2)<<8)|
+  return valid?0x80000000u|((cc0&0xc0u)|power())|(uint32_t(cc1&2)<<8)|
                      (uint32_t(pd&0x80)<<16):0;
+ }
+ // PR_Swap changes power without disconnecting the Alt Mode/data lanes.
+ // Orientation, water, data role and validity still invalidate the session.
+ uint32_t dpSessionSignature() const {
+  return valid?0x80000000u|(cc0&0xc0u)|(uint32_t(cc1&2u)<<8)|
+                     (uint32_t(pd&0x80u)<<16):0;
  }
 };
 template<class Io> bool readCable(Io &io,Cable &out){

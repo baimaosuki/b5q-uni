@@ -87,9 +87,12 @@ for entry in sargs:
 assert {'bluetooth','wifi','vsync-fixed','usb','offline-hid-input'}<=bkeys
 svalues={x.partition('=')[0]:x.partition('=')[2]for x in sargs};bvalues={x.partition('=')[0]:x.partition('=')[2]for x in bargs}
 value_changes={k:(svalues[k],bvalues[k])for k in svalues.keys()&bvalues.keys()if svalues[k]!=bvalues[k]}
-assert value_changes=={'touch':('4','1'),'vsync':('120','60')},value_changes
+assert value_changes=={'touch':('4','1'),'vsync':('120','60'),'debug':('0x14e','334'),'log-bluetooth':('3','2')},value_changes
 value_resolutions={'touch':'Samsung S3916A touch=1 selects IRQ GPIO-I2C; Xiaomi Novatek touch=4 prohibited.',
- 'vsync':'b5q validated60Hz GOP mode, explicit vsync-fixed=1; do not copy Xiaomi120Hz panel rate.'}
+ 'vsync':'b5q validated60Hz GOP mode, explicit vsync-fixed=1; do not copy Xiaomi120Hz panel rate.',
+ 'debug':'334 is numerically identical to0x14e and saves two command-line bytes for the requested Bluetooth diagnostic.',
+ 'log-bluetooth':'Owner-requested level2 runtime/IBS diagnostics; level3 full HCI buffering from sheng is intentionally not enabled.'}
+assert int(bvalues['debug'],0)==int(svalues['debug'],0)==0x14e
 component_omissions=sorted(set(sheng['os_overrides']['macos-27.3-26C5035r']['components']['include'])-set(ctx.board['components']['include']))
 component_resolutions={'ShengPreflight':'Forbidden Xiaomi fastboot/preflight; b5q validated physical ESP/UEFI.', 'ShengUfs':'Samsung B5qUfs/B5qDataBlock authenticated exact geometry; no Xiaomi storage policy.'}
 assert all(v in component_resolutions for v in component_omissions),component_omissions
@@ -97,7 +100,7 @@ sroot=read_fdt(subprocess.check_output(['dtc','-q','-I','dts','-O','dtb','-i',st
 broot=read_fdt(dtb.read_bytes());root_delta=sorted(set(n.name for n in sroot.children)-set(n.name for n in broot.children))
 assert not root_delta,root_delta
 policy=load(R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py');lists=policy.policies();assert all('com.apple.iconservices.iconservicesagent'not in v for v in lists.values())
-assert (len(lists['disabled.plist']),len(lists['disabled.501.plist']))==(58,25)
+assert (len(lists['disabled.plist']),len(lists['disabled.501.plist']))==(59,25)
 assert 'com.apple.watchdogd'in lists['disabled.plist']
 for banned in ['com.apple.WindowServer','com.apple.loginwindow','com.apple.Dock','com.apple.finder']:
  assert all(banned not in v for v in lists.values())
@@ -111,4 +114,4 @@ report=dict(passed=True,hardware_verified=False,memory_mappings=mappings,ADT_loo
  sheng_revision=subprocess.check_output(['git','-C',str(R/'sources/UniXNU-sheng'),'rev-parse','HEAD'],text=True).strip(),
  sheng_shared_value_changes={k:dict(sheng=v[0],b5q=v[1],resolution=value_resolutions[k])for k,v in value_changes.items()},adapted_MMIO_source=dict(path=str(legacy_unselected),sha256=hashlib.sha256(legacy_unselected.read_bytes()).hexdigest(),reason='Actual linked GMU register service uses explicit Inhibit through source adapter; actual returned map options checked'),source_sha256={str(p.relative_to(R)):hashlib.sha256(p.read_bytes()).hexdigest()for p in files},sheng_missing_args_resolved=missing,missing_root_nodes=root_delta,component_omissions={v:component_resolutions[v]for v in component_omissions},policy_counts={k:len(v)for k,v in lists.items()},iconservices_enabled=True,
  sheng_macOS_removes_ipad_launchd_environment=True,menu_args_bytes=lengths,scope='Actual compiled DTB and generated ADT, every board source map/fromPath/chosen inventory; selected component MMIO sources audited separately by target-object gates')
-a.out.write_text(json.dumps(report,indent=2)+'\n');print('PASS explicit cache/source scan, realDTB/ADT lookups, macOSshengdiff,iconservices58/25,allmenu1024Bbounds')
+a.out.write_text(json.dumps(report,indent=2)+'\n');print('PASS explicit cache/source scan, realDTB/ADT lookups, macOSshengdiff,iconservices-and-wallpaper-sshd59/25,allmenu1024Bbounds')

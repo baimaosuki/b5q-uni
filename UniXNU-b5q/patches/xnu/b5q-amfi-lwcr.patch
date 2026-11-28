@@ -1,0 +1,100 @@
+diff --git a/security/mac_base.c b/security/mac_base.c
+index 1edb7baf..510b4960 100644
+--- a/security/mac_base.c
++++ b/security/mac_base.c
+@@ -71,6 +71,7 @@
+ #include <stdarg.h>
+ #include <string.h>
+ #include <security/mac_internal.h>
++#include <libkern/OSAtomic.h>
+ #include <security/mac_mach_internal.h>
+ #include <sys/param.h>
+ #include <sys/vnode.h>
+@@ -94,6 +95,7 @@
+ #include <kern/sched_prim.h>
+ #include <kern/task.h>
+ 
++#include <pexpert/pexpert.h>
+ #if CONFIG_MACF
+ #include <security/mac.h>
+ #include <security/mac_policy.h>
+@@ -118,6 +120,68 @@
+ #define MB_DEBUG
+ #define DPRINTF(x)
+ #endif
+ 
++/* AMFI call 102 copies a 0x40-byte request. The 26C5035r AMFI binary reads
++ * the optional 0x404-byte error output at request offsets 0x30/0x38. */
++struct b5q_amfi_constraint_args {
++	uint8_t opaque[0x30];
++	user_addr_t error_out;
++	uint32_t error_out_size;
++	uint32_t reserved;
++};
++
++struct b5q_amfi_constraint_error {
++	int32_t error_code;
++	char message[1024];
++};
++
++_Static_assert(sizeof(struct b5q_amfi_constraint_args) == 0x40, "AMFI call 102 request ABI");
++_Static_assert(sizeof(struct b5q_amfi_constraint_error) == 0x404, "AMFI call 102 error ABI");
++
++static bool
++b5q_amfi_constraint_override(proc_t p, struct __mac_syscall_args *uap,
++    const char *target, int original_error)
++{
++	static volatile SInt32 logged;
++	struct b5q_amfi_constraint_args args;
++	struct b5q_amfi_constraint_error output = { 0 };
++	uint32_t enabled = 0;
++
++	if (uap->call != 102 || strcmp(target, "AMFI") != 0 ||
++	    !PE_parse_boot_argn("no-lc", &enabled, sizeof(enabled)) || enabled == 0 ||
++	    copyin(uap->arg, &args, sizeof(args)) != 0 || args.error_out == 0 ||
++	    args.error_out_size != sizeof(output)) {
++		return false;
++	}
++	int copy_err = copyin(args.error_out, &output.error_code, sizeof(output.error_code));
++	if (copy_err != 0) {
++		if (original_error == 0) {
++			return false;
++		}
++		output.error_code = -1;
++	}
++	if (original_error == 0 && output.error_code == 0) {
++		return false;
++	}
++	SInt32 slot = OSIncrementAtomic(&logged);
++	if (slot < 32) {
++		char name[MAXCOMLEN + 1] = { 0 };
++		int pid = proc_pid(p);
++		proc_name(pid, name, sizeof(name));
++		char message[49] = { 0 };
++		if (copyin(args.error_out + __builtin_offsetof(struct b5q_amfi_constraint_error, message),
++		    message, sizeof(message) - 1) != 0) {
++			bzero(message, sizeof(message));
++		}
++		for (unsigned i = 0; i < sizeof(message) - 1 && message[i]; i++) {
++			if ((unsigned char)message[i] < 0x20 || (unsigned char)message[i] > 0x7e) { message[i] = '.'; }
++		}
++		printf("B5qAMFI: call=102 pid=%d name=%s ret=%d error-code=%d override=1 msg=%.48s\n",
++		    pid, name, original_error, output.error_code, message);
++	}
++	bzero(&output, sizeof(output));
++	return copyout(&output, args.error_out, sizeof(output)) == 0;
++}
++
+ #if CONFIG_MACF
+ SYSCTL_NODE(, OID_AUTO, security, CTLFLAG_RW | CTLFLAG_LOCKED, 0,
+@@ -1613,7 +1677,10 @@ __mac_syscall(proc_t p, struct __mac_syscall_args *uap, int *retv __unused)
+ 		mac_policy_list_unbusy();
+ 	}
+ 
+ done:
++	if (b5q_amfi_constraint_override(p, uap, target, error)) {
++		error = 0;
++	}
+ 	return error;
+ }
+ 

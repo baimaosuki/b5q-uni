@@ -1,0 +1,241 @@
+--- a/NativeAdrenoMetalPlugin.mm
++++ b/NativeAdrenoMetalPlugin.mm
+@@ -261,7 +261,9 @@
+         }
+         if (!device && !lastError[0]) lastError = nmb_last_error();
+     }
+-    if (!device && !usable) {
++    // A path can pass access(W_OK) yet fail at openat/flock inside a sandbox.
++    // Retry once with an in-memory runtime cache after all disk attempts.
++    if (!device) {
+         setenv("METAL2VULKAN_SHADER_CACHE_OPTIONAL", "1", 1);
+         const char *path = candidates[0][0] ? candidates[0] : candidates[1][0] ? candidates[1] : "/var/mobile/tmp/m2v";
+         @try {
+--- a/NativeBridgeMetalFrontend.mm
++++ b/NativeBridgeMetalFrontend.mm
+@@ -1220,7 +1220,35 @@
+   armPurgeAge();
+  });
+ }
++// One sweep per idle episode for background clients. Removing our cache's
++// reference cannot free an import still retained by a texture or command.
++static std::atomic<uint64_t> gLastBackgroundSubmit{0},gLastBackgroundTrim{0};
++static void noteBackgroundSubmit() {gLastBackgroundSubmit.store(nowUs(),std::memory_order_release);}
++static bool backgroundIdleDue(uint64_t now,uint64_t submitted,uint64_t trimmed) {
++ return submitted && submitted!=trimmed && now>=submitted && now-submitted>=4000000;
++}
++static void watchBackgroundIdle() {
++ static dispatch_once_t once;static dispatch_source_t timer;
++ if(isRenderServer())return;
++ dispatch_once(&once,^{
++  noteBackgroundSubmit();
++  timer=dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER,0,0,dispatch_get_global_queue(QOS_CLASS_UTILITY,0));
++  if(!timer)return;
++  dispatch_source_set_timer(timer,dispatch_time(DISPATCH_TIME_NOW,4*NSEC_PER_SEC),NSEC_PER_SEC,250*NSEC_PER_MSEC);
++  dispatch_source_set_event_handler(timer,^{@autoreleasepool {
++   const uint64_t submitted=gLastBackgroundSubmit.load(std::memory_order_acquire);
++   if(!gDevice || !backgroundIdleDue(nowUs(),submitted,gLastBackgroundTrim.load(std::memory_order_relaxed)))return;
++   trimHeldImports(true);
++   native_bridge_metal_purge(1,4000);
++   // Upstream v2 retires freed blocks on its own 250ms clock.
++   (void)nmb_device_release_kept_memory(gDevice);
++   gLastBackgroundTrim.store(submitted,std::memory_order_relaxed);
++  }});
++  dispatch_activate(timer);
++ });
++}
+ static void watchImportPressure() {
++ watchBackgroundIdle();
+  static dispatch_once_t once;
+  // The source lives as long as the process: a source whose last reference goes is taken off its event queue, and this file's
+  // objects are reference counted by the compiler, so one held only by a local of the block below never delivered an event.
+@@ -3834,6 +3862,7 @@
+   const bool capture=appIndex && range.first && appIndex>=range.first && appIndex<(uint64_t)range.first+range.second;
+   if(capture && dumpAtPassEnd()){self.dumpAppIndex=appIndex;dumpReadback(self,appIndex);}
+   frontStage(traceNumber,self.commitIndex,6);
++  noteBackgroundSubmit();
+   if(nmb_command_buffer_on_completed(_handle,completed,context) &&
+      nmb_command_buffer_on_scheduled(_handle,scheduled,context) && nmb_command_buffer_commit(_handle)) {
+    frontStage(traceNumber,self.commitIndex,7);
+@@ -4660,15 +4689,15 @@
+ // MPSCore reads the GPU core count of every Apple GPU family (no count: no MPS device, and its image cache is nil); the Adreno's
+ // shader processors count as eight cores, which only sizes MPS's kernel choices.
+ - (NSUInteger)gpuCoreCount {return 8;}
+-// A texture over a buffer starts where a linear texture may: the texel-buffer alignment the runtime answers for the linear one.
++// Texture buffers have Vulkan texel-view offset alignment, distinct from a
++// linear image row that the runtime can copy. Preserve the exact device query.
+ - (NSUInteger)minimumTextureBufferAlignmentForPixelFormat:(NSUInteger)format {
+- return ((NSUInteger (*)(id,SEL,NSUInteger))objc_msgSend)(self,sel_registerName("minimumLinearTextureAlignmentForPixelFormat:"),format);
+-}
+-// SPI: the row alignment a read-only texture over an IOSurface needs. Answered unasked it was 0 (a divisor for its callers); the linear
+-// texture alignment of the widest common format is the same rule this GPU applies to any linear image.
+-- (NSUInteger)iosurfaceReadOnlyTextureAlignmentBytes {
+- return ((NSUInteger (*)(id,SEL,NSUInteger))objc_msgSend)(self,sel_registerName("minimumLinearTextureAlignmentForPixelFormat:"),MTLPixelFormatRGBA16Float);
+-}
++ uint64_t alignment=0;
++ return nmb_device_answer(gDevice,"minimumTextureBufferAlignmentForPixelFormat:",format,&alignment)?alignment:0;
++}
++// IOSurface rows are byte aligned; the bridge's copy path handles layouts that
++// cannot be used as a zero-copy Vulkan image. Do not inflate this by texel size.
++- (NSUInteger)iosurfaceReadOnlyTextureAlignmentBytes {return 64;}
+ - (uint64_t)registryID {return gRegistryID;}
+ - (NSUInteger)maxBufferLength {return nmb_device_max_buffer_length(gDevice);}
+ - (BOOL)hasUnifiedMemory {return YES;}
+@@ -4730,10 +4759,11 @@
+ }
+ - (NSUInteger)currentAllocatedSize {return nmb_device_current_allocated_size(gDevice);}
+ - (NSUInteger)recommendedMaxWorkingSetSize {
+- // A process's cache budget is a quarter of the RAM exposed by the selected board.
++ // This is a cache recommendation, never a permission to discard live resources.
++ const uint64_t cap=isRenderServer()?(768ull<<20):(256ull<<20);
+  uint64_t bytes=0;size_t size=sizeof bytes;
+- if(sysctlbyname("hw.memsize",&bytes,&size,nullptr,0))return 256ull<<20;
+- return (NSUInteger)std::min<uint64_t>(bytes/4,2ull<<30);
++ if(sysctlbyname("hw.memsize",&bytes,&size,nullptr,0))return (NSUInteger)cap;
++ return (NSUInteger)std::min<uint64_t>(bytes/4,cap);
+ }
+ - (id<MTLCommandQueue>)newCommandQueue {
+  NmbQueue *handle=nmb_queue_new(gDevice);if(!handle)return nil;
+--- a/bridge/NativeMetalBridge.rs
++++ b/bridge/NativeMetalBridge.rs
+@@ -157,8 +157,9 @@
+         let mut options = DeviceOptions::default();
+         let runtime_cache = PathBuf::from(cache.to_str().map_err(|e| format!("cache path: {e}"))?).join(crate::archive::runtime_namespace());
+         let registry = crate::archive::Registry::new(runtime_cache.clone());
+-        registry.seed_driver_blobs();
+-        options.pipeline_cache_dir = Some(runtime_cache);
++        let optional = std::env::var_os("METAL2VULKAN_SHADER_CACHE_OPTIONAL").is_some_and(|v| v == "1");
++        if !optional { registry.seed_driver_blobs(); }
++        options.pipeline_cache_dir = if optional { None } else { Some(runtime_cache) };
+         match Device::new(&physical, options) {
+             Ok(device) => {
+                 // This frontend owns the full resource-ID namespace of its device.
+--- a/bridge/NativeMetalCapabilities.rs
++++ b/bridge/NativeMetalCapabilities.rs
+@@ -60,6 +60,19 @@
+     "supportsTileShaders",
+ ];
+
++// The runtime's value describes zero-copy Vulkan image placement. Its texture-
++// over-buffer path also accepts byte-addressable rows via a copy when placement
++// differs. Report the Metal frontend's 64-byte contract, retaining format checks.
++pub(crate) fn linear_alignment(device: &Device, format: PixelFormat) -> Result<u64, String> {
++    let direct = device.minimum_linear_texture_alignment(format)
++        .map_err(|e| format!("linear alignment: {e:?}"))?;
++    let texel = device.pixel_format_info(format.as_raw() as u64).words[0] as u64;
++    Ok(frontend_alignment(direct, texel))
++}
++fn frontend_alignment(direct: u64, texel: u64) -> u64 {
++    if texel != 0 && 64 % texel == 0 { 64 } else { direct }
++}
++
+ pub fn answer(device: &Device, selector: &str, arg: u64) -> Result<u64, String> {
+     let translator = device.translator();
+     let p = translator.metal_properties();
+@@ -80,27 +93,16 @@
+             .min(l.max_fragment_output_attachments)
+             .min(8) as u64,
+         "minConstantBufferAlignmentBytes" => 4,
+-        "minimumLinearTextureAlignmentForPixelFormat:" => device
+-            .minimum_linear_texture_alignment(
+-                PixelFormat::try_from(narrow(arg)?).map_err(|_| "invalid pixel format")?,
+-            )
+-            .map_err(|e| format!("linear alignment: {e:?}"))?,
++        "minimumTextureBufferAlignmentForPixelFormat:" => device.minimum_texture_buffer_alignment(
++            PixelFormat::try_from(narrow(arg)?).map_err(|_| "invalid pixel format")?)
++            .map_err(|e| format!("texture buffer alignment: {e:?}"))?,
++        "minimumLinearTextureAlignmentForPixelFormat:" => linear_alignment(device,
++            PixelFormat::try_from(narrow(arg)?).map_err(|_| "invalid pixel format")?)?,
+         "deviceLinearReadOnlyTextureAlignmentBytes"
+         | "deviceLinearTextureAlignmentBytes"
+         | "linearTextureAlignmentBytes"
+         | "iosurfaceTextureAlignmentBytes"
+-        | "iosurfaceReadOnlyTextureAlignmentBytes" => [
+-            PixelFormat::BGRA8Unorm,
+-            PixelFormat::RGBA8Unorm,
+-            PixelFormat::RGBA16Float,
+-        ]
+-        .into_iter()
+-        .try_fold(16, |a, pf| {
+-            device
+-                .minimum_linear_texture_alignment(pf)
+-                .map(|b| a.max(b))
+-                .map_err(|e| format!("linear alignment: {e:?}"))
+-        })?,
++        | "iosurfaceReadOnlyTextureAlignmentBytes" => 64,
+         "maxVertexBuffers"
+         | "maxFragmentBuffers"
+         | "maxComputeBuffers"
+@@ -196,6 +198,15 @@
+     use super::*;
+
+     #[test]
++    fn byte_rows_are_not_widened_by_rgba16float() {
++        for (direct, texel) in [(256, 4), (64, 1), (512, 8)] {
++            assert_eq!(frontend_alignment(direct, texel), 64);
++            for row in [10624, 5696, 4160, 192, 64] { assert_eq!(row % frontend_alignment(direct, texel), 0); }
++        }
++        assert_eq!(frontend_alignment(128, 0), 128);
++        assert_eq!(frontend_alignment(192, 12), 192);
++    }
++    #[test]
+     fn every_registered_selector_has_a_match_arm_in_answer() {
+         let source = include_str!("NativeMetalCapabilities.rs");
+         let answer_body = source
+--- a/bridge/NativeMetalObjects.rs
++++ b/bridge/NativeMetalObjects.rs
+@@ -550,7 +550,10 @@
+ pub extern "C" fn nmb_device_release_kept_memory(device: *const NmbDevice) -> usize {
+     guard(0, || {
+         get(device)?;
+-        Err("runtime-v2 frees idle allocations on its own 250 ms clock; no synchronous trim API".into())
++        // No synchronous v2 trim API: released objects are retired by its own
++        // 250ms clock. Return zero blocks, without inventing freed bytes or
++        // overwriting the caller's last diagnostic with an unsupported error.
++        Ok(0)
+     })
+ }
+
+@@ -800,9 +803,8 @@
+ pub extern "C" fn nmb_device_linear_bytes_per_row(device: *const NmbDevice, format: u64, width: u64) -> u64 {
+     guard(0, || {
+         let d = &get(device)?.0;
+-        let alignment = d
+-            .minimum_linear_texture_alignment(raw::<PixelFormat>(format, "pixel format")?)
+-            .map_err(e("linear texture"))?;
++        let alignment = crate::capabilities::linear_alignment(d,
++            raw::<PixelFormat>(format, "pixel format")?)?;
+         let info = d.pixel_format_info(format);
+         // Flags bit 0x400: a format of blocks, which the alignment query has refused already.
+         if info.flags & 0x400 != 0 || info.words[0] == 0 {
+--- a/bridge/NativeMetalPurge.rs
++++ b/bridge/NativeMetalPurge.rs
+@@ -7,6 +7,8 @@
+ //! Pressure signals discard eligible resources immediately. Age sweeps use the runtime's
+ //! 250 ms idle clock. A discarded resource answers Empty, including after its recreation.
+ //! `NATIVE_METAL_PURGE=0` retains resource state without discarding allocations.
++//! The frontend also requests an Age sweep after four seconds without a commit;
++//! this never changes NonVolatile state or releases held, tied or pinned memory.
+
+ use metal2vulkan_runtime::Device;
+ use crate::texture::{Texture, TextureDescriptor};
+@@ -150,6 +152,10 @@
+     }
+ }
+
++fn idle_enough(now: Instant, since: Instant, idle: Duration) -> bool {
++    now.saturating_duration_since(since) >= idle
++}
++
+ /// Why a sweep left a Volatile or Empty resource.
+ #[derive(Clone, Copy, PartialEq, Eq)]
+ enum Left {
+@@ -405,7 +411,7 @@
+         }
+         if cause == Cause::Age {
+             let idle_since = self.purge.start + Duration::from_millis(self.idle_ms.load(SeqCst));
+-            if now.saturating_duration_since(slot.since.max(idle_since)) < idle {
++            if !idle_enough(now, slot.since.max(idle_since), idle) {
+                 return Swept::Left(Left::Young, self.bytes);
+             }
+         }

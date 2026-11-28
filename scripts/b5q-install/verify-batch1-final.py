@@ -155,7 +155,7 @@ def main():
             assert policy_bytes.startswith(b"bplist00")
             overrides = plistlib.loads(policy_bytes)
             policy_readback[prefix+"/"+name] = dict(stats[prefix+"/"+name], format="bplist00", contents=overrides)
-            assert overrides == dict.fromkeys(labels, True)
+            assert overrides == (dict(labels) if isinstance(labels,dict) else dict.fromkeys(labels,True))
         assert (extracted / prefix / "disabled.migrated").stat().st_size == 0
         (a.out / "disabled-plists-readback.json").write_text(json.dumps(policy_readback,indent=2)+"\n")
 

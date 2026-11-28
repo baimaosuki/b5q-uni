@@ -1,14 +1,42 @@
 #!/usr/bin/env python3
 """Stage the original macOS Bluetooth runtime with Samsung WCN6855 firmware."""
-import argparse,hashlib,json,os,subprocess,sys
+import argparse,hashlib,json,os,plistlib,re,subprocess,sys
 from pathlib import Path
 from b5q_wcn_firmware import stage
+from b5q_codesign import set_platform
+from b5q_bt_le_mask import patch_macos27_bluetoothd_file
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);p.add_argument('target',choices=['macos27']);p.add_argument('--os-root',type=Path,required=True);p.add_argument('--component',type=Path,required=True);a=p.parse_args()
 out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
 subprocess.run([sys.executable,str(a.component/'tools/build-userland.py'),str(out/'userland'),
     '--bluetoothd',str(a.os_root/'usr/sbin/bluetoothd'),'--os',a.target],check=True)
 firmware=stage('bluetooth',out/'firmware/qca')
 report=json.loads((out/'userland/report.json').read_text())
+daemon=out/'userland/bin/bluetoothd'
+def entitlement_value(path):
+    data=subprocess.run(['codesign','--display','--entitlements',':-',str(path)],check=True,capture_output=True).stdout
+    return plistlib.loads(data)
+def identity(path):
+    detail=subprocess.run(['codesign','--display','--verbose=4',str(path)],check=True,capture_output=True,text=True).stderr
+    found=re.search(r'^Identifier=(.+)$',detail,re.M)
+    if not found:raise ValueError('bluetoothd identifier is absent')
+    return found[1]
+baseline_entitlements=entitlement_value(daemon)
+baseline_identifier=identity(daemon)
+le_mask_report=patch_macos27_bluetoothd_file(daemon)
+subprocess.run(['codesign','--force','--sign','-','--pagesize','4096',
+    '--preserve-metadata=identifier,entitlements,flags',str(daemon)],check=True)
+if identity(daemon)!=baseline_identifier or entitlement_value(daemon)!=baseline_entitlements:
+    raise ValueError('bluetoothd identifier or entitlements changed after LE event mask resign')
+platform=set_platform(daemon,27)
+subprocess.run(['codesign','--verify','--strict',str(daemon)],check=True)
+detail=subprocess.run(['codesign','--display','--verbose=4',str(daemon)],check=True,capture_output=True,text=True).stderr
+actual=re.search(r'^CDHash=([0-9a-f]{40})$',detail,re.M)
+if not actual or actual[1] not in platform['cdhashes']:raise ValueError('codesign reported a different patched bluetoothd CDHash')
+report['files']['bin/bluetoothd'].update(cdhash=actual[1],sha256=hashlib.sha256(daemon.read_bytes()).hexdigest(),bytes=daemon.stat().st_size,
+    code_directory_platform=27,code_pages_valid=platform['page_hashes_valid'])
+report['bluetoothd_code_directory']=platform
+report['b5q_le_event_mask_patch']=le_mask_report
+(out/'userland/report.json').write_text(json.dumps(report,indent=2)+'\n')
 marker=dict(native_input_sha256=report['native_input_sha256'],files={n:v['sha256']for n,v in report['files'].items()})
 (out/'userland/bin/QcaBluetooth.runtime').write_text(json.dumps(marker,sort_keys=True)+'\n')
 report['directories']={'sbin':'userland/bin','lib':'userland/lib','firmware/qca':'firmware/qca'}

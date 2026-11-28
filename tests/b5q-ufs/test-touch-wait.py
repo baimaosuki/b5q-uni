@@ -30,6 +30,7 @@ bool lowAttention(){return attention;}
 void clear_wait(void *,int why){assert(why==1);cleared++;}
 int thread_block(int continuation){assert(!continuation);blocked++;now+=40;if(inject==3)irqEvents++;if(inject==4)attention=true;return wakeResult;}
 template<class...A>void IOLog(const char*,A...){logs++;}
+static unsigned b5q_display_rotation(){return 0;} // report timeout/click behavior is independent of display policy
 PUBLISH
 WAIT
 int main(){

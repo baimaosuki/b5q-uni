@@ -1,0 +1,83 @@
+diff --git a/NativeBridgeMetalFrontend.mm b/NativeBridgeMetalFrontend.mm
+--- a/NativeBridgeMetalFrontend.mm
++++ b/NativeBridgeMetalFrontend.mm
+@@ -32,6 +32,9 @@
+ #include <sys/mman.h>
+ #include <CommonCrypto/CommonDigest.h>
+ #include <dlfcn.h>
++#if __has_feature(ptrauth_calls)
++#include <ptrauth.h>
++#endif
+ #include <mach-o/dyld.h>
+ #include <mach-o/getsect.h>
+ #include <mach-o/loader.h>
+@@ -5237,11 +5240,57 @@
+ }
+ static NSUInteger countArgAnswer(id,SEL cmd,NSUInteger arg) {return (NSUInteger)askAnswer(cmd,arg);}
+ static BOOL flagArgAnswer(id,SEL cmd,NSUInteger arg) {return askAnswer(cmd,arg)!=0;}
++// dyld invokes add-image callbacks for existing images and later loads.
++// Publish one immutable __TEXT interval: no allocation, loader scan or dladdr
++// on the supportsFamily hot path. System RenderBox remains loaded for life.
++static std::atomic<uintptr_t> gRenderBoxLo{0},gRenderBoxHi{0};
++static std::atomic_flag gRenderBoxClaim=ATOMIC_FLAG_INIT;
++static void renderBoxAdded(const struct mach_header *header,intptr_t slide) {
++ if(!header || header->magic!=MH_MAGIC_64 || gRenderBoxHi.load(std::memory_order_acquire))return;
++ const auto *mh=reinterpret_cast<const mach_header_64 *>(header);
++ const uint8_t *commands=reinterpret_cast<const uint8_t *>(mh+1);
++ const uint8_t *end=commands+mh->sizeofcmds,*at=commands;
++ bool renderBox=false;uint64_t vm=0,bytes=0;
++ for(uint32_t i=0;i<mh->ncmds;i++) {
++  if(size_t(end-at)<sizeof(load_command))return;
++  const auto *cmd=reinterpret_cast<const load_command *>(at);
++  if(cmd->cmdsize<sizeof(load_command) || cmd->cmdsize>size_t(end-at))return;
++  if(cmd->cmd==LC_ID_DYLIB && cmd->cmdsize>=sizeof(dylib_command)) {
++   const auto *lib=reinterpret_cast<const dylib_command *>(at);
++   const unsigned off=lib->dylib.name.offset;
++   if(off<sizeof(dylib_command) || off>=cmd->cmdsize)return;
++   const char *name=reinterpret_cast<const char *>(at+off);
++   if(!memchr(name,0,cmd->cmdsize-off))return;
++   renderBox=strstr(name,"/RenderBox.framework/")!=nullptr;
++  }
++  if(cmd->cmd==LC_SEGMENT_64 && cmd->cmdsize>=sizeof(segment_command_64)) {
++   const auto *seg=reinterpret_cast<const segment_command_64 *>(at);
++   if(!strncmp(seg->segname,"__TEXT",sizeof(seg->segname))){vm=seg->vmaddr;bytes=seg->vmsize;}
++  }
++  at+=cmd->cmdsize;
++ }
++ if(!renderBox || !bytes)return;
++ const uint64_t positive=slide>=0?uint64_t(slide):uint64_t(-(slide+1))+1;
++ if((slide>=0 && vm>UINTPTR_MAX-positive) || (slide<0 && vm<positive))return;
++ const uintptr_t lo=slide>=0?uintptr_t(vm+positive):uintptr_t(vm-positive);
++ if(!lo || bytes>UINTPTR_MAX-lo)return;
++ if(gRenderBoxClaim.test_and_set(std::memory_order_acquire))return;
++ gRenderBoxLo.store(lo,std::memory_order_relaxed);
++ gRenderBoxHi.store(lo+bytes,std::memory_order_release);
++}
+ static BOOL (*gFamilyAnswer)(id,SEL,NSInteger);
+ static BOOL familyForCaller(id self,SEL _cmd,NSInteger family) {
+- if(family>=1003 && family<2000) {   // MTLGPUFamilyApple3 and up
+-  Dl_info caller;
+-  if(dladdr(__builtin_return_address(0),&caller) && caller.dli_fname && strstr(caller.dli_fname,"/RenderBox.framework/"))return NO;
++ if(family>=1003 && family<2000) {
++  const uintptr_t hi=gRenderBoxHi.load(std::memory_order_acquire);
++  if(hi) {
++   const uintptr_t lo=gRenderBoxLo.load(std::memory_order_relaxed);
++   void *address=__builtin_return_address(0);
++#if __has_feature(ptrauth_calls)
++   address=ptrauth_strip(address,ptrauth_key_return_address);
++#endif
++   const uintptr_t pc=reinterpret_cast<uintptr_t>(address);
++   if(pc>=lo && pc<hi)return NO;
++  }
+  }
+  return gFamilyAnswer(self,_cmd,family);
+ }
+@@ -5323,6 +5370,8 @@
+  }
+  if(Method family=class_getInstanceMethod(cls,@selector(supportsFamily:))) {
+   gFamilyAnswer=(BOOL (*)(id,SEL,NSInteger))method_getImplementation(family);
++  static dispatch_once_t familyImages;
++  dispatch_once(&familyImages,^{_dyld_register_func_for_add_image(renderBoxAdded);});
+   method_setImplementation(family,(IMP)familyForCaller);
+  }
+ }

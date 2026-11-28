@@ -51,6 +51,12 @@ body=base+r'''
 #include "B5qMax77705.h"
 #include "B5qDpPdic.h"
 #include "B5qDpPort.h"
+#include "B5qUsbHostRole.h"
+void *gHost=(void*)1;void *gHostNub=(void*)1;
+struct{uint32_t *va=nullptr;}gXhciRegs,gGlobals;
+constexpr uint32_t kUsb3SuspendPhy=1u<<17;void barrier(){}
+B5qMax77705::Cable gAppliedCable;
+int gAppliedOrientation=-1;
 uint64_t ticks=0;unsigned polls=0,leaves=0,otgOff=0;bool otg=true;uint8_t cc=0x4a,cc1=1,bc=0;
 struct Bus {void *lock=nullptr;uint8_t opcode=0;
  bool read(uint8_t,uint8_t reg,uint8_t &v){v=reg==0xa?cc:reg==0xb?cc1:reg==0xd?0x87:reg==8?bc:0;return true;}
@@ -60,10 +66,10 @@ struct Bus {void *lock=nullptr;uint8_t opcode=0;
 bool openMaxim(){return true;}void IOLockLock(void*){}void IOLockUnlock(void*){}
 void IODelay(unsigned us){ticks+=us;}void IOSleep(unsigned ms){ticks+=ms*1000;}
 uint64_t mach_absolute_time(){return ticks*1000;}void absolutetime_to_nanoseconds(uint64_t n,uint64_t *out){*out=n;}
-#define IOLog(...) ((void)0)
+template<class... T>void IOLog(const char*,T...){ }
 HELPERS
 POLL
-const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1;
+const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1,kMillisecondScale=1000;
 constexpr unsigned kXhciRegisterBytes=0x8000;
 int gRoleWanted=2,gRoleApplied=2,gCoreRole=2;uint32_t gCableWanted=0,gCableApplied=0,gDpLanes=0;
 void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=true,gPhyResetPending=false;uint32_t native_usb_stats[54]={};
@@ -77,9 +83,12 @@ bool qmpInit(bool){return true;}void selectUtmiClock(){}void retryDevicePower(){
 void clock_interval_to_deadline(unsigned,unsigned,uint64_t *p){*p=0;}
 void IOLockSleepDeadline(void*,void*,uint64_t,int){if(++polls>15)throw 1;ticks+=1000000;}
 using wait_result_t=int;
+void *current_thread(){return nullptr;}
+void thread_set_thread_name(void*,const char*){}
+void configureHostPorts(void*){}unsigned hostPortHoldCount(){return 2;}
 ROLE
 int main(){
- B5qMax77705::Cable before;assert(b5q_usb_cable_state(&before));gCableApplied=gCableWanted=before.signature();
+ B5qMax77705::Cable before;assert(b5q_usb_cable_state(&before));gCableApplied=gCableWanted=before.signature();gAppliedCable=before;gAppliedOrientation=before.orientation();
  b5q_usb_otg(true);B5qMax77705::Cable after;assert(b5q_usb_cable_state(&after));assert(before.signature()==after.signature());
  try{roleThread(nullptr,0);}catch(int){}
  assert(otg&&otgOff==0&&leaves==0&&dpAlt.generation==0&&dpFailed&&polls==16);
@@ -147,4 +156,5 @@ assert stop.index('runAction(&NativeHidInput::stopAction')<stop.index('removeEve
 # The production diagnostic must use the same32KiB register mapping as xHCI.
 assert 'mapRegion(gXhciRegs,kCore,kXhciRegisterBytes)'in q.replace(' ','')
 assert 'constexpr unsigned kXhciRegisterBytes=0x8000;'in q
-assert 'rt+0x40/4<kXhciRegisterBytes/4'in q
+assert 'B5qUsbHostEvent::interrupter(rt,irIndex,kXhciRegisterBytes,' in q
+assert 'runtime>windowBytes-(0x40u+index*0x20u)' in (P/'B5qUsbHostEvent.h').read_text()

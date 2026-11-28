@@ -6,7 +6,7 @@ from b5q_audio import prepare_hal
 from b5q_wireless import checkout
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('output',type=Path);p.add_argument('target',choices=['macos27']);a=p.parse_args()
 out=a.output.resolve();out.mkdir(parents=True,exist_ok=True)
-tree=Path(os.environ.get('UNIXNU_TREE',Path.cwd()));reference=checkout(tree,'UniXNU-sheng','https://github.com/UniXNU/UniXNU-sheng.git','6c42e1055ffb3b335fda991190ad221edaa7af3c')
+tree=Path(os.environ.get('UNIXNU_TREE',Path.cwd()));reference=checkout(tree,'UniXNU-sheng','https://github.com/UniXNU/UniXNU-sheng.git','c8f92b208068eeaa4cd2b0f592671f04ee70076e')
 source,info,include=prepare_hal(reference,out/'source')
 sdk=subprocess.check_output(['xcrun','--sdk','macosx','--show-sdk-path'],text=True).strip()
 bundle=out/'B5qAudio.driver';shutil.rmtree(bundle,ignore_errors=True);contents=bundle/'Contents';(contents/'MacOS').mkdir(parents=True)

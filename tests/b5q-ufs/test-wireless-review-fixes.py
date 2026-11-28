@@ -59,7 +59,7 @@ int main(){
 }
 '''
 harness=harness.replace('FUNCTIONS','\n'.join(function(usb,n)for n in ['void selectUtmiClock()','void selectPipeClock()','bool qmpInit(bool reverse)']))
-start=wifi.index('                    uint64_t deadline;clock_interval_to_deadline');end=wifi.index('\n                }',start)
+start=wifi.index('                uint64_t deadline;clock_interval_to_deadline');end=wifi.index('\n                slice=nowNs();',start)
 harness=harness.replace('WAIT',wifi[start:end])
 assert '~Window(){OSSafeReleaseNULL(mapping);}'in wifi
 with tempfile.TemporaryDirectory(prefix='b5q-review-fixes-')as td:

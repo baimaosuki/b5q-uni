@@ -2,9 +2,18 @@
 """Compile shared SM8550 operations with generated Samsung b5q inputs."""
 import hashlib,json,subprocess,os,shutil
 from b5q_compile import ROOT,compile,archive,report
+from b5q_adreno_mmio import source_identity
 from pathlib import Path
 out=ROOT/'build/adreno740';out.mkdir(parents=True,exist_ok=True)
 reuse=os.environ.get('B5Q_REUSE_ADRENO')
+if reuse:
+ # A catalog/source update invalidates the old archive even when its ABI
+ # happens to match. Only identical upstream translation units are reusable.
+ receipt=Path(reuse).with_suffix('.json')
+ identity=json.loads(receipt.read_text()) if receipt.is_file() else {}
+ if identity.get('upstream_tree_sha256')!=source_identity(ROOT) or identity.get('archive_sha256')!=hashlib.sha256(Path(reuse).read_bytes()).hexdigest():
+  print('Adreno upstream source identity changed; rebuilding the source-selected archive')
+  reuse=None
 if reuse:
  # The pinned completed archive and its inputs are qualified locally before
  # submission. This is archive reuse, not a claim that it was recompiled.
@@ -39,6 +48,8 @@ if reuse:
      board_source_sha256=hashlib.sha256(board.read_bytes()).hexdigest(),
      source_archive_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),members_before=before,members_after=after),indent=2)+'\n')
  (out/'reuse.json').write_text(json.dumps({'archive_sha256':hashlib.sha256(path.read_bytes()).hexdigest(),'source_archive_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'recompiled_members':rebuilt,'board_source_sha256':hashlib.sha256(board.read_bytes()).hexdigest(),'members_before':before,'members_after':after,'other_members_unchanged':True},indent=2)+'\n')
+ identity['archive_sha256']=hashlib.sha256(path.read_bytes()).hexdigest()
+ path.with_suffix('.json').write_text(json.dumps(identity,indent=2)+'\n')
  print('Reused qualified Adreno archive; current B5qGpu and register-map helper recompiled')
  raise SystemExit(0)
 # These are shared SoC protocol types, not Xiaomi power votes or physical reservations.
@@ -70,5 +81,5 @@ objects=[compile(p,out/(p.stem+('.kit.o' if p.suffix=='.c' else '.o')),includes,
 path=archive(out/'libAdreno740.a',objects)
 # The original macOS IOAccelerator ABI is bound by the shared audited builder.
 subprocess.run(['python3',str(ROOT/'scripts/build-adreno740-accelerator.py')],check=True)
-report(path,objects,sources,dict(board_power_votes='Samsung common OPP intersection',signed_firmware_embedded=False,firmware_input='validated original Samsung ADT properties',accelerator_abi='shared audited macOS binder'))
+report(path,objects,sources,dict(upstream_tree_sha256=source_identity(ROOT),board_power_votes='Samsung common OPP intersection',signed_firmware_embedded=False,firmware_input='validated original Samsung ADT properties',accelerator_abi='shared audited macOS binder'))
 print('Built shared SM8550 GMU/HFI/SMMU/command-db and b5q platform archive')

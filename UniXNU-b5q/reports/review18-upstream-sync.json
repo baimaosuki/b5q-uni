@@ -1,0 +1,180 @@
+{
+  "status": "STAGE_A_BASELINE_PASS",
+  "repos": [
+    {
+      "repo": "UniXNU",
+      "old_sha": "563595abedfdfa413ad583b66b6176d82007e633",
+      "new_sha": "e7bddb9a7eecdcf81f36da9fa38bd9d4d3f155c2",
+      "upstream_commits": [
+        "e7bddb9a7eecdcf81f36da9fa38bd9d4d3f155c2 UniXNULib: Fix oc-like footer spacing and status layout bounds",
+        "42e7d56b10cfe138b824a28dbc4626d7c68b1ea0 UniXNULib: Remove inner shadows from oc-like wordmark",
+        "3471aa3e8fbab493c34d7aca233d4087ec774458 Docs: Document boot_menu_theme option and [ui] theme field",
+        "3dccc672f115911f5291739801f6c23a3466bc45 unixnu: Add boot_menu_theme build option for EFI/UniXNU/unixnu.toml",
+        "cc8ecb8e5c6865ded9ee55a82c2a0b5039e70de3 UniXNULib: Add selectable oc-like boot menu theme",
+        "b04f131da9151182dbb26ce4e638fa8acc2933ac Adreno740: Pin null address-space map-failure fix",
+        "241dadcdfd913d5b20f09d59eb9eaad1f0c8510d fix(build): Reject mixed Adreno kernel and runtime ABIs",
+        "7b9702288772d5f6d33c8e169ba6137f368c4048 Docs: Update AdrenoMetal runtime and kernel GPU diagnostic documentation",
+        "fce0acbef47d4978e27b8a4c6ee9d62da24281e2 Metal: Pin AdrenoMetal and Adreno740 revisions for UniXNU/metal2vulkan",
+        "d73e814c463ce3055e596b1e476fda87cd53db0f Build: Wire rewritten metal2vulkan runtime checks and fork pin",
+        "2fb08828e6dcc0d1a5ac95dae74bc5cea7f61a7e Turnip: Connect native runtime capabilities and interrupt-backed timeline waits",
+        "8542980d02b4d2cc5c32ee3542de1760b2562aac docs: refresh device records",
+        "519d80242a5028ee123447b01bc3b809baed565f docs: refresh device records"
+      ],
+      "preserved_local_files": [
+        "package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.c",
+        "package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf",
+        "package/UniXNUPkg/UniXNUPkg.dsc",
+        "scripts/seal-source-crypto-kernel.py",
+        "scripts/unixnu/payload.py"
+      ],
+      "source_diff_sha256": "925853d04b9d10427f1f30c374baadc79a0d2bee23cac86924388eaffc2d21ed"
+    },
+    {
+      "repo": "sources/UniXNU-sheng",
+      "old_sha": "6c42e1055ffb3b335fda991190ad221edaa7af3c",
+      "new_sha": "c8f92b208068eeaa4cd2b0f592671f04ee70076e",
+      "upstream_commits": [
+        "c8f92b208068eeaa4cd2b0f592671f04ee70076e fix(touch): include the recorded Novatek validation",
+        "7f269ce619b38706e07f7ff863b1a3babdb0f727 docs(touch): record thermal drift validation",
+        "57f9428f8825bfc882552f863f8e8e1839cd7226 fix(touch): select the drift-corrected Novatek driver"
+      ],
+      "preserved_local_files": [],
+      "source_diff_sha256": "65d1e1def5588a49a46876b7d5f260a5ae5f4a95167d1862fce576eee0aa24cd"
+    },
+    {
+      "repo": "UniXNU/drivers/Adreno740",
+      "old_sha": "1c9029bc3216a39d9e514ba41dee12e95e8f3598",
+      "new_sha": "2962e289c9690aeb668072c170679e6fb28bf8de",
+      "upstream_commits": [
+        "2962e289c9690aeb668072c170679e6fb28bf8de fix(client): a failed map on a connection without an address space no longer panics",
+        "7972a72dcf87a529b472c2556c0cc2d14b78e4eb Merge pull request #30 from CrossDarwin/diagnostics/retained-submit-failures",
+        "0e810388bca8e7b30f7f1b5fb9e148043a61a7ee feat(diag): Retain rejected submissions and pre-recovery GPU state",
+        "be70fb13ed19d5fdf139d27977da6f54078cf50a perf(runtime): merge pull request #29: integrate Adreno740 runtime changes",
+        "a8e41eeeb04e3b0a5c938973e48f34656552404f perf(runtime): integrate qualified Adreno740 runtime changes",
+        "7e8d2482c7fc0f79f0bee4013807679781f419f6 feat(diag): retain the hung CP snapshot and locate fault address candidates",
+        "88241faf6a615b9bf170d24a968d3f94de3d673c fix(recovery): a GPU access fault no longer fails other address spaces",
+        "4afa9552d4ad8241ac613c4bb48ecaaf2e701327 fix(recovery): keep the GPU usable after one process's address space fails",
+        "4aeb7b97833d0e8da593db36a7f8a31033678cc8 fix(submit): blame no job for a ring switch the CP never finished",
+        "87371ec5016d80f27bb7bdd83e6ba4ff427a3956 fix(submit): count the BV thread's progress as GPU progress",
+        "a7219e63b0f5f13a092fdad5f84768d66bdf5e6a fix(submit): leave a working GPU alone in the stall handler",
+        "8e90985cbe39e7dafdf5d020bb3e5109d4673484 feat(vm): record the mapping a failed map met",
+        "c5140fa9df01385ca9362bff74e4ff56a809d8ec feat(submit): keep the CP state of a ring switch that never finished",
+        "3fd449673f41f23f85d83505e2744468bfdec0b5 feat(memory): treat memory the kernel adopted outside its range as kernel memory",
+        "5501b25fa3f87fb9d1b5674d5ffd170b0457c6c3 feat(pool): return a viewed grant's pages once the kernel reports no mapping is left",
+        "93adbc1d312ecbabbb3356affe56738ba6184b0b perf(submit): run the line audits only with gpu-audit=1 and time every job",
+        "4799715c6d43690613be7ed914a8cfdd77846e84 fix(memory): keep the pool's zero fill out of the driver's lock",
+        "2ba96a33ea0282758e1ca05d801103a36218fe45 fix(pool): map a pool run only while it is zero-filled",
+        "9183a9fb4ac19d0e33d9635476c7c159bf1c1be8 feat(memory): take write-combined system BOs from a pool of DRAM outside the kernel's",
+        "eb73e65d0933b3fb7d1112ee10b1fc97479b7e36 fix(priority): give a GPU-denied task the background priority",
+        "5eb625fbb2394f34204e0b11eaadcbf8a7f09240 perf(maintenance): leave the driver's synchronized buffers out of the per-submission cache passes",
+        "3a7319731bfb13d716d730df4c73b24e0a76a02e perf(mailbox): poll only while the mailbox page is mapped",
+        "68b9dabb92b02479a54b29a180c79d1301373134 docs: describe fence waits and the memory counters",
+        "fb190cb271cd3f3900c17f0e6d5ae965b4cc0352 fix(wait): wake fence waiters from the completion pass",
+        "27ed8792b352d900d3d0ef19c3ed9200da598c2c feat(diagnostics): record which ring a stall snapshot is about",
+        "fe5c5a0430fde8a0a68ba726b447a7524cd2bedb fix(submit): look at the ring switch after every pause of a wait",
+        "2ebea4fad5a2e35bf2b7a0cd75db6cbdeaff2429 feat(diagnostics): count imported memory and BO views by process",
+        "d80b6332f91eded47859559f5b4645140d3b7c56 feat(diagnostics): count the system BOs by holding process and by size",
+        "eeca9f088fd823181d74db9fd8c4edc02b4e1ed5 feat: name WindowServer as the render server on macOS",
+        "9c77ce2a27c9afb4aaa6f9a1a50134f57316d033 feat: build for macOS",
+        "4b46cb57f8d465cd9ae980c49f3a67bf570df6fe docs: name the boot arguments without the sheng- prefix",
+        "161c2eb2314ef4decf21bc5223a96bd96e579999 refactor: drop the sheng- prefix from boot arguments",
+        "c6cb924f630e3ce5e173192e29b132400fe9f828 feat(diagnostics): keep Turnip's GMEM swap trace in the GPU trace",
+        "113004431b869caa27f2d5deaaff8696aa46e3ae fix(diagnostics): keep each process's Metal refusal text in the GPU trace",
+        "d1e58ba6c0cb01273b6eccc23dd9a5fd87cf319f docs: describe the seven-issue trace selection",
+        "4d02bf898e699fb1b492e25d8458db43ac0370f6 fix(diagnostics): keep only seven-issue GPU trace events",
+        "44be4689e491aec15bab6a4d2de56a2b12b970f7 docs: describe focused frame latency capture",
+        "b2d5241d71f4393687bdc23c64f871e4c0f3c972 fix(diagnostics): filter GPU trace noise and coalesce pending queries",
+        "0d194ce01e580e6628ce140f8992716a8afafd01 Merge pull request #11 from UniXNU/fix/gpu-scheduling-and-metal",
+        "47b1e29d53d84a916ab0121bbbde779d92aa60f1 docs: describe counter sampling and dispatch trace ownership",
+        "572582e8451cef42e9739dc21d5e8f34dc7c524d feat(diagnostics): capture counter validity and dispatch task events",
+        "02aefbc6e25565872918d77041837bdcfa0cf41d feat(diagnostics): retain Metal render thread identities",
+        "984685bfd7f478492c186d501045a82dd5d73e65 docs: describe gPU frame trace and pixel export",
+        "fb29b830b3373b9028942930a4c9d5321565661a feat(gpu): add bounded frame traces and completed pixel capture",
+        "76b488fe62149d1ebf59ad74d27ffb07f4a3df07 chore: refresh GPU host fixtures and verify task-role priorities",
+        "8a4b0f50bfb5709d15e9380173cb5870664f6b08 fix(gpu): reschedule priority work and track global fence progress",
+        "a482cf496c5ee9e682281e68b178a1bab067ebcb docs: describe two-ring GPU scheduling",
+        "b4302a528fd14f2c2025cce9465e2bcc89cfd84d fix(gpu): preserve contexts and queue ordering across priority rings",
+        "60aa3d78194fb36c12afa8c98540b48df086e842 fix(accelerator): include the ABI header from the renamed module",
+        "6a31d45fbc56de18fb48f7446eba7bf31dd6b395 Merge pull request #9 from UniXNU/merge/unmerged-branches"
+      ]
+    },
+    {
+      "repo": "UniXNU/drivers/AdrenoMetal",
+      "old_sha": "c9ebd2fb17253996f0a8d835c9ab7c2f740778e1",
+      "new_sha": "b25e48e51dfdf4b3889ede6e701ab7dd59929a03",
+      "upstream_commits": [
+        "b25e48e51dfdf4b3889ede6e701ab7dd59929a03 bridge: Pin UniXNU/metal2vulkan fork and drop carried runtime patches",
+        "e9e7696851ead60c9f7559e337d3f0941526e058 bridge: Finish pipelines eagerly and prefer unextended linear modifier",
+        "51b10bb6637835db0a083d1053b5157ad4c3f19c bridge: Restore entry-return floor tail guard across translator stages",
+        "7f93d4a52606cd210cb4a11946e26746e2f684ca bridge: Rebase runtime patches and adapt bridge for metal2vulkan 0c9db497",
+        "400738b5f00e6c77830cb28fb0ad9fc583ece966 bridge: Enable attachment feedback loop on in-place host-import textures",
+        "bb38a2a6fab8c09d117d34fb5371c8a10b5ce78e bridge: Enable zero-copy in-place textures over host memory imports",
+        "ae4a88c6dcfd79d283094dc0b4a3ddf8c6ab3793 frontend: Make NBObject globalTraceObjectID initialization atomic",
+        "a18fada86d3c2f39991a97a1c7ff5dea2d22b427 bridge: Fallback cubic samplers to linear and handle non-heap makeAliasable",
+        "1189e2deaae6956599226fcdb470d945e37e3491 bridge: Support sub-page and unaligned host no-copy buffer imports",
+        "e06ac3b85cfb1fef475b0c69a9f238a6b32b6db4 bridge: Bound YCbCr VRAM with compact SDR backings, reuse, and backpressure",
+        "5c0bb091181a01646f3fd955e0ef1da2daeaec96 bridge: Answer all registered capabilities and guard null no-copy buffers",
+        "50c4948ad3c68ab7892a7e503c6a7e230c409013 bridge: Refresh YCbCr surfaces only on IOSurface seed change",
+        "ba4e8334cc529aee4b038e48cbb97f09df9ef71f bridge: Match runtime TextureIndex reachability rules",
+        "d9bd452d5c472fcda0049dffa430c154fc4d6292 bridge: Read mapping writability before moving into release closure",
+        "ba4524fbb460c1ad6ef8ec1f909c788382b0c62e Metal: Refresh converted YCbCr textures when IOSurface content updates",
+        "233328d29fbf7537fee64916a6853d3496a2a0ee bridge: Add read-only host import contract to runtime and bridge",
+        "96ad2781dd7bc2506a39ff3209f92dae4ac82509 Metal: Convert two-plane YCbCr IOSurface textures via compute",
+        "cdbee785069044ae2469e10bcbf324e7bfed2ae1 bridge: Back memoryless texture descriptors with pooled private storage",
+        "03d12fcf40862488c296f44ac20a9c922dd68bc7 bridge: Answer texture write rounding mode capability queries",
+        "b27440f910f9f6f2094888f82a2ce230a191c122 bridge: Allow read-only host page imports for Shared buffers",
+        "6973c34e1b9be4818eb9bd77723214b6383132ae Metal: Schedule native display writes after driver submission",
+        "fa78d8f912259995423fe4d1371257c185effe4e Metal: Declare indirect resources through upstream runtime APIs",
+        "6cf0e3d9c08d767014fc561887675e912bea1368 bridge: Preserve upstream callback wait restrictions",
+        "8288454cd91410012bb1781b793eee5febc14352 cache: Avoid repeating pipeline cache import work",
+        "76096923e9386735c0dedffefccdc5681e156b86 cache: Isolate artifacts by runtime build identity",
+        "b18f06a6636a4d6d4924f0219358c4f3e8c2deb2 bridge: Use upstream runtime ownership and cache interfaces",
+        "75149b835c26df80c7af936aa0137338dee04b40 Metal: Remove unqualified runtime patches from the upstream experiment",
+        "9ea830fa67f9eafe3bff26dc5559840d9322bfcb Metal: Create a nonpresenting runtime instance for native scanout",
+        "d18ea7906ee0aa1859882933b3785f846a057062 Metal: Port resource ownership and pipelines to runtime v2",
+        "2fbbdccaf1d13f635f9f5855d4dcb881607487db Metal: Stage the development runtime API migration",
+        "95c88a6243a6cd66bae763722c00ff5e07f00ecf Shader Cache: Link the installed macOS VFX treatment function",
+        "d57b19b4e4f131ace68c64f0d2a4e58a3fdf63f1 Shader Cache: Resolve overlapping compute priming bindings",
+        "3ab3e3e3728c48a5226539e1b2dfc1b113bea6e6 fix(shader): Lower bfloat to bool when AIR permits denormal flushing",
+        "eeef38954f544ca500dc159236a7dcdf89320f62 fix(diag): Preserve loss origins after Vulkan recovery",
+        "2e45d0345a2c6f5468e3cb990d9dc52ecaa9d6fb Metal: Keep missing library probes out of specialization failures",
+        "cc0a4e8e57d20f4a4698753c2530875f2b10c0ca docs(metal): describe copied buffer page checks",
+        "ab1e74d913c5ef59b78967b6318827f29581cea3 fix(metal): guard copied host buffers on macOS"
+      ]
+    }
+  ],
+  "commits_created": false,
+  "firmware_modified": false,
+  "hardware_verified": false,
+  "baseline_checks": [
+    {
+      "command": "python3 -m unittest discover -s UniXNU/scripts/unixnu -p test_kernel.py",
+      "result": "PASS5tests",
+      "log": "stage-a-core-tests.log",
+      "log_sha256": "8a2bb3afc056b32aa0ecb2eb1a3d324544fc2c116a86525ff3f9ab06c0c433d4"
+    },
+    {
+      "command": "python3 scripts/b5q-install/check-wifi-target.py",
+      "result": "PASS5arm64eobjects",
+      "log": "stage-a-wifi.log",
+      "log_sha256": "16d3ba2e195b1f862173f84047ec44834d678283af1bc5b25c2ee97b767fc8c7"
+    },
+    {
+      "command": "python3 scripts/b5q-install/check-bt-target.py",
+      "result": "PASS9arm64eobjects",
+      "log": "stage-a-bt.log",
+      "log_sha256": "005ec8df46077af0ea4138dbe600f51d0a4b610519546cc753024238496f671e"
+    },
+    {
+      "command": "check-peripheral-target.py --sources QcomDwc3.cpp,B5qGpu.cpp,LegacyDisplayProbe.cpp,ThermalLevel.cpp,DisplayTimingProbe.cpp,B5qUfs.cpp --objects-out stage-a-target --reference b5q-esp-v33b-repair2/esp.img",
+      "result": "PASS6arm64eobjects,427slots,zero unresolved",
+      "log": "stage-a-target-closure.log",
+      "log_sha256": "5fe00aa64abc9d89415e265cb4b76bc0cf40eaa941e99b25d676ce2802250559"
+    }
+  ],
+  "findings": [
+    "Latest sheng main only changes Novatek touch pin and records; WifiNet, Ath12kWifi, QcaBluetooth, thermal and legacy display production sources are byte-identical to prior sheng pin; do not import Novatek.",
+    "UniXNU new GPU changes include native runtime capability/timeline waits, mixed kernel/runtime ABI rejection, failed-map guard and translator-fork pins; GopFramebuffer and CPU/sleep sources have no revision delta.",
+    "Stage A local core/peripheral baseline passed before any Stage B/C edits. Full native kernel/runtime linking requires the Apple build environment and is not claimed."
+  ]
+}

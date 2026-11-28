@@ -36,6 +36,7 @@ struct Irq {
   __atomic_sub_fetch(&self->irqInFlight,1u,__ATOMIC_RELEASE);
  }
  static void worker(void *p,wait_result_t){
+    thread_set_thread_name(current_thread(),"b5q-dp-irq");
   auto *self=static_cast<Irq*>(p);
   for(;;){
    const uint32_t observed=__atomic_load_n(&self->generation,__ATOMIC_ACQUIRE);

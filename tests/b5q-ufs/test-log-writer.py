@@ -5,7 +5,7 @@ import importlib.util,json,struct,subprocess,sys,tempfile,zlib
 ROOT=Path(__file__).resolve().parents[2];HEADERS=ROOT/'UniXNU-b5q/package/B5qUfs'
 sys.path.insert(0,str(ROOT/'tools/xnu2log/scripts'))
 from nabu_log_volume import make_config,decode_container
-TOKEN=bytes.fromhex('411839cbaebac4088c251c0ea57579a2');BLOCK=4096;ESP=3162880;ROOT_FIRST=49692663;ROOT_LAST=62275574;CAPACITY=62275584;FILE_BYTES=8400896
+TOKEN=bytes.fromhex('411839cbaebac4088c251c0ea57579a2');BLOCK=4096;ESP=3162880;ROOT_FIRST=49692663;ROOT_LAST=62275574;CAPACITY=62275584;FILE_BYTES=33566720
 
 def disk(path,case):
  count=512;stride=128;entries=bytearray(count*stride)
@@ -16,7 +16,7 @@ def disk(path,case):
  header=bytearray(BLOCK);header[:8]=b'EFI PART';struct.pack_into('<II',header,8,0x10000,92);struct.pack_into('<QQQQ',header,24,1,CAPACITY-1,265,CAPACITY-10);struct.pack_into('<QIII',header,72,2,count,stride,zlib.crc32(entries));struct.pack_into('<I',header,16,zlib.crc32(header[:92]))
  boot=bytearray(BLOCK);struct.pack_into('<H',boot,11,BLOCK);boot[13]=1;struct.pack_into('<H',boot,14,32);boot[16]=2;struct.pack_into('<II',boot,32,204800,200);struct.pack_into('<I',boot,44,2);boot[82:87]=b'FAT32';boot[510:512]=b'\x55\xaa'
  fat=bytearray(200*BLOCK);struct.pack_into('<III',fat,0,0xffffff8,0xfffffff,0xfffffff)
- for i in range(2051):struct.pack_into('<I',fat,(3+i)*4,4+i if i<2050 else 0xfffffff)
+ for i in range(8195):struct.pack_into('<I',fat,(3+i)*4,4+i if i<8194 else 0xfffffff)
  if case=='chain':struct.pack_into('<I',fat,4*4,8)
  if case=='fatalias':struct.pack_into('<I',fat,3000*4,4)
  directory=bytearray(BLOCK);directory[:11]=b'XNU2LOG BIN';directory[11]=0x20;struct.pack_into('<H',directory,26,3);struct.pack_into('<I',directory,28,FILE_BYTES)
@@ -28,7 +28,7 @@ def disk(path,case):
   if case=='mirror':f.seek((ESP+232)*BLOCK+12);f.write(bytes(4))
   if case=='gptcrc':f.seek(2*BLOCK+32);f.write(bytes(8))
   if case=='damagedslots':
-   for lba in [first+1,first+1026]:f.seek(lba*BLOCK);f.write(b'BROKEN')
+   for lba in [first+1,first+4098]:f.seek(lba*BLOCK);f.write(b'BROKEN')
  return first
 
 HARNESS=r'''
@@ -46,7 +46,10 @@ HARNESS=r'''
 using namespace B5qUfsProtocol;
 static void *IOMalloc(size_t n){return malloc(n);}
 static void IOFree(void*p,size_t){free(p);}
-typedef int IOReturn;typedef int wait_result_t;typedef void* thread_t;
+typedef int IOReturn;typedef int wait_result_t;typedef void* thread_t;typedef void* event_t;typedef int kern_return_t;
+#define THREAD_UNINT 0
+#define THREAD_AWAKENED 1
+#define THREAD_CONTINUE_NULL nullptr
 #define KERN_SUCCESS 0
 #define kMillisecondScale 1
 #define IOLog(...) std::printf(__VA_ARGS__)
@@ -56,19 +59,26 @@ static struct {bool selected=true,poisoned=false;void*lock=(void*)1;uint8_t lun=
 static FILE*media;static bool held,quarantine;static unsigned submissions,writes,syncs;static int fail_header;
 static uint64_t ticks;
 static bool runningWriter=true;
-static bool interruptContext=false;
+static bool interruptContext=false,interruptsEnabled=true;static int preemptionLevel;
 static bool ml_at_interrupt_context(){return interruptContext;}
-static bool ml_get_interrupts_enabled(){return true;}
-extern "C" int get_preemption_level(){return 0;}
+static bool ml_get_interrupts_enabled(){return interruptsEnabled;}
+extern "C" int get_preemption_level(){return preemptionLevel;}
 static uint32_t read32(uintptr_t,unsigned){return 0;}
 static void write32(uintptr_t,unsigned,uint32_t){}
 static bool IOLockTryLock(void*){if(held)return false;held=true;if(quarantine)host.poisoned=true;return true;}
 static void IOLockUnlock(void*){assert(held);held=false;}
 static uint64_t mach_absolute_time(){return ++ticks;}
 static void clock_interval_to_deadline(unsigned n,int,uint64_t*d){*d=ticks+n;}
-static void thread_yield_internal(int);
+static unsigned blocks,arms,wakes,clears,yield_count,syncRace;
+static bool armed;static event_t waiting;static uint64_t waitDeadline;
+static void waitRace();
+static int assert_wait_deadline(event_t e,int,uint64_t deadline){++arms;waiting=e;armed=true;waitDeadline=deadline;waitRace();return 0;}
+static void thread_wakeup(event_t e){++wakes;if(armed&&waiting==e)armed=false;}
+extern "C" kern_return_t clear_wait(thread_t,int){++clears;armed=false;return 0;}
+static void thread_block(void*);
 static void thread_terminate(thread_t){throw 1;}
 static thread_t current_thread(){return nullptr;}
+static void thread_set_thread_name(thread_t t,const char *name){assert(!t&&!strcmp(name,"b5q-log-ufs"));}
 static void thread_deallocate(thread_t){}
 static int kernel_thread_start(void(*f)(void*,int),void*p,thread_t*t){*t=nullptr;f(p,0);return 0;}
 static std::string bootargs="b5q-log=1 b5q-log-token=411839cbaebac4088c251c0ea57579a2";
@@ -83,7 +93,7 @@ static bool submit(){
  else {
   assert(bytes==blocks*4096 && blocks<=32);assert(!fseeko(media,lba*4096,SEEK_SET));
   if(c[0]==0x2a){assert(c[1]==8 && u[1]==0x20 && (utrd[0]&(3U<<25))==(1U<<25));++writes;
-   assert(lba>3163313 && lba+blocks<=3163313+2051);
+   assert(lba>3163313 && lba+blocks<=3163313+8195);
    if(fail_header && nabu_log_writer_rounds==1 && blocks==1){host.poisoned=true;return false;}
    assert(fwrite(dma+dataOffset,1,bytes,media)==bytes);
   }else {assert(c[0]==0x28 && u[1]==0x40 && (utrd[0]&(3U<<25))==(2U<<25));
@@ -94,10 +104,16 @@ static bool submit(){
  auto*r=u+responseOffset;memset(r,0,512);r[0]=0x21;r[2]=3;return true;
 }
 #include "B5qLogUfs.h"
-static void thread_yield_internal(int){
- ticks+=1;
+static void waitRace(){
+ if(syncRace==1){__atomic_store_n(&nabu_log_committed_end,nabu_log_urgent_end,__ATOMIC_RELEASE);thread_wakeup((event_t)&nabu_log_committed_end);syncRace=0;}
+ if(syncRace==2){__atomic_store_n(&nabu_log_stopping,true,__ATOMIC_RELEASE);thread_wakeup((event_t)&nabu_log_committed_end);syncRace=0;}
+}
+static void thread_block(void*){
+ ++blocks;
+ if(syncRace==3){__atomic_store_n(&nabu_log_committed_end,nabu_log_urgent_end,__ATOMIC_RELEASE);thread_wakeup((event_t)&nabu_log_committed_end);syncRace=0;return;}
  if(nabu_log_writer_rounds==1){static bool appended;if(!appended){nabu_capture_append("LATE-BOOT\n",10);appended=true;
-  interruptContext=true;assert(b5q_log_sync(750)==2);interruptContext=false;}}
+  interruptContext=true;const auto before=blocks;assert(b5q_log_sync(750)==2&&blocks==before);interruptContext=false;}}
+ ticks=waitDeadline;armed=false;
  if(runningWriter&&nabu_log_writer_rounds>=2)throw 2;
 }
 int main(int argc,char**argv){
@@ -129,19 +145,29 @@ int main(int argc,char**argv){
  runningWriter=false;
  if(negative){assert(!writes&&!syncs&&nabu_log_writer_failures==1);fclose(media);return 0;}
  assert(writes>0 && syncs>=2 && !held);
- if(!fail_header){assert(b5q_log_sync(750)==0);assert(ticks<100);}
+ if(!fail_header){assert(b5q_log_sync(750)==0);assert(blocks<=3&&yield_count==0);}
  const unsigned before=writes; nabu_capture_append("URGENT",6);
  assert(b5q_log_sync(2)==(fail_header?3u:1u)&&writes==before);assert(nabu_log_writer_rounds==(fail_header?1u:2u));
+ if(!fail_header){
+  unsigned beforeBlocks=blocks;interruptContext=true;assert(b5q_log_sync(750)==2&&blocks==beforeBlocks);interruptContext=false;
+  interruptsEnabled=false;assert(b5q_log_sync(750)==2&&blocks==beforeBlocks);interruptsEnabled=true;preemptionLevel=1;assert(b5q_log_sync(750)==2&&blocks==beforeBlocks);preemptionLevel=0;
+  syncRace=1;assert(b5q_log_sync(750)==0&&blocks==beforeBlocks&&clears>0); // commit between arm and recheck
+  nabu_capture_append("NEXT",4);syncRace=3;assert(b5q_log_sync(750)==0&&blocks==beforeBlocks+1); // wake after block
+  nabu_capture_append("STOP",4);syncRace=2;assert(b5q_log_sync(750)==3&&blocks==beforeBlocks+1);nabu_log_stopping=false;
+  nabu_log_writer_state=2;const auto at=ticks;nabu_log_urgent_end=nabu_log_committed_end;beforeBlocks=blocks;nabuLogPause(4000);
+  assert(ticks>=at+4000&&blocks==beforeBlocks+1&&yield_count==0);
+  nabu_log_urgent_end=nabu_log_committed_end+1;beforeBlocks=blocks;nabuLogPause(4000);assert(blocks==beforeBlocks);nabuLogPause(4000);assert(blocks==beforeBlocks+1);assert(arms<=9&&wakes>0);
+ }
  assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first,1));
- for(uint64_t lba:{1ULL,3162880ULL,49692663ULL,62275574ULL,static_cast<unsigned long long>(nabu_log_volume.file_first+2051)})assert(!nb_volume_write_allowed(&nabu_log_volume,lba,1));
- assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+2050,2));
- assert(nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+1,2050));
+ for(uint64_t lba:{1ULL,3162880ULL,49692663ULL,62275574ULL,static_cast<unsigned long long>(nabu_log_volume.file_first+8195)})assert(!nb_volume_write_allowed(&nabu_log_volume,lba,1));
+ assert(!nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+8194,2));
+ assert(nb_volume_write_allowed(&nabu_log_volume,nabu_log_volume.file_first+1,8194));
  assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,true,true,0,0));
  // Whole-LUN wire SYNC is still gated by the caller's proven journal extent.
  for(uint64_t lba:{0ULL,1ULL,3162880ULL,49692663ULL,static_cast<unsigned long long>(nabu_log_volume.file_first)})
   assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,lba,1025));
  assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+1,0));
- assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+2050,2));
+ assert(!b5qLogRequest((uint32_t*)dma,dma+commandOffset,host.physical,3,host.capacity[3],&nabu_log_volume,false,true,nabu_log_volume.file_first+8194,2));
  fclose(media);return 0;
 }
 '''
@@ -161,7 +187,7 @@ def main():
     f.seek(first*BLOCK);container=f.read(FILE_BYTES)
    assert container[:BLOCK]==make_config(TOKEN if case!='token' else bytes([9])*16)
    if case in ['ok','headerfail']:
-    text,info=decode_container(container);assert info['sequence']==(1 if case=='headerfail' else 2);assert len(text)==4<<20
+    text,info=decode_container(container);assert info['sequence']==(1 if case=='headerfail' else 2);assert len(text)==16<<20
     if case=='ok':assert text.endswith(b'LATE-BOOT\n')
     saved=temp/'XNU2LOG.BIN';saved.write_bytes(container)
     subprocess.run([sys.executable,str(ROOT/'tools/xnu2log/scripts/read_xnu2log.py'),str(saved),'--out',str(temp/'console.txt')],check=True,capture_output=True)
