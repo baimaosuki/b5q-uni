@@ -52,8 +52,11 @@ def prepare(module,out):
 '''
     s=replace(s,'static const struct ieee80211_ops ath11k_ops = {',bridge+'static const struct ieee80211_ops ath11k_ops = {','mac80211 ops')
     s,n=re.subn(r'(\t\.bss_info_changed\s*= ath11k_mac_op_bss_info_changed,)',
-        r'\1\n\t.link_info_changed = ath11k_mac_op_bss_info_changed,\n\t.vif_cfg_changed = b5q_ath11k_vif_cfg_changed,',s)
+        r'\t.link_info_changed = ath11k_mac_op_bss_info_changed,\n\t.vif_cfg_changed = b5q_ath11k_vif_cfg_changed,',s)
     if n!=1:raise ValueError('ath11k BSS operations changed')
+    ops=s.split('static const struct ieee80211_ops ath11k_ops = {',1)[1].split('};',1)[0]
+    if re.search(r'\.bss_info_changed\s*=',ops) or any(len(re.findall(r'\.'+name+r'\s*=',ops))!=1 for name in ('link_info_changed','vif_cfg_changed')):
+        raise ValueError('mac80211 split callbacks must replace the legacy BSS callback')
     p.write_text(s)
     p=gen/'mhi.c';s=p.read_text()
     mark='\tstruct ath11k_pci *ab_pci = ath11k_pci_priv(ab);\n\n\tath11k_dbg(ab, ATH11K_DBG_BOOT, "notify status reason %s\\n",'

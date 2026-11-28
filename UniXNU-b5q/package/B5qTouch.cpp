@@ -3,6 +3,8 @@
 #include <IOKit/IOLib.h>
 #include <IOKit/IODeviceMemory.h>
 #include <kern/thread.h>
+#include <kern/sched_prim.h>
+#include <kern/clock.h>
 #include <pexpert/pexpert.h>
 #include "B5qTouchBus.h"
 #include "B5qTouchReports.h"
@@ -50,12 +52,7 @@ void touchIrq(void *) {
  thread_wakeup((event_t)&irqEvents);
 }
 bool lowAttention(){return !(tlmmRead(B5qTouchIrq::gpio*0x1000+4)&1u);}
-void waitAttention(){
- const uint32_t seen=__atomic_load_n(&irqEvents,__ATOMIC_ACQUIRE);
- assert_wait((event_t)&irqEvents,THREAD_UNINT);
- if(lowAttention() || seen!=__atomic_load_n(&irqEvents,__ATOMIC_ACQUIRE))clear_wait(current_thread(),THREAD_AWAKENED);
- else thread_block(THREAD_CONTINUE_NULL);
-}
+
 bool powerTouch(){
  TlmmPins pins;
  pins.configure(B5qTouchPower::sda);
@@ -85,6 +82,27 @@ void publish(bool fromReport=true){
  }else if(reports.releases<=8 || !(reports.releases&(reports.releases-1)))
   IOLog("B5qTouch: stage=release-all mode=%02x contacts=0 palm=%u c2=%u identify=%u errors=%u release_all=%u hid=%u\n",reports.mode,reports.palm,reports.c2,reports.identify,reports.errors,reports.releases,native_touch_hid_reports);
 }
+unsigned activeCount(){unsigned n=0;for(const auto &point:reports.points)n+=point.kind==1;return n;}
+void waitAttention(){
+ const uint32_t seen=__atomic_load_n(&irqEvents,__ATOMIC_ACQUIRE);
+ const bool active=activeCount()>0;
+ // The sensor reports held fingers at120Hz. Bound only an active contact's
+ // silence; idle still sleeps on GPIO19 without periodic I2C polling.
+ if(active)assert_wait_timeout((event_t)&irqEvents,THREAD_UNINT,40,kMillisecondScale);
+ else assert_wait((event_t)&irqEvents,THREAD_UNINT);
+ if(lowAttention() || seen!=__atomic_load_n(&irqEvents,__ATOMIC_ACQUIRE)){
+  clear_wait(current_thread(),THREAD_AWAKENED);return;
+ }
+ const wait_result_t result=thread_block(THREAD_CONTINUE_NULL);
+ if(active && result==THREAD_TIMED_OUT && !lowAttention() &&
+    seen==__atomic_load_n(&irqEvents,__ATOMIC_ACQUIRE) && activeCount()){
+  reports.release();publish(true); // Normal lift: keep synthetic tap eligible.
+  static unsigned silenceLifts=0;
+  if(++silenceLifts<=5 || !(silenceLifts&(silenceLifts-1)))
+   IOLog("B5qTouch: stage=silence-lift timeout-ms=40 lifts=%u irq=%u contacts=0\n",silenceLifts,seen);
+ }
+}
+
 unsigned layoutFailures;
 void report(uint8_t code,unsigned n){
  static unsigned sampled=0;
@@ -94,6 +112,12 @@ void report(uint8_t code,unsigned n){
   IOLog("B5qTouch: raw code=%02x bytes=%u first=%s\n",code,n,hex);
  }
  const auto result=reports.consume(code,message,n,config,configBytes,maxObjects);
+ static unsigned ignored=0;
+ if(result==B5qTouch::ReportResult::Ignore && code!=0x11 && ignored<5){
+  char hex[25]={};const unsigned count=n<8?n:8;
+  for(unsigned i=0;i<count;++i)snprintf(hex+3*i,sizeof(hex)-3*i,"%02x ",message[i]);
+  IOLog("B5qTouch: stage=ignored-report sample=%u code=%02x bytes=%u first=%s\n",++ignored,code,n,hex);
+ }
  if(result==B5qTouch::ReportResult::Frame){layoutFailures=0;publish();}
  else if(result==B5qTouch::ReportResult::Released){
   publish(false);

@@ -35,9 +35,37 @@ template<class Io> bool readCable(Io &io,Cable &out){
                io.read(muic,0x0a,end)&&next.cc0==end;
  next.valid=ok;out=next;return ok;
 }
-// Adopt firmware's live negotiated CC/PD state. Do not force a vendor
-// set_sink(1) request on every boot: CcicDxe only proves that opcode takes a
-// parameter, not that literal1 represents a native dual-role initialization.
+// Samsung max77705.h: CCCTRL1 SrcSnk bit4, SnkSrc bit3, Detect bit0.
+// Preserve bits7:5 (source current) and existing debug/audio configuration.
+constexpr uint8_t ccDrpMask=0x19,ccControlRead=0x0b,ccControlWrite=0x0c;
+struct DrpState {
+ uint8_t before=0xff,after=0xff,requested=0xff,pd0=0xff;
+ unsigned stage=0;bool wrote=false,deferred=false;
+ Cable cable;
+};
+template<class Io,class M> bool configureDrp(Io &io,M &mailbox,DrpState &s){
+ s={};uint8_t response[2]={};
+ s.stage=1;
+ if(!readCable(io,s.cable)||!io.read(muic,0x0c,s.pd0)||s.cable.water())return false;
+ if(!mailbox.command(ccControlRead,nullptr,0,response,1))return false;
+ s.before=s.after=response[1];s.requested=s.before|ccDrpMask;
+ if((s.before&ccDrpMask)==ccDrpMask){s.stage=5;return true;}
+ s.stage=2;
+ // A cable can arrive while the opcode is pending: resample before any
+ // role-policy write. Leave all live negotiated sessions and wet ports alone.
+ if(!readCable(io,s.cable))return false;
+ if(s.cable.attached()||s.cable.water()||(s.cable.bc&0x80)){
+  s.deferred=true;return true;
+ }
+ s.stage=3;
+ if(!mailbox.command(ccControlWrite,&s.requested,1,response,1))return false;
+ s.wrote=true;s.stage=4;
+ if(!mailbox.command(ccControlRead,nullptr,0,response,1))return false;
+ s.after=response[1];
+ // Require both role/detection bits and unchanged source current bits.
+ if((s.after&ccDrpMask)!=ccDrpMask || (s.after&0xe0)!=(s.before&0xe0))return false;
+ s.stage=5;return true;
+}
 template<class Io> bool update(Io &io,uint8_t reg,uint8_t mask,uint8_t value){
  uint8_t old=0,check=0;if(!io.read(charger,reg,old))return false;
  const uint8_t next=(old&~mask)|(value&mask);

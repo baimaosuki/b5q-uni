@@ -3370,3 +3370,31 @@ revision = "04018235ba36b16cf5dbe43b870b2ae42ddeb82e"
 reference = "reports/review7-release.json"
 command = "check-v33b-returned.py; check-review7-returned.py; check-wireless-target-closure.py --with-adsp; package-batch2-esp.py; package-usb-dma-boot.py --physical-esp; verify-p0-images.py --wireless --media --dp --v33b"
 result = "JointCI45623026650SUCCESS;originalunchangedWiFiplist/GPUarchive/0014/staticmap/signaturegatesPASS;actual64MiBproducerandfinalLoaderPE/326CPI/USBvtable427PAC/loggerABI andfinal800MiB4KnESP/raw16MiBbootstrapbootreadbackPASS. Exactpaths/bytes/SHA inreport. Firmwarea98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37; Data/rootunaccessed/phoneunflashed. HOST_VERIFIED_PENDING_HARDWARE."
+
+
+[[area]]
+id = "review8-mac80211-touch-silence-drp"
+status = "host-verified"
+components = ["QcomDwc3"]
+paths = ["scripts/build-b5q-wifi.py", "package/B5qTouch.cpp", "package/B5qMax77705.h", "package/B5qUsbBoard.cpp", "reports/review8-release.json"]
+inputs = ["Physical review7 XNU2LOG SHA and sourcebefore hashes recordedinreports/review8-release.json; BTresult0baud3200000/WiFi64MiBDMAqualifiedbyreview7; mac80211BSScallbackassert/touchsilentstuck/CC48-88 documented", "Original Samsungmax77705_usbc.c probeop_ctrl1_w SrcSnk|SnkSrc|Detect andCCCTRL1W; originalmax77705.h bits4/3/0 andopcodes0b/0c; inputSHA/provenance retained", "Reuse physicallytestedreview7firmwareCI45623026650 FD a98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37; firmwarepatches/liveC/H/loaderinputhashes captured,noneedited"]
+configuration = ["Only three requestedkernelareas plus directtests/gates/records; no firmware/boardargs/GPU/BT/pointerheader changes", "Generatedath11k_ops useslink_info_changed+vif_cfg_changed only,no legacybss_info_changed;generationfailclosedoninvalidpair", "Onlyactivekind1touch uses40msassert_wait_timeout; idleassert_waitIRQ; timeoutrechecksATTNhigh+irqcounterunchanged beforeclearpoints/publishtrue; recovered remains0 fornormalclick", "CCCTRL1opcode0b/read0c/write through qualifiedMailbox underexistingSE8lock; preservebits7:5,OR19; readagainverify; liveattached/VBUS/wetportdeferredandresampledpriortowrite; DevicepathnotgatedonDRPconfigurationfailure"]
+procedure = ["Productiongeneratedmac80211callbackpredicate,GPIO19timeout/races+actualpublish/32msclickpulse,causalopcode256controlvalues/liveDevice/attachrace/faults and actualboardinit+48/88diagnostic tests ASanUBSan", "Full localgates/targetABI/PAC/zeroEL1SMMU thenb5q-only kernelCI withreuse-firmware marker;followCI/downloadreturnedgates andpackagepairedESP/boot usingexactreview7FD; finalbinary/ADT/APFS/menureadback"]
+findings = ["review7physicalBTand64MiBDMAqualified;mac80211main809rejectslegacylinkcallbackcoexistence causedbyregexbackreference; replacingwholeentryfixes independentallocationfailure", "Touch40mssilenceguard onlyreleasesonactualtimeout+unchangedIRQ+ATTNhigh,normalpublishtrue keeps clickeligible; no pollingI2C/no pointergainorCPIchanges", "MailboxDPattached-onlyconnectionguardcannotinitializeDRPwhileunplugged; boardcontroladapterallowsvaliddrydetachedcontrol underthesameSE8lock,DPadapterunchanged. Currentconfigurationisreadfirst; currentnegotiatedconnectionpreserved; no guessedCCrole", "Firmwareinputsandreview7validatedFDmustremainbyteidentical; buildsarehostevidenceonly,newassociation/Hostenumeration/touchphysicalresults pending"]
+completion = ["30localgategroups pluscompleteP0-P4PASS;CI45656654077SUCCESS;returnedactualcallbacks/HIDBTUSBbyteidentity/exactfirmwarereuse/finalpairedIMGreadbackPASS;newhardwarepending"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; no phone access/flash;40msinference followsreview7sensor120Hzbehavior andisboundedbyGPIO/IRQchecks"]
+next_action = ["Deliver finalIMGpaths/SHA;keepreview7firmware/bootbyteidentical;nextphysicalWiFi/touch/Hostverificationpending,no phoneaccess"]
+
+[[area.evidence]]
+kind = "host"
+revision = "e33286dc60e39f3677d960d689137e75af9c7d56"
+reference = "reports/review8-release.json"
+command = "test-review8.py; test-touch-wait.py; pre-ci-v33d.py"
+result = "AlllocalproductionASanUBSan/targetABI/PAC/wirelessADSPjoint/zeroEL1SMMU PASS; oldactualreview7ath11k_ops rejectedasnegative;firmware/pointer/BT/boardbyteidentityPASS. CI/returned/finalIMG andnewhardwarepending. Review7BT/64MiBsuccessreferonlytophysicalreview7log."
+
+[[area.evidence]]
+kind = "host"
+revision = "961b809025325dea5c60b419d329fb1d6721ab78"
+reference = "reports/review8-release.json"
+command = "check-v33b-returned.py --reuse-unchanged-firmware; check-review8-returned.py; check-wireless-target-closure.py --with-adsp; package-batch2-esp.py; package-usb-dma-boot.py --physical-esp; verify-p0-images.py --wireless --media --dp --v33b"
+result = "KernelCI45656654077SUCCESS;actualath11k_opslegacyNULL+splitpairandoldinvalidnegative,active40mswait/DRPdiagnostics,unchangedHID/BT/QcomDwc3objects,156objectwirelessADSP/PAC/zeroEL1SMMU/originalWiFiplist/GPU/signaturesandfinal800MiB4KnADT/APFS/menu/bootpairreadbackPASS. FirmwareFDa98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37 andboot20eac73c262470d43984b8edd363dde55f86e38fb75312a68b4a32610907470a byteidenticalreview7. Exactimagesbytes/SHAinreport. HOST_VERIFIED_PENDING_HARDWARE;phoneunaccessed/unflashed."

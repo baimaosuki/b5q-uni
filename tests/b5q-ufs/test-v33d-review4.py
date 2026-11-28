@@ -36,6 +36,10 @@ run('maxim-ready-recovery',base+r'''
 #include <atomic>
 #include <thread>
 #include "B5qMax77705.h"
+// Existing adoption/race fixture isolates the new mailbox dependency;
+// production CC control+init+diagnostic integration runs in test-review8.
+static void configureTypecDrp(){}
+static void diagnoseTypecCc(const B5qMax77705::Cable&){}
 std::atomic<unsigned> opens{0},lives{0},waits{0};std::atomic<uint64_t> ms{1000};
 std::atomic<bool> entered{false},releaseOpen{true},complete{false};bool failOpen=false;unsigned releaseAfter=0;
 std::mutex busLock;
