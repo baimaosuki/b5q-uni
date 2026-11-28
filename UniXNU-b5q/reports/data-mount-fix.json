@@ -1,5 +1,5 @@
 {
-  "state": "implemented and local tests pass; CI and actual ESP acceptance pending",
+  "state": "Req1..4 local implementation, actual CI, returned objects and final ESP readback all passed; hardware boot pending",
   "hardware_input": {
     "path": "logs/b5q-xnu2log-batch2/XNU2LOG.txt",
     "sha256": "a4fe97b42b23971720526d22c30240f0ef7c056203ba79850d409f6dbfb47089",
@@ -95,7 +95,353 @@
     },
     "hardware_execution_tested": false
   },
-  "CI": "pending",
+  "CI": {
+    "id": 45127313070,
+    "head_sha": "05eeb6e4599d0170322853f97f0a2e71baf92bb2",
+    "status": "completed",
+    "conclusion": "success",
+    "html_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45127313070"
+  },
   "device_access": false,
-  "Data_reinitialize": false
+  "Data_reinitialize": false,
+  "returned_provider_PAC": {
+    "passed": true,
+    "hook": "_native_ram_block_provider_seed",
+    "weak_import_presence_PAC": {
+      "key": "IA",
+      "diversity": "0xbd41",
+      "signed_sites": [
+        {
+          "site": "0xbad0",
+          "key": 0,
+          "diversity": 48449,
+          "address_diversity": 0
+        }
+      ]
+    },
+    "hook_and_selector_calls": "ARM64_RELOC_BRANCH26 direct calls; no indirect callback discriminator mismatch",
+    "RAM_and_Data_inherited_vtable_PAC_slots": 326,
+    "objects": {
+      "NativeRamBlock.o": "7527707c34c4f745001a0bdfaf16c8eafc9edafd8bdd4043b18222b4c62a3e76",
+      "B5qUfs.o": "2813f32c323e71b8084dd5d5eada516264cf250f24d3b853063edfcbeee1260f"
+    }
+  },
+  "returned_PAC_zero_smmu": {
+    "passed": true,
+    "objects": {
+      "NativeRamBlock.o": {
+        "sha256": "7527707c34c4f745001a0bdfaf16c8eafc9edafd8bdd4043b18222b4c62a3e76",
+        "instructions": 4942,
+        "apps_smmu_materializations": 0
+      },
+      "B5qRamStorage.o": {
+        "sha256": "162e2517a4353e8aa3119ab019cc47607c2bed9cc629a2652b502f208a7022c2",
+        "instructions": 295,
+        "apps_smmu_materializations": 0
+      },
+      "B5qProcTop.o": {
+        "sha256": "6283c27624aa50adb568e3de77988babb45e2386e56e41aba167bb01c2b8fcce",
+        "instructions": 705,
+        "apps_smmu_materializations": 0
+      },
+      "NativeHidInput.o": {
+        "sha256": "27348ebce0b3d8198bd230353ed5f2452f114498f21e7e4d03e20b543499f801",
+        "instructions": 2652,
+        "apps_smmu_materializations": 0
+      },
+      "B5qPower.o": {
+        "sha256": "96ac9831e78c15bcbbeb7a5f709fd41dc4d076adf60e7c7a24d9395feff9a659",
+        "instructions": 219,
+        "apps_smmu_materializations": 0
+      },
+      "B5qUfs.o": {
+        "sha256": "2813f32c323e71b8084dd5d5eada516264cf250f24d3b853063edfcbeee1260f",
+        "instructions": 9877,
+        "apps_smmu_materializations": 0
+      },
+      "HidInputProbe.o": {
+        "sha256": "557d3ead50b756d165d797882d2e91a4dbdc2309ed1523d44f3219f4299a31d8",
+        "instructions": 1674,
+        "apps_smmu_materializations": 0
+      }
+    },
+    "platform_power_PAC": {
+      "key": "IA",
+      "diversity": "0x0ba5",
+      "producer": [
+        {
+          "site": "0x240",
+          "key": 0,
+          "diversity": 2981,
+          "address_diversity": 0
+        }
+      ],
+      "core_consumer_sites": [
+        "0xe60",
+        "0x474c"
+      ]
+    },
+    "data_root_shared_virtual_slots_verified": 326,
+    "Data_and_root_completion_PAC": {
+      "diversity": "0xe90c",
+      "calls": [
+        {
+          "site": 16292,
+          "diversity": 59660
+        },
+        {
+          "site": 17920,
+          "diversity": 59660
+        }
+      ]
+    },
+    "hardware_execution_tested": false
+  },
+  "source_SHA256": {
+    "UniXNU-b5q/package/B5qUfs/B5qDataBlock.h": "f70d43b8bf4e492530fde20132cd7a7e6ba8bfca2beb6c07918625fcd5607389",
+    "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "4d1c92873731da4452e0a22f0a2d34d8d07ce773b0c2175109a329de7ef0cb2b",
+    "UniXNU-b5q/package/B5qUfs/B5qDataSeed.h": "afc17bad2541ef12b9c8857db48bb9eb4bc3f45525252034e2389453611219fd",
+    "UniXNU-b5q/scripts/b5q-storage-provider.patch": "a7c9f13768c48961ea468fabe10655ad9e42ff100556a64fed2f4bda246ffece",
+    "UniXNU-b5q/scripts/b5q_ramblock.py": "de9a9d9e004d7faa7bd25d2406919495acd097675822d47d41ff24745c23cc79",
+    "tests/b5q-ufs/test-data-volume-seed.py": "24d682e6310a84fc7c470e1535475eb94c615b1bc3dcb0cf438350cfdc4ce6f1"
+  },
+  "final_ESP": {
+    "passed": true,
+    "ESP": {
+      "bytes": 838860800,
+      "sha256": "5dffcb16774b4b25746676835b61977d1e2fa8d305fbe5deb13b925be2c42ed0"
+    },
+    "changed_FAT_members": [
+      "EFI/UniXNU/Payloads/RAM/kernel.macho",
+      "EFI/UniXNU/Payloads/RAM/kernel.macho.crypto-hmac.json",
+      "EFI/UniXNU/Payloads/kernel.macho",
+      "EFI/UniXNU/Payloads/kernel.macho.crypto-hmac.json"
+    ],
+    "changed_archive_members": {
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": [],
+      "build/qcom-dwc3/libQcomDwc3.a": [],
+      "build/ram-block/libRamBlock.a": [
+        "B5qUfs.late.o",
+        "NativeRamBlock.late.o"
+      ]
+    },
+    "profiles": {
+      "xnu": {
+        "kernel_SHA256": "2ca986970c469dde9ad51cb921479d5166831ef39727793ef660640462f6dd05",
+        "args_bytes": 981,
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": false
+      },
+      "ram-fallback": {
+        "kernel_SHA256": "2ca986970c469dde9ad51cb921479d5166831ef39727793ef660640462f6dd05",
+        "args_bytes": 981,
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": true
+      }
+    },
+    "linked_symbols": {
+      "_native_ram_block_provider_seed": "0xfffffff00c2cd81c",
+      "_native_ram_block_volume_seed": "0xfffffff00c2cbcbc",
+      "_native_ram_block_volume_device": "0xfffffff00c2cb2f0",
+      "_b5q_power_start": "0xfffffff00c2d8438",
+      "_sheng_cpu_idle_mach": "0xfffffff00b9ab124",
+      "_ml_outside_memory_pages": "0xfffffff00c941118",
+      "_ml_outside_memory_refused": "0xfffffff00c94111c"
+    },
+    "core_recompiled": false,
+    "storage_objects_compiled": 2,
+    "GPU_UEFI_Data_rebuilt": false,
+    "persistent_Data_accessed": false,
+    "boot_args_ADT_loader_GPU_seed_trustcache_byte_identical": true,
+    "hardware_boot_verified": false
+  },
+  "ADT_retention": {
+    "CI_ESP_SHA256": "afe6a35368e10e8ddedc50f6a72a789f7df452869a52fd2f7236d3d39d554aac",
+    "final_ESP_SHA256": "5dffcb16774b4b25746676835b61977d1e2fa8d305fbe5deb13b925be2c42ed0",
+    "operation": "Restore byte-identical previous ADTs after validating only generated entropy differed; no recompilation",
+    "profiles": {
+      "normal": {
+        "generated_properties_replaced": [
+          "random-seed",
+          "unique-chip-id"
+        ],
+        "retained_ADT_SHA256": "3aaaf828a26302e88574e9aec12312bdae8f599a828f809ef53ee6a9e4479738"
+      },
+      "RAM/": {
+        "generated_properties_replaced": [
+          "random-seed",
+          "unique-chip-id"
+        ],
+        "retained_ADT_SHA256": "9d3e9477f296c7d098701a443fc520a612441e161ad54d6e9ec34731212fdca5"
+      }
+    }
+  },
+  "artifact_digests": {
+    "total_count": 2,
+    "artifacts": [
+      {
+        "id": 14796551051,
+        "node_id": "MDg6QXJ0aWZhY3QxNDc5NjU1MTA1MQ==",
+        "name": "data-mount-objects-and-diagnostics-45127313070",
+        "size_in_bytes": 312302,
+        "url": "https://api.github.com/repos/baimaosuki/b5q-uni/actions/artifacts/14796551051",
+        "archive_download_url": "https://api.github.com/repos/baimaosuki/b5q-uni/actions/artifacts/14796551051/zip",
+        "expired": false,
+        "digest": "sha256:eee97a10627ef2a543d99a38df50279b7306f2b5d6a9d4bd03feff3ad047dbdd",
+        "created_at": "2026-11-23T06:57:25Z",
+        "updated_at": "2026-11-23T06:57:25Z",
+        "expires_at": "2026-11-26T06:57:22Z",
+        "workflow_run": {
+          "id": 45127313070,
+          "repository_id": 1462411659,
+          "head_repository_id": 1462411659,
+          "head_branch": "codex/b5q-new-batch2",
+          "head_sha": "05eeb6e4599d0170322853f97f0a2e71baf92bb2"
+        }
+      },
+      {
+        "id": 14796018724,
+        "node_id": "MDg6QXJ0aWZhY3QxNDc5NjAxODcyNA==",
+        "name": "b5q-data-mount-esp-45127313070",
+        "size_in_bytes": 130609949,
+        "url": "https://api.github.com/repos/baimaosuki/b5q-uni/actions/artifacts/14796018724",
+        "archive_download_url": "https://api.github.com/repos/baimaosuki/b5q-uni/actions/artifacts/14796018724/zip",
+        "expired": false,
+        "digest": "sha256:159ae53cf230d66a07667fd36ac871f172498fea5c7cedb18f98876d3b1b63e3",
+        "created_at": "2026-11-23T06:57:34Z",
+        "updated_at": "2026-11-23T06:57:34Z",
+        "expires_at": "2026-11-26T06:57:25Z",
+        "workflow_run": {
+          "id": 45127313070,
+          "repository_id": 1462411659,
+          "head_repository_id": 1462411659,
+          "head_branch": "codex/b5q-new-batch2",
+          "head_sha": "05eeb6e4599d0170322853f97f0a2e71baf92bb2"
+        }
+      }
+    ]
+  },
+  "requirements": {
+    "Req-1": "DONE",
+    "Req-2": "DONE",
+    "Req-3": "DONE",
+    "Req-4": "DONE"
+  },
+  "device_accessed_this_round": false,
+  "validation_commands": [
+    "python3 tests/b5q-ufs/test-data-volume-seed.py",
+    "python3 scripts/b5q-install/check-peripheral-target.py --sources NativeRamBlock.cpp,B5qUfs.cpp --reference artifacts/b5q-esp-macos-only-userdata/esp.img --objects-out artifacts/b5q-data-mount-fix-work/objects",
+    "python3 scripts/b5q-install/check-data-provider-objects.py --objects artifacts/b5q-data-mount-fix-work/returned-objects --out artifacts/b5q-data-mount-fix-work/returned-provider-PAC.json",
+    "python3 scripts/b5q-install/check-batch2-objects.py --objects artifacts/b5q-data-mount-fix-work/returned-objects --baseline artifacts/b5q-batch2-work/pac --out artifacts/b5q-data-mount-fix-work/returned-PAC-zero-smmu.json",
+    "python3 scripts/b5q-install/verify-data-mount-esp.py --esp artifacts/b5q-esp-data-mount-fix/esp.img --baseline-esp artifacts/b5q-esp-macos-only-userdata/esp.img --diagnostics artifacts/b5q-data-mount-fix-work/ci45127313070 --out artifacts/b5q-data-mount-fix-work/final-verification"
+  ],
+  "POST": {
+    "kernel_sha256": "2ca986970c469dde9ad51cb921479d5166831ef39727793ef660640462f6dd05",
+    "code_file_offset": "0x4920000",
+    "code_bytes": 11035172,
+    "hmac_file_offset": "0x342a08",
+    "hmac_sha256": "844f9c7ea10a78cffd65f144a0c0269207195f75a7c1d476ee1b0cb223203cf9",
+    "static_if_sites_prepatched": 69,
+    "static_if_key_sites": {
+      "_sched_debug_preemption_disable_jump_key": 35,
+      "_sched_debug_interrupt_disable_jump_key": 24,
+      "_static_if_test_key_true_to_false_jump_key": 5,
+      "_static_if_test_key_false_to_true_jump_key": 5
+    },
+    "validation_disables": "0x11040",
+    "runtime_selftests_executed": false,
+    "passed": true,
+    "actual_compiled_override_function": true,
+    "actual_ARM64_instruction_patcher_sites": 69,
+    "all_runtime_writes_leave_sealed_text_unchanged": true,
+    "sealing_idempotent": true,
+    "POST_HMAC_recomputed_independently": true,
+    "hardware_tested": false,
+    "emulation_scope": "actual short leaf functions; no QEMU or OS hardware emulation"
+  },
+  "RAM_recovery_APFS": {
+    "passed": true,
+    "readback_image": "/tmp/b5q-data-mount-accept-15ye81zo/recovery.img",
+    "APFS_volume_UUID": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+    "account_autologin_password_verified": true,
+    "policy_counts": {
+      "disabled.plist": 59,
+      "disabled.501.plist": 26
+    },
+    "inodes": {
+      "private/var/db/.AppleSetupDone": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "private/var/db/dslocal/nodes/Default/users/baimao.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 722
+      },
+      "private/var/db/dslocal/nodes/Default/groups/admin.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 390
+      },
+      "private/var/db/dslocal/nodes/Default/groups/staff.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 370
+      },
+      "Users/baimao": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 16872,
+        "bytes": 0
+      },
+      "Users/baimao/.skipbuddy": {
+        "uid": 501,
+        "gid": 20,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "Library/Preferences/com.apple.loginwindow.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 67
+      },
+      "private/etc/kcpassword": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33152,
+        "bytes": 12
+      },
+      "private/var/db/com.apple.xpc.launchd/disabled.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 1949
+      },
+      "private/var/db/com.apple.xpc.launchd/disabled.501.plist": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 861
+      },
+      "private/var/db/com.apple.xpc.launchd/disabled.migrated": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33188,
+        "bytes": 0
+      },
+      "private/var/ngpu/bin/b5q-absentd": {
+        "uid": 0,
+        "gid": 0,
+        "mode": 33261,
+        "bytes": 53232
+      }
+    },
+    "absentd_SHA256_verified": true
+  }
 }

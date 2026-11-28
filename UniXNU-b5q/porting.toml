@@ -2623,12 +2623,17 @@ paths = ["package/B5qUfs/B5qDataBlock.h", "package/B5qUfs/B5qDataSeed.h", "packa
 inputs = ["ActualBatch2logSHAa4fe97b42b23971720526d22c30240f0ef7c056203ba79850d409f6dbfb47089;NativeRamBlock.cppsourceSHA772d47a069c50c9bf92f6c9292668340e005a61d996651033d9af2b6474b897c. Existingcore88703fdc/GPU/v30loader/Data unchanged."]
 configuration = ["No boot-arg/DTS/ADT/Data format or kernelcorepatch changes. Weaktypedprovider hook accepts onlyonlineB5qDataBlock with validatedDataUUID/geometry,base0,bytes180997812224 andSHA256immutableenvelope. RAM provider remains first unchanged branch."]
 procedure = ["Prepare NativeRamBlock from pinned upstream plus original4GiBpatch andnewproviderpatch;compileonlyNativeRamBlockandB5qUfs;relinkcached45115332412native. RootpublisherthreadwaitsuniqueDataIOMediawithUUID/BSDName/Major/Minor beforepublishingbootroot;duplicates/missingproperties/refusedprovidertimeoutfailclosed."]
-findings = ["Actualhardwareadopts205811lowpages/refused0,usable7014903808B;Data mode3APFSdisk0xid23 recognized,thenPID1panicsENOENTbeforelaunchd. SourceNativeRamBlockselectVolumeSeedrequiresNativeRamBlock andcannotfindB5qDataBlock; no evidence ofDataformatfailure.", "21actualselector/hook/readinessASanUBSan casesPASS inclpersistentwithoutRAM,wrongUUID/duplicates/unready/bytebound/unknownprovider/delayedarrival/RAMrecovery. Twoarm64etargetobjects0missing/duplicate and7objectPAC326slots/zeroapps_smmuPASS;actualCIandESPacceptancepending."]
-completion = ["Req1providerandReq2readinessimplemented;Req3localchecksPASS;Req4incrementalCIandfinalESPreadbackmustcompletebeforeimages/flashcommands."]
+findings = ["Actualhardwareadopts205811lowpages/refused0,usable7014903808B;Data mode3APFSdisk0xid23 recognized,thenPID1panicsENOENTbeforelaunchd. SourceNativeRamBlockselectVolumeSeedrequiresNativeRamBlock andcannotfindB5qDataBlock; no evidence ofDataformatfailure.", "21actualselector/hook/readinessASanUBSan casesPASS inclpersistentwithoutRAM,wrongUUID/duplicates/unready/bytebound/unknownprovider/delayedarrival/RAMrecovery. Twoarm64etargetobjects0missing/duplicate and7objectPAC326slots/zeroapps_smmuPASS;actualCI45127313070SUCCESSandfinalESPreadbackPASS."]
+completion = ["Req1..4DONE:typedproviderintegration,uniqueBSDvolume gate,21actualproductionASanUBSan cases/returnedobjectPAC,onecachedCI45127313070SUCCESS/singleESPfinalreadbackPASS."]
 limits = ["No phone access orDatawrite thisround. NoXNUcore/GPU/Mesa/UEFIrebuild. Static/localvalidationnotclaimedphysicaldesktopmountsuccess."]
-next_action = ["Runonecachedstorage-onlyCI,downloadandverifyactualobjects/ESP,thenprovideESP-onlydeploymentcommandand0..7report."]
+next_action = ["UsermayupdateESPonly;collectactualB5qData:media-ready/devicebytes,Data mountsuccessandlaunchdspawns. Neverinitializeuserdataorreflashboot/rootforthisfix."]
 
 [[area.evidence]]
 kind = "source"
 reference = "reports/data-mount-fix.json"
 result = "ActualBatch2journal/sourcecausalchainplus21ASanUBSan productionselector/hook/readinesscases,2targetobjects0missing/duplicate andcross-objectstoragePAC326slots/IAe90c/PSCI0ba5/zeroapps_smmuPASS. Digestdescribesvalidatedenvelopeonly. CIandfinalimageacceptancepending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/data-mount-fix.json"
+result = "CI45127313070SUCCESSsource05eeb6e4599d0170322853f97f0a2e71baf92bb2;ordinaryartifactdigestsverified. OnlyNativeRamBlock.late.o/B5qUfs.late.ochanged;core88703fdc/GPU/UEFI/Dataunchanged. ActualreturnedhookweakpresenceIA0xbd41/directBR26and326RAM/DataPACslots,7objectzeroapps_smmuPASS. FinalESP838860800BSHA5dffcb16774b4b25746676835b61977d1e2fa8d305fbe5deb13b925be2c42ed0;retainoriginalADTsafterprovingonlygeneratedentropywasdifferent;allotherFATmembersbyteidenticalexceptkernel/HMACnormal+RAMcopies. FAT4Kn/mirrors/journal,981Bargs/SIPu64LE2/2fixups/6GiB+4GiB,69POSTsitesandunchangedRAMseedAPFSaccount/59+26policy/absentdPASS. Req1..4localcomplete;newdevicebootnotclaimed,nophoneaccess."
