@@ -5,14 +5,19 @@ from pathlib import Path
 R=Path(__file__).resolve().parents[2]
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--out',type=Path,required=True)
 p.add_argument('--media',action='store_true',help='Include optional P4 audio/video retained-domain patches')
+p.add_argument('--dp',action='store_true',help='Include the P5 validated GOP tail handoff')
 a=p.parse_args()
+if "b5q-dp=1" in (R/"UniXNU-b5q/board.toml").read_text():a.dp=True
 patch=R/'patches/uefi-b5q';records=[]
 groups=[('uefi-b5q','b303410c8e401fc9419ae65a024356ed09a438ef',[*sorted(patch.glob('000[123]-*.patch')),patch/'0005-b5q-physical-esp.patch',patch/'0007-b5q-pcie-dma.patch']),
         ('UniXNU','563595abedfdfa413ad583b66b6176d82007e633',[patch/'0006-unixnu-ramdisk-direct-decompress.patch']),
         ('UniXNU/drivers/DarwinBoot','5243c68ec332a227fe3680cd5da6d5a0e127035c',[patch/'0004-darwinboot-b5q-usb-dma.patch',patch/'0008-darwinboot-b5q-pcie-dma.patch'])]
-if a.media:
+if a.media or a.dp:
  groups[0][2].append(patch/'0009-b5q-media-dma.patch')
  groups[2][2].append(patch/'0010-darwinboot-b5q-media-dma.patch')
+if a.dp:
+ groups[0][2].append(patch/'0011-b5q-dp-splash-tail.patch')
+ groups[2][2].append(patch/'0012-darwinboot-b5q-dp-tail.patch')
 with tempfile.TemporaryDirectory(prefix='b5q-stage-firmware-')as td:
  for index,(repo,revision,patches)in enumerate(groups):
   dest=Path(td)/str(index);dest.mkdir();paths=set();subprocess.run(['git','init','-q',str(dest)],check=True)

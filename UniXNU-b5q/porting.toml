@@ -2904,7 +2904,7 @@ result = "Production protocol tests above PASS; this is explicitly not full P5 i
 id = "p4-returned-image-acceptance"
 status = "implemented"
 components = ["DarwinBoot", "GopFramebuffer"]
-paths = ["reports/p4-final-images.json", "../scripts/b5q-install/verify-p0-images.py"]
+paths = ["reports/p4-final-images.json"]
 inputs = ["CI45295645295 kernel/HAL/ESP and CI45296602477 firmware; actual hashes in p4-final-images.json"]
 configuration = ["Four menu entries; P4 feature-mask63; safe/RAM mask0; original Data/GPU retained"]
 procedure = ["Verify actual returned35mediaobjects/105callbackPAC/6vtablegroups, wireless122objects/62callbacks, zeroEL1apps_smmu, signed/trustedaddon, pairedloader/FV,4KnFAT/APFS/ADT/policies; independent full second image readback"]
@@ -2923,7 +2923,7 @@ result = "Actual returned image and independent full second readback PASS; no ne
 id = "p5-target-and-dma-contract"
 status = "planned"
 components = ["DarwinBoot", "GopFramebuffer"]
-paths = ["reports/p5-link-source.json", "reports/p5-display-dma-inputs.json", "../scripts/b5q-install/check-dp-target.py", "../scripts/b5q-install/check-dp-display-dma-inputs.py"]
+paths = ["reports/p5-link-source.json", "reports/p5-display-dma-inputs.json"]
 inputs = ["Original selected DisplayDxe SHA51babf469c8a6753082b1a84c677a21ed4ddca64ac98ca939a3bb42a614e8070; original b5q DTS/IORT/msm_drm and pinned matching source hashes in p5-display-dma-inputs.json"]
 configuration = ["No P5 hardware path in either accepted image; existing primary Display SID1c00/mask2 remains unchanged"]
 procedure = ["Read actual selected PE code and original stream tuples; compile actual SE8/USB plus production protocol instantiations; compare original vtables and actual ArmCpu/GENI callback authentication"]
@@ -2938,6 +2938,7 @@ reference = "reports/p5-link-source.json"
 command = "check-dp-target.py; test-dp-port.py; twelve production protocol groups"
 result = "Current scoped imports/target/PAC PASS; full P5 integration remains incomplete. Exact current hashes and scopes retained."
 [[area.evidence]]
+revision = "9b8620adadb2532224cc95c97dd74523af9b5254"
 kind = "source"
 reference = "reports/p5-display-dma-inputs.json"
 command = "python3 scripts/b5q-install/check-dp-display-dma-inputs.py"
@@ -2963,29 +2964,39 @@ command = "Original module symbols/disassembly; pinned sde_hw_sspp/ctl/lm/intf/p
 result = "Original symbols/offsets/bytes and input hashes retained; same-source copies are not independent hardware evidence."
 [[area.evidence]]
 kind = "host"
+revision = "9b8620adadb2532224cc95c97dd74523af9b5254"
 reference = "reports/p5-scanout-source.json"
 command = "python3 scripts/b5q-install/check-dp-local.py; python3 scripts/b5q-install/check-dp-target.py; requested USB/Wi-Fi/touch production regressions"
 result = "All23 scoped host groups/target/PAC/zeroMMIO PASS; real link hooks resolved. Missing retained DMA producer/end-to-end native display pipeline keep release gate closed."
 
 [[area]]
 id = "p5-native-link-and-presentation"
-status = "planned"
+status = "implemented"
 components = ["GopFramebuffer", "DarwinBoot", "QcomDwc3"]
 paths = ["package/B5qDpAux.h", "package/B5qDpBoard.h", "package/B5qDpClock.h", "package/B5qDpController.h", "package/B5qDpCta.h", "package/B5qDpDisplay.cpp", "package/B5qDpDisplay.h", "package/B5qDpDpu.h", "package/B5qDpDpuResources.h", "package/B5qDpIoav.h", "package/B5qDpIrq.cpp", "package/B5qDpIrq.h", "package/B5qDpLink.cpp", "package/B5qDpModes.h", "package/B5qDpMsa.h", "package/B5qDpPdic.h", "package/B5qDpPhy.h", "package/B5qDpPlane.h", "package/B5qDpPllData.h", "package/B5qDpPort.h", "package/B5qDpPresentation.h", "package/B5qDpSession.h", "package/B5qDpTiming.h", "package/B5qDpTraining.h", "package/B5qDpTu.h", "package/B5qDpVsync.h", "package/QcomDwc3.cpp", "package/B5qUsbBoard.cpp", "scripts/build-b5q-gop-27.py", "reports/p5-native-development.json"]
 inputs = ["Original Samsung module and b5q DT hashes, pinned source RPMh commit36ffdaa5a4e2bff6e66812b444874b0cb6133fa9, actual26C5035r KC and reviewed483-slot ABI; exact per-file hashes in reports/p5-native-development.json"]
 configuration = ["Local P5 WIP only; accepted P2/P3 and P4 stage images unchanged; no core/GPU/Data/UEFI build or device access"]
 procedure = ["Run production native-owner/IRQ/presentation/IOMFB host regressions; compile actual arm64e objects and compare original vtable/callback authentication and zeroEL1apps_smmu"]
-findings = ["23hostgroupsPASS; actual8arm64eobjects scoped importsclosed, originalUSB ABI and483externalIOMFB PACslots, IRQ IA2abe/worker IAd507/framecallback/backend IOMFB callbacks/GENI PAC andzeroEL1apps_smmu PASS. Native link andIRQ owners, two-buffer presentation andexternalIOMFB adapter implemented; complete retained DisplayDMA producer andend-to-end display/hotplug/lid wiring remain incomplete. NoP5CI/ESP orhardware claim."]
+findings = ["Owner explicitly selects original cont_splash stock-earlymap tail. NewEFI DpDma.c checks actualGOP Base/Size and completeLegacy primaryallocation, alignsPrimaryEnd to2MiB, requires>=16MiB tail, andhands80B state throughDarwinBoot chosen withfinalEFIreserved/exclusion validation. NoDisplayDxe orSMMU register/domain/bank change. XNU rechecks primaryPEconsole andpoolbounds. EDID modes filtertwo64B-stride/4K-slotbuffers againstpoolcapacity. ActualOwner connects training,independentDPUresources,IRQ115,VSync,latch-onlycompletion,external483slotIOMFB,disconnect drain/replug andP4A clamshell. Dedicatedb5q-dp1 onlyfull menu; other3menus explicitly0. Args1009B fitnative1024buffer; toolinggate1023. OSStringhelperreleaseslocalreferences. AllphysicalresultsremainHOST_VERIFIED_PENDING_HARDWARE; CI/imageacceptancepending."]
 completion = ["Listed software/host scopes verified; whole P5 and three-image final delivery remain incomplete"]
 limits = ["HOST_VERIFIED_PENDING_HARDWARE for listed scopes; no P5 final image/CI completion claim"]
-next_action = ["source-qualified independent retained Display DMA allocation/producer preserving primary domain", "end-to-end connection of native link, IRQ, presentation and IOMFB adapter; full mode/hotplug/lid lifecycle integration", "complete P5 build/CI/actual ESP and final three-image recheck"]
+next_action = ["Finish current full local gates, publish independent P5 commit, complete kernel+UEFI CI and verify actual third ESP/boot, then recheck all three packages"]
 [[area.evidence]]
 kind = "host"
+revision = "9b8620adadb2532224cc95c97dd74523af9b5254"
 reference = "reports/p5-native-development.json"
 command = "check-dp-local.py; check-dp-target.py; test-wireless-review-fixes.py; test-touch-p0.py"
 result = "23hostgroupsPASS; actual8arm64eobjects scoped importsclosed, originalUSB ABI and483externalIOMFB PACslots, IRQ IA2abe/worker IAd507/framecallback/backend IOMFB callbacks/GENI PAC andzeroEL1apps_smmu PASS. Native link andIRQ owners, two-buffer presentation andexternalIOMFB adapter implemented; complete retained DisplayDMA producer andend-to-end display/hotplug/lid wiring remain incomplete. NoP5CI/ESP orhardware claim."
 [[area.evidence]]
+revision = "9b8620adadb2532224cc95c97dd74523af9b5254"
 kind = "source"
 reference = "reports/p5-display-dma-inputs.json"
 command = "check-dp-display-dma-inputs.py"
 result = "Original PE caller/GOP-size bytes, b5q DTS and IORT checked; no independent Display DMA allocation is proven. No firmware mapping changes or EL1 SMMU access."
+
+[[area.evidence]]
+kind = "source"
+revision = "9b8620adadb2532224cc95c97dd74523af9b5254"
+reference = "reports/p5-splash-tail-integration.json"
+command = "Owner-selected GOP tail contract; original b5q DT435..437/35008..35014 and MemoryMapLib; production native pipeline and firmware checks"
+result = "Firmware/loader12patchreconstructionPASS; actualEDK2producer/loaderandnativearm64ecompilePASS; 26DPgroups include13nativeend-to-end pipeline scenarios and11029tail/modebounds. Fullbaseline/CI/actualimagegates tracked separately; nohardwareclaim."

@@ -6,7 +6,7 @@ from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
 R=Path(__file__).resolve().parents[2];sys.path[:0]=[str(R/'UniXNU-b5q/scripts'),str(R/'sources/UniXNU/kits/XnuPrelink')]
 from kc_image import Image
 s=importlib.util.spec_from_file_location('pac',R/'scripts/b5q-install/check-proctop-pac.py');pac=importlib.util.module_from_spec(s);s.loader.exec_module(pac)
-parser=argparse.ArgumentParser();parser.add_argument('--ci',type=Path);parser.add_argument('--out',type=Path);a=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('--ci',type=Path);parser.add_argument('--out',type=Path);parser.add_argument('--dp',action='store_true');a=parser.parse_args()
 out=R/'artifacts/b5q-p4-work/target'
 if a.ci:
     manifest,=a.ci.rglob('media-build.json');out=manifest.parent;build=json.loads(manifest.read_text());objects={}
@@ -17,6 +17,15 @@ if a.ci:
     receipt=dict(passed=True,objects=objects)
 else:receipt=json.loads((out/'report.json').read_text())
 assert receipt['passed'];paths=[Path(p)for p in receipt['objects']]
+if a.dp:
+    if a.ci:
+        dp_manifest,=a.ci.rglob('dp-build.json');dp=json.loads(dp_manifest.read_text())
+        extra={str(dp_manifest.parent/Path(n).name):digest for n,digest in dp['objects'].items()}
+    else:
+        dp=json.loads((R/'artifacts/b5q-p5-work/target/report.json').read_text())
+        extra={n:d for n,d in dp['actual_objects'].items()if Path(n).name in ('B5qDpLink.o','B5qDpIrq.o','B5qDpDisplay.late.o')}
+    assert len(extra)==3
+    receipt['objects'].update(extra);paths+=[Path(n)for n in extra]
 baseline=a.ci or R/'artifacts/b5q-p3-work/ci45261064321'
 arm,=baseline.rglob('ArmCpu.o');geni,=baseline.rglob('GeniI2c.o');native,=baseline.rglob('mach.development.bcm2837.unstripped.noctf')
 allpaths=paths+[arm,geni];scans={p.name:pac.scan(p)for p in allpaths};assert len(scans)==len(allpaths)
@@ -48,7 +57,7 @@ raw=native.read_bytes();core=Image(raw);symbols={n:v for v,names in core.symbols
 dec=Cs(CS_ARCH_ARM64,CS_MODE_ARM);dec.skipdata=True
 core_groups={}
 for name,va in symbols.items():
-    if not(name in ('_sysctl_register_oid_locked','_sysctl_unregister_oid','_sysctl_root') or any(needle in name for needle in ('call_continuation','Call_continuation','IOTimerEventSource'))):continue
+    if not(name in ('_sysctl_register_oid_locked','_sysctl_unregister_oid','_sysctl_root') or any(needle in name for needle in ('call_continuation','Call_continuation','IOTimerEventSource','IOWorkLoop'))):continue
     nxt=bisect.bisect_right(starts,va)
     if nxt==len(starts):continue
     end=starts[nxt]
@@ -74,6 +83,13 @@ assert any(i.mnemonic=='blraa'and i.op_str=='x22, x19'for i in core_groups['_sys
 def selected(obj,name):
     # Every branch follows the callback field in the pinned production source.
     # Never satisfy a callback with an unrelated caller that shares its type.
+    if obj=='B5qDpLink.o':
+        if 'Owner5frame'in name:return [('B5qDpIrq.o','Irq6worker')]
+        return [('B5qDpDisplay.late.o','opaque411_228909'if'Owner7present'in name else'disconnect')]
+    if obj=='B5qDpIrq.o':return [('ArmCpu.o','interrupt')]if'primary'in name else[('native-core','continuation')]
+    if obj=='B5qDpDisplay.late.o':
+        if 'fenceFired'in name:return [('timer-resign','')]
+        if '__invoke'in name:return [('native-core','IOWorkLoop')]
     if obj=='B5qDaily.late.o' or re.search(r'(Thread|Worker|Main|irqThread|workThread|eventThread)EPvi$',name):
         return [('native-core','continuation')]
     if obj=='B5qBacklight.late.o'and '4tickE'in name:return [('timer-resign','')]

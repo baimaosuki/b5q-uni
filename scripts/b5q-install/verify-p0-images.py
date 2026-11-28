@@ -16,6 +16,7 @@ def main():
  p.add_argument('--board',type=Path,default=R/'UniXNU-b5q/board.toml',help='Source configuration for this exact image revision')
  p.add_argument('--wireless',action='store_true',help='Also verify P2/P3 runtime against the accepted GPU addon')
  p.add_argument('--media',action='store_true',help='Verify P4 menu, media HAL, firmware and ADT slots')
+ p.add_argument('--dp',action='store_true',help='Verify final P5 native display, GOP tail handoff and menu isolation')
  a=p.parse_args();a.out.mkdir(parents=True,exist_ok=True)
  fs=load(R/'scripts/b5q-install/package-usb-dma-esp.py');fs.image_format(a.esp)
  run('fsck.fat','-n',a.esp)
@@ -33,7 +34,10 @@ def main():
   if a.media:
    sys.path.insert(0,str(R/'UniXNU-b5q/scripts'));from b5q_menu import profiles as menu_profiles
    assert list(entries.values())==menu_profiles(board['payload']['kernel_args'])
-  assert entries['xnu']['args']==' '.join(board['payload']['kernel_args']) and len(entries['xnu']['args'].encode())<=1000
+  if a.dp:
+   assert a.media
+   for name,entry in entries.items():assert ('b5q-dp=1'if name=='xnu'else'b5q-dp=0')in entry['args'].split()
+  assert entries['xnu']['args']==' '.join(board['payload']['kernel_args']) and len(entries['xnu']['args'].encode())<=1023
   assert 'b5q-data-ufs=2' in entries['xnu']['args'].split() and 'initrd' not in entries['xnu']
   assert 'offline-mobile-graphics-client' not in entries['xnu']['args']
   assert 'b5q-data-ufs=0' in entries['ram-fallback']['args'].split()
@@ -55,11 +59,20 @@ def main():
     for subsystem in ['audio','video']:
      assert chosen['b5q-'+subsystem+'-dma-ready']==bytes(4)
      assert chosen['b5q-'+subsystem+'-dma-state']==bytes(104)
+   if a.dp:
+    assert chosen['b5q-dp-dma-ready']==bytes(4)and chosen['b5q-dp-dma-state']==bytes(80)
    profiles[name]=dict(kernel_sha256=sha(kernel),args_bytes=len(entry['args'].encode()),lp_sip0_hex=chosen.get('lp-sip0',nodes['/chosen/asmb'][2]['lp-sip0']).hex(),RAM_seed_loaded='initrd'in entry)
   assert len({v['kernel_sha256']for v in profiles.values()})==1
   kernel=assets/'kernel.macho';raw=kernel.read_bytes();outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1]);symbols={n:v for v,names in core.symbols().items()for n in names}
   required=['_native_ram_block_provider_seed','_native_ram_block_volume_seed','_native_ram_block_volume_device','_b5q_power_start','_sheng_cpu_idle_mach','_ml_outside_memory_pages','_ml_outside_memory_refused','_native_touch_recovered','_native_touch_set_sink']
   assert all(n in symbols for n in required),[n for n in required if n not in symbols]
+  if a.dp:
+   required_dp=['_b5q_dp_link_update','_b5q_dp_link_stop','_b5q_dp_irq_start','_b5q_dp_irq_stop',
+    '_b5q_dp_display_create','_b5q_dp_display_disconnect','_b5q_dp_display_frame','_b5q_dp_lid_online','__ZTV12B5qDpDisplay']
+   assert all(n in symbols for n in required_dp),[n for n in required_dp if n not in symbols]
+   for marker in [b'scanout=online',b'b5q-dp-dma-state',b'B5qDP: EDID pool-filter',b'B5qDP: vsync frame=',b'clamshell-sleep-disabled=']:
+    assert marker in raw,marker
+   assert b'scanout=unattached'not in raw
   assert not any('B5qTouchPointer'in n for n in symbols)
   for marker in [b'B5qTouch: mode=%02x',b'c2=%u release_all=%u hid=%u',b'stage=release-all',b'report-recovery',b'FUA-still-accepted',b'outside adopted=',b'4.5 GiB',b'TOP6..10',b'B5qPower:',b'persistent Data media/UUID/BSD readiness timeout or duplicate UUID']:
    assert marker in raw,marker
@@ -153,7 +166,7 @@ def main():
    stream.truncate(size)
    for offset,body in extents:stream.seek(offset);stream.write(body)
   run(sys.executable,R/'scripts/b5q-install/verify-apfs-init-readback.py','--image',recovery,'--trust-cache',assets/'kernel.macho.trustcache','--out',a.out/'APFS.json')
-  result=dict(passed=True,stage='P4'if a.media else'P2+P3'if a.wireless else'P0+P1',ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),FD=dict(bytes=a.fd.stat().st_size,sha256=sha(a.fd)),profiles=profiles,required_symbols={n:hex(symbols[n])for n in required},FAT_members=len(members),all_real_link_inputs_resolved=True,Data_GPU_unchanged=True,loader_matches_actual_rebuilt_FD=True,hardware_qualification='HOST_VERIFIED_PENDING_HARDWARE',physical_Data_accessed=False)
+  result=dict(passed=True,stage='P5'if a.dp else'P4'if a.media else'P2+P3'if a.wireless else'P0+P1',ESP=dict(bytes=a.esp.stat().st_size,sha256=sha(a.esp)),FD=dict(bytes=a.fd.stat().st_size,sha256=sha(a.fd)),profiles=profiles,required_symbols={n:hex(symbols[n])for n in required},FAT_members=len(members),all_real_link_inputs_resolved=True,Data_GPU_unchanged=True,loader_matches_actual_rebuilt_FD=True,hardware_qualification='HOST_VERIFIED_PENDING_HARDWARE',physical_Data_accessed=False)
   (a.out/'images.json').write_text(json.dumps(result,indent=2)+'\n')
   print(json.dumps(result,indent=2))
 if __name__=='__main__':main()

@@ -20,6 +20,7 @@ harness=r'''
 #include <vector>
 enum {kRoleNone,kRoleDevice,kRoleHost};
 bool gDmaReady=true,gSuperSpeed=false,gDeviceStackAllowed=false;
+unsigned gDpLanes=0;
 int gCoreRole=kRoleDevice;unsigned powerCalls=0,hostCalls=0,deviceCalls=0,qmpCalls=0,utmi=0;
 bool boost=false,powerFailure=false,phyFailure=false,hostFailure=false,qmpReverse=false;
 uint32_t native_usb_stats[54]={},registers[1024]={};
@@ -71,6 +72,8 @@ int main(){
  // Opposite plug orientation on a reconnect is observed from CC, not GPIO.
  reset();current={0x41,0,0x80,0x80,true};followOrientation();assert(qmpCalls==1&&!qmpReverse);
  current.cc0=0x81;followOrientation();assert(qmpCalls==2&&qmpReverse);
+ gDpLanes=4;followOrientation();assert(qmpCalls==2&&utmi==1);
+ gDpLanes=0;gSuperSpeed=false;followOrientation();assert(qmpCalls==3&&qmpReverse);
  puts("PASS production P1:CC1/CC2,Sink+DFP externalHub,Source+UFP,roles,boost/read/PHY/XHCI failures,firmwareDMA gate,unknownCC UTMI,bus-number u32");
 }
 '''

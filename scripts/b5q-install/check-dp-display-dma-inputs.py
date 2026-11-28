@@ -53,7 +53,7 @@ sid=top[top.index('void sde_hw_set_sspp_sid('):top.index('static void sde_hw_pro
 assert 'if (!sid)\n\t\treturn;'in sid and 'SDE_REG_WRITE(&sid->hw, offset, vm << 2);'in sid
 assert 'sde_hw_set_sspp_sid(sde_kms->hw_sid, psde->pipe, vm, sde_kms->catalog);'in plane
 result=dict(
- complete_P5=False,hardware_verified=False,separate_DP_DMA_mapping_proven=False,
+ complete_P5=False,hardware_verified=False,separate_DP_DMA_mapping_proven=False,selected_policy='Owner-authorized stock earlymap splash tail, real GOP bounds + retained EFI memory; separate stream/domain not used',
  inputs={name:dict(path=str(p.relative_to(R)),bytes=p.stat().st_size,sha256=hashlib.sha256(p.read_bytes()).hexdigest())for name,p in files.items()},
  selected_DisplayDxe=dict(caller_RVA='0x133cc',target_RVA='0x19b18',actual_words=['mov w0,wzr','ret'],
   orphan_HAL_body='0x19b20..0x19bd4; not executed by the selected caller; does not prove a retained identity/bypass mapping',

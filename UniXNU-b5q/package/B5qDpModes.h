@@ -74,5 +74,13 @@ struct Modes {
    const uint64_t current=uint64_t(m.width)*m.height*1000+m.refreshMilliHz();if(current>score){result=&m;score=current;}}
   return result;
  }
+ // 64-byte row alignment and 4KiB slot alignment; both scanout buffers
+ // must fit entirely in the validated stock splash tail.
+ static uint32_t scanoutStride(const Mode &mode){return (uint32_t(mode.width)*4+63)&~63u;}
+ static uint64_t scanoutSlot(const Mode &mode){return (uint64_t(scanoutStride(mode))*mode.height+4095)&~4095ULL;}
+ unsigned fitPool(uint64_t bytes){
+  unsigned kept=0;for(unsigned i=0;i<count;i++)if(values[i].width<=5120&&scanoutSlot(values[i])<=bytes/2)values[kept++]=values[i];
+  count=kept;return kept;
+ }
 };
 }

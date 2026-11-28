@@ -6,6 +6,14 @@
 #include <IOKit/IODeviceMemory.h>
 #include <kern/clock.h>
 #include <mach/mach_time.h>
+#include <IOKit/IOPlatformExpert.h>
+#include <IOKit/IOMemoryDescriptor.h>
+#include <mach/kmod.h>
+#include <pexpert/pexpert.h>
+#include "B5qDpDma.h"
+#include "B5qDpDisplay.h"
+#include "B5qDpIrq.h"
+#include "B5qDpPresentation.h"
 #include "AppsSmmuLock.h"
 #include "B5qDpDpuResources.h"
 #include "B5qDpBoard.h"
@@ -15,6 +23,9 @@
 #include "B5qMax77705.h"
 #include "QcomRpmh.h"
 extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *);
+extern "C" void b5q_dp_lid_online(bool);
+extern kmod_info_t g_kernel_kmod_info;
+extern "C" void b5q_dp_display_static_init(void) __asm__("__GLOBAL__sub_I_B5qDpDisplay.cpp");
 namespace {
 using B5qDp::Block;
 void barrier(){asm volatile("dsb sy":::"memory");}
@@ -144,10 +155,124 @@ struct Hardware {
 struct Owner {
  Hardware io;B5qDp::Session<Hardware> session;uint32_t generation=0;
  uint64_t retryAt=0;bool accepted=false;
+ B5Q_DP_DMA_STATE dma{};Window pool;
+ IOLock *scanLock=nullptr;IOService *display=nullptr,*provider=nullptr;
+ B5qDp::Presentation presentation;uint32_t scanClosing=1;uint64_t frameCount=0;
+ struct Transfer {IOMemoryDescriptor *memory;uint64_t stride;};
+ struct ScanIo {
+  Owner &owner;
+  uint32_t read(unsigned off){return owner.io.read(Block::Dpu,off);}
+  void write(unsigned off,uint32_t value){owner.io.write(Block::Dpu,off,value);}
+  void barrier(){::barrier();}void delay(unsigned us){owner.io.delay(us);}
+  uint64_t nowUs(){return ::nowUs();}
+  bool dmaAllowed(uint64_t address,uint64_t bytes){
+   return B5qDpPoolValid(&owner.dma)&&owner.pool.va&&address>=owner.dma.PoolBase&&
+    address<=owner.dma.PoolBase+owner.dma.PoolBytes&&bytes<=owner.dma.PoolBase+owner.dma.PoolBytes-address;
+  }
+  bool fill(const B5qDp::ScanoutBuffer &b,uint64_t bytes){
+   if(!dmaAllowed(b.address,bytes))return false;
+   volatile uint32_t *out=owner.pool.va+(b.address-owner.dma.PoolBase)/4;
+   for(uint64_t i=0;i<bytes/4;i++)out[i]=0xff000000;return true;
+  }
+  bool clean(const B5qDp::ScanoutBuffer &b,uint64_t bytes){
+   if(!dmaAllowed(b.address,bytes))return false;barrier();return true; // pool mapping is uncached
+  }
+  bool copy(const B5qDp::ScanoutBuffer &b,const void *source,const B5qDp::Mode &m,unsigned stride){
+   const auto &t=*static_cast<const Transfer*>(source);
+   if(!t.memory||t.stride<uint64_t(m.width)*4||t.stride>UINT64_MAX/m.height||
+      t.stride*m.height>t.memory->getLength()||!dmaAllowed(b.address,uint64_t(stride)*m.height))return false;
+   // Descriptor readBytes may use wide/unaligned stores. Stage one normal
+   // RAM row, then scalar-store pixels into the uncached scanout mapping.
+   auto *row=static_cast<uint32_t*>(IOMallocData(m.width*4));if(!row)return false;
+   bool ok=t.memory->prepare(kIODirectionOut)==kIOReturnSuccess;
+   const bool prepared=ok;
+   for(unsigned y=0;ok&&y<m.height;y++){
+    ok=t.memory->readBytes(uint64_t(y)*t.stride,row,m.width*4)==m.width*4;
+    if(ok){volatile uint32_t *out=owner.pool.va+(b.address-owner.dma.PoolBase+uint64_t(y)*stride)/4;
+     for(unsigned x=0;x<m.width;x++)out[x]=row[x];}
+   }
+   if(prepared)t.memory->complete(kIODirectionOut);IOFreeData(row,m.width*4);return ok;
+  }
+  bool arm(B5qDp::Presentation *){return b5q_dp_irq_start(&owner,Owner::frame);}
+  bool disarm(){return b5q_dp_irq_stop();}
+  bool video(){return owner.session.video();}
+  bool stopVideo(){if(owner.session.streaming){owner.session.controller.stop();owner.session.streaming=false;}return true;}
+  void notify(uint32_t,uint64_t){}
+ } scan{*this};
  Owner():session(io){}
+ static void frame(void *context,uint32_t counter,uint64_t timestamp){
+  auto &self=*static_cast<Owner*>(context);if(__atomic_load_n(&self.scanClosing,__ATOMIC_ACQUIRE))return;
+  IOLockLock(self.scanLock);
+  const uint64_t tag=self.presentation.frame(self.scan,counter,timestamp);
+  IOService *target=self.display;if(target)target->retain();
+  if(++self.frameCount<=3||self.frameCount%600==0)IOLog("B5qDP: vsync frame=%u total=%llu tag=%llu\n",counter,self.frameCount,tag);
+  IOLockUnlock(self.scanLock);
+  if(target){b5q_dp_display_frame(target,tag,counter,timestamp);target->release();}
+ }
+ static bool present(void *context,IOMemoryDescriptor *memory,uint64_t stride,bool blank,uint64_t tag){
+  auto &self=*static_cast<Owner*>(context);if(__atomic_load_n(&self.scanClosing,__ATOMIC_ACQUIRE))return false;
+  Transfer transfer{memory,stride};IOLockLock(self.scanLock);
+  const bool ok=!__atomic_load_n(&self.scanClosing,__ATOMIC_ACQUIRE)&&self.presentation.offer(self.scan,tag,&transfer,blank);
+  IOLockUnlock(self.scanLock);return ok;
+ }
+ static bool drain(void *context){
+  auto &self=*static_cast<Owner*>(context);__atomic_store_n(&self.scanClosing,1u,__ATOMIC_RELEASE);
+  // Never hold scanLock while waiting for the IRQ worker: it may be
+  // waiting on that lock or entering the IOMFB work loop.
+  if(!b5q_dp_irq_stop())return false;
+  if(!self.scanLock)return true;
+  IOLockLock(self.scanLock);uint64_t cancelled=0;const bool ok=self.presentation.stop(self.scan,cancelled);
+  IOLockUnlock(self.scanLock);
+  if(cancelled)IOLog("B5qDP: cancelled flip tag=%llu\n",cancelled);return ok;
+ }
+ bool poolReady(){
+  if(!scanLock)scanLock=IOLockAlloc();if(!scanLock)return false;
+  auto *chosen=IORegistryEntry::fromPath("/chosen",gIODTPlane);
+  auto *flag=chosen?OSDynamicCast(OSData,chosen->getProperty("b5q-dp-dma-ready")):nullptr;
+  auto *state=chosen?OSDynamicCast(OSData,chosen->getProperty("b5q-dp-dma-state")):nullptr;
+  uint32_t ready=0;dma={};
+  if(flag&&flag->getLength()==4)memcpy(&ready,flag->getBytesNoCopy(),4);
+  if(state&&state->getLength()==sizeof(dma))memcpy(&dma,state->getBytesNoCopy(),sizeof(dma));
+  OSSafeReleaseNULL(chosen);
+  IOLog("B5qDP: dma-ready=%u primary=%llx..%llx pool=%llx+%llx prepare=%llx retain=%llx\n",
+        ready,dma.FrameBufferBase,dma.PrimaryEnd,dma.PoolBase,dma.PoolBytes,dma.PrepareStatus,dma.RetentionStatus);
+  PE_Video primary{};
+  return ready==1&&B5qDpPoolValid(&dma)&&!PE_current_console(&primary)&&
+   primary.v_baseAddr==dma.FrameBufferBase&&primary.v_rowBytes&&primary.v_height&&
+   uint64_t(primary.v_rowBytes)*primary.v_height<=dma.PrimaryEnd-dma.FrameBufferBase&&
+   pool.open(dma.PoolBase,unsigned(dma.PoolBytes));
+ }
+ bool startDisplay(){
+  static bool initialized=false;
+  if(!initialized){void *handle=OSMetaClass::preModLoad(g_kernel_kmod_info.name);
+   if(!handle)return false;b5q_dp_display_static_init();if(OSMetaClass::postModLoad(handle))return false;initialized=true;}
+  B5qDp::DpuResources r;r.inspect([&](unsigned off){return io.read(Block::Dpu,off);});
+  const auto &m=session.selected;const unsigned stride=B5qDp::Modes::scanoutStride(m);
+  const uint64_t slot=B5qDp::Modes::scanoutSlot(m);
+  if(!r.choose(m.width)||slot>dma.PoolBytes/2)return false;
+  const B5qDp::ScanoutBuffer buffers[2]={{dma.PoolBase,slot},{dma.PoolBase+slot,slot}};
+  IOLockLock(scanLock);__atomic_store_n(&scanClosing,0u,__ATOMIC_RELEASE);
+  const bool started=presentation.begin(scan,r,m,buffers,stride);IOLockUnlock(scanLock);
+  if(!started){drain(this);return false;}
+  provider=new IOService;
+  if(!provider||!provider->init()||!provider->attach(IOService::getPlatform()))return false;
+  provider->setName("B5qDisplayPort");
+  B5qDpDisplayConfig config{};config.mode=m;config.edidBytes=session.edidBytes;
+  memcpy(config.edid,session.edid,config.edidBytes);config.context=this;config.present=present;config.drain=drain;
+  IOService *next=b5q_dp_display_create(provider,&config);
+  IOLockLock(scanLock);display=next;IOLockUnlock(scanLock);
+  if(!display)return false;
+  b5q_dp_lid_online(true);return true;
+ }
  bool stop(){
   accepted=false;
+  b5q_dp_lid_online(false);
+  if(display&&!b5q_dp_display_disconnect(display))return false;
+  if(!display&&!drain(this))return false;
+  if(display){display->terminate(kIOServiceSynchronous);display->release();display=nullptr;}
+  if(provider){if(provider->getProvider())provider->detach(provider->getProvider());provider->release();provider=nullptr;}
   if(!session.stop()){IOLog("B5qDP: stop=retained clock=%x mx=%u\n",session.clock.failed,io.mxOwned);return false;}
+  pool.close();dma={};
   return io.close();
  }
  void update(const B5qDpPortState &p){
@@ -155,24 +280,28 @@ struct Owner {
    stop();retryAt=0;return;
   }
   if(accepted&&generation==p.generation&&!p.hpdIrq&&io.wantedReverse==unsigned(p.reverse)){
+   IOLockLock(scanLock);const bool stalled=presentation.timedOut(scan);IOLockUnlock(scanLock);
    uint8_t status[6]{};bool healthy=io.connected()&&session.aux.dpcd(true,0x202,status,6)&&(status[2]&1);
    for(unsigned lane=0;lane<session.lanes;lane++)healthy=healthy&&((status[lane/2]>>(4*(lane&1)))&7)==7;
-   if(healthy)return;
+   if(healthy&&!stalled)return;
    IOLog("B5qDP: link-status lost aux=%u\n",unsigned(session.aux.error));
   }
   if(nowUs()<retryAt)return;
   if(!stop()){retryAt=nowUs()+1000000;return;}
-  if(!io.open(p.reverse!=0)){
+  if(!poolReady()||!io.open(p.reverse!=0)){
    IOLog("B5qDP: stage=power-gpio failed fault=%u\n",io.fault);io.close();retryAt=nowUs()+1000000;return;
   }
   const bool discovered=session.discover(p.lanes,p.reverse!=0);
-  const bool trained=discovered&&session.train()&&!io.fault;
+  if(discovered){const unsigned advertised=session.modes.count;session.modes.fitPool(dma.PoolBytes);
+   IOLog("B5qDP: EDID pool-filter advertised=%u fitting=%u bytes=%llu\n",advertised,session.modes.count,dma.PoolBytes);}
+  const bool trained=discovered&&session.modes.count&&session.train()&&!io.fault;
   IOLog("B5qDP: stage=link discovered=%u trained=%u error=%u aux=%u phy=%u clock=%x rate=%u lanes=%u modes=%u attempts=%u\n",
         discovered,trained,unsigned(session.error),unsigned(session.aux.error),session.phy.failed,session.clock.failed,
         session.rate,session.lanes,session.modes.count,session.attempts);
   if(!trained){stop();retryAt=nowUs()+1000000;return;}
+  if(!startDisplay()){IOLog("B5qDP: stage=scanout failed retained=%u\n",presentation.dpu.active);stop();retryAt=nowUs()+1000000;return;}
   generation=p.generation;accepted=true;retryAt=0;
-  IOLog("B5qDP: EDID %ux%u pclk=%u refresh_mHz=%u pin=%02x reverse=%d scanout=unattached\n",
+  IOLog("B5qDP: EDID %ux%u pclk=%u refresh_mHz=%u pin=%02x reverse=%d scanout=online\n",
         session.selected.width,session.selected.height,session.selected.pixelKHz,session.selected.refreshMilliHz(),p.pin,p.reverse);
  }
 };

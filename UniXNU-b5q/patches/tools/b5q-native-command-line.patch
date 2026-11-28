@@ -1,0 +1,14 @@
+diff --git a/scripts/unixnu/payload.py b/scripts/unixnu/payload.py
+--- a/scripts/unixnu/payload.py
++++ b/scripts/unixnu/payload.py
+@@ -49,8 +49,8 @@
+             raise Error(f'unsupported kernel argument: {value}')
+     line = ' '.join(arguments)
+     # DarwinBoot copies the command line into a 1024-byte buffer and refuses a longer one.
+-    if len(line) > 1000:
+-        raise Error(f'the kernel command line is {len(line)} bytes; the limit is 1000')
++    if len(line) > 1023:
++        raise Error(f'the kernel command line is {len(line)} bytes; the limit is 1023')
+     return line
+ 
+ 

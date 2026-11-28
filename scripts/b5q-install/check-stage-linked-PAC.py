@@ -7,7 +7,9 @@ from kc_image import Image
 p=argparse.ArgumentParser(description=__doc__);p.add_argument('--kernel',type=Path,required=True);p.add_argument('--out',type=Path,required=True);a=p.parse_args()
 raw=a.kernel.read_bytes();outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1]);symbols={n:v for v,ns in core.symbols().items()for n in ns};fixups=outer.fixups()
 classes={}
-for cls,fixture in [('NativeHidInput','hid-device'),('QcomDwc3Xdci','usb-xdci'),('QcomDwc3Xhci','usb-xhci')]:
+fixtures=[('NativeHidInput','hid-device'),('QcomDwc3Xdci','usb-xdci'),('QcomDwc3Xhci','usb-xhci')]
+if '__ZTV12B5qDpDisplay'in symbols:fixtures.append(('B5qDpDisplay','legacy-display'))
+for cls,fixture in fixtures:
  address=symbols['__ZTV'+str(len(cls))+cls]
  original=json.loads((R/'UniXNU-b5q/scripts'/(fixture+'-26C5035r.json')).read_text())
  for i,row in enumerate(original['slots']):

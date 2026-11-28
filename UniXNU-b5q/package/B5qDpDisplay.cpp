@@ -17,6 +17,7 @@
 #include <libkern/c++/OSDictionary.h>
 #include <libkern/c++/OSNumber.h>
 #include <libkern/c++/OSString.h>
+#include <libkern/OSKextLib.h>
 #include <mach/mach_time.h>
 #include <kern/clock.h>
 extern "C" IOMemoryDescriptor *native_legacy_surface_descriptor(OSObject *);
@@ -68,10 +69,10 @@ class B5qDpDisplay:public IOMobileFramebufferLegacy {
   OSObject *color=native_legacy_ioav_color(2,8,0,0,0,16,false,nullptr,nullptr,nullptr,nullptr);
   OSArray *colors=OSArray::withCapacity(1),*timings=OSArray::withCapacity(1);
   OSDictionary *attributes=OSDictionary::withCapacity(8),*transport=OSDictionary::withCapacity(2),
-   *layers=OSDictionary::withCapacity(1);
+   *layers=OSDictionary::withCapacity(1),*source=OSDictionary::withCapacity(5),*scaling=OSDictionary::withCapacity(2);
   OSData *edid=OSData::withBytes(config.edid,config.edidBytes);bool ok=false;
   do {
-   if(!timing||!color||!colors||!timings||!attributes||!transport||!layers||!edid)break;
+   if(!timing||!color||!colors||!timings||!attributes||!transport||!layers||!source||!scaling||!edid)break;
    ident(color,kDisplayColorID);ident(timing,kDisplayTimingID);
    if(!colors->setObject(color)||!timings->setObject(timing))break;
    native_legacy_ioav_timing_colors(timing,colors);
@@ -81,14 +82,20 @@ class B5qDpDisplay:public IOMobileFramebufferLegacy {
       !attributes->setObject("DefaultColorSpaceIsSRGB",kOSBooleanTrue)||
       !string(transport,"Upstream","DisplayPort")||!string(transport,"Downstream","DisplayPort")||
       !number(layers,"MaxNumLayers",1))break;
+   if(!number(source,"MaxSrcBufferWidth",16384)||!number(source,"MaxSrcBufferHeight",16384)||
+      !number(source,"MaxSrcRectWidth",5120)||!number(source,"MaxSrcRectTotal",0)||
+      !number(source,"IOMFBMaxCompressedSizeInBytes",0)||
+      !number(scaling,"RGBLayer_MinScaleFraction",4)||!number(scaling,"RGBLayer_MaxScale",4))break;
    if(!setProperty("DisplayAttributes",attributes)||!setProperty("Transport",transport)||
       !setProperty("ColorElements",colors)||!setProperty("TimingElements",timings)||
-      !setProperty("IOMFBNumLayers",layers)||!setProperty("NativeDisplayEDID",edid))break;
+      !setProperty("IOMFBNumLayers",layers)||!setProperty("NativeDisplayEDID",edid)||
+      !setProperty("IOMFBMaxSrcPixels",source)||!setProperty("IOMFBScalingLimits",scaling))break;
    setProperty("built-in",false);setProperty("B5qExternalDisplay",true);
    setProperty("DisplayWidth",config.mode.width,32);setProperty("DisplayHeight",config.mode.height,32);
    ok=true;
   }while(false);
   OSSafeReleaseNULL(edid);OSSafeReleaseNULL(layers);OSSafeReleaseNULL(transport);OSSafeReleaseNULL(attributes);
+  OSSafeReleaseNULL(source);OSSafeReleaseNULL(scaling);
   OSSafeReleaseNULL(timings);OSSafeReleaseNULL(colors);OSSafeReleaseNULL(color);OSSafeReleaseNULL(timing);return ok;
  }
  static void fenceFired(OSObject *owner,IOTimerEventSource *){static_cast<B5qDpDisplay*>(owner)->kickSwapQueue();}
@@ -295,6 +302,8 @@ public:
 OSDefineMetaClassAndStructors(B5qDpDisplay,IOMobileFramebufferLegacy)
 extern "C" IOService *b5q_dp_display_create(IOService *provider,const B5qDpDisplayConfig *config){
  if(!provider||!config)return nullptr;
+ const OSReturn graphics=OSKextLoadKextWithIdentifier("com.apple.iokit.IOGraphicsFamily");
+ if(graphics!=kOSReturnSuccess&&graphics!=kOSKextReturnStartStopError)return nullptr;
  auto *display=new B5qDpDisplay;if(!display)return nullptr;
  if(!display->init()||!display->configure(*config)||!display->attach(provider)){display->release();return nullptr;}
  if(!display->start(provider)){display->detach(provider);display->release();return nullptr;}

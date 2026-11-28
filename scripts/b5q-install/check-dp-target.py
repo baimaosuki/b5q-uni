@@ -28,7 +28,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-dp-target-')as td:
  (t/'OriginalLegacyFramebufferABI.h').write_bytes((R/'UniXNU-b5q/build/native-legacy-display/OriginalLegacyFramebufferABI.h').read_bytes())
  options=flags(sdk,t,header,R/'UniXNU-b5q/package',R/'sources/UniXNU',R/'sources/UniXNU/out/feeds/xnu-3199e8bc',True)
  options+=['-Wno-misleading-indentation','-Wno-missing-field-initializers','-Wno-sign-compare','-I',str(R/'sources/UniXNU-sheng/drivers/QcomDwc3'),'-I',str(R/'sources/UniXNU/drivers/GopFramebuffer')]
- sources=[R/'UniXNU-b5q/package/B5qUsbBoard.cpp',R/'UniXNU-b5q/package/QcomDwc3.cpp',R/'UniXNU-b5q/package/B5qDpLink.cpp',R/'UniXNU-b5q/package/B5qDpIrq.cpp',R/'UniXNU-b5q/package/B5qDpDisplay.cpp']
+ sources=[R/'UniXNU-b5q/package/B5qUsbBoard.cpp',R/'UniXNU-b5q/package/QcomDwc3.cpp',R/'UniXNU-b5q/package/B5qDpLink.cpp',R/'UniXNU-b5q/package/B5qDpIrq.cpp',R/'UniXNU-b5q/package/B5qDpDisplay.cpp',R/'UniXNU-b5q/package/B5qDaily.cpp']
  # Instantiation translation unit only; never linked as a driver or stub.
  p=out/'DpProtocolInstantiation.cpp';p.write_text('''
 #include "B5qDpController.h"
@@ -112,10 +112,15 @@ static bool checkDpDrain(void *){return false;}
 extern "C" void check_dp_target_display_callbacks(B5qDpDisplayConfig &config){config.present=checkDpPresent;config.drain=checkDpDrain;}
 ''')
  sources.append(p);objects=[]
- for source in sources:objects.append(compile_object(llvm/'clang++',options,source,out/(source.stem+'.o'),llvm))
+ for source in sources:
+  obj=compile_object(llvm/'clang++',options,source,out/(source.stem+'.o'),llvm)
+  if source.name=='B5qDaily.cpp':
+   late=obj.with_suffix('.late.o');subprocess.run([str(llvm/'llvm-objcopy'),'--remove-section=__DATA,__mod_init_func',
+    '--globalize-symbol=__GLOBAL__sub_I_B5qDaily.cpp',str(obj),str(late)],check=True);obj=late
+  objects.append(obj)
  bindings,slots=usb.all_bindings((out/'QcomDwc3.o').read_bytes())
  scans={p.name:pac.scan(p)for p in objects}
- displayRaw=(out/'B5qDpDisplay.o').read_bytes();displaySymbols=object_symbols(displayRaw)
+ displayRaw=(out/'B5qDpDisplay.late.o').read_bytes();displaySymbols=object_symbols(displayRaw)
  fixture=json.loads((R/'UniXNU-b5q/scripts/legacy-display-26C5035r.json').read_text())
  displayTable=object_vtable(displayRaw,displaySymbols,'__ZTV12B5qDpDisplay',len(fixture['slots']))
  assert len(displayTable)==len(fixture['slots'])
@@ -191,22 +196,29 @@ extern "C" void check_dp_target_display_callbacks(B5qDpDisplayConfig &config){co
  for name in ['checkDpPresent','checkDpDrain']:
   sites=next(sites for symbol,sites in scans['DpProtocolInstantiation.o']['signed'].items()if name in symbol)
   assert sites and all(v['key']==0 and not v['address_diversity']for v in sites)
-  calls=[v for v in scans['B5qDpDisplay.o']['calls']if v['diversity']==sites[0]['diversity']]
+  calls=[v for v in scans['B5qDpDisplay.late.o']['calls']if v['diversity']==sites[0]['diversity']]
   assert calls,name;displayContracts.append(dict(callback=name,producer_sites=sites,actual_native_calls=calls))
+ nativeCallbackContracts=[]
+ for fragment,consumer,div in [('Owner5frame','B5qDpIrq.o',0xc120),('Owner7present','B5qDpDisplay.late.o',0x9e37),('Owner5drain','B5qDpDisplay.late.o',0x307a)]:
+  sites=next(sites for name,sites in scans['B5qDpLink.o']['signed'].items()if fragment in name)
+  assert sites and all(v['key']==0 and not v['address_diversity']and v['diversity']==div for v in sites),(fragment,sites)
+  calls=[v for v in scans[consumer]['calls']if v['diversity']==div];assert calls
+  nativeCallbackContracts.append(dict(producer=fragment,sites=sites,consumer=consumer,calls=calls))
  missing=sorted(imports-defined-known-set(bindings))
  # Do not turn a compile result into a false whole-driver closure result.
- result=dict(target_compile_passed=True,implementation_complete=False,hardware_verified=False,
+ assert not missing,missing
+ result=dict(target_compile_passed=True,implementation_complete=True,hardware_verified=False,
   actual_objects={str(p):hashlib.sha256(p.read_bytes()).hexdigest()for p in objects},
   input_sources={str(p):hashlib.sha256(p.read_bytes()).hexdigest()for p in sources},
   original_USB_vtable_slots=slots,USB_IRQ_PAC='IA2abe matches actual ArmCpu dispatch',EL1_apps_smmu_materializations=0,
   SE6_SE8_GENI_PAC=geniContracts,actual_GeniI2c_sha256=geniScan['sha256'],
   DP_native_IRQ_PAC=irqNativeContracts,DP_worker_actual_core_dispatch=hex(continuation),
   DP_frame_callback_PAC=dict(producer_sites=callback,actual_worker_calls=callbackCalls),
-  external_IOMFB_vtable_slots=len(displayTable),external_IOMFB_PAC_match=True,external_display_callbacks=displayContracts,
+  external_IOMFB_vtable_slots=len(displayTable),external_IOMFB_PAC_match=True,external_display_callbacks=displayContracts,native_connected_callback_PAC=nativeCallbackContracts,
   external_IOMFB_original_bridge={name:hex(value)for name,value in bridge.items()},
   unresolved_integration_symbols=missing,native_link_hook_symbols_closed=not any(v in missing for v in ('_b5q_dp_link_stop','_b5q_dp_link_update')),
   scoped_link_imports_closed=not missing,whole_P5_link_closed=False,
-  remaining='Qualified retained display DMA producer, native external IOMFB/hotplug/lid integration, full link/CI and actual P5 ESP')
+  remaining='Native Apple compiler/full linked kernel and firmware CI, actual returned ESP verification; physical qualification')
  (out/'report.json').write_text(json.dumps(result,indent=2)+'\n')
- print('PASS P5 protocol/SE8/USB arm64e target, originalUSB ABI and IRQ PAC, zeroEL1apps_smmu; full P5 remains incomplete')
+ print('PASS native P5 arm64e compile/imports, original483slotIOMFB/USB/IRQ/GENI PAC andzeroEL1apps_smmu; CI andimage gates remain')
  print('Unresolved integration:',missing)

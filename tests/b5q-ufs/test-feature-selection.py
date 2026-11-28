@@ -35,7 +35,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-features-')as td:
  td=Path(td);(td/'test.cpp').write_text(code)
  subprocess.run(['c++','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-fsanitize=address,undefined',str(td/'test.cpp'),'-o',str(td/'test')],check=True)
  subprocess.run([str(td/'test')],check=True)
-board=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text());args=' '.join(board['payload']['kernel_args']).encode();assert len(args)==1000
+board=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text());args=' '.join(board['payload']['kernel_args']).encode();assert len(args)<=1023
 paths=list((R/'UniXNU/drivers/DarwinBoot').rglob('bootargs.h'))
 # Physical boot ABI used by XNU/loader:1024-byte CommandLine, trailing NUL.
 h=R/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert/pexpert/arm64/boot.h';s=h.read_text();assert re.search(r'#define\s+BOOT_LINE_LENGTH\s+1024',s)
