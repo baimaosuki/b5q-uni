@@ -3243,3 +3243,24 @@ revision = "237e034cbd46b6bc50f9aeb326e30555619abffe"
 reference = "reports/v33d-review4.json"
 command = "Validate source-bound24gates and SHA256SUMS; check porting-record; b5q-only temporary Git index and push to codex/b5q-p0-p5"
 result = "Owner latest instruction authorizes startingCI. Review4sources,localoutputs,immutablemodules and16patchzero-drift recheckedPASS before commit. Revision is remoteparent; dispatchreceipt/runURL recorded locally in artifacts/b5q-v33d-review4-ci. NewCI success is not yet claimed; noESP/phone authorization inferred."
+
+
+[[area]]
+id = "v33d-review4-ci-seed-reuse"
+status = "host-verified"
+components = ["DarwinBoot"]
+paths = ["scripts/update-b5q-launchd-seed.py", "reports/v33d-review4-ci.json"]
+inputs = ["CI45557368186 source7ac6632022fdba386b12ebd3a992b4d5abd70826; UEFI job139012592387 success, kernel job139012592629 fails before compilation at seed SHA assertion", "Successful CI45540221549 digest-verified artifact contains migrated4GiB seed SHAbb959aea0c4ece46fc7903053786825dba44184ee010c9a722e1b8811387d4d2; APFS UUID1552CFEE-78FF-48D8-8A6C-694B867D61AC and exact58/25policies/account/root-ownedinodes/absentd previously readbackPASS"]
+configuration = ["Accept only original pinned seed or independently validated exact migrated seed; metadata SHA and actual bytes must match", "Skip mount/repack only for exact migrated digest with current policy,expected UUID/size and unchanged absentd; policy or executable changes retain migration path", "Kernel retry reuses successful45557368186firmware only after exact firmware patches/pins/board/job andFD identity proof; no ESP or phone operation"]
+procedure = ["Retain complete first failedkernel joblog and firmware artifact; run production updater twice on actual returnedseed with mount/write calls forbidden", "Reject corrupt/unpinned/mismatched UUID/size/metadata seeds; changedpolicy/absentd cannot qualify for no-op", "Run complete localgate, b5q-onlycommit/push, follow CI through artifact download and unchanged returned binary assertions"]
+findings = ["Dynamic artifact selection correctly picked latest complete45540221549, but updater baseline current only pinned premigrationd2e32a5f; repeat APFS mutation would also produce a different digest. Exactverified migratedimage now reused byte-for-byte without APFS regeneration", "Focused production tests PASS:two exact no-mount copies,six corrupt/identity/unpinnednegative cases,and policy/absentd changes block no-op. Original WiFi plist and returned gates unchanged. Full local/CI/returned results recorded as completed in reports/v33d-review4-ci.json"]
+completion = ["Packaging fix,complete localgate,actualseed APFSaccount/policy/inodereadback allPASS; CI retry/returnedacceptance pending; no new hardware success claimed"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; noESP generation or phone access"]
+next_action = ["Finish source-bound localgate, submit CI retry, retain successfulfirmware and follow through returned acceptance"]
+
+[[area.evidence]]
+kind = "host"
+revision = "7ac6632022fdba386b12ebd3a992b4d5abd70826"
+reference = "reports/v33d-review4-ci.json"
+command = "test-v33d-packaging.py; pre-ci-v33d.py; check-v33b-returned.py"
+result = "Firstfailure retained in artifacts/b5q-v33d-review4-ci/ci45557368186-kernel-first-failure.log; seedpin/currentpolicypositive and adversarialnegative testsPASS; subsequentsteps pending actualcompletion. NoWiFireadinessassertion weakened."

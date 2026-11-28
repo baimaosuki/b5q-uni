@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import plistlib
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -17,6 +18,11 @@ V31_SEED_HASH = "10223429847dd0a2d2db4a080cea37847db9d92a0499d9c998f53458ae1d660
 V32_SEED_HASH = "f84207df2076b9eec9f1ba5bec3e2a4e97e8eff1f10ee460967c2dcb91288e2f"
 V33_SEED_HASH = "3c375836fac6170e005ad164d41b05e275114246cd25657c944fa8c97b6b8c5e"
 CURRENT_SEED_HASH = "d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70"
+# CI 45540221549: digest-verified artifact, APFS policy/account/inode readback
+# passed. This is the current seed after its 58/25 policy migration, not a
+# different baseline or a newly generated Data volume.
+MIGRATED_SEED_HASH = "bb959aea0c4ece46fc7903053786825dba44184ee010c9a722e1b8811387d4d2"
+ABSENTD_HASH = "29c52a1b79e53b71022c973a071e1e5dc96830445f742263d68276cee3cb9b72"
 POLICY = Path(os.environ.get("UNIXNU_DEVICE", Path(__file__).resolve().parents[1])) / "package/b5q-launchd-lite.json"
 DIRECTORY = "private/var/db/com.apple.xpc.launchd"
 
@@ -40,6 +46,26 @@ def merge(original, disabled):
     return plistlib.dumps(dict.fromkeys(disabled, True), fmt=plistlib.FMT_BINARY, sort_keys=True)
 
 
+def checked_seed(body, metadata, baseline, stand_in=None):
+    expected = {"v27": SEED_HASH, "v29": V29_SEED_HASH, "v31": V31_SEED_HASH,
+                "v32": V32_SEED_HASH, "v33": V33_SEED_HASH, "current": CURRENT_SEED_HASH}[baseline]
+    digest = hashlib.sha256(body).hexdigest()
+    allowed = {expected, MIGRATED_SEED_HASH} if baseline == "current" else {expected}
+    if digest not in allowed or metadata.get("sha256") != digest:
+        raise ValueError("Data seed does not match a pinned baseline SHA256")
+    if metadata.get("logical_bytes") != 4 * 2**30 or metadata.get("volume_uuid") != "1552CFEE-78FF-48D8-8A6C-694B867D61AC":
+        raise ValueError("Data seed size or volume UUID mismatch")
+    # Only the exact APFS image already read back is eligible for a no-op.
+    # Self-declared policy metadata must never qualify an arbitrary seed.
+    reusable = (digest == MIGRATED_SEED_HASH
+                and metadata.get("launchd_policy") == policies()
+                and metadata.get("launchd_policy_migrated") is True
+                and metadata.get("board_stand_in") == {
+                    "path": "/private/var/ngpu/bin/b5q-absentd", "sha256": ABSENTD_HASH}
+                and (stand_in is None or hashlib.sha256(stand_in.read_bytes()).hexdigest() == ABSENTD_HASH))
+    return digest, reusable
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     for name in ("darwinboot", "seed", "out"):
@@ -54,11 +80,15 @@ def main():
     out = args.out.resolve()
     metadata = json.loads(seed.with_name("data-seed.json").read_text())
     body = seed.read_bytes()
-    expected = {"v27": SEED_HASH, "v29": V29_SEED_HASH, "v31": V31_SEED_HASH, "v32": V32_SEED_HASH, "v33": V33_SEED_HASH, "current": CURRENT_SEED_HASH}[args.baseline]
-    assert metadata["sha256"] == hashlib.sha256(body).hexdigest() == expected
+    expected, reusable = checked_seed(body, metadata, args.baseline, args.stand_in)
     logical, extents = packed_ramdisk.regions(body)
     assert logical == metadata["logical_bytes"] == 4 * 2**30
     out.mkdir(parents=True, exist_ok=True)
+    if reusable:
+        shutil.copyfile(seed, out / "data.dbr")
+        (out / "data-seed.json").write_text(json.dumps(metadata, indent=2) + "\n")
+        print("Reused SHA256-pinned, APFS-verified current 58/25 Data seed unchanged")
+        return
     with tempfile.TemporaryDirectory(prefix="b5q-launchd-seed-") as temp:
         temp = Path(temp).resolve()
         raw = temp / "Data.raw"
