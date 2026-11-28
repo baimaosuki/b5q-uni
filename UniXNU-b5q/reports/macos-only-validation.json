@@ -1,5 +1,35 @@
 {
-  "state": "local preflight complete; finalCI/images pending",
+  "state": "all local implementation, CI and actual image acceptance passed; not installed on device",
+  "CI": {
+    "id": 45115332412,
+    "head_sha": "1df3521219f2232314bf5e1d4960f4526775758a",
+    "head_branch": "codex/b5q-new-batch2",
+    "status": "completed",
+    "conclusion": "success",
+    "created_at": "2026-11-23T05:02:34Z",
+    "updated_at": "2026-11-23T05:19:14Z",
+    "html_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45115332412"
+  },
+  "artifact": {
+    "id": 14792155994,
+    "node_id": "MDg6QXJ0aWZhY3QxNDc5MjE1NTk5NA==",
+    "name": "b5q-userdata-images-45115332412",
+    "size_in_bytes": 310541738,
+    "url": "https://api.github.com/repos/baimaosuki/b5q-uni/actions/artifacts/14792155994",
+    "archive_download_url": "https://api.github.com/repos/baimaosuki/b5q-uni/actions/artifacts/14792155994/zip",
+    "expired": false,
+    "digest": "sha256:178354304c4e6467a886a70157fba3c01e969b760ed8d6ddc74fe4e753a8ed23",
+    "created_at": "2026-11-23T05:19:05Z",
+    "updated_at": "2026-11-23T05:19:05Z",
+    "expires_at": "2026-11-26T05:07:20Z",
+    "workflow_run": {
+      "id": 45115332412,
+      "repository_id": 1462411659,
+      "head_repository_id": 1462411659,
+      "head_branch": "codex/b5q-new-batch2",
+      "head_sha": "1df3521219f2232314bf5e1d4960f4526775758a"
+    }
+  },
   "local_pre_ci": {
     "passed": true,
     "checks": [
@@ -21,6 +51,10 @@
       },
       {
         "name": "userdata-installer",
+        "passed": true
+      },
+      {
+        "name": "data-stream",
         "passed": true
       },
       {
@@ -60,14 +94,14 @@
     "board_objects": 2,
     "core_GPU_Mesa_UEFI_recompiled": false,
     "device_access": false,
-    "final_CI_and_image_acceptance": "pending"
+    "final_CI_and_image_acceptance": "passed; see CI and actual image readback evidence"
   },
-  "objects": {
+  "returned_Xcode_objects": {
     "passed": true,
     "objects": {
       "B5qRamStorage.o": {
-        "sha256": "32dfa9312dcc60c3584ca5e5f6dbd54f2e7c90238308829d9b9c84fbaf200cf1",
-        "instructions": 292,
+        "sha256": "162e2517a4353e8aa3119ab019cc47607c2bed9cc629a2652b502f208a7022c2",
+        "instructions": 295,
         "apps_smmu_materializations": 0
       },
       "B5qProcTop.o": {
@@ -86,8 +120,8 @@
         "apps_smmu_materializations": 0
       },
       "B5qUfs.o": {
-        "sha256": "95ef4e687830b050f1d510d0b46a3aeaa251f225409fab70d85de146d4fb1bc9",
-        "instructions": 9584,
+        "sha256": "0c333808e82a7bda67f7de087ddac82f5398fd342ed7d11ed75c560e11058e5f",
+        "instructions": 9549,
         "apps_smmu_materializations": 0
       },
       "HidInputProbe.o": {
@@ -117,20 +151,78 @@
       "diversity": "0xe90c",
       "calls": [
         {
-          "site": 15368,
+          "site": 15000,
           "diversity": 59660
         },
         {
-          "site": 17088,
+          "site": 16628,
           "diversity": 59660
         }
       ]
     },
     "hardware_execution_tested": false
   },
+  "images": {
+    "passed": true,
+    "CI_core_recompiled": false,
+    "board_objects_recompiled": 2,
+    "storage_profile": "userdata",
+    "board_objects_compiled_this_run": 2,
+    "completed_native_source_CI": null,
+    "ESP": {
+      "bytes": 838860800,
+      "sha256": "47b496286781e30245456475d5335ebd39bc10db7059477cb8c0bc13b327b840"
+    },
+    "Data": {
+      "bytes": 180997812224,
+      "sha256": "d343babb7ca905c957c1b2643ae3cb92f844dd9c2cfd47bb911ef17f98edca0a",
+      "APFS_volume_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+      "APFS_container_uuid": "1a7527c1-5215-4737-888d-3c6bfd79595d",
+      "policies_counts": {
+        "private/var/db/com.apple.xpc.launchd/disabled.plist": 59,
+        "private/var/db/com.apple.xpc.launchd/disabled.501.plist": 26
+      }
+    },
+    "profiles": {
+      "xnu": {
+        "owned_memory_span_bytes": 6442450944,
+        "kernel_sha256": "6d267f4cceb7e371e1b7a4807d5f8152197a68a37f0730433412e9c84c01a044",
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": false,
+        "args_bytes": 981,
+        "ADT_sha256": "3aaaf828a26302e88574e9aec12312bdae8f599a828f809ef53ee6a9e4479738"
+      },
+      "ram-fallback": {
+        "owned_memory_span_bytes": 4294967296,
+        "kernel_sha256": "6d267f4cceb7e371e1b7a4807d5f8152197a68a37f0730433412e9c84c01a044",
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": true,
+        "args_bytes": 981,
+        "ADT_sha256": "9d3e9477f296c7d098701a443fc520a612441e161ad54d6e9ec34731212fdca5"
+      }
+    },
+    "changed_archive_members": {
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": [],
+      "build/qcom-dwc3/libQcomDwc3.a": [],
+      "build/ram-block/libRamBlock.a": [
+        "B5qRamStorage.o",
+        "B5qUfs.late.o"
+      ]
+    },
+    "loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "Batch1_absentd_signatures_trusted": [
+      "828bb566402d31e6d5171ad26c04a139f9c4dcec"
+    ],
+    "hardware_qualified": false,
+    "Data_SHA256_verification": {
+      "full_image_pass": true,
+      "reused_receipt": "/home/baimao/zflip5/artifacts/b5q-userdata-work/data-sha256-receipt.json",
+      "unchanged_stat_checked_before_and_after": true
+    }
+  },
   "layout": {
     "schema_version": 1,
-    "state": "minimal-layout-selected; images not yet built",
+    "state": "minimal-layout-selected; build and deployment status recorded in macos-only-validation.json",
     "sector_bytes": 4096,
     "source": {
       "kind": "user-pasted GPT listing, 2026-11-19; not independently read from a disk",
@@ -226,13 +318,43 @@
     },
     "input_hashes": {
       "source_GPT_listing_SHA256": "f03c7b4e6349ac7d7d1a92c387fccb9566c940af0efd407a21821d346489a644",
-      "planner_SHA256": "1fc5fa480b1b14edcad1cb534bd2d48ecfe79aaf7cd237b6963b9d268e43b9ba"
+      "planner_SHA256": "a2219ec82089e48050d1bd75b026746f1f4d9d6385993f65605b5fa595d4d0ea"
     }
   },
-  "source_hashes": {
+  "source_SHA256": {
+    "UniXNU-b5q/board.toml": "29e4b1d8fb6204e4c5522083b6ba70eff23e5d5d4c54f7551bf8a939cd28bed9",
     "UniXNU-b5q/package/B5qRamStorage.cpp": "6236fd36e643524140221cc1376d2046130471e8bdd8cfef800ba004ad294f78",
-    "UniXNU-b5q/package/B5qUfs/B5qDataFormat.h": "3801a84580eb3dba54211286c06f069fff701157b3d77d8fa945a989ea4cbc30",
     "UniXNU-b5q/package/B5qUfs/B5qUfs.cpp": "fe8bf3261227d8c2d567a51deef2cb775c90271e92e7e97c76360d4dfb4599a3",
-    "scripts/b5q-install/install-data-ufs.py": "baeffda8173470ca472b7e1a0a7dcf7e2c2d5a28f4d50f4214678c08d98c0ee5"
+    "UniXNU-b5q/package/B5qUfs/B5qDataFormat.h": "3801a84580eb3dba54211286c06f069fff701157b3d77d8fa945a989ea4cbc30",
+    "UniXNU-b5q/scripts/package-batch2-esp.py": "e46b340c4b0f64559d9adf61954aa2080168e5be3978ae5aa30473adffc573ef",
+    "UniXNU-b5q/scripts/relink-b5q-peripherals.py": "2e9b00b49fa365d6f7658fad9f148e7a230574d3c8e835194df82d3b127e6272",
+    "scripts/b5q-install/b5q_data_format.py": "842ebf39060ea6441dcf7f1a2958aefbd293f8c83dd2eaf3c6462293ab7e988f",
+    "scripts/b5q-install/install-data-ufs.py": "893debdca8caf03639635a5c04a1736c20975319b197e67c6db545013c0564f2",
+    "scripts/b5q-install/install-firstboot.py": "ba7c039b2ccd3d6c0afc8bc7240dde733039ce8bcd51e1b24ef45d91648e1dad",
+    "scripts/b5q-install/plan-macos-only.py": "a2219ec82089e48050d1bd75b026746f1f4d9d6385993f65605b5fa595d4d0ea",
+    "scripts/b5q-install/verify-batch2-images.py": "337837b6a8539aca933e58229a9cb821bc64a2e1d0df1ae51020f0db83f19b28",
+    "tests/b5q-ufs/test-data-stream.py": "bc520c31d637998cc759c73f9e4ad6da139a5cb6916f1081e37420549289512e",
+    "tests/b5q-ufs/test-image-hash-receipt.py": "b375328016cece706200eabc484282f7d1781ef420ea874e6ca0688e1ee218cf",
+    "tests/b5q-ufs/test-userdata-installer.py": "c2f0391b7300d2352e2eb14bf49f2da26ff17fc428783bc14466a5b2ffd1254b",
+    ".github/workflows/b5q-macos-only-userdata.yml": "4d7fb3727102e474a93cf393eecf14957eac2ae683948dcc5c2a15166ee1d9a8"
+  },
+  "installation": {
+    "phone_connected": false,
+    "flash_performed": false,
+    "GPT_changes": 0,
+    "Android_userdata_will_be_replaced": true,
+    "hardware_qualification": "pending physical operation; no claimed device success"
+  },
+  "post_CI_host_only_changes": [
+    "installer gzip/EOF transport handling and regression tests",
+    "planner status/evidence/report updates",
+    "future upload compression level1; current accepted images built at level6"
+  ],
+  "tests": {
+    "userdata_CLI_cases": 24,
+    "legacy_tail_installer_negative_cases": 14,
+    "paired_Python_CPP_selector_envelope_cases": 19,
+    "production_raw_gzip_stream_cases": 2,
+    "actual_digest_receipt_gate_cases": 6
   }
 }

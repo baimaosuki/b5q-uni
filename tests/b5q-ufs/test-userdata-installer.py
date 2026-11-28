@@ -2,7 +2,7 @@
 """Run the real userdata conversion CLI with fake ADB; never open a device."""
 from pathlib import Path
 from unittest.mock import patch
-import hashlib,importlib.util,json,struct,subprocess,sys,tempfile,uuid,zlib
+import hashlib,importlib.util,io,json,struct,subprocess,sys,tempfile,uuid,zlib
 R=Path(__file__).resolve().parents[2];sys.path.insert(0,str(R/'scripts/b5q-install'))
 import b5q_data_format as fmt
 spec=importlib.util.spec_from_file_location('installer',R/'scripts/b5q-install/install-data-ufs.py');m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
@@ -57,6 +57,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-userdata-cli-')as td:
    if cmd=='cat /sys/class/block/sda36/start':return str(fmt.USERDATA_FIRST*8+(1 if case=='wrong-sysfs'else 0))
    if cmd=='cat /sys/class/block/sda36/size':return str((fmt.USERDATA_LAST-fmt.USERDATA_FIRST+1)*8)
    if cmd=='cat /proc/mounts':return '/dev/block/dm-0 /data f2fs rw 0 0'if case=='mounted-dm'else'/dev/block/sda36 /other ext4 rw 0 0'if case=='mounted-direct'else''
+   if cmd=='command -v gzip || true':return ''if case=='raw-fallback'else'/sbin/gzip'
    if cmd=='cat /proc/swaps':return 'Filename Type Size Used Priority\n'+('/dev/block/sda36 partition 1 0 -1'if case=='swap'else'')
    if 'sha256sum'in cmd:
     assert cmd.startswith('set -o pipefail; dd if=/dev/block/by-name/userdata ')
@@ -64,23 +65,30 @@ with tempfile.TemporaryDirectory(prefix='b5q-userdata-cli-')as td:
    raise AssertionError(cmd)
   def run(args,**kw):
    nonlocal committed
+   if case=='remote-gzip-error' and 'gzip -dc'in args[-1]:raise subprocess.CalledProcessError(1,args)
    v=dict(s.split('=',1)for s in args[-1].split()if '='in s)
    assert v['of']=='/dev/block/by-name/userdata' and v['bs']=='4096'and v['conv']=='fsync'
    if 'input'in kw:
-    assert len(writes)==1 and int(v['seek'])==0 and int(v['count'])==1
+    assert len(writes)==1 and int(v['seek'])==0 and 'count'not in v and len(kw['input'])==4096
     committed=kw['input'];identity=fmt.choose((4).to_bytes(16,'little'),[dict(name=n,first=a,last=b,uuid=i.to_bytes(16,'little'))for n,a,b,i in parts],dict(), 'userdata');fmt.validate_envelope(committed,identity)
-   else:assert int(v['seek'])==256 and int(v['count'])==blocks
+   else:assert int(v['seek'])==256 and 'count' not in v
    writes.append(v);return subprocess.CompletedProcess(args,0)
+  class Encoder:
+   def __init__(self,*args,**kwargs):self.stdout=io.BytesIO()
+   def wait(self):return 1 if case=='local-gzip-error'else 0
   argv=['installer','--image',str(image),'--partition','userdata']+(['--apply']if apply else[])+(['--replace-android-data']if replace else[])
   try:
-   with patch.object(sys,'argv',argv),patch.object(m,'local_image'),patch.object(subprocess,'check_output',side_effect=output),patch.object(subprocess,'run',side_effect=run):m.main()
-  except (ValueError,SystemExit)as e:return False,writes,str(e)
+   with patch.object(sys,'argv',argv),patch.object(m,'local_image'),patch.object(m.shutil,'which',return_value='/usr/bin/gzip'),patch.object(subprocess,'Popen',side_effect=Encoder),patch.object(subprocess,'check_output',side_effect=output),patch.object(subprocess,'run',side_effect=run):m.main()
+  except (ValueError,SystemExit,subprocess.CalledProcessError)as e:return False,writes,str(e)
   return True,writes,''
  for c in ['not-root','not-twrp','wrong-model','wrong-lun','wrong-sector','bad-gpt-crc','wrong-bounds','wrong-disk','wrong-sysfs','mounted-dm','mounted-direct','swap','initialized','raw-apfs','existing-apfs']:
   ok,writes,error=exercise(c);assert not ok and not writes,(c,error,writes);cases.append(c)
  ok,writes,error=exercise('ok',replace=False);assert not ok and not writes;cases.append('missing-explicit-replacement')
  for c in ('bad-sha','bad-checkpoint','bad-tail'):
   ok,writes,error=exercise(c);assert not ok and len(writes)==1,(c,error,writes);cases.append(c)
+ for c in ('local-gzip-error','remote-gzip-error'):
+  ok,writes,error=exercise(c);assert not ok and len(writes)==(0 if c=='remote-gzip-error'else 1),(c,error,writes);cases.append(c)
+ ok,writes,error=exercise('raw-fallback');assert ok and len(writes)==2;cases.append('raw-fallback')
  ok,writes,error=exercise('ok',apply=False);assert ok and not writes,(error,writes);cases.append('check-only')
  ok,writes,error=exercise('ok');assert ok and len(writes)==2,(error,writes);cases.append('explicit-convert')
 print('PASS actual userdata installer.main:',len(cases),'cases; only exact userdata target writes, no GPT/root writes; refuse mounted/dm-data/swap/existingmacOS/identity/bounds and commit only after readback')

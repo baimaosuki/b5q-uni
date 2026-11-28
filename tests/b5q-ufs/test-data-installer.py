@@ -85,9 +85,9 @@ with tempfile.TemporaryDirectory(prefix='b5q-installer-cli-') as td:
    nonlocal committed
    cmd=args[-1];assert 'dd of=/dev/block/by-name/macosroot ' in cmd
    fields=dict(x.split('=',1)for x in cmd.split()if '=' in x)
-   start=int(fields['seek']);count=int(fields['count']);assert fields['bs']=='4096' and fields['conv']=='fsync'
-   if 'input'in kwargs:assert start==identity['first']-f.ROOT_FIRST and count==1;committed=True
-   else:assert start==identity['first']-f.ROOT_FIRST+256 and count==apfs_blocks
+   start=int(fields['seek']);count=int(fields.get('count',apfs_blocks));assert fields['bs']=='4096' and fields['conv']=='fsync'
+   if 'input'in kwargs:assert start==identity['first']-f.ROOT_FIRST and len(kwargs['input'])==4096 and 'count'not in fields;committed=True
+   else:assert 'count' not in fields and start==identity['first']-f.ROOT_FIRST+256 and count==apfs_blocks
    writes.append((start,count));return subprocess.CompletedProcess(args,0)
   # Fixture byte hashes are deterministic; this substitution only affects
   # post-write mock sectors, not the production local_image test above.

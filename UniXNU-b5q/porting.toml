@@ -2553,10 +2553,10 @@ paths = ["package/B5qRamStorage.cpp", "package/B5qUfs/B5qDataFormat.h", "package
 inputs = ["User latest instruction: macOS only, minimum work, Android data need not be preserved. Existing GPT listing from2026-11-19; not a new device read. userdata LBA3406336..47595510,180998860800B; root/ESP unchanged. Exact source SHA in reports/macos-only-layout.json."]
 configuration = ["b5q-data-ufs=2 selects only GPT userdata with exact bounds, LUN0 and envelope disk/partition UUID;1retains prior tail/macOSData mode;0RAM fallback. All other boot args unchanged, still981ASCII bytes. NoGPT rename or repartition."]
 procedure = ["Replace the earlier24GiBroot/movedsystem proposal with originaluserdata reuse. Extend production Data selector, build only2changedstorageobjects, reuse completedBatch2core/GPU/UEFI/nativeinputs, grow verified APFS seed to168.567GiB, then local readback before delivery. Device installation remains user-run only."]
-findings = ["Originaluserdata is168.568325GiB; after immutable1MiB envelope APFS is168.567348GiB (44188919blocks). Existing48GiB root and8GiB gap remain untouched; this avoids moving root or rewritingGPT. User explicitly authorizes dropping Android data for this design.", "Data mode3 adds name+exactLBA+CRC+UUID+nonoverlap gate; root authentication/FUA/tag1/sharedlock/shutdown stay unchanged. Installer requires explicituserdata replacement and unmounted/data; rejects existing APFS/envelope to prevent repeat initialization. Current implementation/CI/image acceptance pending."]
+findings = ["Originaluserdata is168.568325GiB; after immutable1MiB envelope APFS is168.567348GiB (44188919blocks). Existing48GiB root and8GiB gap remain untouched; this avoids moving root or rewritingGPT. User explicitly authorizes dropping Android data for this design.", "Data mode3 adds name+exactLBA+CRC+UUID+nonoverlap gate; root authentication/FUA/tag1/sharedlock/shutdown stay unchanged. Installer requires explicituserdata replacement and unmounted/data; rejects existing APFS/envelope to prevent repeat initialization. Implementation, CI45115332412 and actualESP/APFSreadback complete; see reports/macos-only-validation.json."]
 completion = ["Productionpositive/negative tests,2targetobjects andPAC/zeroapps_smmu, incrementalCI, actualESP/Datareadback and exact user-run installation instructions must pass before final delivery."]
-limits = ["No phone connected and no GPT/partition writes performed. Newimage/CI/hardwareverification pending; old30GiB tail image is not theuserdata installer payload."]
-next_action = ["Complete host/target regression and incrementalCI; preserveBatch1SIP2/absentd/59+26policy/v30loader and oldroot; download and inspect final images."]
+limits = ["No phone connected and no GPT/partition writes performed. Localimplementation/CI/imageacceptancepassed; physicalpersistence/PSCI/inputqualificationpending. Old30GiBtailimageisnottheuserdata payload."]
+next_action = ["User-run first conversion ofunmounteduserdatafollowedbyESP-onlyupdate; hardwarelogqualification. NeverrepeatData initialization aftersuccess; noGPT/boot/rootchanges."]
 
 [[area.evidence]]
 kind = "source"
@@ -2566,4 +2566,14 @@ result = "Offline calculation from userGPTlisting confirmsall37GPTentriesunchang
 [[area.evidence]]
 kind = "source"
 reference = "reports/macos-only-validation.json"
-result = "12localuserdata preflightgroupsPASS;19pairedPython/C++productionGPTmodecasesASanUBSan,21actualuserdataCLIpositive/negativecasesandold14tailregressioncases,8000queueiterations,2arm64eobjects0undefined/duplicate,326storagevtablePACslots andcompletionIAe90c/PSCI0ba5,actualobjdumpzeroapps_smmu. Fixednativecachefrom45108577992usedonitscachebearingbranch;disableoldpushworkflowtopreventduplicatebuild. NoGPT/systemmove/UEFIorGPU/corebuild; finalCI/imagespending."
+result = "13localuserdata preflightgroupsPASS;19pairedPython/C++productionGPTmodecasesASanUBSan,24actualuserdataCLIpositive/negativecasesandold14tailregressioncases,8000queueiterations,2arm64eobjects0undefined/duplicate,326storagevtablePACslots andcompletionIAe90c/PSCI0ba5,actualobjdumpzeroapps_smmu. Fixednativecachefrom45108577992usedonitscachebearingbranch;disableoldpushworkflowtopreventduplicatebuild. NoGPT/systemmove/UEFIorGPU/corebuild; finalCI/imagespending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/macos-only-validation.json"
+result = "ActualCI45115332412compiled2storageobjectsandnative/prelink/ESP, reusedcore88703fdc/allnonstoragearchives/GPU/v30loader. NativeAPFSgrowthpassed180997812224B/44188919blocks/UUID1552CFEEwithfsckexit0/account59+26policies. ReturnedXcodeobjectsPASS326vtablePACslots/IAe90c/IA0ba5/zeroapps_smmu. InstallerbulkreadsverifiedIMGuntilEOFtoavoidddecountearlyshortpipe;userdatauseslivegzipstreamwhenavailable, noadditionalarchive, fullSHA/checkpoint/tailreadbackbeforecommit.24CLIuserdataandactualproductionraw/gziplocalfiletestsPASS. Artifactupload/finalreadbackpending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/macos-only-validation.json"
+result = "CI45115332412SUCCESSsource1df3521219f2232314bf5e1d4960f4526775758a;ordinaryartifactdigestverifiedbeforeextraction. ActualESP838860800BSHA47b496286781e30245456475d5335ebd39bc10db7059477cb8c0bc13b327b840;Data180997812224BSHAd343babb7ca905c957c1b2643ae3cb92f844dd9c2cfd47bb911ef17f98edca0a. FinalFAT4Kn/mirrors/journal/allmembers,981Bmode2/noRAMdefault/independent4GiBRAMrecovery,6GiB/4GiBADT,SIPu64LE2/2fixups/8clusters,APFSuuid/account/root0644binary59+26policies/absentdsignaturetrust/POST69sitesPASS. Only2storageobjectscompiled;coreGPUUEFIunchanged; physicalhardwareunclaimed. Plannerstatusnowreferstothisvalidation;latestinstallerstreamandEOFtestsPASS;6digest-receiptgatecasesPASS;fullSHAcalculatedonceandboundtodev/inode/size/mtime/ctimebeforeandafterreadback,installerstillhashesallbytes."
