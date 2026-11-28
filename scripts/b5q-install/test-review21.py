@@ -15,7 +15,7 @@ def run(name,cmd,env=None):
  checks.append(dict(name=name,passed=True,command=list(map(str,cmd)),log_sha256=hashlib.sha256(out.encode()).hexdigest()));print('PASS',name,flush=True)
 def host(t,name,s):
  p=t/(name+'.cpp');p.write_text(s);o=t/name;run(name+'-compile',['c++','-std=c++17','-O1','-g','-Wall','-Wextra','-Werror','-Wno-misleading-indentation','-Wno-unused-parameter','-fsanitize=address,undefined','-fno-sanitize-recover=all','-pthread',p,'-o',o]);run(name+'-ASan-UBSan',[o])
-policy=load('r21policy',R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py');pol=policy.policies();assert list(map(len,pol.values()))==[59,25];assert pol['disabled.plist']['com.openssh.sshd']is False and 'com.openssh.sshd'not in pol['disabled.501.plist'];assert sum(pol['disabled.plist'].values())==58
+policy=load('r21policy',R/'UniXNU-b5q/scripts/update-b5q-launchd-seed.py');pol=policy.policies();assert list(map(len,pol.values()))==[59,25];assert pol['disabled.plist']['com.openssh.sshd']is False and 'com.openssh.sshd'not in pol['disabled.501.plist'];assert pol['disabled.plist']['com.apple.softwareupdated']is False;assert sum(pol['disabled.plist'].values())==57
 for d in pol.values():
  assert d['com.apple.SoftwareUpdateNotificationManager']is True and 'com.apple.wallpaper.agent'not in d
  assert d['com.apple.wallpaper.extension.aerials']is True
@@ -105,7 +105,7 @@ int main(){auto a=b5q_callback_begin(3,(const void*)callback);ms=200;b5q_callbac
 #include <cstring>
 #include <cstdio>
 #include <cassert>
-volatile uint32_t native_adreno_bo_memory[8],native_adreno_bo_owners[24][4],native_adreno_import_memory[4],native_adreno_import_owners[24][4];
+volatile uint32_t native_adreno_bo_memory[8],native_adreno_bo_owners[24][4],native_adreno_bo_sizes[6][2],native_adreno_import_memory[4],native_adreno_import_owners[24][4];
 '''+row+'\n'+memory+r'''
 int main(){assert(gpuRowLog(0x96,0,"e0",0,0));assert(gpuRowLog(0x97,0,"H0 F0 f0",0,0));assert(!gpuRowLog(0x97,0,"H2 F0 f0",2000,0));assert(!gpuRowLog(0x97,0,"H28 F0 f0",29999,0));assert(gpuRowLog(0x97,0,"H30 F0 f0",30000,0));assert(gpuRowLog(0x97,0,"H31 F1 f0",31000,0));assert(!gpuRowLog(0x97,0,"H32 F1 f0",32000,0));assert(gpuRowLog(0x97,0,"H33 F0 f0",33000,0));assert(gpuRowLog(0x97,0,"H34 F0 f0",34000,1));assert(gpuRowLog(0x97,0,"gx-off",35000,1));assert(gpuRowLog(0x98,0,"e0",35001,0));
  native_adreno_bo_memory[0]=10;native_adreno_bo_memory[4]=600;native_adreno_bo_memory[5]=700;native_adreno_bo_memory[6]=2;native_adreno_import_memory[0]=3;native_adreno_import_memory[1]=2048;native_adreno_import_memory[2]=4096;native_adreno_bo_owners[0][0]=30;native_adreno_bo_owners[0][1]=100;native_adreno_bo_owners[1][0]=20;native_adreno_bo_owners[1][1]=200;native_adreno_import_owners[0][0]=42;native_adreno_import_owners[0][1]=2048;char out[320];gpuMemoryRow(out,sizeof(out));assert(strstr(out,"bo_mib=600/700 bo_n=10 kbo=2 imp_kib=2048/4096 imp_n=3 bo_top=20:200K,30:100K,0:0K imp_top=42:2048K,0:0K"));char shortbuf[8];gpuMemoryRow(shortbuf,sizeof(shortbuf));assert(shortbuf[7]==0);}

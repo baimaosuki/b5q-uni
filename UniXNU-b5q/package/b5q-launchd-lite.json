@@ -31,7 +31,6 @@
     "com.apple.modelmanagerd",
     "com.apple.perfpowermetricd",
     "com.apple.rtcreportingd",
-    "com.apple.softwareupdated",
     "com.apple.spindump",
     "com.apple.tailspind",
     "com.apple.watchdogd"
@@ -66,6 +65,7 @@
     "com.apple.wallpaper.extension.aerials"
   ],
   "system_enabled": [
+    "com.apple.softwareupdated",
     "com.openssh.sshd"
   ]
 }

@@ -1,0 +1,17 @@
+--- a/scripts/build-boot-runtime.py
++++ b/scripts/build-boot-runtime.py
+@@ -522,6 +522,14 @@
+                    'Library/LaunchAgents', jobs_a)
+             addon = out / 'test-addon.bin'
+             candidate.replace(addon)
++        # Board-owned plist/script overlays are applied to both rebuilt and
++        # reused GPU addons before signature/trust collection and payload seal.
++        board_policy = Path(request['device']) / 'scripts/refresh-b5q-addon-policy.py'
++        if addon is not None and Path(request['device']).name == 'UniXNU-b5q' and board_policy.is_file():
++            candidate = work / 'b5q-runtime-policy.bin'
++            run(sys.executable, board_policy, '--unixnu', ROOT, '--input', addon, '--out', candidate)
++            addon = out / 'b5q-runtime-policy.bin'
++            candidate.replace(addon)
+         if trust is not None and (request.get('wifi_tool') or bluetooth_report is not None or appsync_report is not None
+                                   or absent_report is not None):
+             # Keep every original module intact. Append only absent hashes;

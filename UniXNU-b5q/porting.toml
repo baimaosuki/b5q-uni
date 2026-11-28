@@ -3719,3 +3719,21 @@ revision = "be86b03e82fea3b2baa97038366061b2ee2ffca6"
 reference = "reports/review21-source-audit.json"
 command = "check-xnu-patches.py;test-review21.py;check-wifi-target.py;check-peripheral-target.py;pre-ci-v33d.py;porting-record.py check"
 result = "PASS147 unchanged patches,40 aggregate gates,actual Metal arm64e TU zero warnings and PAC strip/delegate,source-bound board/ath11k objects and all retained host regressions; hardware_verified=false"
+[[area]]
+id = "review22-metal-dp-platform-policy"
+status = "host-verified"
+components = ["Adreno740", "AdrenoMetal", "QcomDwc3"]
+paths = ["package/B5qBootPolicy.c", "package/B5qGpu.cpp", "package/B5qMax77705.h", "package/B5qUsbBoard.cpp", "package/b5q-launchd-lite.json", "package/b5q-software-update-policy.sh", "patches/tools/b5q-review22-metal-memory.patch", "patches/tools/b5q-review22-runtime-policy.patch", "scripts/b5q_display.py", "scripts/b5q_identity.py", "scripts/build-b5q-payload.py", "scripts/package-batch2-esp.py", "scripts/refresh-b5q-addon-policy.py", "reports/review22-source-audit.json"]
+inputs = ["AdrenoMetal b25e48e51dfdf4b3889ede6e701ab7dd59929a03", "metal2vulkan 87a869f7fc4b73265d4812c40d8cccb6a83c7b17", "26C5035r original GPUProcess.sb; SHA256 de88d0f6f11f06b83df0a4e8e10963d5271b25a55cb42a523ec9e3190384229a", "Existing Samsung MAX77705 IRQ source"]
+configuration = ["Existing147-patch XNU core and qualified64MiB firmware unchanged;1023-byte board arguments unchanged", "PE_builtin_boot_args enables existing GPU system bundle view", "Qualified58/25 recovery Data seed retained; runtime59/25 overrides enable softwareupdated and sshd"]
+procedure = ["Apply reproducible b5q-only Metal/runtime patches; compile real arm64e translation units and Rust bridge", "Exercise production DP poll with ASan/UBSan; run complete pre-ci,DP ABI and existing XNU patch application"]
+findings = ["Pinned runtime minimum_linear_texture_alignment probes Vulkan image rowPitch per format; its buffer-backed texture accepts different pitches through synchronized copy.", "26C5035r GPUProcess.sb allows file-read under /Library/GPUBundles but executable mapping under /System/Library/Extensions; existing147-patch core already supplies opt-in read-only system view.", "NativeAdrenoMetalPlugin clientDevice already sets METAL2VULKAN_SHADER_CACHE_OPTIONAL; bridge previously ignored it. New bridge passes pipeline_cache_dir=None for the explicit fallback.", "Runtime-v2 automatically retires released allocations after250ms; nmb_device_release_kept_memory previously returned an unsupported error and has no synchronous trim API. Zero blocks returned now means no immediate release claimed.", "Samsung max77705-irq.c maps PD_INT bit4 Attention,bit3 Configure,bit2 Status and bit5 DataRole. VDM bit4 compatibility indication is also retained for Attention as requested.", "Stable platform namespace retained privately from the final delivered Review21 ADT; no new hardware identifier guessed or logged.", "Core/firmware/Touch/Bluetooth/USB-HAL protected hashes unchanged; only board policy,DP port,GPU log and runtime changes."]
+completion = ["Host gates PASS; hardware success is not inferred"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; live sandbox denial,actual IOSurface behavior,BO/wired targets,DP output and CLT/Homebrew await reachable device", "No broad AMFI bypass; no unproved firmware,Touch or main-display change"]
+next_action = ["Return ARM build and ESP after local acceptance; complete device qualification when SSH endpoint is supplied"]
+[[area.evidence]]
+kind = "host"
+reference = "reports/review22-source-audit.json"
+revision = "6304650975be9dd94470bb5eed4899665912cf4d"
+command = "TMPDIR=artifacts/b5q-review22-local B5Q_GATE_WORK=artifacts/b5q-review22-local/full-gate python3 scripts/b5q-install/pre-ci-v33d.py"
+result = "PASS all source-bound host gates; see report for individual receipts"

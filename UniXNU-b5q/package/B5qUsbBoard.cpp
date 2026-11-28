@@ -334,6 +334,8 @@ struct PdicIo {
 };
 B5qDp::AltMode dpAlt;bool dpStarted=false,dpFailed=false;uint32_t dpCable=0,dpPending=0;
 uint64_t dpDeadline=0;
+uint64_t dpRetryAt=0,dpStatusAt=0;
+unsigned dpStartAttempts=0,dpStatusAttempts=0;
 uint32_t dpDeferSignature=~0u,dpIrqBits=0;
 uint64_t dpNow(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns/1000000;}
 }
@@ -343,7 +345,7 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
  IOLockLock(maxim->lock);
  B5qMax77705::Cable cable;const bool sampled=B5qMax77705::readCable(*maxim,cable);
  PdicIo io;B5qDp::Mailbox<PdicIo> mailbox(io);bool ok=sampled;
- const uint32_t signature=sampled?cable.signature():0;
+ const uint32_t signature=sampled?cable.dpSessionSignature():0;
  // Source must establish VBUS before optional DP opcode discovery can
  // wait on the same role worker. Keep an existing active DP link intact.
  if(sampled&&!dpStarted&&cable.sourceVbus(cable.role())&&!(cable.bc&0x80)){
@@ -357,25 +359,42 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
   if(dpStarted)mailbox.enable(false);
   dpStarted=dpFailed=false;dpCable=dpPending=0;dpAlt.reset();
   dpDeferSignature=~0u;dpIrqBits=0;
+  dpRetryAt=dpStatusAt=0;dpStartAttempts=dpStatusAttempts=0;
  }else{
   if(signature!=dpCable){
    if(dpStarted)mailbox.enable(false);
    dpAlt.reset();dpStarted=dpFailed=false;dpCable=signature;dpPending=0;
    dpIrqBits=0;
+   dpRetryAt=dpStatusAt=0;dpStartAttempts=dpStatusAttempts=0;
   }
-  if(!dpStarted&&!dpFailed){
-   dpStarted=dpAlt.start(mailbox,cable.power()==1&&cable.role()==2);dpFailed=!dpStarted;dpDeadline=dpNow()+3000;ok=dpStarted;
+  if(!dpStarted&&!dpFailed&&dpNow()>=dpRetryAt){
+   ++dpStartAttempts;
+   dpStarted=dpAlt.start(mailbox,cable.power()==1&&cable.role()==2);
+   dpFailed=!dpStarted&&(dpAlt.error!=B5qDp::PdError::Timeout||dpStartAttempts>=3);
+   dpRetryAt=dpNow()+1000;dpDeadline=dpNow()+3000;ok=dpStarted;
    IOLog("B5qDP: pdic-start ok=%u sinkDfp=%u role=%d power=%u sig=%x err=%u mbx=%u\n",
      dpStarted,cable.power()==1&&cable.role()==2,cable.role(),cable.power(),signature,unsigned(dpAlt.error),unsigned(mailbox.error));
   }
   if(dpStarted){
    uint8_t pd=0,vdm=0;
    ok=maxim->read(0x25,4,pd)&&maxim->read(0x25,5,vdm);
-   if(ok)dpPending|=(vdm&15)|((uint32_t(pd)&0x1c)<<2);
-   const uint32_t irqBits=(vdm&15)|((uint32_t(pd)&0x1c)<<8);
+   // Samsung max77705-irq.c: PD bits2/3/4 are Status/Configure/Attention;
+   // bit5 is DataRole, never an Attention packet. Keep the reported VDM bit4
+   // compatibility indication too; preserve every raw bit in the diagnostic.
+   if(ok)dpPending|=(vdm&15)|((uint32_t(pd)&0x1c)<<2)|((uint32_t(vdm)&0x10)<<2);
+   const uint32_t irqBits=uint32_t(vdm)|(uint32_t(pd)<<8);
    if(ok&&irqBits&&irqBits!=dpIrqBits)
     IOLog("B5qDP: pdic-irq pd=%02x vdm=%02x pending=%02x phase=%u\n",pd,vdm,dpPending,unsigned(dpAlt.phase));
    if(ok)dpIrqBits=irqBits;
+   if(ok&&dpAlt.phase==B5qDp::AltMode::Phase::Active&&!dpAlt.hpd&&
+      dpStatusAttempts<6&&dpNow()>=dpStatusAt){
+    ++dpStatusAttempts;dpStatusAt=dpNow()+500;
+    // Bounded DP Status Update (DFP_D connected), not an Attention request.
+    // A missed HPD interrupt must not permanently strand an active Alt Mode.
+    const bool requested=mailbox.request(16,dpAlt.modePosition,1,true);
+    if(requested)dpPending|=1u<<4;
+    IOLog("B5qDP: pdic-status-retry attempt=%u ok=%u err=%u\n",dpStatusAttempts,requested,unsigned(mailbox.error));
+   }
    // Firmware can omit an earlier VDM interrupt. Recover its cached packet
    // in the same order as Samsung max77705_receive_alternate_message.
    const unsigned awaited=unsigned(dpAlt.phase);
@@ -423,5 +442,6 @@ extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
 extern "C" void b5q_dp_port_stop(void){
  if(!openMaxim())return;IOLockLock(maxim->lock);
  if(dpStarted){PdicIo io;B5qDp::Mailbox<PdicIo> mailbox(io);mailbox.enable(false);}
- dpStarted=dpFailed=false;dpPending=dpCable=0;dpAlt.reset();dpDeferSignature=~0u;dpIrqBits=0;IOLockUnlock(maxim->lock);
+ dpStarted=dpFailed=false;dpPending=dpCable=0;dpAlt.reset();dpDeferSignature=~0u;dpIrqBits=0;
+ dpRetryAt=dpStatusAt=0;dpStartAttempts=dpStatusAttempts=0;IOLockUnlock(maxim->lock);
 }

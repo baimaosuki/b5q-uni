@@ -11,6 +11,7 @@ from unixnu.devicetree import generate,compile_hardware
 from unixnu import ramdisk
 from unixnu.payload import check_args
 from b5q_gpu_adt import preserve as preserve_gpu_firmware,verify as verify_gpu_firmware
+from b5q_identity import UNIQUE_CHIP_ID
 ctx=Context(parser().parse_args(['build','payload','--device',str(R/'UniXNU-b5q'),'--os','macos-27.3-26C5035r']))
 work=a.ci.resolve()if a.ci else ctx.work;payload=work/'payload/payload.img';esp=a.out.resolve()if a.out else work/'esp.img'
 if not a.fd:raise SystemExit('ESP packaging requires paired firmware FD for menu/loader identity')
@@ -42,6 +43,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-batch2-package-')as td:
   seed=format(struct.unpack('<Q',chosen['unique-chip-id'])[0],'016x');dtb=work/'device-tree/hardware.dtb'
  else:
   seed=(work/'runtime/build-platform-seed').read_text().strip();dtb=compile_hardware(ctx)
+ assert seed==UNIQUE_CHIP_ID,'Payload platform namespace differs from fixed b5q identity'
  # DarwinBoot uses kernel-path + .adt; a separate byte-identical kernel path
  # is required to select the independent RAM profile without changing firmware.
  fallback=assets/'RAM';fallback.mkdir()

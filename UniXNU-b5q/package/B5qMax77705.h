@@ -35,6 +35,12 @@ struct Cable {
   return valid?0x80000000u|((cc0&0xc0u)|power())|(uint32_t(cc1&2)<<8)|
                      (uint32_t(pd&0x80)<<16):0;
  }
+ // PR_Swap changes power without disconnecting the Alt Mode/data lanes.
+ // Orientation, water, data role and validity still invalidate the session.
+ uint32_t dpSessionSignature() const {
+  return valid?0x80000000u|(cc0&0xc0u)|(uint32_t(cc1&2u)<<8)|
+                     (uint32_t(pd&0x80u)<<16):0;
+ }
 };
 template<class Io> bool readCable(Io &io,Cable &out){
  Cable next;uint8_t end=0;

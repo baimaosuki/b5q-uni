@@ -2129,7 +2129,7 @@ extern volatile uint32_t native_hid_input_events[8],native_touch_count,native_to
 extern volatile int32_t native_buttons_stats[10];
 }
 extern "C" {
-extern volatile uint32_t native_adreno_bo_memory[8],native_adreno_bo_owners[24][4];
+extern volatile uint32_t native_adreno_bo_memory[8],native_adreno_bo_owners[24][4],native_adreno_bo_sizes[6][2];
 extern volatile uint32_t native_adreno_import_memory[4],native_adreno_import_owners[24][4];
 }
 static void gpuMemoryRow(char *out,size_t bytes) {
@@ -2143,10 +2143,13 @@ static void gpuMemoryRow(char *out,size_t bytes) {
         }
     };
     top(native_adreno_bo_owners,bo,3);top(native_adreno_import_owners,imp,2);
-    snprintf(out,bytes,"B5qGpu: mem bo_mib=%u/%u bo_n=%u kbo=%u imp_kib=%u/%u imp_n=%u bo_top=%u:%uK,%u:%uK,%u:%uK imp_top=%u:%uK,%u:%uK",
+    snprintf(out,bytes,"B5qGpu: mem bo_mib=%u/%u bo_n=%u kbo=%u imp_kib=%u/%u imp_n=%u bo_top=%u:%uK,%u:%uK,%u:%uK imp_top=%u:%uK,%u:%uK bo_sizes=%u:%uK,%u:%uK,%u:%uK,%u:%uK,%u:%uK,%u:%uK",
         native_adreno_bo_memory[4],native_adreno_bo_memory[5],native_adreno_bo_memory[0],native_adreno_bo_memory[6],
         native_adreno_import_memory[1],native_adreno_import_memory[2],native_adreno_import_memory[0],
-        bo[0].pid,bo[0].kib,bo[1].pid,bo[1].kib,bo[2].pid,bo[2].kib,imp[0].pid,imp[0].kib,imp[1].pid,imp[1].kib);
+        bo[0].pid,bo[0].kib,bo[1].pid,bo[1].kib,bo[2].pid,bo[2].kib,imp[0].pid,imp[0].kib,imp[1].pid,imp[1].kib,
+        native_adreno_bo_sizes[0][0],native_adreno_bo_sizes[0][1],native_adreno_bo_sizes[1][0],native_adreno_bo_sizes[1][1],
+        native_adreno_bo_sizes[2][0],native_adreno_bo_sizes[2][1],native_adreno_bo_sizes[3][0],native_adreno_bo_sizes[3][1],
+        native_adreno_bo_sizes[4][0],native_adreno_bo_sizes[4][1],native_adreno_bo_sizes[5][0],native_adreno_bo_sizes[5][1]);
 }
 void heartbeat() {
     // Row 4 from now on: seconds since the run ended, GX state, and (only with GX on) the GPU status words, so a photo
@@ -2209,7 +2212,7 @@ void heartbeat() {
             const unsigned gpuLevel=native_gpu_dcvs[1];
             IOLog("B5qGpu: dcvs busy_pct=%u level=%u mhz=%u transitions=%u errors=%u\n",native_gpu_dcvs[4],gpuLevel,
                 gpuLevel<=kGpuTop?kGpuMHz[gpuLevel]:0,native_gpu_dcvs[2],native_gpu_dcvs[3]);
-            char memory[320];gpuMemoryRow(memory,sizeof(memory));IOLog("%s\n",memory);
+            char memory[512];gpuMemoryRow(memory,sizeof(memory));IOLog("%s\n",memory);
             char thermal[256]={},level[256]={},clock[256]={};
             sheng_thermal_row(0,thermal,sizeof(thermal));sheng_thermal_level_row(level,sizeof(level));sheng_board_clock_row(clock,sizeof(clock));
             IOLog("B5qThermal: %s | %s\n",thermal,level);IOLog("B5qClock: %s\n",clock);
