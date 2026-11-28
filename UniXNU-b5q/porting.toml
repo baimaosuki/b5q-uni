@@ -3737,3 +3737,21 @@ reference = "reports/review22-source-audit.json"
 revision = "6304650975be9dd94470bb5eed4899665912cf4d"
 command = "TMPDIR=artifacts/b5q-review22-local B5Q_GATE_WORK=artifacts/b5q-review22-local/full-gate python3 scripts/b5q-install/pre-ci-v33d.py"
 result = "PASS all source-bound host gates; see report for individual receipts"
+[[area]]
+id = "review23-dp-metal-usb-local"
+status = "host-verified"
+components = ["AdrenoMetal", "QcomDwc3"]
+paths = ["package/B5qDpLink.cpp", "package/B5qUsbHostEvent.h", "package/QcomDwc3.cpp", "patches/tools/b5q-review23-metal-diagnostics.patch", "scripts/b5q_display.py", "reports/review23-source-audit.json"]
+inputs = ["Review22commit43768c7c4aaf28ad4d027c3019f655b1ef971d88 and existing18live followup logs; no new device access", "Stock gcc-kalama.ko anddispcc-kalama.ko plus pinned Samsung clock source36ffdaa5a4e2bff6e66812b444874b0cb6133fa9; exact hashes in Review23 report", "Unchanged AdrenoMetal b25e48e51dfdf4b3889ede6e701ab7dd59929a03 andmetal2vulkan87a869f7fc4b73265d4812c40d8cccb6a83c7b17"]
+configuration = ["Local development only;70protected inputs and1023-byte arguments retained;no commit,push,CI,ESP,SSH/ADB or phone action", "Upstream code changes packaged as a board patch,applied to isolated source copies;runtime fixed16MiB allocation unit unchanged"]
+procedure = ["Read actual struct andmodule data before implementing GCC delay branches;keep DISP GDSC and ordinary DISPCC HALT gates", "Run source-derived ASan/UBSan,full Rust bridge checks/tests,complete Metal translation-unit and Mac host-test-source arm64e compilation,DP ABI/PAC,147patch application and full42-entrypre-ci"]
+findings = ["GCC AHB/XO halt_check2means fixed delay,noCLK_OFF polling. Binaryoffset0is hwcg_reg:XOzero denotes noHWCG,not nohalt_reg. DISPCC branches have ordinaryHALT contracts", "True IOSurface failure text is now bounded directos_log independent oflog-gpu;do not guess another row alignment from legalBGRA8pitches", "Pinned runtime refuses ExtendedRange intexture::viewed;Photos public setter ABI-checked observation logs exact rejected format and rethrows unchanged. WindowServerXR10 remainsfalse", "New lowfrequency perprocess counters distinguish pooled/placed/idle/own/imported/blocks. Noncompositor Turnip emptyBOcache disabled usingexisting knob;inflight retirement unchanged. No unsupported runtime allocator knob invented", "Set1descriptorpool417216entriesat64Brequests26701824B;darwin_size_classroundsto29360128B/28MiB. Cache-disablednoncompositorpathavoidsthisrounding;livepoolmustnotbediscarded. RuntimecountersdonotincludeTurnipinternaldescriptorBOs", "USB bridge thread snapshots pending failure events andthreeTRBs/slot/EP0 beforesecondary callback. Bounded8perhostepoch,read-only qualifiedDMA,EDcookie notdereferenced,nohardIRQmapping or diskflush;idleunchangedERDPdoesnotscanphysicalring"]
+completion = ["HOST_VERIFIED_PENDING_HARDWARE;42canonicalpre-cigatesplus2providerchecksallPASS,20Review23checksand28RustunittestsPASS", "DP26hostgroups,483slotIOMFBABI,arm64eMetalzero-warningfullTUsandboardABI/PAC/closure,147orderedXNUpatchesPASS;70protectedinputsand1023Bargumentsunchanged"]
+limits = ["RenderTarget exact refusal andPhotos exact requestedformat pendingruntime evidence;fullIOSurface/scanout execution requiresmacOShost,notLinux crosscompile", "Runtimeunit/staging16MiBnotadjustablethroughDeviceOptions;aggregatebinsdonotidentifyeacholdBO. Static28MiBdescriptorsizeisexplainedbutreductiontargetnotclaimed", "IR0mayalreadybeconsumedbyitsindependentIRQbeforethethreadsnapshot;IR1captureprecedesitscallback;noabsoluteIR0teardownguarantee"]
+next_action = ["Ownerreviewofartifacts/b5q-review23-local/incremental.diffandgates.json;futureCIonlyafterauthorization,rebuildchangedboardobjectsandMetal/runtime,reuseunchangedcore/GPU/Mesa/UEFI"]
+[[area.evidence]]
+kind = "host"
+reference = "reports/review23-source-audit.json"
+revision = "43768c7c4aaf28ad4d027c3019f655b1ef971d88"
+command = "pre-ci-v33d.py;test-review23.py;check-dp-local.py;check-dp-target.py;check-xnu-patches.py --unixnu sources/UniXNU --source sources/UniXNU/out/feeds/xnu-3199e8bc"
+result = "PASS42canonicalplus2providergates,28Rusttests,26DPgroups,147patches,arm64e/PAC/ABIand70protectedhashes;HOST_VERIFIED_PENDING_HARDWARE,novalidationofphysicalfixesorMacpixeltestexecutionclaimed"

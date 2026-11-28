@@ -54,7 +54,8 @@ struct Hardware {
   if(rc)IOLog("B5qDP: trace-flush step=%s rc=%d\n",name,rc);
  }
  bool opened=false,mxOwned=false,fault=false,cablePresent=false;
- bool dpBusy=false;uint32_t dispPowerSnapshot=0;
+ bool dpBusy=false;uint32_t dispPowerSnapshot=0,gccAhbBefore=0,gccAhbAfter=0,gccXoBefore=0,gccXoAfter=0;
+ bool dispPowerRead=false;
  unsigned wantedReverse=0;uint64_t sampled=0;
  QcomRpmhResource mx{};
  uint64_t nowUs(){return ::nowUs();}
@@ -95,10 +96,27 @@ struct Hardware {
  bool openFailure(const char *step){
   IOLog("B5qDP: stage=hw-open failed step=%s gcc50018=%08x gcc39004=%08x disp9000=%08x dpBusy=%u sel=%08x/%08x en=%08x/%08x\n",
     step,gcc.va?gcc.va[0x50018/4]:0,gcc.va?gcc.va[0x39004/4]:0,dispPowerSnapshot,
-    dpBusy,sel.va?sel.va[0]:0,sel.va?sel.va[1]:0,en.va?en.va[0]:0,en.va?en.va[1]:0);return false;
+    dpBusy,sel.va?sel.va[0]:0,sel.va?sel.va[1]:0,en.va?en.va[0]:0,en.va?en.va[1]:0);
+  clockSnapshot();return false;
+ }
+ void clockSnapshot(){
+  IOLog("B5qDP: hw-clocks gcc27004=%08x->%08x gcc27018=%08x->%08x disp9000=%08x read=%u\n",
+    gccAhbBefore,gccAhbAfter,gccXoBefore,gccXoAfter,dispPowerSnapshot,dispPowerRead);
+ }
+ bool enableDispGcc(){
+  // Stock gcc-kalama.ko: both use BRANCH_HALT_DELAY (2), not
+  // BRANCH_HALT. AHB has HW_CTL bit1; neither checks CLK_OFF.
+  gccAhbBefore=gcc.va[0x27004/4];gcc.va[0x27004/4]=gccAhbBefore|1u;barrier();IODelay(50);
+  gccAhbAfter=gcc.va[0x27004/4];
+  gccXoBefore=gcc.va[0x27018/4];gcc.va[0x27018/4]=gccXoBefore|1u;barrier();IODelay(50);
+  gccXoAfter=gcc.va[0x27018/4];
+  // Still fail closed on a lost enable write. CLK_OFF is not a status
+  // contract for these branches; all DISPCC/DPU accesses remain gated.
+  return (gccAhbAfter&1u)&&(gccXoAfter&1u);
  }
  bool open(bool reverse){
-  dispPowerSnapshot=0;fault=false;wantedReverse=reverse;sampled=nowUs();cablePresent=true;
+  dispPowerSnapshot=0;dispPowerRead=false;gccAhbBefore=gccAhbAfter=gccXoBefore=gccXoAfter=0;
+  fault=false;wantedReverse=reverse;sampled=nowUs();cablePresent=true;
   dpBusy=false;
   trace("map");
   if(!dp.open(0xae90000,0x2000)||!phy.open(0x88ea000,0x1000)||
@@ -111,16 +129,12 @@ struct Hardware {
   if(!b5q_usb_dp_phy_ready())return openFailure("qmp-clock-reset");
   // Do not read a DISPCC/DPU register while its retained supply is off.
   if(!(gcc.va[0x50018/4]&(1u<<31))||!(gcc.va[0x39004/4]&(1u<<31)))return openFailure("gdsc-usb");
-  auto gccBranch=[&](unsigned off){
-   gcc.va[off/4]|=1u;barrier();
-   for(unsigned us=0;us<1000;us+=10){if(!(gcc.va[off/4]&(1u<<31)))return true;IODelay(10);}return false;
-  };
   // gcc-kalama.c critical DISP AHB/XO branches. Set no GDSC or
   // primary display timing; fail closed if the retained domains are off.
-  if(!gccBranch(0x27004)||!gccBranch(0x27018))return openFailure("disp-gcc-clock");
-  dispPowerSnapshot=disp.va[0x9000/4];
+  if(!enableDispGcc())return openFailure("disp-gcc-clock");
+  dispPowerSnapshot=disp.va[0x9000/4];dispPowerRead=true;
   if(!(gcc.va[0x50018/4]&(1u<<31))||!(gcc.va[0x39004/4]&(1u<<31))||
-     !(disp.va[0x9000/4]&(1u<<31)))return openFailure("gdsc");
+     !(dispPowerSnapshot&(1u<<31)))return openFailure("gdsc");
   B5qDp::Clock<Hardware> accessClock(*this);
   if(!accessClock.branch(0x80a4)||!accessClock.branch(0xa020))return openFailure("disp-ahb-clock");
   trace("dpu-inspect");
@@ -132,6 +146,7 @@ struct Hardware {
   if(!pins.begin(*this,reverse))return openFailure("aux-gpio");opened=true;
   IOLog("B5qDP: stage=hw-open ok rev=%u sel=%08x/%08x en=%08x/%08x in_mismatch=%x\n",
     reverse,sel.va?sel.va[0]:0,sel.va?sel.va[1]:0,en.va?en.va[0]:0,en.va?en.va[1]:0,pins.inMismatch);
+  clockSnapshot();
   return true;
  }
  bool voteMx(uint32_t value){

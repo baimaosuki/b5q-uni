@@ -63,6 +63,7 @@ void hostCheckpoint(const char *reason,bool force=false,bool allowU3=false);
 void restoreHostGlobals(void);
 void configureHostPorts(IOService *host);
 void releaseHostPortPowerHolds();
+void captureHostFailures(unsigned source);
 extern "C" unsigned b5q_log_sync(unsigned);
 namespace {
 // The DWC3 global, device and OTG registers in the window Apple's class addresses: base + 0xc000.
@@ -837,6 +838,10 @@ static void hostIrqBridge(void *, wait_result_t) {
         const bool active1 = have1 && (ir1.iman & 3u) == 3u;
         const bool active2 = have2 && (ir2.iman & 3u) == 3u;
         const bool active=active1||active2;
+        // Thread context, before the secondary callback advances ERDP or
+        // clears failed slot/EP0 contexts. No logging or mapping in the IRQ.
+        captureHostFailures(0);
+        if(active1)captureHostFailures(1);
         if(!active){
             gHostIrqBridge.idle();
             const unsigned op=gXhciRegs.va[0]&255u;
@@ -1088,6 +1093,43 @@ bool dmaRead64(uint64_t pa,uint64_t &value){
     for(unsigned i=0;i<gDmaExcludedCount;i++)if(pa<gDmaExcluded[i].base+gDmaExcluded[i].bytes&&gDmaExcluded[i].base<pa+8)return false;
     for(unsigned i=0;i<gDmaRamCount;i++)if(pa>=gDmaRam[i].base&&pa+8<=gDmaRam[i].base+gDmaRam[i].bytes){value=ml_phys_read_double_64(pa);return true;}
     return false;
+}
+void captureHostFailures(unsigned source){
+    if(source>1u||!gXhciRegs.va||gCoreRole!=kRoleHost)return;
+    static uint32_t epoch=0,count=0;static uint64_t seen[8]{};
+    struct Cursor {uint64_t erst,erdp;};static Cursor cursors[2]{};
+    if(epoch!=gHostEpoch){epoch=gHostEpoch;count=0;memset(seen,0,sizeof seen);memset(cursors,0,sizeof cursors);}
+    if(count>=8u)return;
+    const unsigned cap=gXhciRegs.va[0]&255u,rt=gXhciRegs.va[0x18/4]&~31u;
+    if(cap>kXhciRegisterBytes-0x38u)return;
+    auto *op=gXhciRegs.va+cap/4;
+    const uint64_t dcbaa=(uint64_t(op[0x30/4])|(uint64_t(op[0x34/4])<<32))&~63ULL;
+    const unsigned stride=((gXhciRegs.va[0x10/4]>>2)&1u)?64u:32u;
+    B5qUsbHostEvent::Interrupter ir{};
+    if(!B5qUsbHostEvent::interrupter(rt,source,kXhciRegisterBytes,[](unsigned off){return gXhciRegs.va[off/4];},ir))return;
+    // The bridge wakes every millisecond. Inspect physical ring memory only
+    // for a pending interrupt or a newly advanced dequeue, never idle polls.
+    auto &cursor=cursors[source];
+    if(!(ir.iman&1u)&&cursor.erst==ir.erst&&cursor.erdp==ir.erdp)return;
+    cursor={ir.erst,ir.erdp};
+    auto read=[](uint64_t pa,uint64_t &v){return dmaRead64(pa,v);};
+    auto observe=[&](unsigned segment,unsigned index,const B5qUsbHostEvent::Event &event){
+        if(event.type!=32u||event.slot<2u||event.completion==1u||count>=8u)return;
+        const uint64_t key=(ir.erst&~63ULL)^(uint64_t(segment)<<48)^(uint64_t(index)<<32)^event.parameter^event.control;
+        for(unsigned i=0;i<count;i++)if(seen[i]==key)return;
+        seen[count++]=key;
+        const auto fault=B5qUsbHostEvent::failure(event,dcbaa,stride,read);
+        IOLog("qcom-dwc3: host-failure-now ir=%u index=%u cc=%u slot=%u ep=%u parameter=%llx status=%08x control=%08x\n",
+            source,index,event.completion,event.slot,event.endpoint,event.parameter,event.status,event.control);
+        for(unsigned i=0;i<3;i++)IOLog("qcom-dwc3: host-failure-trb rel=%d read=%u dw=%08x:%08x:%08x:%08x\n",
+            int(i)-2,!!(fault.trbMask&(1u<<i)),uint32_t(fault.trbs[i][0]),uint32_t(fault.trbs[i][0]>>32),
+            uint32_t(fault.trbs[i][1]),uint32_t(fault.trbs[i][1]>>32));
+        IOLog("qcom-dwc3: host-failure-context slot=%u ctx=%llx read=%u slotdw=%08x:%08x:%08x:%08x ep0=%08x:%08x:%08x:%08x\n",
+            event.slot,fault.context,fault.contextRead,uint32_t(fault.slot[0]),uint32_t(fault.slot[0]>>32),uint32_t(fault.slot[1]),uint32_t(fault.slot[1]>>32),
+            uint32_t(fault.ep0[0]),uint32_t(fault.ep0[0]>>32),uint32_t(fault.ep0[1]),uint32_t(fault.ep0[1]>>32));
+    };
+    B5qUsbHostEvent::pending(ir.erst&~63ULL,ir.erstsz,ir.erdp,16,read,observe);
+    B5qUsbHostEvent::latest(ir.erst&~63ULL,ir.erstsz,ir.erdp,16,read,observe);
 }
 void dmaDiagnostics(const char *reason){
     if(!gXhciRegs.va||!gGlobals.va)return;

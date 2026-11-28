@@ -11,6 +11,61 @@ struct Event {
 };
 
 struct Interrupter {uint32_t iman,erstsz;uint64_t erst,erdp;};
+
+struct Failure {
+    uint64_t trbs[3][2]{},context=0,slot[2]{},ep0[2]{};
+    unsigned trbMask=0;bool contextRead=false;
+};
+template<class Read>
+Failure failure(const Event &event,uint64_t dcbaa,unsigned stride,Read read){
+    Failure out;
+    if(event.type!=32u||event.slot<2u||event.completion==1u)return out;
+    // ED means parameter is an opaque Event Data cookie, never a DMA address.
+    if(!(event.control&4u)&&event.parameter>=32u&&!(event.parameter&15u)&&event.parameter<=UINT64_MAX-8u){
+        for(unsigned i=0;i<3;i++){
+            const uint64_t pa=event.parameter-32u+16u*i;
+            if(read(pa,out.trbs[i][0])&&read(pa+8u,out.trbs[i][1]))out.trbMask|=1u<<i;
+        }
+    }
+    if(!dcbaa||(dcbaa&63u)||(stride!=32u&&stride!=64u)||event.slot>255u||
+       dcbaa>UINT64_MAX-uint64_t(event.slot)*8u)return out;
+    if(!read(dcbaa+uint64_t(event.slot)*8u,out.context)||!out.context||(out.context&63u)||
+       out.context>UINT64_MAX-stride-16u)return out;
+    out.contextRead=read(out.context,out.slot[0])&&read(out.context+8u,out.slot[1])&&
+        read(out.context+stride,out.ep0[0])&&read(out.context+stride+8u,out.ep0[1]);
+    return out;
+}
+
+// Inspect the queued events before Apple's thread callback can tear down a
+// failed slot. ERDP names the next event; its predecessor gives the expected
+// cycle except at ring wrap. No dequeue, status or endpoint write is made.
+template<class Read,class Emit>
+bool pending(uint64_t table,unsigned tableEntries,uint64_t erdp,unsigned limit,Read read,Emit emit){
+    if(!table||(table&63u)||!tableEntries||tableEntries>64u||!limit)return false;
+    const uint64_t pointer=erdp&~15ULL;
+    for(unsigned segment=0;segment<tableEntries;segment++){
+        if(table>UINT64_MAX-uint64_t(segment)*16u-16u)return false;
+        uint64_t base=0,size=0;
+        if(!read(table+16u*segment,base)||!read(table+16u*segment+8u,size))return false;
+        const unsigned entries=uint32_t(size)&65535u;base&=~63ULL;
+        if(!base||entries<16u||entries>65536u||base>UINT64_MAX-uint64_t(entries)*16u||
+           pointer<base||pointer>=base+uint64_t(entries)*16u)continue;
+        const unsigned index=unsigned((pointer-base)/16u),previous=(index+entries-1u)%entries;
+        uint64_t prior=0;if(!read(base+uint64_t(previous)*16u+8u,prior))return false;
+        unsigned cycle=unsigned(prior>>32)&1u;if(index==0)cycle^=1u;
+        const unsigned count=limit<entries?limit:entries;
+        for(unsigned i=0;i<count&&index+i<entries;i++){
+            const uint64_t pa=base+uint64_t(index+i)*16u;uint64_t parameter=0,words=0;
+            if(!read(pa,parameter)||!read(pa+8u,words))return false;
+            const uint32_t status=uint32_t(words),control=uint32_t(words>>32);
+            if((control&1u)!=cycle||!((control>>10)&63u))break;
+            emit(segment,index+i,Event{parameter,status,control,status>>24,(control>>10)&63u,
+                (control>>24)&255u,(control>>16)&31u,control&1u});
+        }
+        return true;
+    }
+    return false;
+}
 template<class Read32>
 bool interrupter(unsigned runtime,unsigned index,unsigned windowBytes,Read32 read,Interrupter &out){
     if(index>1u||(runtime&31u)||windowBytes<0x40u+index*0x20u||

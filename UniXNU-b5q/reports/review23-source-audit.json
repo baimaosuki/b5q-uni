@@ -1,0 +1,337 @@
+{
+  "review": 23,
+  "source_base": "43768c7c4aaf28ad4d027c3019f655b1ef971d88",
+  "time_utc": "2026-11-28T09:58:03.997076+00:00",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "scope": [
+    "UniXNU-b5q/package/B5qDpLink.cpp",
+    "UniXNU-b5q/package/B5qUsbHostEvent.h",
+    "UniXNU-b5q/package/QcomDwc3.cpp",
+    "UniXNU-b5q/patches/tools/b5q-review23-metal-diagnostics.patch",
+    "UniXNU-b5q/scripts/b5q_display.py",
+    "scripts/b5q-install/test-review23.py",
+    "scripts/b5q-install/pre-ci-v33d.py"
+  ],
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qDpLink.cpp": "7f9ae44dc23ede96a336c39e44c6d144314904e1e52c8a1c11952db963ac293d",
+    "UniXNU-b5q/package/B5qUsbHostEvent.h": "4d4c224023d963c5c6b866fb431003f1b7fd6be3bddc638a6098cd1bcd59c1a6",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "368ffa213ca2c768b053028ccf7d3076b74facc1483fadf5e69d37e398912737",
+    "UniXNU-b5q/patches/tools/b5q-review23-metal-diagnostics.patch": "b9dd4d7d9467604f43cf694a70ecaf703b342beaf4d897e69876e7de770a514c",
+    "UniXNU-b5q/scripts/b5q_display.py": "b97506870a3065d0954c18a7f196ee8a61827e8bf1134bd14eda78abf1c0ce1b",
+    "scripts/b5q-install/test-review23.py": "088bf83680ab92818c947c88b0f91ea71c98466ea330285d0d583f84b547aa11",
+    "scripts/b5q-install/pre-ci-v33d.py": "a9f14938032a2fe249068d83399a2644ccc6a7ed77df90522d435e908f1e4f81"
+  },
+  "protected_sha256": {
+    ".github/workflows/b5q-batch1-final.yml": "31eed607989e11281f5afd7ff682189bbc6f838371a7e72f222e5c4fd17a8ea4",
+    ".github/workflows/b5q-data-mount-fix.yml": "3bafcaeb2d2d40ad096e95b9d1c050ae1bbf0593b9f6f1b13531d6e73b8117bd",
+    ".github/workflows/b5q-diagnostics.yml": "0fc363ae7ae658eba64f8a5b82ce4f7627ec37c9e5a0b4f44db1fb55a4fd9ada",
+    ".github/workflows/b5q-firmware.yml": "e7483ca515dcff340e69b8982509a383af6cab70e5513d86fd199ca1a0d8561b",
+    ".github/workflows/b5q-install-seed.yml": "dfb104f630eeffd04869f8ef1b0701081d08ea7794182751fdded66b9557b85e",
+    ".github/workflows/b5q-macos-only-userdata.yml": "c1da4000587416ec196b435050423e617fa573763a7c4128b468d1854a743867",
+    ".github/workflows/b5q-new-batch2.yml": "f32153854d48463c9d0927be685cf331719b892630666099954a5e1c2f201bc8",
+    ".github/workflows/b5q-p0-p5.yml": "50360d5872a0271fc7817db7dcc27b3afdd506ee81cc66abcee6de992ddbd2dd",
+    ".github/workflows/b5q-runtime.yml": "e7f9ad5ae7e38b480bdc14b838c755ac290ecd28e5dec81fb9adceb284559674",
+    ".github/workflows/b5q-stage123.yml": "5359d54b38a730d3fe9a957f7f8777ec74fece83c09f8f2049043b552bccfe76",
+    ".github/workflows/b5q-storage-tests.yml": "c040bd74acfb5c4ce8b22952cd7d272c1f1c4ea5ebdfc1da2a58b68c4bbcc267",
+    ".github/workflows/b5q-v24-package.yml": "7309aeefd35c6eba7ea43eaa5f5fe9f8ae8d9e50014de35d9701f6f39f162c8b",
+    ".github/workflows/b5q-v25-incremental.yml": "74aa19315479fb5513532e4ac7d61dc07d998b40067e799ff4184e091591d62f",
+    ".github/workflows/b5q-v26-incremental.yml": "26b5a31ce7a605b9dd754eba4d1d8be24a5fd1f1775aefc875757c5569ffbe7a",
+    ".github/workflows/b5q-v27-incremental.yml": "4c9cd46a56ae18860e60ddfe8f39015e1b60be15271768492c3f2de4091dfe4b",
+    ".github/workflows/b5q-v29-incremental.yml": "2f1efffdda93497fd864e3a2c67a7c4db907be88132a1057a7fba4a9fcf82a98",
+    ".github/workflows/b5q-v31-incremental.yml": "7e5706ed5bb4e8396cd48178c53bb39c3c9557d47ae75f69c343612387433b1d",
+    ".github/workflows/b5q-v32-incremental.yml": "b5276607d5f8c56a46b85bd6e77ef20be9d20ce0f95d8d755901846354ae9489",
+    ".github/workflows/b5q-v33-incremental.yml": "91fe48a46990c4647dfd01998dc4a329340d09b2e3ff515cf8cf01d8d69fa2d8",
+    "UniXNU-b5q/board.toml": "db7b02ca1e4c3d6a591304e863e5d5e08415c2aa3dd6e5fae18d649d045f5dc4",
+    "UniXNU-b5q/package/B5qBtFifo.c": "ec31af0fb349f14e1ae14734318772afa551d828c7197caaf04e0d19e07fac35",
+    "UniXNU-b5q/package/B5qUsbInputs.h": "676e88f1b5cb9e0af19e6e819b5ea0d438c2e01d7ce3542769936b0c50503c89",
+    "UniXNU-b5q/package/B5qWcnPower.cpp": "81a6ed3e6e95fa2b6799ff244b1b792182ef0d95dc666f3ec4eb9b8aa19d4999",
+    "UniXNU-b5q/patches/xnu/series": "40339cfe6b2339fc509f3a6695ac84e04cab81b527962cb700e78a939166f3df",
+    "UniXNU-b5q/scripts/usb-dual-bindings-26C5035r.json": "9e30f96b7ad59b9ec7ea4430bf970a000090db9ff705f17123e85d582b4a83e3",
+    "UniXNU-b5q/scripts/usb-xhci-26C5035r.json": "c6d7ad3855b213b794b11f5a6efc4922cc957cf6285e000ad69dac7ab661946b",
+    "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
+    "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+    "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
+    "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29",
+    "patches/uefi-b5q/0005-b5q-physical-esp.patch": "45539390db2142e460c12c9d71b56f79cca88922976bac29096feb6b0aa4da11",
+    "patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch": "ee152149bf5395e97987de7f9e1587c8a5fec78da64ad25fb416feb416ba68b1",
+    "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
+    "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
+    "patches/uefi-b5q/0009-b5q-media-dma.patch": "b41f5d54e4fc03f3b72bdfa300c3d81a0bf3ac8a184e5bf659fcfef7538701b6",
+    "patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch": "00f6e3dbecd897b5d7d54b182b0ab7a3d3bc522b1f1e81bafff19cda942fdd15",
+    "patches/uefi-b5q/0011-b5q-dp-splash-tail.patch": "07316f6c87fe7f66d8bdf0b44ac7c1217fa6525c20d74a0d201354c4c8705118",
+    "patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch": "7166412b0aa62093c6dc68fc4c38d810fbecf4d1b5dddd29aa860267655dae1d",
+    "patches/uefi-b5q/0013-b5q-reserved-dma-guards.patch": "22249582ec46dc5df2bcac9aa50ea73fb3667808961dbff930ee679e369ade62",
+    "patches/uefi-b5q/0014-b5q-dma-unprivileged-wbis.patch": "8111a4c0639fb89c117cc10d63eb86584e0c63f015d692923f9389f3305075e9",
+    "patches/uefi-b5q/0015-b5q-usb-map-lifetime.patch": "572961ee673fb0b0b2184bf52427208bd97e94e903d5a3c40f2ce42c330d54d0",
+    "patches/uefi-b5q/0016-darwinboot-dma-order-inputs.patch": "1a5354301eb37a2347e98d6ca7cca670c6b201a1f973e689e0b5230ca025b316",
+    "patches/uefi-b5q/0017-b5q-dma-attach-flush.patch": "663c3e010f6409a2ec298a5b656a080243a02c47dea52a3ffb2647fbb8934d7e",
+    "patches/uefi-b5q/0018-darwinboot-usb-coverage.patch": "f1cd6bdb914f974e35d746c86ff9eecfee62c45fb921881ba5f1cbad36bd29f1",
+    "patches/uefi-b5q/0019-b5q-pcie-64m.patch": "90030fd213f8f8ed38a840c5d1de40c96da39dff85eaa3835864bfcfd790832a",
+    "patches/uefi-b5q/0020-darwinboot-pcie-64m.patch": "53584fb8d71284971aab718ebea51c34fa6a557ea744a0510375bd01311f17d8",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/DeviceBuild.py": "621c23af3706fb0a50759ac935f9601d11e8e4d024d1585848b7f9cfa3c1bd28",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c": "ea445a783a57523172b92c1ff54a3ac1fac7058f877762c5b743c8ac93d2f73d",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf": "ae88b0a0ff6ac8e97043799d8ba1d78fc10f88e007d49b24276c332db4c1c2ec",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/DpDma.c": "e2db8a0f2dea26c4f3f284b356694e6fc22de69b35c2ae37186c26cc904d2e05",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c": "3f0ed80ac2b460192938c8c9d3f13890a6228cdda280f25334f29b7fe2eb218a",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c": "9adf46d4715ce402cb2b5e504e34e8a92d8c0b4c6f5b22d4b315c56904d8cce4",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h": "325740f2c1ef3f4204c8ac3373d22677479d36322a81c3e75a256905df5d58d7",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c": "938150bcfcab68bde313d4a55eb2b8b3b1c8ce0d194d855106fe12d79578f551",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h": "9ebedcef081a3a7131517103aae2f71e87af0a8ba2d59b4629680de03447ee9b",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/APRIORI.inc": "403fdd1d2abcc4ef3988f2d05b5de5a89e73957a86d6922511e2346af1829517",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qDpDma.h": "6ed7661423604bee46397903ee1223e220140f3df374d27503aaa8086da7d802",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qMediaDma.h": "ec2bb043be6ff945be72a2c93a8353ad9906905f0cd40c2c5020e7e1ea791875",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h": "8b40a4490e0ff0461d2a9ce0fc1ae3ac5eb88d5123cb01fc16a82a05ba0e24d3",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h": "baed80a61a455d386b6dde580e46cb37da37f77f37683b9ac034bb01d20b2489",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qUsbDma.h": "4ad183ccfa342cf2602fcb3c69dc1d23803ca34232c6f9f18400f42d1caf5def",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/DXE.inc": "bfc8aabcf3b162093b6f8e15cb27529bd0dc60e06e65b63ef858de1a801ab8a3",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/RAW.inc": "1bbc5f56c2cf2e427f64c04829b755e7dfe2a9f45a2260d7bd14e3385cf7008d",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Library/ConfigurationMapLib/ConfigurationMapLib.c": "bd5e595e31933e337d22e4cd52bf24944eebe2a7172e551f5187f2b0af3fb83b",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Library/ConfigurationMapLib/ConfigurationMapLib.inf": "d43514ac5ee1f0758fe3bec0e73c5ff2f4f9b31e0d3546377c54e9214cc6a7b7",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c": "aa80b16e1c68b088f38d554bbb9b06a04c117e9ad5bc66cda9d675865bee3247",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.inf": "159424f05f845ecb993029636bd30ac167784697855a654bf95c7a202a3378ae",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.dec": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.dsc": "ae7f35e03accc44f56738e03a322fd2ba57fa5f051eedd5569b69da4db9a70aa",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/b5q.fdf": "c49811d33a7e43d441898c8c582ca19aa17bf12ea0bd3a8191bbbe58723fed6c"
+  },
+  "protected_count": 70,
+  "protected_unchanged": true,
+  "boot_args_bytes": 1023,
+  "core_patches_unchanged": 147,
+  "upstream_no_added_changes": true,
+  "upstream_preexisting_changes_preserved": true,
+  "input_sha256": {
+    "sources/twrp-b5q/recovery/root/lib/modules/gcc-kalama.ko": "25984e51bd6788c80ef0dac00ba093558fdc965d26a2198c68d82b440f23ebf0",
+    "sources/twrp-b5q/recovery/root/lib/modules/dispcc-kalama.ko": "21c58ba414185559e1ff9f35c6a06b71c83529e0fee06de8ea5285c16ca4d5f5",
+    "artifacts/b5q-review22-local/metal2vulkan/crates/metal2vulkan-runtime/src/memory.rs": "12c26f346b590522d5cf6c0a9c2916fba6c05a2b8dc27a31278b82de42597c2a",
+    "artifacts/b5q-review22-local/metal2vulkan/crates/metal2vulkan-runtime/src/staging.rs": "f4f488548f4ed6697fc63b063762f76436140cb1e8c6cddf1cbe5d5102bb12e7",
+    "artifacts/b5q-review22-local/metal2vulkan/crates/metal2vulkan-runtime/src/texture.rs": "c2957eb3e822d2e7b63e1d869468da08427f04bcfb83d068628dacf4e433308e",
+    "artifacts/b5q-review22-local/metal2vulkan/crates/metal2vulkan-runtime/src/device.rs": "9c798e192934999942023cdf4bd3cd8eaead9418fb7b0069ec74de98691c1af2",
+    "artifacts/b5q-review22-local/metal2vulkan/crates/metal2vulkan-runtime/src/arrays.rs": "e75a3fc7b6d2ec5767b9fcca9195cd83c2ba560c0bcf632055e2349cb6da0e76",
+    "artifacts/b5q-review22-local/metal2vulkan/crates/metal2vulkan-runtime/src/counters.rs": "ba8b7f556989bfe017f77649edb8dc9b19d5db727cd646f9f522f6ab578fd513",
+    "artifacts/b5q-review22-local/metal2vulkan/crates/metal2vulkan-runtime/src/floor.rs": "e7130477efea99b96401a36169721be43fe54a08e1e5d0a460595787ea70a09d",
+    "artifacts/b5q-review23-local/clock-source/clk-branch.c": "66853f40607605cbb460bd817856207ea79e3afcb50202158c57ef4004e408c2",
+    "artifacts/b5q-review23-local/clock-source/clk-branch.h": "1ab0fa444fc9e500dac10bcbf9ec0f38e79146482e01b678e82fb5ffcd34d3be",
+    "artifacts/b5q-review23-local/clock-source/gcc-kalama.c": "d653b83fcdfdbf9524664c4455eca2d6a460ba97294588ba373c6518e0441a31",
+    "artifacts/b5q-review23-local/clock-source/dispcc-kalama.c": "6f2ad482645c03c0b902edcc13f20dae2e359dfbb57f4383bf7cfaa6c9f5d38a",
+    "artifacts/b5q-review23-local/mesa-source/tu_descriptor_set.cc": "b64bcde50d9445accd8d016a2749d3709ac6af0b43d94849cd0e31f955740a8b",
+    "artifacts/b5q-review23-local/mesa-source/tu_descriptor_set.h": "d947111012b80ab2016096458b97ef3232a5f29349b2d777a5996133c03b6abb"
+  },
+  "source_findings": {
+    "DP": {
+      "verified_root_cause": "GCC AHB/XO use BRANCH_HALT_DELAY;pollingCLK_OFF is not their enable contract",
+      "implementation": "enablebit0,barrier,50us each,enable readback;preserveGDSC/DISPCC gating;printbefore/afterandreadflag",
+      "field_correction": "XO zero field atstructoffset0is hwcg_reg;actualhalt_reg=0x27018. No zero halt_reg claim retained.",
+      "DPClock_audit": "Stock DISPCC0x80a4/0xa020andDPaux/link/intf/pixel haveordinaryBRANCH_HALT;noheaderchange"
+    },
+    "surface_failure": {
+      "status": "DIAGNOSTICS_IMPLEMENTED_ROOT_CAUSE_PENDING",
+      "audited_steps": {
+        "1": "nullsurface/descriptor,plane bounds",
+        "2": "baseVMmapping,pagealignment,allocationlength/overflow",
+        "3": "planeoffset,rowzero/range;existingb3a8fallback",
+        "4": "surfaceBuffer hostpagealias/import withread-onlyprotectionpreserved",
+        "5": "runtime descriptorrotation/usage/swizzle/index/shape,readonlyRenderTarget,Vulkanimageplan/memory;linear-placementmisscanusesynchronizedcopy"
+      },
+      "static_findings": "BGRA8format80rows10624and768covertexels andbyte spans;noevidencejustifiesanotheralignmentchange. allowGPUOptimizedContents/fbOnlymetadataalonearenotshownasrefusal.",
+      "change": "refuseSurfaceandtextureOnBuffer logfirst16+every1024withoutSHENG_LOG_GPU,includingdesc/surface/error;nohotdladdr",
+      "tests": "Production Rust descriptor cases plus genuineMacRenderTargetclear-pixeltestfor2640x1080and180x180addedtosurface_import_host.mm;MacpixeltestnotexecutedonLinux"
+    },
+    "memory": {
+      "runtime_pool": {
+        "symbol": "memory::ALLOCATION_LEN",
+        "bytes": 16777216,
+        "source": "crates/metal2vulkan-runtime/src/memory.rs:41",
+        "creation": [
+          "memory::stock/ahead",
+          "Pool::own len.max(ALLOCATION_LEN)"
+        ],
+        "retention": "one wholly-free reserve per class plus live allocations;surplus empty allocations wait250ms and retirement",
+        "DeviceOptions_tunable": false
+      },
+      "staging": {
+        "symbol": "staging::REGION_LEN",
+        "bytes": 16777216,
+        "source": "crates/metal2vulkan-runtime/src/staging.rs:32",
+        "creation": "submit::Work::make_staging_region;one fixed region per Device",
+        "DeviceOptions_tunable": false
+      },
+      "descriptor_pool": {
+        "symbols": [
+          "Arrays::make",
+          "tu_CreateDescriptorPool",
+          "darwin_size_class"
+        ],
+        "sources": [
+          "crates/metal2vulkan-runtime/src/arrays.rs:1000",
+          "Mesa src/freedreno/vulkan/tu_descriptor_set.cc:832",
+          "UniXNU/patches/mesa/turnip-darwin-kmd.patch:815"
+        ],
+        "counts": {
+          "sampled_images_with_seconds": 131072,
+          "storage_images": 131072,
+          "uniform_texel": 65536,
+          "storage_texel": 65536,
+          "samplers": 24000
+        },
+        "descriptor_stride_bytes": 64,
+        "requested_bytes": 26701824,
+        "cache_enabled_BO_bytes": 29360128,
+        "cache_disabled_requested_BO_bytes": 26701824,
+        "expected_saving_per_pool_bytes": 2658304,
+        "retention": "live descriptor set1 is required for resource-ID ABI;not an empty slab;cannot discard while device lives",
+        "DeviceOptions_tunable": false,
+        "confidence": "Exact static creation-size match to28MiB bin;existing aggregate bins do not identify each individual BO",
+        "driver_private_not_in_runtime_VkDeviceMemory_counters": true,
+        "limitation": "Runtime pooled/placed/empty summary omits Turnip internal descriptor BO accounting;static pool size plus kernel BO bins identify this size class,butindividual old BOs were not stack-attributed."
+      },
+      "bridge_heap": {
+        "sources": [
+          "bridge/NativeMetalHeap.rs",
+          "bridge/NativeMetalBufferArena.rs"
+        ],
+        "retention": "explicit Metal heap length and live leases;small buffers share64KiB chunk with weak arena refs;ownership held by in-flight command buffers",
+        "default_16_to_32_MiB_slab": false
+      },
+      "kernel": {
+        "source": "UniXNU/drivers/Adreno740/NativeAdrenoMemory.cpp",
+        "action": "size/count probes only;no kernel allocation trimming or accounting changes"
+      },
+      "safe_change": {
+        "source": "NativeAdrenoMetalPlugin.mm non-render-server branch",
+        "value": "TU_DARWIN_BO_CACHE=0 (respect explicit environment override)",
+        "effect": "avoid rounded size classes and a second BO cache after fence retirement;does not free live runtime reserves,descriptor sets,NonVolatile resources or in-flight commands"
+      },
+      "possible_future_patch": {
+        "route": "board tool patch adds a bridge/patches/*.patch and records it in scripts/build-adreno-metal-bridge.py PATCHES;source-tree digest includes patched pinned runtime",
+        "needed_changes": [
+          "runtime DeviceOptions perdevice pool/staging parameters",
+          "Pool::own,ahead,Allocation::unit/fit/whole,texture heap sizing andring/staging invariant tests",
+          "descriptor array counts require shader resource-ID/layout/floor/indices ABI qualification,not a literal count reduction"
+        ],
+        "implemented_this_round": false
+      }
+    },
+    "Photos": {
+      "status": "EXACT_FORMAT_CAPTURE_PENDING",
+      "reason": "Runtime texture::form requiresviewed(mapping.emulation);viewedexcludesExtendedRangeusedforXR10formats552..555. FullXR10 render/sample/IOSurfacesupportcannotbeadvertised.",
+      "change": "Photos-onlypublicCAMetalLayersetPixelFormatABIcheckedwrapperlogsactualrejectednumericformatandoriginalexception;delegatesandrethrowsunchanged;noformatrewrite",
+      "WindowServer_XR10_changed": false,
+      "fix_claimed": false
+    },
+    "USB": {
+      "status": "EARLY_DIAGNOSTICS_IMPLEMENTED",
+      "change": "ThreadcapturebeforeIR1callbackpendingeventconsumption,pluslatestfallback;targetparameterandprevious2TRBs,actualslot/EP0;8groupsperhostepochdeduplicated",
+      "bounds": "NoEDcookiedereference,unaligned/underflow/overflow/invalidcontextsrejected;everyphysicalreadusesexistingqualifieddmaRead64",
+      "idle_cost": "No physicalringrescanonunchangedERDPwithoutpendingIMAN.IP",
+      "IR0_limit": "IndependentIRQconsumptioncanprecedethreadobservation;notaguaranteetobeatteardownonIR0",
+      "controller_register_writes_added": false,
+      "HAL_changes": false
+    },
+    "swap_optional": {
+      "integrated": false,
+      "reason": "Existinglive8x1GiBpolicyreceiptreviewedlocally;optionalimagepolicydeferred,nomachineaccess. Notagpuwiredmemoryfix."
+    }
+  },
+  "validation": {
+    "passed": true,
+    "canonical_pre_ci_gates": 42,
+    "additional_provider_checks": 2,
+    "actual_recorded_pre_ci_checks": 44,
+    "review23_checks": 20,
+    "Rust_bridge_unit_tests": 28,
+    "DP_host_groups": 26,
+    "DP_IOMFB_vtable_slots": 483,
+    "xHCI_slots": 427,
+    "XDCI_slots": 384,
+    "XNU_patch_application": "147/147",
+    "Metal_mm_arm64e_warnings": 0,
+    "Mac_host_pixel_execution": "NOT_EXECUTED_LINUX_HOST",
+    "Rust_warning": "Existing unchanged pinnedruntime floor::check dead_code warning;cargo check/test PASS",
+    "receipts": {
+      "artifacts/b5q-review23-local/full-gate/v33d-local-gates.json": {
+        "sha256": "f22780b35de9d72631106b1a75d45f2085eb9d8242f4f641c22901aa937536b7",
+        "bytes": 15364
+      },
+      "artifacts/b5q-review23-local/full-gate/review23-tests.json": {
+        "sha256": "15e4cfbf5d3098fbbdaa8cf5d85f33ebfa5ceeccc41559e1b6087860ea333269",
+        "bytes": 16897
+      },
+      "UniXNU-b5q/reports/xnu-patch-application.json": {
+        "sha256": "a3f6727ef2aeda0cedc62f1c2b166de417188d69ebe2e91f079f5304f0a554ee",
+        "bytes": 24925
+      },
+      "artifacts/b5q-p5-work/target/report.json": {
+        "sha256": "d1004bd0e419a389c7eb39e99407856e567ba516ed392ce8492a49dd70ac8a15",
+        "bytes": 12506
+      },
+      "artifacts/b5q-review23-local/full-gate/all-PAC.json": {
+        "sha256": "d2fca40da905ef435574895e5c47c1af7989e1186f4123450f5bc2b8b146e8af",
+        "bytes": 29869
+      },
+      "artifacts/b5q-review23-local/full-gate/zero-EL1-SMMU.json": {
+        "sha256": "02917d45b9793b65263fc57733317621835abefbc9ff436281aefe193a48e75e",
+        "bytes": 6220
+      },
+      "artifacts/b5q-review23-local/pre-ci.log": {
+        "sha256": "035cef71c513af265672e6ed3a1b3e5fbcc235558655d2ad2159eced5c5b8287",
+        "bytes": 875
+      },
+      "artifacts/b5q-review23-local/dp-local.log": {
+        "sha256": "de85db4a79a64ae33576b61d2e73005e0705b2d00ac9ba030984172d7c1c613a",
+        "bytes": 421
+      },
+      "artifacts/b5q-review23-local/dp-target-final.log": {
+        "sha256": "3cac2f02c7ac3db1d9e40230cc95ea024717b420658a7a386b318efc98c15170",
+        "bytes": 429
+      },
+      "artifacts/b5q-review23-local/xnu-patches-147.log": {
+        "sha256": "6656fabbea26dfcb4ad16d61973bf7926e580c0300b215a684b541da3b82c4bd",
+        "bytes": 41
+      }
+    }
+  },
+  "unresolved": [
+    "ActualliveIOSurfaceRenderTargetrefusalstep/errornotpresentinReview22;newboundedlogneeded",
+    "Photosactualrequestedformatandcontrolledworkingfallbacknotyetproven;diagnosticonly",
+    "GPUtotaltargetnotclaimed;16MiBruntimeunitnotchanged,and28MiBlivedescriptorsnotfreed;perBOhistoricalownershippending",
+    "DP AUX/training/scanoutandUSBphysicaldownstreamrecoverypendingnewhardwaretest"
+  ],
+  "future_minimum_CI": {
+    "rebuild_board": [
+      "B5qDpLink.o",
+      "QcomDwc3.o includingB5qUsbHostEvent templates"
+    ],
+    "rebuild_userspace": [
+      "NativeAdrenoMetal full frontend/plugin/Rustbridge",
+      "runtime addon/payload"
+    ],
+    "relink_kernel": true,
+    "reuse": [
+      "XNUcore147patches",
+      "libAdreno740.a",
+      "Mesa/Turnipbinary",
+      "landscapeshaders",
+      "Touch",
+      "WiFi",
+      "Bluetooth",
+      "ADSP/audio",
+      "UEFIreview7/64MiBDMA",
+      "qualifiedData seed"
+    ]
+  },
+  "artifacts": {
+    "changed_files": "artifacts/b5q-review23-local/changed-files.json",
+    "diff": "artifacts/b5q-review23-local/incremental.diff",
+    "gates": "artifacts/b5q-review23-local/gates.json",
+    "notes": "artifacts/b5q-review23-local/NOTES.md"
+  },
+  "actions": {
+    "commit": false,
+    "push": false,
+    "CI": false,
+    "final_ESP": false,
+    "phone_access": false,
+    "flash": false
+  }
+}
