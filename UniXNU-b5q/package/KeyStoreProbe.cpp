@@ -59,7 +59,9 @@ static void aks_publish(void) {
     }
     char head[48];
     snprintf(head, sizeof head, "AKS opens=%u calls=%u", native_aks_opens, native_aks_calls);
-    for (unsigned i = 0; i < 47; ++i) boot_progress_ext[0][i] = head[i] ? head[i] : ' ';
+    unsigned h = 0;
+    for (; h < 47 && head[h]; ++h) boot_progress_ext[0][h] = head[h];
+    for (; h < 47; ++h) boot_progress_ext[0][h] = ' ';
     boot_progress_ext[0][47] = 0;
     unsigned i = 0;
     for (; i < 47 && row[i]; ++i) boot_progress_ext[1][i] = row[i];

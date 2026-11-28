@@ -41,7 +41,7 @@ def build(tree,package,out):
         source=lock[name]
         checkout(tree,'Ath12kWifi/deps/'+name,source['url'],source['commit'],source['paths'])
     subprocess.run([sys.executable,str(module/'tools/fetch-sources.py')],check=True)
-    sources,include=bluetooth_sources(bt,package,tree/'kits/Sm8550Platform',out/'bluetooth')
+    sources,include=bluetooth_sources(bt,package,tree/'kits/Sm8550Platform',out/'bluetooth',reference)
     sources += [package/'B5qWifiBoard.cpp',package/'WifiFirmware.c',network_source(reference,out/'network')]
     include += [module/'include',module/'src',out/'network',package,tree/'kits/Sm8550Platform']
     flags=[v for path in include for v in ['-I',str(path)]]

@@ -13,7 +13,7 @@ run('production-target',[sys.executable,R/'scripts/b5q-install/check-p4a-target.
 for name,cmd in [('joint-symbol-vtable-zeroMMIO',['check-media-target-closure.py']),('all-callback-PAC',['check-media-callback-pac.py']),('firmware-tenpatch-reconstruction',['check-stage-firmware-inputs.py','--media','--out',str(out/'firmware-inputs.json')]),('actual-EDK2-target',['check-pcie-uefi-target.py','--media'])]:
  run(name,[sys.executable,R/'scripts/b5q-install'/cmd[0],*cmd[1:]])
 run('all-retained-P0-P1-P2-P3-baselines',[sys.executable,R/'scripts/b5q-install/pre-ci-p2-p3.py'])
-b=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text());chosen=b['adt']['chosen'];assert chosen['u32']['b5q-feature-mask']==63
+b=tomllib.loads((R/'UniXNU-b5q/board.toml').read_text());chosen=b['adt']['chosen'];assert chosen['u32']['b5q-feature-mask']==61
 for name in ['audio','video']:
  assert chosen['u32']['b5q-'+name+'-dma-ready']==0
  assert bytes.fromhex(chosen['bytes']['b5q-'+name+'-dma-state'])==bytes(104)

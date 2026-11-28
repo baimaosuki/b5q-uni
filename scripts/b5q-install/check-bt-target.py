@@ -12,7 +12,7 @@ out=R/'artifacts/b5q-p2-work/target';out.mkdir(parents=True,exist_ok=True)
 sdk=R/'tools/macos-sdk/MacOSX26.5.sdk';llvm=R/'tools/llvm21/usr/lib/llvm-21/bin';cxx=llvm/'clang++'
 os.environ['LD_LIBRARY_PATH']=str(R/'tools/llvm21/usr/lib/x86_64-linux-gnu')
 component=R/'sources/UniXNU-sheng/drivers/QcaBluetooth'
-sources,includes=prepare(component,R/'UniXNU-b5q/package',R/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',out/'generated')
+sources,includes=prepare(component,R/'UniXNU-b5q/package',R/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',out/'generated',R/'sources/UniXNU-sheng')
 with tempfile.TemporaryDirectory(prefix='b5q-bt-target-') as td:
     td=Path(td);header=sdk/'System/Library/Frameworks/Kernel.framework/Headers'
     p=td/'libkern/c++/OSMetaClass.h';p.parent.mkdir(parents=True)

@@ -3,7 +3,7 @@
 import argparse,ast,hashlib,importlib.util,json,struct,subprocess,sys,tempfile,tomllib
 from pathlib import Path
 R=Path(__file__).resolve().parents[2]
-sys.path.insert(0,str(R/'sources/UniXNU/kits/XnuPrelink'))
+sys.path[:0]=[str(R/'sources/UniXNU/kits/XnuPrelink'),str(R/'UniXNU-b5q/scripts')]
 from kc_image import Image
 def load(path):
  spec=importlib.util.spec_from_file_location(path.stem,path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m);return m
@@ -56,12 +56,14 @@ def main():
     assert len(chosen['darwinboot-memory-excluded'])==128*16 and len(chosen['darwinboot-memory-outside'])==16*16
    else:assert 'PackedRAMDisk'in maps and 'darwinboot-memory-outside'not in chosen
    if a.media:
-    assert chosen['b5q-feature-mask']==struct.pack('<I',0 if name=='ram-fallback' else 63)
+    assert chosen['b5q-feature-mask']==struct.pack('<I',0 if name=='ram-fallback' else 61)
     for subsystem in ['audio','video']:
      assert chosen['b5q-'+subsystem+'-dma-ready']==bytes(4)
      assert chosen['b5q-'+subsystem+'-dma-state']==bytes(104)
    if a.dp:
     assert chosen['b5q-dp-dma-ready']==bytes(4)and chosen['b5q-dp-dma-state']==bytes(80)
+   from b5q_gpu_adt import verify as verify_gpu_firmware
+   verify_gpu_firmware(chosen)
    profiles[name]=dict(kernel_sha256=sha(kernel),args_bytes=len(entry['args'].encode()),lp_sip0_hex=chosen.get('lp-sip0',nodes['/chosen/asmb'][2]['lp-sip0']).hex(),RAM_seed_loaded='initrd'in entry)
   assert len({v['kernel_sha256']for v in profiles.values()})==1
   kernel=assets/'kernel.macho';raw=kernel.read_bytes();outer=Image(raw);core=Image(raw,outer.entries['com.apple.kernel'][1]);symbols={n:v for v,names in core.symbols().items()for n in names}
@@ -69,12 +71,14 @@ def main():
   assert all(n in symbols for n in required),[n for n in required if n not in symbols]
   if a.dp:
    required_dp=['_b5q_dp_link_update','_b5q_dp_link_stop','_b5q_dp_irq_start','_b5q_dp_irq_stop',
-    '_b5q_dp_display_create','_b5q_dp_display_disconnect','_b5q_dp_display_frame','_b5q_dp_lid_online','__ZTV12B5qDpDisplay']
+    '_b5q_dp_display_create','_b5q_dp_display_disconnect','_b5q_dp_display_frame','__ZTV12B5qDpDisplay']
    assert all(n in symbols for n in required_dp),[n for n in required_dp if n not in symbols]
-   for marker in [b'scanout=online',b'b5q-dp-dma-state',b'B5qDP: EDID pool-filter',b'B5qDP: vsync frame=',b'clamshell-sleep-disabled=']:
+   for marker in [b'scanout=online',b'b5q-dp-dma-state',b'B5qDP: EDID pool-filter',b'B5qDP: vsync frame=',b'scanout=online']:
     assert marker in raw,marker
    assert b'scanout=unattached'not in raw
   assert not any('B5qTouchPointer'in n for n in symbols)
+  assert not any('lidWorker'in n or 'backlight_lid'in n or 'dp_lid_online'in n for n in symbols)
+  assert b'B5qLid:'not in raw and b'clamshell-sleep-disabled='not in raw
   for marker in [b'B5qTouch: mode=%02x',b'c2=%u release_all=%u hid=%u',b'stage=release-all',b'report-recovery',b'FUA-still-accepted',b'outside adopted=',b'4.5 GiB',b'TOP6..10',b'B5qPower:',b'persistent Data media/UUID/BSD readiness timeout or duplicate UUID']:
    assert marker in raw,marker
   for marker in [b'policy=firmware-negotiated',b'external-hub=%u',b'QMP orientation=unknown',b'qcom-dwc3: device dctl=']:
@@ -168,7 +172,7 @@ def main():
     assert media['audio']['cdhash']in signed[hal+'Contents/MacOS/B5qAudio']
     required_media=['_b5q_daily_probe','_b5q_backlight_probe','_sheng_audio_probe','_sheng_video_probe','_sheng_adsp_probe']
     assert all(n in symbols for n in required_media),[n for n in required_media if n not in symbols]
-    for marker in [b'B5qBattery:',b'B5qLid:',b'B5qBacklight:',b'B5qAudio',b'B5qVideo:']:
+    for marker in [b'B5qBattery:',b'B5qBacklight:',b'B5qAudio',b'B5qVideo:']:
      assert marker in raw,marker
     media_result=dict(passed=True,previous_wireless_entries_preserved=50,original_firmware_files=stock['files'],audio_cdhash=media['audio']['cdhash'],ADT_media_slots_zero=True,menu_profile_selection=True,hardware_verified=False)
     (a.out/'media-runtime.json').write_text(json.dumps(media_result,indent=2)+'\n')

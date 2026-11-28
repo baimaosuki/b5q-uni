@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Inventory actual probe/thread exits; refuse new silent error branches."""
-import hashlib,json,re
+import hashlib,json,os,re
 from pathlib import Path
-R=Path(__file__).resolve().parents[2];W=R/'artifacts/b5q-v33b-fix-work'
+R=Path(__file__).resolve().parents[2];W=Path(os.environ.get('B5Q_GATE_WORK',R/'artifacts/b5q-v33b-fix-work'))
 files=sorted((R/'UniXNU-b5q/package').glob('*.cpp'))
 for folder in ['generated-adsp','generated-audio-service','generated-video']:
  files+=sorted((R/'artifacts/b5q-p4-work/target'/folder).glob('*.cpp'))

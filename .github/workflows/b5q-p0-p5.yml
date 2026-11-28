@@ -150,9 +150,10 @@ jobs:
         run: |
           set -euo pipefail
           UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os "$OS_PROFILE"
-          gh run download 45047962341 --repo "$GITHUB_REPOSITORY" --name b5q-build-45047962341 --dir "$RUNNER_TEMP/b5q-stage-inputs"
+          python3 UniXNU-b5q/scripts/fetch-b5q-reuse.py --repo "$GITHUB_REPOSITORY" --out "$RUNNER_TEMP/b5q-stage-inputs"
+          read -r reuse_run reuse_commit < <(python3 -c 'import json,os; from pathlib import Path; r=json.loads((Path(os.environ["RUNNER_TEMP"])/"b5q-stage-inputs/reuse-source.json").read_text()); print(r["run"],r["commit"])')
           python3 UniXNU-b5q/scripts/stage-v24-inputs.py --unixnu UniXNU --artifact "$RUNNER_TEMP/b5q-stage-inputs" --inputs "$RUNNER_TEMP/b5q-v24-inputs" --data-out "$RUNNER_TEMP/b5q-stage-data"
-          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/b5q-stage-inputs" --data-out "$RUNNER_TEMP/b5q-stage-data" --source-run 45047962341 --source-commit 5d7c4eadaa5344e1b96edc593b26d6d18d2bc6d0
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/b5q-stage-inputs" --data-out "$RUNNER_TEMP/b5q-stage-data" --source-run "$reuse_run" --source-commit "$reuse_commit"
           python3 - <<'PYRESET'
           from pathlib import Path
           import shutil
@@ -318,9 +319,16 @@ jobs:
           name: b5q-build-${{ github.run_id }}
           path: |
             UniXNU/out/b5q/**/kernel/kernel.macho
+            UniXNU/out/b5q/**/tree/build/adreno740/libAdreno740.a
+            ${{ runner.temp }}/b5q-stage-data/data.dbr
+            ${{ runner.temp }}/b5q-stage-data/gpu-addon.bin
+            ${{ runner.temp }}/b5q-stage-data/owner-trust.bundle
+            ${{ runner.temp }}/b5q-stage-data/original-ipsw-trust.bundle
             UniXNU/out/b5q/**/payload/payload.img
             UniXNU/out/b5q/**/device-tree/hardware.dtb
             UniXNU/out/b5q/**/tree/build/apple-key-store-state/*.o
+            UniXNU/out/b5q/**/tree/build/adreno740/NativeAdrenoGmuService.o
+            UniXNU/out/b5q/**/tree/build/adreno740/mmio-helper.json
             UniXNU/out/b5q/**/tree/build/native-legacy-display/NativeLegacyDisplay*.o
             UniXNU/out/b5q/**/tree/build/native-legacy-display/board-include/B5qLaunchdPolicyData.h
             UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
@@ -352,7 +360,7 @@ jobs:
             UniXNU/out/b5q/**/batch2-package.json
           if-no-files-found: warn
           compression-level: 1
-          retention-days: 3
+          retention-days: 30
 
       - name: Save completed incremental GPU work, including failed payload attempts
         if: ${{ always() && steps.gpu-cache.outputs.cache-hit != 'true' }}
@@ -432,7 +440,10 @@ jobs:
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch"
           git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0011-b5q-dp-splash-tail.patch"
           git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0013-b5q-reserved-dma-guards.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0014-b5q-dma-unprivileged-wbis.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0015-b5q-usb-map-lifetime.patch"
           git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch"
+          git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0016-darwinboot-dma-order-inputs.patch"
           git -C UniXNU apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch"
           git -C uefi-b5q submodule update --init --depth 1 Binaries
           UNIXNU_UEFI="$GITHUB_WORKSPACE/uefi-b5q" python3 UniXNU-b5q/scripts/check-b5q-uefi.py
@@ -463,6 +474,7 @@ jobs:
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/DarwinBoot/OUTPUT/DarwinBoot.efi
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/B5qHandoffDxe.efi
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/UsbDma.obj
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/PcieDma.obj
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/MediaDma.obj
             uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/DpDma.obj

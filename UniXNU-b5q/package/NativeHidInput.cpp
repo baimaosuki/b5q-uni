@@ -273,6 +273,15 @@ class NativeHidInput : public IOHIDDevice {
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
     bool mouseEnabled=false;
     B5qTouchMouse pointer;
+    uint32_t pointerLogAt=0,pointerLogEvents=0;
+    void pointerDiagnostics(){
+        const uint32_t events=pointer.lifts_seen+pointer.taps_cancelled_slop+pointer.taps_cancelled_time;
+        const uint32_t now=pointerNow();
+        if(events==pointerLogEvents || (pointerLogEvents>=8 && now-pointerLogAt<1000))return;
+        pointerLogAt=now;pointerLogEvents=events;
+        IOLog("B5qTouchMouse: clicks_left=%u clicks_right=%u taps_cancelled_slop=%u taps_cancelled_time=%u lifts_seen=%u held=%u\n",
+            pointer.clicks_left,pointer.clicks_right,pointer.taps_cancelled_slop,pointer.taps_cancelled_time,pointer.lifts_seen,unsigned(pointer.held));
+    }
     IOTimerEventSource *clickTimer=nullptr;
     static uint32_t pointerNow(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return uint32_t(ns/1000000);}
     void pointerReport(const uint8_t *report){
@@ -284,7 +293,7 @@ class NativeHidInput : public IOHIDDevice {
     static void clickTick(OSObject *owner,IOTimerEventSource *){
         auto *self=static_cast<NativeHidInput*>(owner);
         if(self->inputStopping)return;
-        self->pointer.advance(pointerNow(),[self](const uint8_t *r){self->pointerReport(r);});self->scheduleClick();
+        self->pointer.advance(pointerNow(),[self](const uint8_t *r){self->pointerReport(r);});self->pointerDiagnostics();self->scheduleClick();
     }
     IOReturn sendPointer(uint8_t buttonMask,int dx,int dy,int wheel=0,int pan=0) {
         uint8_t report[8];b5q_mouse_report(report,buttonMask,dx,dy,wheel,pan);
@@ -315,22 +324,31 @@ class NativeHidInput : public IOHIDDevice {
     void touchSend() {
         NativeHidInput *self=this;
         if(!self->hasEventDriverCached())return;
-        uint32_t before=native_touch_seq;
-        if((before&1) || before==self->lastSeq)return;
-        __asm__ volatile("dmb ish":::"memory");
-        unsigned count=native_touch_count;if(count>TOUCH_FINGERS)count=TOUCH_FINGERS;
+        uint32_t before=0;
+        unsigned count=0;
         int ids[TOUCH_FINGERS],xs[TOUCH_FINGERS],ys[TOUCH_FINGERS];
-        for(unsigned i=0;i<count;++i){ids[i]=native_touch_ids[i];xs[i]=native_touch_xs[i];ys[i]=native_touch_ys[i];}
+        bool stable=false;
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
-        const bool recovered=native_touch_recovered!=0;
+        bool recovered=false;
 #endif
-        __asm__ volatile("dmb ish":::"memory");
-        if(native_touch_seq!=before)return;      // torn read: retry on the next tick
+        for(unsigned attempt=0;attempt<4;++attempt){
+            before=__atomic_load_n(&native_touch_seq,__ATOMIC_ACQUIRE);
+            if(before&1)continue;
+            if(before==self->lastSeq)return;
+            count=native_touch_count;if(count>TOUCH_FINGERS)count=TOUCH_FINGERS;
+            for(unsigned i=0;i<count;++i){ids[i]=native_touch_ids[i];xs[i]=native_touch_xs[i];ys[i]=native_touch_ys[i];}
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+            recovered=native_touch_recovered!=0;
+#endif
+            __asm__ volatile("dmb ish":::"memory");
+            if(__atomic_load_n(&native_touch_seq,__ATOMIC_ACQUIRE)==before){stable=true;break;}
+        }
+        if(!stable)return;
         self->lastSeq=before;
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         if(mouseEnabled) {
             pointer.update(count,ids,xs,ys,pointerNow(),recovered,[this](const uint8_t *r){pointerReport(r);});
-            scheduleClick();
+            pointerDiagnostics();scheduleClick();
             return; // One input mode per service; never also submit digitizer report 3.
         }
 #endif
@@ -395,10 +413,12 @@ class NativeHidInput : public IOHIDDevice {
         IORegistryEntry *driver=eventDriver(this,4);
         if(driver!=cachedEventDriver) {
             IOLog("B5qInput: event-driver changed old=%p new=%p\n",cachedEventDriver,driver);
+            const bool firstDriver=!cachedEventDriver && driver;
             OSSafeReleaseNULL(cachedEventDriver);cachedEventDriver=driver;driver=nullptr;
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
-            pointer={};
-            if(cachedEventDriver && mouseEnabled)sendPointer(0,0,0);
+            if(mouseEnabled)pointer.cancel([this](const uint8_t *r){pointerReport(r);});
+            if(clickTimer)clickTimer->cancelTimeout();
+            if(firstDriver && mouseEnabled)sendPointer(0,0,0);
 #endif
             if(cachedEventDriver && (touchEnabled || touchOnly))edge::install(cachedEventDriver);
         }
@@ -578,9 +598,9 @@ public:
     }
     void stop(IOService *provider) override {
         // Drain the same work-loop gate as reports/timer before retiring sources.
-        if(inputLoop)inputLoop->runAction(&NativeHidInput::stopAction,this);
         if((touchOnly||touchEnabled) && &native_touch_set_sink)native_touch_set_sink(nullptr,nullptr);
         if(!touchOnly && &native_buttons_set_sink)native_buttons_set_sink(nullptr,nullptr);
+        if(inputLoop)inputLoop->runAction(&NativeHidInput::stopAction,this);
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         if(clickTimer){inputLoop->removeEventSource(clickTimer);OSSafeReleaseNULL(clickTimer);}
 #endif

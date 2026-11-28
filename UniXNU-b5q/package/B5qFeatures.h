@@ -6,7 +6,8 @@
 #include <pexpert/pexpert.h>
 extern const IORegistryPlane *gIODTPlane;
 namespace B5qFeatures {
-enum:uint32_t {Battery=1u<<0,Lid=1u<<1,Backlight=1u<<2,Adsp=1u<<3,Audio=1u<<4,Video=1u<<5,DisplayPort=1u<<6};
+// Bit1 is permanently unused: no hall GPIO or clamshell power policy.
+enum:uint32_t {Battery=1u<<0,Backlight=1u<<2,Adsp=1u<<3,Audio=1u<<4,Video=1u<<5,DisplayPort=1u<<6};
 // Feature selection belongs to the menu's ADT; it is never a hardware-ready
 // flag. Each normal boot argument remains an explicit independent override.
 inline unsigned option(const char *name,uint32_t bit,unsigned selected=1){

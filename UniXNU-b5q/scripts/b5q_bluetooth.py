@@ -8,8 +8,8 @@ from pathlib import Path
 
 REVISION='effe4ec5c57cd400a5f818b21c9903fef237edbc'
 
-def prepare(component,package,soc,out):
-    component,package,soc,out=map(Path,(component,package,soc,out))
+def prepare(component,package,soc,out,reference):
+    component,package,soc,out,reference=map(Path,(component,package,soc,out,reference))
     out.mkdir(parents=True,exist_ok=True)
     revision=subprocess.check_output(['git','-C',str(component),'rev-parse','HEAD'],text=True).strip()
     if revision!=REVISION:raise ValueError('QcaBluetooth component revision changed: '+revision)
@@ -25,4 +25,4 @@ def prepare(component,package,soc,out):
         transport='Samsung GENI FIFO; no DMA backend',
         sources={str(p):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources})
     (out/'sources.json').write_text(json.dumps(report,indent=2)+'\n')
-    return sources,[component/n for n in ('include','src','shim','out/linux')]
+    return sources,[component/n for n in ('include','src','shim','out/linux')]+[reference/'package']

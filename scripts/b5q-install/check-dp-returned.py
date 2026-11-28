@@ -44,11 +44,11 @@ for index,(entry,expected)in enumerate(zip(table,fixture['slots'])):
 with tempfile.TemporaryDirectory(prefix='b5q-dp-returned-core-')as td:
  kernel=Path(td)/'kernel';subprocess.run(['mcopy','-i',str(a.esp),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
  data=kernel.read_bytes();outer=Image(data);core=Image(data,outer.entries['com.apple.kernel'][1]);syms={n:v for v,names in core.symbols().items()for n in names}
- assert all(n in syms for n in ['_b5q_dp_display_create','_b5q_dp_link_update','_b5q_dp_irq_start','_b5q_dp_lid_online','__GLOBAL__sub_I_B5qDpDisplay.cpp'])
+ assert all(n in syms for n in ['_b5q_dp_display_create','_b5q_dp_link_update','_b5q_dp_irq_start','__GLOBAL__sub_I_B5qDpDisplay.cpp'])
  fixups=outer.fixups();start=syms['__ZTV12B5qDpDisplay']
  for index,expected in enumerate(fixture['slots']):
   pointer=fixups[start+16+index*8];assert pointer[1:]==(1,0,int(expected[1],16),1)
- for marker in [b'scanout=online',b'B5qDP: dma-ready=',b'B5qDP: EDID pool-filter',b'B5qDP: vsync frame=',b'clamshell-sleep-disabled=']:
+ for marker in [b'scanout=online',b'B5qDP: dma-ready=',b'B5qDP: EDID pool-filter',b'B5qDP: vsync frame=',b'scanout=online']:
   assert marker in data,marker
  assert b'scanout=unattached'not in data
  kernel_sha=hashlib.sha256(data).hexdigest()

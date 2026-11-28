@@ -9,7 +9,9 @@
 #include "B5qProcTopFormat.h"
 
 static void descriptor() {
- unsigned page=0,size=0,count=0,report=0,bits=0,minimum=0,maximum=0;
+ unsigned page=0,size=0,count=0,report=0,bits=0,minimum=0,maximum=0,unit=0,exponent=0,physicalMin=0,physicalMax=0;
+ struct Global{unsigned page,size,count,report,minimum,maximum,unit,exponent,physicalMin,physicalMax;};
+ std::vector<Global> stack;
  std::vector<unsigned> usages;bool buttons=false,xy=false,wheel=false,pan=false;
  for(unsigned i=0;i<sizeof(mouseDescriptor);) {
   unsigned key=mouseDescriptor[i++],n=key&3;if(n==3)n=4;
@@ -19,13 +21,16 @@ static void descriptor() {
    case 0x04:page=value;break;case 0x08:usages.push_back(value);break;
    case 0x18:minimum=value;break;case 0x28:maximum=value;break;
    case 0x74:size=value;break;case 0x94:count=value;break;case 0x84:report=value;break;
+   case 0xa4:stack.push_back({page,size,count,report,minimum,maximum,unit,exponent,physicalMin,physicalMax});break;
+   case 0xb4:{assert(!stack.empty());auto g=stack.back();stack.pop_back();page=g.page;size=g.size;count=g.count;report=g.report;minimum=g.minimum;maximum=g.maximum;unit=g.unit;exponent=g.exponent;physicalMin=g.physicalMin;physicalMax=g.physicalMax;}break;
+   case 0x64:unit=value;break;case 0x54:exponent=value;break;case 0x34:physicalMin=value;break;case 0x44:physicalMax=value;break;
    case 0xa0:usages.clear();break;
    case 0x80:
     assert(report==0x1a);bits+=size*count;
     if(page==9 && size==1 && count==2) {assert(minimum==1 && maximum==2 && value==2);buttons=true;}
-    if(page==1 && size==16 && count==2) {assert(usages.size()==2 && usages[0]==0x30 && usages[1]==0x31 && value==6);xy=true;}
-    if(page==1 && size==8 && usages.size()==1 && usages[0]==0x38) {assert(value==6);wheel=true;}
-    if(page==0xc && size==8 && usages.size()==1 && usages[0]==0x238) {assert(value==6);pan=true;}
+    if(page==1 && size==16 && count==2) {assert(usages.size()==2 && usages[0]==0x30 && usages[1]==0x31 && value==6);assert(unit==0x13&&exponent==0xe&&physicalMin==0xffffd8bd&&physicalMax==0x2743);xy=true;}
+    if(page==1 && size==8 && usages.size()==1 && usages[0]==0x38) {assert(value==6&&unit==0&&exponent==0&&physicalMin==0&&physicalMax==0);wheel=true;}
+    if(page==0xc && size==8 && usages.size()==1 && usages[0]==0x238) {assert(value==6&&unit==0&&exponent==0&&physicalMin==0&&physicalMax==0);pan=true;}
     usages.clear();break;
   }
  }
@@ -41,7 +46,7 @@ static void gestures() {
  assert(press==1&&release==1);
  p.update(3,ids,x,y,100,false,send);p.update(1,ids,x,y,113,false,send);
  x[0]+=1000;p.update(1,ids,x,y,126,false,send);assert(move==1);
- p.update(0,nullptr,nullptr,nullptr,140,true,send);assert(!p.pointer.fingers);
+ p.update(0,nullptr,nullptr,nullptr,140,true,send);assert(!p.fingers);
  // Full lifetime and differential upstream coverage: test-touch-p0.py.
 }
 static void formatting() {

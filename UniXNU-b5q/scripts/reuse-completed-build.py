@@ -6,6 +6,7 @@ import shutil
 import struct
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 p = argparse.ArgumentParser(description=__doc__)
@@ -21,6 +22,7 @@ core, device = a.unixnu.resolve(), a.device.resolve()
 sys.path.insert(0, str(core / 'scripts'))
 from unixnu.cli import parser
 from unixnu.config import Context
+from unixnu import ramdisk
 
 ctx = Context(parser().parse_args(['build', 'payload', '--device', str(device),
                                  '--os', 'macos-27.3-26C5035r']))
@@ -51,11 +53,15 @@ if a.kernel_only:
     raise SystemExit(0)
 out = a.data_out
 out.mkdir(parents=True, exist_ok=True)
-for src, dest in [('scratch-data.img', 'data.dbr'),
-                  ('kernel.macho.trustcache', 'owner-trust.bundle'),
-                  ('kernel.macho.gpuaddon','gpu-addon.bin')]:
-    subprocess.run(['mcopy', '-i', str(source / 'payload/payload.img'),
-                    '::/EFI/UniXNU/Payloads/' + src, str(out / dest)], check=True)
+with tempfile.TemporaryDirectory(prefix='b5q-reuse-payload-')as td:
+    payload=source/'payload/payload.img'
+    if ramdisk.packed(payload):
+        decoded=Path(td)/'payload.fat';ramdisk.decode(payload,decoded);payload=decoded
+    for src, dest in [('scratch-data.img', 'data.dbr'),
+                      ('kernel.macho.trustcache', 'owner-trust.bundle'),
+                      ('kernel.macho.gpuaddon','gpu-addon.bin')]:
+        subprocess.run(['mcopy', '-i', str(payload),
+                        '::/EFI/UniXNU/Payloads/' + src, str(out / dest)], check=True)
 # Retain original Apple modules; the official runtime regenerates and signs
 # its owner module together with its boot shim addon in the new payload.
 trust = out / 'original-ipsw-trust.bundle'

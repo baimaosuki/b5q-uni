@@ -11,22 +11,27 @@ static void dpPrepare(B5Q_DP_DMA_STATE *s){dpPrepares++;assert(B5qDpPool(s,0xb80
 static B5Q_DP_DMA_PROTOCOL dpProtocol={1,dpPrepare};
 static EFI_STATUS dpLocate(EFI_GUID *guid,void *unused,void **out){assert(guid->Data1==0x16d34ec5&&!unused);*out=&dpProtocol;return 0;}
 int main(void){assert(!qualified_media_main());services.LocateProtocol=dpLocate;
- B5Q_DP_DMA_STATE state;GetDpDmaResult("usb=1 b5q-dp=0",&state);assert(!dpPrepares);
- GetDpDmaResult("b5q-dp=1 b5q-dp=bad",&state);assert(!dpPrepares);
- GetDpDmaResult("usb=1 b5q-dp=1",&state);assert(dpPrepares==1&&!state.PrepareStatus);
+ B5Q_DP_DMA_STATE state;GetDpDmaResult("usb=1 b5q-dp=0",64,&state);assert(!dpPrepares);
+ GetDpDmaResult("b5q-dp=1 b5q-dp=bad",0,&state);assert(!dpPrepares);
+ GetDpDmaResult("usb=1 b5q-dp=1",0,&state);assert(dpPrepares==1&&!state.PrepareStatus);
+ GetDpDmaResult("b5q-f=0",64,&state);assert(dpPrepares==1);
+ GetDpDmaResult("b5q-f=64",0,&state);assert(dpPrepares==2);
+ GetDpDmaResult("",64,&state);assert(dpPrepares==3);
  UINT8 tree[1024]={0};UINTN at=8;UINT32 root[2]={1,1};memcpy(tree,root,8);prop(tree,&at,"name","/",2);
- UINT32 chosen[2]={3,0};memcpy(tree+at,chosen,8);at+=8;prop(tree,&at,"name","chosen",7);
+ UINT32 chosen[2]={4,0};memcpy(tree+at,chosen,8);at+=8;prop(tree,&at,"name","chosen",7);
+ UINT32 features=64;prop(tree,&at,"b5q-feature-mask",&features,4);
  prop(tree,&at,"b5q-dp-dma-ready",NULL,4);prop(tree,&at,"b5q-dp-dma-state",NULL,80);
  UINTN size=at,cursor=0;B5Q_DP_DMA_ADT adt={MAX_UINTN,MAX_UINTN};
- assert(FindDpDmaNode(tree,size,&cursor,0,3,&adt)&&cursor==size);
+ assert(FindDpDmaNode(tree,size,&cursor,0,3,&adt)&&cursor==size&&adt.Features==64);
  for(UINTN n=0;n<size;n++){cursor=0;B5Q_DP_DMA_ADT bad={MAX_UINTN,MAX_UINTN};assert(!FindDpDmaNode(tree,n,&cursor,0,3,&bad));}
  EFI_MEMORY_DESCRIPTOR map={.Type=EfiReservedMemoryType,.PhysicalStart=0xb8000000,.NumberOfPages=0x2b00000/4096};
- WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,0x8c0000000ULL,0x180000000ULL);
+ WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,0x8c0000000ULL,0x180000000ULL,FALSE);
  UINT32 flag;memcpy(&flag,tree+adt.Ready,4);assert(flag==1);B5Q_DP_DMA_STATE received;memcpy(&received,tree+adt.State,sizeof received);assert(B5qDpPoolValid(&received));
- map.Type=EfiBootServicesData;WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,0x8c0000000ULL,0x180000000ULL);
+ map.Type=EfiBootServicesData;WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,0x8c0000000ULL,0x180000000ULL,FALSE);
  memcpy(&flag,tree+adt.Ready,4);assert(!flag);map.Type=EfiReservedMemoryType;
- WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,state.PoolBase,0x180000000ULL);memcpy(&flag,tree+adt.Ready,4);assert(!flag);
- state.PoolBase--;WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,0x8c0000000ULL,0x180000000ULL);memcpy(&flag,tree+adt.Ready,4);assert(!flag);
+ WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,state.PoolBase,0x180000000ULL,FALSE);memcpy(&flag,tree+adt.Ready,4);assert(!flag);
+ WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,state.PoolBase,0x180000000ULL,TRUE);memcpy(&flag,tree+adt.Ready,4);assert(flag==1);
+ state.PoolBase--;WriteDpDmaResult(tree,&adt,&state,&map,sizeof map,sizeof map,0x8c0000000ULL,0x180000000ULL,FALSE);memcpy(&flag,tree+adt.Ready,4);assert(!flag);
  puts("PASS actual DP loader selection/ADTtruncation/state/EFIreserved/owned-window gates; all USB/PCIe/media retention regressions preserved");
 }
 '''

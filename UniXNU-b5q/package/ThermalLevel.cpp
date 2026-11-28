@@ -183,7 +183,7 @@ extern "C" void sheng_thermal_level_probe(void) {
     // Without readings there is nothing to say: the level stays unwritten, as without this file.
     if (!sheng_thermal_sample || !&native_thermal_info[0] || !&native_thermal_now[0] || (native_thermal_info[0] != 1 && native_thermal_info[0] != 2)) {
         native_thermal_level_state = -1;
-        IOLog("B5qThermal: stage=level-source result=-1 thermal-state=%u\n",native_thermal_info[0]);
+        IOLog("B5qThermal: stage=level-source result=-1 thermal-state=%u\n",(&native_thermal_info[0] ? native_thermal_info[0] : 0u));
         return;
     }
     nanoseconds_to_absolutetime(kMinIntervalNs, &gMinIntervalAbs);

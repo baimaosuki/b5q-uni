@@ -66,14 +66,14 @@ POLL
 const int kRoleHost=2,kRoleNone=0,kRoleDevice=1,THREAD_UNINT=0,kSecondScale=1;
 constexpr unsigned kXhciRegisterBytes=0x8000;
 int gRoleWanted=2,gRoleApplied=2,gCoreRole=2;uint32_t gCableWanted=0,gCableApplied=0,gDpLanes=0;
-void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=true;uint32_t native_usb_stats[54]={};
+void *gRoleLock=nullptr;bool gDeviceStackAllowed=true,gSuperSpeed=true,gPhyResetPending=false;uint32_t native_usb_stats[54]={};
 namespace B5qFeatures{enum{DisplayPort=64};unsigned option(const char*,unsigned){return 1;}}
 bool b5q_usb_cable_state(B5qMax77705::Cable *out){return B5qMax77705::readCable(bus,*out);}
 bool b5q_usb_otg(bool on){otg=on;if(on){bc=0x80;cc1=9;}else{bc=0;cc1=1;otgOff++;}return true;}
 void cableChanged(){B5qMax77705::Cable c;b5q_usb_cable_state(&c);gCableWanted=c.signature();gRoleWanted=c.role();}
 bool b5q_dp_link_stop(){return true;}void b5q_dp_link_update(const B5qDpPortState*){}
 void leaveRole(int){leaves++;b5q_usb_otg(false);}bool enterRole(int role){return b5q_usb_otg(role==kRoleHost);}
-bool qmpInit(bool){return true;}void selectUtmiClock(){}void hostStats(){}void deviceStats(){}
+bool qmpInit(bool){return true;}void selectUtmiClock(){}void retryDevicePower(){}void hostStats(){}void deviceStats(){}
 void clock_interval_to_deadline(unsigned,unsigned,uint64_t *p){*p=0;}
 void IOLockSleepDeadline(void*,void*,uint64_t,int){if(++polls>15)throw 1;ticks+=1000000;}
 using wait_result_t=int;
@@ -101,15 +101,16 @@ int main(){
   now+=quiet;x+=roll*32767/4095;p.update(1,&id,&x,&y,now,false,send);
   now+=40;p.update(0,nullptr,nullptr,nullptr,now,false,send);assert(events.size()==1&&events[0].button==1);
   now+=31;p.advance(now,send);assert(events.size()==1);now++;p.advance(now,send);assert(events.size()==2&&events[1].button==0&&events[1].at-events[0].at>=32);
-  now+=80;p.update(1,&id,&x,&y,now,false,send);assert(last==1); //second tap begins held drag
-  now+=80;x+=1200;p.update(1,&id,&x,&y,now,false,send);assert(last==1);
-  now+=50;p.update(0,nullptr,nullptr,nullptr,now,false,send);assert(last==0);
+  now+=80;p.update(1,&id,&x,&y,now,false,send);assert(last==0); // second contact stays neutral until its own lift
+  now+=80;p.update(1,&id,&x,&y,now,false,send);assert(last==0);
+  now+=50;p.update(0,nullptr,nullptr,nullptr,now,false,send);assert(last==1);
+  now+=32;p.advance(now,send);assert(last==0);
   assert(events.size()==4&&events[3].at-events[2].at>=32);
  }
  B5qTouchMouse p;uint32_t now=1;std::vector<Event> e;uint8_t last=0;auto send=[&](const uint8_t*r){if(last!=r[1])e.push_back({now,r[1]});last=r[1];};
  int ids[]={1,2},x[]={10000,20000},y[]={10000,20000};p.update(2,ids,x,y,now,false,send);now=100;p.update(1,ids,x,y,now,false,send);now=120;p.update(0,nullptr,nullptr,nullptr,now,false,send);assert(last==2);now=152;p.advance(now,send);assert(last==0&&e[1].at-e[0].at==32);
  p.update(1,ids,x,y,200,false,send);now=210;p.update(0,nullptr,nullptr,nullptr,now,false,send);assert(last==1);p.cancel(send);assert(last==0&&!p.timeout(now));
- puts("PASS Flip5 human1.5-2.5mm roll/80-180ms stationary micro-motion:9datasets,32msbuttonhold/timerrelease/doubletapdrag/staggeredrighttap/recoverycancel ASanUBSan");
+ puts("PASS Flip5 human1.5-2.5mm roll/80-180ms stationary micro-motion:9datasets,32msbuttonhold/timerrelease/two-independent-clicks/staggeredrighttap/recoverycancel ASanUBSan");
 }
 '''
 execute('phone-click',body)
@@ -124,7 +125,7 @@ struct IOTimerEventSource{unsigned ms=0,cancels=0;void setTimeoutMS(unsigned n){
 struct NativeHidInput:OSObject{
  bool inputStopping=false,mouseEnabled=true;B5qTouchMouse pointer;IOTimerEventSource status,click;
  IOTimerEventSource *timer=&status,*clickTimer=&click;void *cachedEventDriver=nullptr;unsigned sends=0;uint8_t button=0;
- static uint32_t now;static uint32_t pointerNow(){return now;}
+ static uint32_t now;static uint32_t pointerNow(){return now;}void pointerDiagnostics(){}
  void pointerReport(const uint8_t *r){sends++;button=r[1];}
  SCHEDULE
  TICK
@@ -144,6 +145,6 @@ assert stop.index('runAction(&NativeHidInput::stopAction')<stop.index('removeEve
 
 # RTSOFF/ERST lie past the capability/operational4KiB page on DWC3.
 # The production diagnostic must use the same32KiB register mapping as xHCI.
-assert 'mapRegion(gXhciRegs, kCore, kXhciRegisterBytes)'in q
+assert 'mapRegion(gXhciRegs,kCore,kXhciRegisterBytes)'in q.replace(' ','')
 assert 'constexpr unsigned kXhciRegisterBytes=0x8000;'in q
 assert 'rt+0x40/4<kXhciRegisterBytes/4'in q

@@ -11,6 +11,7 @@ p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--ci',type=Path,help='Actual downloaded CI objects; never use raw namespace inputs')
 p.add_argument('--esp',type=Path,help='Actual returned deployment ESP')
 p.add_argument('--out',type=Path)
+p.add_argument('--with-adsp',action='store_true',help='Include current media objects and ADSP AOSS mutex consumers')
 a=p.parse_args()
 out=R/'artifacts/b5q-p3-work';bt=R/'artifacts/b5q-p2-work/target'
 if a.ci:
@@ -35,15 +36,37 @@ if a.ci:
     armPath,=a.ci.rglob('ArmCpu.o')
     kernelESP=a.esp
     coreName='actual returned CI deployment kernel'
-    callbackPaths=[manifest.parent/'B5qWifiBoard.o',manifest.parent/'B5qBluetooth.o']
+    callbackPaths=[manifest.parent/'B5qWifiBoard.o',manifest.parent/'B5qBluetooth.o',manifest.parent/'B5qWcnPower.o',ethernet]
 else:
     target=json.loads((out/'target/compile-result.json').read_text());assert target['passed']and not target['core_only']
     paths=list(map(Path,target['objects']));paths+=list((out/'board-target').glob('*.o'))
     paths+=[bt/n for n in json.loads((bt/'report.json').read_text())['objects']if n!='B5qWcnPower.o']
     armPath=R/'artifacts/b5q-p1-work/returned-PAC/ArmCpu.o'
-    kernelESP=R/'artifacts/b5q-p1-work/ci45167257160/esp.img'
+    kernelESP=a.esp or R/'artifacts/b5q-esp-v33b-repair2/esp.img'
     coreName='actual P1 CI45167257160'
-    callbackPaths=[out/'board-target/B5qWifiBoard.o',bt/'B5qBluetooth.o']
+    callbackPaths=[out/'board-target/B5qWifiBoard.o',bt/'B5qBluetooth.o',out/'board-target/B5qWcnPower.o',out/'board-target/B5qEthernet.o']
+if a.ci:
+    qmp,=a.ci.rglob('QcomQmp.o')
+else:
+    qmp=R/'artifacts/b5q-p4-work/target/QcomQmp.o'
+    media=json.loads((qmp.parent/'report.json').read_text());assert media['passed']
+    assert hashlib.sha256(qmp.read_bytes()).hexdigest()==media['objects'][str(qmp)]
+if qmp not in paths:paths.append(qmp)
+if a.with_adsp:
+    if a.ci:
+        media_manifest,=a.ci.rglob('media-build.json')
+        media=json.loads(media_manifest.read_text())
+        media_paths=[(media_manifest.parent/Path(n).name,h)for n,h in media['objects'].items()]
+    else:
+        media=json.loads((R/'artifacts/b5q-p4-work/target/report.json').read_text());assert media['passed']
+        media_paths=[(Path(n),h)for n,h in media['objects'].items()]
+    by_name={path.name:path for path in paths}
+    for path,digest in media_paths:
+        assert hashlib.sha256(path.read_bytes()).hexdigest()==digest,path
+        if path.name in by_name:
+            assert by_name[path.name].read_bytes()==path.read_bytes(),('joint object differs',path.name)
+        else:paths.append(path);by_name[path.name]=path
+    callbackPaths.append(by_name['AdspProbe.o'])
 def calls(instructions):
     values={};result=[]
     for ins in instructions:
@@ -101,7 +124,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
     decoder=Cs(CS_ARCH_ARM64,CS_MODE_ARM);decoder.skipdata=True
     starts=sorted(set(symbols.values()))
     for name,va in symbols.items():
-        if not name.startswith(('_ctl_','_proc_iterate','_thread_continue','_thread_invoke','_thread_call','_kernel_thread')):continue
+        if not(name.startswith(('_ctl_','_proc_iterate','_thread_continue','_thread_invoke','_thread_call','_kernel_thread'))or 'IOCommandGate'in name):continue
         try:
             end=min((v for v in starts if v>va),default=va+4096)
             if end-va>65536:continue
@@ -128,10 +151,12 @@ with tempfile.TemporaryDirectory(prefix='b5q-joint-core-')as td:
     contracts=[]
     for p in callbackPaths:
         for callback,sites in scans[p]['signed'].items():
-            if not callback.startswith(('__ZN12_GLOBAL__N_','__Z11processSeen','__Z12processWatch','__enable_preemption','__disable_preemption')):continue
+            if not callback.startswith(('__ZN12_GLOBAL__N_','__Z11processSeen','__Z12processWatch','__enable_preemption','__disable_preemption','__ZN11B5qEthernet10linkAction')):continue
             for site in sites:
                 assert site['key']==0 and not site['address_diversity'],(callback,site)
                 targets=consumers.get(site['diversity'],[])
+                if 'B5qEthernet10linkAction'in callback:targets=[t for t in targets if 'IOCommandGate'in t.get('function','')]
+                if 'kickPdc'in callback:targets=[t for t in targets if Path(t['object']).name=='QcomQmp.o']
                 assert targets,(callback,hex(site['diversity']),'no authenticated consumer')
                 contracts.append(dict(producer=str(p),callback=callback,signature=site,consumers=targets))
     mmio={}

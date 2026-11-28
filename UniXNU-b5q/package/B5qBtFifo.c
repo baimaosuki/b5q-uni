@@ -21,7 +21,7 @@
 #define F_RX_WATER (1u << 26)
 #define F_RX_LAST (1u << 27)
 #define F_FIFO_ERRORS (3u << 24)
-#define F_M_ERRORS (G_CMD_ERRORS | (15u << 24))
+#define F_M_ERRORS (G_CMD_ERRORS | (3u << 24) | (3u << 28))
 #define F_CANCELLED (3u << 4)
 #define F_S_IRQS (G_CMD_ERRORS | F_CANCELLED | G_LINE_ERRORS | F_RX_WATER | F_RX_LAST)
 #define F_M_IRQS (F_M_ERRORS | F_CANCELLED | G_DONE | (1u << 31))
@@ -77,6 +77,20 @@ int b5q_bt_fifo_start(struct b5q_bt_fifo *g) {
     wr(g,G_IRQ_EN,3);barrier(g); // CPU M/S interrupts only, no DMA IRQs.
     __atomic_store_n(&g->irq_pending,false,__ATOMIC_RELEASE);fifoMask(g,false);return 0;
 }
+static bool discard_startup_rx(struct b5q_bt_fifo *g) {
+    unsigned words=rd(g,F_RX_STATUS)&0x1ffffffu;
+    if(words>g->rx_depth){fail(g,-EOVERFLOW);return false;}
+    for(unsigned i=0;i<words;i++)(void)rd(g,F_RX);
+    g->stats.startup_rx_discarded+=words*4u;
+    return true;
+}
+int b5q_bt_fifo_startup(struct b5q_bt_fifo *g) {
+    if(g->state!=B5Q_BT_FIFO_STOPPED)return -EINVAL;
+    if(!discard_startup_rx(g))return g->error;
+    int e=b5q_bt_fifo_start(g);
+    if(!e)g->startup_deadline=now(g)+50000000ULL;
+    return e;
+}
 void b5q_bt_fifo_irq(struct b5q_bt_fifo *g) {
     fifoMask(g,true);__atomic_store_n(&g->irq_pending,true,__ATOMIC_RELEASE);
     g->ops.wake_worker(g->ops.context);
@@ -126,12 +140,29 @@ bool b5q_bt_fifo_service(struct b5q_bt_fifo *g) {
     if(__atomic_exchange_n(&g->irq_pending,false,__ATOMIC_ACQ_REL))g->stats.interrupts++;
     uint32_t mi=rd(g,G_M_IRQ),si=rd(g,G_S_IRQ);
     wr(g,G_M_CLEAR,mi);wr(g,G_S_CLEAR,si);
+    const uint32_t line=si&(G_LINE_ERRORS&~F_FIFO_ERRORS);
+    if(!(mi&F_M_ERRORS) && !(si&(G_CMD_ERRORS|F_FIFO_ERRORS)) && line &&
+       now(g)<g->startup_deadline && !g->stats.startup_line_errors &&
+       !g->tx_busy && !g->stats.tx_bytes && !g->stats.rx_bytes) {
+        /* Samsung counts startup break/parity rather than killing UART.
+         * Drop the damaged FIFO bytes; never deliver them as an HCI reply.
+         * Repeated, late, overflow or in-command errors still fail closed. */
+        g->fault_irq[0]=mi;g->fault_irq[1]=si;
+        g->stats.startup_line_errors++;
+        if(!discard_startup_rx(g))return false;
+        si&=~G_LINE_ERRORS;
+    }
     if((mi&F_M_ERRORS) || (si&(G_CMD_ERRORS|G_LINE_ERRORS|F_FIFO_ERRORS))) {
         g->fault_irq[0]=mi;g->fault_irq[1]=si;g->stats.line_errors++;fail(g,-EIO);return false;
     }
     deliver(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
-    receive_fifo(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
-    deliver(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
+    // Drain successive hardware batches, bounded by the software queue.
+    for(unsigned batch=0;batch<sizeof(g->rx)/4;batch++){
+        const uint64_t before=g->stats.rx_words;
+        receive_fifo(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
+        deliver(g);if(g->state==B5Q_BT_FIFO_FAILED)return false;
+        if(!(rd(g,F_RX_STATUS)&0x1ffffffu)||g->stats.rx_words==before)break;
+    }
     if(g->tx_busy && (mi&G_DONE)) {
         if(g->tx_offset!=g->tx_length){fail(g,-EIO);return false;}
         g->stats.tx_bytes+=g->tx_length;g->tx_busy=false;g->tx_length=g->tx_offset=0;
@@ -156,7 +187,7 @@ bool b5q_bt_fifo_service(struct b5q_bt_fifo *g) {
          * interrupt the boot CPU. The timed worker retries and reenables it. */
         wr(g,G_S_IRQ_EN,room?F_S_IRQS:F_S_IRQS&~(F_RX_WATER|F_RX_LAST));
     }
-    g->retry_at=g->rx_count?now(g)+1000000ULL:0;
+    g->retry_at=(g->rx_count || (rd(g,F_RX_STATUS)&0x1ffffffu))?now(g)+1000000ULL:0;
     barrier(g);fifoMask(g,false);return false;
 }
 bool b5q_bt_fifo_drained(struct b5q_bt_fifo *g) {

@@ -66,7 +66,7 @@ struct Io {
   if(off==0x3526c&&stuckTiming)return 1;
   if(off==0x3526c&&runFrame)return regs[0x35000]&1;
   if(off==0x350ac&&runFrame&&(regs[0x35000]&1))return ++regs[off];
-  if(autoLatch&&off>=0x16000&&off<0x1c000&&(off&0xfff)==0x18)regs[off]=0;
+  if(autoLatch&&((regs[0x35000]&1)||!runFrame)&&off>=0x16000&&off<0x1c000&&(off&0xfff)==0x18)regs[off]=0;
   return regs[off];}
  void write(unsigned off,u32 v){assert(!(off&3)&&off<0x84000);regs[off]=v;writes.emplace_back(off,v);}
  bool dmaAllowed(uint64_t addr,uint64_t bytes){return dma&&addr>=0xc0000000&&addr<=0xc8000000&&bytes<=0xc8000000-addr;}
@@ -163,6 +163,12 @@ int main(){using namespace B5qDp;unsigned cases=0,rejected=0;std::mt19937 rng(0x
   assert(plan.latched(actual)&&plan.quiesce(actual));
   assert(plan.make(reusable,mode,0xc0000000,uint64_t(width)*4*1080,width*4)&&plan.apply(actual));
   actual.regs[0x3526c]=0;assert(!plan.start(actual)&&plan.active&&plan.started);assert(plan.quiesce(actual));
+  // Physical latch only clears while INTF timing is running. A stop-first
+  // quiesce would leave CTL_FLUSH permanently set and fail this case.
+  assert(plan.make(reusable,mode,0xc0000000,uint64_t(width)*4*1080,width*4)&&plan.apply(actual));
+  actual.runFrame=true;assert(plan.start(actual));unsigned stopBegin=actual.elapsed;
+  assert(plan.quiesce(actual)&&actual.elapsed==stopBegin&&!plan.active);
+  actual.runFrame=false;
   cases++;
  }
  // Original CTL flush tables are deliberately different from fetch bits.

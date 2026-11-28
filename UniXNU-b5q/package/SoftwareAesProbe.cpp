@@ -29,18 +29,18 @@ void worker(void *, wait_result_t)
 {
     // The family has no personality on this board; loading it makes the parent class before NativeAES registers.
     const OSReturn loaded = OSKextLoadKextWithIdentifier("com.apple.iokit.IOCryptoAcceleratorFamily");
-    if (loaded != kOSReturnSuccess && loaded != kOSKextReturnStartStopError) fail(1);
+    if (loaded != kOSReturnSuccess && loaded != kOSKextReturnStartStopError) {fail(1);return;}
     void *handle = OSMetaClass::preModLoad(g_kernel_kmod_info.name);
-    if (!handle) fail(2);
+    if (!handle) {fail(2);return;}
     native_aes_static_init();
-    if (OSMetaClass::postModLoad(handle)) fail(3);
+    if (OSMetaClass::postModLoad(handle)) {fail(3);return;}
     OSObject *object = OSMetaClass::allocClassWithName("NativeAES");
     IOService *aes = OSDynamicCast(IOService, object);
     IOService *parent = IOService::getResourceService();
-    if (!aes || !parent || !aes->init()) {OSSafeReleaseNULL(object); fail(4);}
-    if (!aes->attach(parent)) {aes->release(); fail(5);}
+    if (!aes || !parent || !aes->init()) {OSSafeReleaseNULL(object); fail(4);return;}
+    if (!aes->attach(parent)) {aes->release(); fail(5);return;}
     // NativeAES::start runs the NIST known-answer tests and registers the service only when they pass.
-    if (!aes->start(parent)) {aes->detach(parent); aes->release(); fail(6);}
+    if (!aes->start(parent)) {aes->detach(parent); aes->release(); fail(6);return;}
     aes->release();
     b5q_software_aes_state = 1;
     IOLog("SoftwareAES: IOAESAccelerator registered\n");

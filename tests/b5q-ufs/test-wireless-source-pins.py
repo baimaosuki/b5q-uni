@@ -23,3 +23,16 @@ with tempfile.TemporaryDirectory(prefix='b5q-wireless-source-pins-')as td:
     else:raise AssertionError('dirty source silently discarded')
     assert git(path,'rev-parse','HEAD')==moved and (path/'sys/sys/types.h').read_text()=='local-edit\n'
 print('PASS production source checkout: exact commit over moving ref, sparse import, idempotence, clean update, dirty source preserved/rejected')
+# CI places the independent component and the sheng reference next to each
+# other. The header directory must not be inferred from component parents.
+from b5q_bluetooth import prepare as bluetooth_sources
+with tempfile.TemporaryDirectory(prefix='b5q-wireless-CI-layout-')as td:
+    td=Path(td);cache=td/'tree/.cache/b5q-wireless';cache.mkdir(parents=True)
+    component=cache/'QcaBluetooth';component.symlink_to(R/'sources/UniXNU-sheng/drivers/QcaBluetooth',target_is_directory=True)
+    reference=cache/'UniXNU-sheng';reference.symlink_to(R/'sources/UniXNU-sheng',target_is_directory=True)
+    sources,include=bluetooth_sources(component,R/'UniXNU-b5q/package',R/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',td/'out',reference)
+    assert reference/'package'in include and component.parents[1]/'package'not in include
+    assert all(p.is_dir()for p in include)
+    src=td/'headers.c';src.write_text('#include "QcomQmp.h"\n#include "QcomScm.h"\nQcomQmp peer;\n')
+    subprocess.run(['cc','-std=c11','-Werror',*[v for p in include for v in ['-I',str(p)]],'-c',str(src),'-o',str(td/'headers.o')],check=True)
+print('PASS production Bluetooth recipe with actual CI sibling-cache layout:explicit lockedreference supplies QMP/SCM headers')

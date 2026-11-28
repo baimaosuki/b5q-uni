@@ -23,6 +23,6 @@ extern "C" bool b5q_audio_dma_buffer(uint8_t **cpu,uint64_t *physical,uint64_t *
     if(!mapping||!mapping->getVirtualAddress()){IOLog("B5qAudio: stage=dma-copyback-map base=%llx bytes=%llu result=failed\n",s.poolBase,s.poolBytes);OSSafeReleaseNULL(mapping);return false;}
     retained=mapping;*cpu=reinterpret_cast<uint8_t*>(mapping->getVirtualAddress());*physical=s.poolBase;
     // AudioReach's upper address word encodes stream-index1, not PA high bits.
-    *dsp=s.iova|(1ULL<<32);memset(*cpu,0,65536);
+    *dsp=s.iova|(1ULL<<32);memset(*cpu,0,65536);__asm__ volatile("dsb sy" ::: "memory");
     IOLog("B5qAudio: retained WBIS pool=%llu bytes DMA IOVA=%llx buffer=65536\n",s.poolBytes,*dsp);return true;
 }

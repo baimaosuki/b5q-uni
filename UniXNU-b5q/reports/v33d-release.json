@@ -1,0 +1,312 @@
+{
+  "status": "DELIVERED_OFFLINE_VERIFIED_AWAITING_FLASH_CONFIRMATION",
+  "hardware_verified": false,
+  "phone_access": false,
+  "source_commit": "f6f2119d95134d9ca977bcbaa8c581fba90c1147",
+  "reviewed_source_parent": "5c5e1c01f12980d4f9e096d6a11fb5a8df2ad574",
+  "CI": {
+    "kernel_run": 45540221549,
+    "kernel_conclusion": "success",
+    "firmware_run": 45537636188,
+    "firmware_conclusion": "success",
+    "kernel_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45540221549",
+    "firmware_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45537636188",
+    "new_build_artifact_retention_days": 30,
+    "reused_firmware_input_identity": {
+      "passed": true,
+      "source_firmware_commit": "5c5e1c01f12980d4f9e096d6a11fb5a8df2ad574",
+      "current_commit": "f6f2119d95134d9ca977bcbaa8c581fba90c1147",
+      "FD_sha256": "f432336002c93740746a682f1a61d821463c91dc6e9ab0efbe2282f7717902c2",
+      "patches": {
+        "patches/uefi-b5q/0001-b5q-unixnu-ram-handoff.patch": "43c51bbead53526f26382241919c11bfe216c9d58cb09050139cfcc9f593dff0",
+        "patches/uefi-b5q/0002-b5q-live-high-memory.patch": "d13b20221621b90659a7856e71b38cb45d19281e023614381583b84adea332f1",
+        "patches/uefi-b5q/0003-b5q-usb-dma.patch": "5f970100790e8a5b6db35368030d103f0c3a95dc1f040eb5a1ab0304722e29e5",
+        "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29",
+        "patches/uefi-b5q/0005-b5q-physical-esp.patch": "45539390db2142e460c12c9d71b56f79cca88922976bac29096feb6b0aa4da11",
+        "patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch": "ee152149bf5395e97987de7f9e1587c8a5fec78da64ad25fb416feb416ba68b1",
+        "patches/uefi-b5q/0007-b5q-pcie-dma.patch": "dce6f36095313a036668000f3875af40a77c53c4e6736468af6c2f6f55a1cd89",
+        "patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch": "775e3b5abac97184933a8211eef2b0511fa49ea67fb02615f9f3ce9884faa873",
+        "patches/uefi-b5q/0009-b5q-media-dma.patch": "b41f5d54e4fc03f3b72bdfa300c3d81a0bf3ac8a184e5bf659fcfef7538701b6",
+        "patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch": "00f6e3dbecd897b5d7d54b182b0ab7a3d3bc522b1f1e81bafff19cda942fdd15",
+        "patches/uefi-b5q/0011-b5q-dp-splash-tail.patch": "07316f6c87fe7f66d8bdf0b44ac7c1217fa6525c20d74a0d201354c4c8705118",
+        "patches/uefi-b5q/0012-darwinboot-b5q-dp-tail.patch": "7166412b0aa62093c6dc68fc4c38d810fbecf4d1b5dddd29aa860267655dae1d",
+        "patches/uefi-b5q/0013-b5q-reserved-dma-guards.patch": "22249582ec46dc5df2bcac9aa50ea73fb3667808961dbff930ee679e369ade62",
+        "patches/uefi-b5q/0014-b5q-dma-unprivileged-wbis.patch": "8111a4c0639fb89c117cc10d63eb86584e0c63f015d692923f9389f3305075e9",
+        "patches/uefi-b5q/0015-b5q-usb-map-lifetime.patch": "030b61035667feeb90ddb325669bf457d7958e80577e399e86b6cff93f7b2e05",
+        "patches/uefi-b5q/0016-darwinboot-dma-order-inputs.patch": "1a5354301eb37a2347e98d6ca7cca670c6b201a1f973e689e0b5230ca025b316"
+      },
+      "lock_and_firmware_configuration_unchanged": true,
+      "firmware_job_unchanged": true
+    }
+  },
+  "first_attempt": {
+    "run": 45537636188,
+    "kernel": "failed",
+    "firmware": "success",
+    "error": "CI sibling cache layout lacked explicit pinnedreference/package include for QcomQmp.h",
+    "fix": "Pass reference explicitly to Bluetoothprepare; production CI-layout header regression plus total local gate pass",
+    "log": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-v33d-release/ci45537636188-kernel-first-failure.log",
+      "bytes": 141559,
+      "sha256": "d81b0b30ee3c3360c0b447b30d5d9aa97bce476d86433f8b2b8689ba6d9d5cbd"
+    },
+    "bootstrap_link": "Expected initial prearchive missing board symbols, followed by real blocking archive07headerfailure; no final link success was claimed"
+  },
+  "artifacts": {
+    "ESP": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-v33d/esp.img",
+      "bytes": 838860800,
+      "sha256": "bf64ec69be5187261f86c2102e20da3204494814d30e1ba6ee8ba11a4d754892"
+    },
+    "boot": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-v33d/boot.img",
+      "bytes": 19124224,
+      "sha256": "623979acff78a52ecd94a0822e061ce39600d3b4bcd26acb841c037b377419eb"
+    },
+    "FD": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-v33d-release/ci45537636188-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
+      "bytes": 3145728,
+      "sha256": "f432336002c93740746a682f1a61d821463c91dc6e9ab0efbe2282f7717902c2"
+    },
+    "kernel_manifest": {
+      "bytes": 143622144,
+      "sha256": "d7397936f0dddeed891fef9bc42711816186f0e473ca0624db75b4a864b0a399"
+    },
+    "deployed_kernel_sha256": "f62150556ae963ed9b0a4a17522d0b909344c926af4f944c4aa5f0fa08865a8e"
+  },
+  "transfer": {
+    "build": {
+      "id": 14991230443,
+      "archive_sha256": "e0b319d3aad001ca8724f55b46df0bd2f06a429486cbc80834f7d75142a6530d",
+      "github_digest_verified": true
+    },
+    "firmware_artifact_sha256": "376d123a9980f19334f37c672b770d9edf9e07640fb74038ce5d151efedfe428",
+    "both_GitHub_digests_verified": true,
+    "build_files": 647,
+    "firmware_files": 8,
+    "new_artifact_complete_for_future_reuse": true
+  },
+  "returned_gate": {
+    "passed": true,
+    "checks": [
+      "unchanged-firmware-inputs",
+      "APFS-existing-policy-account-trust",
+      "reserved-RAM-actual-map-options",
+      "linked-PAC",
+      "actual-new-core-callbacks-zeroMMIO",
+      "media-DP-HID-callbacks",
+      "wireless-closure",
+      "media-closure",
+      "DP-native-ABI"
+    ],
+    "receipt": "artifacts/b5q-v33d-release/returned/package-ready.json",
+    "firmware_constants": "artifacts/b5q-v33d-release/returned/firmware-SMMU-constants.json",
+    "mUsbMapBuf_no_AllocatePool": true,
+    "WiFi_RunAtLoad_false_KeepAlive_readiness_path_assertions": true,
+    "GPU_changed_members": [
+      "NativeAdrenoGmuService.o",
+      "B5qGpu.o"
+    ],
+    "GPU_other_members_SHA_identical": 49,
+    "GPU_members_before": {
+      "NativeAdrenoBoard.o": "9b80af16d09eeb6cc283fe5d32ba1ad6e24dd08557d65454688be25be74513c3",
+      "NativeAdrenoClient.o": "da98a870dd1ec7d645a5244e5d40eb2c1b5c1e562410c5f54dfcb93b54d26d1c",
+      "NativeAdrenoCpInit.o": "7227acf2296b7633798457e7036b8e03fa9e510acd5f7644f12263ef1cea9e09",
+      "NativeAdrenoCpu.o": "474348466a72d3c37461c12066d8879cdeeb9e824d886a92558bfcb5cee39116",
+      "NativeAdrenoFirmware.o": "682f20d9a8ae914e17040da1c1ca20b0f4edfa8f4aa40aa6f2a6184beac3b043",
+      "NativeAdrenoFirmwareDefaults.o": "7db7fef3ff9f1e4cd1b97c05906a6437511f0f5573f5fff8daf7128659ad2efe",
+      "NativeAdrenoGmuConfig.o": "43e405cf950a319a894aa0b6d5d696b63d777cc0dae1ffa7c6fe3a02f40ef57b",
+      "NativeAdrenoGmuContext.o": "a2195e7eecb89002fbc0a43aa5f74659b5c6c56025fc37e0a88bb7df828cd3ee",
+      "NativeAdrenoGmuMemory.o": "99644745538eff2601bdfe8964d377c7bab8ab9871ad25b264cfe792767e6105",
+      "NativeAdrenoGmuPlatform.o": "67a0065e843523de949ec1389dba43aa79a44b4ee4320a6eb135deb3e2c4b2c7",
+      "NativeAdrenoGmuService.o": "d68be4e99c90af56a9f3112a2091fcc921940b728f2d329dcac897f8af396e10",
+      "NativeAdrenoGpu.o": "7319b4ecd51df02033ef2c4fd164e2705bda8356bb76df7f5f4654ea35166639",
+      "NativeAdrenoGpuContext.o": "8491cbe6cf523657cf49f73caa1fd48d734a7532b7fe2f6e7c01edbc71b79a0a",
+      "NativeAdrenoIrq.o": "8a25a6cb39ad4046dd2b9155e4a7168c1c213bdda79402a9ca7524a763d05836",
+      "NativeAdrenoKernelTime.o": "0143ec6cc80792fe9920cba7d1e5b34b0437b4ca88f8fff506a78d1aeca67ca1",
+      "NativeAdrenoMemory.o": "38a4f08cbe38b44a3a25919e8780bdc7315cbe90f8b896e17d2abb0367c73015",
+      "NativeAdrenoPool.o": "5c075a7ebf639f72578a43e6214de1fa6bb9999bc6e659c9286a011883520b30",
+      "NativeAdrenoPreempt.o": "73736cefa28f070489206c5bf1aba6fe942f1ee77d217f538f90d50a7d04db35",
+      "NativeAdrenoPublish.o": "9d225602d8feddcd679ffe565b4446721f6fe60b13766e75c1e8f4191fb6f1a6",
+      "NativeAdrenoPwrup.o": "ada101c5cd0ac8dfad41e2f43f7137c2278c203823d568649d1812d2533b9c68",
+      "NativeAdrenoRing.o": "3c15118121bbc203454f27075f5dccc54b71d7b83788d2d8fed98d4919843f93",
+      "NativeAdrenoService.o": "de5927594c48a8f42f188eaed4719201c6ed16b849602b07fb9d984971d2926b",
+      "NativeAdrenoSha256.o": "14e2087ae7657b5e756f91755e0dfee67e18c1efc76548143e007a68cba393ab",
+      "NativeAdrenoSmmuContext.o": "565731fc8dc060e8b945061fbe12a3ab7cd6bbe668a8493189dd8d887b32c69a",
+      "NativeAdrenoSmmuMemory.o": "d8b79fc8f42357fb655eadb826d8fb6328b95ceb42ec898b1354f6b98d296c4a",
+      "NativeAdrenoSmmuService.o": "cccc159687957db11d5f7cd1bf4fea0522f108fb3c2c629638ea890424cd25ef",
+      "NativeAdrenoSubmit.o": "02ca9f2d3c8ce56f7aa8f37c7320a56c541a3d946c0d9b22bf2db4feda94cac8",
+      "NativeAdrenoTimer.o": "97410ac1246c3e24562c09ad8defff868558468960d4a871bfa3edb0f34fd79b",
+      "NativeAdrenoUserClient.o": "a2fb81fc330c899a1023df4869dc305a7dae949e3b7189b2a462d9d66d6de668",
+      "NativeAdrenoVm.o": "4d8f291ed9e8d386fc792e40587b7062dba216db792d1e6dde3822e482898445",
+      "ShengGmu.kit.o": "7cd557cb2fa5576f85df6d45524dceda067f1ad8d64ef604428cd6b84339f311",
+      "ShengGpuSmmu.kit.o": "7af54faf3414bd1efd5dea422c24868e8fa425be06e092b574e880719942bbd3",
+      "ShengGmuCommandDb.kit.o": "796c25be612654545311da08880b8327b2d4b74bee5d79469618ede014f0878c",
+      "B5qGmuVotes.kit.o": "7c3cca1afeffbc0b63f089a7d0ee0e8d897ae74e18bbcac59fee9ce3a9beaf9c",
+      "AdrenoHfi.kit.o": "07f79877eeeb528c02610eaaf00e633b86d9175234a7f9780cf44a92be1426f8",
+      "AdrenoHfiStartup.kit.o": "6fbb4efdfa87ca028442e4c58e88de7e4eefd17d4cd6cf60a4d7cbbcdd097ed2",
+      "AdrenoHfiVotes.kit.o": "1afcbc8bfd84db11a36d7b12a07e78591b4eb9b8c6d8eb7af2e09aa45f699566",
+      "AdrenoFirmware.kit.o": "dc7e63a259659f82fa17686c2db131f886219222e3352daf4e95873dc2ad7b88",
+      "ArmSmmu4K.kit.o": "ffee770765c9042daa8b1bcf40a29e175219c7f782707b1f3644460e1af996f0",
+      "ArmSmmu4KAudit.kit.o": "34cc024dc383f17b2fc711443a91bb690e7de3d8e2227244ad4072d6a93af985",
+      "ArmSmmu4KContext.kit.o": "ee3d6f951b3d4ae1a9971768599644b170a218faab9d0836a4c79d90b85f2588",
+      "ArmSmmu4KLive.kit.o": "7265cfc76a38b1a037f69af06a4ab8e12f6f09d55657cab2b04fbc9680aa42af",
+      "ArmSmmu4KMmio.kit.o": "076cddc73cfe8850cedc5f1c630bdba29131ed6971e811cb68fbf3a9b3981a66",
+      "ArmSmmu4KProgram.kit.o": "3075d39395b68bacf211e016c1e024bec9ede39f9183208d2251d3118ee1fdc2",
+      "ArmSmmu4KStreams.kit.o": "11444989ee2584add02cb19575b4ac041e065c626bc7aa8e0f7ed1086c175522",
+      "ArmSmmu4KTableMemory.kit.o": "d993a460e425336e35287199d0d4720a6d8aa4a8b9d518528cc0cf54c53cc6df",
+      "AdrenoPM4.kit.o": "ed29b52b985aa76089a95cde0946df95f8601c1d67bcbd3fab642a96ba13b769",
+      "B5qGpu.o": "377f13a5e93f00ed6b5ce8a7cdbb5ab7c7e8481aa60b1150543bac0c6548b53f",
+      "NativeAdrenoAccelerator.late.o": "b677032b2b84cf3a05a2ed024185c6ef2e6cf0a20fea49a3f5d8382a9b8a0a63",
+      "original-bindings.o": "7f89007724984ef55d44ddd04fd7d3842986db57796a7172eb48955b1ebbee04",
+      "original-addresses.o": "ea95bd5d658d70796840f71bd2da2cce1205988f832ac4aa1f2f3aa7d100968f"
+    },
+    "GPU_members_after": {
+      "NativeAdrenoBoard.o": "9b80af16d09eeb6cc283fe5d32ba1ad6e24dd08557d65454688be25be74513c3",
+      "NativeAdrenoClient.o": "da98a870dd1ec7d645a5244e5d40eb2c1b5c1e562410c5f54dfcb93b54d26d1c",
+      "NativeAdrenoCpInit.o": "7227acf2296b7633798457e7036b8e03fa9e510acd5f7644f12263ef1cea9e09",
+      "NativeAdrenoCpu.o": "474348466a72d3c37461c12066d8879cdeeb9e824d886a92558bfcb5cee39116",
+      "NativeAdrenoFirmware.o": "682f20d9a8ae914e17040da1c1ca20b0f4edfa8f4aa40aa6f2a6184beac3b043",
+      "NativeAdrenoFirmwareDefaults.o": "7db7fef3ff9f1e4cd1b97c05906a6437511f0f5573f5fff8daf7128659ad2efe",
+      "NativeAdrenoGmuConfig.o": "43e405cf950a319a894aa0b6d5d696b63d777cc0dae1ffa7c6fe3a02f40ef57b",
+      "NativeAdrenoGmuContext.o": "a2195e7eecb89002fbc0a43aa5f74659b5c6c56025fc37e0a88bb7df828cd3ee",
+      "NativeAdrenoGmuMemory.o": "99644745538eff2601bdfe8964d377c7bab8ab9871ad25b264cfe792767e6105",
+      "NativeAdrenoGmuPlatform.o": "67a0065e843523de949ec1389dba43aa79a44b4ee4320a6eb135deb3e2c4b2c7",
+      "NativeAdrenoGmuService.o": "98b7d5508ab236dbfc2dac75889026e064e062ed8624d86704eb52a3d12df79c",
+      "NativeAdrenoGpu.o": "7319b4ecd51df02033ef2c4fd164e2705bda8356bb76df7f5f4654ea35166639",
+      "NativeAdrenoGpuContext.o": "8491cbe6cf523657cf49f73caa1fd48d734a7532b7fe2f6e7c01edbc71b79a0a",
+      "NativeAdrenoIrq.o": "8a25a6cb39ad4046dd2b9155e4a7168c1c213bdda79402a9ca7524a763d05836",
+      "NativeAdrenoKernelTime.o": "0143ec6cc80792fe9920cba7d1e5b34b0437b4ca88f8fff506a78d1aeca67ca1",
+      "NativeAdrenoMemory.o": "38a4f08cbe38b44a3a25919e8780bdc7315cbe90f8b896e17d2abb0367c73015",
+      "NativeAdrenoPool.o": "5c075a7ebf639f72578a43e6214de1fa6bb9999bc6e659c9286a011883520b30",
+      "NativeAdrenoPreempt.o": "73736cefa28f070489206c5bf1aba6fe942f1ee77d217f538f90d50a7d04db35",
+      "NativeAdrenoPublish.o": "9d225602d8feddcd679ffe565b4446721f6fe60b13766e75c1e8f4191fb6f1a6",
+      "NativeAdrenoPwrup.o": "ada101c5cd0ac8dfad41e2f43f7137c2278c203823d568649d1812d2533b9c68",
+      "NativeAdrenoRing.o": "3c15118121bbc203454f27075f5dccc54b71d7b83788d2d8fed98d4919843f93",
+      "NativeAdrenoService.o": "de5927594c48a8f42f188eaed4719201c6ed16b849602b07fb9d984971d2926b",
+      "NativeAdrenoSha256.o": "14e2087ae7657b5e756f91755e0dfee67e18c1efc76548143e007a68cba393ab",
+      "NativeAdrenoSmmuContext.o": "565731fc8dc060e8b945061fbe12a3ab7cd6bbe668a8493189dd8d887b32c69a",
+      "NativeAdrenoSmmuMemory.o": "d8b79fc8f42357fb655eadb826d8fb6328b95ceb42ec898b1354f6b98d296c4a",
+      "NativeAdrenoSmmuService.o": "cccc159687957db11d5f7cd1bf4fea0522f108fb3c2c629638ea890424cd25ef",
+      "NativeAdrenoSubmit.o": "02ca9f2d3c8ce56f7aa8f37c7320a56c541a3d946c0d9b22bf2db4feda94cac8",
+      "NativeAdrenoTimer.o": "97410ac1246c3e24562c09ad8defff868558468960d4a871bfa3edb0f34fd79b",
+      "NativeAdrenoUserClient.o": "a2fb81fc330c899a1023df4869dc305a7dae949e3b7189b2a462d9d66d6de668",
+      "NativeAdrenoVm.o": "4d8f291ed9e8d386fc792e40587b7062dba216db792d1e6dde3822e482898445",
+      "ShengGmu.kit.o": "7cd557cb2fa5576f85df6d45524dceda067f1ad8d64ef604428cd6b84339f311",
+      "ShengGpuSmmu.kit.o": "7af54faf3414bd1efd5dea422c24868e8fa425be06e092b574e880719942bbd3",
+      "ShengGmuCommandDb.kit.o": "796c25be612654545311da08880b8327b2d4b74bee5d79469618ede014f0878c",
+      "B5qGmuVotes.kit.o": "7c3cca1afeffbc0b63f089a7d0ee0e8d897ae74e18bbcac59fee9ce3a9beaf9c",
+      "AdrenoHfi.kit.o": "07f79877eeeb528c02610eaaf00e633b86d9175234a7f9780cf44a92be1426f8",
+      "AdrenoHfiStartup.kit.o": "6fbb4efdfa87ca028442e4c58e88de7e4eefd17d4cd6cf60a4d7cbbcdd097ed2",
+      "AdrenoHfiVotes.kit.o": "1afcbc8bfd84db11a36d7b12a07e78591b4eb9b8c6d8eb7af2e09aa45f699566",
+      "AdrenoFirmware.kit.o": "dc7e63a259659f82fa17686c2db131f886219222e3352daf4e95873dc2ad7b88",
+      "ArmSmmu4K.kit.o": "ffee770765c9042daa8b1bcf40a29e175219c7f782707b1f3644460e1af996f0",
+      "ArmSmmu4KAudit.kit.o": "34cc024dc383f17b2fc711443a91bb690e7de3d8e2227244ad4072d6a93af985",
+      "ArmSmmu4KContext.kit.o": "ee3d6f951b3d4ae1a9971768599644b170a218faab9d0836a4c79d90b85f2588",
+      "ArmSmmu4KLive.kit.o": "7265cfc76a38b1a037f69af06a4ab8e12f6f09d55657cab2b04fbc9680aa42af",
+      "ArmSmmu4KMmio.kit.o": "076cddc73cfe8850cedc5f1c630bdba29131ed6971e811cb68fbf3a9b3981a66",
+      "ArmSmmu4KProgram.kit.o": "3075d39395b68bacf211e016c1e024bec9ede39f9183208d2251d3118ee1fdc2",
+      "ArmSmmu4KStreams.kit.o": "11444989ee2584add02cb19575b4ac041e065c626bc7aa8e0f7ed1086c175522",
+      "ArmSmmu4KTableMemory.kit.o": "d993a460e425336e35287199d0d4720a6d8aa4a8b9d518528cc0cf54c53cc6df",
+      "AdrenoPM4.kit.o": "ed29b52b985aa76089a95cde0946df95f8601c1d67bcbd3fab642a96ba13b769",
+      "B5qGpu.o": "76f4187f2c8ea87e664d7669aa546dae6a6c1af620873245a1e71417a5078c77",
+      "NativeAdrenoAccelerator.late.o": "b677032b2b84cf3a05a2ed024185c6ef2e6cf0a20fea49a3f5d8382a9b8a0a63",
+      "original-bindings.o": "7f89007724984ef55d44ddd04fd7d3842986db57796a7172eb48955b1ebbee04",
+      "original-addresses.o": "ea95bd5d658d70796840f71bd2da2cce1205988f832ac4aa1f2f3aa7d100968f"
+    },
+    "GPU_board_source_sha256": "dc5a70747ee00ab2f1c5a0d416a24dda669032068087583d538d1dff4da2c827",
+    "wireless_ADSP_objects": 156,
+    "wireless_ADSP_authenticated_contracts": 79,
+    "wireless_ADSP_unresolved": [],
+    "wireless_ADSP_duplicate_definitions": {}
+  },
+  "final_readback": {
+    "passed": true,
+    "stage": "P5",
+    "ESP": {
+      "bytes": 838860800,
+      "sha256": "bf64ec69be5187261f86c2102e20da3204494814d30e1ba6ee8ba11a4d754892"
+    },
+    "FD": {
+      "bytes": 3145728,
+      "sha256": "f432336002c93740746a682f1a61d821463c91dc6e9ab0efbe2282f7717902c2"
+    },
+    "profiles": {
+      "xnu": {
+        "kernel_sha256": "f62150556ae963ed9b0a4a17522d0b909344c926af4f944c4aa5f0fa08865a8e",
+        "args_bytes": 1011,
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": false
+      },
+      "daily": {
+        "kernel_sha256": "f62150556ae963ed9b0a4a17522d0b909344c926af4f944c4aa5f0fa08865a8e",
+        "args_bytes": 1019,
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": false
+      },
+      "safe": {
+        "kernel_sha256": "f62150556ae963ed9b0a4a17522d0b909344c926af4f944c4aa5f0fa08865a8e",
+        "args_bytes": 1019,
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": false
+      },
+      "ram-fallback": {
+        "kernel_sha256": "f62150556ae963ed9b0a4a17522d0b909344c926af4f944c4aa5f0fa08865a8e",
+        "args_bytes": 1019,
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": true
+      }
+    },
+    "required_symbols": {
+      "_native_ram_block_provider_seed": "0xfffffff00c42b828",
+      "_native_ram_block_volume_seed": "0xfffffff00c429854",
+      "_native_ram_block_volume_device": "0xfffffff00c428e88",
+      "_b5q_power_start": "0xfffffff00c42ada4",
+      "_sheng_cpu_idle_mach": "0xfffffff00b9ab074",
+      "_ml_outside_memory_pages": "0xfffffff00c945118",
+      "_ml_outside_memory_refused": "0xfffffff00c94511c",
+      "_native_touch_recovered": "0xfffffff00c9a3fb8",
+      "_native_touch_set_sink": "0xfffffff00c2c8100"
+    },
+    "FAT_members": 16,
+    "all_real_link_inputs_resolved": true,
+    "Data_GPU_unchanged": true,
+    "loader_matches_actual_rebuilt_FD": true,
+    "hardware_qualification": "HOST_VERIFIED_PENDING_HARDWARE",
+    "physical_Data_accessed": false
+  },
+  "boot_pairing": {
+    "boot_source": "physical 4Kn UFS ESP",
+    "bootstrap_fat16_bytes": 16777216,
+    "bootstrap_fat16_sha256": "ec709a0a612ce76091cf117104b70f18837c1881c648338f590ff6b1281ffb96",
+    "darwinboot_sha256": "ed36201a11836f76b21f4eb00e09069247973a87b033bc2225861aa9ebc33e5e",
+    "samsung_dtb_sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+    "bootshim_sha256": "9346a527441b242c69414fd7e3d6fa17813f281d562fef13d9ba8373d39007a9",
+    "boot": {
+      "bytes": 19124224,
+      "sha256": "623979acff78a52ecd94a0822e061ce39600d3b4bcd26acb841c037b377419eb"
+    },
+    "source_boot": {
+      "bytes": 19275776,
+      "sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1"
+    },
+    "firmware": {
+      "bytes": 3145728,
+      "sha256": "f432336002c93740746a682f1a61d821463c91dc6e9ab0efbe2282f7717902c2"
+    },
+    "esp": {
+      "bytes": 838860800,
+      "sha256": "bf64ec69be5187261f86c2102e20da3204494814d30e1ba6ee8ba11a4d754892"
+    },
+    "boot_partition_bytes": 100663296,
+    "hardware_tested": false
+  },
+  "source_checks": {
+    "board_sha256": "967683af4c48528096e46f3bc8402881cd0cfa735fb96b48ea80a222a127c02b",
+    "0014_sha256": "8111a4c0639fb89c117cc10d63eb86584e0c63f015d692923f9389f3305075e9",
+    "bootargs_unchanged": true,
+    "user_TWRP_files_unchanged": true,
+    "main_index_unchanged": true
+  },
+  "remaining": "Wait for owner confirmation before connecting/flashing phone; physical hardware validation pending"
+}

@@ -23,7 +23,6 @@
 #include "B5qMax77705.h"
 #include "QcomRpmh.h"
 extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *);
-extern "C" void b5q_dp_lid_online(bool);
 extern kmod_info_t g_kernel_kmod_info;
 extern "C" void b5q_dp_display_static_init(void) __asm__("__GLOBAL__sub_I_B5qDpDisplay.cpp");
 namespace {
@@ -265,11 +264,10 @@ struct Owner {
   IOService *next=b5q_dp_display_create(provider,&config);
   IOLockLock(scanLock);display=next;IOLockUnlock(scanLock);
   if(!display)return false;
-  b5q_dp_lid_online(true);return true;
+  return true;
  }
  bool stop(){
   accepted=false;
-  b5q_dp_lid_online(false);
   if(display&&!b5q_dp_display_disconnect(display))return false;
   if(!display&&!drain(this))return false;
   if(display){display->terminate(kIOServiceSynchronous);display->release();display=nullptr;}

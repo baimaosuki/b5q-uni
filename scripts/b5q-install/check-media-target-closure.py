@@ -22,6 +22,20 @@ if a.ci:
 else:receipt=json.loads((out/'report.json').read_text())
 assert receipt['passed'];paths=[Path(p)for p in receipt['objects']]
 assert len(paths)==35 and {'udivti3.o','udivmodti4.o','ShengAudioReach.o','ShengGpr.o','AudioProbe.o','ShengAudioService.late.o','B5qAudioBoard.o','B5qAudioDma.o'}<={p.name for p in paths},'Current P4A/ADSP/Iris/TDM encoder recipe must be complete'
+# ADSP's shared AOSS mutex is supplied by the real WCN board object, never
+# an assumed future core symbol. The combined wireless/ADSP gate audits both.
+if a.ci:
+    wireless_manifest,=a.ci.rglob('wireless-build.json')
+    wireless=json.loads(wireless_manifest.read_text())
+    name,digest=next((n,h)for n,h in wireless['objects'].items()if Path(n).name=='B5qWcnPower.o')
+    wcn=wireless_manifest.parent/name.split('/native-legacy-display/wireless/',1)[1]
+else:
+    wireless=json.loads((R/'artifacts/b5q-p3-work/board-target/report.json').read_text())
+    name,digest=next((n,h)for n,h in wireless['objects'].items()if Path(n).name=='B5qWcnPower.o')
+    wcn=Path(name)
+assert wcn.is_file()and hashlib.sha256(wcn.read_bytes()).hexdigest()==digest
+paths.append(wcn)
+receipt['objects'][str(wcn)]=digest
 def unused_auth_declarations(path,scan):
     # Apple clang emits unused weak l_<name>.ptrauth nlist declarations next
     # to the *referenced*, authenticated $auth_ptr. They carry no relocation.

@@ -28,12 +28,13 @@ int main(void) {
     assert(B5qPcieMapPool(&t,0xa0000000,base,0x02000000));
     for(UINT64 off=0;off<0x02000000;off+=4096) {
       unsigned shift=0;UINT64 e=walk(&t,0xa0000000+off,&shift);
-      assert(shift==21 && (e&0x708)==0x708);
+      assert(shift==21 && (e&0x748)==0x748);
       assert(((e&USB_DMA_PA_MASK)+((0xa0000000+off)&((1ULL<<shift)-1)))==base+off);
     }
     unsigned shift=0;assert(!walk(&t,0x9ffff000,&shift));assert(!walk(&t,0xa2000000,&shift));
     assert(B5qPcieMapMsi(&t));
     UINT64 msi=walk(&t,0xaffff040,&shift);
+    assert((msi&(1ULL<<6))!=0);
     assert(shift==12 && (msi&USB_DMA_PA_MASK)==0x17110000 && (msi&0x1c)==0);
     assert(!B5qPcieMapMsi(&t));assert(!walk(&t,0xafffe000,&shift));
     assert(!B5qPcieMapPool(&t,0xa0000000,base,0x02000000)); // no overwrite

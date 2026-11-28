@@ -60,7 +60,7 @@ template<class Io,class Delay> bool otg(Io &io,bool on,Delay delay){
  if(next==15 && !update(io,0xc3,0x40,0))return false;
  bool success=update(io,0xb7,15,next);
  if(next==15)success=update(io,0xc3,0x40,c3)&&success;
- if(!success)update(io,0xb7,15,m==5?5:4);
+ if(!success)update(io,0xb7,15,m==0?0:m==5?5:4);
  return success;
 }
 }

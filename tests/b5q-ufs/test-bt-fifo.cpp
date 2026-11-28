@@ -92,5 +92,21 @@ int main(){
     {Model m;m.start();assert(b5q_bt_fifo_quiesce(&m.g)==-EINPROGRESS);
      m.time+=10000000;b5q_bt_fifo_service(&m.g);assert(m.g.state==B5Q_BT_FIFO_ABORT && m.regs[0x634/4]==2);
      m.time+=10000000;b5q_bt_fifo_service(&m.g);assert(m.g.error==-ETIMEDOUT && m.masked);}
+    // Reset/mux garbage is discarded before the first HCI request.
+    {Model m;assert(!m.prepare());assert(!b5q_bt_fifo_set_rate(&m.g,115200,7372800,16));
+     m.input={0,0,0,0};m.regs[0x640/4]=0xc00;
+     assert(!b5q_bt_fifo_startup(&m.g)&&m.input.empty());
+     m.regs[0x640/4]=0xc00;m.input={0,0};b5q_bt_fifo_service(&m.g);
+     assert(m.g.state==B5Q_BT_FIFO_RUN&&m.g.stats.startup_line_errors==1&&m.received.empty());
+     m.inject({4,14,1,0});b5q_bt_fifo_service(&m.g);assert((m.received==std::vector<uint8_t>{4,14,1,0}));}
+    for(unsigned mode=0;mode<4;mode++){
+     Model m;assert(!m.prepare());assert(!b5q_bt_fifo_set_rate(&m.g,115200,7372800,16));assert(!b5q_bt_fifo_startup(&m.g));
+     if(mode==0){m.regs[0x640/4]=0xc00;b5q_bt_fifo_service(&m.g);}
+     if(mode==1)m.time+=50000000;
+     if(mode==2){const uint8_t command[]={1,3,12,0};assert(b5q_bt_fifo_write(&m.g,command,4)==4);}
+     m.regs[0x640/4]=mode==3?1u<<24:0xc00;b5q_bt_fifo_service(&m.g);
+     assert(m.g.state==B5Q_BT_FIFO_FAILED&&m.g.error==-EIO&&m.masked);
+    }
+    puts("PASS startup stale RX/single pre-command break recovery; repeated/late/in-command/FIFO errors still fatal");
     puts("PASS production BT FIFO: capability refusal, 4096 TX lengths, partial RX/tails/backpressure, IRQ, bounded cancel/abort, zero DMA registers");
 }

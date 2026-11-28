@@ -61,7 +61,7 @@ SOURCE
 static UINT32 create(void **p){assert(!*p);creates++;if(fault==4)return 9;*p=(void*)1;return 0;}
 static UINT32 drop(void *p){assert(p==(void*)1);deletes++;return 0;}
 static UINT32 attach(void *p,const char *name,UINT32 arid,UINT32 zero){assert(p==(void*)1&&!zero);assert(!strcmp(name,"LPASS")||!strcmp(name,"VIDEO"));assert(arid==0x03000000||arid==0x03000001||arid==0x03000005||arid==0x0300000e);attaches++;return fault==6&&attaches==1?6:fault==7&&attaches==2?7:0;}
-static UINT32 configure(void *p,HAL_CONFIG *c){assert(p==(void*)1&&c->Vmsa==0&&!c->Reserved&&!c->Ttbr1&&c->Ttbr0==0xe0000000&&c->Mair0==0xff0400&&c->Sctlr==0xc000e7&&c->Tcr==0x802010&&c->Tcr2==0x3c071);configures++;return fault==5?5:0;}
+static UINT32 configure(void *p,HAL_CONFIG *c){assert(p==(void*)1&&c->Vmsa==0&&!c->Reserved&&!c->Ttbr1&&c->Ttbr0==0xe0000000&&c->Mair0==0xff0400&&c->Sctlr==0xc01027&&c->Tcr==0x803510&&c->Tcr2==0x3c071);configures++;return fault==5?5:0;}
 static HAL_TABLE hal={create,drop,attach,attach,configure};
 static void init(const HAL_TABLE **p){assert(!*p);*p=&hal;}
 static HAL_PROTOCOL protocol={0x10002,init,NULL};

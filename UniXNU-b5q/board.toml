@@ -101,7 +101,7 @@ kernel-ctrr-to-be-enabled = 0
 # These slots are zero in the build. DarwinBoot fills them from B5qHandoffDxe.
 b5q-usb-dma-ready = 0
 b5q-pcie-dma-ready = 0
-b5q-feature-mask = 63
+b5q-feature-mask = 61
 b5q-audio-dma-ready = 0
 b5q-video-dma-ready = 0
 b5q-dp-dma-ready = 0

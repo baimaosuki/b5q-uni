@@ -18,6 +18,7 @@
 #include <stdarg.h>
 extern "C" bool sm8550_gcc_trigger32(volatile uint32_t *,uint32_t,unsigned);
 extern "C" ifnet_t sheng_ethernet_ifnet(void);
+extern "C" void sheng_ethernet_wifi_detach(void);
 extern "C" int b5q_wifi_publish_ready(void);
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 #include "B5qPcieCore.h"
@@ -89,11 +90,18 @@ bool readHandoff() {
     return arena->init(const_cast<uint32_t*>(dma.va),dmaState.iova,uint32_t(dmaState.poolBytes));
 }
 struct Hardware {
+    uint64_t radioAt=0,resetAt=0;
     bool power(){return !b5q_wcn_power_get(B5Q_WCN_WLAN) && !b5q_wcn_pcie_vote();}
-    bool radio(bool on){return !b5q_wcn_radio_enable(B5Q_WCN_WLAN,on);}
+    bool radio(bool on){bool ok=!b5q_wcn_radio_enable(B5Q_WCN_WLAN,on);radioAt=mach_absolute_time();native_wifi_logf(ok?6:3,"stage=wlan-en on=%u verified=%u",on,ok);return ok;}
     void pin(unsigned n,uint32_t cfg,int level) {
         if(level>=0)tlmm.va[(n*0x1000+4)/4]=level?2:0;
         tlmm.va[n*0x1000/4]=cfg;barrier();
+        if(n==94){uint64_t at=mach_absolute_time(),held=0,sinceRadio=0;
+            if(!level)resetAt=at;
+            if(resetAt)absolutetime_to_nanoseconds(at-resetAt,&held);
+            if(radioAt)absolutetime_to_nanoseconds(at-radioAt,&sinceRadio);
+            native_wifi_logf(6,"stage=perst level=%d read=%u held-us=%llu wlan-return-us=%llu",level,tlmm.va[(n*0x1000+4)/4]&1,held/1000,sinceRadio/1000);
+        }
     }
     bool gcc(uint32_t reg,uint32_t clear,uint32_t set){bool ok=sm8550_gcc_update32(gccWindow.va+reg/4,clear,set);if(!ok)native_wifi_logf(3,"stage=gcc-rmw reg=%x value=%x clear=%x set=%x result=-12",reg,gccWindow.va[reg/4],clear,set);return ok;}
     bool rcg(uint32_t reg){bool ok=sm8550_gcc_trigger32(gccWindow.va+reg/4,1,10000);native_wifi_logf(ok?6:3,"stage=rcg-update reg=%x value=%x result=%d",reg,gccWindow.va[reg/4],ok?0:-12);return ok;}
@@ -146,13 +154,18 @@ bool cfgOffset(int off,int size,uint32_t &reg) {
     return (size==1||size==2||size==4) && !(reg&(size-1)) && reg<=4096-unsigned(size);
 }
 int cfgRead(int off,int size,uint32_t *out) {
+    if(!config.va||!dbi.va||!(dbi.va[0x72c/4]&16))return -ENXIO;
     uint32_t reg;if(!out || !cfgOffset(off,size,reg))return -EINVAL;
     uint32_t value=config.va[(reg&~3u)/4];*out=size==4?value:(value>>((reg&3)*8))&((1u<<(size*8))-1);return 0;
 }
 int cfgWrite(int off,int size,uint32_t value) {
+    if(!config.va||!dbi.va||!(dbi.va[0x72c/4]&16))return -ENXIO;
     uint32_t reg;if(!cfgOffset(off,size,reg))return -EINVAL;
-    unsigned shift=(reg&3)*8;uint32_t mask=size==4?~0u:((1u<<(size*8))-1)<<shift;
-    config.va[(reg&~3u)/4]=(config.va[(reg&~3u)/4]&~mask)|((value<<shift)&mask);barrier();return 0;
+    volatile uint8_t *base=reinterpret_cast<volatile uint8_t*>(config.va);
+    if(size==1)base[reg]=uint8_t(value);
+    else if(size==2)*reinterpret_cast<volatile uint16_t*>(base+reg)=uint16_t(value);
+    else *reinterpret_cast<volatile uint32_t*>(base+reg)=value;
+    barrier();return 0;
 }
 int msiTarget(uint32_t *lo,uint32_t *hi,uint32_t *data) {
     if(!irqAttached)return -ENXIO;
@@ -288,9 +301,11 @@ void worker(void *,wait_result_t) {
     if(!readHandoff()){error=-2;goto failed;}
     if(!gccWindow.open(0x100000,0x80000) || !tlmm.open(0xf100000,0x100000)){error=-3;goto failed;}
     {
-        Hardware hardware;error=B5qPcie::train(hardware);
+        uint32_t linkState[4]={};Hardware hardware;error=B5qPcie::train(hardware,linkState);
         native_wifi_stats[0]=error?uint32_t(error):16;
         native_wifi_logf(error?3:6,"PCIe train result=%d phy-entries=%zu",error,sizeof(B5qPcieInputs::phy)/sizeof(B5qPcieInputs::phy[0]));
+        native_wifi_logf(error?3:6,"stage=link-state dbi728=%08x dbi72c=%08x ltssm=%u up=%u polls=%u phy214=%08x",linkState[0],linkState[1],linkState[0]&63,!!(linkState[1]&16),linkState[2],linkState[3]);
+        if(parf.va&&phy.va)native_wifi_logf(error?3:6,"stage=link-clock parf1b0=%08x cfg=%x/%x pipe=%x gdsc=%x/%x",parf.va[0x1b0/4],gccWindow.va[0x6b078/4],gccWindow.va[0x6b05c/4],gccWindow.va[0x6b070/4],gccWindow.va[0x6b004/4],gccWindow.va[0x6c000/4]);
         if(error)goto failed;
     }
     if(!endpoint()){error=-17;goto failed;}
@@ -312,7 +327,7 @@ void worker(void *,wait_result_t) {
         static const lx_platform platform={nowMs,sleepMs,poll,logLine,halt,allocate,release,
             dmaAllocate,dmaRelease,dmaMap,dmaSync,fwGet,nowNs,bootNs,busyDelay,_disable_preemption,_enable_preemption};
         nw_wifi_set_platform(&platform);
-        error=controlStart();if(error)goto failed;
+        error=controlStart();if(error){if(error>0)error=-error;goto failed;}
         static nw_board board;
         board.bar=const_cast<uint32_t*>(bar.va);board.bar_len=0x200000;
         board.device_id=0x1103;board.msi_cap=uint16_t(msiCap);board.irq_base=1000;
@@ -351,12 +366,17 @@ void worker(void *,wait_result_t) {
         }
     }
 failed:
+    if(error>0)error=-error;
     native_wifi_stats[0]=uint32_t(error?error:-1);
     // Stop endpoint DMA before Linux teardown touches ring buffers. Keep all
     // retained firmware pages and mappings for the rest of this boot.
     if(irqAttached)armcpu_spi_mask(800,true);
+    if(config.va&&dbi.va&&(dbi.va[0x72c/4]&16)){
+        auto *command=reinterpret_cast<volatile uint16_t*>(reinterpret_cast<volatile uint8_t*>(config.va)+4);
+        *command=uint16_t(*command&~4u);barrier();
+    }
     if(tlmm.va){Hardware h;h.pin(94,0x201,0);IODelay(1000);}
-    if(config.va){config.va[4/4]&=~4u;barrier();}
+    sheng_ethernet_wifi_detach();
     if(stackStarted)nw_wifi_stop();
     b5q_wcn_radio_enable(B5Q_WCN_WLAN,0);b5q_wcn_power_put(B5Q_WCN_WLAN);
     native_wifi_logf(3,"stopped result=%d; boot continues; DMA pool retained",error);

@@ -20,7 +20,7 @@ harness=r'''
 #include <vector>
 enum {kRoleNone,kRoleDevice,kRoleHost};
 bool gDmaReady=true,gSuperSpeed=false,gDeviceStackAllowed=false;
-unsigned gDpLanes=0;
+unsigned gDpLanes=0;bool gPhyResetPending=false,gDevicePowerAcknowledged=false;uint32_t gDevicePowerOnAtAttach=0;
 int gCoreRole=kRoleDevice;unsigned powerCalls=0,hostCalls=0,deviceCalls=0,qmpCalls=0,utmi=0;
 bool boost=false,powerFailure=false,phyFailure=false,hostFailure=false,qmpReverse=false;
 uint32_t native_usb_stats[54]={},registers[1024]={};
@@ -43,7 +43,7 @@ void selectUtmiClock(){++utmi;}
 void vbusOverride(bool on){assert(!on);}
 void enterHost(){++hostCalls;gHost=hostFailure?nullptr:&controller;}
 '''
-harness+='\n'.join(function(x)for x in ['bool superSpeedInit()','void followOrientation()','bool setCoreRole(int role)','bool enterRole(int role)'])
+harness+='\n'.join(function(x)for x in ['bool superSpeedInit()','bool followOrientation()','bool setCoreRole(int role,bool forceReset=false)','bool enterRole(int role)'])
 harness+=r'''
 void reset(){boost=false;gHost=nullptr;gDmaReady=true;gSuperSpeed=false;gCoreRole=kRoleDevice;powerFailure=phyFailure=hostFailure=false;powerCalls=hostCalls=deviceCalls=qmpCalls=utmi=0;}
 int main(){

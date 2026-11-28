@@ -59,9 +59,8 @@ struct Window {std::vector<uint32_t> memory;volatile uint32_t *va=nullptr;
  bool open(uint64_t,unsigned bytes,unsigned cache){assert(cache==kIOMapCopybackCache);memory.resize(bytes/4);va=memory.data();return true;}
  void close(){va=nullptr;memory.clear();}
 };
-bool online=false,drainOk=true;unsigned publications=0,completedTags=0;B5qDpDisplayConfig displayConfig;
+bool drainOk=true;unsigned publications=0,completedTags=0;B5qDpDisplayConfig displayConfig;
 B5qDpFrameCallback irqCallback=nullptr;void *irqContext=nullptr;
-void b5q_dp_lid_online(bool value){online=value;}
 bool b5q_dp_irq_start(void *p,B5qDpFrameCallback cb){assert(!irqContext);irqContext=p;irqCallback=cb;return true;}
 bool b5q_dp_irq_stop(){if(!drainOk)return false;irqContext=nullptr;irqCallback=nullptr;return true;}
 IOService *b5q_dp_display_create(IOService *provider,const B5qDpDisplayConfig *c){assert(provider&&c);displayConfig=*c;publications++;auto *p=new IOService;p->attach(provider);return p;}
@@ -95,8 +94,8 @@ template<class Io>struct Session {
 test=r'''
 int main(){unsigned cases=0;assert(B5qDpPool(&firmware,0xb8000000,1080*2640*4,0xb8000000+1080*2640*4));firmware.RetentionStatus=0;
  Owner o;B5qDpPortState port{};port.attached=port.configured=port.hpd=true;port.reverse=0;port.lanes=2;port.pin=8;port.generation=1;
- ready=0;o.update(port);assert(!o.accepted&&!online&&!publications);ready=1;tick+=1000000;o.update(port);
- assert(o.accepted&&o.presentation.ready&&online&&o.display&&irqCallback&&publications==1);cases++;
+ ready=0;o.update(port);assert(!o.accepted&&!publications);ready=1;tick+=1000000;o.update(port);
+ assert(o.accepted&&o.presentation.ready&&o.display&&irqCallback&&publications==1);cases++;
  IOMemoryDescriptor memory;memory.bytes.resize(1920*1080*4);for(unsigned i=0;i<memory.bytes.size();i++)memory.bytes[i]=uint8_t(i);
  for(uint64_t tag=1;tag<=8;tag++){
   assert(displayConfig.present(displayConfig.context,&memory,1920*4,false,tag));
@@ -107,14 +106,14 @@ int main(){unsigned cases=0;assert(B5qDpPool(&firmware,0xb8000000,1080*2640*4,0x
  }
  // A partial DMA drain must not release the primary-independent pool or
  // PHY. Retrying the exact physical unplug finishes without stale tags.
- drainOk=false;port.hpd=false;o.update(port);assert(!o.accepted&&o.pool.va&&o.display&&!online);cases++;
+ drainOk=false;port.hpd=false;o.update(port);assert(!o.accepted&&o.pool.va&&o.display);cases++;
  drainOk=true;o.update(port);assert(!o.pool.va&&!o.display&&!o.io.opened&&!irqContext);cases++;
- port.hpd=true;port.reverse=1;port.generation++;o.update(port);assert(o.accepted&&online&&o.io.wantedReverse==1&&publications==2);
+ port.hpd=true;port.reverse=1;port.generation++;o.update(port);assert(o.accepted&&o.io.wantedReverse==1&&publications==2);
  assert(displayConfig.present(displayConfig.context,nullptr,0,true,99));o.io.delay(17000);irqCallback(irqContext,o.io.regs[0x350ac],tick);assert(completedTags==9);cases++;
  assert(displayConfig.present(displayConfig.context,&memory,1920*4,false,100));tick+=100000;o.update(port);
  assert(o.accepted&&publications==3&&!o.presentation.pendingTag);cases++;
- assert(o.stop()&&!o.pool.va&&!online);delete o.scanLock;
- printf("PASS native DP pipeline %u end-to-end cases:firmwaregate/modefilter/training/realDPU/buffer-copy/IRQ-tag/IOMFB/lid/unplug-drain/replug/timeout-retrain ASanUBSan\n",cases);
+ assert(o.stop()&&!o.pool.va);delete o.scanLock;
+ printf("PASS native DP pipeline %u end-to-end cases:firmwaregate/modefilter/training/realDPU/buffer-copy/IRQ-tag/IOMFB/no-lid/unplug-drain/replug/timeout-retrain ASanUBSan\n",cases);
 }
 '''
 with tempfile.TemporaryDirectory(prefix='b5q-dp-pipeline-')as td:

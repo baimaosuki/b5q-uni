@@ -1,0 +1,61 @@
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+@@ -57,27 +57,18 @@
+ STATIC CONST CHAR8 mUsb0[] = "USB0";
+ STATIC BOOLEAN mAttempted;
+ STATIC B5Q_USB_DMA_RESULT mResult;
++STATIC UINT8 mUsbMapBuf[32768] __attribute__((aligned(8)));
+ 
+ STATIC EFI_STATUS
+ BuildUsbTables (USB_DMA_TABLES *Tables, UINT64 OwnedBase, UINT64 OwnedBytes, UINT64 *MappedBytes)
+ {
+-  EFI_MEMORY_DESCRIPTOR *Map = NULL;
+-  UINTN Size = 0, Key, Stride;
++  EFI_MEMORY_DESCRIPTOR *Map = (VOID *)mUsbMapBuf;
++  UINTN Size = sizeof(mUsbMapBuf), Key, Stride;
+   UINT32 Version;
+-  EFI_STATUS Status = gBS->GetMemoryMap (&Size, NULL, &Key, &Stride, &Version);
+-  if ((Status != EFI_BUFFER_TOO_SMALL) || (Stride < sizeof (*Map)) ||
+-      (Stride > MAX_UINTN / 16) || (Size > MAX_UINTN - 16 * Stride)) {
+-    return EFI_DEVICE_ERROR;
+-  }
+-  Size += 16 * Stride;
+-  Map = AllocatePool (Size);
+-  if (Map == NULL) {
+-    return EFI_OUT_OF_RESOURCES;
+-  }
+-  Status = gBS->GetMemoryMap (&Size, Map, &Key, &Stride, &Version);
+-  if (EFI_ERROR (Status)) {
+-    goto Done;
+-  }
++  EFI_STATUS Status = gBS->GetMemoryMap (&Size, Map, &Key, &Stride, &Version);
++  // The firmware snapshot uses no transient pool allocation: freeing one
++  // after table construction would expose a previously unmapped RAM page.
++  if (EFI_ERROR (Status)) { return Status; }
+   if ((Stride < sizeof (*Map)) || (Size % Stride != 0) ||
+       (UsbDmaNewTable (Tables) == NULL)) {
+     Status = EFI_COMPROMISED_DATA;
+@@ -134,7 +125,6 @@
+   DEBUG((DEBUG_ERROR,"B5Q-USBDMA: stock-reserved-filter=1 mapped=%lx\n",*MappedBytes));
+   Status = (OwnsHead && Retained) ? EFI_SUCCESS : EFI_COMPROMISED_DATA;
+ Done:
+-  FreePool (Map);
+   return Status;
+ }
+ 
+@@ -210,11 +200,10 @@
+   }
+   Status = EFI_DEVICE_ERROR;
+ Fail:
+-  if ((State->Create == 0) && (Domain != NULL)) {
+-    Diag->Delete = Hal->Delete (Domain);
+-  }
+-  // A failed attach may have installed a hardware reference before reporting failure.
++  // An attach that reports failure may still own a hardware reference.
++  // Never destroy that domain/table until ownership is proven detached.
+   if (State->Attach == B5Q_USB_DMA_NOT_RUN) {
++    if ((State->Create == 0) && (Domain != NULL)) { Diag->Delete = Hal->Delete (Domain); }
+     gBS->FreePages (Table, USB_DMA_TABLE_PAGES);
+   }
+   return Status;
