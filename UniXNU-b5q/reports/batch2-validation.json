@@ -1,0 +1,3439 @@
+{
+  "passed": true,
+  "args_bytes": 981,
+  "engineering_limit": 1000,
+  "buffer_bytes": 1024,
+  "terminator_required": true,
+  "memory_floor_bytes": 4831838208,
+  "target_bytes": 6442450944,
+  "shutdown": "ProcessExit->PagingOff only; vfs_unmountall(TRUE/FALSE)->host_reboot->rootDomain driver shutdown->platform PSCI; FUA late writes accepted and invalidate old flush status",
+  "source_sha256": {
+    "UniXNU-b5q/board.toml": "1389e0dc68fa5b6f69b7a0ad97e27000d217e48c109b21937ee8736606178e14",
+    "UniXNU-b5q/package/B5qRamStorage.cpp": "45ebb51fdf8e128bbcd93dae34780d24119facdbc175729f8ee23e2892c638fb",
+    "UniXNU-b5q/package/B5qPower.cpp": "7a2cda7669c20ce6f08929d1ef1dadc4c19c5b02178e0389b39f7641e7f32888",
+    "UniXNU-b5q/package/B5qUfs/B5qDataBlock.h": "c79999457bc4a178e6ce8df0839b7151330fa63a708246000a336a1cd929d679",
+    "UniXNU-b5q/package/B5qUfs/B5qDataFormat.h": "0e0046430bfb2d71eac807417d0260e650e796b9588088d62600b8156b9a437b",
+    "UniXNU-b5q/package/B5qUfs/B5qVmAlloc.h": "ffee186bf84063e451f4201b8b956f0d01148f6a218b7463dc4540d75f87d24a",
+    "UniXNU-b5q/package/B5qMouseReport.h": "3a527aee84e17a3a28cf0b84c9ceb3699a10a83bff9a63fadd2d88731962bc6d",
+    "UniXNU-b5q/package/B5qTouchPointer.h": "71fec2e94cd5dca2dce0a47b840904bf4c477f2553c12bc214007e974d39f4fa",
+    "UniXNU-b5q/package/NativeHidInput.cpp": "bb0ec4f2248d6d33b9dafc2bab1a09d81af41542c0e4efeee3f50ef8d742ac0a",
+    "UniXNU-b5q/package/HidInputProbe.cpp": "6f20f1e012902aaeae66f6df504591af0008935493652a09d7ab50a97a070574",
+    "UniXNU-b5q/package/B5qProcTop.c": "5dcad30e3bdbf35185981a50cdcea7628d9ed2bc364a1470fed04ed8652ec26b",
+    "UniXNU-b5q/package/B5qProcTopFormat.h": "8820f1bcd0facf898d94101eb22f2284a5904887decc9482de912a03a339d9a7",
+    "scripts/b5q-install/install-data-ufs.py": "6658de004bd3a2ce83e34df4e9a1f78ac9657689784699d765016248d7073b8f",
+    "scripts/b5q-install/build-persistent-data.py": "0dfc6545c39841ed6ce70ae7f0b0fe7aeae741a2daa0cf318ecdaf970e6be0fc",
+    "UniXNU-b5q/scripts/package-batch2-esp.py": "eb614d231001f32936b272683cd7b81ca2d7f6793c60a9f1d5ee4bcce2b98a13",
+    "scripts/b5q-install/verify-batch2-images.py": "4666b5d74848a692f3bf5f64ad33a851cd83dea451860c4999e23e1a4aaf1db1"
+  },
+  "stage": "local pre-CI; final returned-object/image acceptance pending",
+  "input_source_sha256": {
+    "UniXNU-b5q/package/B5qRamStorage.cpp": "45ebb51fdf8e128bbcd93dae34780d24119facdbc175729f8ee23e2892c638fb",
+    "UniXNU-b5q/package/B5qUfs/B5qDataBlock.h": "c79999457bc4a178e6ce8df0839b7151330fa63a708246000a336a1cd929d679",
+    "UniXNU-b5q/board.toml": "1389e0dc68fa5b6f69b7a0ad97e27000d217e48c109b21937ee8736606178e14"
+  },
+  "local_pre_ci": {
+    "passed": true,
+    "checks": [
+      {
+        "name": "records",
+        "passed": true
+      },
+      {
+        "name": "memory-model",
+        "passed": true
+      },
+      {
+        "name": "batch2-contract",
+        "passed": true
+      },
+      {
+        "name": "data-queue",
+        "passed": true
+      },
+      {
+        "name": "data-installer",
+        "passed": true
+      },
+      {
+        "name": "data-partition",
+        "passed": true
+      },
+      {
+        "name": "data-grow",
+        "passed": true
+      },
+      {
+        "name": "installer",
+        "passed": true
+      },
+      {
+        "name": "absentd-v33",
+        "passed": true
+      },
+      {
+        "name": "data-account",
+        "passed": true
+      },
+      {
+        "name": "log-startup",
+        "passed": true
+      },
+      {
+        "name": "log-writer",
+        "passed": true
+      },
+      {
+        "name": "pointer-batch2-compile",
+        "passed": true
+      },
+      {
+        "name": "pointer-batch2-ASan-UBSan",
+        "passed": true
+      },
+      {
+        "name": "proctop-compile",
+        "passed": true
+      },
+      {
+        "name": "proctop-ASan-UBSan",
+        "passed": true
+      },
+      {
+        "name": "native-launchd",
+        "passed": true
+      },
+      {
+        "name": "native-XPC-five-jobs",
+        "passed": true
+      },
+      {
+        "name": "target",
+        "passed": true
+      },
+      {
+        "name": "objects",
+        "passed": true
+      },
+      {
+        "name": "proctop-PAC",
+        "passed": true
+      },
+      {
+        "name": "cross-object-PAC",
+        "passed": true
+      },
+      {
+        "name": "Batch1-inheritance-v30-loader-dedicated-incremental-workflow",
+        "passed": true
+      }
+    ],
+    "core_recompiled": false,
+    "GPU_recompiled": false,
+    "UEFI_recompiled": false,
+    "board_objects": 6,
+    "persistent_APFS": "grow existing Batch1 volume; native CI result and final readback still required",
+    "hardware_qualified": false
+  },
+  "memory_model": {
+    "passed": true,
+    "evidence_scope": "production allocator/exclusion/outside functions with captured-FDT/static-UEFI-derived synthetic maps; not a final EFI map or hardware RAM claim",
+    "span": "0x180000000",
+    "candidate_base": "0x88ba04000",
+    "model_inside_bytes": 6171901952,
+    "model_low_outside_ranges": [
+      {
+        "base": "0x811d0000",
+        "bytes": 8585216
+      },
+      {
+        "base": "0x81f20000",
+        "bytes": 7208960
+      },
+      {
+        "base": "0x82800000",
+        "bytes": 134217728
+      },
+      {
+        "base": "0xa5580000",
+        "bytes": 12058624
+      },
+      {
+        "base": "0xc7cc0000",
+        "bytes": 218365952
+      },
+      {
+        "base": "0xdfc00000",
+        "bytes": 109314048
+      },
+      {
+        "base": "0xe6720000",
+        "bytes": 219021312
+      },
+      {
+        "base": "0xf7a00000",
+        "bytes": 132120576
+      },
+      {
+        "base": "0xffe00000",
+        "bytes": 2097152
+      }
+    ],
+    "model_total_GiB_before_runtime_EFI_allocations": 6.5331268310546875,
+    "runtime_pressure_cases": [
+      {
+        "firmware_carve_bytes": 0,
+        "model_usable_bytes": 7014891520,
+        "persistent_profile_admitted": true,
+        "target_6GiB_met": true
+      },
+      {
+        "firmware_carve_bytes": 134217728,
+        "model_usable_bytes": 6880673792,
+        "persistent_profile_admitted": true,
+        "target_6GiB_met": true
+      },
+      {
+        "firmware_carve_bytes": 402653184,
+        "model_usable_bytes": 6612238336,
+        "persistent_profile_admitted": true,
+        "target_6GiB_met": true
+      },
+      {
+        "firmware_carve_bytes": 671088640,
+        "model_usable_bytes": 6343802880,
+        "persistent_profile_admitted": true,
+        "target_6GiB_met": false
+      }
+    ],
+    "usb_domain_limit": "0x1000000000",
+    "owned_end_within_36bit": true,
+    "hardware_memory_qualified": false,
+    "required_runtime_gate": "B5qMemory max_mem>=4.5GiB; target>=6GiB after existing EARLY_BOOT outside adoption; no assumed hardware outcome"
+  },
+  "objects": {
+    "passed": true,
+    "objects": {
+      "B5qRamStorage.o": {
+        "sha256": "6c793b860326c3db3bfbe2d52a6e25039d6654cc0e7592099fd26d3fee19881a",
+        "instructions": 287,
+        "apps_smmu_materializations": 0
+      },
+      "B5qProcTop.o": {
+        "sha256": "df803cdaf91ac6929681816fcdca83f38b468659a6ccba9fad5a68b34aba0d1f",
+        "instructions": 625,
+        "apps_smmu_materializations": 0
+      },
+      "NativeHidInput.o": {
+        "sha256": "688edb0c461c68de33ee309e35203cbd9c168d79d64df203cac99250af2239b6",
+        "instructions": 2798,
+        "apps_smmu_materializations": 0
+      },
+      "B5qPower.o": {
+        "sha256": "cd05ae1ad71b36a9055b7ad1cd1e9e49bf3eb2c42fbf291dc000d4688862e020",
+        "instructions": 243,
+        "apps_smmu_materializations": 0
+      },
+      "B5qUfs.o": {
+        "sha256": "f5ad861028b4d9f7d8085b20beeda60482cf28f51a239cb4a81a1420538befc8",
+        "instructions": 9544,
+        "apps_smmu_materializations": 0
+      },
+      "HidInputProbe.o": {
+        "sha256": "7b861155d775c5d8795bb5f503726733c42736568c4c54de6998e3596058d4df",
+        "instructions": 1941,
+        "apps_smmu_materializations": 0
+      }
+    },
+    "platform_power_PAC": {
+      "key": "IA",
+      "diversity": "0x0ba5",
+      "producer": [
+        {
+          "site": "0x2a4",
+          "key": 0,
+          "diversity": 2981,
+          "address_diversity": 0
+        }
+      ],
+      "core_consumer_sites": [
+        "0xe60",
+        "0x474c"
+      ]
+    },
+    "data_root_shared_virtual_slots_verified": 326,
+    "Data_and_root_completion_PAC": {
+      "diversity": "0xe90c",
+      "calls": [
+        {
+          "site": 15244,
+          "diversity": 59660
+        },
+        {
+          "site": 16964,
+          "diversity": 59660
+        }
+      ]
+    },
+    "hardware_execution_tested": false
+  },
+  "PAC_interfaces": {
+    "passed": true,
+    "USB_to_ArmCpu": {
+      "producer": [
+        {
+          "site": "0x34c8",
+          "key": 0,
+          "diversity": 10942,
+          "address_diversity": 0,
+          "kind": "PACIAinstruction"
+        }
+      ],
+      "actual_ArmCpu_dispatch_calls": [
+        {
+          "site": "0x34b0",
+          "diversity": 10942,
+          "key": 0
+        }
+      ],
+      "key": "IA",
+      "diversity": "0x2abe"
+    },
+    "all_GMU_IO_and_services_fields": [
+      {
+        "field": "read32",
+        "key": "IA",
+        "diversity": "0x54f7",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b20",
+            "key": 0,
+            "diversity": 21751,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x4cd8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d10",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d48",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d80",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4db8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4df0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e28",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e60",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e98",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4ed0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f08",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f40",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f78",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4fbc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x50e4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5188",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5208",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5288",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x52cc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5320",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x538c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x53f0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x545c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5688",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x57c0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5834",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x58a8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x58d0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6984",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x69ac",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x69e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6a08",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6a3c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6bf8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c1c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c44",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c6c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c94",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6cbc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6ce0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6d04",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6d2c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6da4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6dcc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6df4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e1c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e40",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e64",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6f84",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6fa8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6fd0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6ff8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7020",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7cc8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7d04",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7d2c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x859c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x85d0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8630",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x865c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x89f4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8a30",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8b34",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8e50",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9060",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9118",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x913c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9160",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9184",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x91a8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9ee8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb268",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb328",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb374",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb39c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xd118",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xda90",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xea60",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xede4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xee80",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeea0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeebc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeeec",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf220",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf240",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf25c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf28c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf470",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf4bc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf4e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf504",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf530",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf554",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf578",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5a4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5c8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5ec",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf6e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf704",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xfaf0",
+            "diversity": 21751,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "write32",
+        "key": "IA",
+        "diversity": "0xb286",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b34",
+            "key": 0,
+            "diversity": 45702,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3cf8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x3d14",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x50c0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5114",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5134",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x51ac",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5238",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5300",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5344",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x53d0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5494",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5638",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5654",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5788",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5800",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x6388",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x63a4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64b8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64d4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64f4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8564",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8600",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x89d4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a10",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a54",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a70",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a90",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8aac",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ad8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8af8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b14",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b68",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b94",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bb4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bd4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bf0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c0c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c44",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c60",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c7c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c98",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cb4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cd0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d24",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d40",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d5c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d78",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8da4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8dd0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8dec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e24",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e74",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e90",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8eb0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ed0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8eec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f0c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f48",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f64",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f80",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f9c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8fbc",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8fe0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ffc",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x9038",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb290",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb300",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb354",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb424",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb440",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb45c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xd140",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xd1d0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xda64",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xdaf8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xedc0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xee08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xee28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xfa84",
+            "diversity": 45702,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "barrier",
+        "key": "IA",
+        "diversity": "0x307a",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b48",
+            "key": 0,
+            "diversity": 12410,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3d24",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5664",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5798",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5810",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0xee38",
+            "diversity": 12410,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "sha256",
+        "key": "IA",
+        "diversity": "0xe2e",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c74",
+            "key": 0,
+            "diversity": 3630,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3e4",
+            "diversity": 3630,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "now_us",
+        "key": "IA",
+        "diversity": "0xe4fe",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c88",
+            "key": 0,
+            "diversity": 58622,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x11f0",
+            "diversity": 58622,
+            "key": 0
+          },
+          {
+            "site": "0x1260",
+            "diversity": 58622,
+            "key": 0
+          },
+          {
+            "site": "0x164c",
+            "diversity": 58622,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "wait_us",
+        "key": "IA",
+        "diversity": "0x50c7",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c9c",
+            "key": 0,
+            "diversity": 20679,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x1358",
+            "diversity": 20679,
+            "key": 0
+          },
+          {
+            "site": "0x1664",
+            "diversity": 20679,
+            "key": 0
+          }
+        ]
+      }
+    ],
+    "objects_sha256": {
+      "USB": "4abfb27db2ae02118f0cbe97358b3752b578d0f31d4cf4d12eb474c47a7f1536",
+      "ArmCpu": "b9f6ae3d43109dbd799e3483f7a9e824c31a5da2bdae47ce77c2d71294da69a1",
+      "GPU": "377f13a5e93f00ed6b5ce8a7cdbb5ab7c7e8481aa60b1150543bac0c6548b53f",
+      "GMU": "7cd557cb2fa5576f85df6d45524dceda067f1ad8d64ef604428cd6b84339f311"
+    },
+    "PAuth_disabled": false,
+    "hardware_PAuth_execution_tested": false,
+    "expanded_interfaces": [
+      {
+        "interface": "BoardClock.read -> gClockRead",
+        "producer_object": "BoardClock.o",
+        "producer_symbol": "__ZN12_GLOBAL__N_14readEPy",
+        "signed_sites": [
+          {
+            "site": "0x6b8",
+            "key": 0,
+            "diversity": 12410,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0x307a",
+        "consumer_object": "ArmDTPlatform.o",
+        "consumer_function": "__ZN13ArmDTPlatform15getGMTTimeOfDayEv",
+        "call_sites": [
+          {
+            "site": "0x338",
+            "diversity": 12410,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "BoardClock.set -> gClockSet",
+        "producer_object": "BoardClock.o",
+        "producer_symbol": "__ZN12_GLOBAL__N_13setEy",
+        "signed_sites": [
+          {
+            "site": "0x6cc",
+            "key": 0,
+            "diversity": 2712,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xa98",
+        "consumer_object": "ArmDTPlatform.o",
+        "consumer_function": "__ZN13ArmDTPlatform15setGMTTimeOfDayEl",
+        "call_sites": [
+          {
+            "site": "0x8b8",
+            "diversity": 2712,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ButtonProbe.buttonsIrq -> ArmCpu.interrupt",
+        "key": "IA",
+        "diversity": "0x2abe",
+        "signed_sites": [
+          {
+            "site": "0x888",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          },
+          {
+            "site": "0x8c8",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_ArmCpu_dispatch_calls": [
+          {
+            "site": "0x34b0",
+            "diversity": 10942,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "NativeHid.touchNotify -> B5qTouch.sink",
+        "producer_object": "NativeHidInput.o",
+        "producer_symbol": "__ZN14NativeHidInput11touchNotifyEPv",
+        "signed_sites": [
+          {
+            "site": "0x1000",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0x2abe",
+        "consumer_object": "B5qTouch.o",
+        "consumer_function": "__ZN12_GLOBAL__N_17publishEb",
+        "call_sites": [
+          {
+            "site": "0x1540",
+            "diversity": 10942,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "NativeHid.buttonsNotify -> ButtonProbe.gSink",
+        "producer_object": "NativeHidInput.o",
+        "producer_symbol": "__ZN14NativeHidInput13buttonsNotifyEPvj",
+        "signed_sites": [
+          {
+            "site": "0x1030",
+            "key": 0,
+            "diversity": 54535,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xd507",
+        "consumer_object": "ButtonProbe.o",
+        "consumer_function": "__ZN12_GLOBAL__N_113buttonsThreadEPvi",
+        "call_sites": [
+          {
+            "site": "0xa48",
+            "diversity": 54535,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sCount -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient6sCountEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2d88",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sKeys -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient5sKeysEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2da0",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sValues -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient7sValuesEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2db8",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sWrite -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient6sWriteEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2dd0",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      }
+    ],
+    "expanded_objects_sha256": {
+      "BoardClock.o": "6bf6caeff7e8f9b82c8f8e621617fcb505cfb797c3bbed3c5c9948316a322daa",
+      "ArmDTPlatform.o": "d6286777eabec7cdc4c64ca82fd4f16719106be3d26b9d8b7116ddaa4a6d7fbb",
+      "ButtonProbe.o": "40df81912badfa00296ba3f16b5a897b80619a53fe39fa63c13ddb01e58d7de6",
+      "NativeHidInput.o": "688edb0c461c68de33ee309e35203cbd9c168d79d64df203cac99250af2239b6",
+      "B5qTouch.o": "84e7115794f4c40a258d0596f90df1e10b1a69dd2429494b113b651a8fbb0b4c",
+      "ThermalLevel.o": "97df93c44009e51131bc7ca1e7276077c10682fd306203b601c2ab768a9d77b3",
+      "IOUserClient.cpo": "b97381261b0e4ff6575c85f8c147aa6b0334c64cddcef89bc69d733395d09508"
+    },
+    "all_requested_cross_object_interfaces_verified": true,
+    "touch_IRQ_to_ArmCpu": {
+      "passed": true,
+      "producer_sites": [
+        {
+          "site": "0x8fc",
+          "key": 0,
+          "diversity": 10942,
+          "address_diversity": 0,
+          "kind": "PACIAinstruction"
+        }
+      ],
+      "consumer_calls": [
+        {
+          "site": "0x34b0",
+          "diversity": 10942,
+          "key": 0
+        }
+      ],
+      "key": "IA",
+      "diversity": "0x2abe"
+    }
+  },
+  "linkd": {
+    "log": "logs/b5q-xnu2log-v33/XNU2LOG.txt:2037-2061",
+    "PID": 401,
+    "source": "iokit/Kernel/IOUserClient.cpp:4563 mac_iokit_check_open refusal returns kIOReturnNotPermitted",
+    "plist": "System/Library/LaunchAgents/com.apple.linkd.plist",
+    "plist_sha256": "10826a8764e0e8adefb6a1402c0c2c76426d0d20c21d043df8adf973495b3730",
+    "label": "com.apple.linkd",
+    "decision": "MACF key-store policy denial; no evidence of panic/respawn. Keep signing/MACF intact and retain inherited 59/26 policy; no new hardware inference."
+  },
+  "first_CI": {
+    "run": 45105257996,
+    "status": "failure",
+    "reason": "Submission manifest omitted existing B5qVmAlloc.h; first 5 board objects compiled, no core/GPU compilation",
+    "diagnostics_sha256": "623edd2e1daed9b3924d0afce44196c3081990d2c1e624ba8ad1b90eb8295c46"
+  },
+  "second_CI": {
+    "run": 45105913288,
+    "native_relink": "PASS six board objects; zero core/GPU rebuilds",
+    "native_sha256": "f6756042309a6d540fedcc62381640227692ea701b64d96782cb73d10756fe49",
+    "ESP_build": "PASS; final download was skipped by old success-only upload; next workflow retains products even if a later step fails",
+    "APFS_growth": "PASS native resize to32211206144 and fsck_apfs exit0",
+    "first_error": "resizeContainer remounted Data at a different mountpoint; policy read used stale hdiutil path",
+    "fix": "Query the same APFS DeviceIdentifier/UUID for actual MountPoint after growth; 5 native remount regression cases PASS; reuse saved native cache from this run"
+  },
+  "returned_Xcode_objects": {
+    "passed": true,
+    "objects": {
+      "B5qRamStorage.o": {
+        "sha256": "1b4676758acc8a6b53611bf77443f141faaac386ccc02669cb55e76ea3350e5b",
+        "instructions": 286,
+        "apps_smmu_materializations": 0
+      },
+      "B5qProcTop.o": {
+        "sha256": "6283c27624aa50adb568e3de77988babb45e2386e56e41aba167bb01c2b8fcce",
+        "instructions": 705,
+        "apps_smmu_materializations": 0
+      },
+      "NativeHidInput.o": {
+        "sha256": "27348ebce0b3d8198bd230353ed5f2452f114498f21e7e4d03e20b543499f801",
+        "instructions": 2652,
+        "apps_smmu_materializations": 0
+      },
+      "B5qPower.o": {
+        "sha256": "96ac9831e78c15bcbbeb7a5f709fd41dc4d076adf60e7c7a24d9395feff9a659",
+        "instructions": 219,
+        "apps_smmu_materializations": 0
+      },
+      "B5qUfs.o": {
+        "sha256": "8d7b7368a5261b3ce547639ff5a6ed440fadfa2db37aa20d3c80dadd339ad5e2",
+        "instructions": 9509,
+        "apps_smmu_materializations": 0
+      },
+      "HidInputProbe.o": {
+        "sha256": "557d3ead50b756d165d797882d2e91a4dbdc2309ed1523d44f3219f4299a31d8",
+        "instructions": 1674,
+        "apps_smmu_materializations": 0
+      }
+    },
+    "platform_power_PAC": {
+      "key": "IA",
+      "diversity": "0x0ba5",
+      "producer": [
+        {
+          "site": "0x240",
+          "key": 0,
+          "diversity": 2981,
+          "address_diversity": 0
+        }
+      ],
+      "core_consumer_sites": [
+        "0xe60",
+        "0x474c"
+      ]
+    },
+    "data_root_shared_virtual_slots_verified": 326,
+    "Data_and_root_completion_PAC": {
+      "diversity": "0xe90c",
+      "calls": [
+        {
+          "site": 14876,
+          "diversity": 59660
+        },
+        {
+          "site": 16504,
+          "diversity": 59660
+        }
+      ]
+    },
+    "hardware_execution_tested": false
+  },
+  "DMA_memory_compatibility": {
+    "source_files": {
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c": "d1279c78212c517bfb34d743957532446d6915633450b890c969d67fdc72ab18",
+      "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h": "b23cc3e3c826e4b3fc66b52cce3da0a35e13b3fc3a3b8da052454d1be3895e6f",
+      "patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch": "6092ce105950de175dfcf8e9f943a67867e39c0d63107afc2b645aa079bd5c29"
+    },
+    "firmware": "UsbDma.c BuildUsbTables: conventional EFI ranges plus loader memory clipped to actual OwnedBase/OwnedBytes, bounded by2GiB..64GiB; reserved table pages excluded. PrepareUsbDma receives the loader-selected current span, not a hardcoded4GiB. No firmware recompile.",
+    "USB": "36bit aperture includes static high/low-safe modeled allocations; original firmware result/retention flags still required. No claim that every static FDT page is runtime conventional.",
+    "UFS": "DMA CAP64AS check and contiguous allocation preserved; Data descriptor/tag1 has its own allocated pages; no EL1 SMMU modification. Physical address compatibility awaits runtime actual allocation as in the baseline.",
+    "shutdown_driver_delivery": "IOPMrootDomain.cpp10665..10908 walks the PM plane, selects actual systemWillShutdown overrides; B5qDataBlock PMinit+rootDomain.addPowerChild publishes the callback. Normal callback follows both vfs_unmountall passes; no early write closure."
+  },
+  "third_CI": {
+    "run": 45106921809,
+    "board_compiled_this_run": 0,
+    "completed_native_reused_from": 45105913288,
+    "APFS_growth": "PASS; diskutil left volume unmounted",
+    "fix": "Explicitly mount the already UUID-identified original device at owned temporary mountpoint, enable ownership, then query and verify UUID. Six host remount cases pass. Retained third ESP and grown Data for local inspection; not a delivery."
+  },
+  "fourth_CI": {
+    "run": 45107692131,
+    "compiled_board_objects": 0,
+    "first_error": "diskutil mount succeeded; enableOwnership requires root on runner",
+    "fix": "Use scoped sudo -n diskutil enableOwnership for the locally attached file-backed APFS device; tolerate diskutil plist variants that omit Mounted but provide an exact UUID and absolute MountPoint. Seven mount regressions PASS. Native core/board/GPU unchanged."
+  },
+  "retained_artifact_pre_readback": {
+    "passed": true,
+    "CI_core_recompiled": false,
+    "board_objects_recompiled": 6,
+    "ESP": {
+      "bytes": 838860800,
+      "sha256": "a3cc85c310a7081deeb87433d3c0daf8b86dbca3ed795e9fe5556bcbf3c3c765"
+    },
+    "Data": {
+      "bytes": 32211206144,
+      "sha256": "e1ebfbc4c149a244f7ce594d25aac7242bfdfc5e0cafafeb49f1c73c90ae3892",
+      "APFS_volume_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+      "APFS_container_uuid": "1a7527c1-5215-4737-888d-3c6bfd79595d",
+      "policies_counts": {
+        "private/var/db/com.apple.xpc.launchd/disabled.plist": 59,
+        "private/var/db/com.apple.xpc.launchd/disabled.501.plist": 26
+      }
+    },
+    "profiles": {
+      "xnu": {
+        "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": false,
+        "args_bytes": 981,
+        "ADT_sha256": "4a3fab0698b247d975a1b0aa4a6cf480994e53be7dd492c73456b9b77907b368"
+      },
+      "ram-fallback": {
+        "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": true,
+        "args_bytes": 981,
+        "ADT_sha256": "25de7450a625fb07ab7fb657a62947929869cfc22d28b81eea0610ce32c1789f"
+      }
+    },
+    "changed_archive_members": {
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": [
+        "B5qProcTop.o",
+        "HidInputProbe.o",
+        "NativeHidInput.late.o"
+      ],
+      "build/qcom-dwc3/libQcomDwc3.a": [],
+      "build/ram-block/libRamBlock.a": [
+        "B5qPower.o",
+        "B5qRamStorage.o",
+        "B5qUfs.late.o"
+      ]
+    },
+    "loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "Batch1_absentd_signatures_trusted": [
+      "828bb566402d31e6d5171ad26c04a139f9c4dcec"
+    ],
+    "hardware_qualified": false,
+    "scope": "Failed CI45106921809 artifacts independently read back; all bytes pass; temporary only, not final delivery"
+  },
+  "returned_full_cross_PAC": {
+    "passed": true,
+    "USB_to_ArmCpu": {
+      "producer": [
+        {
+          "site": "0x34c8",
+          "key": 0,
+          "diversity": 10942,
+          "address_diversity": 0,
+          "kind": "PACIAinstruction"
+        }
+      ],
+      "actual_ArmCpu_dispatch_calls": [
+        {
+          "site": "0x34b0",
+          "diversity": 10942,
+          "key": 0
+        }
+      ],
+      "key": "IA",
+      "diversity": "0x2abe"
+    },
+    "all_GMU_IO_and_services_fields": [
+      {
+        "field": "read32",
+        "key": "IA",
+        "diversity": "0x54f7",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b20",
+            "key": 0,
+            "diversity": 21751,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x4cd8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d10",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d48",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4d80",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4db8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4df0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e28",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e60",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4e98",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4ed0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f08",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f40",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4f78",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x4fbc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x50e4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5188",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5208",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5288",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x52cc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5320",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x538c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x53f0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x545c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5688",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x57c0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x5834",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x58a8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x58d0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6984",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x69ac",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x69e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6a08",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6a3c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6bf8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c1c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c44",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c6c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6c94",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6cbc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6ce0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6d04",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6d2c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6da4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6dcc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6df4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e1c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e40",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6e64",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6f84",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6fa8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6fd0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x6ff8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7020",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7cc8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7d04",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x7d2c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x859c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x85d0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8630",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x865c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x89f4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8a30",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8b34",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x8e50",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9060",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9118",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x913c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9160",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9184",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x91a8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0x9ee8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb268",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb328",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb374",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xb39c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xd118",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xda90",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xea60",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xede4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xee80",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeea0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeebc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xeeec",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf220",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf240",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf25c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf28c",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf470",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf4bc",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf4e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf504",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf530",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf554",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf578",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5a4",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5c8",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf5ec",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf6e0",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xf704",
+            "diversity": 21751,
+            "key": 0
+          },
+          {
+            "site": "0xfaf0",
+            "diversity": 21751,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "write32",
+        "key": "IA",
+        "diversity": "0xb286",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b34",
+            "key": 0,
+            "diversity": 45702,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3cf8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x3d14",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x50c0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5114",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5134",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x51ac",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5238",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5300",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5344",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x53d0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5494",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5638",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5654",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5788",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x5800",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x6388",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x63a4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64b8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64d4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x64f4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8564",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8600",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x89d4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a10",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a54",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a70",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8a90",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8aac",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ad8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8af8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b14",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b68",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8b94",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bb4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bd4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8bf0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c0c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c44",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c60",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c7c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8c98",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cb4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cd0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8cec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d24",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d40",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d5c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8d78",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8da4",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8dd0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8dec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e24",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e74",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8e90",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8eb0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ed0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8eec",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f0c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f48",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f64",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f80",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8f9c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8fbc",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8fe0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x8ffc",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0x9038",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb290",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb300",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb354",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb424",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb440",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xb45c",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xd140",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xd1d0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xda64",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xdaf8",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xedc0",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xee08",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xee28",
+            "diversity": 45702,
+            "key": 0
+          },
+          {
+            "site": "0xfa84",
+            "diversity": 45702,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "barrier",
+        "key": "IA",
+        "diversity": "0x307a",
+        "actual_signed_targets": [
+          {
+            "site": "0x1b48",
+            "key": 0,
+            "diversity": 12410,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3d24",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5664",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5798",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0x5810",
+            "diversity": 12410,
+            "key": 0
+          },
+          {
+            "site": "0xee38",
+            "diversity": 12410,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "sha256",
+        "key": "IA",
+        "diversity": "0xe2e",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c74",
+            "key": 0,
+            "diversity": 3630,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x3e4",
+            "diversity": 3630,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "now_us",
+        "key": "IA",
+        "diversity": "0xe4fe",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c88",
+            "key": 0,
+            "diversity": 58622,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x11f0",
+            "diversity": 58622,
+            "key": 0
+          },
+          {
+            "site": "0x1260",
+            "diversity": 58622,
+            "key": 0
+          },
+          {
+            "site": "0x164c",
+            "diversity": 58622,
+            "key": 0
+          }
+        ]
+      },
+      {
+        "field": "wait_us",
+        "key": "IA",
+        "diversity": "0x50c7",
+        "actual_signed_targets": [
+          {
+            "site": "0x3c9c",
+            "key": 0,
+            "diversity": 20679,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_matching_consumer_calls": [
+          {
+            "site": "0x1358",
+            "diversity": 20679,
+            "key": 0
+          },
+          {
+            "site": "0x1664",
+            "diversity": 20679,
+            "key": 0
+          }
+        ]
+      }
+    ],
+    "objects_sha256": {
+      "USB": "4abfb27db2ae02118f0cbe97358b3752b578d0f31d4cf4d12eb474c47a7f1536",
+      "ArmCpu": "b9f6ae3d43109dbd799e3483f7a9e824c31a5da2bdae47ce77c2d71294da69a1",
+      "GPU": "377f13a5e93f00ed6b5ce8a7cdbb5ab7c7e8481aa60b1150543bac0c6548b53f",
+      "GMU": "7cd557cb2fa5576f85df6d45524dceda067f1ad8d64ef604428cd6b84339f311"
+    },
+    "PAuth_disabled": false,
+    "hardware_PAuth_execution_tested": false,
+    "expanded_interfaces": [
+      {
+        "interface": "BoardClock.read -> gClockRead",
+        "producer_object": "BoardClock.o",
+        "producer_symbol": "__ZN12_GLOBAL__N_14readEPy",
+        "signed_sites": [
+          {
+            "site": "0x6b8",
+            "key": 0,
+            "diversity": 12410,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0x307a",
+        "consumer_object": "ArmDTPlatform.o",
+        "consumer_function": "__ZN13ArmDTPlatform15getGMTTimeOfDayEv",
+        "call_sites": [
+          {
+            "site": "0x338",
+            "diversity": 12410,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "BoardClock.set -> gClockSet",
+        "producer_object": "BoardClock.o",
+        "producer_symbol": "__ZN12_GLOBAL__N_13setEy",
+        "signed_sites": [
+          {
+            "site": "0x6cc",
+            "key": 0,
+            "diversity": 2712,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xa98",
+        "consumer_object": "ArmDTPlatform.o",
+        "consumer_function": "__ZN13ArmDTPlatform15setGMTTimeOfDayEl",
+        "call_sites": [
+          {
+            "site": "0x8b8",
+            "diversity": 2712,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ButtonProbe.buttonsIrq -> ArmCpu.interrupt",
+        "key": "IA",
+        "diversity": "0x2abe",
+        "signed_sites": [
+          {
+            "site": "0x888",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          },
+          {
+            "site": "0x8c8",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "actual_ArmCpu_dispatch_calls": [
+          {
+            "site": "0x34b0",
+            "diversity": 10942,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "NativeHid.touchNotify -> B5qTouch.sink",
+        "producer_object": "NativeHidInput.o",
+        "producer_symbol": "__ZN14NativeHidInput11touchNotifyEPv",
+        "signed_sites": [
+          {
+            "site": "0xf48",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0x2abe",
+        "consumer_object": "B5qTouch.o",
+        "consumer_function": "__ZN12_GLOBAL__N_17publishEb",
+        "call_sites": [
+          {
+            "site": "0x1540",
+            "diversity": 10942,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "NativeHid.buttonsNotify -> ButtonProbe.gSink",
+        "producer_object": "NativeHidInput.o",
+        "producer_symbol": "__ZN14NativeHidInput13buttonsNotifyEPvj",
+        "signed_sites": [
+          {
+            "site": "0xf78",
+            "key": 0,
+            "diversity": 54535,
+            "address_diversity": 0,
+            "kind": "PACIAinstruction"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xd507",
+        "consumer_object": "ButtonProbe.o",
+        "consumer_function": "__ZN12_GLOBAL__N_113buttonsThreadEPvi",
+        "call_sites": [
+          {
+            "site": "0xa48",
+            "diversity": 54535,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sCount -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient6sCountEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2d88",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sKeys -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient5sKeysEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2da0",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sValues -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient7sValuesEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2db8",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      },
+      {
+        "interface": "ThermalLevel.sWrite -> IOExternalMethodDispatch.function",
+        "producer_object": "ThermalLevel.o",
+        "producer_symbol": "__ZN34AppleSMCSensorDispatcherUserClient6sWriteEP8OSObjectPvP25IOExternalMethodArguments",
+        "signed_sites": [
+          {
+            "site": "0x2dd0",
+            "key": 0,
+            "diversity": 48301,
+            "address_diversity": 0,
+            "kind": "relocation"
+          }
+        ],
+        "key": "IA",
+        "diversity": "0xbcad",
+        "consumer_object": "IOUserClient.cpo",
+        "consumer_function": "__ZN12IOUserClient14externalMethodEjP25IOExternalMethodArgumentsP24IOExternalMethodDispatchP8OSObjectPv",
+        "call_sites": [
+          {
+            "site": "0xfbac",
+            "diversity": 48301,
+            "key": 0
+          }
+        ],
+        "passed": true
+      }
+    ],
+    "expanded_objects_sha256": {
+      "BoardClock.o": "6bf6caeff7e8f9b82c8f8e621617fcb505cfb797c3bbed3c5c9948316a322daa",
+      "ArmDTPlatform.o": "d6286777eabec7cdc4c64ca82fd4f16719106be3d26b9d8b7116ddaa4a6d7fbb",
+      "ButtonProbe.o": "40df81912badfa00296ba3f16b5a897b80619a53fe39fa63c13ddb01e58d7de6",
+      "NativeHidInput.o": "27348ebce0b3d8198bd230353ed5f2452f114498f21e7e4d03e20b543499f801",
+      "B5qTouch.o": "84e7115794f4c40a258d0596f90df1e10b1a69dd2429494b113b651a8fbb0b4c",
+      "ThermalLevel.o": "97df93c44009e51131bc7ca1e7276077c10682fd306203b601c2ab768a9d77b3",
+      "IOUserClient.cpo": "b97381261b0e4ff6575c85f8c147aa6b0334c64cddcef89bc69d733395d09508"
+    },
+    "all_requested_cross_object_interfaces_verified": true,
+    "touch_IRQ_to_ArmCpu": {
+      "passed": true,
+      "producer_sites": [
+        {
+          "site": "0x8fc",
+          "key": 0,
+          "diversity": 10942,
+          "address_diversity": 0,
+          "kind": "PACIAinstruction"
+        }
+      ],
+      "consumer_calls": [
+        {
+          "site": "0x34b0",
+          "diversity": 10942,
+          "key": 0
+        }
+      ],
+      "key": "IA",
+      "diversity": "0x2abe"
+    }
+  },
+  "fifth_CI": {
+    "run": 45108103050,
+    "board_objects_recompiled": 0,
+    "first_error": "resized auto-mounted APFS ownership was ignored; root-owned on-disk policy looked user-owned in mount view",
+    "independent_disk_evidence": "read-only native APFS parser on retained grown image confirms both plists are root:wheel0644 and59/26entries; complete ESP/Data verification passed",
+    "fix": "Enable ownership for every mounted/unmounted branch before stat, same UUID-identified local device only;7 production helper cases pass"
+  },
+  "final_CI": {
+    "run": 45108577992,
+    "commit": "e66beea40e2a887e177c762804206d21ba983ef2",
+    "status": "success",
+    "board_objects_compiled_this_run": 0,
+    "native_compilation_source_run": 45105913288,
+    "artifacts": {
+      "images": {
+        "id": 14788812083,
+        "sha256": "43bfbfb4e143c365fe8159604ba81f0cf8372cec5b8e618b1bc700c205bc2e99"
+      },
+      "diagnostics": {
+        "id": 14788621806,
+        "sha256": "467b65d301c1e6d5ff06f2d08ad27f1f766a1600b75d048469582dc8442f7020"
+      }
+    },
+    "final_object_bytes_identical_to_verified_Xcode": true,
+    "download_image_acceptance": "PASS"
+  },
+  "mouse_descriptor": {
+    "bytes": 73,
+    "hex": "05010902a101851a0901a1000509190129021500250175019502810275069501810305010930093116018026ff7f75109502810609381581257f750895018106050c0a38028106c0c0",
+    "report_id": "0x1a",
+    "report_bytes": 8,
+    "fields": [
+      "buttons2+padding6",
+      "s16le relative X",
+      "s16le relative Y",
+      "s8 Wheel",
+      "s8 Consumer AC Pan"
+    ]
+  },
+  "final_image_readback": {
+    "passed": true,
+    "CI_core_recompiled": false,
+    "board_objects_recompiled": 6,
+    "board_objects_compiled_this_run": 0,
+    "completed_native_source_CI": 45105913288,
+    "ESP": {
+      "bytes": 838860800,
+      "sha256": "c97e09e6993f3df6ccccc075db69adc5154ecf8c1593bee2aed82a78284f3047"
+    },
+    "Data": {
+      "bytes": 32211206144,
+      "sha256": "0af5262d519d0dd8a4a86da7cc5e4c0b10470b51a272591b0d8b52e6df34da96",
+      "APFS_volume_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+      "APFS_container_uuid": "1a7527c1-5215-4737-888d-3c6bfd79595d",
+      "policies_counts": {
+        "private/var/db/com.apple.xpc.launchd/disabled.plist": 59,
+        "private/var/db/com.apple.xpc.launchd/disabled.501.plist": 26
+      }
+    },
+    "profiles": {
+      "xnu": {
+        "owned_memory_span_bytes": 6442450944,
+        "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": false,
+        "args_bytes": 981,
+        "ADT_sha256": "a3c27eab51494ff992ec2bec1f50b49539c36634b18653d29d438483f997d977"
+      },
+      "ram-fallback": {
+        "owned_memory_span_bytes": 4294967296,
+        "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+        "lp_sip0_hex": "0200000000000000",
+        "RAM_seed_loaded": true,
+        "args_bytes": 981,
+        "ADT_sha256": "823963a0d0eb1ee205864bde6ba225765f9a147b33e3319d17c2d932aa7f3595"
+      }
+    },
+    "changed_archive_members": {
+      "build/native-legacy-display/libNativeLegacyDisplay.late.a": [
+        "B5qProcTop.o",
+        "HidInputProbe.o",
+        "NativeHidInput.late.o"
+      ],
+      "build/qcom-dwc3/libQcomDwc3.a": [],
+      "build/ram-block/libRamBlock.a": [
+        "B5qPower.o",
+        "B5qRamStorage.o",
+        "B5qUfs.late.o"
+      ]
+    },
+    "loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "Batch1_absentd_signatures_trusted": [
+      "828bb566402d31e6d5171ad26c04a139f9c4dcec"
+    ],
+    "hardware_qualified": false
+  },
+  "completion": {
+    "Req-1": "DONE",
+    "Req-2": "DONE",
+    "Req-3": "DONE",
+    "Req-4": "DONE",
+    "Req-5": "DONE",
+    "Req-6": "DONE"
+  },
+  "scope": "Local implementation/tests and returned CI bytes complete; hardware RAM/PSCI/persistence/input qualification pending",
+  "completion_audit": {
+    "passed": true,
+    "requirements": {
+      "Req-1": {
+        "result": "DONE",
+        "evidence": [
+          "reports/batch2-inputs.json",
+          "reports/batch2-validation.json:source hashes and memory model",
+          "b5q-runtime.fdt",
+          "MemoryMapLib.c",
+          "SHNGROOT first4096 bytes"
+        ],
+        "scope": "All static sources and model rechecked; actual >=6GiB remains a hardware observation, as required by the approved 4.5GiB floor correction"
+      },
+      "Req-2": {
+        "result": "DONE",
+        "evidence": [
+          "package/B5qUfs/B5qDataBlock.h",
+          "package/B5qUfs/B5qDataFormat.h",
+          "package/B5qPower.cpp",
+          "data-queue.log",
+          "data-partition-modes.json",
+          "boot-shutdown-contract.json"
+        ],
+        "scope": "Independent Data tag/UCD/DMA; shared mutex; GPT/hash/envelope bounds; FUA+SYNC; pinned shutdown order and platform PAC. No device write performed"
+      },
+      "Req-3": {
+        "result": "DONE",
+        "evidence": [
+          "completion-image-audit/images.json:profiles",
+          "board.toml",
+          "memory-model.json"
+        ],
+        "scope": "Actual normal6GiB span/noinitrd/exclusions/outside; separate4GiBRAM recovery. Physical usable memory not fabricated"
+      },
+      "Req-4": {
+        "result": "DONE",
+        "evidence": [
+          "pointer-batch2-ASan-UBSan.log",
+          "proctop-ASan-UBSan.log",
+          "reports/batch2-validation.json:linkd/mouse_descriptor",
+          "returned six object hashes"
+        ],
+        "scope": "Gesture/HID/report/drivercache/ProcTop source matches actual CI objects; MACF left intact"
+      },
+      "Req-5": {
+        "result": "DONE",
+        "evidence": [
+          "pre-ci.json:23groups",
+          "ci45105913288/objects-verified.json",
+          "ci45105913288/full-cross-object-PAC.json",
+          "completion-image-audit/images.json",
+          "completion-image-audit/disabled-plists-readback.json",
+          "completion-image-audit/post-seal.json"
+        ],
+        "scope": "Positive/negative host tests, real arm64e compile, closure/PAC/zeroMMIO and actual final IMG readback"
+      },
+      "Req-6": {
+        "result": "DONE",
+        "evidence": [
+          "tests/b5q-ufs/test-data-installer.py",
+          "tests/b5q-ufs/test-data-partition.py",
+          "tests/b5q-ufs/test-installer.py",
+          "reports/batch2-delivery.md:section6",
+          "porting.toml:batch2-persistent-data-input"
+        ],
+        "scope": "Scoped TWRP installer with explicit apply, whole payload/checkpoint/tail readback before envelope; later updates ESP-only"
+      }
+    },
+    "previous_goal_turn_classification": "progress: NewBatch2 source, CI images and readback artifacts were produced",
+    "current_goal_turn_classification": "progress: completion audit, explicit positive/negative future macosdata tests and complete numeric memory tables",
+    "CI": {
+      "run": 45108577992,
+      "status": "completed",
+      "conclusion": "success",
+      "source": "e66beea40e2a887e177c762804206d21ba983ef2"
+    },
+    "compiled_package_source_files_unchanged": 84,
+    "pre_ci_groups": 23,
+    "final_image_readback": {
+      "passed": true,
+      "CI_core_recompiled": false,
+      "board_objects_recompiled": 6,
+      "board_objects_compiled_this_run": 0,
+      "completed_native_source_CI": 45105913288,
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "c97e09e6993f3df6ccccc075db69adc5154ecf8c1593bee2aed82a78284f3047"
+      },
+      "Data": {
+        "bytes": 32211206144,
+        "sha256": "0af5262d519d0dd8a4a86da7cc5e4c0b10470b51a272591b0d8b52e6df34da96",
+        "APFS_volume_uuid": "1552CFEE-78FF-48D8-8A6C-694B867D61AC",
+        "APFS_container_uuid": "1a7527c1-5215-4737-888d-3c6bfd79595d",
+        "policies_counts": {
+          "private/var/db/com.apple.xpc.launchd/disabled.plist": 59,
+          "private/var/db/com.apple.xpc.launchd/disabled.501.plist": 26
+        }
+      },
+      "profiles": {
+        "xnu": {
+          "owned_memory_span_bytes": 6442450944,
+          "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false,
+          "args_bytes": 981,
+          "ADT_sha256": "a3c27eab51494ff992ec2bec1f50b49539c36634b18653d29d438483f997d977"
+        },
+        "ram-fallback": {
+          "owned_memory_span_bytes": 4294967296,
+          "kernel_sha256": "80f64e15d84cfc064526bc2eedd75abe1886a73e0a3f14bc9acfe8d8b98f13be",
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": true,
+          "args_bytes": 981,
+          "ADT_sha256": "823963a0d0eb1ee205864bde6ba225765f9a147b33e3319d17c2d932aa7f3595"
+        }
+      },
+      "changed_archive_members": {
+        "build/native-legacy-display/libNativeLegacyDisplay.late.a": [
+          "B5qProcTop.o",
+          "HidInputProbe.o",
+          "NativeHidInput.late.o"
+        ],
+        "build/qcom-dwc3/libQcomDwc3.a": [],
+        "build/ram-block/libRamBlock.a": [
+          "B5qPower.o",
+          "B5qRamStorage.o",
+          "B5qUfs.late.o"
+        ]
+      },
+      "loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+      "Batch1_absentd_signatures_trusted": [
+        "828bb566402d31e6d5171ad26c04a139f9c4dcec"
+      ],
+      "hardware_qualified": false
+    },
+    "device_access_performed": false,
+    "hardware_qualification_claimed": false
+  }
+}

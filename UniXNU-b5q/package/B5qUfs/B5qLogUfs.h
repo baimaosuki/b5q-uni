@@ -12,8 +12,10 @@
 #include "B5qLogProtocol.h"
 #include "B5qLogArgs.h"
 #include <kern/clock.h>
+extern "C" void thread_yield_internal(unsigned int);
 static const uint8_t nabu_log_build_id[32]="b5q-log-v12-26C5035r";
 
+static bool nabu_log_stopping=false;
 static struct nb_log_volume *nabu_log_volume_ptr;
 #define nabu_log_volume (*nabu_log_volume_ptr)
 static uint8_t *nabu_log_payload;
@@ -29,10 +31,10 @@ uint64_t nabu_log_committed_end=0;
  * read path stays read-only. Only this function can emit the bounded WRITE(10). */
 static int nabuLogIo(bool write,uint64_t lba,uint32_t blocks,uint8_t *data,bool sync=false)
 {
-  if(!host.selected || host.poisoned || !host.lock || (!sync && !data)) {nabu_log_io_reason="host";return -1;}
+  if(__atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE) || !host.selected || host.poisoned || !host.lock || (!sync && !data)) {nabu_log_io_reason="host";return -1;}
   if(!IOLockTryLock(host.lock)) {nabu_log_io_reason="busy";return 0;}
   int result=-1;
-  if(!host.selected || host.poisoned || read32(host.hc,0x58) || (read32(host.hc,0x20)&fatalStatus)) {
+  if(__atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE) || !host.selected || host.poisoned || read32(host.hc,0x58) || (read32(host.hc,0x20)&fatalStatus)) {
     nabu_log_io_reason="transport-quarantined";IOLockUnlock(host.lock);return -1;
   }
   bzero(host.dma,dmaBytes);

@@ -40,11 +40,11 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  h=t/'IOKit/hidsystem/IOHIDDescriptorParser.h';h.write_text(h.read_text().replace('#if __has_include(<MacTypes.h>)','#if __has_include(<MacTypes.h>) && !defined(KERNEL)'))
  subprocess.run(['mcopy','-i',str(a.reference),'::/EFI/UniXNU/Payloads/kernel.macho',str(kernel)],check=True)
  raw=kernel.read_bytes();outer=Image(raw);im=Image(raw,outer.entries['com.apple.kernel'][1]);defined={n for rows in im.symbols().values()for n in rows}
- flags=['-target','arm64e-apple-ios27.0','-O2','-isysroot',str(a.sdk),'-fptrauth-calls','-fptrauth-returns','-fptrauth-intrinsics','-fptrauth-function-pointer-type-discrimination','-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-fno-common','-fapple-kext','-ffreestanding','-mgeneral-regs-only','-nostdinc++','-D__PTRAUTH_INTRINSICS__=1','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-incompatible-sysroot','-Wno-deprecated-declarations','-Wno-unknown-warning-option','-Wno-unused-private-field','-Wno-c++11-narrowing','-Wno-deprecated-enum-enum-conversion']
+ flags=['-target','arm64e-apple-ios27.0','-O2','-isysroot',str(a.sdk),'-fptrauth-calls','-fptrauth-returns','-fptrauth-intrinsics','-fptrauth-function-pointer-type-discrimination','-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-fno-common','-fapple-kext','-ffreestanding','-mgeneral-regs-only','-nostdinc++','-D__PTRAUTH_INTRINSICS__=1','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-Wall','-Wextra','-Werror','-Wno-unused-parameter','-Wno-incompatible-sysroot','-Wno-deprecated-declarations','-Wno-unknown-warning-option','-Wno-unused-private-field','-Wno-c++11-narrowing','-Wno-c99-designator','-Wno-missing-designated-field-initializers','-Wno-deprecated-enum-enum-conversion']
  flags+=['-D'+v+'=1'for v in ['KERNEL','KERNEL_PRIVATE','DRIVER_PRIVATE','XNU_KERNEL_PRIVATE','XNU_TARGET_OS_OSX','PRIVATE','MACH_KERNEL_PRIVATE','__arm64__','__LP64__','__DARWIN_UNIX03']]
  for d in [t,ROOT/'UniXNU-b5q/package',a.sdk/'System/Library/Frameworks/Kernel.framework/Headers',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/pexpert',ROOT/'sources/UniXNU/drivers/Adreno740',ROOT/'sources/UniXNU/kits/AdrenoFirmware',ROOT/'UniXNU-b5q/package/B5qUfs',ROOT/'UniXNU-b5q/package/Sm8550Inputs',ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform',ROOT/'UniXNU/kits/ArmSmmu4K',ROOT/'UniXNU/kits/AdrenoPM4',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/libkern',ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/EXTERNAL_HEADERS']:flags+=['-I',str(d)]
  results={};objects=[];strong_owners={};duplicates={}
- sources=[ROOT/'UniXNU-b5q/package'/name for name in ['QcomDwc3.cpp','UsbProbe.cpp','B5qUsbBoard.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c','Sm8550Gcc.c','QcomRpmh.c','B5qBootPolicy.c','B5qProcTop.c']]
+ sources=[ROOT/'UniXNU-b5q/package'/name for name in ['QcomDwc3.cpp','UsbProbe.cpp','B5qUsbBoard.cpp','B5qGpu.cpp','LegacyDisplayProbe.cpp','B5qGmuVotes.c','CpuFreqProbe.cpp','ThermalProbe.cpp','ThermalLevel.cpp','BoardClock.cpp','ButtonProbe.cpp','DisplayTimingProbe.cpp','NativeHidInput.cpp','HidInputProbe.cpp','B5qTouch.cpp','GeniI2c.c','Sm8550Gcc.c','QcomRpmh.c','B5qBootPolicy.c','B5qProcTop.c','B5qPower.cpp','B5qRamStorage.cpp','B5qUfs/B5qUfs.cpp']]
  # Compile the service with its previously excluded cold-start branches.
  service=ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoService.cpp';adapted=t/service.name
  adapted.write_text(service.read_text().replace('0x23b14u*4u-0x6a000u','0x23b14u*4u-SHENG_GMU_CORE_GPU_DELTA').replace('0x23b13u*4u-0x6a000u','0x23b13u*4u-SHENG_GMU_CORE_GPU_DELTA'))
@@ -52,6 +52,14 @@ with tempfile.TemporaryDirectory(prefix='b5q-native-input-check-')as t:
  timer=t/'NativeAdrenoTimer.cpp';timer.write_text('#include "ShengGmuSource.h"\n'+(ROOT/'UniXNU/drivers/Adreno740/NativeAdrenoTimer.cpp').read_text().replace('TimerGmuLow = 0x14220','TimerGmuLow = (0x1f888u*4u)-SHENG_GMU_CORE_GPU_DELTA').replace('TimerGmuHigh = 0x14224','TimerGmuHigh = (0x1f889u*4u)-SHENG_GMU_CORE_GPU_DELTA'));sources.append(timer)
  sources += [ROOT/'sources/UniXNU-sm8550-common/kits/Sm8550Platform'/name for name in ['ShengGmu.c','ShengGmuCommandDb.c','ShengGpuSmmu.c']]
  if a.sources:sources=[s for s in sources if s.name in set(a.sources.split(','))]
+ if any(s.name in ('B5qUfs.cpp','B5qRamStorage.cpp') for s in sources):
+  storage=next((ROOT/'sources/UniXNU/out/feeds').glob('IOStorageFamily-*'))
+  dest=t/'IOKit/storage';dest.mkdir(parents=True,exist_ok=True)
+  for h in storage.glob('*.h'):shutil.copyfile(h,dest/h.name)
+  # Reproduce the source-kernel's macOS branch despite its iOS Mach-O target.
+  (t/'macos-target.h').write_text('#include <TargetConditionals.h>\n#undef TARGET_OS_OSX\n#define TARGET_OS_OSX 1\n')
+  flags+=['-include',str(t/'macos-target.h'),'-I',str(ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk'),'-I',str(ROOT/'sources/UniXNU/kits/VerifiedRoot/include')]
+
  for source in sources:
   target=t/(source.stem+'.o');cflags=flags if source.suffix=='.cpp' else [v for v in flags if v not in ['-std=gnu++17','-fno-c++-static-destructors','-fno-exceptions','-fno-rtti','-nostdinc++','-D__builtin_xnu_types_compatible(T,U)=__is_same(T,U)','-fapple-kext']]+['-x','c','-std=gnu11','-mkernel','-fptrauth-function-pointer-type-discrimination']
   if source.name=='B5qProcTop.c':cflags=cflags+['-I',str(ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc'),'-I',str(ROOT/'sources/UniXNU/out/feeds/xnu-3199e8bc/osfmk')]

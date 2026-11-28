@@ -2448,3 +2448,99 @@ next_action = ["Deliver v4 standalone IMG; first verify recovery is reachable an
 kind = "source"
 reference = "reports/twrp-cover-off.json"
 result = "Records earlier hardware symptoms including v3 logo persistence, v4 ordering fix, successful build, final IMG/source/patch hashes, 75 host checks and replay; v4 hardware_tested=false."
+
+[[area]]
+id = "batch1-launchd-policy"
+status = "implemented"
+components = ["DarwinBoot", "B5qBootPolicy", "B5qProcTop", "b5q-absentd", "launchd-policy"]
+paths = ["board.toml", "package/b5q-launchd-lite.json", "package/B5qBootPolicy.c", "package/B5qProcTop.c", "patches/tools/b5q-absentd-user-domains.patch", "scripts/update-b5q-launchd-seed.py", "reports/batch1-final.json", "reports/launchd-26C5035r-policy.json", "reports/launchd-26C5035r-census.json", "reports/absentd-lifecycle-final.json"]
+inputs = ["macOS 27.3 26C5035r OS.raw.dmg SHA256 40d8282eb8650da9b4d7437a981764c48d47ee4bdc5b8b362248f25ecbce0e70; actual /sbin/launchd SHA256 33cb5981d59aa60db3c27fd309a9aa95bf77ae1bef8369beffa3e9ba37f926bc; v33 device log SHA256 cd646f02468e971aad11c278ef017e7fc49829020e23c9940561834d33bcb82d."]
+configuration = ["Only /chosen/asmb/lp-sip0 is set to the approved 8-byte u64 value 2. The existing 4 GiB APFS Data volume identity is preserved; launchd policies are binary plists. b5q-absentd holds one XPC transaction for its lifetime and uses static source-qualified service tables without runtime launch plist reads. B5qProcTop remains a fixed-storage 30-second MAC observer."]
+procedure = ["Run the native 26C5035r launchd instruction harness, five-job/profile and native libxpc audits, production absentd and ProcTop ASan/UBSan tests, PAC check, package-only CI, then read the final 4Kn ESP and APFS seed locally."]
+findings = ["The actual launchd accepts root-owned disabled.plist and disabled.<uid>.plist files only when fstat succeeds, st_uid is zero, and mode has neither group-write nor other-write bits; it does not test gid. disabled.migrated skips legacy migration but current override files are still read. lp-sip0=2 allows CSR_ALLOW_UNRESTRICTED_FS only.", "Five replaced launchd jobs are source-qualified from 26C5035r. Their pressured-exit and MachServices behavior is audited; absentd now marks itself non-idle with xpc_transaction_begin, resolves known empty-label boot launches by exact original argv0, and no longer depends on sandbox-sensitive plist reads.", "The v32 journal did not preserve an exit reason for each of seven absentd PIDs. The source-level pressured-exit eligibility and no-label/plist-read defects are corrected and tested; no per-instance historical cause is fabricated.", "Final system/user override plists contain 59/26 true entries, root:wheel 0644; WindowServer, loginwindow, Dock, Finder, and EndpointSecurity are absent from the deny lists.", "Batch1 CI 45047962341 succeeded from source commit 5d7c4eadaa5344e1b96edc593b26d6d18d2bc6d0. It reused v33 kernel, GPU addon, and 4 GiB Data volume without compiling core/board objects; final ESP readback verified the v30 DarwinBoot, XNU2LOG allocation, boot arguments, ADT, seed, stand-in signature/trust, and unchanged kernel/archive members."]
+completion = ["All six Batch 1 local requirements and final image readbacks passed. The single final 800 MiB 4Kn ESP is artifacts/b5q-esp-batch1-final/esp.img with SHA256 6768e3aa2bbcb2c2b7f2b5efd2d2066336218d65b46509e132e263a31f8b8ca9. CI archive digest verified; no additional image was generated."]
+limits = ["The final image was not run on hardware. The v33 runtime log observed nine ProcTop windows; that does not establish final-image temperature or daemon behavior. Historical v32 per-process absentd exit causes remain unavailable."]
+next_action = ["Use the scoped ESP-only install command after independently confirming the connected device is the intended b5q in TWRP. Gather a new XNU2LOG before changing later batches."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch1-final.json"
+result = "Req-1..Req-6 marked DONE after package CI 45047962341 and actual final ESP/APFS/plist readback; final image SHA256 6768e3aa2bbcb2c2b7f2b5efd2d2066336218d65b46509e132e263a31f8b8ca9."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/launchd-26C5035r-policy.json"
+result = "Actual macOS 26C5035r launchd SHA256 33cb5981d59aa60db3c27fd309a9aa95bf77ae1bef8369beffa3e9ba37f926bc; 89 original-instruction cases cover SIP, override reads, migrated marker, mode/owner gate and launch policy."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/absentd-lifecycle-final.json"
+result = "Five real jobs and profile paths audited; 3 actual libxpc transaction transitions and 21 production absentd ASan/UBSan cases pass. v32 did not record individual exit reasons."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch1-final.json"
+result = "Final 838860800-byte 4Kn ESP verified: SHA256 6768e3aa2bbcb2c2b7f2b5efd2d2066336218d65b46509e132e263a31f8b8ca9; ADT lp-sip0 bytes 0200000000000000; 4 GiB Data seed, 59/26 root-owned binary plists, reused deployment kernel and signatures validated. Hardware-tested=false."
+
+[[area]]
+id = "batch2-persistent-data-input"
+status = "implemented"
+components = ["RamBlock", "DarwinBoot", "VerifiedRoot"]
+paths = ["package/B5qUfs/B5qData*", "package/B5qUfs/B5qUfs.cpp", "package/B5qUfs/B5qLogUfs.h", "package/B5qRamStorage.cpp", "package/B5qTouchPointer.h", "package/B5qMouseReport.h", "package/NativeHidInput.cpp", "package/HidInputProbe.cpp", "package/B5qProcTop*", "reports/batch2-inputs.json"]
+inputs = ["Captured b5q-runtime.fdt SHA256 74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6; original 17603493888-byte SHNGROOT v2 header SHA256 d93a00b589d64b7e0757aa40288aaa927a5364382ec5a0dd08faa3629d9a7d8b."]
+configuration = ["New user authorization permits persistent writes only in the explicitly bounded macosroot tail or a separately validated macosdata GPT partition. No GPT/protected-partition writes or device access. Batch1-final SIP2, lifetime absentd transaction, 59/26 binary policies remain authoritative."]
+procedure = ["Audit exact memory/root inputs, implement independent DMA/tag1 Data under the shared queue mutex, shutdown/PSCI, pointer/HID and bounded ProcTop output, then complete host/target/PAC/binary/CI/image gates before any delivery."]
+findings = ["2026-11-23 completion audit: exact attachment Req1..6 rechecked against current source, raw final image bytes and live GitHub run state. Added13 paired Python/C++ production GPT/UUID/bounds tests for currenttail+futuremacosdata (ASan/UBSan);23 local preflight groups PASS. NormalADT actualdarwinboot-memory-size6GiB, fallback4GiB, onlyfallbackhasinitrd. Fullmemory/reservationnumeric tables addedto deliveryreport. All compiledpackage sourcefiles stillmatch successfulCI45108577992; no productioncode/IMGchange or newCI.", "2026-11-23 resumed New Batch2 in primary workspace: usable-memory panic floor corrected to 4.5GiB; target6GiB remains observational. Actual ml_outside_memory_pages/refused counters logged. Pinned XNU shutdown order verified: early ProcessExit invokes only PagingOff, vfs_unmountall(TRUE/FALSE) precedes final driver shutdown; remove dataClosing and accept late FUA writes, invalidating prior flush status until successful SYNC10. Native 1024-byte command buffer rejects >=1024; official1000-byte engineering gate accepts current981ASCII bytes. All changes retain Batch1 SIP2,59/26binary policies and v30 loader.", "Largest contiguous safe high bank is 5 GiB, not 6 GiB. Captured FDT minus known reservations and static UEFI allocations gives only an upper bound before live firmware allocations. Existing core has outside-memory adoption support; final EFI free memory and >=6 GiB runtime remain unproven.", "SHNGROOT total is17603493888 bytes, absolute final LBA53990390. The30GiB tail window begins at54411255 and ends62275574, leaving1723858944 bytes after the root (more than256MiB). A1MiB immutable configuration envelope precedes APFS.", "Initial source implementation adds Data GPT/magic/bounds gate, independent DMA/tag1 serialized against root/logger tag0, FUA writes and flush; removes UFS non-reuse apps_smmu path. Production integration, target/PAC and final image tests pass; final device qualification remains pending.", "Pointer source now has edge capture, tap/drag, two-finger right-click/XY scroll and recovery releases; HID avoids digitizer mutation for relative mouse and refreshes event-driver cache. Production descriptor/gesture/ProcTop formatter ASan/UBSan tests pass; target ABI/PAC and final image readback pass; physical behavior remains pending."]
+completion = ["New Batch2 Req1..6 DONE for source implementation, production host tests, arm64e/PAC/symbol checks and actual final CI45108577992 ESP/Data readback. Delivery contains one800MiB4KnESP and one first-install30GiB-minus1MiBAPFSDataIMG. Actual hardware qualification remains separate."]
+limits = ["No final runtime EFI memory map input; >=6GiB safe memory remains unproven. Current storage/shutdown/installer/CI/image gates pass; actual phone persistence, PSCI shutdown and pointer behavior require hardware validation. Static memory upper bound6.533GiB is not actual usableRAM; approved4.5GiB boot floor remains."]
+next_action = ["User may initialize only the validated Data tail once, then install ESP only. Subsequent updates must never reinitialize persistentData. Verify actual max_mem/adopted/refused, cleanshutdown and filesystem persistence with new device logs; do not infer hardware success from local tests."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-inputs.json"
+result = "Read-only captured-FDT/UEFI/root audit with exact hashes, all memory/reservation tuples, contiguous limit and protected Data-tail arithmetic. Final runtime usable memory is explicitly not inferred from the static upper bound."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "Pinned XNU/DarwinBoot source hashes and shutdown ordering, 1000/1001 and1023/1024 byte boundaries,4.5GiB memory floor verified locally. Real Data queue8000iterations/6000submissions and installer.main14negative cases passed; no device access. Six arm64e objects close with no undefined or duplicate symbols. Final CI/PAC/image acceptance remains pending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "20 NewBatch2 local preflight groups PASS, including real8000queueiterations/14installerCLInegativecases,89macOSlaunchdinstructioncases/3libxpctransactioncases/21absentdcases,gesture/descriptor/boundedProcTopASanUBSan,6arm64eobjects with full symbolclosure,326storagevtablePACslots,IA0ba5platformcallback,allUSB/GMU/clock/button/HID/Thermalcross-objectPACandactual-objectzeroapps_smmu. Dedicated branch uses only6boardobjects, v24core88703fdc/GPU/Batch1seed and exactv30loader10008091; native30GiBAPFSgrowth and finalimage acceptance pending CI."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "First CI45105257996 stopped at sixth object because the submission omitted existing B5qVmAlloc.h. Fulltransitiveboardincludeclosurefinds onlythismissingheader; retainedfirsterrorand5compiledobjects. Addheaderandcontinuecachedcore/GPUincrementalrecipe; no hardware/outcome inferred."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45105913288 compiled all6boardobjects, linkednative f6756042 and packagedESP with0core/GPUrebuilds. NativeAPFSresize/fsckpassed32211206144B andcorrectDataUUID; postresizepolicyreadfailedbecausemacOSremountedoutsidehdiutilcustompath. Fixqueries sameDeviceIdentifier/UUIDMountPoint;5hostremountcasesPASS. Resume matching completednative/prelinkcache; retainESP/partialDataevenonlaterfailure. ESPinstalleracceptspersistentmanifestonlywithESP-onlyoutputandrejectsroot/boot/repair/all;mockCLItestsPASS."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45106921809 reused completednative/prelink from45105913288 with0newboardobjects; nativeAPFSgrowthpassesbutdiskutilleavesvolumeunmounted. Addexplicitmount/ownershipbeforequery;6hostcasesPASS. PreservefailedESP/grownDataandfirsterror;nextCIonlyreusesnativelinkandfinishesData/runtime. No finaldelivery yet."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45107692131 nativecachehit0boardbuilds; resize/fsck/mountsucceed. enableOwnershiprequiresroot, soscope sudo-n onlytoattachedfilebackedDataownershipcommand; supportplistswithoutMountedwhenUUID/absoluteMountPointproven.7hostregressionspass. Kernel/GPU/UEFIunchanged; finalCIimagegatecontinues."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "CI45108103050 cachehit0compiles; postresizeautomountignoredownership, misleadingmountedstat. IndependentAPFSparseronretainedDataandcompleteESPreadbackPASS, actualrootwheel0644/59+26/UUID/account/signaturescorrect. EnableownershipunconditionallyonoriginalUUIDdevicebeforestat;7productionhelpercasesPASS. No board/kernel/GPUchange."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "FINAL NewBatch2 CI45108577992 SUCCESS; completednative/prelinkfrom45105913288,0newboard/core/GPUcompiles. Final838860800B4KnESP SHA256 c97e09e6993f3df6ccccc075db69adc5154ecf8c1593bee2aed82a78284f3047; Data32211206144B SHA256 0af5262d519d0dd8a4a86da7cc5e4c0b10470b51a272591b0d8b52e6df34da96. ActualFATmembers/logjournal/twoADTmenus/defaultnoinitrd/RAMfallback/981Bargs/SIPu64LE2/2BGRAfixups/8E-Pnodes/persistentAPFSUUID/rootwheel0644binary59+26/account/absentdsignaturetrust/POST69sites PASS. Core88703fdc/GPUaddonb68e1164/v30loader10008091unchanged. Returned6XcodeobjectsbyteidenticaltofullPAC/326vtable/zeroapps_smmuverifiedobjects. SevennativeAPFSmountownershiphelpercasesPASS. NoQEMU,deviceaccessorflashing. Req1..6localsource+CIbyteacceptanceDONE; hardwarequalificationpending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/batch2-validation.json"
+result = "Completionaudit Req1..6 currentevidencePASS: liveGitHub45108577992SUCCESS/e66beea40e; finalESPc97e09e6 andData0af5262d SHA256recomputed; entirecurrentcompiledpackagesourcehashsetmatchesCI. 23preCIgroups plus13futuremacosdata/currenttailpairedPython/C++ASanUBSancasesPASS. Fullfinalimageauditincludesexplicit6GiB/4GiBADTspanchecks, noRAMseeddefault, Batch1SIP2/account/59+26/signaturetrust and POST. DeliveryreportnowincludescompleteFDT/UEFIreservationsandidmaps; nohardwarequalificationclaimed."

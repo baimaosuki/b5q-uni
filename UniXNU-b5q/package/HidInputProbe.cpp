@@ -75,7 +75,8 @@ static IORegistryEntry *findEventDriver(IORegistryEntry *parent,unsigned depth) 
     while(OSObject *child=it->getNextObject()) {
         IORegistryEntry *entry=OSDynamicCast(IORegistryEntry,child);
         if(!entry)continue;
-        if(entry->metaCast("IOHIDEventDriver")){found=entry;break;}
+        IOService *service=OSDynamicCast(IOService,entry);
+        if(service && !service->isInactive() && entry->metaCast("IOHIDEventDriver")){found=entry;found->retain();break;}
         if((found=findEventDriver(entry,depth-1)))break;
     }
     it->release();return found;
@@ -121,7 +122,11 @@ static bool hasDigitizerPair(IORegistryEntry *driver) {
     OSSafeReleaseNULL(pageValue);
     return paired;
 }
+static bool relativePointer(IORegistryEntry *device) {
+    return device->getProperty("B5qRelativePointer")==kOSBooleanTrue;
+}
 static void publishDigitizer(IORegistryEntry *device,IORegistryEntry *driver) {
+    if(relativePointer(device))return;
     IORegistryEntry *interface=driver->getParentEntry(gIOServicePlane);
     const char *const names[]={"displayUUID","kUSBContainerID"};
     for(const char *name:names) {
@@ -150,6 +155,7 @@ static void publishDigitizer(IORegistryEntry *device,IORegistryEntry *driver) {
 // thread closes that window: it checks every 2 ms until the service has been registered for 10 s, at most 180 s.
 static void digitizerPairGuard(void *context,wait_result_t) {
     IORegistryEntry *device=static_cast<IORegistryEntry *>(context);
+    if(relativePointer(device)){device->release();thread_terminate(current_thread());return;}
     unsigned stopAt=180000;
     for(unsigned ms=0;ms<stopAt;ms+=2) {
         if(IORegistryEntry *driver=findEventDriver(device,4)) {
@@ -159,9 +165,11 @@ static void digitizerPairGuard(void *context,wait_result_t) {
             }
             IOService *service=OSDynamicCast(IOService,driver);
             if(stopAt==180000 && service && (service->getState()&kIOServiceRegisteredState) && ms+10000<stopAt)stopAt=ms+10000;
+            driver->release();
         }
         IOSleep(2);
     }
+    device->release();thread_terminate(current_thread());
 }
 __attribute__((noinline)) void native_hid_live_checkpoint(IOService *device) {
     size_t used=0;native_hid_input_registry[0]=0;describeInput(device,0,used);
@@ -174,7 +182,7 @@ __attribute__((noinline)) void native_hid_live_checkpoint(IOService *device) {
         // iPadOS 27: the event service is the kernel side of a DriverKit driver, which publishes its own usage pair (1,6) after it
         // starts, later than the first check here; a pair read back as anything but (0x0d,4) is therefore published again.
         static IORegistryEntry *publishedFor;
-        if(device->getProperty("Built-In") && (publishedFor!=driver || !hasDigitizerPair(driver))) {
+        if(!relativePointer(device) && device->getProperty("Built-In") && (publishedFor!=driver || !hasDigitizerPair(driver))) {
             publishedFor=driver;
             publishDigitizer(device,driver);
         }
@@ -182,6 +190,7 @@ __attribute__((noinline)) void native_hid_live_checkpoint(IOService *device) {
         // driver-internal state from a foreign thread; only the cheap Built-In readback stays.
         appendProperty(driver,"Built-In","BI",props);
         appendProperty(driver,"PrimaryUsagePage","PP",props);appendProperty(driver,"PrimaryUsage","PU",props);
+        driver->release();
     }
     __asm__ volatile("" ::: "memory");
 }
@@ -246,9 +255,10 @@ void native_hid_input_probe(void) {
                         if(attached)device->detach(resource);
                         OSSafeReleaseNULL(device);native_hid_input_object=0;
                     }
-                    if(started) {
-                        thread_t guard=nullptr;
+                    if(started && !relativePointer(device)) {
+                        device->retain();thread_t guard=nullptr;
                         if(kernel_thread_start(digitizerPairGuard,device,&guard)==KERN_SUCCESS)thread_deallocate(guard);
+                        else device->release();
                     }
                     unsigned touchHid=0;
                     unsigned split=0;

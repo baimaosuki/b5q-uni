@@ -117,36 +117,8 @@ void testClocks(){
  puts("PASS production SE4 clock helper: locked votes/peer preservation/all branch timeouts/HW_CTL 80000002 skip/DFS levels0..7/no DFS writes/no-XO failure/nonDFS RCG faults/offset isolation");
 }
 int main(){
- {
-  B5qTouchPointer::Pointer pointer;
-  const int ids[]={1,2,3}, x[]={16000,1000,31500}, y[]={16000,1000,30000};
-  assert(!pointer.update(1,ids,x,y,1,250).click);
-  assert(pointer.update(0,nullptr,nullptr,nullptr,10,250).click);
-  pointer.update(1,ids,x,y,20,250);
-  const int moved[]={18000,1000,31500};
-  assert(pointer.update(3,ids,moved,y,25,250).dx>0);
-  assert(!pointer.update(0,nullptr,nullptr,nullptr,30,250).click);
-  // Grip contacts remain on both sides: add the operating finger, reorder
-  // all slots, then lift only that finger. It must click once and rearm.
-  const int gripIds[]={2,3},gripX[]={1000,31500},gripY[]={1000,30000};
-  assert(!pointer.update(2,gripIds,gripX,gripY,31,250).click&&!pointer.hasContact);
-  pointer.update(3,ids,x,y,32,250);
-  const int shuffled[]={3,1,2},jitterX[]={31500,16400,1000},jitterY[]={30000,16300,1000};
-  pointer.update(3,shuffled,jitterX,jitterY,33,250);
-  assert(pointer.update(2,gripIds,gripX,gripY,34,250).click);
-  assert(!pointer.update(2,gripIds,gripX,gripY,35,250).click);
-  pointer.update(3,ids,x,y,36,250);
-  assert(pointer.update(2,gripIds,gripX,gripY,37,250).click);
-  pointer.update(1,ids,x,y,38,250);
-  assert(!pointer.update(0,nullptr,nullptr,nullptr,39,250,true).click);
-  pointer.update(1,ids,x,y,40,250);
-  assert(!pointer.update(0,nullptr,nullptr,nullptr,400,250).click);
-  pointer.update(1,ids,x,y,401,250);
-  const int changed[]={9};
-  assert(pointer.update(1,changed,x,y,402,250).click&&!pointer.hasContact);
-  assert(!pointer.update(1,changed,x,y,403,250).click);
-  assert(pointer.id==9);
- }
+ // Pointer gesture coverage lives in test-pointer-batch2.cpp.
+
  using namespace B5qTouch;Point points[12]={};testClocks();
  uint32_t invalid[]={0,0,0};int32_t mc=THERMAL_NONE;assert(!thermal_pick_valid(invalid,3,&mc)&&mc==THERMAL_NONE);
  uint32_t valid[]={0,THERMAL_STATUS_VALID|310u,0};assert(thermal_pick_valid(valid,3,&mc)&&mc==31000);

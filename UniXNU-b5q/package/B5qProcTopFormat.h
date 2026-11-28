@@ -2,7 +2,9 @@
 #pragma once
 #include "B5qProcTop.h"
 
-// IOLog truncates long lines. Keep each ranked row below 200 bytes.
+// IOLog's formatter has a 255-byte limit. Emit a summary and individually
+// ranked rows: even a 63-byte name and maximum counters fit below 200 bytes.
+// snprintf and the emitter are supplied by the kernel/host caller.
 static inline void b5q_proc_print(struct b5q_proc_window w,
                                   const struct b5q_proc_row *rows,
                                   void (*emit)(const char *,void *),void *context) {

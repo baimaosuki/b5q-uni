@@ -83,6 +83,13 @@ with tempfile.TemporaryDirectory(prefix='b5q-install-test-') as tmp:
     (directory / 'package.manifest.json').write_text(json.dumps(manifest))
     assert case('--check')[0] == []
     assert case('--all', expect_failure=True) == ([], [])
+    manifest['build_status'].update(data_persistent=True, data_volatile=False)
+    (directory / 'package.manifest.json').write_text(json.dumps(manifest))
+    assert case('--check')[0] == []
+    assert case('--esp')[0] == ['esp']
+    for flag in ('--all', '--repair', '--root', '--boot'):
+        assert case(flag, expect_failure=True) == ([], [])
+    manifest['build_status'].update(data_persistent=False, data_volatile=True)
     manifest['outputs'] = outputs
     (directory / 'package.manifest.json').write_text(json.dumps(manifest))
     original_esp = (directory / 'esp.img').read_bytes()

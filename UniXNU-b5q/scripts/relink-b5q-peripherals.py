@@ -22,6 +22,7 @@ CORE_ARCHIVE = XNU_OBJECT + '/mach.development.bcm2837.link/mach.development.bcm
 NATIVE = XNU_OBJECT + '/mach.development.bcm2837.unstripped.noctf'
 DISPLAY = 'build/native-legacy-display/libNativeLegacyDisplay.late.a'
 USB = 'build/qcom-dwc3/libQcomDwc3.a'
+STORAGE = 'build/ram-block/libRamBlock.a'
 # build-xnu-4k-baseline.sh + the resolved b5q defconfig. The repeated RAM
 # force_load in EXTRA_LD_ARCHIVES contributes the same members only once.
 LINK_INPUTS = [
@@ -47,6 +48,9 @@ REPLACEMENTS = {
     'HidInputProbe.cpp': ('HidInputProbe.o', (DISPLAY,)),
     'B5qBootPolicy.c': ('B5qBootPolicy.o', (DISPLAY,)),
     'B5qProcTop.c': ('B5qProcTop.o', (DISPLAY,)),
+    'B5qRamStorage.cpp': ('B5qRamStorage.o', (STORAGE,)),
+    'B5qPower.cpp': ('B5qPower.o', (STORAGE,)),
+    'B5qUfs/B5qUfs.cpp': ('B5qUfs.late.o', (STORAGE,)),
 }
 RECIPES = {
     'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp', 'GeniI2c.c')),
@@ -60,8 +64,9 @@ RECIPES = {
             ('B5qUsbBoard.cpp', 'B5qBootPolicy.c')),
     'v33': (45016691051, '2f74ab3b3850711cd4f2bc61c75bdbe187a1f586',
             ('B5qBootPolicy.c', 'B5qProcTop.c')),
-    'batch1-proctop': (45041019820, 'ac082c9d53049323fd701cec5d6ba5bd7621bc1f',
-                       ('B5qProcTop.c',)),
+    'batch2': (45047962341, '5d7c4eadaa5344e1b96edc593b26d6d18d2bc6d0',
+               ('NativeHidInput.cpp','HidInputProbe.cpp','B5qProcTop.c',
+                'B5qRamStorage.cpp','B5qPower.cpp','B5qUfs/B5qUfs.cpp')),
 }
 
 
@@ -235,7 +240,7 @@ def main():
     # integrity acceptance step is inserted into the upstream CI build.
     for member, archives in replacements.values():
         for relative in archives:
-            if member not in archive_members[relative] and member not in ('B5qBootPolicy.o', 'B5qProcTop.o'):
+            if member not in archive_members[relative] and member not in ('B5qBootPolicy.o', 'B5qProcTop.o','B5qPower.o'):
                 raise RuntimeError(f'{relative} has no cached replacement member {member}')
     (out / 'incremental-inputs.json').write_text(json.dumps(record, indent=2) + '\n')
     if args.prepare_only:
@@ -257,6 +262,11 @@ def main():
     sdk = Path(subprocess.check_output(['xcrun', '--sdk', 'macosx', '--show-sdk-path'], text=True).strip())
     include = out / 'include'
     header = prepare_headers(sdk, include, hid)
+    if args.version=='batch2':
+        storage=dependency(core,'IOStorageFamily','IOBlockStorageDevice.h')
+        dest=include/'IOKit/storage';dest.mkdir(parents=True,exist_ok=True)
+        for path in storage.glob('*.h'):shutil.copyfile(path,dest/path.name)
+        (include/'macos-target.h').write_text('#include <TargetConditionals.h>\n#undef TARGET_OS_OSX\n#define TARGET_OS_OSX 1\n')
     spec = importlib.util.spec_from_file_location('usb_builder', device / 'scripts/build-b5q-usb.py')
     usb = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(usb)
@@ -277,6 +287,9 @@ def main():
         options = [flag for flag in cflags if not name.endswith('.c') or flag not in
                    ('-Wno-unused-private-field', '-Wno-c++11-narrowing',
                     '-Wno-deprecated-enum-enum-conversion')]
+        if name in ('B5qRamStorage.cpp','B5qUfs/B5qUfs.cpp','B5qPower.cpp'):
+            options+=['-include',str(include/'macos-target.h'),'-I',str(xnu/'osfmk'),
+                      '-I',str(ctx.tree/'kits/VerifiedRoot/include')]
         obj = compile_object(cxx, options, device / 'package' / name, compiled, llvm)
         objects[obj.name] = sha(obj)
         # Return exactly one object per source, containing the bytes inserted
@@ -317,7 +330,7 @@ def main():
                   native_output_sha256=sha(native_out),
                   archive_outputs={rel: sha(ctx.tree / rel) for rel in [*LINK_INPUTS, USB]})
     record['output_archive_members'] = {rel: {name: hashlib.sha256(body).hexdigest()
-                                             for name, body in members(ctx.tree / rel)} for rel in [DISPLAY, USB]}
+                                             for name, body in members(ctx.tree / rel)} for rel in [DISPLAY, USB, STORAGE]}
     # Save the completed native link before prelink/payload, including on failure.
     for path in [target, out / 'incremental-inputs.json']:
         path.write_text(json.dumps(record, indent=2) + '\n')
