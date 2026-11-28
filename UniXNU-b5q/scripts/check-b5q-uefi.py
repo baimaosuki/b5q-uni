@@ -35,6 +35,12 @@ if not report['errors']:
       ('0x880100000ULL, 0xa02000ULL', '0x880c00000ULL, 0xad00000ULL',
        '0x8b9a00000ULL, 0x200000ULL', '0x8bba00000ULL, 0x4600000ULL')):
   report['errors'].append('RamManager requires all four b5q live high-memory reservations')
+ ranges=board/'Include/B5qReservedMemory.h'
+ if not ranges.is_file()or '0xf3800000ULL,0xf7a00000ULL'not in ranges.read_text():report['errors'].append('Missing stock TrustUI DMA reservation')
+ for module in ['MediaDma.c','PcieDma.c','UsbDma.c']:
+  source=board/'Drivers/B5qHandoffDxe'/module
+  if not source.is_file()or 'B5qDmaRangeAllowed'not in source.read_text():report['errors'].append('Missing reserved-RAM DMA guard: '+module)
+ if not all(x in reserved for x in ['0xd4d00000ULL','0xe6440000ULL','0xf3800000ULL','0xff800000ULL']):report['errors'].append('Missing low no-map HOB reservations')
  for name in ('ButtonsDxe', 'DisplayDxe', 'HALIOMMUDxe', 'CmdDbDxe', 'RpmhDxe'):
   if f'/{name}/' not in dxe:report['errors'].append('Required firmware module missing: '+name)
  for line in (dxe+'\n'+apriori+'\n'+fdf).splitlines():

@@ -1,0 +1,228 @@
+diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
+--- a/bsd/kern/kern_exec.c
++++ b/bsd/kern/kern_exec.c
+@@ -9706,6 +9706,90 @@
+ 	printf("owner Data: GPU addon memory release %d\n", native_gpu_addon_released);
+ }
+ 
++extern int b5q_launchd_policy_blob(unsigned, const char **, const unsigned char **, size_t *);
++static int
++b5q_launchd_policy_prepare(proc_t p, user_addr_t scratch)
++{
++	vfs_context_t ctx = vfs_context_kernel();
++	const char *dir = "/private/var/db/com.apple.xpc.launchd";
++	vnode_t vp = NULLVP;
++	int error;
++	/* Stale readiness from a previous boot must never launch the supplicant. */
++	static const char ready[] = "/private/var/run/b5q-wifi-ready";
++	struct unlink_args remove = {.path = scratch + 0x100}; int32_t result = 0;
++	error = copyout(ready, remove.path, sizeof(ready));
++	if (!error) error = unlink(p, &remove, &result);
++	if (error == ENOENT) error = 0;
++	if (error) return error;
++	error = vnode_lookup(dir, VNODE_LOOKUP_NOFOLLOW, &vp, ctx);
++	if (error) return error;
++	struct vnode_attr va;
++	VATTR_INIT(&va); VATTR_WANTED(&va, va_uid); VATTR_WANTED(&va, va_mode);
++	error = vnode_getattr(vp, &va, ctx);
++	if (!error && (vnode_vtype(vp) != VDIR || va.va_uid != 0 || (va.va_mode & 022))) error = EPERM;
++	vnode_put(vp);
++	if (error) return error;
++
++	for (unsigned i = 0; i < 2; i++) {
++		const char *name = NULL; const unsigned char *data = NULL; size_t bytes = 0;
++		if (!b5q_launchd_policy_blob(i, &name, &data, &bytes) || !data || !bytes || bytes > 16384) return EINVAL;
++		char path[160], temp[176];
++		snprintf(path, sizeof(path), "%s/%s", dir, name);
++		snprintf(temp, sizeof(temp), "%s/.b5q-%s.new", dir, name);
++		/* Reject symlinks/hardlinks/foreign owners on both final and temp. */
++		const char *paths[] = {path, temp};
++		for (unsigned n = 0; n < 2; n++) {
++			vp = NULLVP; error = vnode_lookup(paths[n], VNODE_LOOKUP_NOFOLLOW, &vp, ctx);
++			if (error == ENOENT) {error = 0; continue;}
++			if (error) return error;
++			VATTR_INIT(&va); VATTR_WANTED(&va, va_uid); VATTR_WANTED(&va, va_nlink);
++			error = vnode_getattr(vp, &va, ctx);
++			/* launchd itself requires uid0 for disabled.501.plist too.
++             * A singly linked uid501 GUI file can be atomically replaced;
++             * never trust/read it as current, and install the new file uid0. */
++            const bool gui_user_owned = n == 0 && i == 1 && va.va_uid == 501;
++            if (!error && (vnode_vtype(vp) != VREG || (va.va_uid != 0 && !gui_user_owned) || va.va_nlink != 1)) error = EPERM;
++			vnode_put(vp); if (error) return error;
++		}
++		/* An already-current policy remains byte-for-byte untouched. */
++		vp = NULLVP; error = vnode_open(path, FREAD | O_NOFOLLOW, 0, 0, &vp, ctx);
++		bool same = false;
++		if (!error) {
++			VATTR_INIT(&va); VATTR_WANTED(&va, va_data_size); VATTR_WANTED(&va, va_mode); VATTR_WANTED(&va, va_gid); VATTR_WANTED(&va, va_uid);
++			error = vnode_getattr(vp, &va, ctx);
++			if (!error && va.va_data_size == bytes && (va.va_mode & 07777) == 0644 && va.va_gid == 0 && va.va_uid == 0) {
++				unsigned char *check = kalloc_data(bytes, Z_WAITOK | Z_NOFAIL); int resid = 0;
++				error = vn_rdwr(UIO_READ, vp, (caddr_t)check, (int)bytes, 0, UIO_SYSSPACE, IO_NOAUTH, vfs_context_ucred(ctx), &resid, p);
++				same = !error && !resid && !memcmp(check, data, bytes); kfree_data(check, bytes);
++			}
++			vnode_close(vp, FREAD, ctx);
++		} else if (error == ENOENT) error = 0;
++		if (error) return error;
++		if (same) {printf("B5qLaunchd: policy=%s current=1 iconservices=enabled\n", name); continue;}
++		vp = NULLVP; error = vnode_open(temp, FWRITE | O_CREAT | O_TRUNC | O_NOFOLLOW, 0600, 0, &vp, ctx);
++		if (error) return error;
++		int resid = 0;
++		error = vn_rdwr(UIO_WRITE, vp, (caddr_t)data, (int)bytes, 0, UIO_SYSSPACE, IO_NOAUTH | IO_SYNC, vfs_context_ucred(ctx), &resid, p);
++		if (!error && resid) error = EIO;
++		if (!error) {
++			VATTR_INIT(&va); VATTR_SET(&va, va_uid, 0); VATTR_SET(&va, va_gid, 0); VATTR_SET(&va, va_mode, 0644);
++			/* XNU non-compound vnode_open may leave O_TRUNC unfinished. */
++			VATTR_SET(&va, va_data_size, bytes);
++			error = vnode_setattr(vp, &va, ctx);
++		}
++		if (!error) error = VNOP_FSYNC(vp, MNT_WAIT, ctx);
++		int closed = vnode_close(vp, FWRITE, ctx); if (!error) error = closed;
++		if (error) return error;
++		struct rename_args move = {.from = scratch + 0x100, .to = scratch + 0x200};
++		error = copyout(temp, move.from, strlen(temp) + 1);
++		if (!error) error = copyout(path, move.to, strlen(path) + 1);
++		if (!error) error = rename(p, &move, &result);
++		printf("B5qLaunchd: policy=%s updated=%u bytes=%lu result=%d iconservices=enabled\n", name, !error, bytes, error);
++		if (error) return error;
++	}
++	return 0;
++}
++
+ static int
+ native_owner_macos_data_prepare(proc_t p, user_addr_t scratch)
+ {
+@@ -9775,6 +9859,10 @@
+ #ifdef XNU_OWNER_APP_VOLUME_UUID
+ 	if (!error) native_owner_macos_app_cryptex(p, scratch);
+ #endif
++	if (!error) {
++		const int policy_error = b5q_launchd_policy_prepare(p, scratch);
++		printf("B5qLaunchd: stage=before-launchd result=%d boot-continues=1\n", policy_error);
++	}
+ 	if (!error) native_owner_macos_gpu_addon(p, scratch);
+ 	if (!error) native_owner_macos_addon_sbin(p, scratch);
+ 	if (!error) b5q_wireless_runtime_prepare(p, scratch);
+diff --git a/osfmk/kern/host.c b/osfmk/kern/host.c
+--- a/osfmk/kern/host.c
++++ b/osfmk/kern/host.c
+@@ -828,6 +828,11 @@
+ 	natural_t speculative_count = vm_page_speculative_count;
+ 	natural_t throttled_count = vm_page_throttled_count;
+ 
++	/* Newer macOS callers supply a larger append-only buffer capacity.
++	 * Return our supported revision/count; never write unknown tail fields. */
++#if XNU_TARGET_OS_OSX
++	if (*count > HOST_VM_INFO64_COUNT) *count = HOST_VM_INFO64_COUNT;
++#endif
+ 	if (*count > HOST_VM_INFO64_COUNT) {
+ 		vm_log_error("host_statistics64() count is larger than expected "
+ 		    "(actual:%u > HOST_VM_INFO64_COUNT:%u). This is most likely a bug in "
+diff --git a/iokit/Kernel/IOUserClient.cpp b/iokit/Kernel/IOUserClient.cpp
+--- a/iokit/Kernel/IOUserClient.cpp
++++ b/iokit/Kernel/IOUserClient.cpp
+@@ -4391,6 +4391,10 @@
+ 	if (!list) {
+ 		return false;
+ 	}
++	/* The board's owned keystore exposes software state only. Limit its
++	 * explicit grant to Apple platform processes; no global MACF bypass. */
++	if (service->getProperty("B5qKeyStorePlatformGrant") == kOSBooleanTrue
++	    && !task_get_platform_binary(current_task())) return false;
+ 	proc_selfname(name, sizeof(name));
+ 	for (const char * at = list->getCStringNoCopy(); *at;) {
+ 		size_t length = 0;
+diff --git a/osfmk/vm/vm_dyld_pager.c b/osfmk/vm/vm_dyld_pager.c
+--- a/osfmk/vm/vm_dyld_pager.c
++++ b/osfmk/vm/vm_dyld_pager.c
+@@ -931,25 +931,19 @@
+ 	switch (hdr->mwli_pointer_format) {
+ #if defined(HAS_APPLE_PAC)
+ 	case DYLD_CHAINED_PTR_ARM64E:
+-		fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, false);
+-		break;
++		return fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, false);
+ 	case DYLD_CHAINED_PTR_ARM64E_USERLAND:
+ 	case DYLD_CHAINED_PTR_ARM64E_USERLAND24:
+-		fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, true);
+-		break;
++		return fixupPageAuth64(userVA, contents, pager, segInfo, pageIndex, true);
+ 	case DYLD_CHAINED_PTR_ARM64E_SHARED_CACHE:
+-		fixupCachePageAuth64(userVA, contents, pager, segInfo, pageIndex);
+-		break;
++		return fixupCachePageAuth64(userVA, contents, pager, segInfo, pageIndex);
+ #endif /* defined(HAS_APPLE_PAC) */
+ 	case DYLD_CHAINED_PTR_64:
+-		fixupPage64(userVA, contents, link_info, segInfo, pageIndex, false);
+-		break;
++		return fixupPage64(userVA, contents, link_info, segInfo, pageIndex, false);
+ 	case DYLD_CHAINED_PTR_64_OFFSET:
+-		fixupPage64(userVA, contents, link_info, segInfo, pageIndex, true);
+-		break;
++		return fixupPage64(userVA, contents, link_info, segInfo, pageIndex, true);
+ 	case DYLD_CHAINED_PTR_32:
+-		fixupPage32(userVA, contents, link_info, link_info_size, segInfo, pageIndex);
+-		break;
++		return fixupPage32(userVA, contents, link_info, link_info_size, segInfo, pageIndex);
+ 	default:
+ 		ktriage_record(thread_tid(current_thread()), KDBG_TRIAGE_EVENTID(KDBG_TRIAGE_SUBSYS_DYLD_PAGER, KDBG_TRIAGE_RESERVED, KDBG_TRIAGE_DYLD_PAGER_BAD_POINTER_FMT), (uintptr_t)userVA);
+ 		printf("%s(): unknown pointer_format %d\n", __func__, hdr->mwli_pointer_format);
+@@ -1316,7 +1310,7 @@
+ 				top_page = VM_PAGE_NULL;
+ 			}
+ 
+-			retval = KERN_SUCCESS;
++			kern_return_t page_kr = KERN_SUCCESS;
+ 			for (i = 0; i < mwli_page_size / PAGE_SIZE; ++i) {
+ 				if (i == part) {
+ 					continue;
+@@ -1324,20 +1318,24 @@
+ 				kr = dyld_pager_peek(src_top_object, base_off + (vm_object_offset_t)i * PAGE_SIZE,
+ 				    (char *)fixup_buffer + (vm_offset_t)i * PAGE_SIZE, &fault_info);
+ 				if (kr != KERN_SUCCESS) {
+-					retval = kr;
++					page_kr = kr;
+ 					break;
+ 				}
+ 			}
+-			if (retval == KERN_SUCCESS) {
+-				if (fixup_page((vm_offset_t)fixup_buffer, base_userVA, pager) != KERN_SUCCESS) {
+-					retval = KERN_FAILURE;
++			if (page_kr == KERN_SUCCESS) {
++				page_kr = fixup_page((vm_offset_t)fixup_buffer, base_userVA, pager);
++				if (page_kr != KERN_SUCCESS) {
++					retval = page_kr;
+ 				} else {
+ 					bcopy((const char *)fixup_buffer + (vm_offset_t)part * PAGE_SIZE, (char *)dst_vaddr, PAGE_SIZE);
+ 				}
++			} else {
++				retval = page_kr;
+ 			}
+-		} else if (fixup_page(dst_vaddr, userVA, pager) != KERN_SUCCESS) {
+-			/* KDBG / printf was done under fixup_page() */
+-			retval = KERN_FAILURE;
++
++		} else {
++			/* Preserve the exact chain parser/code-signing failure. */
++			retval = fixup_page(dst_vaddr, userVA, pager);
+ 		}
+ 		if (retval != KERN_SUCCESS) {
+ 			ktriage_record(thread_tid(current_thread()), KDBG_TRIAGE_EVENTID(KDBG_TRIAGE_SUBSYS_DYLD_PAGER, KDBG_TRIAGE_RESERVED, KDBG_TRIAGE_DYLD_PAGER_SLIDE_ERROR), userVA);
+@@ -1347,7 +1345,8 @@
+ 		}
+ 
+ 		if (src_page == VM_PAGE_NULL) {
+-			/* a fixup page larger than a page: its source page is already released (above) */
++			/* The source was already released. Abort the whole UPL on any subpage failure. */
++			if (retval != KERN_SUCCESS) break;
+ 			continue;
+ 		}
+ 
+@@ -1371,6 +1370,7 @@
+ 			vm_object_paging_end(src_top_object);
+ 			vm_object_unlock(src_top_object);
+ 		}
++		if (retval != KERN_SUCCESS) break;
+ 	}
+ 
+ done:

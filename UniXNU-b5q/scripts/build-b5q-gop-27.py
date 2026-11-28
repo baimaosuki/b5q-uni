@@ -195,7 +195,14 @@ if '--abi-header-only' in sys.argv:
     # Reuse the identical qualified ABI for the independent DP backend.
     # No driver/core/GPU build is run in this mode.
     raise SystemExit(0)
-print(run(['python3', ROOT / 'scripts/build-arm-driver.py', 'NativeLegacyDisplay'], text=True), end='')
+display_source=ROOT/'drivers/GopFramebuffer/NativeLegacyDisplay.cpp'
+display_original=display_source.read_text()
+display_patch=display_original.replace('primary && hz>60 && hz<=240','primary && hz>=60 && hz<=240').replace('if(hz<=60 || hz>240)return true;','if(hz<60 || hz>240)return true;')
+require(display_patch!=display_original,'Pinned refresh attributes changed')
+try:
+    display_source.write_text(display_patch)
+    print(run(['python3', ROOT / 'scripts/build-arm-driver.py', 'NativeLegacyDisplay'], text=True), end='')
+finally:display_source.write_text(display_original)
 
 
 
@@ -373,7 +380,15 @@ compile_cpp(support, OUT / 'LegacyDisplaySupport27.o')
 # The keystore state service (AppleKeyStoreState) and its probe, unchanged from iPadOS 17.
 keystore_source = KITS / 'KeyStoreProbe.cpp'
 compile_cpp(keystore_source, OUT / 'KeyStoreProbe.o')
-print(run(['python3', ROOT / 'scripts/build-arm-driver.py', 'NativeKeyStoreEvents'], text=True), end='')
+keyevents_source=ROOT/'drivers/AppleKeyStoreState/NativeKeyStoreEvents.cpp'
+keyevents_original=keyevents_source.read_text()
+keyevents_patch=keyevents_original.replace('setName("Native keystore state service");',
+    'setName("Native keystore state service");\n        setProperty("B5qKeyStorePlatformGrant",true);\n        setProperty("NativeSandboxGrantProcess","pboard,usernoted,usernotification,linkd,audiomxd");')
+require(keyevents_patch!=keyevents_original,'Pinned keystore source grant site changed')
+try:
+    keyevents_source.write_text(keyevents_patch)
+    print(run(['python3', ROOT / 'scripts/build-arm-driver.py', 'NativeKeyStoreEvents'], text=True), end='')
+finally:keyevents_source.write_text(keyevents_original)
 keyevents = ROOT / 'build/apple-key-store-state'
 keyevents_late = keyevents / 'NativeKeyStoreEvents.late.o'
 run([llvm / 'llvm-objcopy', '--remove-section=__DATA,__mod_init_func', '--globalize-symbol=__GLOBAL__sub_I_NativeKeyStoreEvents.cpp',

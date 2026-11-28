@@ -39,3 +39,13 @@ int sheng_wifi_firmware_read(const char *name,uint8_t **data,size_t *size) {
     if(error){if(buffer)IOFreeData(buffer,length);return error;}
     *data=buffer;*size=length;return 0;
 }
+// Called only after station firmware and the real native interface exist.
+int b5q_wifi_publish_ready(void) {
+    vfs_context_t ctx=vfs_context_kernel();vnode_t vp=NULL;
+    int error=vnode_open("/private/var/run/b5q-wifi-ready",FWRITE|O_CREAT|O_EXCL|O_NOFOLLOW,0600,0,&vp,ctx);
+    if(error)return error;
+    static const char content[]="station-interface-ready\n";int resid=0;
+    error=vn_rdwr(UIO_WRITE,vp,(caddr_t)content,sizeof(content)-1,0,UIO_SYSSPACE,IO_NOAUTH|IO_SYNC,
+        vfs_context_ucred(ctx),&resid,vfs_context_proc(ctx));
+    int closed=vnode_close(vp,FWRITE,ctx);return error?error:resid?EIO:closed;
+}

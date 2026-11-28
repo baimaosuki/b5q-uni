@@ -54,8 +54,9 @@ import yaml
 workflow=yaml.safe_load((R/'.github/workflows/b5q-p0-p5.yml').read_text())
 assert set(workflow['jobs'])=={'kernel','firmware'}
 commands='\n'.join(s.get('run','') for j in workflow['jobs'].values() for s in j['steps'])
-for required in ['build kernel','build firmware','package-batch2-esp.py','shutil.rmtree(reused.parent/\'kernel\')']:
+for required in ['build kernel','build firmware','build-b5q-payload.py','shutil.rmtree(reused.parent/\'kernel\')']:
  assert required in commands,required
+assert 'package-batch2-esp.py' not in commands,'Final ESP must wait for local returned-binary gates'
 assert 'build-persistent-data.py' not in commands and 'Create fresh' not in commands
 for job in workflow['jobs'].values():
  for step in job['steps']:

@@ -702,6 +702,21 @@
       "name": "zzzzzzzzzzz-b5q-edge-matrix.patch",
       "sha256": "5048e180f459e860b2fad50f66e2a49231b70081cb32f930e1d92c2c579011e7",
       "result": "PASS"
+    },
+    {
+      "name": "b5q-wireless-runtime.patch",
+      "sha256": "1b5c0d07a4fae80fcd972c80911b8339425132951a3e6bc7d723947d44d635c3",
+      "result": "PASS"
+    },
+    {
+      "name": "b5q-media-runtime.patch",
+      "sha256": "917748ccdaea777af030341a19b8cadca97ed52b21f2805963de4a39f090ddb4",
+      "result": "PASS"
+    },
+    {
+      "name": "b5q-v33b-runtime-repair.patch",
+      "sha256": "16e9d4691f7ff8561135ef46cd3bc72a0b6f12b9c49f9abd4e89629288a9111e",
+      "result": "PASS"
     }
   ],
   "result": "PASS"

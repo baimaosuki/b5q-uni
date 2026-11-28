@@ -25,3 +25,6 @@ zzyf-b5q-amp.patch
 zzzzzzzzzzz-b5q-edge-matrix.patch
 b5q-wireless-runtime.patch
 b5q-media-runtime.patch
+
+# v33b real-runtime repairs: Data policy migration, host statistics capacity, owned AKS grant.
+b5q-v33b-runtime-repair.patch

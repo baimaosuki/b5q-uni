@@ -256,6 +256,7 @@ class NativeHidInput : public IOHIDDevice {
     IOWorkLoop *inputLoop=nullptr;
     IOTimerEventSource *timer=nullptr;
     bool down=false;
+    bool inputStopping=false;
     uint8_t buttons=0;   // report 2 bits held by the hardware buttons
     bool touchEnabled=false;
     // The digitizer is a separate service from the keyboard: backboardd matches digitizers by primary usage page/usage
@@ -272,6 +273,19 @@ class NativeHidInput : public IOHIDDevice {
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
     bool mouseEnabled=false;
     B5qTouchMouse pointer;
+    IOTimerEventSource *clickTimer=nullptr;
+    static uint32_t pointerNow(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return uint32_t(ns/1000000);}
+    void pointerReport(const uint8_t *report){
+        sendPointer(report[1],int(int16_t(uint16_t(report[2])|uint16_t(report[3])<<8)),
+            int(int16_t(uint16_t(report[4])|uint16_t(report[5])<<8)),int(int8_t(report[6])),int(int8_t(report[7])));
+        native_touch_hid_reports=native_touch_hid_reports+1;
+    }
+    void scheduleClick(){if(clickTimer){unsigned ms=pointer.timeout(pointerNow());if(ms)clickTimer->setTimeoutMS(ms);else clickTimer->cancelTimeout();}}
+    static void clickTick(OSObject *owner,IOTimerEventSource *){
+        auto *self=static_cast<NativeHidInput*>(owner);
+        if(self->inputStopping)return;
+        self->pointer.advance(pointerNow(),[self](const uint8_t *r){self->pointerReport(r);});self->scheduleClick();
+    }
     IOReturn sendPointer(uint8_t buttonMask,int dx,int dy,int wheel=0,int pan=0) {
         uint8_t report[8];b5q_mouse_report(report,buttonMask,dx,dy,wheel,pan);
         IOBufferMemoryDescriptor *buffer=IOBufferMemoryDescriptor::withBytes(report,sizeof(report),kIODirectionNone);
@@ -295,7 +309,7 @@ class NativeHidInput : public IOHIDDevice {
     }
     static IOReturn touchAction(OSObject *owner,void *,void *,void *,void *) {
         NativeHidInput *self=OSDynamicCast(NativeHidInput,owner);if(!self)return kIOReturnSuccess;
-        self->touchSend();
+        if(!self->inputStopping)self->touchSend();
         return kIOReturnSuccess;
     }
     void touchSend() {
@@ -315,13 +329,8 @@ class NativeHidInput : public IOHIDDevice {
         self->lastSeq=before;
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         if(mouseEnabled) {
-            uint64_t nanos=0;absolutetime_to_nanoseconds(mach_absolute_time(),&nanos);
-            pointer.update(count,ids,xs,ys,uint32_t(nanos/1000000),recovered,[this](const uint8_t *report){
-                const int dx=int(int16_t(uint16_t(report[2])|(uint16_t(report[3])<<8)));
-                const int dy=int(int16_t(uint16_t(report[4])|(uint16_t(report[5])<<8)));
-                sendPointer(report[1],dx,dy,int(int8_t(report[6])),int(int8_t(report[7])));
-                native_touch_hid_reports=native_touch_hid_reports+1;
-            });
+            pointer.update(count,ids,xs,ys,pointerNow(),recovered,[this](const uint8_t *r){pointerReport(r);});
+            scheduleClick();
             return; // One input mode per service; never also submit digitizer report 3.
         }
 #endif
@@ -372,6 +381,7 @@ class NativeHidInput : public IOHIDDevice {
     }
     static IOReturn buttonsAction(OSObject *owner,void *mask,void *,void *,void *) {
         NativeHidInput *self=OSDynamicCast(NativeHidInput,owner);if(!self)return kIOReturnSuccess;
+        if(self->inputStopping)return kIOReturnSuccess;
         self->buttons=static_cast<uint8_t>(uintptr_t(mask)&0xe);
         if(!self->hasEventDriverCached())return kIOReturnSuccess;
         unsigned char report[]={2,static_cast<unsigned char>((self->down?1:0)|self->buttons)};
@@ -417,6 +427,7 @@ class NativeHidInput : public IOHIDDevice {
     }
     static void tick(OSObject *owner,IOTimerEventSource *source) {
         NativeHidInput *self=OSDynamicCast(NativeHidInput,owner);if(!self)return;
+        if(self->inputStopping)return;
         native_hid_live_checkpoint(self);
         self->hasEventDriverCached();
         if(self->touchOnly){source->setTimeoutMS(1000);return;}
@@ -497,10 +508,11 @@ public:
     }
 #endif
     bool start(IOService *provider) override {
-        inputLoop=IOWorkLoop::workLoop();if(!inputLoop)return false;
+        inputStopping=false;
+        inputLoop=IOWorkLoop::workLoop();if(!inputLoop){IOLog("B5qInput: stage=workloop result=no-memory\n");return false;}
         // Request the normal generic HID event personality for this owned
         // keyboard. This is a matching property, not a client entitlement.
-        if(!setProperty("HIDDefaultBehavior",true))return false;
+        if(!setProperty("HIDDefaultBehavior",true)){IOLog("B5qInput: stage=behavior-property result=no-memory\n");return false;}
         unsigned touch=0;
         touchEnabled=PE_parse_boot_argn("touch-hid",&touch,sizeof(touch)) && touch==1;
         // DigitizerCollectionDispatch: IOHIDEventDriver (setDigitizerProperties) reads it up the service plane and then sends each
@@ -529,11 +541,22 @@ public:
 #endif
             {setProperty("DisplayIntegrated",true);setProperty("DigitizerCollectionDispatch",true);}
         }
-        if(!IOHIDDevice::start(provider))return false;
+        if(!IOHIDDevice::start(provider)){IOLog("B5qInput: stage=super-start result=failed\n");return false;}
         timer=IOTimerEventSource::timerEventSource(this,tick);
         if(!timer || inputLoop->addEventSource(timer)!=kIOReturnSuccess) {
+            IOLog("B5qInput: stage=status-timer result=failed\n");
             OSSafeReleaseNULL(timer);IOHIDDevice::stop(provider);return false;
         }
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+        if(mouseEnabled){
+            clickTimer=IOTimerEventSource::timerEventSource(this,clickTick);
+            if(!clickTimer||inputLoop->addEventSource(clickTimer)!=kIOReturnSuccess){
+                IOLog("B5qInput: stage=click-timer result=failed\n");
+                OSSafeReleaseNULL(clickTimer);inputLoop->removeEventSource(timer);OSSafeReleaseNULL(timer);
+                IOHIDDevice::stop(provider);return false;
+            }
+        }
+#endif
         if(touchOnly||touchEnabled) {
             if(&native_touch_set_sink)native_touch_set_sink(&NativeHidInput::touchNotify,this);
         }
@@ -542,14 +565,26 @@ public:
         native_hid_input_observed(2,0);
         timer->setTimeoutMS(1000);return true;
     }
-    void stop(IOService *provider) override {
+    static IOReturn stopAction(OSObject *owner,void *,void *,void *,void *) {
+        auto *self=static_cast<NativeHidInput*>(owner);
+        self->inputStopping=true;
+        if(self->timer)self->timer->cancelTimeout();
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
-        if(mouseEnabled)sendPointer(0,0,0);
+        if(self->clickTimer)self->clickTimer->cancelTimeout();
+        if(self->mouseEnabled)self->pointer.cancel([self](const uint8_t *r){self->pointerReport(r);});
 #endif
-        OSSafeReleaseNULL(cachedEventDriver);
+        OSSafeReleaseNULL(self->cachedEventDriver);
+        return kIOReturnSuccess;
+    }
+    void stop(IOService *provider) override {
+        // Drain the same work-loop gate as reports/timer before retiring sources.
+        if(inputLoop)inputLoop->runAction(&NativeHidInput::stopAction,this);
         if((touchOnly||touchEnabled) && &native_touch_set_sink)native_touch_set_sink(nullptr,nullptr);
         if(!touchOnly && &native_buttons_set_sink)native_buttons_set_sink(nullptr,nullptr);
-        if(timer){timer->cancelTimeout();inputLoop->removeEventSource(timer);OSSafeReleaseNULL(timer);}
+#if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
+        if(clickTimer){inputLoop->removeEventSource(clickTimer);OSSafeReleaseNULL(clickTimer);}
+#endif
+        if(timer){inputLoop->removeEventSource(timer);OSSafeReleaseNULL(timer);}
         IOHIDDevice::stop(provider);
     }
     void free() override {OSSafeReleaseNULL(cachedEventDriver);OSSafeReleaseNULL(inputLoop);IOHIDDevice::free();}

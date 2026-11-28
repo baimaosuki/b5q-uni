@@ -1,0 +1,188 @@
+diff --git a/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c b/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c
+--- a/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c
++++ b/Platforms/Samsung/b5qPkg/Library/MemoryMapLib/MemoryMapLib.c
+@@ -43,6 +43,20 @@
+   {"b5q high reserved 2",  0x8b9a00000ULL, 0x200000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
+   {"b5q high reserved 3",  0x8bba00000ULL, 0x4600000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
+ 
++  // Original b5q no-map gaps: HOB reservation only; never map/read/zero.
++  {"b5q low no-map 0", 0x82600000ULL, 0x100000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 1", 0xd4d00000ULL, 0x3300000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 2", 0xd8100000ULL, 0x40000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 3", 0xe6440000ULL, 0x2dd000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 4", 0xf3800000ULL, 0x40ee000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 5", 0xf78ee000ULL, 0x1000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 6", 0xf78ef000ULL, 0x9000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 7", 0xf78f8000ULL, 0x4000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 8", 0xf78fc000ULL, 0x4000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 9", 0xf7900000ULL, 0x100000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 10", 0xff800000ULL, 0x600000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++  {"b5q low no-map 11", 0xa7ed9000ULL, 0x127000ULL, HobOnlyNoCacheSetting, MEM_RES, UNCACHEABLE, Reserv, UNCACHED_UNBUFFERED_XN},
++
+   // Other Memory Regions
+   {"IMEM Base",          0x14680000, 0x0002A000, NoHob,  MMAP_IO, INITIALIZED, Conv,   NS_DEVICE},
+   {"IMEM Cookie Base",   0x146AA000, 0x00016000, AddDev, MMAP_IO, INITIALIZED, Conv,   NS_DEVICE},
+diff --git a/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h b/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h
+new file mode 100644
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Include/B5qReservedMemory.h
+@@ -0,0 +1,36 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++// Original b5q reserved-memory fixed-reg union, including disabled no-map.
++// Input SHA256: 345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f
++// No device identity, secure-memory reads, or MMIO; only integer boundaries.
++#ifndef B5Q_RESERVED_MEMORY_H
++#define B5Q_RESERVED_MEMORY_H
++STATIC CONST struct {UINT64 Base,End;} mB5qReservedRanges[]={
++  {0x80000000ULL,0x80e00000ULL},
++  {0x81a00000ULL,0x81cf5000ULL},
++  {0x81d00000ULL,0x81f20000ULL},
++  {0x82600000ULL,0x82800000ULL},
++  {0x8a800000ULL,0x9b09c000ULL},
++  {0x9b100000ULL,0xa43b4000ULL},
++  {0xa7d00000ULL,0xa8000000ULL},
++  {0xb01ff000ULL,0xb0240000ULL},
++  {0xb1000000ULL,0xb4000000ULL},
++  {0xb8000000ULL,0xbab00000ULL},
++  {0xd4d00000ULL,0xd8000000ULL},
++  {0xd8100000ULL,0xd8800000ULL},
++  {0xe6440000ULL,0xe671d000ULL},
++  {0xf3800000ULL,0xf7a00000ULL},
++  {0xff800000ULL,0xffe00000ULL},
++  {0x880100000ULL,0x880b02000ULL},
++  {0x880c00000ULL,0x88b900000ULL},
++  {0x8b9a00000ULL,0x8b9c00000ULL},
++  {0x8bba00000ULL,0x8c0000000ULL},
++};
++STATIC BOOLEAN B5qDmaRangeAllowed(UINT64 Base,UINT64 Bytes)
++{
++ if(!Bytes || (Base&4095) || (Bytes&4095) || Bytes>(~(UINT64)0)-Base)return FALSE;
++ UINT64 End=Base+Bytes;
++ for(UINTN I=0;I<sizeof(mB5qReservedRanges)/sizeof(mB5qReservedRanges[0]);++I)
++  if(Base<mB5qReservedRanges[I].End && mB5qReservedRanges[I].Base<End)return FALSE;
++ return TRUE;
++}
++#endif
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/MediaDma.c
+@@ -7,6 +7,7 @@
+ #include <Library/UefiBootServicesTableLib.h>
+ #include "../../Include/B5qMediaDma.h"
+ #include "PcieDmaTables.h"
++#include "../../Include/B5qReservedMemory.h"
+ typedef struct {UINT32 Vmsa,Reserved;UINT64 Ttbr0,Ttbr1;UINT32 Mair0,Mair1,Sctlr,Tcr,Tcr2,Padding;} HAL_CONFIG;
+ typedef UINT32(EFIAPI *HAL_CREATE)(VOID**);
+ typedef UINT32(EFIAPI *HAL_DELETE)(VOID*);
+@@ -33,7 +34,7 @@
+  Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,Pages,&Base);
+  if(EFI_ERROR(Status))return Status;
+  UINT64 Aligned=ALIGN_VALUE(Base,0x200000);
+- if(Base<0x80000000ULL||Aligned>0x100000000ULL-R->PoolBytes){gBS->FreePages(Base,Pages);return EFI_UNSUPPORTED;}
++ if(!B5qDmaRangeAllowed(Base,Pages*EFI_PAGE_SIZE)||Base<0x80000000ULL||Aligned>0x100000000ULL-R->PoolBytes){gBS->FreePages(Base,Pages);return EFI_UNSUPPORTED;}
+  UINTN Head=(UINTN)((Aligned-Base)/EFI_PAGE_SIZE),Tail=Pages-Head-(UINTN)(R->PoolBytes/EFI_PAGE_SIZE);
+  if(Head)gBS->FreePages(Base,Head);
+  if(Tail)gBS->FreePages(Aligned+R->PoolBytes,Tail);
+@@ -41,6 +42,7 @@
+  EFI_PHYSICAL_ADDRESS Table=0xffffffffULL;
+  Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,32,&Table);
+  if(EFI_ERROR(Status))goto Fail;
++ if(!B5qDmaRangeAllowed(Table,32*EFI_PAGE_SIZE)){gBS->FreePages(Table,32);Status=EFI_UNSUPPORTED;goto Fail;}
+  R->TableBase=Table;R->TableBytes=32*EFI_PAGE_SIZE;
+  ZeroMem((VOID*)(UINTN)Table,(UINTN)R->TableBytes);
+  ZeroMem((VOID*)(UINTN)R->PoolBase,(UINTN)R->PoolBytes);
+@@ -97,5 +99,6 @@
+ STATIC B5Q_MEDIA_DMA_PROTOCOL mProtocol={1,PrepareMedia};
+ EFI_STATUS InstallB5qMediaDma(EFI_HANDLE ImageHandle)
+ {
++ DEBUG((DEBUG_ERROR,"B5Q-DMA: stock-reserved-guard=before-zero ranges=%u\n",(UINT32)(sizeof(mB5qReservedRanges)/sizeof(mB5qReservedRanges[0]))));
+  return gBS->InstallMultipleProtocolInterfaces(&ImageHandle,&mMediaGuid,&mProtocol,NULL);
+ }
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+@@ -7,6 +7,7 @@
+ #include <Library/UefiBootServicesTableLib.h>
+ #include "../../Include/B5qPcieDma.h"
+ #include "PcieDmaTables.h"
++#include "../../Include/B5qReservedMemory.h"
+ typedef struct {UINT32 Vmsa,Reserved;UINT64 Ttbr0,Ttbr1;UINT32 Mair0,Mair1,Sctlr,Tcr,Tcr2,Padding;} HAL_CONFIG;
+ typedef UINT32(EFIAPI *HAL_CREATE)(VOID**);
+ typedef UINT32(EFIAPI *HAL_DELETE)(VOID*);
+@@ -28,7 +29,7 @@
+   EFI_STATUS Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,Pages,&Base);
+   if(EFI_ERROR(Status))return Status;
+   UINT64 Aligned=ALIGN_VALUE(Base,B5Q_PCIE_DMA_ALIGN);
+-  if(Base<0x80000000ULL || Aligned>0x100000000ULL-B5Q_PCIE_DMA_BYTES){gBS->FreePages(Base,Pages);return EFI_UNSUPPORTED;}
++  if(!B5qDmaRangeAllowed(Base,Pages*EFI_PAGE_SIZE) || Base<0x80000000ULL || Aligned>0x100000000ULL-B5Q_PCIE_DMA_BYTES){gBS->FreePages(Base,Pages);return EFI_UNSUPPORTED;}
+   UINTN Head=(UINTN)((Aligned-Base)/EFI_PAGE_SIZE);
+   UINTN Tail=Pages-Head-(B5Q_PCIE_DMA_BYTES/EFI_PAGE_SIZE);
+   if(Head)gBS->FreePages(Base,Head);
+@@ -49,6 +50,7 @@
+   EFI_PHYSICAL_ADDRESS Table=0xffffffffULL;
+   Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,TABLE_PAGES,&Table);
+   if(EFI_ERROR(Status))goto Fail;
++  if(!B5qDmaRangeAllowed(Table,TABLE_PAGES*EFI_PAGE_SIZE)){gBS->FreePages(Table,TABLE_PAGES);Status=EFI_UNSUPPORTED;goto Fail;}
+   mResult.TableBase=Table;mResult.TableBytes=TABLE_PAGES*EFI_PAGE_SIZE;
+   ZeroMem((VOID*)(UINTN)Table,mResult.TableBytes);
+   USB_DMA_TABLES Tables={(VOID*)(UINTN)Table,Table,0,TABLE_PAGES};
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c
+@@ -7,6 +7,7 @@
+ #include <Library/UefiBootServicesTableLib.h>
+ #include "../../Include/B5qUsbDma.h"
+ #include "UsbDmaTables.h"
++#include "../../Include/B5qReservedMemory.h"
+ 
+ #define HAL_REVISION 0x10002
+ #define USB0_ARID 0x03000000U
+@@ -102,7 +103,7 @@
+     if ((Desc->Type == EfiLoaderCode) || (Desc->Type == EfiLoaderData)) {
+       Start = MAX (Start, OwnedBase);
+       End = MIN (End, OwnedBase + OwnedBytes);
+-      OwnsHead |= (Start == OwnedBase) && (End > Start);
++      OwnsHead |= (Start == OwnedBase) && (End > Start) && B5qDmaRangeAllowed(Start,EFI_PAGE_SIZE);
+     } else if (Desc->Type != EfiConventionalMemory) {
+       continue;
+     }
+@@ -111,13 +112,26 @@
+     if (Start >= End) {
+       continue;
+     }
+-    if ((Start < Tables->PhysicalBase + USB_DMA_RESERVED_BYTES && Tables->PhysicalBase < End) ||
+-        !UsbDmaMapRange (Tables, Start, End)) {
+-      Status = EFI_COMPROMISED_DATA;
+-      goto Done;
++    // Even a buggy EFI conventional descriptor cannot authorize stock
++    // reserved/no-map RAM. Subtract every excluded span before mapping.
++    UINT64 Cursor=Start;
++    for(UINTN I=0;Cursor<End;++I) {
++      UINT64 Stop=End,Next=End;
++      if(I<sizeof(mB5qReservedRanges)/sizeof(mB5qReservedRanges[0])) {
++        if(mB5qReservedRanges[I].End<=Cursor)continue;
++        Stop=MIN(End,mB5qReservedRanges[I].Base);
++        Next=MIN(End,mB5qReservedRanges[I].End);
++      }
++      if(Stop>Cursor) {
++        if(!B5qDmaRangeAllowed(Cursor,Stop-Cursor) ||
++           (Cursor<Tables->PhysicalBase+USB_DMA_RESERVED_BYTES && Tables->PhysicalBase<Stop) ||
++           !UsbDmaMapRange(Tables,Cursor,Stop)){Status=EFI_COMPROMISED_DATA;goto Done;}
++        *MappedBytes+=Stop-Cursor;
++      }
++      Cursor=MAX(Cursor,Next);
+     }
+-    *MappedBytes += End - Start;
+   }
++  DEBUG((DEBUG_ERROR,"B5Q-USBDMA: stock-reserved-filter=1 mapped=%lx\n",*MappedBytes));
+   Status = (OwnsHead && Retained) ? EFI_SUCCESS : EFI_COMPROMISED_DATA;
+ Done:
+   FreePool (Map);
+@@ -158,6 +172,7 @@
+   if (EFI_ERROR (Status)) {
+     return Status;
+   }
++  if(!B5qDmaRangeAllowed(Table,USB_DMA_RESERVED_BYTES)){gBS->FreePages(Table,USB_DMA_TABLE_PAGES);return EFI_UNSUPPORTED;}
+   Diag->TableBase = Table;
+   Diag->TableBytes = USB_DMA_RESERVED_BYTES;
+   State->Create = Hal->Create (&Domain);

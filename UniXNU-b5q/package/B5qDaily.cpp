@@ -129,7 +129,8 @@ extern "C" void b5q_daily_probe() {
     if(__atomic_exchange_n(&once,1u,__ATOMIC_ACQ_REL))return;
     if(B5qFeatures::option("battery",B5qFeatures::Battery)==1) {
         void *handle=OSMetaClass::preModLoad(g_kernel_kmod_info.name);
-        if(handle){b5q_daily_static_init();if(!OSMetaClass::postModLoad(handle))launch(batteryWorker,"battery");}
+        if(handle){b5q_daily_static_init();auto status=OSMetaClass::postModLoad(handle);if(!status)launch(batteryWorker,"battery");else IOLog("B5qDaily: stage=battery-metaclass-post result=%x\n",status);}
+        else IOLog("B5qDaily: stage=battery-metaclass-pre result=failed\n");
     }
     if(B5qFeatures::option("lid",B5qFeatures::Lid)==1)launch(lidWorker,"lid");
 }

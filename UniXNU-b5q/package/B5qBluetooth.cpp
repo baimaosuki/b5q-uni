@@ -410,9 +410,9 @@ void worker(void *,wait_result_t) {
         if (trace) ops.trace_hci = traceHci;
         else printf("[bluetooth hci] allocation failed\n");
     }
-    bt.core=qbt_create(&ops);if(!bt.core){native_bluetooth_stats[0]=3;return;}
+    bt.core=qbt_create(&ops);if(!bt.core){native_bluetooth_stats[0]=3;IOLog("B5qBluetooth: stage=core-create result=%d\n",-ENOMEM);return;}
     struct qbt_transport_ops transport={nullptr,wake,requestPower};
-    int e=qbt_transport_init(&transport);if(e){native_bluetooth_stats[0]=3;return;}
+    int e=qbt_transport_init(&transport);if(e){native_bluetooth_stats[0]=3;IOLog("B5qBluetooth: stage=transport-init result=%d\n",e);return;}
     while(native_gpu_addon_stage<1)waitUntil(nullptr,nowNs(nullptr)+10000000ULL);
     /* Wi-Fi settles WLAN_EN and the shared supplies first; its failure stage is negative. */
     unsigned wifi=0;PE_parse_boot_argn("wifi",&wifi,sizeof(wifi));
@@ -507,11 +507,12 @@ extern "C" void b5q_bluetooth_probe(void) {
     if(!PE_parse_boot_argn("bluetooth",&enabled,sizeof(enabled)) || !enabled)return;
     uint32_t expected=0;if(!__atomic_compare_exchange_n(&bt.started,&expected,1u,false,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE))return;
     native_bluetooth_stats[0]=1;
-    if(!address()){native_bluetooth_stats[0]=3;native_bluetooth_stats[1]=(uint64_t)(int64_t)-ENOENT;return;}
+    if(!address()){native_bluetooth_stats[0]=3;native_bluetooth_stats[1]=(uint64_t)(int64_t)-ENOENT;IOLog("B5qBluetooth: stage=address failed requires=/arm-io/bluetooth encoding=1 speed=3200000 identity=nonzero\n");return;}
     PE_parse_boot_argn("log-bluetooth",&bt.log,sizeof(bt.log));
     if(bt.log>=2)native_bluetooth_boot_text=static_cast<char *>(IOMallocData(8192));
     thread_t thread=nullptr;
     if(kernel_thread_start(worker,nullptr,&thread)==KERN_SUCCESS)thread_deallocate(thread);
-    else native_bluetooth_stats[0]=3;
-    if(bt.log>=2 && kernel_thread_start(processWatch,nullptr,&thread)==KERN_SUCCESS)thread_deallocate(thread);
+    else {native_bluetooth_stats[0]=3;IOLog("B5qBluetooth: stage=worker-start failed\n");}
+    if(bt.log>=2){const kern_return_t rc=kernel_thread_start(processWatch,nullptr,&thread);
+        if(rc==KERN_SUCCESS)thread_deallocate(thread);else IOLog("B5qBluetooth: stage=process-watch result=%d\n",rc);}
 }

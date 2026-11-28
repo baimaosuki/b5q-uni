@@ -6,7 +6,7 @@ from capstone import Cs,CS_ARCH_ARM64,CS_MODE_ARM
 R=Path(__file__).resolve().parents[2];sys.path[:0]=[str(R/'UniXNU-b5q/scripts'),str(R/'sources/UniXNU/kits/XnuPrelink')]
 from kc_image import Image
 s=importlib.util.spec_from_file_location('pac',R/'scripts/b5q-install/check-proctop-pac.py');pac=importlib.util.module_from_spec(s);s.loader.exec_module(pac)
-parser=argparse.ArgumentParser();parser.add_argument('--ci',type=Path);parser.add_argument('--out',type=Path);parser.add_argument('--dp',action='store_true');a=parser.parse_args()
+parser=argparse.ArgumentParser();parser.add_argument('--ci',type=Path);parser.add_argument('--out',type=Path);parser.add_argument('--dp',action='store_true');parser.add_argument('--hid',type=Path,help='Verify newly scheduled HID timers/actions against the actual core');a=parser.parse_args()
 out=R/'artifacts/b5q-p4-work/target'
 if a.ci:
     manifest,=a.ci.rglob('media-build.json');out=manifest.parent;build=json.loads(manifest.read_text());objects={}
@@ -134,6 +134,19 @@ for path in paths:
             assert matches,(path.name,name,hex(site['diversity']),routes,[c for c in consumers[site['diversity']]if any(c['object']==obj for obj,_ in routes)])
             contracts.append(dict(producer=path.name,callback=name,signature=site,source_selected_routes=routes,authenticated_consumers=matches))
 assert len(contracts)>=100,'Missing selected module callbacks'
+if a.hid:
+    hid=pac.scan(a.hid)
+    for part in ['9clickTick','4tick','10stopAction','11touchAction','13buttonsAction']:
+        names=[n for n in hid['signed']if '__ZN14NativeHidInput'+part+'E'in n];assert len(names)==1,(part,names)
+        name=names[0];sites=hid['signed'][name]
+        for site in sites:
+            div=0x73d8 if part in ['9clickTick','4tick']else 0xbd41
+            assert site['key']==0 and site['diversity']==div and not site['address_diversity']
+            matches=([dict(object='native-core',function=timer_name,typed_auth='0x73d8',stored_resign='0x7c11')]
+                if div==0x73d8 else [c for c in consumers[div]if c['object']=='native-core'and 'IOWorkLoop'in c['function']])
+            assert matches,(part,hex(div))
+            contracts.append(dict(producer='NativeHidInput.o',callback=name,signature=site,authenticated_consumers=matches))
+    receipt['objects'][str(a.hid)]=hid['sha256']
 result=dict(passed=True,hardware_verified=False,contracts=contracts,objects=receipt['objects'],
     baseline_objects={p.name:hashlib.sha256(p.read_bytes()).hexdigest()for p in [arm,geni,native]},
     scope='All defined non-vtable P4 callbacks in current35object recipe; 6 base vtables checked separately; full audio/runtime/CI remains pending')

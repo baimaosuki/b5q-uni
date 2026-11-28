@@ -54,5 +54,5 @@ extern "C" void b5q_software_aes_probe(void)
 {
     thread_t thread = nullptr;
     if (kernel_thread_start(worker, nullptr, &thread) == KERN_SUCCESS) thread_deallocate(thread);
-    else b5q_software_aes_state = -7;
+    else {b5q_software_aes_state = -7;IOLog("SoftwareAES: stage=thread-start result=-7\n");}
 }

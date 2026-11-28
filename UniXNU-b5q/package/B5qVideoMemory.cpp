@@ -35,10 +35,11 @@ bool b5q_video_memory_init() {
     auto *memory=IODeviceMemory::withRange(s.poolBase,s.poolBytes);
     // Original b5q non_secure_cb and non_secure_pixel_cb are dma-coherent.
     // This is the sole CPU mapping of reserved WBIS memory, not XNU pages.
-    auto *mapping=memory?memory->map(kIOMapAnywhere|kIOMapDefaultCache):nullptr;
+    auto *mapping=memory?memory->map(kIOMapAnywhere|kIOMapCopybackCache):nullptr;
     OSSafeReleaseNULL(memory);
     auto *made=IONewZero(Pool,1);
     if(!mapping||!made||!made->init(reinterpret_cast<void*>(mapping->getVirtualAddress()),s.iova,uint32_t(s.poolBytes))) {
+        IOLog("B5qVideo: stage=dma-copyback-map-pool base=%llx bytes=%llu map=%u alloc=%u result=failed\n",s.poolBase,s.poolBytes,mapping!=nullptr,made!=nullptr);
         if(made)IODelete(made,Pool,1);OSSafeReleaseNULL(mapping);return false;
     }
     poolMap=mapping;pool=made;

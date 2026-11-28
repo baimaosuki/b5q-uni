@@ -491,6 +491,7 @@ IOLock *gRoleLock;
 int gRoleWanted, gRoleApplied, gCoreRole = kRoleDevice;
 uint32_t gCableWanted, gCableApplied;
 bool gForceHost;
+constexpr unsigned kXhciRegisterBytes=0x8000; // same bounded host window as makeHost()
 Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
 QcomDwc3Xhci *gHost;
@@ -641,6 +642,14 @@ void hostStats() {
     native_usb_stats[47] = op[0]; native_usb_stats[48] = op[1];
     native_usb_stats[49] = op[0x400 / 4]; native_usb_stats[50] = op[0x410 / 4];
     native_usb_stats[51] = gXhciRegs.va[1];
+    const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
+    const uint64_t dcbaa=uint64_t(op[0x30/4])|(uint64_t(op[0x34/4])<<32);
+    const unsigned rt=(gXhciRegs.va[0x18/4]&~31u)/4;
+    if(rt+0x40/4<kXhciRegisterBytes/4){
+        const uint64_t erst=uint64_t(gXhciRegs.va[rt+0x30/4])|(uint64_t(gXhciRegs.va[rt+0x34/4])<<32);
+        IOLog("qcom-dwc3: host DMA64=%u crcr=%llx dcbaa=%llx erst=%llx iman=%x routed=%u enabled=%u\n",
+          gXhciRegs.va[0x10/4]&1,crcr,dcbaa,erst,gXhciRegs.va[rt+0x20/4],gActiveNub==gHostNub,gLineAttached);
+    }
     if (gHost) native_usb_stats[46] = (native_usb_stats[46] & 0xffff00ffu) | (uint32_t)gHost->getPowerState() << 8;
     // What the system's stack enumerated: how many devices now, the last one's vendor and product (kept after it leaves).
     OSDictionary *match = IOService::serviceMatching("IOUSBHostDevice");
@@ -670,7 +679,6 @@ void deviceStats() {
 }
 void roleThread(void *, wait_result_t) {
     const bool dpEnabled=B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)!=0;
-    uint32_t dpGeneration=0;
     for (;;) {
         B5qDpPortState port{};
         if(dpEnabled)b5q_dp_port_poll(&port);
@@ -683,11 +691,11 @@ void roleThread(void *, wait_result_t) {
             cableChanged();hostStats();deviceStats();
             if(dpEnabled){
                 b5q_dp_port_poll(&port);
-                if((port.configured?port.lanes:0)==gDpLanes&&port.generation==dpGeneration)b5q_dp_link_update(&port);
+                if((port.configured?port.lanes:0)==gDpLanes)b5q_dp_link_update(&port);
             }
             IOLockLock(gRoleLock);
             if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied&&
-               (!dpEnabled||((port.configured?port.lanes:0)==gDpLanes&&port.generation==dpGeneration))){IOLockUnlock(gRoleLock);continue;}
+               (!dpEnabled||(port.configured?port.lanes:0)==gDpLanes)){IOLockUnlock(gRoleLock);continue;}
         }
         const int role = gRoleWanted;
         const uint32_t cableVersion = gCableWanted;
@@ -705,10 +713,10 @@ void roleThread(void *, wait_result_t) {
         leaveRole(gRoleApplied);
         gRoleApplied = kRoleNone;
         if(dpEnabled){
-            gDpLanes=port.configured?port.lanes:0;dpGeneration=port.generation;
+            gDpLanes=port.configured?port.lanes:0;
             B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
             if(cable.orientation()>=0){gSuperSpeed=qmpInit(cable.orientation()!=0);if(!gSuperSpeed)selectUtmiClock();}
-            IOLog("B5qDP: combo lanes=%u reverse=%d usb3=%u generation=%u\n",gDpLanes,cable.orientation(),gSuperSpeed,dpGeneration);
+            IOLog("B5qDP: combo lanes=%u reverse=%d usb3=%u generation=%u\n",gDpLanes,cable.orientation(),gSuperSpeed,port.generation);
         }
         const bool entered=enterRole(role);
         if(dpEnabled)b5q_dp_link_update(&port);
@@ -807,7 +815,7 @@ extern "C" void qcom_dwc3_publish(void) {
         unsigned forced = 0;
         PE_parse_boot_argn("usb-host", &forced, sizeof forced);
         gRoleLock = IOLockAlloc();
-        if (!gRoleLock || !mapRegion(gGlobals, kAppleWindow, 0x1000) || !mapRegion(gXhciRegs, kCore, 0x1000) ||
+        if (!gRoleLock || !mapRegion(gGlobals, kAppleWindow, 0x1000) || !mapRegion(gXhciRegs, kCore, kXhciRegisterBytes) ||
             kernel_thread_start(roleThread, nullptr, &thread) != KERN_SUCCESS) {stage(-17); break;}
         thread_deallocate(thread);
         if (forced && kernel_thread_start(forceHostThread, reinterpret_cast<void *>((uintptr_t)forced), &thread) == KERN_SUCCESS) thread_deallocate(thread);

@@ -3000,3 +3000,54 @@ revision = "9b8620adadb2532224cc95c97dd74523af9b5254"
 reference = "reports/p5-splash-tail-integration.json"
 command = "Owner-selected GOP tail contract; original b5q DT435..437/35008..35014 and MemoryMapLib; production native pipeline and firmware checks"
 result = "Firmware/loader12patchreconstructionPASS; actualEDK2producer/loaderandnativearm64ecompilePASS; 26DPgroups include13nativeend-to-end pipeline scenarios and11029tail/modebounds. Fullbaseline/CI/actualimagegates tracked separately; nohardwareclaim."
+
+[[area]]
+id = "p5-final-three-package-delivery"
+status = "implemented"
+components = ["DarwinBoot", "GopFramebuffer", "QcomDwc3"]
+paths = ["reports/p5-final-images.json", "reports/p5-published-source-files.json", "reports/p0-p5-goal-delivery.md", "reports/p5-splash-tail-integration.json"]
+inputs = ["P5 source07806e9b9ede578837ca44c10a11d7e6d5eedbee; original b5q DTS SHA345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f; selected DisplayDxe SHA51babf469c8a6753082b1a84c677a21ed4ddca64ac98ca939a3bb42a614e8070; source, original-module and actual returned-file hashes in final receipts"]
+configuration = ["Owner-selected stock cont_splash earlymap tail; validate actual GOP allocation and retained memory, never modify primary Display domain or DisplayDxe; zero EL1 apps_smmu; only full menu enables b5q-dp=1; persistent userdata remains installed"]
+procedure = ["Finish full kernel and UEFI CI45344176858; verify ordinary artifact SHA256; pair actual FD DarwinBoot with ESP; inspect actual returned DP/media/wireless/platform objects and final chained PAC; read all three ESP and boot pairs twice before handoff"]
+findings = ["CI kernel+UEFI bothSUCCESS. P5 native DP objects,483originalIOMFB slots,114source-selectedcallbackcontracts,122wirelessobjects/62contracts,35mediaobjects and303returnedboardobjects zeroEL1apps_smmu PASS. FullFAT/ADT/69POST/APFS59+26binaryplist/trust/signature/menu gates and independent secondreadback PASS. P5 finalESP838860800B SHAb71e54f1c6567746442f88c05ff8d48ba7fed2870fbd335f825dbe56c60e136f; boot19124224B SHA0b672d636330b13117563ae50ba3479853f1eb7366bed312379129dab0c83f40; FDSHAe5f20f393295df7743cbbd3f3a9d0e1bef427ba5caf0f25e18b044998b74897b. P2/P3 andP4 fourpriorIMG hashesunchanged, freshfullreadbacksPASS. Allsource/host/build/image scope complete; actualphysicalqualificationremainsHOST_VERIFIED_PENDING_HARDWARE. LocaloriginalWCNinputs contain24files; chip/board-specificbdwlan.eXX orbdwlanHH.eLL unavailable andcannotbeinvented; exactrequest mustselectoriginalfile perfinalreport. No phone access or partition operation performed."]
+completion = ["Requested three independent ESP/boot pairs and final report complete within source/host/CI/image scope"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; original earlymap coverage/actualGOP size and DP train/scanout/lid/hotplug require physical validation; board-specific Wi-Fi BDF filename remains unknown until actual QMI ID, extraction/injection instructions provided"]
+next_action = ["User may install one matched ESP/boot pair using final report; review P0-P5 XNU2LOG criteria without reinitializing userdata or macosroot"]
+[[area.evidence]]
+kind = "host"
+revision = "07806e9b9ede578837ca44c10a11d7e6d5eedbee"
+reference = "reports/p5-final-images.json"
+command = "CI45344176858; check-dp-returned.py; check-media-callback-pac.py --dp --ci; check-stage-returned-objects.py; check-wireless-target-closure.py --ci; check-media-target-closure.py --ci; verify-p0-images.py --wireless --media --dp twice"
+result = "Actual returned and second-readback gates PASS; artifact GitHubSHA verified; final receipt records exact images,source,objects,loader,firmware,PAC andAPFS. No hardware success inferred."
+[[area.evidence]]
+kind = "host"
+revision = "07806e9b9ede578837ca44c10a11d7e6d5eedbee"
+reference = "reports/p0-p5-goal-delivery.md"
+command = "Repeat P2/P3 and P4 actual FAT/ADT/APFS/trust/PAC acceptance using each revision's board.toml; compare boot FD and original shim/DTB/FAT16; SHA256 all six final IMG files"
+result = "Three matched pairs accepted; final0-7report includes actualpaths/bytes/SHA,CI,firmware extraction/injection,selectiveESP+bootcommands andphysicalacceptancecriteria."
+
+[[area]]
+id = "v33b-complete-runtime-repair"
+status = "implemented"
+components = ["QcomDwc3", "GopFramebuffer", "AppleKeyStoreState", "Ath12kWifi", "QcaBluetooth", "DarwinBoot"]
+paths = ["reports/v33b-runtime-repair.json", "reports/v33b-runtime-repair.md", "patches/xnu/b5q-v33b-runtime-repair.patch", "package/B5qLaunchdPolicy.c", "scripts/b5q_peripherals.py"]
+inputs = ["Actual b5q XNU2LOG-v33b BIN SHA256 dd8acfb9f130bdb1899d76c53990fb4e04cd64fc91687208c4ecaaf2c2908410; seq137 bothslots valid zero dropped", "Previous accepted P5 source07806e9b9ede578837ca44c10a11d7e6d5eedbee/CI45344176858; native macOS26C5035r ABI fixtures and pinned sheng macOS override", "Existing recovery seed d2e32a5f7dd37807a816d857d8b62eba41615c5da9ac335c2322e3c7a35ffc70; retained P5 FD e5f20f393295df7743cbbd3f3a9d0e1bef427ba5caf0f25e18b044998b74897b"]
+configuration = ["One final ESP only after five offline gates; no phone access, no partition changes; existing UFS Data policy upgraded atomically before launchd", "New core required only for exact host_statistics64 capacity compatibility, pre-launchd policy transaction and owned AKS platform process grant; unchanged GPU/Mesa/UEFI reused", "Explicit Normal-WB CPU mappings for audio/video/Wi-Fi/DP reserved DMA RAM; MMIO Inhibit; stock thermal thresholds preserved"]
+procedure = ["Execute production self-clearing RCG/PCIe, physical OTG BC80+CC1=09 15s feedback with PD timeout, human-calibrated touch/timer models under sanitizers", "Compile actual DTB/ADT, inventory memory/lookup properties and macOS sheng differences, classify every probe/worker failure; all retained P0-P5 target/PAC gates", "Build native core/board/runtime in one cache-aware CI, return payload and objects without final ESP; verify actual returned DTB/kernel/APFS/addon/PAC first, then assemble and read back final 800MiB4Kn ESP"]
+findings = ["v33b Host was torn down by self-sourced VBUS feedback; Cable.signature excludes BC VBUS/CC1 bit3 and idle/nonDP AltMode reset is idempotent. Physical feedback model15seconds yields zeroleaveRole/OTGoff/generationjitter", "Two ESR96000061 faults during reserved audio/video buffer zeroing: their DefaultCache maps replaced with explicitCopyback, likewise WiFi and DP pool. RCG update self-clears immediately: dedicated locked trigger-wait-clear helper fixes falsePCIe -12", "Phone tap slop3mm with aspect-correct Y,400ms deadline,32msdown/8msup,workloop timer,staggeredrighttap and doubletapdrag; no stationary60msgap cancellation; stop serialization on sameworkloop", "Policy58system/25gui removes iconservices; exact binary blob is migrated on both existingUFS and RAMData beforelaunchd with owner/mode/link checks,atomicrename,explicittruncate/fsync and repeatno-op. Wireless job gated by real firmware/interface readiness with60srestartfloor and stale marker removed atboot", "Actual native vm_stats15capacity canary and ownedAKS5platformprocess/nonplatformspoof testsPASS. Actual compiled DTB/ADT contains Bluetooth encoding1/speed3200000 and wlan; vsync-fixed=1 and owned refresh publication admits60Hz. Thermal78C level0 matches unchanged90C CPU firsttrip; no hardware outcome inferred", "Additional diagnostic review found RTSOFF/ERST outside the old4KiB monitor map; monitor now uses the existing host32KiB MMIO aperture and the same bound. Source and local gates tracked in v33b report; CI/returned-binary/final-image validation pending until their receipts exist. No image completion or enumeration success claimed"]
+completion = ["Source fixes and local production regression checks implemented; final delivery awaits native CI and actual returned-byte acceptance"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE: actual USB enumeration, clicks, radio firmware/BDF, audio/video and thermal/VSync behavior need new physical log; compiler or simulated MMIO cannot prove silicon behavior"]
+next_action = ["Finish all local gates, push reviewed source, complete CI, accept actual returned payload/objects then generate exactly one final ESP and final0-7report"]
+[[area.evidence]]
+kind = "host"
+revision = "4a50a304c3fd96791970537b3793f9c241f895eb"
+reference = "reports/v33b-runtime-repair.json"
+command = "test-v33b-causal.py; test-v33b-policy.py; test-v33b-host-abi.py; check-v33b-static.py; check-v33b-failures.py; pre-ci-p4.py; check-dp-local.py; check-dp-target.py; check-media-callback-pac.py --dp --hid"
+result = "Production models, POSIX migration, exact ABI canaries, compiled DTB/ADT, 48probe/thread entry and87exit inventory, retained P0-P5 regression and target callback checks; complete native CI and image status recorded separately without hardware claims"
+
+[[area.evidence]]
+kind = "source"
+revision = "9a28e884665a5ff66b843b757db713f86601a70b"
+reference = "reports/v33b-additional-five.json"
+command = "Compare original b5q iommu-map and Linuxv6.12 pcie-qcom.c config_sid; complete50fixed DT reservations/HOB and production allocation/USB mapping tests; actualCI45393357234 payload plist readback; real UPL/error and policy boot-chain harnesses"
+result = "PARF encoding alreadycorrect01000100: BDF31:16=0100,SIDoffset15:8=1,NEXT7:0=0 =>SID1401; proposed01000001 wouldcorruptNEXT. Explicit encoding and actualDT/IORT assertions added. Fixed12uncovered low no-map HOB gaps, validates PCIe/media fullpool+table allocations beforezero and subtracts all fixedreserved spans from USB maps. New0013UEFIpatch requiresnewFD/boot. dyld loopalreadyguardsretval but nowlocalpage_kr+explicitbreak andeverychainparserfailurepropagates. Stalereadymarker is removed beforepolicypermissionchecks, so a failedmigration cannot launchWiFi early. Officialfirmware5mergedDTs yield190low no-mapchecks withzerouncoveredranges. Migrationfailure is independentofmount/GPU; uid501 GUIoldfile repairedtoroot, nonrootssystem/symlinks/hardlinksrejected. ActualCIaddon ReadBack alreadyPASS newfalseRunAtLoad/PathState/60job; addedexplicit addon-add-dir refresh inreusepath withoutchangingexecutablesorweakeningassertion. Cachefallback restrictedtosameOS/arch/Xcode/OSprofile; upstreamresolverreappliesorderedpatches and preservesonlybyteidenticalfiles mtimes, nativecompile/link stillrequiredforchangedcore. UpdatednativeCI/finalbytespending; nohardwareclaim."

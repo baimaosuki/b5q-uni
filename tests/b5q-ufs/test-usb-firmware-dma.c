@@ -110,6 +110,21 @@ int main(void)
   tables.Capacity = tables.Used;
   assert(!UsbDmaMapRange(&tables, 0x8b9c00000, 0x8b9c01000));
 
+  // v33b actual handoff: owned RAM starts above4GiB and spans6GiB.
+  // Walk every4KiB leaf, checking translated address and WB-IS attributes.
+  static UINT64 high_pages[32 * USB_DMA_PAGE / sizeof(UINT64)];
+  USB_DMA_TABLES high = {high_pages, 0xa0c000000, 1, 32};
+  const UINT64 first = 0x88ba04000, last = first + 0x180000000;
+  assert(UsbDmaMapRange(&high, first, last));
+  for (UINT64 pa = first; pa < last; pa += 4096) {
+    UINT64 descriptor = walk(&high, pa, &shift);
+    UINT64 offset = ((UINT64)1 << shift) - 1;
+    assert(((descriptor & USB_DMA_PA_MASK & ~offset) | (pa & offset)) == pa);
+    assert((descriptor & USB_DMA_LEAF_ATTR) == USB_DMA_LEAF_ATTR);
+  }
+  assert(!walk(&high, first - 4096, &shift));
+  assert(!walk(&high, last, &shift));
+
   UINT8 tree[100] = {0};
   B5Q_USB_DMA_ADT adt = {MAX_UINTN, MAX_UINTN, MAX_UINTN};
   assert(FindUsbDmaProperty("b5q-usb-dma-ready", tree, 0, 4, &adt));
@@ -134,5 +149,5 @@ int main(void)
   result.State.OwnedBytes = 0x100000000;
   WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x100000000, FALSE);
   assert(tree[0] == 0);
-  puts("PASS USB 1GiB/2MiB/4KiB mappings, unmapped holes, held table pool, optional ADT and final-map retry");
+  puts("PASS USB actual0x88ba04000+6GiB every4KiB WB-IS, 1GiB/2MiB/4KiB mappings, unmapped holes, held table pool, optional ADT and final-map retry");
 }

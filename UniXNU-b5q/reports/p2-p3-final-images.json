@@ -73,5 +73,16 @@
     "artifacts/b5q-p3-work/ci45268304105/artifact-transfer.json": "2316ecaa2aeb87e566e774fac6ea3b15394dca39d1741ccc6944b0b4e809c666",
     "artifacts/b5q-p3-work/ci45268304105/firmware-pairing.json": "2cf7b919b6b3e1065f72dad0b7c430932ffe198af593ed86abc7031f1b7ef7c5"
   },
-  "delivery": "Retained until separate full P4 and P5 images and overall recheck complete. No flashing performed or hardware success inferred."
+  "delivery": "Ready as one of three matched ESP/boot pairs; see reports/p0-p5-goal-delivery.md. Source/host/CI/image gates passed, new physical hardware qualification pending; no phone operation performed.",
+  "final_handoff_recheck": {
+    "passed": true,
+    "images": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-p3-work/handoff-recheck/images.json",
+      "sha256": "0aa18f84900f0c2a4e593f48789bdac7c1e63903bc3c3cd41357c81e20a9806c"
+    },
+    "boot": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-p3-work/handoff-recheck/boot.json",
+      "sha256": "c8953d079ec1dbf877888237e675f20c072a312fa000c7849dc410b7d0032902"
+    }
+  }
 }

@@ -84,6 +84,11 @@ def unused_auth_declarations(path,scan):
         rows.append(dict(object=str(path),declaration=name,target=target,external_relocations=0,
             actual_target_auth_relocations=scan['signed'][target]))
     return rows
+if not a.ci:
+    # The new shared RCG trigger is supplied by this build's real board C
+    # object, rather than pretending it exists in the historical P1 core.
+    gcc=R/'artifacts/b5q-p0-work/objects/Sm8550Gcc.o'
+    assert gcc.is_file();paths.append(gcc)
 scans={p:pac.scan(p)for p in paths};coreCalls=[]
 auth_metadata=[row for p,scan in scans.items()for row in unused_auth_declarations(p,scan)]
 metadata_names={row['declaration']for row in auth_metadata}

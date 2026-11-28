@@ -15,13 +15,10 @@ template<class IO> int train(IO &io) {
     unsigned tries=0;
     while(tries++<100 && (!(io.readGcc(0x6b004)&(1u<<31)) || !(io.readGcc(0x6c000)&(1u<<31))))io.delay(10);
     if(!(io.readGcc(0x6b004)&(1u<<31)) || !(io.readGcc(0x6c000)&(1u<<31)))return -11;
-    if(!io.gcc(0x6b078,~0u,0) || !io.gcc(0x6b074,0,1) ||
-       !io.gcc(0x6b05c,~0u,(6u<<8)|5) || !io.gcc(0x6b058,0,1))return -12;
-    const uint32_t roots[]={0x6b074u,0x6b058u};
-    for(uint32_t reg: roots) {
-        tries=0;while((io.readGcc(reg)&1) && tries++<100)io.delay(100);
-        if(io.readGcc(reg)&1)return -12;
-    }
+    // CMD_UPDATE is a pulse: hardware clears it on a successful switch.
+    // Never verify it with the persistent RMW/readback helper.
+    if(!io.gcc(0x6b078,~0u,0) || !io.rcg(0x6b074) ||
+       !io.gcc(0x6b05c,~0u,(6u<<8)|5) || !io.rcg(0x6b058))return -12;
     if(!io.gcc(0x6b070,3,2) || !io.gcc(0x52008,0,0x7f) ||
        !io.gcc(0x52000,0,(1u<<12)|(1u<<19)|(1u<<22)) || !io.clkref())return -12;
     io.delay(200);
@@ -46,12 +43,15 @@ template<class IO> int train(IO &io) {
     tries=0;while((io.readPhy(0x214)&0x40) && tries++<100)io.delay(100);
     if(io.readPhy(0x214)&0x40)return -14;
     // Requester-ID to SID translation is PCIe PARF, never SMMU MMIO.
+    // qcom_pcie_config_sid_sm8250: BDF[31:16], offset[15:8], NEXT[7:0].
+    // b5q iommu-map: RID0100 -> SID1401, base1400 => offset1.
+    constexpr uint32_t endpointEntry=(0x0100u<<16)|(1u<<8);
     for(unsigned i=0;i<256;i++)io.parf(0x2000+4*i,~0u,0);
     io.parf(0x2c00,1,0);
     uint8_t crc=0;
     const unsigned requester[]={1,0};
     for(unsigned byte: requester){crc^=byte;for(unsigned bit=0;bit<8;bit++)crc=(crc&128)?uint8_t((crc<<1)^7):uint8_t(crc<<1);}
-    io.parf(0x2000+4*crc,~0u,0x01000100);
+    io.parf(0x2000+4*crc,~0u,endpointEntry);
     io.dbi(0x18,~0u,0x00010100);io.dbi(4,0,6);
     io.delay(100000);io.pin(94,0x201,1);io.delay(1000);
     io.parf(0x1b0,0,1u<<8);
