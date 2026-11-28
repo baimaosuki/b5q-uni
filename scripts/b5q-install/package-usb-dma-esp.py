@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Repack the verified v27 ESP with the DarwinBoot PE from the new firmware."""
+"""Repack a verified b5q ESP with the DarwinBoot PE from the new firmware."""
 import argparse
 import hashlib
 import json
@@ -16,6 +16,7 @@ from unixnu.boot_template import loader_pe
 
 LOADER = "1b64af87-8415-4b57-9b16-680d70913b9f"
 V27_SHA = "f7cacbc026f765514262d62d634a49af6526167350e16a15bcf966f7604c446a"
+V29_SHA = "441607e5f864935e2000ba5dea04e90c9b2fbdb11c4df10bd6ba672cef191134"
 EFI = "EFI/UniXNU"
 ADT = EFI + "/Payloads/kernel.macho.adt"
 DRIVER = EFI + "/Drivers/DarwinBoot.efi"
@@ -96,35 +97,47 @@ def main():
     parser.add_argument("--esp", type=Path, required=True, help="verified input ESP updated in place")
     parser.add_argument("--fd", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--baseline", choices=("v27", "v29"), default="v27")
     args = parser.parse_args()
     original = record(args.esp)
-    assert original["sha256"] == V27_SHA
+    from_v29 = args.baseline == "v29"
+    assert original["sha256"] == (V29_SHA if from_v29 else V27_SHA)
     image_format(args.esp)
     loader = loader_pe(args.fd.read_bytes(), LOADER)
     assert b"b5q-usb-dma-diagnostics" in loader
     with tempfile.TemporaryDirectory(prefix="b5q-dma-esp-") as name:
         temp = Path(name)
         before = members(args.esp, temp / "before")
-        assert before[ADT]["bytes"] > 0 and before[DRIVER]["sha256"] != hashlib.sha256(loader).hexdigest()
-        patched = temp / "kernel.macho.adt"
-        patched.write_bytes(add_placeholders((temp / "before" / ADT).read_bytes()))
+        adt = (temp / "before" / ADT).read_bytes()
+        updated = {}
+        if from_v29:
+            chosen = adt_nodes(adt)["/chosen"][2]
+            assert all(chosen.get(name) == bytes(size) for name, size in PLACEHOLDERS.items())
+        else:
+            patched = temp / "kernel.macho.adt"
+            patched.write_bytes(add_placeholders(adt))
+            updated[ADT] = patched
         pe = temp / "DarwinBoot.efi"
         pe.write_bytes(loader)
-        run("mcopy", "-o", "-i", args.esp, patched, "::/" + ADT)
-        run("mcopy", "-o", "-i", args.esp, pe, "::/" + DRIVER)
+        if before[DRIVER] != record(pe):
+            updated[DRIVER] = pe
+        for name, path in updated.items():
+            run("mcopy", "-o", "-i", args.esp, path, "::/" + name)
         after = members(args.esp, temp / "after")
         assert before.keys() == after.keys()
-        assert {item for item in before if before[item] != after[item]} == {ADT, DRIVER}
-        assert after[ADT] == record(patched) and after[DRIVER] == record(pe)
+        assert {item for item in before if before[item] != after[item]} == updated.keys()
+        assert all(after[name] == record(path) for name, path in updated.items())
+        assert after[DRIVER] == record(pe)
         menu = tomllib.loads((temp / "after" / EFI / "unixnu.toml").read_text())
         entry = next(e for e in menu["entry"] if e.get("type") == "xnu")
         assert menu["boot"]["default"] == entry["id"] == "xnu"
         assert "usb=1" in entry["args"].split() and len(entry["args"].encode()) <= 950
     image_format(args.esp)
     run("fsck.fat", "-n", args.esp)
-    report = {"baseline_run": 44980608285, "baseline_esp": original, "updated_esp": record(args.esp),
+    report = {"baseline_run": 44985774704 if from_v29 else 44980608285,
+              "baseline_esp": original, "updated_esp": record(args.esp),
               "firmware": record(args.fd), "darwinboot": after[DRIVER], "boot_args_bytes": len(entry["args"].encode()),
-              "changed_esp_files": [ADT, DRIVER], "members": after, "real_device_verified": False}
+              "changed_esp_files": list(updated), "members": after, "real_device_verified": False}
     args.report.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps({"esp": report["updated_esp"], "darwinboot": report["darwinboot"]}))
 

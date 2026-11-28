@@ -1,0 +1,85 @@
+{
+  "passed": true,
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "source_commit": "9b0653f1894d3b144acfb694dd233342890c6c5b",
+  "CI": {
+    "kernel": 45295645295,
+    "firmware": 45296602477
+  },
+  "esp": {
+    "path": "artifacts/b5q-esp-p4/esp.img",
+    "bytes": 838860800,
+    "sha256": "fb874c56a44d2c8632609a2719ba2bc2c18d816ea263a14baf406db2676960ba"
+  },
+  "boot": {
+    "path": "artifacts/b5q-esp-p4/boot.img",
+    "bytes": 19120128,
+    "sha256": "32727e914f0b2741b2b5731ea4fa19c3b671973990bafc5dd0740b6f0dbe811f"
+  },
+  "firmware": {
+    "bytes": 3145728,
+    "sha256": "5c3a2522d193b2699bfc0fc922abfda027bc00d48cbe553db2c49c5188013f03"
+  },
+  "kernel": "5a4d8d945b09d8b1f00e59f921cd8435709bd2d2868c6416e9263493c5767dff",
+  "profiles": {
+    "xnu": {
+      "kernel_sha256": "5a4d8d945b09d8b1f00e59f921cd8435709bd2d2868c6416e9263493c5767dff",
+      "args_bytes": 1000,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": false
+    },
+    "daily": {
+      "kernel_sha256": "5a4d8d945b09d8b1f00e59f921cd8435709bd2d2868c6416e9263493c5767dff",
+      "args_bytes": 1008,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": false
+    },
+    "safe": {
+      "kernel_sha256": "5a4d8d945b09d8b1f00e59f921cd8435709bd2d2868c6416e9263493c5767dff",
+      "args_bytes": 1008,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": false
+    },
+    "ram-fallback": {
+      "kernel_sha256": "5a4d8d945b09d8b1f00e59f921cd8435709bd2d2868c6416e9263493c5767dff",
+      "args_bytes": 1008,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": true
+    }
+  },
+  "tests": {
+    "preCI_groups": 24,
+    "media_objects": 35,
+    "media_callback_PAC": 105,
+    "media_vtable_groups": 6,
+    "wireless_objects": 122,
+    "wireless_callback_PAC": 62,
+    "EL1_apps_smmu_materializations": 0,
+    "Data_policy_counts": [
+      59,
+      26
+    ],
+    "preserved_addon_entries": 50,
+    "new_media_entries": 7
+  },
+  "evidence": {
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/firmware-FV.json": "3d0722d9dd608476a99d000129175cca7accd698ec9cbd5f886a471f95fe7e3f",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/log-allocation.json": "3cead7416fe1b018cecde132bf242e5046c372d1346241629c36d84f90505ab8",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/media-callback-pac.json": "05827e7766e95ca0682fe9aa2ecd31fa85f165c9336867d9a51f908ef120363c",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/linked-PAC.json": "4212d31260960c4f0eada70152364da6de422dea03bdaebaa5a6d40c3e0ba04a",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/images.json": "8fa3acbf4420c98069d1aaff9bcecab2fdcc5b3b3eeaa0f64fadfedb8c41b982",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/POST.json": "45eb6ca90d55648210de77a6b4fd92ed20046bb5ce4bf9886f9d1a3b751879d8",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/wireless-symbol-PAC.json": "97e7c351d7407b80ce5863ec65fa25aa4860bdd527911b5ed0762db5be2dd5ca",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/media-symbol-vtable.json": "254c268b0cabfa962f2596480f1111062cc0721dddb75c4f06096ca040b04b8e",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/APFS.json": "00348862869e5f02563e0f3b7c9758782f110bce20c741fa433c3ce652469b53",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/media-runtime.json": "d50b348a62fb13b4e5ba65a53a5b715e400af1385c1db5d14617ccb15d4df6d1",
+    "artifacts/b5q-p4-work/ci45295645295/acceptance/wireless-runtime.json": "758b4802c45aabec53c3a2fcabb9f1e3c9051f5e47e1d85cf35db8d975e76dde",
+    "artifacts/b5q-p4-work/ci45295645295/firmware-pairing.json": "38462f5b49dfc1a665064fde00a389ffcb3c953484cfe03f28929c1a95aeb414"
+  },
+  "delivery": "Retained until separate complete P5 image and overall recheck; no flashing or hardware success claim",
+  "second_readback": {
+    "path": "artifacts/b5q-p4-work/final-recheck/images.json",
+    "sha256": "8fa3acbf4420c98069d1aaff9bcecab2fdcc5b3b3eeaa0f64fadfedb8c41b982",
+    "passed": true
+  }
+}

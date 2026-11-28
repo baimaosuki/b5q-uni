@@ -191,6 +191,10 @@ for i in range(BASE, len(slots)):
         header += f' virtual __attribute__((deprecated("Unclassified ABI: never call from source"))) void opaque{i}();\n'
 header += f'}};\nstatic_assert(sizeof(IOMobileFramebufferLegacy)=={abi["instance_size"]},"Actual original instance extent");\n'
 (OUT / 'OriginalLegacyFramebufferABI.h').write_text(header)
+if '--abi-header-only' in sys.argv:
+    # Reuse the identical qualified ABI for the independent DP backend.
+    # No driver/core/GPU build is run in this mode.
+    raise SystemExit(0)
 print(run(['python3', ROOT / 'scripts/build-arm-driver.py', 'NativeLegacyDisplay'], text=True), end='')
 
 
@@ -430,6 +434,7 @@ if MACOS:
     compile_cpp(KITS / 'B5qEthernet.cpp', ETH_OUT / 'B5qEthernet.o',
                 ('-I', str(ETH_OUT / 'include'), '-idirafter', f'{macsdk}/System/Library/Frameworks/Kernel.framework/Headers',
                  f'-DB5Q_ETHERNET_CONTROLLER_SIZE={eth_abi["instance_size"]}',
+                 f'-DB5Q_ETHERNET_INTERFACE_SIZE={eth_abi["interface_instance_size"]}',
                  ))
     eth_raw = (ETH_OUT / 'B5qEthernet.o').read_bytes()
     eth_found = object_symbols(eth_raw)
@@ -469,6 +474,8 @@ if MACOS:
 
     eth_slots = [(int(t, 16), int(d, 16)) for t, d in eth_abi['slots']]
     eth_vt = family_vtable('B5qEthernet', 'IOEthernetController', eth_slots)
+    interface_slots = [(int(t, 16), int(d, 16)) for t,d in eth_abi['interface_slots']]
+    family_vtable('ShengWifiInterface','IOEthernetInterface',interface_slots)
     for name in sorted(eth_used - set(eth_bindings)):
         require(False, f'{name}: bound to the collection')
     eth_text, eth_addresses = '.text\n.p2align 2\n', ''

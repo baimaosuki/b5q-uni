@@ -1,0 +1,134 @@
+{
+  "stage": "P1",
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_tested": false,
+  "inputs": {
+    "sources/twrp-b5q/recovery/root/lib/modules/pdic_max77705.ko": "f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca",
+    "sources/twrp-b5q/recovery/root/lib/modules/max77705_charger.ko": "2c7b72c1fd1c5eb840f1c18880ea18c4afb81634d2dd56e9e77c24c31566b6b1",
+    "sources/twrp-b5q/recovery/root/lib/modules/repeater-i2c-eusb2.ko": "a9ee6f9335ddff418bd4cdbd3f82869b01c8a759b0ccc4b151ed9f85fc67bcb5",
+    "uefi-b5q/Binaries/b5q/QcomPkg/Drivers/SamsungDxe/CcicDxe/CcicDxe.efi": "5388db26dd4d8c1b10ee6f3e2190b476dbb19ff306ceece7f9f3cd61a8af787d",
+    "uefi-b5q/Resources/DTBs/b5q.dts": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f",
+    "b5q-runtime.fdt": "74aaf1524d9aca9b8e01c1854fbfcdaf6060f189f3f37db00196d866e3d57be6",
+    "UniXNU-b5q/reports/official-firmware-hardware.json": "e834c46556af74de85f5e988bf2adde0fa7ff600cbf16939e0c07f71943f151f",
+    "UniXNU-b5q/reports/hardware-baseline.json": "7e4e6117b4bf54c3d714742139b19eecde04bd33db8ab787a19ef588706d4228"
+  },
+  "provenance": "UEFI b5q.dts is the Project-Silicium reference. Existing separately extracted stockfirmware reports and runtimeFDT corroborate device properties; copies are not new independent phone samples.",
+  "Samsung_symbols": {
+    "max77705_ccpinstat_irq": "0x16e8..0x18ec;0x1710 reads0a;0x1728 extracts bits7:6",
+    "max77705_ccstat_irq_handler": "0x1b88..0x2250;CC_STATUS0 powerrole1Sink/2Source",
+    "max77705_datarole_irq_handler": "0x6f5c..0x7144;0x6f84 reads0d;0x6fa0 signedbyte and0x7004 bit31 choose data0UFP/1DFP",
+    "max77705_usbc_opcode_write": "0x7340..0x76cc",
+    "CcicDxe": "0x2410..0x2454 accepts a callerparameter for vendor set_sink; it does not prove literal1 is required native DRP initialization",
+    "eusb2_repeater_init": "originalsymbol disassembly inartifacts/b5q-p1-work/eusb2_repeater_init.txt"
+  },
+  "decisions": [
+    "Delete the old forced5e/01 opcode path; adopt firmware negotiated CC/PD state with zero opcode/interruptregister writes. Never label its echo as a proven rolechange.",
+    "Five-read status snapshot0a/0b/0d/08/0a rejects tornCC; pin1CC1/pin2CC2 drivesQMP. Unknownpin degradesUTMI; noGPIO11/PS5169 programming.",
+    "DataHost readsPD0d bit7 independently ofCCpower; Sink+DFP disables localboost and startsXHCI, Source+UFP can keepboost while runningXDCI.",
+    "Connector power/orientation generation reuses the existing serialized QcomDwc3 rolethread, quiescing oldrole before PHYreset; failedtransition backs off1second.",
+    "Both provider bus-number properties now use sizeof(uint32_t). Device register summaries reuse upstreamDWC3 offsets and never sample SMMU.",
+    "Existing168orderedSamsungQMPpairs,TI0x3eoverrides,reset/FIFO powerinputs,1secondIRQfuse,HALhandoff remain. Verified6firmwarepatches reconstructexactv30sources; missingCIinputfiles must be included beforejointCI."
+  ],
+  "dt_lines": [
+    "22447 repeater0x3e",
+    "23315 MAX77705SE8",
+    "23423 DWC3/SID40 and0x90000000+0x60000000 IOVApool",
+    "23499/23513 QMP168sequence"
+  ],
+  "reused_components": [
+    "QcomDwc3 classes/ABI/XDCI/XHCI/reset/rolethread/IRQ",
+    "QcomEusb2Phy.h",
+    "QcomQmpUsb3.h",
+    "UsbProbe kextcatalogue path"
+  ],
+  "remaining_gates": [
+    "New USB3/PDhub/Device phone qualification only; HOST_VERIFIED_PENDING_HARDWARE"
+  ],
+  "joint_preflight": {
+    "baseline_groups": 43,
+    "P1_groups": 10,
+    "report": "artifacts/b5q-p1-work/pre-ci.json",
+    "sha256": "33f82f5ff2f2ec8adbfc7cde59b305f02953dd16dd1cab20c76dc82164afbd33"
+  },
+  "stage_build_and_readback": {
+    "source_commit": "b1e7ae43fb01857d8d845fddeebe4bfdcec0cbfd",
+    "CI_run": 45167257160,
+    "CI_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45167257160",
+    "kernel_and_UEFI_full_builds": "SUCCESS",
+    "images": {
+      "passed": true,
+      "stage": "P0+P1",
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "b07c600256dc392bbd6d752c7f6a7f10adb33aa5f3bfe3ac0abc474945d7b02b"
+      },
+      "FD": {
+        "bytes": 3145728,
+        "sha256": "b909347dd044341ff5e573f2be33154be27900f31b8753cb9f88101b60ece157"
+      },
+      "profiles": {
+        "xnu": {
+          "kernel_sha256": "6996d91a3eaae44ac7e26416d68c98a6fb3fdd65c3ce2c25fbe7e70697746a50",
+          "args_bytes": 981,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "ram-fallback": {
+          "kernel_sha256": "6996d91a3eaae44ac7e26416d68c98a6fb3fdd65c3ce2c25fbe7e70697746a50",
+          "args_bytes": 981,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": true
+        }
+      },
+      "required_symbols": {
+        "_native_ram_block_provider_seed": "0xfffffff00c2d3f14",
+        "_native_ram_block_volume_seed": "0xfffffff00c2d1f44",
+        "_native_ram_block_volume_device": "0xfffffff00c2d1578",
+        "_b5q_power_start": "0xfffffff00c2d3494",
+        "_sheng_cpu_idle_mach": "0xfffffff00b9ab124",
+        "_ml_outside_memory_pages": "0xfffffff00c941118",
+        "_ml_outside_memory_refused": "0xfffffff00c94111c",
+        "_native_touch_recovered": "0xfffffff00c99ff68",
+        "_native_touch_set_sink": "0xfffffff00c2c27d8"
+      },
+      "FAT_members": 16,
+      "all_real_link_inputs_resolved": true,
+      "Data_GPU_unchanged": true,
+      "loader_matches_actual_rebuilt_FD": true,
+      "hardware_qualification": "HOST_VERIFIED_PENDING_HARDWARE",
+      "physical_Data_accessed": false
+    },
+    "boot": {
+      "boot_source": "physical 4Kn UFS ESP",
+      "bootstrap_fat16_bytes": 16777216,
+      "bootstrap_fat16_sha256": "ec709a0a612ce76091cf117104b70f18837c1881c648338f590ff6b1281ffb96",
+      "darwinboot_sha256": "9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f",
+      "samsung_dtb_sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+      "bootshim_sha256": "9346a527441b242c69414fd7e3d6fa17813f281d562fef13d9ba8373d39007a9",
+      "boot": {
+        "bytes": 19116032,
+        "sha256": "38cbf9eb34f942e4f6f816538c4b4b3071c89d2563f00901dd2826493da4a6fc"
+      },
+      "source_boot": {
+        "bytes": 19275776,
+        "sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1"
+      },
+      "firmware": {
+        "bytes": 3145728,
+        "sha256": "b909347dd044341ff5e573f2be33154be27900f31b8753cb9f88101b60ece157"
+      },
+      "esp": {
+        "bytes": 838860800,
+        "sha256": "b07c600256dc392bbd6d752c7f6a7f10adb33aa5f3bfe3ac0abc474945d7b02b"
+      },
+      "boot_partition_bytes": 100663296,
+      "hardware_tested": false
+    },
+    "actual_object_PAC_report": "artifacts/b5q-p1-work/returned-PAC/report.json",
+    "full_image_report": "artifacts/b5q-p1-work/image-acceptance/images.json",
+    "physical_device_accessed": false,
+    "firmware_pairing": "RebuiltDarwinBoot fromtheexactv30source/pinnedpatches; ESPdriverreplaced to matchactualnewFD;15otherFATmembersunchanged",
+    "previous_loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "new_loader_sha256": "9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f"
+  }
+}

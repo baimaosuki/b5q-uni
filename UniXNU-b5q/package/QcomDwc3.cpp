@@ -11,10 +11,13 @@
 #include "B5qUsbInputs.h"
 #include "B5qUsbIrq.h"
 #include "B5qUsbDmaHandoff.h"
+#include "B5qMax77705.h"
+#include "B5qDpPort.h"
 #include <mach/mach_time.h>
 extern "C" bool b5q_usb_repeater(bool,bool);
 extern "C" bool b5q_usb_typec_init(void);
 extern "C" int b5q_usb_cable_role(void);
+extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *);
 extern "C" bool b5q_usb_otg(bool);
 #include "QcomRpmh.h"
 #include "AppsSmmuLock.h"
@@ -26,6 +29,9 @@ extern "C" bool b5q_usb_otg(bool);
 #include <IOKit/IODeviceTreeSupport.h>
 #include <IOKit/IOPlatformExpert.h>
 #include <libkern/c++/OSData.h>
+#include "B5qFeatures.h"
+extern "C" bool b5q_dp_link_stop(void);
+extern "C" void b5q_dp_link_update(const B5qDpPortState *);
 extern "C" {
 int armcpu_spi_attach(uint32_t, bool, void (*)(void *), void *, uint32_t *, uint64_t *);
 int armcpu_spi_mask(uint32_t, bool);
@@ -52,6 +58,7 @@ constexpr unsigned kOwnedTcs = 2;   // shared with the microphone rail under the
 struct Region {IOMemoryMap *map; volatile uint32_t *va;};
 Region gGcc, gScratch, gPhy, gTcsrMap;
 bool gSuperSpeed;
+unsigned gDpLanes;
 void stage(int value) {native_usb_stats[0] = (uint32_t)value;IOLog("qcom-dwc3: stage=%d\n",value);}
 bool mapRegion(Region &r, uint64_t pa, uint64_t bytes) {
     IODeviceMemory *d = IODeviceMemory::withRange(pa, bytes);
@@ -166,6 +173,15 @@ void selectUtmiClock() {
     *cfg = *cfg | 1u | 1u << 3; barrier(); IOSleep(1);
     *cfg = *cfg & ~(1u << 8); barrier();
 }
+// Reverse the QSCRATCH UTMI-only mux after a successful hot-plug QMP start.
+// PIPE_UTMI_CLK_DIS gates the mux while PIPE_UTMI_CLK_SEL/PIPE3_PHYSTATUS_SW
+// change. Preserve every unrelated GENERAL_CFG bit.
+void selectPipeClock() {
+    volatile uint32_t *cfg = gScratch.va + 0x8 / 4;
+    *cfg = *cfg | 1u << 8; barrier(); IOSleep(1);
+    *cfg = *cfg & ~(1u | 1u << 3); barrier(); IOSleep(1);
+    *cfg = *cfg & ~(1u << 8); barrier();
+}
 void vbusOverride(bool on) {
     volatile uint32_t *ss = gScratch.va + 0x30 / 4, *hs = gScratch.va + 0x10 / 4;
     const uint32_t ssBits = 1u << 24, hsBits = 1u << 20 | 1u << 28;
@@ -180,16 +196,26 @@ bool qmpInit(bool reverse) {
     volatile uint8_t *base = reinterpret_cast<volatile uint8_t *>(phy.va);
     auto rd = [&](uint32_t o) {return *reinterpret_cast<volatile uint32_t *>(base + o);};
     auto wr = [&](uint32_t o, uint32_t v) {*reinterpret_cast<volatile uint32_t *>(base + o) = v; barrier();};
+    if(gDpLanes==4){
+        // Samsung dp_catalog_ctrl_usb_reset: USB is already stopped by
+        // roleThread. Four DP lanes retain USB2 through the UTMI mux.
+        wr(kQmpComResetOvrd,0x0a);wr(kQmpComMode,2);wr(kQmpComReset,1);
+        wr(kQmpComTypec,reverse?3:2);wr(kQmpComSwi,0);wr(kQmpComReset,0);
+        wr(kQmpComPower,1);wr(kQmpComResetOvrd,0);
+        phy.map->release();return false;
+    }
     volatile uint32_t *reset = gGcc.va + 0x50000 / 4, *common = gGcc.va + 0x50008 / 4;
     *reset = *reset | 1u; *common = *common | 1u; barrier(); IODelay(20);
     *reset = *reset & ~1u; *common = *common & ~1u; barrier();
-    if (!rcg(0x39070, 0) || !branch(0x39060) || !branch(0x39064)) return false;
-    sm8550_gcc_update32(gGcc.va + 0x3906c / 4, 3u, 0);                          // the pipe clock comes from the PHY
-    sm8550_gcc_update32(gGcc.va + 0x39068 / 4, 0, 1u);
+    if (!rcg(0x39070, 0) || !branch(0x39060) || !branch(0x39064) ||
+        !sm8550_gcc_update32(gGcc.va + 0x3906c / 4, 3u, 0) ||
+        !sm8550_gcc_update32(gGcc.va + 0x39068 / 4, 0, 1u)) {
+        phy.map->release();return false;
+    }
     wr(kQmpComPower, rd(kQmpComPower) | 1u);
     wr(kQmpComResetOvrd, rd(kQmpComResetOvrd) | 0xfu);
     wr(kQmpComTypec, 1u << 1 | (reverse ? 1u : 0));                             // software port select
-    wr(kQmpComMode, 1u);                                                        // USB3_MODE
+    wr(kQmpComMode, gDpLanes==2?3u:1u);                                        // Samsung USB3+DP / USB3 only
     wr(kQmpComResetOvrd, rd(kQmpComResetOvrd) & ~0xcu);
     wr(kQmpComSwi, rd(kQmpComSwi) & ~3u);
     wr(kQmpComReset, rd(kQmpComReset) & ~1u);
@@ -197,19 +223,21 @@ bool qmpInit(bool reverse) {
     for (const auto &w : B5qUsbInputs::qmp) wr(w.offset, w.value);
     wr(kQmpReset, rd(kQmpReset) & ~1u);
     wr(kQmpStart, rd(kQmpStart) | 3u);
+    if(gDpLanes==2)wr(kQmpComResetOvrd,rd(kQmpComResetOvrd)&~0xfu);
     bool ok = false;
     for (unsigned i = 0; i < 1000 && !ok; ++i) {ok = !(rd(kQmpStatus) & 1u << 6); if (!ok) IODelay(200);}
     native_usb_stats[33] = rd(kQmpStatus);
+    if(ok)selectPipeClock();
+    phy.map->release();
     return ok;
 }
 // The USB 3 path, or false for USB 2 only with the UTMI clock in place of the PIPE clock (a USB 2 cable still works on the former).
 bool superSpeedInit() {
-    Region tlmm = {};
-    if (!mapRegion(tlmm, 0xf100000, 0x10000)) return false;
-    const bool reverse = tlmm.va[(11 * 0x1000 + 4) / 4] & 1u;                   // orientation-gpios, tlmm 11, active high
-    native_usb_stats[34] = reverse;
-    tlmm.map->release();
-    return qmpInit(reverse);
+    B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
+    const int reverse=cable.orientation();
+    native_usb_stats[34]=uint32_t(reverse);
+    if(reverse<0){IOLog("qcom-dwc3: QMP orientation=unknown CC0=%x valid=%u UTMI-only\n",cable.cc0,cable.valid);return false;}
+    return qmpInit(reverse!=0);
 }
 // The b5q EL2 XPU rejects even SMR reads at EL1. No mapping, ID register,
 // allocator scan or diagnostic may touch apps_smmu here. A future loader-owned
@@ -324,7 +352,7 @@ public:
 OSDefineMetaClassAndStructors(QcomDwc3Nub, IOService)
 
 // Whether the device stack may have the core: false while the core is in the host role or going there.
-static volatile bool gDeviceStackAllowed = true;
+static volatile bool gDeviceStackAllowed = false;
 class QcomDwc3Xdci : public AppleUSBXDCI {
     OSDeclareDefaultStructors(QcomDwc3Xdci)
     uint32_t read(uint32_t offset) {return (*reinterpret_cast<volatile uint32_t **>(reinterpret_cast<uint8_t *>(this) + 0x450))[offset / 4];}
@@ -461,6 +489,7 @@ int gVbusOn = -1, gVbusApplied = -1;
 enum Role {kRoleNone, kRoleDevice, kRoleHost};
 IOLock *gRoleLock;
 int gRoleWanted, gRoleApplied, gCoreRole = kRoleDevice;
+uint32_t gCableWanted, gCableApplied;
 bool gForceHost;
 Region gGlobals, gXhciRegs;
 QcomDwc3Nub *gDeviceNub, *gHostNub;
@@ -472,9 +501,17 @@ void wantRole(int role) {
     IOLockWakeup(gRoleLock, &gRoleWanted, false);
     IOLockUnlock(gRoleLock);
 }
-// What is known now, by ucsi_partner_change: the port manager when it answered, which tells a USB host from a charger and a peripheral; the
-// charger firmware's online value until then, or if UCSI does not come up.
-void cableChanged() {wantRole(gForceHost?kRoleHost:b5q_usb_cable_role());}
+// A data-role, power-role or CC orientation change restarts the existing
+// serialized role lifecycle, including when the data role itself stayed Host.
+void cableChanged() {
+    B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
+    if(!gRoleLock)return;
+    IOLockLock(gRoleLock);
+    gCableWanted=cable.signature();
+    gRoleWanted=gForceHost?kRoleHost:cable.role();
+    IOLockWakeup(gRoleLock,&gRoleWanted,false);
+    IOLockUnlock(gRoleLock);
+}
 void forceHostThread(void *seconds, wait_result_t) {
     IOSleep((uint32_t)reinterpret_cast<uintptr_t>(seconds) * 1000);
     gForceHost = true;
@@ -506,8 +543,9 @@ void leaveRole(int role) {
     }
 }
 // __dwc3_set_mode: a core soft reset between the roles, then the port capability.
-void setCoreRole(int role) {
-    if (gCoreRole == role) return;
+bool setCoreRole(int role) {
+    gDeviceStackAllowed = role == kRoleDevice;
+    if (gCoreRole == role) return repeater(false,role==kRoleHost);
     volatile uint32_t *gctl = gGlobals.va + 0x110 / 4;
     QcomDwc3Nub::route(nullptr);
     *gctl = *gctl | 1u << 11;
@@ -523,15 +561,15 @@ void setCoreRole(int role) {
     barrier();
     gCoreRole = role;
     gDeviceStackAllowed = role == kRoleDevice;
-    repeater(false, role == kRoleHost);
+    return repeater(false, role == kRoleHost);
 }
-// qmp_combo_typec_switch_set and ps5169: the lanes follow the plug. The GPIO means something once a cable is in.
+// Lanes follow Samsung PDIC CCPinStat. The role thread has already stopped
+// the previous controller before resetting a PHY on a changed connector.
 void followOrientation() {
-    Region tlmm = {};
-    if (!mapRegion(tlmm, 0xf100000, 0x10000)) return;
-    const uint32_t reverse = tlmm.va[(11 * 0x1000 + 4) / 4] & 1u;
-    tlmm.map->release();
-    if (gSuperSpeed && reverse != native_usb_stats[34]) {
+    B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
+    const int reverse=cable.orientation();
+    if (gDpLanes==4) {selectUtmiClock();return;}
+    if (!gSuperSpeed || uint32_t(reverse) != native_usb_stats[34]) {
         gSuperSpeed = superSpeedInit();
         if (!gSuperSpeed) selectUtmiClock();
     }
@@ -541,7 +579,8 @@ void enterHost() {
     // DWC3_XHCI_REGS_END: the host registers below the global ones.
     IODeviceMemory *range = IODeviceMemory::withRange(kCore, 0x8000);
     OSArray *ranges = range ? OSArray::withObjects((const OSObject **)&range, 1) : nullptr;
-    OSData *zero = OSData::withBytes("\0\0\0\0", 4);
+    const uint32_t busNumber=0;
+    OSData *zero = OSData::withBytes(&busNumber,sizeof(busNumber));
     bool done = false;
     if (nub && nub->init() && ranges && zero) {
         nub->setDeviceMemory(ranges);
@@ -573,11 +612,16 @@ bool enterRole(int role) {
         IOLog("qcom-dwc3: hardware-only role=%u dma=deferred-no-firmware-handoff\n",role);
         return true;
     }
-    if (role == kRoleNone) return true;
-    if(role!=kRoleHost && !b5q_usb_otg(false))return false;
-    if(role==kRoleHost && !b5q_usb_otg(true)){IOLog("qcom-dwc3: OTG power rejected\n");return false;}
+    if (role == kRoleNone) return b5q_usb_otg(false);
+    B5qMax77705::Cable cable;
+    if(!b5q_usb_cable_state(&cable)||cable.water())return false;
+    // Power role is independent of DFP/UFP. In particular a powered PD Hub
+    // can be Sink+DFP: disable our boost and let its VBUS supply the bus.
+    const bool source=cable.sourceVbus(role);
+    if(!b5q_usb_otg(source)){IOLog("qcom-dwc3: power transition rejected source=%u power=%u data=%d\n",source,cable.power(),role);return false;}
+    IOLog("qcom-dwc3: role=%d power=%u vbus-source=%u external-hub=%u\n",role,cable.power(),source,role==kRoleHost&&cable.power()==1);
     followOrientation();
-    setCoreRole(role);
+    if(!setCoreRole(role)){b5q_usb_otg(false);return false;}
     if (role == kRoleHost) {
         vbusOverride(false);
         enterHost();
@@ -613,27 +657,73 @@ void hostStats() {
     IOLog("qcom-dwc3: host cmd=%x sts=%x EINT=%u HSE=%u devs=%u irq=%u storm=%u pwr=%u\n",native_usb_stats[47],native_usb_stats[48],!!(native_usb_stats[48]&8),!!(native_usb_stats[48]&4),count,native_usb_stats[11],gIrqStormed,gHost?unsigned(gHost->getPowerState()):0);
     OSSafeReleaseNULL(devices); OSSafeReleaseNULL(match);
 }
+void deviceStats() {
+    if(!gDmaReady || gRoleApplied!=kRoleDevice || !gGlobals.va)return;
+    // Reuse the upstream device-register samples; SMMU diagnostic slots stay
+    // zero on b5q. The role worker owns this mapping for its entire lifetime.
+    native_usb_stats[26]=gGlobals.va[0x70c/4];
+    native_usb_stats[28]=gGlobals.va[0x40c/4];
+    native_usb_stats[31]=gGlobals.va[0x408/4];
+    IOLog("qcom-dwc3: device dctl=%x dsts=%x events=%x evsz=%x on=%u off=%u irq=%u storm=%u\n",
+          gGlobals.va[0x704/4],native_usb_stats[26],native_usb_stats[28],native_usb_stats[31],
+          native_usb_stats[12],native_usb_stats[13],native_usb_stats[11],gIrqStormed);
+}
 void roleThread(void *, wait_result_t) {
+    const bool dpEnabled=B5qFeatures::option("b5q-dp",B5qFeatures::DisplayPort)!=0;
+    uint32_t dpGeneration=0;
     for (;;) {
+        B5qDpPortState port{};
+        if(dpEnabled)b5q_dp_port_poll(&port);
+        const unsigned requestedDp=dpEnabled&&port.configured?port.lanes:0;
         IOLockLock(gRoleLock);
-        if(gRoleWanted==gRoleApplied){
+        if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied&&requestedDp==gDpLanes){
             uint64_t deadline;clock_interval_to_deadline(1,kSecondScale,&deadline);
             IOLockSleepDeadline(gRoleLock,&gRoleWanted,deadline,THREAD_UNINT);
             IOLockUnlock(gRoleLock);
-            cableChanged();hostStats();
+            cableChanged();hostStats();deviceStats();
+            if(dpEnabled){
+                b5q_dp_port_poll(&port);
+                if((port.configured?port.lanes:0)==gDpLanes&&port.generation==dpGeneration)b5q_dp_link_update(&port);
+            }
             IOLockLock(gRoleLock);
-            if(gRoleWanted==gRoleApplied){IOLockUnlock(gRoleLock);continue;}
+            if(gRoleWanted==gRoleApplied&&gCableWanted==gCableApplied&&
+               (!dpEnabled||((port.configured?port.lanes:0)==gDpLanes&&port.generation==dpGeneration))){IOLockUnlock(gRoleLock);continue;}
         }
         const int role = gRoleWanted;
+        const uint32_t cableVersion = gCableWanted;
         IOLockUnlock(gRoleLock);
-        if (role == kRoleHost) gDeviceStackAllowed = false;
+        if(dpEnabled&&!b5q_dp_link_stop()){
+            // Keep the combo lanes and existing controller intact until
+            // DP has actually stopped clocks/scanout. A detached cable
+            // still drops our VBUS source immediately.
+            B5qMax77705::Cable current;
+            if(!b5q_usb_cable_state(&current)||!current.attached())b5q_usb_otg(false);
+            IOLog("B5qDP: combo transition deferred: previous link still owned\n");
+            IOSleep(100);continue;
+        }
+        gDeviceStackAllowed = false;
         leaveRole(gRoleApplied);
         gRoleApplied = kRoleNone;
-        if(enterRole(role))gRoleApplied=role;
-        else {gRoleApplied=kRoleNone;gRoleWanted=kRoleNone;}
+        if(dpEnabled){
+            gDpLanes=port.configured?port.lanes:0;dpGeneration=port.generation;
+            B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
+            if(cable.orientation()>=0){gSuperSpeed=qmpInit(cable.orientation()!=0);if(!gSuperSpeed)selectUtmiClock();}
+            IOLog("B5qDP: combo lanes=%u reverse=%d usb3=%u generation=%u\n",gDpLanes,cable.orientation(),gSuperSpeed,dpGeneration);
+        }
+        const bool entered=enterRole(role);
+        if(dpEnabled)b5q_dp_link_update(&port);
+        IOLockLock(gRoleLock);
+        gCableApplied=cableVersion;
+        if(entered)gRoleApplied=role;
+        else {
+            gRoleApplied=kRoleNone;
+            if(gRoleWanted==role && gCableWanted==cableVersion)gRoleWanted=kRoleNone;
+        }
+        IOLockUnlock(gRoleLock);
         native_usb_stats[44] = (uint32_t)role | (uint32_t)gRoleWanted << 8 | (uint32_t)gCoreRole << 16;
         native_usb_stats[45] = native_usb_stats[45] + 1;
         native_usb_stats[35] = ((native_usb_stats[35] & 0xffffu) + 1) | (uint32_t)(role == kRoleDevice) << 16;
+        if(!entered)IOSleep(1000); // Bounded retries must not spin on a failed I2C/PHY transition.
     }
 }
 extern "C" void qcom_dwc3_vbus(int online) {
@@ -682,7 +772,8 @@ extern "C" void qcom_dwc3_publish(void) {
         return;
     }
     do {
-        OSData *zero = OSData::withBytes("\0\0\0\0", 1);
+        const uint32_t busNumber=0;
+        OSData *zero = OSData::withBytes(&busNumber,sizeof(busNumber));
         QcomDwc3Nub *nub = OSTypeAlloc(QcomDwc3Nub);
         IOService *platform = IOService::getPlatform();
         IODeviceMemory *range = IODeviceMemory::withRange(kAppleWindow, 0x1000);

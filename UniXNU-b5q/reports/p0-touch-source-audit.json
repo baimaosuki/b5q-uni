@@ -1,0 +1,147 @@
+{
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "inputs": {
+    "Wn8030.c": {
+      "path": "sources/UniXNU-sheng/package/Wn8030.c",
+      "sha256": "15643bbcb9d240ebf94a76bab0fab94bac5d0712157b79be663ff4d2e547e253"
+    },
+    "Wn8030.h": {
+      "path": "sources/UniXNU-sheng/package/Wn8030.h",
+      "sha256": "31242b62404656e181b01114b1e5b5c7f3a7e54edd8781df90a211dbc45501f0"
+    },
+    "synaptics_ts_i2c.ko": {
+      "path": "sources/twrp-b5q/recovery/root/lib/modules/synaptics_ts_i2c.ko",
+      "sha256": "42933f1b8d51c8caa89755472d264456417734837c46ffa7f8ffd5025c99a7c0"
+    },
+    "sec_common_fn.ko": {
+      "path": "sources/twrp-b5q/recovery/root/lib/modules/sec_common_fn.ko",
+      "sha256": "0755d4c6a92e6090f8b2ab62d370632696c5482bd49fe1cc142ff7b3e6b0a521"
+    },
+    "b5q.dts": {
+      "path": "uefi-b5q/Resources/DTBs/b5q.dts",
+      "sha256": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f"
+    },
+    "baseline.log": {
+      "path": "logs/b5q-xnu2log-data-mount-fix/XNU2LOG.txt",
+      "sha256": "6b4624e6960f27c42bd1d018aacc82eb4b5dba0b0ba910f9b49cf76dea7b677a"
+    },
+    "objective": {
+      "path": "/home/baimao/.codex/attachments/b63b31b7-ea7d-4bba-a4ff-ef2ff8580b9d/goal-objective.md",
+      "sha256": "91a3d44e421a5f6ee73f5df857cdc2bf1c53b2b6246c8d9e6485936ffe5ebf14"
+    }
+  },
+  "samsung_module_provenance": "Existing original Samsung recovery module input; not an independently extracted second sample",
+  "module_addresses": {
+    "synaptics_ts_get_event": "0x95d8..0x9bb4;0x9694..0x96b4 invokes full-frame 0x11 config parser",
+    "synaptics_ts_parse_touch_report": "0x73b0..0x95d8",
+    "synaptics_ts_irq_thread": "0x9bb4..0xb9dc;0x9d20..0x9ddc extracts zero-based ID/action/12-bit XY/type;0x9e14..0x9e4c marks type5 palm;0x9fe0..0xa000 accepts0x69 and fills slot",
+    "synaptics_ts_release_all_finger": "0x13e2c..0x13e54 delegates sec_input_release_all_finger",
+    "sec_input_coord_event_fill_slot": "0x8870..0x8c54;0x8874 rejectsID>=10;0x88b0..0x88c8 action1/2/3;0x890c..0x8920 clearsreleasedslot"
+  },
+  "c2_policy": "Module names 0xc2 REPORT_SEC_COORDINATE_RAWDATA_EVENT, not a universal firmware reset. Requested b5q safety policy releases contacts on every0xc2; this differs from native rawdata handling and needs hardware qualification.",
+  "desktop_palm_policy": "Module accepts0,3,5,6 but marks5 as palm. Pointer excludes5;0,3,6 remain accepted. Unknown types release their slot. InvalidIDs/malformed/status/Identify/I2C releaseall12.",
+  "reused_code": "Four Wn8030 pointer function bodies are verbatim with static inline linkage only; no Xiaomi GPIO/power/firmware. Contact-packing/tap adapter only.",
+  "dt_lines": [
+    "3956..4006 GPIO44/45 pinctrl",
+    "22309..22347 S3916A0x20/IRQ19/4096x4096"
+  ],
+  "hardware_tested": false,
+  "host_tests": {
+    "groups": 43,
+    "result": "PASS",
+    "preflight_report": "artifacts/b5q-p0-work/pre-ci-initial-43.json",
+    "preflight_sha256": "f3c265e9033287f649886b81932e189c3aaf4dd3ba5be84209ba9f0f7de9466d",
+    "target_objects": 28,
+    "PAC": "All requested callback producers/consumers and original storage vtable discriminators verified",
+    "apps_smmu": "All compiled board objects zero materialized apps_smmu addresses; no bypass helpers"
+  },
+  "targeted_sources": {
+    "UniXNU-b5q/package/B5qTouch.cpp": "3b3f81d72337ea4849bf286c906f661bddfa08ba9cf2b2a2acd5acd729acd70c",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "f1d5d8bbc7eab6d24f1f4c5b3521868e9bae39de357563ddd02c09853cc8091f",
+    "UniXNU-b5q/package/B5qTouchReports.h": "46104f4b59e72c7d81a87de1b607e57873aa458d82576fd185a739ec23a1f1be",
+    "UniXNU-b5q/package/B5qTouchMouse.h": "8794a455768228c3eb6eeb8fdbac52ba5c8c17370015137f176f5509a79bcda1",
+    "UniXNU-b5q/package/Wn8030Pointer.h": "e22967c836a14971e47b9f4ee88314db06ce7e6dbf75c8379633bb3a7bd4c237",
+    "UniXNU-b5q/package/NativeHidInput.cpp": "3a6774d3795b7fb7e3381e2a2bbb07401f9e5c8cd343e5e6a1faa2a0c9e6efb1"
+  },
+  "stage_build_and_readback": {
+    "source_commit": "b1e7ae43fb01857d8d845fddeebe4bfdcec0cbfd",
+    "CI_run": 45167257160,
+    "CI_url": "https://github.com/baimaosuki/b5q-uni/actions/runs/45167257160",
+    "kernel_and_UEFI_full_builds": "SUCCESS",
+    "images": {
+      "passed": true,
+      "stage": "P0+P1",
+      "ESP": {
+        "bytes": 838860800,
+        "sha256": "b07c600256dc392bbd6d752c7f6a7f10adb33aa5f3bfe3ac0abc474945d7b02b"
+      },
+      "FD": {
+        "bytes": 3145728,
+        "sha256": "b909347dd044341ff5e573f2be33154be27900f31b8753cb9f88101b60ece157"
+      },
+      "profiles": {
+        "xnu": {
+          "kernel_sha256": "6996d91a3eaae44ac7e26416d68c98a6fb3fdd65c3ce2c25fbe7e70697746a50",
+          "args_bytes": 981,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": false
+        },
+        "ram-fallback": {
+          "kernel_sha256": "6996d91a3eaae44ac7e26416d68c98a6fb3fdd65c3ce2c25fbe7e70697746a50",
+          "args_bytes": 981,
+          "lp_sip0_hex": "0200000000000000",
+          "RAM_seed_loaded": true
+        }
+      },
+      "required_symbols": {
+        "_native_ram_block_provider_seed": "0xfffffff00c2d3f14",
+        "_native_ram_block_volume_seed": "0xfffffff00c2d1f44",
+        "_native_ram_block_volume_device": "0xfffffff00c2d1578",
+        "_b5q_power_start": "0xfffffff00c2d3494",
+        "_sheng_cpu_idle_mach": "0xfffffff00b9ab124",
+        "_ml_outside_memory_pages": "0xfffffff00c941118",
+        "_ml_outside_memory_refused": "0xfffffff00c94111c",
+        "_native_touch_recovered": "0xfffffff00c99ff68",
+        "_native_touch_set_sink": "0xfffffff00c2c27d8"
+      },
+      "FAT_members": 16,
+      "all_real_link_inputs_resolved": true,
+      "Data_GPU_unchanged": true,
+      "loader_matches_actual_rebuilt_FD": true,
+      "hardware_qualification": "HOST_VERIFIED_PENDING_HARDWARE",
+      "physical_Data_accessed": false
+    },
+    "boot": {
+      "boot_source": "physical 4Kn UFS ESP",
+      "bootstrap_fat16_bytes": 16777216,
+      "bootstrap_fat16_sha256": "ec709a0a612ce76091cf117104b70f18837c1881c648338f590ff6b1281ffb96",
+      "darwinboot_sha256": "9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f",
+      "samsung_dtb_sha256": "8017c2d197c53f1f09a83ef698a612dc0bed1afd41a9b3b340e7328b418175be",
+      "bootshim_sha256": "9346a527441b242c69414fd7e3d6fa17813f281d562fef13d9ba8373d39007a9",
+      "boot": {
+        "bytes": 19116032,
+        "sha256": "38cbf9eb34f942e4f6f816538c4b4b3071c89d2563f00901dd2826493da4a6fc"
+      },
+      "source_boot": {
+        "bytes": 19275776,
+        "sha256": "e400f4d63a4baff1845ca336ba87612be44ab2b2113758d290e9840f21f0cfa1"
+      },
+      "firmware": {
+        "bytes": 3145728,
+        "sha256": "b909347dd044341ff5e573f2be33154be27900f31b8753cb9f88101b60ece157"
+      },
+      "esp": {
+        "bytes": 838860800,
+        "sha256": "b07c600256dc392bbd6d752c7f6a7f10adb33aa5f3bfe3ac0abc474945d7b02b"
+      },
+      "boot_partition_bytes": 100663296,
+      "hardware_tested": false
+    },
+    "actual_object_PAC_report": "artifacts/b5q-p1-work/returned-PAC/report.json",
+    "full_image_report": "artifacts/b5q-p1-work/image-acceptance/images.json",
+    "physical_device_accessed": false,
+    "firmware_pairing": "RebuiltDarwinBoot fromtheexactv30source/pinnedpatches; ESPdriverreplaced to matchactualnewFD;15otherFATmembersunchanged",
+    "previous_loader_sha256": "100080919035179c86c1f4b1eee16e6a8a46166beee95234dc2c842995009cde",
+    "new_loader_sha256": "9e9118b624ab4f46ba80c728421fcfde2d5aa07dac847cad5ccba5055be4829f"
+  }
+}

@@ -1,0 +1,482 @@
+name: b5q P4 complete media build
+run-name: b5q P4A+B+C / ${{ github.sha }}
+on:
+  push:
+    branches: [codex/b5q-p0-p5]
+    paths:
+      - '.github/workflows/b5q-p0-p5.yml'
+      - 'UniXNU-b5q/board.toml'
+      - 'UniXNU-b5q/package/**'
+      - 'UniXNU-b5q/scripts/**'
+      - 'UniXNU-b5q/configs/**'
+      - 'UniXNU-b5q/dts/**'
+      - 'UniXNU-b5q/patches/**'
+      - 'patches/uefi-b5q/**'
+  workflow_dispatch:
+    inputs:
+      os_profile:
+        required: true
+        default: macos-27.3-26C5035r
+      xcode:
+        required: true
+        default: '26.6'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: b5q-p0-p5-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: 1
+  HOMEBREW_NO_INSTALL_CLEANUP: 1
+  HOMEBREW_NO_ENV_HINTS: 1
+
+jobs:
+  kernel:
+    if: ${{ !contains(github.event.head_commit.message, '[seed-only]') && !contains(github.event.head_commit.message, '[payload-only]') && !contains(github.event.head_commit.message, '[firmware-only]') }}
+    name: macOS XNU full-component build
+    # GitHub draft release assets require push access even for downloads.
+    # Firmware stays in the unpublished draft; this token is used only by API clients.
+    permissions:
+      contents: write
+      actions: read
+    # Same Xcode 26.6/17F113 and SDK; cross-compile the unchanged arm64e target.
+    # GitHub's ARM64 pool could not acquire a runner on two consecutive attempts.
+    runs-on: macos-26-intel
+    timeout-minutes: 360
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_${{ inputs.xcode || '26.6' }}.app/Contents/Developer
+      UNIXNU_DEVICE: ${{ github.workspace }}/UniXNU-b5q
+      OS_PROFILE: ${{ inputs.os_profile || 'macos-27.3-26C5035r' }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out b5q source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check out pinned UniXNU
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/UniXNU
+          ref: 8542980d02b4d2cc5c32ee3542de1760b2562aac
+          path: UniXNU
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
+        with:
+          python-version: '3.13'
+      - name: Restore GPU source and incremental compiler caches
+        id: gpu-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/gpu-reference/metal2vulkan
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-venv
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-tools
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/mesa-tu-macos27
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/adreno-metal-bridge
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/m2v-target
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/turnip-smoke
+            ~/.cargo/registry
+            ~/.cargo/git/db
+          key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-macos27-gpu-v1-${{ hashFiles('UniXNU/scripts/data/adreno-compiler-inputs.json', 'UniXNU/scripts/data/gpu-metal-vulkan-inputs.json', 'UniXNU/components.toml', 'UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-macos27-gpu-v1-${{ hashFiles('UniXNU/scripts/data/adreno-compiler-inputs.json', 'UniXNU/scripts/data/gpu-metal-vulkan-inputs.json', 'UniXNU/components.toml', 'UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch') }}-
+      - name: Restore Homebrew downloads
+        id: brew-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-brew-v1-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-b5q-brew-v1-
+      - name: Restore pinned wireless sources and target objects
+        id: wireless-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/b5q-wireless
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/native-legacy-display/wireless
+          key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-b5q-wireless-v1-${{ hashFiles('UniXNU-b5q/scripts/b5q_wireless.py', 'UniXNU-b5q/scripts/build-b5q-wifi.py', 'UniXNU-b5q/scripts/b5q_wifi.py', 'UniXNU-b5q/scripts/b5q_bluetooth.py', 'UniXNU-b5q/package/B5qAth11kCompat/**') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-b5q-wireless-v1-${{ hashFiles('UniXNU-b5q/scripts/b5q_wireless.py', 'UniXNU-b5q/scripts/build-b5q-wifi.py', 'UniXNU-b5q/scripts/b5q_wifi.py', 'UniXNU-b5q/scripts/b5q_bluetooth.py', 'UniXNU-b5q/package/B5qAth11kCompat/**') }}-
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-b5q-wireless-v1-
+      - name: Restore matching XNU core compilation progress
+        id: xnu-cache
+        uses: actions/cache/restore@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/xnu-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/xnu
+          key: ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-macos26C5035r-xnu-v1-${{ hashFiles('UniXNU-b5q/unixnu.lock', 'UniXNU-b5q/patches/xnu/**', 'UniXNU-b5q/configs/**', 'UniXNU/components.toml', 'UniXNU/profiles/**') }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-${{ runner.arch }}-xcode26.6-arm64e-macos26C5035r-xnu-v1-${{ hashFiles('UniXNU-b5q/unixnu.lock', 'UniXNU-b5q/patches/xnu/**', 'UniXNU-b5q/configs/**', 'UniXNU/components.toml', 'UniXNU/profiles/**') }}-
+      - name: Install upstream macOS host tools
+        run: |
+          set -euo pipefail
+          brew install --formula llvm lld mtools dtc bison ninja glslang shaderc spirv-tools pkgconf
+          python3 scripts/b5q-install/install-ci-ipsw.py --out "$RUNNER_TEMP/b5q-host-tools"
+          echo "$RUNNER_TEMP/b5q-host-tools" >> "$GITHUB_PATH"
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/macos-2g-ram-data.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-turnip-oneui.patch
+          git -C UniXNU apply ../UniXNU-b5q/patches/tools/b5q-validation-post-seal.patch
+          rustup toolchain install 1.98.0 --profile minimal --component rust-src
+          if ! command -v unifdef >/dev/null; then
+            brew install unifdef
+            echo "$(brew --prefix unifdef)/bin" >> "$GITHUB_PATH"
+          fi
+      - name: Stage existing GPU and temporary board binary inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          B5Q_V24_INPUT_0: ${{ secrets.B5Q_V24_INPUT_0 }}
+          B5Q_V24_INPUT_1: ${{ secrets.B5Q_V24_INPUT_1 }}
+          B5Q_V24_INPUT_2: ${{ secrets.B5Q_V24_INPUT_2 }}
+          B5Q_V24_INPUT_3: ${{ secrets.B5Q_V24_INPUT_3 }}
+          B5Q_V24_INPUT_4: ${{ secrets.B5Q_V24_INPUT_4 }}
+          B5Q_V24_INPUT_5: ${{ secrets.B5Q_V24_INPUT_5 }}
+          B5Q_V24_INPUT_6: ${{ secrets.B5Q_V24_INPUT_6 }}
+          B5Q_V24_INPUT_7: ${{ secrets.B5Q_V24_INPUT_7 }}
+        run: |
+          set -euo pipefail
+          UniXNU/unixnu defconfig b5q_macos_defconfig --device UniXNU-b5q --os "$OS_PROFILE"
+          gh run download 45047962341 --repo "$GITHUB_REPOSITORY" --name b5q-build-45047962341 --dir "$RUNNER_TEMP/b5q-stage-inputs"
+          python3 UniXNU-b5q/scripts/stage-v24-inputs.py --unixnu UniXNU --artifact "$RUNNER_TEMP/b5q-stage-inputs" --inputs "$RUNNER_TEMP/b5q-v24-inputs" --data-out "$RUNNER_TEMP/b5q-stage-data"
+          python3 UniXNU-b5q/scripts/reuse-completed-build.py --unixnu UniXNU --device UniXNU-b5q --artifact "$RUNNER_TEMP/b5q-stage-inputs" --data-out "$RUNNER_TEMP/b5q-stage-data" --source-run 45047962341 --source-commit 5d7c4eadaa5344e1b96edc593b26d6d18d2bc6d0
+          python3 - <<'PYRESET'
+          from pathlib import Path
+          import shutil
+          for reused in Path('UniXNU/out/b5q').rglob('kernel-reuse.json'):
+              shutil.rmtree(reused.parent/'kernel')
+              reused.unlink()
+          PYRESET
+          cp UniXNU-b5q/inputs/DarwinBoot-v30.efi "$RUNNER_TEMP/b5q-v24-inputs/DarwinBoot.efi"
+          rm -rf "$RUNNER_TEMP/b5q-stage-inputs"
+          echo "B5Q_REUSE_ADRENO=$RUNNER_TEMP/b5q-v24-inputs/libAdreno740.a" >> "$GITHUB_ENV"
+          echo "B5Q_DATA_SEED=$RUNNER_TEMP/b5q-stage-data/data.dbr" >> "$GITHUB_ENV"
+      - name: Stage hash-locked original Samsung WCN firmware
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/stage-wcn-ci-input.py --out "$RUNNER_TEMP/b5q-stock-wcn"
+          echo "B5Q_STOCK_WCN_FIRMWARE=$RUNNER_TEMP/b5q-stock-wcn" >> "$GITHUB_ENV"
+      - name: Stage hash-locked original Samsung media firmware
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/stage-media-ci-input.py --out "$RUNNER_TEMP/b5q-stock-media"
+          echo "B5Q_STOCK_MEDIA_FIRMWARE=$RUNNER_TEMP/b5q-stock-media" >> "$GITHUB_ENV"
+      - name: Resolve full b5q target
+        working-directory: UniXNU
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
+          ./unixnu tree --device ../UniXNU-b5q --os "$OS_PROFILE"
+      - name: Build full-component XNU
+        id: kernel
+        working-directory: UniXNU
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ./unixnu build kernel --device ../UniXNU-b5q --os "$OS_PROFILE" --data-ramdisk "$B5Q_DATA_SEED" 2>&1 | tee "$RUNNER_TEMP/b5q-kernel-console.log"
+      - name: Check out pinned panic-screen font source only
+        if: success()
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/uefi-sheng
+          ref: b303410c8e401fc9419ae65a024356ed09a438ef
+          path: font-reference
+          sparse-checkout: Silicon/Silicium/SiliciumPkg/Library/FrameBufferSerialPortLib
+          persist-credentials: false
+      - name: Build actual RAM payload and package manifest
+        if: success()
+        id: payload
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          python3 UniXNU-b5q/scripts/build-b5q-payload.py --unixnu UniXNU --device UniXNU-b5q --font-source font-reference --data-ramdisk "$B5Q_DATA_SEED" --reuse-addon 2>&1 | tee "$RUNNER_TEMP/b5q-payload-console.log"
+          python3 UniXNU-b5q/scripts/package-batch2-esp.py --unixnu UniXNU --inputs "$RUNNER_TEMP/b5q-v24-inputs"
+      - name: Preserve wireless sources and valid compilation progress
+        if: always()
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/b5q-wireless
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/native-legacy-display/wireless
+          key: ${{ steps.wireless-cache.outputs.cache-primary-key }}
+      - name: Preserve XNU core progress after success or failure
+        if: always()
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/xnu-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/xnu
+          key: ${{ steps.xnu-cache.outputs.cache-primary-key }}
+      - name: Collect text diagnostics
+        if: always()
+        env:
+          KERNEL_OUTCOME: ${{ steps.kernel.outcome }}
+          PAYLOAD_OUTCOME: ${{ steps.payload.outcome }}
+        run: |
+          python3 - <<'PY'
+          import os, re, shutil
+          from pathlib import Path
+          root = Path(os.environ['GITHUB_WORKSPACE']) / 'UniXNU/out/b5q'
+          dest = Path(os.environ['RUNNER_TEMP']) / 'b5q-text-logs'
+          dest.mkdir(parents=True, exist_ok=True)
+          count = 0
+          for p in sorted(root.rglob('*.log')) if root.exists() else []:
+              raw = p.read_bytes()
+              if b'\0' in raw:
+                  continue
+              text = raw.decode('utf-8', 'replace')
+              text = re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)', '***', text)
+              text = re.sub(r'https?://[^\s"\']*[?&](?:token|sig|signature|key|X-Amz-Signature)=[^\s"\']*', '***', text, flags=re.I)
+              out = dest / p.relative_to(root)
+              out.parent.mkdir(parents=True, exist_ok=True)
+              out.write_text(text)
+              count += 1
+          if os.environ.get('KERNEL_OUTCOME') == 'failure':
+              diagnostics = []
+              for p in sorted(root.rglob('*.log')) if root.exists() else []:
+                  for line in p.read_text(errors='replace').splitlines():
+                      if re.search(r'(?:fatal error:|error:| requires |\*\* BUILD FAILED|make(?:\[\d+\])?: \*\*\*)', line, re.I):
+                          diagnostics.append((p.name, line[:900]))
+              symbols=[]
+              for p in sorted(root.rglob('kernel.log')) if root.exists() else []:
+                  text=p.read_text(errors='replace')
+                  start=text.rfind('Undefined symbols for architecture')
+                  if start<0:continue
+                  block=text[start:].split('ld: symbol(s) not found',1)[0]
+                  for line in block.splitlines():
+                      if re.match(r'^\s+"[^"\n]+", referenced from:',line):
+                          symbol=line.strip().split('"')[1]
+                          if symbol not in symbols:symbols.append(symbol)
+              for start in range(0,len(symbols),6):
+                  msg=' | '.join(symbols[start:start+6]).replace('%','%25').replace('\n','%0A').replace('\r','%0D')
+                  print(f'::warning title=b5q final unresolved symbols {start+1}::'+msg)
+              for index, (name, line) in enumerate(diagnostics[:8]):
+                  msg = (name + ': ' + line).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                  print(f'::error title=b5q source diagnostic {index+1}::' + msg)
+          console = Path(os.environ['RUNNER_TEMP']) / 'b5q-kernel-console.log'
+          if console.is_file():
+              text = console.read_text(errors='replace')
+              text = re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)', '***', text)
+              (dest / 'kernel-console.log').write_text(text)
+              if os.environ.get('KERNEL_OUTCOME') == 'failure':
+                  tail = '\n'.join(line[:240] for line in text.splitlines()[-18:])[-3000:]
+                  escaped = tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                  print('::error title=b5q kernel first-failure diagnostics::' + escaped)
+          console = Path(os.environ['RUNNER_TEMP']) / 'b5q-payload-console.log'
+          if console.is_file():
+              text = console.read_text(errors='replace')
+              text = re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)', '***', text)
+              (dest / 'payload-console.log').write_text(text)
+              if os.environ.get('PAYLOAD_OUTCOME') == 'failure':
+                  for index, line in enumerate(text.splitlines()[-24:]):
+                      escaped = line[:1200].replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+                      print(f'::error title=b5q actual payload failure {index+1}::' + escaped)
+          (dest / 'scope.txt').write_text('Pinned full-component b5q kernel attempt. No phone flash or hardware qualification. Apple-derived binaries are not published by this diagnostic workflow.\n')
+          print(f'{count} text logs collected')
+          PY
+      - name: Upload text diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-kernel-logs-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/b5q-text-logs/
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Upload actual kernel and payload outputs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-build-${{ github.run_id }}
+          path: |
+            UniXNU/out/b5q/**/esp.img
+            UniXNU/out/b5q/**/tree/build/xnu/ios-obj/DEVELOPMENT_ARM64_BCM2837/mach.development.bcm2837.unstripped.noctf
+            UniXNU/out/b5q/**/tree/build/**/native-recount-build.json
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.command.json
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/**/*.o
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/wireless/**/*.json
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/wireless/**/*.log
+            UniXNU/out/b5q/**/tree/build/b5q/ethernet/*.o
+            UniXNU/out/b5q/**/tree/build/b5q/ethernet/*.S
+            UniXNU/out/b5q/**/tree/build/qcom-dwc3/**/*.o
+            UniXNU/out/b5q/**/tree/build/qcom-dwc3/**/*.json
+            UniXNU/out/b5q/**/tree/build/**/ArmCpu.o
+            UniXNU/out/b5q/**/tree/build/**/ArmDTPlatform.o
+            UniXNU/out/b5q/**/tree/build/**/processor.cpo
+            UniXNU/out/b5q/**/tree/build/**/processor.o
+            UniXNU/out/b5q/**/tree/build/**/IOUserClient.cpo
+            UniXNU/out/b5q/**/kernel/*.json
+            UniXNU/out/b5q/**/payload/payload.json
+            UniXNU/out/b5q/**/runtime/data-seed.json
+            UniXNU/out/b5q/**/runtime/generated.json
+            UniXNU/out/b5q/**/runtime/media-runtime.json
+            UniXNU/out/b5q/**/tree/build/native-legacy-display/media/**/*.json
+            UniXNU/out/b5q/**/runtime/inputs.json
+            UniXNU/out/b5q/**/package.manifest.json
+            UniXNU/out/b5q/**/batch2-package.json
+          if-no-files-found: warn
+          compression-level: 1
+          retention-days: 3
+
+      - name: Save completed incremental GPU work, including failed payload attempts
+        if: ${{ always() && steps.gpu-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: |
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-work
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/gpu-reference/metal2vulkan
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-venv
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/.cache/mesa-tools
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/mesa-tu-macos27
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/adreno-metal-bridge
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/m2v-target
+            UniXNU/out/b5q/macos-27.3-26C5035r/b5q_macos/tree/build/turnip-smoke
+            ~/.cargo/registry
+            ~/.cargo/git/db
+          key: ${{ steps.gpu-cache.outputs.cache-primary-key }}
+      - name: Save Homebrew download cache
+        if: ${{ always() && steps.brew-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830
+        with:
+          path: ~/Library/Caches/Homebrew
+          key: ${{ steps.brew-cache.outputs.cache-primary-key }}
+
+  firmware:
+    if: ${{ !contains(github.event.head_commit.message, '[reuse-firmware]') }}
+    name: b5q UEFI source build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        shell: bash
+    env:
+      OS_PROFILE: ${{ inputs.os_profile || 'macos-27.3-26C5035r' }}
+    steps:
+      - name: Check out b5q source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Check out pinned UniXNU
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/UniXNU
+          ref: 563595abedfdfa413ad583b66b6176d82007e633
+          path: UniXNU
+          persist-credentials: false
+      - name: Check out pinned DarwinBoot
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/DarwinBoot
+          ref: 5243c68ec332a227fe3680cd5da6d5a0e127035c
+          path: UniXNU/drivers/DarwinBoot
+          persist-credentials: false
+      - name: Check out pinned firmware baseline
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: UniXNU/uefi-sheng
+          ref: b303410c8e401fc9419ae65a024356ed09a438ef
+          path: uefi-b5q
+          persist-credentials: false
+      - name: Install matching UEFI host tools
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-18 lld-18 llvm-18 llvm-18-tools build-essential uuid-dev nasm python3-pip acpica-tools device-tree-compiler dosfstools mtools
+      - name: Apply b5q-only firmware integration
+        run: |
+          set -euo pipefail
+          for patch in "$GITHUB_WORKSPACE"/patches/uefi-b5q/000[123]-*.patch; do
+            git -C uefi-b5q apply "$patch"
+          done
+          git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0004-darwinboot-b5q-usb-dma.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0005-b5q-physical-esp.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0007-b5q-pcie-dma.patch"
+          git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0008-darwinboot-b5q-pcie-dma.patch"
+          git -C uefi-b5q apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0009-b5q-media-dma.patch"
+          git -C UniXNU/drivers/DarwinBoot apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0010-darwinboot-b5q-media-dma.patch"
+          git -C UniXNU apply "$GITHUB_WORKSPACE/patches/uefi-b5q/0006-unixnu-ramdisk-direct-decompress.patch"
+          git -C uefi-b5q submodule update --init --depth 1 Binaries
+          UNIXNU_UEFI="$GITHUB_WORKSPACE/uefi-b5q" python3 UniXNU-b5q/scripts/check-b5q-uefi.py
+      - name: Build b5q firmware with upstream resolver
+        id: firmware
+        working-directory: UniXNU
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          export PATH="/usr/lib/llvm-18/bin:$PATH"
+          ./unixnu defconfig b5q_macos_defconfig --device ../UniXNU-b5q --os "$OS_PROFILE"
+          ./unixnu build firmware --device ../UniXNU-b5q --os "$OS_PROFILE" \
+            --uefi ../uefi-b5q --clang-bin /usr/lib/llvm-18/bin 2>&1 | tee "$RUNNER_TEMP/b5q-firmware-console.log"
+      - name: Record successful FD identity
+        if: success()
+        run: |
+          set -euo pipefail
+          test -f uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd
+          sha256sum uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd | tee "$RUNNER_TEMP/b5q-firmware.sha256"
+          echo "::notice title=b5q FD SHA256::$(cat "$RUNNER_TEMP/b5q-firmware.sha256")"
+      - name: Upload compiled b5q FD
+        if: success()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-uefi-fd-${{ github.sha }}
+          path: |
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/DarwinBoot/OUTPUT/DarwinBoot.efi
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/B5qHandoffDxe.efi
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/PcieDma.obj
+            uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/AARCH64/**/B5qHandoffDxe/OUTPUT/MediaDma.obj
+            ${{ runner.temp }}/b5q-firmware.sha256
+          if-no-files-found: error
+          retention-days: 14
+      - name: Publish firmware first-error diagnostics
+        if: always()
+        env:
+          FIRMWARE_OUTCOME: ${{ steps.firmware.outcome }}
+        run: |
+          python3 - <<'PY'
+          import os,re
+          from pathlib import Path
+          root=Path('UniXNU/out/b5q')
+          dest=Path(os.environ['RUNNER_TEMP'])/'b5q-firmware-text'
+          dest.mkdir(exist_ok=True)
+          paths=list(root.rglob('*.log')) if root.exists() else []
+          console=Path(os.environ['RUNNER_TEMP'])/'b5q-firmware-console.log'
+          if console.is_file():paths.append(console)
+          errors=[]
+          for index,p in enumerate(paths):
+              text=p.read_text(errors='replace')
+              text=re.sub(r'(?:gh[pousr]_[A-Za-z0-9_]+|github_pat_[A-Za-z0-9_]+)','***',text)
+              (dest/f'{index:02d}-{p.name}').write_text(text)
+              for line in text.splitlines():
+                  if re.search(r'(?:error:|fatal error|error [0-9a-f]+:|not found|missing|failed)',line,re.I) and '-Werror' not in line:errors.append(p.name+': '+line[:800])
+          if os.environ.get('FIRMWARE_OUTCOME')=='failure':
+              messages=errors[:8]
+              if console.is_file():messages += ['console tail: '+line[:700] for line in console.read_text(errors='replace').splitlines()[-8:]]
+              for index,line in enumerate(messages):
+                  line=line.replace('%','%25').replace('\r','%0D').replace('\n','%0A')
+                  print(f'::error title=b5q firmware diagnostic {index+1}::'+line)
+          PY
+      - name: Upload firmware text logs
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: b5q-firmware-logs-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/b5q-firmware-text/
+          if-no-files-found: warn
+          retention-days: 7

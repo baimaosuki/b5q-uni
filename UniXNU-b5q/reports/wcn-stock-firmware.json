@@ -1,0 +1,127 @@
+{
+  "source": "Samsung F7310ZCS7EYF3 offline official AP super.img -> vendor filesystem; not phone read or sheng firmware",
+  "parent_manifest_sha256": "76d7f494d8cd1d0811a86a79999a449d96567f5206d14f02da169e63278c3326",
+  "files": {
+    "bluetooth/hpbtfw21.tlv": {
+      "source": "vendor/firmware/hpbtfw21.tlv",
+      "bytes": 189236,
+      "sha256": "618cb892c016d5e0e2180703558fc93f9c97ce7ba4261ebeb7ac658496d85bde"
+    },
+    "bluetooth/hpnv21.b9a": {
+      "source": "vendor/firmware/hpnv21.b9a",
+      "bytes": 6999,
+      "sha256": "578a73c914799b4d5888c25d6c47ca8cfb068c6b68d17eb019a83f59f3a346d9"
+    },
+    "bluetooth/hpnv21.b9b": {
+      "source": "vendor/firmware/hpnv21.b9b",
+      "bytes": 6999,
+      "sha256": "e09f905b12c2b02c636be8f08cc864014a150c750829e4fb2d6aa4f9bc4e3936"
+    },
+    "bluetooth/hpnv21.baa": {
+      "source": "vendor/firmware/hpnv21.baa",
+      "bytes": 6735,
+      "sha256": "fa0713e24acaca18b18732dd55a9a5c8b50b6970e973eccbc24706525ac3d723"
+    },
+    "bluetooth/hpnv21.bb7": {
+      "source": "vendor/firmware/hpnv21.bb7",
+      "bytes": 6763,
+      "sha256": "e3a27dfaf20b61aa92df08e4836fd51cf8bf82b910262b8a361649a16c731d44"
+    },
+    "bluetooth/hpnv21.bb9": {
+      "source": "vendor/firmware/hpnv21.bb9",
+      "bytes": 6727,
+      "sha256": "1ca04b65984451fc770be055baed889d7757a0eb9ec57418c5f7387f37fd45fb"
+    },
+    "bluetooth/hpnv21.bin": {
+      "source": "vendor/firmware/hpnv21.bin",
+      "bytes": 6727,
+      "sha256": "66fff0c106768912f749bdea9b83d1c628260cf29c24b587e197728130d72a7a"
+    },
+    "bluetooth/hpnv21g.b9a": {
+      "source": "vendor/firmware/hpnv21g.b9a",
+      "bytes": 6915,
+      "sha256": "7d60418c939a6690f215023c8220620461ce86b2f65c010d947207b23f516f4c"
+    },
+    "bluetooth/hpnv21g.b9b": {
+      "source": "vendor/firmware/hpnv21g.b9b",
+      "bytes": 6839,
+      "sha256": "6bbec3b1bc891916a11df3ba2d89df0187bac863707533d330d2449ca3ff2631"
+    },
+    "bluetooth/hpnv21g.baa": {
+      "source": "vendor/firmware/hpnv21g.baa",
+      "bytes": 6575,
+      "sha256": "ecc81b45a575c1706c2dc8663adbffbaf8507cbf5198c89477e13813094d8632"
+    },
+    "bluetooth/hpnv21g.bb7": {
+      "source": "vendor/firmware/hpnv21g.bb7",
+      "bytes": 6603,
+      "sha256": "402fddfa8ec621263e4f90ad2c2f75a2be8bac9d055093cc96bb6bc46f8ee7f2"
+    },
+    "bluetooth/hpnv21g.bb9": {
+      "source": "vendor/firmware/hpnv21g.bb9",
+      "bytes": 6567,
+      "sha256": "ee1ce27c7169d312a1c97d90a5cabc82c3957b5e6bb5da32286c1d76fbe274e3"
+    },
+    "bluetooth/hpnv21g.bin": {
+      "source": "vendor/firmware/hpnv21g.bin",
+      "bytes": 6663,
+      "sha256": "d56de1f3baf193a90dda6b115c8cff77d4448e69e2b4a2e8b24b1e3445f01a60"
+    },
+    "wifi/amss20.bin": {
+      "source": "vendor/firmware/qca6490/amss20.bin",
+      "bytes": 5496832,
+      "sha256": "989f652bc5f176634db256dd99690f93df9841adb05f5a2274444a0db53e050b"
+    },
+    "wifi/bdwlan.elf": {
+      "source": "vendor/firmware/qca6490/bdwlan.elf",
+      "bytes": 59900,
+      "sha256": "00452ed13384e95888f7d9f27b4e6ae893a1a099e60a213efb6a5377b0c2120a"
+    },
+    "wifi/bdwlan.elf1": {
+      "source": "vendor/firmware/qca6490/bdwlan.elf1",
+      "bytes": 59900,
+      "sha256": "c0992ef309b73ac2711e761b2089e997f53f13d24fb8625fa093d325f71c9aad"
+    },
+    "wifi/bdwlan.elf10": {
+      "source": "vendor/firmware/qca6490/bdwlan.elf10",
+      "bytes": 59900,
+      "sha256": "afee43bd9131ad63dddc136f387fc0b6e4f10ae0ae4f3d2380b9b183543e9617"
+    },
+    "wifi/bdwlan.elf2": {
+      "source": "vendor/firmware/qca6490/bdwlan.elf2",
+      "bytes": 59900,
+      "sha256": "6fae367c3f27b189068cb68869e2b1898ad68a128b2e96d9e3a9abeb5c583dbc"
+    },
+    "wifi/bdwlang.elf": {
+      "source": "vendor/firmware/qca6490/bdwlang.elf",
+      "bytes": 59900,
+      "sha256": "72314ed16db8fedf7c2ceeabceaf11231407b3b421c770727ed85d47ef1df3e0"
+    },
+    "wifi/bdwlang.elf1": {
+      "source": "vendor/firmware/qca6490/bdwlang.elf1",
+      "bytes": 59900,
+      "sha256": "a08d397fc489567e7de55cb9bd17c874bdbfe75f54f933618e11c46b3eb58038"
+    },
+    "wifi/bdwlang.elf10": {
+      "source": "vendor/firmware/qca6490/bdwlang.elf10",
+      "bytes": 59900,
+      "sha256": "d5c683da051bc2bb71f9e1a7da392ea104bfa77e71f320841b77735e3f8413f0"
+    },
+    "wifi/bdwlang.elf2": {
+      "source": "vendor/firmware/qca6490/bdwlang.elf2",
+      "bytes": 59900,
+      "sha256": "3fd4f34a0213b3b4441645f2b4a2b99f2f1a833e09aa5be2ced2acbc8ec3e373"
+    },
+    "wifi/m3.bin": {
+      "source": "vendor/firmware/qca6490/m3.bin",
+      "bytes": 266684,
+      "sha256": "f91047ad41dcb92789fbf56b865a14b75ee68be4336a1b7d4f93205bc6bbbcce"
+    },
+    "wifi/regdb.bin": {
+      "source": "vendor/firmware/qca6490/regdb.bin",
+      "bytes": 24278,
+      "sha256": "af5640b31337c36bad1cc2cd48e39132c631abc2c971aea29686caf8b21fcc2f"
+    }
+  },
+  "hardware_verified": false
+}

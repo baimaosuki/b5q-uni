@@ -1,0 +1,77 @@
+{
+  "status": "HOST_VERIFIED_PENDING_HARDWARE",
+  "passed": true,
+  "source_commit": "57058874364249242582c683a444f1d24404bcbb",
+  "CI": {
+    "kernel": 45268304105,
+    "firmware": 45229274907
+  },
+  "esp": {
+    "path": "artifacts/b5q-esp-p2-p3/esp.img",
+    "bytes": 838860800,
+    "sha256": "a537450f18d2f809649b9fbbb22bd8bcc0cdafba25120d1fda5e83eb8815c146"
+  },
+  "boot": {
+    "path": "artifacts/b5q-esp-p2-p3/boot.img",
+    "bytes": 19120128,
+    "sha256": "d8799ec099cb952b72d7768b46e57cbd94e25bd6a9a3f3f08e278b3410471abd"
+  },
+  "firmware": {
+    "bytes": 3145728,
+    "sha256": "42e828e89f99ab33e984bc3811c67f64ea2af78bc2d972217d604b8594614a60"
+  },
+  "kernel": "d00e4b5c395b753d0ce44b1b110484d91bba2ea8bc235fb5e212f0cd26634748",
+  "profiles": {
+    "xnu": {
+      "kernel_sha256": "d00e4b5c395b753d0ce44b1b110484d91bba2ea8bc235fb5e212f0cd26634748",
+      "args_bytes": 1000,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": false
+    },
+    "ram-fallback": {
+      "kernel_sha256": "d00e4b5c395b753d0ce44b1b110484d91bba2ea8bc235fb5e212f0cd26634748",
+      "args_bytes": 1000,
+      "lp_sip0_hex": "0200000000000000",
+      "RAM_seed_loaded": true
+    }
+  },
+  "tests": {
+    "preCI_groups": 22,
+    "P0_groups": 43,
+    "P1_groups": 10,
+    "actual_returned_objects": 122,
+    "PAC_callback_contracts": 62,
+    "original_network_vtable_slots": 746,
+    "original_family_bindings": 221,
+    "zero_EL1_apps_smmu": true,
+    "FAT_members": 16,
+    "stock_wireless_firmware_files": 24,
+    "native_BT_patch_sites": 52,
+    "Data_plist_policy_counts": {
+      "system": 59,
+      "user": 26
+    },
+    "original_GPU_addon_entries_preserved": 19
+  },
+  "unused_compiler_auth_metadata": {
+    "declarations": 2,
+    "actual_external_relocations": 0,
+    "real_auth_pointer_targets_resolved": true,
+    "negative_mutations_rejected": 3
+  },
+  "fixed_sources": {
+    "UniXNU-b5q/package/B5qWifiBoard.cpp": "07f5d99b83ad340dbdd589ee28b191f2a333362d5ab1bf6950d0868459971d5b",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "b9a9301497001f7b14c37633bde90c7066681c721fe96cf1111c7f792e8ae9c1",
+    "UniXNU-b5q/package/B5qTouchMouse.h": "105310dbdc6a979be69cfe5509bc069ffec9e5fd4134093bc4608ed9ecfc979a"
+  },
+  "evidence": {
+    "artifacts/b5q-p3-work/ci45268304105/acceptance/images.json": "0aa18f84900f0c2a4e593f48789bdac7c1e63903bc3c3cd41357c81e20a9806c",
+    "artifacts/b5q-p3-work/ci45268304105/returned-objects.json": "af12785e5aaabc8c979ea4292c454b9687837d93df04c371226da273ba8423fc",
+    "artifacts/b5q-p3-work/ci45268304105/acceptance/APFS.json": "58a994831610b0fa9c1a985982377bc2d60e0c1742b2ee36b5b5154fb6c89a3e",
+    "artifacts/b5q-p3-work/ci45268304105/acceptance/linked-PAC.json": "825518398aad514d7e83f3085f7e152099008d5a1d7e606f800d563bb9c2869b",
+    "artifacts/b5q-p3-work/ci45268304105/acceptance/wireless-runtime.json": "289a6915f9c47142316026c56a7bac5a7915eaeecc7c245fb92194b1653e34f7",
+    "artifacts/b5q-p3-work/ci45268304105/artifact-transfer.json": "2316ecaa2aeb87e566e774fac6ea3b15394dca39d1741ccc6944b0b4e809c666",
+    "artifacts/b5q-p3-work/ci45268304105/firmware-pairing.json": "2cf7b919b6b3e1065f72dad0b7c430932ffe198af593ed86abc7031f1b7ef7c5"
+  },
+  "delivery": "Retained until separate full P4 and P5 images and overall recheck complete. No flashing performed or hardware success inferred."
+}

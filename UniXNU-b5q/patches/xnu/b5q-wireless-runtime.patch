@@ -1,0 +1,45 @@
+diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
+--- a/bsd/kern/kern_exec.c
++++ b/bsd/kern/kern_exec.c
+@@ -9603,6 +9603,33 @@ native_owner_macos_gpu_addon(proc_t p, user_addr_t scratch)
+  */
+ volatile int native_owner_boot_shim_stage = 0;
+ volatile int native_owner_boot_shim_status = -1;
++/* The macOS path already publishes addon lib/sbin via
++ * native_owner_macos_addon_sbin. Verify those views and publish the Wi-Fi job
++ * before launchd scans /Library/LaunchDaemons; do not stack duplicate mounts. */
++static void
++b5q_wireless_runtime_prepare(proc_t p, user_addr_t scratch)
++{
++	uint32_t bluetooth_enabled = 0, wifi_enabled = 0;
++	PE_parse_boot_argn("bluetooth", &bluetooth_enabled, sizeof(bluetooth_enabled));
++	PE_parse_boot_argn("wifi", &wifi_enabled, sizeof(wifi_enabled));
++	if (bluetooth_enabled == 1) {
++		vnode_t probe = NULLVP;
++		int library = vnode_lookup("/usr/lib/QcaBTType0.dylib", 0, &probe, vfs_context_current());
++		if (!library) vnode_put(probe);
++		probe = NULLVP;
++		int service = vnode_lookup("/usr/sbin/QcaBluetooth.runtime", 0, &probe, vfs_context_current());
++		if (!service) vnode_put(probe);
++		printf("B5qWireless: bluetooth library=%d services=%d union=%d\n", library, service, native_owner_addon_sbin_status);
++	}
++	if (wifi_enabled) {
++		static const char source[] = "/private/var/ngpu/Library/LaunchDaemons", point[] = "/Library/LaunchDaemons";
++		static volatile int stage, status;
++		native_gpu_addon_mount(p, scratch, 0x600, source, sizeof(source), point, sizeof(point),
++		    "/Library/LaunchDaemons", "/Library/LaunchDaemons/org.unixnu.wifi.supplicant.plist", &stage, &status);
++		printf("B5qWireless: wifi launchd=%d/%d\n", stage, status);
++	}
++}
++
+ static void
+ native_owner_macos_boot_shims(proc_t p, user_addr_t scratch)
+ {
+@@ -9731,6 +9758,7 @@ native_owner_macos_data_prepare(proc_t p, user_addr_t scratch)
+ #endif
+ 	if (!error) native_owner_macos_gpu_addon(p, scratch);
+ 	if (!error) native_owner_macos_addon_sbin(p, scratch);
++	if (!error) b5q_wireless_runtime_prepare(p, scratch);
+ 	if (!error) native_owner_macos_boot_shims(p, scratch);
+ 	if (!error) native_gpu_addon_release();
+ done:

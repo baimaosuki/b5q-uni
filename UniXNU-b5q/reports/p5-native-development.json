@@ -1,0 +1,233 @@
+{
+  "complete_P5": false,
+  "hardware_verified": false,
+  "device_access": false,
+  "EL1_apps_smmu_access": false,
+  "source_sha256": {
+    "UniXNU-b5q/package/B5qDpAux.h": "c0c0664a078376490f19ec5c8a5d9b26bebf61c4a82bdd18729a0fda3e318414",
+    "UniXNU-b5q/package/B5qDpBoard.h": "e8bd63a7ff31fac7d57cdb8c956c01433602568e9b10f4fb7416ea80f11a4820",
+    "UniXNU-b5q/package/B5qDpClock.h": "26a95a62f147baee1d49713eca3b9e862f4d6d987caabdff58ecccf7c543d6a9",
+    "UniXNU-b5q/package/B5qDpController.h": "527044b476d5cb0459b586231c10b83242626c6f704ca3761733f5ab22456779",
+    "UniXNU-b5q/package/B5qDpCta.h": "a626d0c3d93a9e7bf4e7e2339b98d3f1f2d3836fe9643edc25fc76784bebfb19",
+    "UniXNU-b5q/package/B5qDpDisplay.cpp": "c32feffdcddc756d04140797b39a9fc3dc60d5a9d5b6cdd947f3b604b9427bb5",
+    "UniXNU-b5q/package/B5qDpDisplay.h": "8e80b95d4068a3617488d1015f7b5edc8c07c759c43b79ba413159f926275eca",
+    "UniXNU-b5q/package/B5qDpDpu.h": "ab2770a3d1ad4ef793c1214263ec0d3bb5ed755f3ac37029321b0e84700436bd",
+    "UniXNU-b5q/package/B5qDpDpuResources.h": "a5d22e79cc89e34cb3395ffbce8c65029596a491747d3d87fd849507c082e4d9",
+    "UniXNU-b5q/package/B5qDpIoav.h": "9f04e6aeba1e688e7e631c97f50ed23012c24cceca82c19c4ff49da87811c267",
+    "UniXNU-b5q/package/B5qDpIrq.cpp": "330bd6523a3a7b37e528df6a3f32a15a6b9f9dbd58dbae383f3b187cba4f94bb",
+    "UniXNU-b5q/package/B5qDpIrq.h": "1194b0cb56354454015d6681f6861db89d7f1d9c120da4ad07f84e0d496228a5",
+    "UniXNU-b5q/package/B5qDpLink.cpp": "89b0682a892c4bb51a0a1fcbf50e83c2ee6da7d37da83b12b01fde155c10f934",
+    "UniXNU-b5q/package/B5qDpModes.h": "699d7f190e16b36a46c80b8807f28e6b84bd71f1488f19d1f88e4943ffe9392c",
+    "UniXNU-b5q/package/B5qDpMsa.h": "ef3b68a5bdeb36931f476bb5c52d23dd3673f797de22786ede5310825a193165",
+    "UniXNU-b5q/package/B5qDpPdic.h": "b937d579b293dfc983ef6b7d12ad89298b65db6c4957cfedc182a1ca5f40f281",
+    "UniXNU-b5q/package/B5qDpPhy.h": "e2c4133af82818a5a6107dfb5c4898b1bdf685884c60166c8d515ae8f8d5ebc9",
+    "UniXNU-b5q/package/B5qDpPlane.h": "0b4f68e911317ddce9b461207729f931fe09d3044d3ef35f5b6155a6d8ccc927",
+    "UniXNU-b5q/package/B5qDpPllData.h": "41ca8fc1eccd7cbdb6a1abbc6c51a364183bedf02821c042e6b5d25b76f39123",
+    "UniXNU-b5q/package/B5qDpPort.h": "7fd7a699df8bb2e04c3d4a2c78227d2ed2e30fc8149866fe232c7daeb10a345d",
+    "UniXNU-b5q/package/B5qDpPresentation.h": "d6c9c131f273508c7173a167144e22ca3e421d4acad6650b7fdfabc5efa097d2",
+    "UniXNU-b5q/package/B5qDpSession.h": "fb75c6c37d58cb3df557101e0b5a94ed24202f0f50e3ba0ea4aea6470e6d93b0",
+    "UniXNU-b5q/package/B5qDpTiming.h": "0453a363cf41405ba3221d856253c2e021e5be00848e3de7062a4d45bdfb3b2e",
+    "UniXNU-b5q/package/B5qDpTraining.h": "7d847cd573571ce79bf25d70d3dac32a87326e9053c51f5c3e9b6519a41985ed",
+    "UniXNU-b5q/package/B5qDpTu.h": "0f250a084674cd0d433ce636144b8864624a38c15f65374b57ef3a2519fd26b5",
+    "UniXNU-b5q/package/B5qDpVsync.h": "8d3521dddc4a69858d159545530edbc5435fae0f091950dd9d8a76af529f5539",
+    "tests/b5q-ufs/test-dp-aux.py": "86e7807caca8c20db1e1befd4549f5d6258c0f5e6364f1c995f473b2c48360b1",
+    "tests/b5q-ufs/test-dp-board.py": "9565e4da65bf6427dd59be5a361db718e69a67404ddfb4c0a634f07b80a3753f",
+    "tests/b5q-ufs/test-dp-clock.py": "d24e9702bc0b4181d7f5025b610c3eb71b93e62df42a7074ab35b2f4d1665562",
+    "tests/b5q-ufs/test-dp-controller.py": "4043c3480f865acf1b86e70233a39693525a09349ae80033e68945de1c10b1fb",
+    "tests/b5q-ufs/test-dp-cta.py": "aa040734476c7bd8962ddd73680c243360af86046da4151e395378755c2146ce",
+    "tests/b5q-ufs/test-dp-display.py": "d7ed960a160043396ff391db8abb7e07cdc4f0b8a307420613324d35161159c2",
+    "tests/b5q-ufs/test-dp-dpu-resources.py": "6fba2ad1ba6d8c9d6ede20916823eabc99bcb347a68f18e99d82962fa57d16ac",
+    "tests/b5q-ufs/test-dp-dpu.py": "d39d4a871b11f27681b87ee823cdbd5f166432165a9ef6a3ee6d720f356e444d",
+    "tests/b5q-ufs/test-dp-ioav.py": "3d96282a6303057bb228d0cd8c20b6c47d415c03ad796be0bc5631cea7cf7bf4",
+    "tests/b5q-ufs/test-dp-irq-owner.py": "800807ae28e695ac68533358a23eaa803312ecba1d7b45f037b556494d2ad98d",
+    "tests/b5q-ufs/test-dp-link-owner.py": "eba2d5c3cec5dbb3a08e8c9e61ff7abe25afd347da5a22cd9441c40bd4e76591",
+    "tests/b5q-ufs/test-dp-modes.py": "bc7221227a10898dd940ce895d2e3d126488f4c8642b73ee85684f71c90b17db",
+    "tests/b5q-ufs/test-dp-pdic.py": "dad10090c250c8d2aa14afe95f93f6866ad95c26f392fd12571dcc9f1079a826",
+    "tests/b5q-ufs/test-dp-phy.py": "65c9c330c7127386fd755999ae6e434ddea62411806c5ae826008e2ebce01123",
+    "tests/b5q-ufs/test-dp-plane.py": "49d53b564ed0eef20fb4cdaa530d1e2b953324bc6a416995d5de58e24f31f309",
+    "tests/b5q-ufs/test-dp-port.py": "195dc00c7e299e2be3326a61ad8d7d320313ca13474a4ed12dbff9a4815f3b7d",
+    "tests/b5q-ufs/test-dp-presentation.py": "238c622d8dc26db0a0504994b2bf79905abd5297aaa7f7f8ac54c5a78183b65f",
+    "tests/b5q-ufs/test-dp-rpmh.py": "ad4a29f56660f15f30568dc53d708b78bfdcc921ff80c2bacb5a1d057a5f1aa0",
+    "tests/b5q-ufs/test-dp-session.py": "02d6d0a5c2715df32dc98b3655a51754e3bd8e7d9d0d45cc9c2ace7484255cac",
+    "tests/b5q-ufs/test-dp-timing.py": "dcd47552b64a111fd7e69604701ba84a75ebd52b94f2162d3a08f5cc27886f38",
+    "tests/b5q-ufs/test-dp-training.py": "4aac62349eb02ed8407a950f6d7b70b5dbea11d5bb995b22822ca768b1b5ad30",
+    "tests/b5q-ufs/test-dp-tu.py": "b986b3834debb35c013629be1a018a0b88ff61e13740ffbc1b1d564519968513",
+    "tests/b5q-ufs/test-dp-vsync.py": "61c41c7787e45300582884bdeda9eee4ec88661ca5db396f6a789703b07c80ab",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "f759b22913c493d549ec88dc279677593933345f0a7bce9c41435b8abde9c349",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp": "7dbd5e6d86f661222a01e2ee6ad053ab0db6a01a59774ae203d92e9fc2c58f95",
+    "UniXNU-b5q/scripts/build-b5q-gop-27.py": "cb939ff2e00100c3957a3db22044bb26670ffffafff4b36637283bbd75be5ead",
+    "scripts/b5q-install/check-dp-local.py": "48d10f2600070292180fdd73e51f25d903c5a892b916e35eadde795a7af4a855",
+    "scripts/b5q-install/check-dp-target.py": "14f48d7a99cae524393d9df3342f391fbbdbed753328d0e506a9966032dfa978",
+    "scripts/b5q-install/check-dp-display-dma-inputs.py": "875ef90567c76f2f421e6ba1e811dafe387e65b560761dfc6540aaba2c88777a"
+  },
+  "source_provenance": {
+    "original_module": "sources/twrp-b5q/recovery/root/lib/modules/msm_drm.ko",
+    "original_sha256": "81248f938e3ff18c71335ea535f3f5a6868e66c6005f8520571422cbedb8945a",
+    "rpmh": {
+      "path": "drivers/soc/qcom/rpmh-rsc.c",
+      "sha256": "377364ae666b0d9e333a47e3083293642f65cd8c5c84e391bbd268a4a585cd5a",
+      "url": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550/36ffdaa5a4e2bff6e66812b444874b0cb6133fa9/drivers/soc/qcom/rpmh-rsc.c",
+      "commit": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9"
+    },
+    "OS_ABI_fixture": {
+      "path": "UniXNU-b5q/scripts/legacy-display-26C5035r.json",
+      "sha256": "1f032c508e2b124e1cee87a4fc29a483f90195c40910d713a3b71e18b1ae85d1"
+    },
+    "original_KC": "d1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9"
+  },
+  "host": {
+    "report": "artifacts/b5q-p5-work/local-regression/report.json",
+    "sha256": "9f02fbb2ee0de1be5ea4bda864a27f910443104b50f68b396235577e3c701dd5",
+    "groups": 23,
+    "passed": true,
+    "results": {
+      "aux": "PASS productionEDID 90 sink cases:8blocks/order/segmentreset/MOT/STOP-pointer-loss/24transactionfailures/CRC/atomicpublication ASanUBSan\nPASS productionAUX FIFO73cases/nativeI2C/readwrite1..16/8faults/bounded250mstimeout/7deferretries/shortindex/detach/overflow;ASanUBSan",
+      "board": "PASS native DP AUX switch 8193 GPIO180/183 cases/CC1CC2/active-low/readback/refusal/restore/noGPIO11 ASanUBSan",
+      "clock": "PASS SamsungDPclock 65567cases:exactMND/DP0VCOparent/RCGpreservation/4linkrates/32displayclocks/1msbounds ASanUBSan",
+      "controller": "PASS SamsungDPcontroller: 71892 exact-original MSA outputs,source/SST/reset/TPS1..4/10msvideo/1080pMSA/TU/bandwidth/invalid-inputs ASanUBSan",
+      "cta": "PASS CTA94originaltimings/127VICs/4K60advertisement/RGB-YUV420isolation ASanUBSan count=94",
+      "display": "PASS external IOMFB 23 production validation/fence/latch-tag/cancel/stale-callback cases ASanUBSan; original 53-line notification packing preserved",
+      "dpu-resources": "PASS production DPU resource discovery:all retained CTL/LM/SSPP rect0/1/highbits/fetch/pairs/full/busy/bounds; no writes\nPASS 4941 DPU ownership cases ASanUBSan",
+      "dpu": "PASS DP DPU 80 exact-original CTL/LM/INTF/MERGE route traces and 600 zero-write ownership/DMA failures ASanUBSan",
+      "ioav": "PASS IOAV timing 2820 real macOS26C5035r getter executions/94 CTA modes/fractional refresh/no porch transform; invalid mode refused",
+      "irq-owner": "PASS actual native MDSS IRQ worker 7 scheduler/IRQ races/foreignsource isolation/callback drain/timeout/restart cases ASanUBSan",
+      "link-owner": "PASS actual native DP Owner 21 attach/HPD/polarity/linkloss/retry/failure/stop-retention cases",
+      "modes": "PASS productionDPmodes:128checksumfaults/alltruncations/CTAoverrun/1080p60DTDandbandwidth/100000randomEDIDbounds ASanUBSan",
+      "pdic": "PASS SamsungPDIC 194cases:mailboxlength0..32/endmarker/500msbound/opcode/IO/detach/CDEpin/plug-receptacle/HPD/NAK/order/truncation/100000fuzz ASanUBSan",
+      "phy": "PASS SamsungPLL 129cases:24exactoriginalfunctiontraces/4x22v11params/5boundedlockfaults/V600AUX/originalDTswing",
+      "plane": "PASS SamsungDPplane 10040 exact-original BGRA/stride/crop/PE/CDP/register traces and 16 bounds failures ASanUBSan",
+      "port": "PASS 18 actual board PDIC polls:automaticVDM/poweredhub/missedIRQ/duplicates/HPD-pulse/lane-retention/exit/deadline/water/IO/malformed/lockownership ASanUBSan",
+      "presentation": "PASS DP presentation 20 scenarios, 10000 alternating flips, DMA rejection/real-latch/timeout-retention/counter-wrap ASanUBSan",
+      "rpmh": "PASS native DP MX RPMh 28 old/newlayout/busy/lock/complete/timeout/reap/ARClevel cases ASanUBSan",
+      "session": "PASS production DP session 53 full AUX/EDID/PHY/clock/training/modefallback/video/detach/failure/teardown/deadline cases ASanUBSan",
+      "timing": "PASS SamsungDPUtiming 2094 exact-original write traces/DP-bottom-right/negative-sync-polarity/configpreservation/bounds ASanUBSan",
+      "training": "PASS productionDPtraining 65555cases:1-2-4lanes/rates6-10-20-30/CR-EQ-faults/downshift/IO-detach/levelsclamp/intervalbound ASanUBSan",
+      "tu": "In file included from /home/baimao/zflip5/UniXNU-b5q/package/B5qDpTu.h:13,\n                 from /tmp/b5q-dp-tu-0u6clnbp/test.cpp:5:\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h: In member function \u2018bool B5qDp::Modes::add(const B5qDp::Mode&)\u2019:\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h:29:3: warning: this \u2018if\u2019 clause does not guard... [-Wmisleading-indentation]\n   29 |   if(count==capacity)return false;values[count++]=mode;return true;\n      |   ^~\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h:29:35: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the \u2018if\u2019\n   29 |   if(count==capacity)return false;values[count++]=mode;return true;\n      |                                   ^~~~~~\nPASS SamsungTU 487 exact-reference outputs, 389 bounded rejections; original adaptive rounding, RGB24, ASanUBSan",
+      "vsync": "PASS DP hardwareVSync 3236 W1C/isolation/reentry/detach/framewrap cases; no timer-generated frames ASanUBSan"
+    }
+  },
+  "target": {
+    "report": "artifacts/b5q-p5-work/target/report.json",
+    "sha256": "516d98ffe37e3f77be15988ff03847dca104a806c5011d08726275b07b3c41f9",
+    "objects": {
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/B5qUsbBoard.o": "fe1a721da82ed1c095dc52eeedf11392ac8a73e29929a75b176c38a1ab983d0f",
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/QcomDwc3.late.o": "ea2d4c036c68b1d1ef9e800016f43d9ab3bddf1ae63c6f8a77cfc4e5ac6453a4",
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/B5qDpLink.o": "2b9fc55d8d1c05022271fff2d87c49cb5244076a53877ba6059f353b8cbd5499",
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/B5qDpIrq.o": "7b45cf572912429868e5fcc39b4e2b9d4adabe6d3cabe3c9bfe1658ae1ad6ab4",
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/B5qDpDisplay.o": "be7579718cfbdc1aecf68585896fd8556895b1ec9124a369ff371d13c11fba20",
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/DpProtocolInstantiation.o": "8b112b811b65c7bbb5ce746d3c5d565379eb75cdab0656e61a67afcd5aa7f9da",
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/DpOriginalBindings.o": "4621fba71f05d38431c127990ce8f194e78d10e1306650f9d3e2b8d8afcd6f62",
+      "/home/baimao/zflip5/artifacts/b5q-p5-work/target/DpOriginalAddresses.o": "65a13895deb25cbe9785da4e77185c945ada27595c84e0244838b6ac3a58c120"
+    },
+    "scoped_imports_closed": true,
+    "whole_P5_link_closed": false,
+    "original_external_IOMFB_slots": 483,
+    "original_USB_slots": {
+      "xhci": 427,
+      "xdci": 384
+    },
+    "IRQ_worker_PAC": [
+      {
+        "symbol": "__ZN12_GLOBAL__N_13Irq7primaryEPv",
+        "sites": [
+          {
+            "site": "0x238",
+            "key": 0,
+            "diversity": 10942,
+            "address_diversity": 0
+          }
+        ]
+      },
+      {
+        "symbol": "__ZN12_GLOBAL__N_13Irq6workerEPvi",
+        "sites": [
+          {
+            "site": "0x9c",
+            "key": 0,
+            "diversity": 54535,
+            "address_diversity": 0
+          }
+        ]
+      }
+    ],
+    "worker_dispatch": "0xfffffff00bba0580",
+    "frame_callback": {
+      "producer_sites": [
+        {
+          "site": "0x8f90",
+          "key": 0,
+          "diversity": 49440,
+          "address_diversity": 0
+        }
+      ],
+      "actual_worker_calls": [
+        {
+          "site": 1352,
+          "diversity": 49440
+        }
+      ]
+    },
+    "external_display_callbacks": [
+      {
+        "callback": "checkDpPresent",
+        "producer_sites": [
+          {
+            "site": "0xa018",
+            "key": 0,
+            "diversity": 40503,
+            "address_diversity": 0
+          }
+        ],
+        "actual_native_calls": [
+          {
+            "site": 8584,
+            "diversity": 40503
+          }
+        ]
+      },
+      {
+        "callback": "checkDpDrain",
+        "producer_sites": [
+          {
+            "site": "0xa02c",
+            "key": 0,
+            "diversity": 12410,
+            "address_diversity": 0
+          }
+        ],
+        "actual_native_calls": [
+          {
+            "site": 2704,
+            "diversity": 12410
+          },
+          {
+            "site": 4568,
+            "diversity": 12410
+          }
+        ]
+      }
+    ],
+    "external_IOMFB_original_bridge": {
+      "__ZN25IOMobileFramebufferLegacy13newUserClientEP4taskPvjPP12IOUserClient": "0xfffffff00ac26154",
+      "__ZTV25IOMobileFramebufferLegacy": "0xfffffff0086232b8",
+      "__ZN25IOMobileFramebufferLegacy13setPowerStateEmP9IOService": "0xfffffff00ac2ef20",
+      "__ZN25IOMobileFramebufferLegacy10gMetaClassE": "0xfffffff00cc2cdf0"
+    },
+    "zero_EL1_apps_smmu": true
+  },
+  "findings": [
+    "Native link owner now defines both real USB integration hooks; maps owned DP/PHY/clock/GPIO ranges, verifies shared supplies, reads physical CC orientation, retrains after HPD/link loss, and retains ownership across failed stop.",
+    "HBR3 MX vote uses cmd-db ARC level indices and actual RSC status/completion. Busy TCS is never overwritten; timed-out active commands are retained and later reaped, not aborted.",
+    "Permanent IRQ115 shared handler acknowledges only owned INTF0 bits24/25. Atomic publication, in-flight drain, bounded stop/retry and else-thread_block race handling are production-tested. No timer synthesizes VSync.",
+    "Presentation validates two disjoint qualified buffers before memory writes, copies/cleans before CTL flush, completes only after a real frame/flush latch, and preserves DMA/tag ownership on teardown timeout. 10000 alternating flips pass ASanUBSan.",
+    "External IOMFB adapter uses the exact original 483-slot class ABI, real EDID IOAV timing, original 53-line notification/completion bodies, GPU producer-fence gating and generation tags. Cancelled/late callbacks cannot retire a later request. This adapter is not yet connected to a qualified native DMA allocation.",
+    "Actual selected DisplayDxe GOP single-display size path272c..2740 computes visible width*height*bytesPerPixel; publish2994..29a8 does not advertise unused reserved tail. No independent Display DMA mapping can be inferred from the reservation."
+  ],
+  "remaining": [
+    "source-qualified independent retained Display DMA allocation/producer preserving primary domain",
+    "end-to-end connection of native link, IRQ, presentation and IOMFB adapter; full mode/hotplug/lid lifecycle integration",
+    "complete P5 build/CI/actual ESP and final three-image recheck"
+  ],
+  "CI_run": null,
+  "ESP": null
+}

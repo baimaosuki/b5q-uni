@@ -110,7 +110,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-v27-accept-')as td:
  for name in ['BoardClock.o','ButtonProbe.o','NativeHidInput.o','B5qTouch.o','ThermalLevel.o','IOUserClient.cpo','ArmDTPlatform.o']:
   shutil.copyfile(find(name),objdir/name)
  arm=find('ArmCpu.o');gpuarchive=find('libAdreno740.a')
- llvm=Path('/home/baimao/nabu_macos/out/nabu-27.3-fresh/p025-m2v/toolchain/llvm21/usr/lib/llvm-21/bin')
+ llvm=ROOT/'tools/llvm21/usr/lib/llvm-21/bin'
  # ar extraction itself needs no target execution.
  ar='ar'
  for member in ['B5qGpu.o','ShengGmu.kit.o']:

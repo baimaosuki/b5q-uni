@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "checks": 21,
+  "hardware_verified": false,
+  "failed_run": 45255874610,
+  "first_error": "Native final kernel link rejects unresolved optional BootUiTrace imports boot_cpu_kick/boot_kthread_report",
+  "fix": "Omit only optional stack/IPI diagnostics unavailable in this image; preserve full native network dataplane and real stall counters; no replacement stubs or invented kick success",
+  "local": "122targetobjects/62PACcontracts/zero unresolved including weak/zero apps_smmu; original14sharedhost groups; originalP0P1/8firmwarepatches/141XNUpatches",
+  "pre_ci_sha256": "815b96f2220c1ea73f19301b01a6c86f1fa26c96dff8b5e77e58406ffbdd38cc"
+}

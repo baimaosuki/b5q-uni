@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 
 ROOT = Path(__file__).resolve().parents[2]
-TC = Path('/home/baimao/nabu_macos/out/nabu-27.3-fresh/p025-m2v/toolchain/llvm21/usr')
+TC = ROOT/'tools/llvm21/usr'
 compiler = TC / 'lib/llvm-21/bin/clang'
 environment = dict(os.environ, LD_LIBRARY_PATH=str(TC / 'lib/x86_64-linux-gnu'))
 with tempfile.TemporaryDirectory(prefix='b5q-absent-test-') as tmp:

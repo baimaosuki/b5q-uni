@@ -21,7 +21,7 @@ with tempfile.TemporaryDirectory(prefix='b5q-batch2-host-')as td:
   run(name+'-ASan-UBSan',[exe])
 S=R/'artifacts/b5q-runtime-v33-work'
 run('native-launchd',[sys.executable,'scripts/b5q-install/check-macos-launchd-policy.py','--launchd',S/'root/sbin/launchd','--rootless',S/'root/System/Library/Sandbox/com.apple.xpc.launchd.rootless.plist','--policy',R/'UniXNU-b5q/package/b5q-launchd-lite.json','--report',W/'native-launchd.json'])
-run('native-XPC-five-jobs',[sys.executable,'scripts/b5q-install/check-absentd-lifecycle.py','--root',S/'root','--cache','/home/baimao/nabu_macos/out/nabu-27.3-fresh/assets/shared-cache/System/Library/dyld/dyld_shared_cache_arm64e','--report',W/'absent-lifecycle.json'])
+run('native-XPC-five-jobs',[sys.executable,'scripts/b5q-install/check-absentd-lifecycle.py','--root',S/'root','--cache',R/'inputs/macos-27.3-26C5035r/shared-cache/dyld_shared_cache_arm64e','--report',W/'absent-lifecycle.json'])
 run('target',[sys.executable,'scripts/b5q-install/check-peripheral-target.py','--sources','NativeHidInput.cpp,HidInputProbe.cpp,B5qProcTop.c,B5qRamStorage.cpp,B5qPower.cpp,B5qUfs.cpp','--reference','artifacts/b5q-esp-batch1-final/esp.img','--objects-out',W/'objects'])
 run('objects',[sys.executable,'scripts/b5q-install/check-batch2-objects.py','--objects',W/'objects','--baseline',W/'pac','--out',W/'batch2-objects.json'])
 run('proctop-PAC',[sys.executable,'scripts/b5q-install/check-proctop-pac.py','--object',W/'objects/B5qProcTop.o','--core-objects',S/'pac','--out',W/'proctop-pac.json'])

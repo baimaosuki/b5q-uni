@@ -1,0 +1,344 @@
+{
+  "input": {
+    "path": "/home/baimao/zflip5/artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/etc/audconf/OPEN/acdb_cal.acdb",
+    "bytes": 3776798,
+    "sha256": "e243d8fc25d5afda8e7e9abfd45b6e3548b8dd2076174e52bc390ff14dbe0120"
+  },
+  "selected": {
+    "subgraph": 2952790018,
+    "tag": 3221225476,
+    "keys": [
+      2
+    ],
+    "iid": 17329,
+    "parameter": 134221851,
+    "file_payload_offset": 1325174,
+    "payload_hex": "00000000000000000100000003000000040020000000000001000000",
+    "fields": {
+      "lpaif_type": 0,
+      "intf_idx": 0,
+      "sync_src": 1,
+      "ctrl_data_out_enable": 0,
+      "slot_mask": 3,
+      "nslots_per_frame": 4,
+      "slot_width": 32,
+      "sync_mode": 0,
+      "ctrl_invert_sync_pulse": 0,
+      "ctrl_sync_data_delay": 1,
+      "reserved": 0
+    }
+  },
+  "all_TDM_rows": [
+    {
+      "subgraph": 2952790018,
+      "tag": 3221225476,
+      "keys": [
+        1
+      ],
+      "iid": 17329,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790018,
+      "tag": 3221225476,
+      "keys": [
+        2
+      ],
+      "iid": 17329,
+      "parameter": 134221851,
+      "file_payload_offset": 1325174,
+      "payload_hex": "00000000000000000100000003000000040020000000000001000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 0,
+        "slot_mask": 3,
+        "nslots_per_frame": 4,
+        "slot_width": 32,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 1,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790018,
+      "tag": 3221225476,
+      "keys": [
+        3
+      ],
+      "iid": 17329,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790018,
+      "tag": 3221225476,
+      "keys": [
+        4
+      ],
+      "iid": 17329,
+      "parameter": 134221851,
+      "file_payload_offset": 1325210,
+      "payload_hex": "0000000000000000010000000f000000040020000000000001000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 0,
+        "slot_mask": 15,
+        "nslots_per_frame": 4,
+        "slot_width": 32,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 1,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790229,
+      "tag": 3221225477,
+      "keys": [
+        1
+      ],
+      "iid": 17801,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790229,
+      "tag": 3221225477,
+      "keys": [
+        2
+      ],
+      "iid": 17801,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790229,
+      "tag": 3221225477,
+      "keys": [
+        3
+      ],
+      "iid": 17801,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790229,
+      "tag": 3221225477,
+      "keys": [
+        4
+      ],
+      "iid": 17801,
+      "parameter": 134221851,
+      "file_payload_offset": 1325210,
+      "payload_hex": "0000000000000000010000000f000000040020000000000001000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 0,
+        "slot_mask": 15,
+        "nslots_per_frame": 4,
+        "slot_width": 32,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 1,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790460,
+      "tag": 3221225476,
+      "keys": [
+        1
+      ],
+      "iid": 19170,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790460,
+      "tag": 3221225476,
+      "keys": [
+        2
+      ],
+      "iid": 19170,
+      "parameter": 134221851,
+      "file_payload_offset": 1326378,
+      "payload_hex": "00000000000000000100010003000000040020000000000001000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 3,
+        "nslots_per_frame": 4,
+        "slot_width": 32,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 1,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790460,
+      "tag": 3221225476,
+      "keys": [
+        3
+      ],
+      "iid": 19170,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    },
+    {
+      "subgraph": 2952790460,
+      "tag": 3221225476,
+      "keys": [
+        4
+      ],
+      "iid": 19170,
+      "parameter": 134221851,
+      "file_payload_offset": 1325138,
+      "payload_hex": "00000000000000000100010001000000010010000000000000000000",
+      "fields": {
+        "lpaif_type": 0,
+        "intf_idx": 0,
+        "sync_src": 1,
+        "ctrl_data_out_enable": 1,
+        "slot_mask": 1,
+        "nslots_per_frame": 1,
+        "slot_width": 16,
+        "sync_mode": 0,
+        "ctrl_invert_sync_pulse": 0,
+        "ctrl_sync_data_delay": 0,
+        "reserved": 0
+      }
+    }
+  ],
+  "hardware_verified": false,
+  "status": "Original packet settings implemented; full P4 audio transport/amplifier/HAL remains incomplete",
+  "sources": {
+    "scripts/b5q-install/extract-b5q-audio-topology.py": "90e99e415b47e8d6f9b759d687337a68947309ea5b1a4e68358171f8fbb17e25",
+    "UniXNU-b5q/package/B5qAudioTdm.h": "21110ba747246f5c4141fec9a814ec90d24cb9400439ef0a939b208627a95c61",
+    "UniXNU-b5q/scripts/b5q_audio.py": "d3d9e7e487e3ff26935d1a0a6ba5f9219a3cd6cb7784bd72cde207752948973b",
+    "artifacts/b5q-p4-work/gsl-reference/spf/api/modules/pcm_tdm_api.h": "fc9a2189a6223db0e002f81ebf41eaf5093695474ffdd6a3b3e7efef2e9eb3ab",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/lib64/libagm.so": "150b18501fa0d3c22030241b3542635fb1ddca80d91aee752c5a210b82dce2ac",
+    "scripts/b5q-install/check-p4a-target.py": "9888c7d6c80c4a4c9b63c5feabbccb1f87bd744dce456f45369630d4eaf6d3db",
+    "scripts/b5q-install/check-media-target-closure.py": "32e486e54a853a342c8d0f26cb60259ca890a60f389064e7a0fc03e147b29c5a",
+    "tests/b5q-ufs/test-audio-tdm.py": "b67607c4984ee880892d2c54556e06f59233df179f35e668a76c6d5058b3b63e"
+  },
+  "references": {
+    "AGM_revision": "10316d1cf67a187721ab56af7e7359837c693885",
+    "graphservices_revision": "1d2e82222dbc35b9b2cff966281cd2b7a26d081a",
+    "ACDB_source": "acdb_command.c TagDataSearchKeyTable/TagDataSearchLut/TagDataGetParameterData",
+    "stock_XML": "vendor/etc/audio/sku_kalama/resourcemanager.xml:1078 PAL_DEVICE_OUT_SPEAKER primary TDM48k2ch24bit",
+    "original_payload_offset": "0x143876",
+    "original_module": "TDM sink0700100e, interface0800101b; packed28B"
+  },
+  "host_regression": "PASS real307MTKTrecords/12TDMvariants, original primary stereo,13ACDBbounds faults,6147packetcapacity/guard cases underASanUBSan",
+  "target": "29actualarm64eP4objects inclShengGpr/ShengAudioReach;0missing/0duplicates,4basevtablesPAC,zeroEL1apps_smmu",
+  "PCM_conversion": "Original AGM graph_module.c:975 uses24bit/32bit container/Q27 on playback PCM converter; decoder and shared ring stay16bit/Q15"
+}

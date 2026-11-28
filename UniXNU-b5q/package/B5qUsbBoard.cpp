@@ -7,6 +7,9 @@
 #include "B5qUsbBoardCore.h"
 #include "B5qMax77705.h"
 #include "B5qQupClock.h"
+#include "B5qFuelGauge.h"
+#include "B5qDpPdic.h"
+#include "B5qDpPort.h"
 extern "C" bool sm8550_gcc_update32(volatile uint32_t *,uint32_t,uint32_t);
 namespace {
 void barrier(){__asm__ volatile("dsb sy":::"memory");}
@@ -19,6 +22,7 @@ uint32_t seRead(void *ctx,uint32_t reg){return static_cast<volatile uint32_t*>(c
 void seWrite(void *ctx,uint32_t reg,uint32_t value){static_cast<volatile uint32_t*>(ctx)[reg/4]=value;barrier();}
 struct Bus {
  Map engine;GeniI2c bus={};IOLock *lock=nullptr;bool ready=false;
+ ~Bus(){if(lock)IOLockFree(lock);}
  bool open(bool hub){
   if(ready)return true;
   Map gcc,tlmm;
@@ -75,7 +79,20 @@ struct Bus {
   }return false;
  }
  bool read(uint8_t address,uint8_t reg,uint8_t &value){bus.address=address;if(geni_i2c_start_read(&bus,reg)||!finish())return false;value=bus.data;return true;}
+ bool readWord(uint8_t address,uint8_t reg,uint16_t &value){
+  uint8_t bytes[2]={};bus.address=address;
+  if(geni_i2c_start_read_buffer(&bus,&reg,1,bytes,2)||!finish())return false;
+  value=uint16_t(bytes[0])|(uint16_t(bytes[1])<<8);return true;
+ }
  bool write(uint8_t address,uint8_t reg,uint8_t value){bus.address=address;return !geni_i2c_start_write(&bus,reg,value)&&finish();}
+ bool readBuffer(uint8_t address,uint8_t reg,uint8_t *value,unsigned bytes){
+  if(!value||!bytes||bytes>33||geni_i2c_busy(&bus)||(seRead(bus.io.ctx,GENI_STATUS)&GENI_STATUS_M_ACTIVE))return false;
+  bus.address=address;return !geni_i2c_start_read_buffer(&bus,&reg,1,value,bytes)&&finish();
+ }
+ bool writeBuffer(uint8_t address,const uint8_t *value,unsigned bytes){
+  if(!value||!bytes||bytes>34||geni_i2c_busy(&bus)||(seRead(bus.io.ctx,GENI_STATUS)&GENI_STATUS_M_ACTIVE))return false;
+  bus.address=address;return !geni_i2c_start_write_buffer(&bus,value,bytes)&&finish();
+ }
  uint32_t ios() const {return seRead(bus.io.ctx,B5qUsbBoardCore::geniIos);}
  B5qUsbBoardCore::Transfer tiTransfer(bool reading,uint8_t address,uint8_t reg,uint8_t value=0){
   // The shared FIFO code can retire an error before the hardware goes idle.
@@ -92,6 +109,23 @@ struct Bus {
  }
 };
 Bus *ti,*maxim;bool maximReady=false;bool otgOn=false;
+volatile unsigned maximBusState;
+bool openMaxim(){
+ unsigned expected=0;
+ if(__atomic_compare_exchange_n(&maximBusState,&expected,1u,false,__ATOMIC_ACQ_REL,__ATOMIC_ACQUIRE)){
+  Bus *candidate=new Bus;
+  const bool ok=candidate&&candidate->open(true);
+  if(ok)maxim=candidate;else delete candidate;
+  __atomic_store_n(&maximBusState,ok?2u:3u,__ATOMIC_RELEASE);
+  return ok;
+ }
+ for(unsigned i=0;i<100;++i){
+  const unsigned state=__atomic_load_n(&maximBusState,__ATOMIC_ACQUIRE);
+  if(state!=1)return state==2;
+  IOSleep(10);
+ }
+ return false;
+}
 // PM8550VS SID3 GPIO4 => PPID38b. Select only an APPS-owned channel.
 bool releaseTiReset(){
  Map core,cnfg,obs,channel;if(!core.open(0xc400000,0x3000)||!cnfg.open(0xc42d000,0x4000))return false;
@@ -171,32 +205,127 @@ extern "C" bool b5q_usb_repeater(bool init,bool host){
  return ok;
 }
 extern "C" bool b5q_usb_typec_init(void){
- maxim=new Bus;if(!maxim||!maxim->open(true))return false;
- uint8_t id=0,rev=0,cc=0,water=0;IOLockLock(maxim->lock);
- maximReady=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&maxim->read(0x25,0x0a,cc)&&
-            maxim->read(0x25,0x0b,water)&&id!=0xff&&!(water&2);
- bool roleCommandOk=false;
- if(maximReady)roleCommandOk=B5qMax77705::drp(*maxim,[](unsigned us){IODelay(us);},
-  [](const B5qMax77705::OpcodeResult &r){
-   IOLog("qcom-dwc3: max77705 DRP opcode=%02x reply=%02x irq=%02x polls=%u triggered=%u reg=%02x ok=%u\n",
-         r.opcode,r.reply,r.interrupt,r.polls,r.triggered,r.failedReg,r.ok);
-  });
+ if(!openMaxim())return false;
+ uint8_t id=0,rev=0;B5qMax77705::Cable cable;
+ IOLockLock(maxim->lock);
+ maximReady=maxim->read(0x66,0,id)&&maxim->read(0x66,1,rev)&&id!=0xff&&
+            B5qMax77705::readCable(*maxim,cable);
  IOLockUnlock(maxim->lock);
- IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x water=%u bus-ready=%u role-command-ok=%u\n",
-       id,rev,cc,!!(water&2),maximReady,roleCommandOk);
+ IOLog("qcom-dwc3: max77705 PMIC66 id=%x rev=%x CC25=%x/%x PD=%x water=%u bus-ready=%u policy=firmware-negotiated\n",
+       id,rev,cable.cc0,cable.cc1,cable.pd,cable.water(),maximReady);
+ // Water blocks roles in Cable, not future dry-cable status observations.
  return maximReady;
 }
+// Battery and USB share the same physical SE8 engine and lock. Read-only
+// gauge/charger sampling never changes charge policy or clears IRQ status.
+extern "C" bool b5q_battery_snapshot(B5qFuelGauge::Raw *raw,
+                                     B5qMax77705::Cable *cable,uint8_t *detail){
+ if(!raw||!cable||!detail||!openMaxim())return false;
+ B5qFuelGauge::Raw pending{};B5qMax77705::Cable next{};uint8_t chargerDetail=0;
+ IOLockLock(maxim->lock);
+ const bool ok=B5qFuelGauge::read([](uint8_t address,uint8_t reg,uint16_t &value){
+    return maxim->readWord(address,reg,value);
+   },pending)&&B5qMax77705::readCable(*maxim,next)&&maxim->read(0x69,0xb3,chargerDetail);
+ IOLockUnlock(maxim->lock);
+ if(ok){*raw=pending;*cable=next;*detail=chargerDetail;}
+ return ok;
+}
+extern "C" bool b5q_usb_cable_state(B5qMax77705::Cable *out){
+ if(!out)return false;
+ *out={};if(!maximReady)return false;
+ IOLockLock(maxim->lock);const bool ok=B5qMax77705::readCable(*maxim,*out);IOLockUnlock(maxim->lock);
+ static uint32_t previous=~0u;
+ if(__atomic_exchange_n(&previous,out->signature(),__ATOMIC_RELAXED)!=out->signature())
+  IOLog("qcom-dwc3: max77705 CC0=%x CC1=%x PD=%x BC=%x power=%u data=%d reverse=%d valid=%u\n",
+        out->cc0,out->cc1,out->pd,out->bc,out->power(),out->role(),out->orientation(),out->valid);
+ return ok;
+}
 extern "C" int b5q_usb_cable_role(void){
- if(!maximReady)return 0;uint8_t cc0=0,cc1=0;IOLockLock(maxim->lock);
- const bool ok=maxim->read(0x25,0x0a,cc0)&&maxim->read(0x25,0x0b,cc1);IOLockUnlock(maxim->lock);
- const int role=ok?B5qMax77705::role(cc0,cc1):0;
- static int previous=-1;if(role!=previous){IOLog("qcom-dwc3: max77705 CC0=%x CC1=%x role=%d valid=%u\n",cc0,cc1,role,ok);previous=role;}
- return role;
+ B5qMax77705::Cable cable;b5q_usb_cable_state(&cable);
+ return cable.role();
 }
 extern "C" bool b5q_usb_otg(bool on){
  if(!maximReady)return false;IOLockLock(maxim->lock);
- // Always disable explicitly on a non-host transition, including firmware's prior state.
+ // The caller follows the PDIC power role, independently of Host/Device.
  const bool ok=B5qMax77705::otg(*maxim,on,[](unsigned us){IODelay(us);});
  if(ok)otgOn=on;uint8_t mode=0,ilim=0,c3=0;maxim->read(0x69,0xb7,mode);maxim->read(0x69,0xb9,ilim);maxim->read(0x69,0xc3,c3);
  IOLockUnlock(maxim->lock);IOLog("qcom-dwc3: Charger69 OTG=%u verified=%u B7=%02x B9=%02x C3=%02x\n",on,ok,mode,ilim,c3);return ok;
+}
+namespace {
+// No second GENI owner: an opcode, its response and any dependent VDM request
+// stay under the same physical SE8 lock as Type-C and battery sampling.
+struct PdicIo {
+ bool read(uint8_t address,uint8_t reg,uint8_t *data,unsigned size){return maxim->readBuffer(address,reg,data,size);}
+ bool write(uint8_t address,const uint8_t *data,unsigned size){return maxim->writeBuffer(address,data,size);}
+ bool connected(){B5qMax77705::Cable cable;return B5qMax77705::readCable(*maxim,cable)&&cable.attached();}
+ void delay(unsigned us){if(us>=1000)IOSleep(us/1000);else IODelay(us);}
+ uint64_t nowUs(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns/1000;}
+};
+B5qDp::AltMode dpAlt;bool dpStarted=false,dpFailed=false;uint32_t dpCable=0,dpPending=0;
+uint64_t dpDeadline=0;
+uint64_t dpNow(){uint64_t ns=0;absolutetime_to_nanoseconds(mach_absolute_time(),&ns);return ns/1000000;}
+}
+extern "C" bool b5q_dp_port_poll(B5qDpPortState *out){
+ if(!out)return false;*out={};out->reverse=-1;
+ if(!openMaxim())return false;
+ IOLockLock(maxim->lock);
+ B5qMax77705::Cable cable;const bool sampled=B5qMax77705::readCable(*maxim,cable);
+ PdicIo io;B5qDp::Mailbox<PdicIo> mailbox(io);bool ok=sampled;
+ const uint32_t signature=sampled?cable.signature():0;
+ if(!sampled||!cable.attached()||cable.orientation()<0){
+  if(dpStarted)mailbox.enable(false);
+  dpStarted=dpFailed=false;dpCable=dpPending=0;dpAlt.reset();
+ }else{
+  if(signature!=dpCable){
+   if(dpStarted)mailbox.enable(false);
+   dpAlt.reset();dpStarted=dpFailed=false;dpCable=signature;dpPending=0;
+  }
+  if(!dpStarted&&!dpFailed){
+   dpStarted=dpAlt.start(mailbox,cable.power()==1&&cable.role()==2);dpFailed=!dpStarted;dpDeadline=dpNow()+3000;ok=dpStarted;
+  }
+  if(dpStarted){
+   uint8_t pd=0,vdm=0;
+   ok=maxim->read(0x25,4,pd)&&maxim->read(0x25,5,vdm);
+   if(ok)dpPending|=(vdm&15)|((uint32_t(pd)&0x1c)<<2);
+   // Firmware can omit an earlier VDM interrupt. Recover its cached packet
+   // in the same order as Samsung max77705_receive_alternate_message.
+   const unsigned awaited=unsigned(dpAlt.phase);
+   if(awaited>=1&&awaited<=4&&(dpPending&0x0fu))dpPending|=1u<<(awaited-1);
+   for(unsigned bit=0;ok&&bit<7;bit++)if(dpPending&(1u<<bit)){
+    const uint8_t ids[]={1,2,3,4,0x10,0x11,6};const uint8_t id=ids[bit];
+    const unsigned expected=unsigned(dpAlt.phase);
+    if(bit<4&&expected!=bit+1){if(expected>bit+1)dpPending&=~(1u<<bit);continue;}
+    // Status is also an active-mode update. A cached Configure ACK belongs
+    // only to the in-flight configure, never to a later HPD interrupt.
+    if(bit==4&&expected<unsigned(B5qDp::AltMode::Phase::Status))continue;
+    if(bit==5&&dpAlt.phase!=B5qDp::AltMode::Phase::Configure){
+     if(dpAlt.phase==B5qDp::AltMode::Phase::Active)dpPending&=~(1u<<bit);continue;
+    }
+    if(bit==6&&expected<unsigned(B5qDp::AltMode::Phase::Status))continue;
+    uint8_t reply[33];ok=mailbox.get(id,reply);
+    if(ok)ok=dpAlt.event(mailbox,id,reply,(id==1||id==2)?32:id==4?8:12);
+    dpPending&=~(1u<<bit);dpDeadline=dpNow()+3000;
+    IOLog("B5qDP: pdic id=%02x phase=%u pin=%02x lanes=%u hpd=%u irq=%u packet=%u error=%u mailbox=%u\n",
+      id,unsigned(dpAlt.phase),dpAlt.pin,dpAlt.lanes(),dpAlt.hpd,dpAlt.hpdIrq,ok,unsigned(dpAlt.error),unsigned(mailbox.error));
+   }
+   if(ok&&dpAlt.phase==B5qDp::AltMode::Phase::Off){
+    mailbox.enable(false);dpStarted=false;dpFailed=true;dpPending=0;
+   }
+   if(dpAlt.phase!=B5qDp::AltMode::Phase::Active&&dpNow()>dpDeadline){ok=false;dpAlt.reject(B5qDp::PdError::Timeout);}
+   if(!ok||dpAlt.phase==B5qDp::AltMode::Phase::Failed){
+    mailbox.enable(false);dpStarted=false;dpFailed=true;
+   }
+  }
+ }
+ out->phase=unsigned(dpAlt.phase);out->error=unsigned(dpAlt.error);out->generation=dpAlt.generation;
+ out->pin=dpAlt.pin;out->lanes=uint8_t(dpAlt.lanes());out->reverse=int8_t(cable.orientation());
+ out->attached=sampled&&cable.attached();out->hpd=dpStarted&&dpAlt.phase==B5qDp::AltMode::Phase::Active&&dpAlt.hpd;
+ out->configured=dpStarted&&dpAlt.phase==B5qDp::AltMode::Phase::Active;
+ out->hpdIrq=dpAlt.hpdIrq;dpAlt.hpdIrq=false;
+ IOLockUnlock(maxim->lock);return ok;
+}
+extern "C" void b5q_dp_port_stop(void){
+ if(!openMaxim())return;IOLockLock(maxim->lock);
+ if(dpStarted){PdicIo io;B5qDp::Mailbox<PdicIo> mailbox(io);mailbox.enable(false);}
+ dpStarted=dpFailed=false;dpPending=dpCable=0;dpAlt.reset();IOLockUnlock(maxim->lock);
 }

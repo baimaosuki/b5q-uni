@@ -2637,3 +2637,355 @@ result = "ActualBatch2journal/sourcecausalchainplus21ASanUBSan productionselecto
 kind = "source"
 reference = "reports/data-mount-fix.json"
 result = "CI45127313070SUCCESSsource05eeb6e4599d0170322853f97f0a2e71baf92bb2;ordinaryartifactdigestsverified. OnlyNativeRamBlock.late.o/B5qUfs.late.ochanged;core88703fdc/GPU/UEFI/Dataunchanged. ActualreturnedhookweakpresenceIA0xbd41/directBR26and326RAM/DataPACslots,7objectzeroapps_smmuPASS. FinalESP838860800BSHA5dffcb16774b4b25746676835b61977d1e2fa8d305fbe5deb13b925be2c42ed0;retainoriginalADTsafterprovingonlygeneratedentropywasdifferent;allotherFATmembersbyteidenticalexceptkernel/HMACnormal+RAMcopies. FAT4Kn/mirrors/journal,981Bargs/SIPu64LE2/2fixups/6GiB+4GiB,69POSTsitesandunchangedRAMseedAPFSaccount/59+26policy/absentdPASS. Req1..4localcomplete;newdevicebootnotclaimed,nophoneaccess."
+
+[[area]]
+id = "twrp-fastcharge"
+status = "implemented"
+components = []
+paths = ["reports/twrp-fastcharge.json"]
+inputs = ["Userrequestsnewb5qTWRPwithfastcharging. Existingcover-off-v4kernel/DTB/modules retained. Actualsec-battery.komodulehash+symbol/attraddressesandpinnedSamsungdriver36ffdaa5sourcehashesinreports/twrp-fastcharge.json."]
+configuration = ["Boardqcom/SamsunginitrestoreSIOP100;initservicewaitsmodularbatteryandsetsvolatilebattery/pd_disable0oncewithreadback. NativePD/PPS/AFCnegotiationandthermal/batterylimitspreserved. Noafc_disablepersistentwrite,noforced9Vcabletype,norawPMICregister,current,temperature/factorycontrolwrites."]
+procedure = ["Layerboard-onlychargepatchontheexistingcover-off-v4patch;6productionshellcasesPASS;incrementalrecoveryimagebuildfromexistingTWRPout;finalramdisk/FATtools/unchangedkernelDTBDTBOanddriververificationbeforeIMGdelivery. NoOdinTAR/ZIP,phoneflashorfullkernelbuild."]
+findings = ["BothcurrentqcomandsharedSamsungrccontainexplicitbattery/siop_level0withcut-chargingcomment. PinnedSamsungSIOPstore100clearsSIOPcurrenteventandqueuesworker;SIOPworkreleasesvoltage/FCC/inputvotes. Actualmoduleattributesandworkercmp80/releasevoteinstructionsconfirmmatchinginterface.", "Host6casesPASS:normalSIOP/PD,idempotence,statusreadonly,optionalPD,absentbattery,lateprobe;thermal/current/cablecontrolsbyteunchanged. NewrecoveryIMGbuiltandactualramdiskverified;physicalchargingnegotiationpending,nodeviceconnected."]
+completion = ["recovery.imgbuilt109576192BSHAbd13d25a4692236e8525afbe259a1f46c9b1c4f6e9e50bac852bfd19cd931498;actualramdiskpolicy/version/module/kernelDTBDTBOandcoveroffchecksPASS;6scriptcases/initverifier/patchreplayPASS."]
+limits = ["Nocharger/cableorphoneconnected;cannotclaim9V/PPS/25Wphysicallynegotiated. Actualpowerdependsnativeadapter/cable/SOC/temperaturelimits. Noautomaticflashauthorized."]
+next_action = ["UsermayinstallnewrecoveryIMGandverifybatteryreadback/negotiationwithcompatiblecharger;noflashorrebootperformed."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/twrp-fastcharge.json"
+result = "ActualinitSIOP0restriction+sec-battery.koattr/workerevidence+pinnedSamsungsource;6productionpolicyhostcasesPASS. Nativecharginglimitsretained;build/hardwarepending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/twrp-fastcharge.json"
+result = "FinalactualrecoveryIMG109576192BSHAbd13d25a4692236e8525afbe259a1f46c9b1c4f6e9e50bac852bfd19cd931498;Androidv2/4Kheader/partitionfit/ramdisktoolinventory/6chargepolicycases/hostinitverifier/6filepatchreplayPASS. FinalramdisknoSIOP0writes;normalSIOP100+volatilePD0serviceandlate-probeobserverpresent;nativebattery/PDIC/PCA9482/MAX77705modulesunchanged. Existingcoveroff4andkernel/DTB/DTBOexacthashesretained. OnlyIMGoutput,noTAR/ZIP/fullkernelbuild/CI/phoneaccess. Hardware9V/PPS/25Wnegotiationnotclaimed."
+
+[[area]]
+id = "p0-touch-lifecycle"
+status = "host-verified"
+components = ["ShengHidInput", "QcomGeniSpi"]
+paths = ["package/B5qTouch.cpp", "package/B5qTouchProtocol.h", "package/B5qTouchReports.h", "package/B5qTouchMouse.h", "package/Wn8030Pointer.h", "package/NativeHidInput.cpp", "reports/p0-touch-source-audit.json", "reports/p0-p5-goal-delivery.md"]
+inputs = ["Samsung original touch module SHA256 42933f1b8d51c8caa89755472d264456417734837c46ffa7f8ffd5025c99a7c0", "Samsung sec_common_fn SHA256 0755d4c6a92e6090f8b2ab62d370632696c5482bd49fe1cc142ff7b3e6b0a521", "Pinned sheng6c42e105 Wn8030.c SHA256 15643bbcb9d240ebf94a76bab0fab94bac5d0712157b79be663ff4d2e547e253"]
+configuration = ["Keep board, memory, UFS Data, GPU and service policy unchanged; touch-mouse=0 retains typed tenfinger HID and digitizerPairGuard."]
+procedure = ["Original DT and module disassembly, verbatim upstream pointer extraction, production lifecycle tests and target compilation; full kernel+UEFI and final image acceptance required before stage completion."]
+findings = ["FinaljointCI45167257160fullkernel+UEFISUCCESSandactualreturnedimages/PAC/APFSallPASS; sourceb1e7ae4; newhardwarepending. ", "Original0x69 type mask includesPALM5 with a separate palm flag atirq_thread0x9e14..0x9e4c. Desktop policy excludesPALM5, keeps0/3/6, releases invalidtypeslots, and clearsall12 onC2/Identify/status/I2C/malformed frames.", "Prefer fullframe0x11; bounded fallbacktoC1 on unsupportedlayout. Delete old latchedmultifingerpointer; movement/scroll/identity/60msreset come from unchanged shengfunctionbodies, with boardtap/coordinatepacking only.", "43hostpreflightgroups,28arm64eobjects withzero unresolved/duplicates, allrequestedcrossobjectPAC andzeroapps_smmu passed; fullkernel+UEFICI,returnedimages andnewhardwarequalification pending."]
+completion = ["Host preflight, full kernel+UEFI build/image readback, independent stage commit; hardware status is always explicit."]
+limits = ["New hardware behavior unverified. C2 is called rawdata in originalmodule; unconditional release is requested board safety policy."]
+next_action = ["Finish full hostpreflight, build kernel+UEFI, readback images, commit P0, then immediately proceedP1 throughP5."]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p0-touch-source-audit.json"
+result = "Actual module symbol addresses, fullinputSHA256, SamsungDTlines and pinned upstream sourceidentity recorded; no hardware success inferred."
+
+[[area.evidence]]
+kind = "host"
+reference = "reports/p0-touch-source-audit.json"
+command = "python3 scripts/b5q-install/pre-ci-p0-p1.py; CI45167257160fullkernel+UEFI; python3 scripts/b5q-install/verify-p0-images.py; python3 scripts/b5q-install/check-stage-returned-objects.py"
+revision = "b1e7ae43fb01857d8d845fddeebe4bfdcec0cbfd"
+result = "53jointpreflightgroupsPASS; fullkernelandUEFISUCCESS; actual31XcodeboardobjectsPAC/zeroapps_smmu,1145USBHID+326storagePACslots,69POSTsites,800MiB4KnESP/SIPu64LE2/981Bargs/twoBGRA/E-P8/4GiBRAMrecovery/59+26binaryrootownedpolicies/absentdtrust/FATjournalallPASS. ESPb07c6002,FD b909347d,boot38cbf9eb34f942e4. No hardwarequalification ordeviceaccess."
+
+[[area]]
+id = "p1-native-usb"
+status = "host-verified"
+components = ["QcomDwc3"]
+paths = ["package/QcomDwc3.cpp", "package/B5qUsbBoard.cpp", "package/B5qMax77705.h", "reports/p1-usb-source-audit.json"]
+inputs = ["SamsungPDICmodule f32bd8305382f6786daee68dbf584446033770cef9f4e7d0458496806ad0afca", "OriginalCcicDxe 5388db26dd4d8c1b10ee6f3e2190b476dbb19ff306ceece7f9f3cd61a8af787d", "ReferenceDTS/runtimeFDT/stockfirmwareprovenance distinguished in sourceaudit."]
+configuration = ["Keep usb=1 and optionalusb-host; preserve168QMP/TI/IRQfuse/firmwareHALDMA; noEL1apps_smmu."]
+procedure = ["DisassembleCCPinStat/CCpower/PDdata role functions; replay actualproduction snapshot/rolefunctions and compileexactmacOSABI; jointlygateP0+P1 beforeCI per latestuserinstruction."]
+findings = ["FinaljointCI45167257160fullkernel+UEFISUCCESSandactualreturnedimages/PAC/APFSallPASS; sourceb1e7ae4; newhardwarepending. ", "PD0d bit7isdataHost independentlyofCC0a powerrole; source/sink no longer guessesdata role. CC0a bits7:6determineQMPorientation; noGPIO11/PS5169access.", "Removeforced vendor5e01 initialization; statusadoptionneverclobbers livePDcontract. PoweredSink+DFPdoesnotrequestboost; Source+UFPpowersupplystaysindependent. Toread/waterfailuresrejectroles withoutdisabling futurestatusrecovery.", "Bothbus-numbervaluesareu32. Existingrolethreadobservespower/orientationgeneration andyieldsonfailedtransition; newdevicediagnosticsomitSMMU. TargetedASanUBSan/P1twoobjectclosurepassed; fulljointgates/CI/returnimages pending.", "InitialP0CI45162509107 kernel succeeded; UEFI stoppedbeforecompilebecause oldbranchmissed existingv30patch0005/0006. Firsterrorretained; userrequiresP0+P1localcompletionbeforeanynewCI, so noP0retrywaslaunched."]
+completion = ["CompleteP0+P1localpreflight, onejointCI,actualimage/PAC/ADT/APFSreadback; hardwareclaimsremainseparate."]
+limits = ["No new hardware validation; nofirmwareopcodeechoisacceptedashardwareenumerationproof."]
+next_action = ["Finishjointsource/target/PAC/firmwaregates, submitP1commitandonejointCI, thencontinueP2-P5."]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p1-usb-source-audit.json"
+result = "OriginalmoduleRVA/bitfields,inputSHA256,DTprovenance,implementednativeCC/PDpolicy andremaininggates recorded."
+
+[[area.evidence]]
+kind = "host"
+reference = "reports/p1-usb-source-audit.json"
+command = "python3 scripts/b5q-install/pre-ci-p0-p1.py; CI45167257160fullkernel+UEFI; python3 scripts/b5q-install/verify-p0-images.py; python3 scripts/b5q-install/check-stage-returned-objects.py"
+revision = "b1e7ae43fb01857d8d845fddeebe4bfdcec0cbfd"
+result = "53jointpreflightgroupsPASS; fullkernelandUEFISUCCESS; actual31XcodeboardobjectsPAC/zeroapps_smmu,1145USBHID+326storagePACslots,69POSTsites,800MiB4KnESP/SIPu64LE2/981Bargs/twoBGRA/E-P8/4GiBRAMrecovery/59+26binaryrootownedpolicies/absentdtrust/FATjournalallPASS. ESPb07c6002,FD b909347d,boot38cbf9eb34f942e4. No hardwarequalification ordeviceaccess."
+
+[[area]]
+id = "p2-bluetooth"
+status = "host-verified"
+components = ["QcaBluetooth"]
+paths = ["package/B5qBtFifo.c", "package/B5qBtFifo.h", "package/B5qBluetooth.cpp", "package/B5qWcnPower.cpp", "scripts/b5q_bluetooth.py", "reports/p2-bluetooth-source-audit.json"]
+inputs = ["Samsung b5q UART14 and six logical BT supplies; original hpbtfw21/hpnv21 firmware; QcaBluetooth effe4ec5c57cd400a5f818b21c9903fef237edbc"]
+configuration = ["Independent bluetooth boot argument; FIFO only, no EL1 apps_smmu or DMA mapping"]
+procedure = ["Implement and test Samsung FIFO transport, WCN shared power and native macOS runtime before stage CI"]
+findings = ["CI45250039600 first error: forced strrchr macro renamed a later XNU __pure__ declaration onto an inline definition, rejected by Xcode. Compatibility header now consumes sys/systm.h and string.h before macro, retains immutable btqca source. Exact attribute-order regression and all9nativeBSD targetobjects pass; full20group preCI being rerun. No ESP success claimed.", "CI45245676090 advanced through exact Linux/FreeBSD resolution and failed B5qBtFifo at mixed osfmk/BSD private headers and mask macro. Fix: all nativewirelessC recipe now replays actualBSD kern_event compile record; C++ and othercomponentskeep existingrecords. fifoMask name avoids kernel macro. Localchecker nowcompilesall9BTobjects against pinnedprivateBSD definitions; all9PASS plusproductionFIFOtests/jointPAC required. Firstfailure log preserved; core/GPU/Data/acceptedUEFI unchanged.", "2026-11-24 host gate PASS. Original Samsung msm_geni_serial.ko handle_rx_hs RVA9a9c verifies RX FIFO780/word packing/tail count; DTS UART SPI461 is GIC INTID493. BT six logical supplies collapse to four physical resources and are shared with Wi-Fi. FIFO capability is read-only and unavailable FIFO fails safely without hardware override. Production FIFO, shared-power, pinned WCN6855 H4/IBS, original macOS 27 bluetoothd ABI, native target-object and joint P2/P3 closure checks pass. Three reviewed fixes are covered by ASan/UBSan regressions. Full CI, returned image and hardware behavior remain pending."]
+completion = ["Host source, target, PAC/MMIO and joint P2/P3 preflight pass; full CI, image readback and hardware remain pending"]
+limits = ["Native signing/linking, full CI/image return and device qualification are pending"]
+next_action = ["Submit the joint P2/P3 branch once, verify returned kernel/UEFI/runtime and package the paired ESP"]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p2-bluetooth-source-audit.json"
+result = "Pinned DT/module/source hashes and exact instruction evidence; IN_PROGRESS"
+
+[[area.evidence]]
+kind = "host"
+reference = "reports/p2-p3-pre-ci.json"
+revision = "a91c3fbd071fff37893816f588e1f0b4ec213f9d"
+command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
+result = "Production FIFO/shared power/WCN6855, original macOS runtime input and nine target Bluetooth objects pass; 122-object joint closure/PAC/MMIO gate passes. Full CI, signing and hardware pending."
+
+[[area]]
+id = "p3-wifi"
+status = "host-verified"
+components = ["Ath12kWifi"]
+paths = ["scripts/build-b5q-wifi.py", "package/B5qAth11kCompat/**", "reports/p3-wifi-source-audit.json"]
+inputs = ["Locked Linux458c6079 ath11k and shared native mac80211/cfg80211; Samsung b5q DT; zizhan a7f8ae29 software ABI adapters only"]
+configuration = ["Independent wifi switch and firmware HAL DMA; no EL1 apps_smmu"]
+procedure = ["Complete production ath11k/PCIe/MHI/QMI, native network and wpa integration, then jointP2+P3 host/PAC/CI/image gates"]
+findings = ["ActualCI45268304105SUCCESS source5705887; final800MiB4KnESP a537450f18d2f809649b9fbbb22bd8bcc0cdafba25120d1fda5e83eb8815c146 pairedPCIeFD42e828e8/DarwinBootce8d86c4. Actual122objects/62PACcontracts/746networkvtables/221originalbindings/zeroapps_smmu PASS;24stockFWfiles/nativeBTpatches/trust/4GiBAPFS59-26policies/8E-P/SIPu64-2/2BGRA/1000Bargs/FATjournal PASS. Threeuserreviewbugs productionregressions+targethashespass. Two unusedXcodePACnlistdeclarations classifiedonlywithzeroRelocs+realauthtargetresolved,3negative mutationsrejected; noweakruntimeexemptions. P2P3acceptedhostbuildonly; retainuntilP4P5complete, noflash/hardwareclaim. reports/p2-p3-final-images.json.", "ActualCI45261064321 SUCCESS, download/FAT/PAC/trustedruntime firmware passed preliminary checks but binary readback exposed wireless patch in unused iPadOS prepare, not selected macOS data_prepare. Existing macOS lib/sbin binder already supplies nativeBT; move verification and missingWiFiLaunchDaemonsview to reachablemacOSprelaunch path afteraddon_sbin, beforepayloadrelease. No duplicateBTmounts. Addproductionbootpath+mountfaultregression and return actualEthernetobjects for jointaudit. No acceptedP2P3image until correctedbinaryreadback. reports/p2-p3-runtime-path-fix.json.", "CI45255874610 allboardobjectscompiled, finalnativekernel link refused boot_cpu_kick/boot_kthread_report despiteweak_import. RemovedonlyoptionalunbuiltBootUiTracediagnosticcalls; realpacket/stallcounts preserved, nofakestub. Removedlocalunresolvedsymbolallowlist:122objects62PACcontractsclosedwithoutweakexceptions;21localgroupsPASS. Exactmonitoridle/stall/recovery/boundedlogsregressionPASS. reports/p2-p3-no-boottrace-link-fix.json; actualCI/imagepending.", "CI45238564080 stopped at original wireless fetch: FreeBSD releng15.1 tipbb03631 differs from locked95719d8. Production resolver now fetches exact source-lock commits before unchanged upstream required-file/hash validation; moving-ref/sparse/idempotence/dirty-source rejection regressionPASS. XNU source/object cache added with target/Xcode/profile/patch/config identity and save-on-failure. ExistingacceptedPCIeFD42e828e8 reused. No new hardware/image success claimed.", "Run45237798813 confirms Homebrew still parses the invalid blacktop cask even with --formula. Remove that tap from host setup and use upstream ipsw3.1.750 release archive with official formula SHA0c75b813(x64)/03c0701b(arm64). Local bounded downloader verified actual x64 archive digest, tar regular-file entry and Mach-O CPU before CI retry; binary is kept outside Git. This fixes host tools only, without driver/core/GPU/Data source changes.", "Intel runner45236971355 acquired immediately but host setup selected blacktop/tap ipsw cask and hit an incompatible zap stanza in the preinstalled Homebrew. Explicit --formula selects the CLI formula; no XNU compilation had begun. First log retained and compiled FD remains reusable.", "GitHub run45232005688 attempt1 failed because no hosted macOS ARM64 runner could be acquired; attempt2 remained queued with zero steps. Only that unacquired job was cancelled. Official actions/runner-images macos26 Intel and ARM64 both list Xcode26.6/17F113 and macOS26.5SDK; use macos-26-intel for identical arm64e target/SDK. Host-architecture cache keys remain distinct; reused GPU/Data/acceptedFD remain unchanged. New image remains pending.", "Returned-image verifier gains an explicit wireless mode: all baseline GPU/addon files remain identical, new native Bluetooth/supplicant code pages and CDHashes must verify against final trust cache, all24SamsungFW hashes must match, daemon UUID and native patch instructions must match actual macOS27.3 reference, and PCIe ADT slots must begin zero. Syntax checks pass; execution on new returned ESP remains pending.", "CI45229274907 full UEFI build and actual FD/FV/PCIe producer+loader checks pass (FD42e828e8); kernel stopped before compilation at private draft WCN download HTTP403. Grant only kernel job contents-write required by GitHub to read draft assets; retain unpublished input and reuse successful FD on retry. Cache and first error preserved. Target closure verifier now accepts actual CI object manifests and deployment ESP for returned-binary validation.", "2026-11-24 currentjointlocalgatesPASS:14originalsharedLinux/WPA/MHIhostregressions, originalQCA6490PCIrevision/MHIconfigASanUBSan, all22ath11kstrictcallbacktypes,122arm64eobjects0missing/0duplicates/62PACproducerconsumercontracts/0apps_smmu;43P0+10P1baselinegroupsretained. RealEDK2PCIeproducer/DarwinBoottargetcompile+8firmwarepatchreconstructionPASS.24SamsungoriginalFWfilehashesvalidatedandprivateCIdraftasset91f82f09validated;noneingit. RealmacOS27BlueTool/Type0targetcompilesandoriginalbluetoothdpatchassertionsPASS. CI/signing/finalnewimagespending;hardwarepending. Threeuserreviewfixesincludedandregressiontested;1000Bargsandnew88BzeroPCIehandoffslotschecked.", "2026-11-24 userreview3fixes complete: WiFi armwaitcancel has elseblock and temporaryWindowRAII; USBQMPsuccess switches UTMIbits0/3 backtoPIPE and releases12KiB onallmappedexits; natural2to1to0righttap retainsoriginalIDs/time/motion and rejectsreadd. ProductionASanUBSanPASS including6USBfaults,2IRQracebranches,andrighttapnegativecases. Nativeen0OSadapter400+346slots/221bindingsPASS; full141XNUpatchesapply. Added signednativeBluetooth/wpa+originalSamsung24filemanifest integration, runtimeviews and1000Bargs; fullintegration/CI pending. Delivery usernowrequests combinedP2P3ESP then separateP4/P5ESP; noimageoffered beforelocalgates.", "2026-11-24 P2+P3 combined gate continues: full ath11k/shared stack target compile passes. Added original115-entry b5q PCIe PHY, bounded controller bringup, firmware-only32MiB DMA allocator, exact Samsung QMI BDF names/amss20 mapping and QGIC MSI alternative from original disabled DT node (17110040/SPI768, not sheng SPI141); hardware applicability explicitly pending. Firmware statev2 requires Device-mapped MSI page and retainedWBISpool. Production allocator/name/table/loader ASanUBSan and3boardarm64eobjectsPASS. Native Ethernet/packet ABI, joint symbol/PAC, addon/UEFI/CI/image gates remain incomplete; no delivery or hardware claim.", "P3 implementation in progress. Samsung DTS PCIe0SID1400/1401, IOVAa0000000+10000000 and dynamic32MiB cnss pool are distinct facts; pool has no fixed physical base. Shared locked Linux source resolved; moving FreeBSD release tip was corrected to pinned95719d8 without claiming source identity from the tag. Compatibility bridge uses same-version ath11k unified BSS callback for native split mac80211 notifications. No P3 build, firmware handoff or hardware success claimed."]
+completion = ["Joint P2/P3 production tests, target symbol/PAC closure, source UEFI/DarwinBoot target compile and no-apps_smmu gate pass; full CI, image readback and hardware remain pending"]
+limits = ["Stock MSI applicability, native signing/linking, full CI/image return and device qualification are pending; the QGIC alternative is feature-gated and is not claimed as stock ITS hardware proof"]
+next_action = ["Submit the joint P2/P3 branch once, verify returned kernel/UEFI/runtime and package the paired ESP"]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p3-wifi-source-audit.json"
+result = "Pinned input hashes, Samsung resource facts and allowed software reuse scope; IN_PROGRESS"
+
+[[area.evidence]]
+kind = "host"
+reference = "reports/p2-p3-pre-ci.json"
+revision = "a91c3fbd071fff37893816f588e1f0b4ec213f9d"
+command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
+result = "18 joint gate groups pass, preserving 43 P0 and 10 P1 groups; 122 arm64e target objects, 62 PAC producer/consumer contracts, zero unresolved/duplicate symbols and apps_smmu materializations. 14 original shared runtime regressions, 141 XNU patches and 8 firmware patch reconstructions pass. Native signing, full CI and returned image checks remain pending."
+
+[[area.evidence]]
+revision = "57058874364249242582c683a444f1d24404bcbb"
+kind = "host"
+reference = "reports/p2-p3-runtime-path-fix.json"
+command = "python3 scripts/b5q-install/pre-ci-p2-p3.py"
+result = "22 local groups PASS; selected macOS wireless publication after existing BT union views; actual previous successful CI image rejected by readback, new image not yet accepted."
+
+[[area.evidence]]
+revision = "57058874364249242582c683a444f1d24404bcbb"
+kind = "host"
+reference = "reports/p2-p3-final-images.json"
+command = "verify-p0-images.py --wireless; check-wireless-target-closure.py --ci; test-compiler-auth-metadata.py"
+result = "CI45268304105SUCCESS and actual paired ESP/FAT/APFS/ADT/signature/runtime plus122actualobjects/62PAC/zeroMMIO PASS. Separate P4/P5 images and overall delivery still incomplete; hardware qualification pending."
+
+[[area]]
+id = "p4-stock-inputs"
+status = "planned"
+components = ["QcomIris"]
+paths = ["reports/p4-media-dma-source.json", "reports/p4-panel-lid-source.json", "package/B5qPanelCommand.h", "package/B5qLid.h", "reports/p4-stock-inputs.json", "package/B5qFuelGauge.h"]
+inputs = ["Offline Samsung F7310ZCS7EYF3 NON-HLOS FAT; original vendor tfa98xx.cnt and vpu30_4v.mbn; original b5q DTS and kernel modules"]
+configuration = ["Preparation only; no new P4 hardware path enabled or included in the P2/P3 CI snapshot"]
+procedure = ["Reconstruct exact original ADSP ELF container from bounded split pieces, verifying MDT header/hash-segment identity"]
+findings = ["P4BSamsungTFA9878prepare/start/stop524ASanUBSanPASS for2revisions/2originalprofiles/faultstop/timeouts. NewI2C18FIFOtransport exactGCC170b0/170ac/votebit16,pins8/9/reset0/TDM126-129; retained104BUEFIaudioDMAconsumer. PinnedAudioProbe adaptedoutputonly,noCS35/noEL1SMMU/nounownedlowRAM; publishService checksactualreturn andDSPdisconnectclearsready. Target33objects inprogress; fullHAL/startup/CI/image pending; reports/p4-audio-board-source.json.", "P4current29objectrecipe100nonvtablecallbackPACsitesPASS againstsource-selectedmodulesandactualnativeXNUconsumers. ExplicitIOTimer73d8->7c11andsysctl0e2e->address/nameblendresigningproveninactualCIcore; wronggenericcallmatchingrejected.4basevtablescheckedseparately. Fullaudio/startup/CI/imagepending; reports/p4-callback-pac.json.", "P4BaudioTDMproductionencodingASanUBSanPASS6147capacityguardsand13ACDBboundsfaults; decoder16Q15->converter24in32Q27 matchedoriginalAGM. 29actualarm64eP4objects importsclosed/no duplicates/4basevtablesPAC/zeroapps_smmu PASS. Fullhardwareaudio/HAL/runtime/CI stillpending; reports/p4-audio-tdm-source.json.", "P4Baudioreachprotocol now derives exactprimaryTDMfrom originalSamsungACDB e243d8fc:28BstereoRXpayload at143876,4x32bits/slotmask3/delay1; source307MTKTrows and12TDMvariants resolved viaMTLU/MTDE/MTDO/POOL, not guesseddefaults. PinnedsharedencoderadaptedTDMsink0700100e+0800101b and24bitoutput,16bitsharedPCM. Fullaudiohardware/HAL/integrationstillincomplete; reports/p4-audio-tdm-source.json.", "P4media sources now reproducible as0009UEFI/0010DarwinBoot patches, all10baseline+media patches reconstruct exactsourcesPASS andactualEDK2targetcompilePASS. 27actualP4A/ADSP/Irisobjects have610closedimports,4basevtablesPACmatch,zeroEL1apps_smmu. Original2022userclient guardedmethod binding retained. Audio/fullcallback/startup/CI/image pending; notP4complete. reports/p4-media-dma-source.json and artifacts/b5q-p4-work/target/media-symbol-vtable-closure.json.", "P4B actual5096BPM3_01TFAcontainer discovered: physical34/35plusDSPpseudo0,defaultregister-onlyplans match independent decoder,all5096CRCcorruptions/truncations,RMWfaultstopASanUBSanPASS. VFSreader adds exact540934d3cnt whitelist,authenticates4realSamsungfiles,11failurecleanupand137BpartialreadtestsPASS; handleusespointerheap. Original resource XML1078confirmsPRIMARYTDM48k2ch24bit; no shengCS35reuse. Transport/fullAudioReach/HAL/CI remain incomplete; reports/p4-audio-container-source.json.", "P4C retained-video memory and pinned QcomIris adaptation implemented in working tree: excludes IrisMmu/Sm8550AppsSmmu/ArmSmmu4KLive entirely, uses original b5q nonsecure coherent SID1940/1947 pool and bounded input-every-QBUF/output-before-delivery copies. 128MiB extent allocator, exact client plane bounds and RSC completion failures. Target/tests being run; startup/runtime/P4B/CI/image remain incomplete, no P4 delivery. Evidence reports/p4-video-source.json.", "P4mediaUEFIproducer+DarwinBootconsumerimplementedusingoriginalIORT LPASSARID03000001/0e andVIDEO03000000/05 only; independentReservedWBIS2MiBaudio/128MiBvideo pools and32pagetables. LoaderfinalEFIdescriptorretentiongates104Bstates; nofake ready, no Display/secureVideo attachments. ActualEDK2MediaDma+DarwinBoottargetPASS; ASanUBSan33280pages+statefaults+loadertruncation/retention/HALfailuresPASS withUSBregression. NoP4firmwareCI/OSconsumer/audio/video integration yet. Sourcehashes reports/p4-media-dma-source.json.", "P4Bsource preparation: exact6c42e10ADSP transport retained with b5q59b4000length, staged-onlyb5qfirmware paths, RPMhcompletiontimeoutfailure and stage diagnostics. New VFS media reader accepts only3originalSamsungexactsize/SHA256files,no modem/partitionfallback; canonicaladsp681ab07e/dtb13a0d68a/vpu4a3b9ed9. Target/runtimeintegration/AudioReachSamsungTDM/amplifier/UEFIdomain/HALremaining; not workingaudio claim. reports/p4-panel-lid-source.json includes hashes.", "P4A targetcompilePASS 3boardobjects,0missingimports,545basevtablePACslots+3callbackPACcontracts checked against actualP1core (typedtimerAction73d8 authenticated/resigned7c11 by IOTimerEventSource::init/invokeAction),0apps_smmumaterializations. ProductionSE8initializer16threadrace+16atomicreadfaults ASanUBSanPASS; validonlysnapshotpublication and no chargereg writes. OriginalF7310merged5overlays normalcandela3729B table all match independentlycollectedruntimeDTB. Backlight/battery/lid services implemented but P4B/P4C/startup/CI/image stillpending. No P4image or hardwaresuccess.", "P4A helpers ASan/UBSanPASS4096rawlevels/completion/errors/timeout/restore andGPIO107debounce. Added actual IOPMPowerSource publisher, sharedSE8 gauge+charger snapshot, arm64e-safe backlight metaclass override with no vptr copying, native normal256entrySamsungcandela table raw4..2047/nits1..500. Service/target/PAC/integrationpending; not P4 completion. Evidence reports/p4-panel-lid-source.json includes source hashes; no hardware success claimed.", "2026-11-24 P4A production GPIO107 active-low50ms debounce and Samsung DSI FIFO DCS51 helper added. Register offsets/packets checked against original msm_drm.ko1403c0..14055c and pinned Samsung source; no command DMA/SMMU memory fetch. Source evidence reports/p4-panel-lid-source.json includes all input hashes/disassembly. Service integration, target and tests pending; no P4 image or hardware claim.", "2026-11-24 original MAX77705 read-only sample helper implemented: child address36, exact status/SOC/temp/voltage/current/capacity/cycle registers and DTS resistor5. No calibration/charging writes. ASan/UBSan exhaustively checks65536rawvoltage/current values, negative temperatures, absent battery and10read-failure atomic publication paths. This is a production helper only; IOPMPowerSource/transport and completeP4integration still pending.", "2026-11-24 preparation: 53 original ADSP/DTB split and metadata files found in offline NON-HLOS image. Source tool verifies sizes/ELF offsets/no overlap and MDT signed hash-segment identity before reconstructing containers. adsp.mbn SHA681ab07eea92eeb42ce1da35a866105851dd1dfb4f207c1c9fcb5f853be84380, adsp_dtb.mbn SHA13a0d68a97b0fb04a32c0b478d420ddec821b251e38cd656322b0acdd2cd2e90. These are derived containers with unchanged original segments, not an asserted signature-execution or hardware result. P4 driver/firmware integration remains pending."]
+completion = ["Complete P4A/B/C implementations, production tests, target/PAC/MMIO, full CI and actual images before P4 delivery"]
+limits = ["P4 local source/production/host/target/PAC integration complete; CI/image/hardware remain pending"]
+next_action = ["Build and verify the independent P4 firmware/kernel/HAL and actual800MiBESP"]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p4-audio-board-source.json"
+result = "Original TFA/GCC/TLMM input hashes, 524 production lifecycle tests, actual board transport/retained DMA/shared service implementation; full audio HAL/runtime/CI remains incomplete."
+
+[[area.evidence]]
+revision = "d0d106f95c9aba22bc6e7ea4006ab7f45581faf0"
+kind = "host"
+reference = "reports/p4-callback-pac.json"
+command = "python3 scripts/b5q-install/check-media-callback-pac.py"
+result = "100 current non-vtable callback signatures verified against source-selected actual consumers, including native timer/sysctl resigning; full P4 audio/runtime/CI remains pending."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p4-audio-tdm-source.json"
+result = "Exact original ACDB table relationships, tagged stereo payload, source revisions and numeric TDM settings; full audio is not yet complete."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p4-stock-inputs.json"
+result = "Original offline NON-HLOS parent SHA and all extracted piece/container hashes; exact MDT header/hash equality PASS. Tool refuses block devices; no phone access."
+
+[[area]]
+id = "p5-displayport"
+status = "planned"
+components = []
+paths = ["reports/p5-source-inputs.json"]
+inputs = ["Original F7310ZCS7EYF3 merged b5q DT; original msm_drm.ko/pdic_max77705.ko; pinned Samsung display-driver source a1fdd086620bc0e2f767323c2853bcc9424e3087"]
+configuration = ["No P5 hardware path selected or included in P2/P3 CI"]
+procedure = ["Compare original DP AUX/link/PHY/clock/PDIC evidence before implementation"]
+findings = ["P5 original source inputs retained with parent hashes: DP ae90000/AUX ae90200/Link ae90400/pixel ae91000, combo88e8000,PHY88eaa00,PLL88ea000 and tx lanes88ea200/88ea600. Original pdic symbols f204configure/11780receive/1215cenable/c890discovermode/116b8selectpin identified; original msm_drm dp_aux_transfer1ef38/catalog17c1c.98pinnedSamsungTFA+DPsourcefiles downloaded with hashes. This is input preparation, not P5 implementation or external-display hardware evidence."]
+completion = ["Complete PD/PHY/AUX/link/clock/DPU/IOMFB implementation, all local gates, CI and returned image before a separate P5 ESP delivery"]
+limits = ["P5 implementation, CI and image outstanding; physical connector DP routing unqualified"]
+next_action = ["Finish P2/P3 and P4 while retaining original P5 source inputs"]
+[[area.evidence]]
+kind = "source"
+reference = "reports/p5-source-inputs.json"
+result = "Original DT/module hashes, function offsets and pinned Samsung source identities; source inputs only"
+
+[[area]]
+id = "p4-production-integration"
+status = "implemented"
+components = ["DarwinBoot", "GopFramebuffer"]
+paths = ["scripts/b5q_media.py", "package/B5qFeatures.h", "package/LegacyDisplayProbe.cpp", "scripts/build-b5q-media-runtime.py"]
+inputs = ["Pinned sheng6c42e10; original F7310ZCS7EYF3 files and source hashes in reports/p4-integration.json"]
+configuration = ["Feature-mask63; explicit subsystem arguments and b5q-f menu override; firmware readiness remains independently observed"]
+procedure = ["Compile exact production source recipe, host fault tests, actual PAC/ABI, baseline regression, then CI and image readback"]
+completion = ["All local P4A/B/C gates plus actual CI firmware/kernel/HAL/ESP return acceptance"]
+limits = ["Physical P4 hardware validation pending; accepted image retained until complete P5 and overall recheck"]
+next_action = ["Complete independent P5 then recheck all three accepted images before delivery"]
+findings = ["ActualCI45295645295kernel-HAL-ESP and45296602477firmwarePASS; actual35mediaobjects-105callbackPAC-6vtables and122wirelessobjects-62callbackPAC-zeroEL1apps_smmuPASS. Loader-onlyFDpairing and800MiB4KnFAT-menu-ADT-POST-APFS59-26policies-50preservedaddonentries-7mediaentries-signatures-4stockmediahashesPASS. Receipt reports/p4-final-images.json; hardware pending.", "Local17P4groups/22P2P3baselinegroups/35productionarm64eobjects/6vtablePACgroups/105callbackcontracts/10firmwarepatches/142XNUpatches/4menuentries PASS. ActualEFIproducer16failurepaths and retainedpool lifetime verified. NativeAppleHALlink/sign, fullCI and actualimageacceptance remain pending; noP4delivery or hardwareclaim.", "P4 source-qualified media recipe and display-after worker integrated; loader must use same ADT feature mask as XNU or it never prepares DMA domains. Corrected selection retains explicit subsystem overrides and menu safe disable. Runtime extension preserves Data/GPU entries and original trust modules. Full CI and actual image acceptance are still pending."]
+[[area.evidence]]
+revision = "d0d106f95c9aba22bc6e7ea4006ab7f45581faf0"
+kind = "host"
+reference = "reports/p4-integration.json"
+command = "python3 tests/b5q-ufs/test-media-loader.py"
+result = "ASan/UBSan actual media loader/USB regressions and256kind-mask cases pass; hardware qualification pending. Input/source hashes are in the referenced receipt."
+
+[[area.evidence]]
+kind = "host"
+revision = "828009313241637d9c17a67dbc65e34518c05557"
+reference = "reports/p4-firmware-gitapply-fix.json"
+command = "python3 scripts/b5q-install/check-stage-firmware-inputs.py --media --out artifacts/b5q-p4-work/firmware-gitapply.json"
+result = "Exact git apply reconstruction10patchesPASS; firstCI firmware failedmissingnewfilemode metadata, fixed without kernel/GPU/Data rebuild. ActualfirmwareCIpending."
+
+[[area.evidence]]
+kind = "host"
+revision = "9b0653f1894d3b144acfb694dd233342890c6c5b"
+reference = "reports/p4-final-images.json"
+command = "verify-p0-images.py --media; actual media/wireless target PAC and closure; package-usb-dma-boot.py --physical-esp"
+result = "Actual returned binary-ESP-FD acceptancePASS; ESP fb874c56a44d2c8632609a2719ba2bc2c18d816ea263a14baf406db2676960ba; hardware remains pending."
+
+[[area]]
+id = "p5-dp-link"
+status = "planned"
+components = ["GopFramebuffer"]
+paths = ["package/B5qDpModes.h", "package/B5qDpAux.h", "package/B5qDpPdic.h", "package/B5qDpTraining.h", "reports/p5-link-source.json"]
+inputs = ["Original b5q.dts34863..34958 and Samsung msm_drm/pdic modules; hash-qualified matching platform DP/PDIC source"]
+configuration = ["P5 not enabled or part of P4 image; no fabricatedready flag"]
+procedure = ["Source/module alignment, production protocol helpers, host fault tests, then fullPD/PHY/AUX/DPU/IOMFB integration"]
+findings = ["P5exactPLL24Samsungfunctionwrite-traces-plus105fault-voltagecasesPASS; sharedSE8adapteraddedwithoutsecondGENIowner andarm64ecompiled. USB roleThread serializes combo transitions and link work; link implementation,targetPAC,CI,image remainpending.", "ProductionAUX72fault-framingcases,PDIC190cases-plus100000fuzz andCR-EQ-downshift65555casesASanUBSanPASS. SamsungcountincludesmessageheaderplusVDMheader; status-configIDs0x10-0x11. Fullhardwareintegration,targetPAC,CIandimage stillincomplete.", "P5 originalDPregister/clock/PLL/AUX constants andPDpinselection evidence retained. New boundedEDID1.xDTD/CTAbounds parser validates128bytechecksums/extensionlengths,progressiveseparateSync,precisetiming and24bitRGB8b10blinkbudget. ASanUBSan128faults/alltruncations/100000randomEDIDcasesPASS. This is oneprotocolhelper only;PD/PHY/AUX/DPU/IOMFB/target/CI/image remain incomplete."]
+completion = ["Complete nativePD/PHY/AUX/link/clock/DPU/externalIOMFB plus hosttargetPAC,CI and actual independentP5ESP before delivery"]
+limits = ["NoP5 image or physical connector DP routing qualification"]
+next_action = ["Continue allP5layers while P4 nativeCI runs;do not deliver unfinished image"]
+[[area.evidence]]
+kind = "host"
+revision = "828009313241637d9c17a67dbc65e34518c05557"
+reference = "reports/p5-link-source.json"
+command = "python3 tests/b5q-ufs/test-dp-modes.py"
+result = "ProductionprotocolhelperASanUBSanPASS;nohardware-ready or completeP5claim. Exactoriginalsource/inputandhelperhashes retained."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/p5-tu-source.json"
+result = "Source-qualified Samsung TU algorithm integrated as bounded RGB24 helper; original adaptive fixedpoint rounding preserved with defined unsigned shift arithmetic. Differential tests and full P5 integration still pending; no complete-image or hardware claim."
+
+[[area]]
+id = "p5-controller-protocol"
+status = "planned"
+components = []
+paths = ["package/B5qDpAux.h", "package/B5qDpPdic.h", "package/B5qDpMsa.h", "package/B5qDpController.h", "package/B5qDpTiming.h", "reports/p5-link-source.json"]
+inputs = ["Samsung original msm_drm.ko/pdic_max77705.ko; pinned Samsung display source a1fdd086620bc0e2f767323c2853bcc9424e3087 and kernel36ffdaa5a4e2bff6e66812b444874b0cb6133fa9; individual SHA256s in p5-link-source.json"]
+configuration = ["P5 path remains disabled in accepted P2/P3 and P4 images; no Display SMMU domain change"]
+procedure = ["Qualify exact original arithmetic, register writes and fault paths before linking native external output"]
+findings = ["EDID now restores segment/offset for every chunk and explicitly resets a previously used high segment;90 register-level sink cases and72 AUX cases ASanUBSanPASS. Samsung automatic Identity/SVID/Modes discovery retained; explicit Identity only Sink+DFP;PDIC190cases plus100000fuzzPASS. DPU progressiveRGB timing includes original bottom-right transform and inverted-negative-sync polarity;2094 exact original write traces PASS. MSA rational/adaptivefixedpoint agrees with original71892inputs; controllerSST/TPS/video/TU testsPASS. TU487original outputs/389rejects and94CTA entries verified. Native hardware glue, display DMA qualification, externalIOMFB and P5 CI/image remain incomplete."]
+completion = ["All P5 layers, target/PAC/zeroMMIO, CI and actual separate ESP acceptance required"]
+limits = ["No P5 delivery or physical DP routing/hardware success claim"]
+next_action = ["Finish native integration without touching live Display handoff or guessing SID routing"]
+[[area.evidence]]
+revision = "c5c59d394c88864ba4e477f5ea02a8d6692acaf7"
+kind = "host"
+reference = "reports/p5-link-source.json"
+command = "python3 tests/b5q-ufs/test-dp-{aux,pdic,timing,controller,tu,cta}.py"
+result = "Production protocol tests above PASS; this is explicitly not full P5 implementation or a hardware result."
+
+[[area]]
+id = "p4-returned-image-acceptance"
+status = "implemented"
+components = ["DarwinBoot", "GopFramebuffer"]
+paths = ["reports/p4-final-images.json", "../scripts/b5q-install/verify-p0-images.py"]
+inputs = ["CI45295645295 kernel/HAL/ESP and CI45296602477 firmware; actual hashes in p4-final-images.json"]
+configuration = ["Four menu entries; P4 feature-mask63; safe/RAM mask0; original Data/GPU retained"]
+procedure = ["Verify actual returned35mediaobjects/105callbackPAC/6vtablegroups, wireless122objects/62callbacks, zeroEL1apps_smmu, signed/trustedaddon, pairedloader/FV,4KnFAT/APFS/ADT/policies; independent full second image readback"]
+findings = ["Both CI runs SUCCESS. Actual P4 ESP838860800B SHAfb874c56a44d2c8632609a2719ba2bc2c18d816ea263a14baf406db2676960ba; boot19120128B SHA32727e914f0b2741b2b5731ea4fa19c3b671973990bafc5dd0740b6f0dbe811f. Second full readback PASS with same bytes/hashes. NativeAppleclang weak PAC metadata explicitly distinguished from real relocations, three malicious mutations rejected. Idempotent verifier selects runtime/media-runtime.json, not its own prior acceptance report. Physical qualification remains pending."]
+completion = ["P4 host/build/returned-image gates completed; retained for requested combined three-image delivery"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; no complete P5 or physical P4 claim"]
+next_action = ["Finish P5 and overall three-image delivery gate"]
+[[area.evidence]]
+kind = "host"
+revision = "9b0653f1894d3b144acfb694dd233342890c6c5b"
+reference = "reports/p4-final-images.json"
+command = "verify-p0-images.py --media; check-media-target-closure.py --ci; test-compiler-auth-metadata.py"
+result = "Actual returned image and independent full second readback PASS; no new core/GPU/Data build or phone access."
+
+[[area]]
+id = "p5-target-and-dma-contract"
+status = "planned"
+components = ["DarwinBoot", "GopFramebuffer"]
+paths = ["reports/p5-link-source.json", "reports/p5-display-dma-inputs.json", "../scripts/b5q-install/check-dp-target.py", "../scripts/b5q-install/check-dp-display-dma-inputs.py"]
+inputs = ["Original selected DisplayDxe SHA51babf469c8a6753082b1a84c677a21ed4ddca64ac98ca939a3bb42a614e8070; original b5q DTS/IORT/msm_drm and pinned matching source hashes in p5-display-dma-inputs.json"]
+configuration = ["No P5 hardware path in either accepted image; existing primary Display SID1c00/mask2 remains unchanged"]
+procedure = ["Read actual selected PE code and original stream tuples; compile actual SE8/USB plus production protocol instantiations; compare original vtables and actual ArmCpu/GENI callback authentication"]
+findings = ["23hostgroupsPASS; actual8arm64eobjects scoped importsclosed, originalUSB ABI and483externalIOMFB PACslots, IRQ IA2abe/worker IAd507/framecallback/backend IOMFB callbacks/GENI PAC andzeroEL1apps_smmu PASS. Native link andIRQ owners, two-buffer presentation andexternalIOMFB adapter implemented; complete retained DisplayDMA producer andend-to-end display/hotplug/lid wiring remain incomplete. NoP5CI/ESP orhardware claim.", "Original selected DisplayDxe caller133cc still returns through19b18 patch; single-display GOP size272c..2740 is visible width*height*bytesPerPixel, not the full reserved splash. IORT secondarySID1c04 exists but b5q has no sid_phys route. Independent retained DMA coverage remains unknown; primary domain/bank and EL1 apps_smmu untouched."]
+completion = ["Resolve DMA/resource ownership and finish complete nativeP5 integration, alltargetclosure/PAC,CI and actual independentESP before release"]
+limits = ["P5 INCOMPLETE; helper/target checks cannot satisfy full driver or image gates"]
+next_action = ["Qualify retained Display DMA and connect actual native display pipeline before P5 CI/image"]
+[[area.evidence]]
+revision = "c5c59d394c88864ba4e477f5ea02a8d6692acaf7"
+kind = "host"
+reference = "reports/p5-link-source.json"
+command = "check-dp-target.py; test-dp-port.py; twelve production protocol groups"
+result = "Current scoped imports/target/PAC PASS; full P5 integration remains incomplete. Exact current hashes and scopes retained."
+[[area.evidence]]
+kind = "source"
+reference = "reports/p5-display-dma-inputs.json"
+command = "python3 scripts/b5q-install/check-dp-display-dma-inputs.py"
+result = "Original static input checksPASS; independent DP DMA routing/coverage remains unknown. Explicitly no release qualification or hardware success."
+
+[[area]]
+id = "p5-scanout-session-development"
+status = "planned"
+components = ["GopFramebuffer", "DarwinBoot"]
+paths = ["package/B5qDpPlane.h", "package/B5qDpDpu.h", "package/B5qDpDpuResources.h", "package/B5qDpVsync.h", "package/B5qDpSession.h", "package/B5qDpIoav.h", "package/B5qDpClock.h", "package/B5qDpAux.h", "reports/p5-scanout-source.json"]
+inputs = ["Original msm_drm.ko SHA81248f938e3ff18c71335ea535f3f5a6868e66c6005f8520571422cbedb8945a; original26C5035r kernelcache SHAd1003b5143ffd88439b4d45b6017f587171cfe6855660bed05370a2ea5db9fe9; pinned Samsung source and individual hashes in p5-scanout-source.json"]
+configuration = ["Local P5 development only; accepted P2/P3 and P4 image bytes unchanged; no Display domain changes, device access or P5 CI"]
+procedure = ["Compare actual original plane/CTL/LM/INTF/merge bodies with owned register plans under ASanUBSan; real26C5035r IOAV getters under Unicorn; native session register sink tests; production arm64e instantiation and original USB/GENI/IRQ PAC checks"]
+findings = ["23hostgroupsPASS; actual8arm64eobjects scoped importsclosed, originalUSB ABI and483externalIOMFB PACslots, IRQ IA2abe/worker IAd507/framecallback/backend IOMFB callbacks/GENI PAC andzeroEL1apps_smmu PASS. Native link andIRQ owners, two-buffer presentation andexternalIOMFB adapter implemented; complete retained DisplayDMA producer andend-to-end display/hotplug/lid wiring remain incomplete. NoP5CI/ESP orhardware claim."]
+completion = ["Complete native ownership, retained DMA, externalIOMFB/presentation and actual P5 CI/image gates before final three-image handoff"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE within listed scopes; wholeP5 INCOMPLETE"]
+next_action = ["Qualify retained Display DMA and connect actual native display pipeline before P5 CI/image"]
+[[area.evidence]]
+kind = "source"
+revision = "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+reference = "reports/p5-scanout-source.json"
+command = "Original module symbols/disassembly; pinned sde_hw_sspp/ctl/lm/intf/pingpong source; real26C5035r IOAV getter instructions"
+result = "Original symbols/offsets/bytes and input hashes retained; same-source copies are not independent hardware evidence."
+[[area.evidence]]
+kind = "host"
+reference = "reports/p5-scanout-source.json"
+command = "python3 scripts/b5q-install/check-dp-local.py; python3 scripts/b5q-install/check-dp-target.py; requested USB/Wi-Fi/touch production regressions"
+result = "All23 scoped host groups/target/PAC/zeroMMIO PASS; real link hooks resolved. Missing retained DMA producer/end-to-end native display pipeline keep release gate closed."
+
+[[area]]
+id = "p5-native-link-and-presentation"
+status = "planned"
+components = ["GopFramebuffer", "DarwinBoot", "QcomDwc3"]
+paths = ["package/B5qDpAux.h", "package/B5qDpBoard.h", "package/B5qDpClock.h", "package/B5qDpController.h", "package/B5qDpCta.h", "package/B5qDpDisplay.cpp", "package/B5qDpDisplay.h", "package/B5qDpDpu.h", "package/B5qDpDpuResources.h", "package/B5qDpIoav.h", "package/B5qDpIrq.cpp", "package/B5qDpIrq.h", "package/B5qDpLink.cpp", "package/B5qDpModes.h", "package/B5qDpMsa.h", "package/B5qDpPdic.h", "package/B5qDpPhy.h", "package/B5qDpPlane.h", "package/B5qDpPllData.h", "package/B5qDpPort.h", "package/B5qDpPresentation.h", "package/B5qDpSession.h", "package/B5qDpTiming.h", "package/B5qDpTraining.h", "package/B5qDpTu.h", "package/B5qDpVsync.h", "package/QcomDwc3.cpp", "package/B5qUsbBoard.cpp", "scripts/build-b5q-gop-27.py", "reports/p5-native-development.json"]
+inputs = ["Original Samsung module and b5q DT hashes, pinned source RPMh commit36ffdaa5a4e2bff6e66812b444874b0cb6133fa9, actual26C5035r KC and reviewed483-slot ABI; exact per-file hashes in reports/p5-native-development.json"]
+configuration = ["Local P5 WIP only; accepted P2/P3 and P4 stage images unchanged; no core/GPU/Data/UEFI build or device access"]
+procedure = ["Run production native-owner/IRQ/presentation/IOMFB host regressions; compile actual arm64e objects and compare original vtable/callback authentication and zeroEL1apps_smmu"]
+findings = ["23hostgroupsPASS; actual8arm64eobjects scoped importsclosed, originalUSB ABI and483externalIOMFB PACslots, IRQ IA2abe/worker IAd507/framecallback/backend IOMFB callbacks/GENI PAC andzeroEL1apps_smmu PASS. Native link andIRQ owners, two-buffer presentation andexternalIOMFB adapter implemented; complete retained DisplayDMA producer andend-to-end display/hotplug/lid wiring remain incomplete. NoP5CI/ESP orhardware claim."]
+completion = ["Listed software/host scopes verified; whole P5 and three-image final delivery remain incomplete"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE for listed scopes; no P5 final image/CI completion claim"]
+next_action = ["source-qualified independent retained Display DMA allocation/producer preserving primary domain", "end-to-end connection of native link, IRQ, presentation and IOMFB adapter; full mode/hotplug/lid lifecycle integration", "complete P5 build/CI/actual ESP and final three-image recheck"]
+[[area.evidence]]
+kind = "host"
+reference = "reports/p5-native-development.json"
+command = "check-dp-local.py; check-dp-target.py; test-wireless-review-fixes.py; test-touch-p0.py"
+result = "23hostgroupsPASS; actual8arm64eobjects scoped importsclosed, originalUSB ABI and483externalIOMFB PACslots, IRQ IA2abe/worker IAd507/framecallback/backend IOMFB callbacks/GENI PAC andzeroEL1apps_smmu PASS. Native link andIRQ owners, two-buffer presentation andexternalIOMFB adapter implemented; complete retained DisplayDMA producer andend-to-end display/hotplug/lid wiring remain incomplete. NoP5CI/ESP orhardware claim."
+[[area.evidence]]
+kind = "source"
+reference = "reports/p5-display-dma-inputs.json"
+command = "check-dp-display-dma-inputs.py"
+result = "Original PE caller/GOP-size bytes, b5q DTS and IORT checked; no independent Display DMA allocation is proven. No firmware mapping changes or EL1 SMMU access."

@@ -104,14 +104,13 @@ void clocks(){
 }
 
 void roles(){
- // Actual pdic_max77705.ko: CC_STATUS0@0a bits2:0, Sink1/Source2;
- // CC_STATUS1@0b bit1 ConnStat=water. Upper CC current/orientation bits ignored.
- for(unsigned cc0=0;cc0<256;++cc0)for(unsigned cc1=0;cc1<256;++cc1){
-  const int expected=(cc1&2)?0:(cc0%8==1)?1:(cc0%8==2)?2:0;
-  assert(B5qMax77705::role(cc0,cc1)==expected);
+ // Official PDIC separates power (CC0 bits2:0) from data (PD1 bit7).
+ for(unsigned cc0=0;cc0<256;++cc0)for(unsigned cc1=0;cc1<256;++cc1)for(unsigned pd:{0u,128u}){
+  B5qMax77705::Cable c={uint8_t(cc0),uint8_t(cc1),uint8_t(pd),0,true};
+  const bool attached=!(cc1&2)&&(cc0%8==1||cc0%8==2);
+  assert(c.role()==(attached?(pd?2:1):0));
+  assert(c.sourceVbus(c.role())==(attached&&cc0%8==2));
  }
- assert(B5qMax77705::role(0x71,0)==1 && B5qMax77705::role(0x72,0)==2);
- assert(B5qMax77705::role(0x71,2)==0 && B5qMax77705::role(0x72,2)==0);
- puts("PASS production Max77705: all65536 CC0/CC1 pairs including physical0x71 Sink, Source2 and ConnStat water suppression");
+ puts("PASS production Max77705:131072 CC/power/data/water combinations; Sink+DFP and Source+UFP stay independent");
 }
 int main(){cold();clocks();roles();}

@@ -1,0 +1,207 @@
+{
+  "complete_P5": false,
+  "hardware_verified": false,
+  "scope": "Production DPU/plane/vsync/session/timing and native link/IRQ/presentation/external IOMFB adapter; retained DMA producer and end-to-end integration incomplete",
+  "original_module": {
+    "path": "sources/twrp-b5q/recovery/root/lib/modules/msm_drm.ko",
+    "sha256": "81248f938e3ff18c71335ea535f3f5a6868e66c6005f8520571422cbedb8945a",
+    "symbols": [
+      {
+        "symbol": "sde_hw_sspp_setup_format",
+        "section": ".text",
+        "section_offset": "0x103a50",
+        "size": 1044,
+        "sha256": "685e8cd680c3569a4fe001971c9ba945444a9e62ace87ae15fe6b24df0ead5c3"
+      },
+      {
+        "symbol": "sde_hw_sspp_setup_rects",
+        "section": ".text",
+        "section_offset": "0x103e64",
+        "size": 548,
+        "sha256": "cae0c9c38d78bc4e93558b365661fbc8dc4a39235add066f2ee87a9eeb2eb0e1"
+      },
+      {
+        "symbol": "sde_hw_sspp_setup_sourceaddress",
+        "section": ".text",
+        "section_offset": "0x104088",
+        "size": 264,
+        "sha256": "a951bb821c645846438ba0aa4a91d06052decf98f8c65ef7dc1ef9ef0ba51ded"
+      },
+      {
+        "symbol": "sde_hw_sspp_setup_secure",
+        "section": ".text",
+        "section_offset": "0x1043f4",
+        "size": 168,
+        "sha256": "15c31d1a84028728fc3f3e39f4b8ceec9a45eb85a4ae90c7510accba39e2aff7"
+      },
+      {
+        "symbol": "sde_hw_sspp_setup_pe_config",
+        "section": ".text",
+        "section_offset": "0x1041f8",
+        "size": 508,
+        "sha256": "04a65ef621ece0bc7f9944e5e8c5abbf23926fa2dbd5654707e6c89481025e31"
+      },
+      {
+        "symbol": "sde_hw_sspp_setup_cdp",
+        "section": ".text",
+        "section_offset": "0x104fb0",
+        "size": 168,
+        "sha256": "ebc01da6ba712b4a7225d46c34721208a182d4a189b493d51fb9f85c7bb1e91c"
+      },
+      {
+        "symbol": "sde_hw_lm_setup_out",
+        "section": ".text",
+        "section_offset": "0xfc128",
+        "size": 144,
+        "sha256": "3843ee34d09c1114240117cce492285dc9f787edd7eddc553ea6da56a223507b"
+      },
+      {
+        "symbol": "sde_hw_ctl_intf_cfg_v1",
+        "section": ".text",
+        "section_offset": "0xfcf84",
+        "size": 800,
+        "sha256": "122d4b5ae67ccd4921ef7eda07b4fee13924eabad324a89211314a7d386068d1"
+      },
+      {
+        "symbol": "sde_hw_ctl_setup_blendstage",
+        "section": ".text",
+        "section_offset": "0xfe6d8",
+        "size": 676,
+        "sha256": "5820f461b20779626e1aec0deffa594cfa70122f8c8faf743828cc6c0824cea1"
+      },
+      {
+        "symbol": "_sde_hw_merge_3d_setup_blend_mode",
+        "section": ".text",
+        "section_offset": "0x106f34",
+        "size": 72,
+        "sha256": "e45cd6798f52cb4fce595add2e68ccb7f9d935b0fed6b3de23c5fdf707e4a7b3"
+      },
+      {
+        "symbol": "sde_hw_intf_bind_pingpong_blk",
+        "section": ".text",
+        "section_offset": "0xfb3c0",
+        "size": 136,
+        "sha256": "932e15e5db3d9fb12e60609f33e18eebf095a9138502b6685304a59079591e2f"
+      },
+      {
+        "symbol": "sde_hw_intf_v1_get_status",
+        "section": ".text",
+        "section_offset": "0xfb314",
+        "size": 172,
+        "sha256": "c04e16c7787b0ccbd046d800fad434cb6f91e8b58a83223fa3fdb3cbcf15bb34"
+      }
+    ],
+    "disassembly": "artifacts/b5q-p5-work/evidence/scanout-module.json",
+    "disassembly_sha256": "8597172ecb928906c6db6ec7dd53fa08c44d21bd69a75e47bf92d5741726ea04"
+  },
+  "pinned_additional_sources": [
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_encoder_phys.c",
+      "error": "HTTP Error 404: Not Found",
+      "source": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550-modules/a1fdd086620bc0e2f767323c2853bcc9424e3087/qcom/opensource/display-drivers/msm/sde/sde_encoder_phys.c"
+    },
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_encoder_phys.h",
+      "sha256": "cdf50a6d82464fbfe6eac2c9a6a13183f5c500c7c846ade029b0cf615834c4b5",
+      "source": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550-modules/a1fdd086620bc0e2f767323c2853bcc9424e3087/qcom/opensource/display-drivers/msm/sde/sde_encoder_phys.h",
+      "commit": "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+    },
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_hwio.h",
+      "sha256": "5330d038b45a68e61063606e0003bf7767ec4c11d6eb44b4a0e9777cf881020f",
+      "source": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550-modules/a1fdd086620bc0e2f767323c2853bcc9424e3087/qcom/opensource/display-drivers/msm/sde/sde_hwio.h",
+      "commit": "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+    },
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_hw_pingpong.c",
+      "sha256": "ea7466a335fdc0f2d910a5107d86f3db0721af4fe89665f64f04788941b46734",
+      "source": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550-modules/a1fdd086620bc0e2f767323c2853bcc9424e3087/qcom/opensource/display-drivers/msm/sde/sde_hw_pingpong.c",
+      "commit": "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+    },
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_hw_interrupts.c",
+      "sha256": "92152ce7f874279af0bd492017c2e7463681686faee36d8da494815d60b27a08",
+      "source": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550-modules/a1fdd086620bc0e2f767323c2853bcc9424e3087/qcom/opensource/display-drivers/msm/sde/sde_hw_interrupts.c",
+      "commit": "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+    },
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_hw_sspp.h",
+      "sha256": "05e85a9feb4ece70fcca65217fa6618c7b055d8d172c8a6c37c5b2e0df5e1be6",
+      "source": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550-modules/a1fdd086620bc0e2f767323c2853bcc9424e3087/qcom/opensource/display-drivers/msm/sde/sde_hw_sspp.h",
+      "commit": "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+    },
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_hw_ctl.h",
+      "sha256": "e2f10218d20a398e9636dc3bc648d4735cf0ac647a2724053ff133b0cb89e7e6",
+      "source": "https://raw.githubusercontent.com/LineageOS/android_kernel_samsung_sm8550-modules/a1fdd086620bc0e2f767323c2853bcc9424e3087/qcom/opensource/display-drivers/msm/sde/sde_hw_ctl.h",
+      "commit": "a1fdd086620bc0e2f767323c2853bcc9424e3087"
+    },
+    {
+      "path": "qcom/opensource/display-drivers/msm/sde/sde_hw_merge3d.c",
+      "error": "HTTP404: merge3d functions actually live in sde_hw_pingpong.c"
+    }
+  ],
+  "host_report": {
+    "path": "artifacts/b5q-p5-work/local-regression/report.json",
+    "sha256": "9f02fbb2ee0de1be5ea4bda864a27f910443104b50f68b396235577e3c701dd5",
+    "passed": true,
+    "groups": 23
+  },
+  "target_report": {
+    "path": "artifacts/b5q-p5-work/target/report.json",
+    "sha256": "516d98ffe37e3f77be15988ff03847dca104a806c5011d08726275b07b3c41f9",
+    "scoped_compile_passed": true,
+    "scoped_imports_closed": true,
+    "whole_P5_link_closed": false
+  },
+  "results": {
+    "aux": "PASS productionEDID 90 sink cases:8blocks/order/segmentreset/MOT/STOP-pointer-loss/24transactionfailures/CRC/atomicpublication ASanUBSan\nPASS productionAUX FIFO73cases/nativeI2C/readwrite1..16/8faults/bounded250mstimeout/7deferretries/shortindex/detach/overflow;ASanUBSan",
+    "board": "PASS native DP AUX switch 8193 GPIO180/183 cases/CC1CC2/active-low/readback/refusal/restore/noGPIO11 ASanUBSan",
+    "clock": "PASS SamsungDPclock 65567cases:exactMND/DP0VCOparent/RCGpreservation/4linkrates/32displayclocks/1msbounds ASanUBSan",
+    "controller": "PASS SamsungDPcontroller: 71892 exact-original MSA outputs,source/SST/reset/TPS1..4/10msvideo/1080pMSA/TU/bandwidth/invalid-inputs ASanUBSan",
+    "cta": "PASS CTA94originaltimings/127VICs/4K60advertisement/RGB-YUV420isolation ASanUBSan count=94",
+    "display": "PASS external IOMFB 23 production validation/fence/latch-tag/cancel/stale-callback cases ASanUBSan; original 53-line notification packing preserved",
+    "dpu-resources": "PASS production DPU resource discovery:all retained CTL/LM/SSPP rect0/1/highbits/fetch/pairs/full/busy/bounds; no writes\nPASS 4941 DPU ownership cases ASanUBSan",
+    "dpu": "PASS DP DPU 80 exact-original CTL/LM/INTF/MERGE route traces and 600 zero-write ownership/DMA failures ASanUBSan",
+    "ioav": "PASS IOAV timing 2820 real macOS26C5035r getter executions/94 CTA modes/fractional refresh/no porch transform; invalid mode refused",
+    "irq-owner": "PASS actual native MDSS IRQ worker 7 scheduler/IRQ races/foreignsource isolation/callback drain/timeout/restart cases ASanUBSan",
+    "link-owner": "PASS actual native DP Owner 21 attach/HPD/polarity/linkloss/retry/failure/stop-retention cases",
+    "modes": "PASS productionDPmodes:128checksumfaults/alltruncations/CTAoverrun/1080p60DTDandbandwidth/100000randomEDIDbounds ASanUBSan",
+    "pdic": "PASS SamsungPDIC 194cases:mailboxlength0..32/endmarker/500msbound/opcode/IO/detach/CDEpin/plug-receptacle/HPD/NAK/order/truncation/100000fuzz ASanUBSan",
+    "phy": "PASS SamsungPLL 129cases:24exactoriginalfunctiontraces/4x22v11params/5boundedlockfaults/V600AUX/originalDTswing",
+    "plane": "PASS SamsungDPplane 10040 exact-original BGRA/stride/crop/PE/CDP/register traces and 16 bounds failures ASanUBSan",
+    "port": "PASS 18 actual board PDIC polls:automaticVDM/poweredhub/missedIRQ/duplicates/HPD-pulse/lane-retention/exit/deadline/water/IO/malformed/lockownership ASanUBSan",
+    "presentation": "PASS DP presentation 20 scenarios, 10000 alternating flips, DMA rejection/real-latch/timeout-retention/counter-wrap ASanUBSan",
+    "rpmh": "PASS native DP MX RPMh 28 old/newlayout/busy/lock/complete/timeout/reap/ARClevel cases ASanUBSan",
+    "session": "PASS production DP session 53 full AUX/EDID/PHY/clock/training/modefallback/video/detach/failure/teardown/deadline cases ASanUBSan",
+    "timing": "PASS SamsungDPUtiming 2094 exact-original write traces/DP-bottom-right/negative-sync-polarity/configpreservation/bounds ASanUBSan",
+    "training": "PASS productionDPtraining 65555cases:1-2-4lanes/rates6-10-20-30/CR-EQ-faults/downshift/IO-detach/levelsclamp/intervalbound ASanUBSan",
+    "tu": "In file included from /home/baimao/zflip5/UniXNU-b5q/package/B5qDpTu.h:13,\n                 from /tmp/b5q-dp-tu-0u6clnbp/test.cpp:5:\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h: In member function \u2018bool B5qDp::Modes::add(const B5qDp::Mode&)\u2019:\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h:29:3: warning: this \u2018if\u2019 clause does not guard... [-Wmisleading-indentation]\n   29 |   if(count==capacity)return false;values[count++]=mode;return true;\n      |   ^~\n/home/baimao/zflip5/UniXNU-b5q/package/B5qDpModes.h:29:35: note: ...this statement, but the latter is misleadingly indented as if it were guarded by the \u2018if\u2019\n   29 |   if(count==capacity)return false;values[count++]=mode;return true;\n      |                                   ^~~~~~\nPASS SamsungTU 487 exact-reference outputs, 389 bounded rejections; original adaptive rounding, RGB24, ASanUBSan",
+    "vsync": "PASS DP hardwareVSync 3236 W1C/isolation/reentry/detach/framewrap cases; no timer-generated frames ASanUBSan"
+  },
+  "ioav_original_binary_evidence": {
+    "path": "artifacts/b5q-p5-work/evidence/ioav-timing.json",
+    "sha256": "04fc0c0666cd5cadda46fdba021d63360a9e7bc641741cfa7242fa57d6ac0ddb"
+  },
+  "findings": [
+    "Little-endian BGRA bytes use the original DRM ARGB8888 unpack order, not DRM BGRA8888.",
+    "Read-only resource discovery now reserves retained PP/MERGE_3D and pending CTL flush state. Each fresh DMA/ownership gate precedes all setup writes.",
+    "DPU quiesce waits for actual INTF_STATUS and owned CTL flush completion. Timeout retains ownership and saved state; successful stop restores registers and permits repeated hotplug reuse.",
+    "Native IRQ115 owner now uses ArmCpu shared IRQ, production Vsync helper, permanent context and real IRQ worker callbacks. Original source offsets and PAC are verified; not yet attached to an external display pipeline.",
+    "Native session joins production AUX/EDID, D0/D3, PLL/clocks, CR/EQ, rate/mode fallback and bounded teardown. Modes are real EDID modes; no fabricated fallback.",
+    "Actual macOS 26C5035r IOAV getter/PixelClock instructions consume produced 80-byte data for all94 CTA modes and fractional refresh variants. This does not publish an external IOMFB service."
+  ],
+  "remaining": [
+    "source-qualified independent retained Display DMA allocation/producer preserving primary domain",
+    "end-to-end connection of native link, IRQ, presentation and IOMFB adapter; full mode/hotplug/lid lifecycle integration",
+    "complete P5 build/CI/actual ESP and final three-image recheck"
+  ],
+  "CI_run": null,
+  "ESP": null,
+  "device_access": false,
+  "EL1_apps_smmu_access": false,
+  "native_development_report": {
+    "path": "UniXNU-b5q/reports/p5-native-development.json",
+    "sha256": "850b85f9aeb1d7885551c5fb745f56731c45fa276c8eea10afdb815add4a11ad"
+  }
+}

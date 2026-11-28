@@ -26,7 +26,7 @@ publish = function('extern "C" void qcom_dwc3_publish(void)')
 assert publish.index('if (!gDmaReady)') < publish.index('controller->start')
 assert 'return;' in publish[:publish.index('    do {')]
 enter = function('bool enterRole(int role)')
-hardware_enter = enter[:enter.index('    if (role == kRoleNone) return true;')] + '\nassert(false); return false;\n}'
+hardware_enter = enter[:enter.index('    B5qMax77705::Cable cable;')] + '\nassert(false); return false;\n}'
 assert hardware_enter.index('if (!gDmaReady)') < hardware_enter.index('b5q_usb_otg')
 hardware_leave = function('void leaveRole(int role)').split('    if (role == kRoleDevice)', 1)[0] + '\n}'
 

@@ -1,0 +1,37 @@
+diff --git a/bsd/kern/kern_exec.c b/bsd/kern/kern_exec.c
+--- a/bsd/kern/kern_exec.c
++++ b/bsd/kern/kern_exec.c
+@@ -9630,6 +9630,25 @@ b5q_wireless_runtime_prepare(proc_t p, user_addr_t scratch)
+ 	}
+ }
+ 
++/* Only publish the signed native macOS HAL when the board selected its
++ * audio feature. The presence of an addon never asserts hardware readiness. */
++extern bool b5q_audio_runtime_enabled(void) __attribute__((weak_import));
++static void
++b5q_media_runtime_prepare(proc_t p, user_addr_t scratch)
++{
++	if (!b5q_audio_runtime_enabled || !b5q_audio_runtime_enabled()) return;
++	static const char source[] = "/private/var/ngpu/Library/Audio/Plug-Ins/HAL";
++	static const char point[] = "/Library/Audio/Plug-Ins/HAL";
++	static const char own[] = "/Library/Audio/Plug-Ins/HAL/B5qAudio.driver/Contents/Info.plist";
++	static volatile int stage, status;
++	/* Create only owner Data parents before mounting the read-only view. */
++	status = native_gpu_addon_parents(p, scratch, "/Library/Audio/Plug-Ins/HAL/.b5q");
++	if (!status)
++		native_gpu_addon_mount(p, scratch, 0x600, source, sizeof(source), point, sizeof(point),
++		    point, own, &stage, &status);
++	printf("B5qMedia: audio HAL view=%d/%d\n", stage, status);
++}
++
+ static void
+ native_owner_macos_boot_shims(proc_t p, user_addr_t scratch)
+ {
+@@ -9759,6 +9778,7 @@ native_owner_macos_data_prepare(proc_t p, user_addr_t scratch)
+ 	if (!error) native_owner_macos_gpu_addon(p, scratch);
+ 	if (!error) native_owner_macos_addon_sbin(p, scratch);
+ 	if (!error) b5q_wireless_runtime_prepare(p, scratch);
++	if (!error) b5q_media_runtime_prepare(p, scratch);
+ 	if (!error) native_owner_macos_boot_shims(p, scratch);
+ 	if (!error) native_gpu_addon_release();
+ done:

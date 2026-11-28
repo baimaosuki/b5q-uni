@@ -1,0 +1,25 @@
+{
+  "hardware_verified": false,
+  "audio_complete": false,
+  "evidence": [
+    "Original5096BPM3_01cntSHA540934d3,3device records (physical34/35 plus tfadsp0); exact per-device register updates then default-profile updates; no copied shengCS35 values",
+    "Original Samsung resourcemanager.xml1078 TDM-LPAIF-RX-PRIMARY,48kHz2ch24bit; original tfa9878 DTS GPIO8/9I2C18 resetGPIO0 andGPIO126..129TDM0",
+    "Pinned original tfa_container.c1317/1353 order/default semantics and2792 CRC; profile length includes name"
+  ],
+  "tests": [
+    "ProductionContainer plans match independent stock decoder,stereo slots,all5096bitcorruptions/truncations,badpointer and RMWfaultstop ASanUBSanPASS",
+    "ProductionVFS reader authenticates4actualSamsungfiles,137Bpartialreads/11failurecleanup/EOF/overflow/symlink/whitelist ASanUBSanPASS"
+  ],
+  "remaining": "TFA9878 init/transport, full Samsung TDM AudioReach graph andHAL runtime integration/target/PAC/CI/image still required",
+  "sha256": {
+    "UniXNU-b5q/package/B5qTfaContainer.h": "ce0ac6c6b87c126fd165b66cd068c2a5974d336decb98121d2db17e2c736c721",
+    "tests/b5q-ufs/test-tfa-container.py": "1c3671e4d40f00c00d2cad5f5404be09075b49f3443be8a231b7804e0ba7bdf1",
+    "tests/b5q-ufs/test-media-firmware.py": "604f1158320bcb25597027d51583c13e559157bfdc750e66e95e672bbbc5cd6d",
+    "UniXNU-b5q/package/B5qMediaFirmware.c": "10c31ac73ddfe5ae1d2fe223e262f9763cc604158b1f2b8eb3748272fc1867ee",
+    "UniXNU-b5q/package/B5qMediaFirmwareIdentity.h": "2df2f4489c7cababf905aaacfc869acdaed86c2d6c59935403213d752b938a52",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/firmware/tfa98xx.cnt": "540934d3f79bbbef1c1503f3e531f2e2cf92a1ec0c735a898f3bed5d7b350f49",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/etc/audio/sku_kalama/resourcemanager.xml": "a3a00e73bafc0cd8d34ca986646fc9dbbd9bd4ff2a5a891bb4154ee459071efd",
+    "artifacts/firmware-b5q/F7310ZCS7EYF3/vendor/etc/audio/sku_kalama/mixer_paths.xml": "d52f259755e92268d966359b40ec2b0ce844099d6043a22623b884f49cb7ac0a",
+    "artifacts/b5q-p4-work/samsung-source/full/qcom/opensource/audio-kernel/asoc/codecs/tfa9878/tfa_container.c": "aafd880f0e23593354962f1c45362328538924d588d20c5b63dcce817b18a30a"
+  }
+}

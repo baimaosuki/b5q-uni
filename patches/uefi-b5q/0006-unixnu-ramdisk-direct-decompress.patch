@@ -1,0 +1,100 @@
+diff --git a/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.c b/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.c
+--- a/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.c
++++ b/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.c
+@@ -12,9 +12,9 @@
+ #include <Library/HobLib.h>
+ #include <Library/MemoryAllocationLib.h>
+ #include <Library/UefiBootServicesTableLib.h>
++#include <Library/UefiDecompressLib.h>
+ #include <Protocol/BlockIo.h>
+ #include <Protocol/DevicePath.h>
+-#include <Protocol/Decompress.h>
+ 
+ // Mu-Silicium SEC stores the incoming x0 value in this HOB as a UINT64.
+ STATIC CONST EFI_GUID mEntryArgHobGuid = {
+@@ -54,7 +54,7 @@
+ 
+ STATIC UINT8                    *mRamBase;
+ STATIC EFI_BLOCK_IO_MEDIA       mMedia;
+-STATIC EFI_DECOMPRESS_PROTOCOL  *mDecompress;
++STATIC BOOLEAN                  mPacked;
+ STATIC UINTN                    mSourceBytes;
+ STATIC UINT64                   mLogicalBytes;
+ STATIC UINT32                   mChunkCount;
+@@ -91,7 +91,7 @@
+       ((UINT64)Offset + Length > mSourceBytes)) {
+     return EFI_COMPROMISED_DATA;
+   }
+-  Status = mDecompress->GetInfo (mDecompress, mRamBase + Offset, Length,
++  Status = UefiDecompressGetInfo (mRamBase + Offset, Length,
+                                &DestinationBytes, &ScratchBytes);
+   Expected = (UINT32)MIN ((UINT64)PACKED_CHUNK_SIZE, mLogicalBytes - (UINT64)Index * PACKED_CHUNK_SIZE);
+   if (EFI_ERROR (Status) || (DestinationBytes != Expected)) {
+@@ -107,8 +107,8 @@
+       return EFI_OUT_OF_RESOURCES;
+     }
+   }
+-  Status = mDecompress->Decompress (mDecompress, mRamBase + Offset, Length,
+-                                  mChunkCache, DestinationBytes, mScratch, ScratchBytes);
++  mCachedChunk = MAX_UINT32;
++  Status = UefiDecompress (mRamBase + Offset, mChunkCache, mScratch);
+   if (!EFI_ERROR (Status)) {
+     mCachedChunk = Index;
+   }
+@@ -153,7 +153,7 @@
+     return EFI_INVALID_PARAMETER;
+   }
+ 
+-  if (mDecompress != NULL) {
++  if (mPacked) {
+     UINT64      Position = Lba * RAM_BLOCK_SIZE;
+     UINTN       Copied = 0;
+     EFI_STATUS  Status;
+@@ -260,11 +260,6 @@
+       DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: invalid packed geometry\n"));
+       return;
+     }
+-    Status = gBS->LocateProtocol (&gEfiDecompressProtocolGuid, NULL, (VOID **)&mDecompress);
+-    if (EFI_ERROR (Status)) {
+-      DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: decompressor %r\n", Status));
+-      return;
+-    }
+     mChunkCache = AllocatePool (PACKED_CHUNK_SIZE);
+     if (mChunkCache == NULL) {
+       return;
+@@ -274,6 +269,7 @@
+       DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: first packed chunk %r\n", Status));
+       return;
+     }
++    mPacked = TRUE;
+     DEBUG ((DEBUG_ERROR, "UNIXNURAMDISK: packed %lu decoded %lu chunks %u\n",
+             (UINT64)mSourceBytes, mLogicalBytes, mChunkCount));
+   }
+diff --git a/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf b/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
+--- a/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
++++ b/package/UniXNUPkg/Driver/UniXNURamDiskDxe/UniXNURamDiskDxe.inf
+@@ -20,12 +20,12 @@
+   HobLib
+   MemoryAllocationLib
+   UefiBootServicesTableLib
++  UefiDecompressLib
+   UefiDriverEntryPoint
+ 
+ [Protocols]
+   gEfiBlockIoProtocolGuid                       ## PRODUCES
+   gEfiDevicePathProtocolGuid                    ## PRODUCES
+-  gEfiDecompressProtocolGuid                    ## CONSUMES
+ 
+ [Depex]
+   TRUE
+diff --git a/package/UniXNUPkg/UniXNUPkg.dsc b/package/UniXNUPkg/UniXNUPkg.dsc
+--- a/package/UniXNUPkg/UniXNUPkg.dsc
++++ b/package/UniXNUPkg/UniXNUPkg.dsc
+@@ -30,6 +30,7 @@
+   PrintLib|MdePkg/Library/BasePrintLib/BasePrintLib.inf
+   UefiApplicationEntryPoint|MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf
+   UefiBootServicesTableLib|MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf
++  UefiDecompressLib|MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf
+   UefiDriverEntryPoint|MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf
+   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
+   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf

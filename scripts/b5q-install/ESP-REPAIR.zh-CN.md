@@ -1,4 +1,6 @@
-# b5q macOS 27.3：ESP-v2 菜单交付修复
+# b5q macOS 27.3：原 ESP-v2 交付说明（补充4Kn格式）
+
+2026-11-20：按锁定的 UniXNU 指南恢复原有已完成 payload 的部署副本，使用 `ESP-4KN.zh-CN.md` 所述的 `b5q-esp-guide-restored-v5` 包。旧 v2 实体 FAT 扇区是512字节，需要保留用户验证的4096字节格式修正；v4 直接换成中间 kernel 的方案已撤回。下文的目录复制方法仍可用于已经正常挂载的4Kn ESP。
 
 ## 这版修什么
 

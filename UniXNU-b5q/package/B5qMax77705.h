@@ -5,37 +5,37 @@ namespace B5qMax77705 {
 constexpr uint8_t pmic=0x66,charger=0x69,muic=0x25;
 // Samsung max77705_chg_set_mode_state: preserve charger/buck state;
 // UNO->OTG passes through buck for at least1ms.
-struct OpcodeResult {
- uint8_t opcode=0,reply=0xff,interrupt=0,failedReg=0;
- unsigned polls=0;
- bool triggered=false,ok=false;
-};
-// CcicDxe 0x259c: drain UIC_INT, fill AP_DATAOUT, trigger at 0x41,
-// then require a fresh APCMDRES interrupt before accepting the echoed opcode.
-// Only undo firmware's set_sink(0). Opcode 0x37 is a swap request, not port
-// initialization. Never retry an ambiguous trigger or accept a stale reply.
-template<class Io,class Delay> OpcodeResult opcode(Io &io,uint8_t command,uint8_t value,Delay delay){
- OpcodeResult result;result.opcode=command;
- if(command!=0x5e || value!=1)return result;
- auto read=[&](uint8_t reg,uint8_t &data){result.failedReg=reg;return io.read(muic,reg,data);};
- auto write=[&](uint8_t reg,uint8_t data){result.failedReg=reg;return io.write(muic,reg,data);};
- if(!read(0x02,result.interrupt)||!write(0x21,command)||!write(0x22,value))return result;
- if(!write(0x41,0))return result;
- result.triggered=true;
- for(unsigned poll=0;poll<100;++poll){
-  delay(1000);result.polls=poll+1;
-  if(!read(0x02,result.interrupt))return result;
-  if(!(result.interrupt&0x80))continue;
-  if(!read(0x51,result.reply))return result;
-  if(result.reply==command){result.ok=true;result.failedReg=0;return result;}
+// Native PDIC evidence: CC_STATUS0 0x0a bits7:6 are CCPinStat,
+// bits2:0 are power role (1 sink,2 source). PD_STATUS1 0x0d bit7 is
+// data role (0 UFP/device,1 DFP/host). Never infer data role from power.
+struct Cable {
+ uint8_t cc0=0,cc1=0,pd=0,bc=0;
+ bool valid=false;
+ bool water() const {return (cc1&2)!=0;}
+ unsigned power() const {return valid&&!water()?(cc0&7):0;}
+ bool attached() const {return power()==1 || power()==2;}
+ int role() const {return attached()?((pd&0x80)?2:1):0;}
+ int orientation() const {
+  const unsigned pin=cc0>>6;
+  return attached()&&(pin==1||pin==2)?int(pin-1):-1;
  }
- return result;
+ bool sourceVbus(int requestedRole) const {return requestedRole!=0&&power()==2;}
+ uint32_t signature() const {
+  return valid?0x80000000u|(cc0&0xc7u)|(uint32_t(cc1&2)<<8)|
+                     (uint32_t(pd&0x80)<<16)|(uint32_t(bc&0x80)<<17):0;
+ }
+};
+template<class Io> bool readCable(Io &io,Cable &out){
+ Cable next;uint8_t end=0;
+ // Reading status leaves all read-to-clear interrupt registers untouched.
+ const bool ok=io.read(muic,0x0a,next.cc0)&&io.read(muic,0x0b,next.cc1)&&
+               io.read(muic,0x0d,next.pd)&&io.read(muic,0x08,next.bc)&&
+               io.read(muic,0x0a,end)&&next.cc0==end;
+ next.valid=ok;out=next;return ok;
 }
-template<class Io,class Delay,class Report> bool drp(Io &io,Delay delay,Report report){
- const auto result=opcode(io,0x5e,1,delay);
- report(result);
- return result.ok;
-}
+// Adopt firmware's live negotiated CC/PD state. Do not force a vendor
+// set_sink(1) request on every boot: CcicDxe only proves that opcode takes a
+// parameter, not that literal1 represents a native dual-role initialization.
 template<class Io> bool update(Io &io,uint8_t reg,uint8_t mask,uint8_t value){
  uint8_t old=0,check=0;if(!io.read(charger,reg,old))return false;
  const uint8_t next=(old&~mask)|(value&mask);
@@ -60,9 +60,5 @@ template<class Io,class Delay> bool otg(Io &io,bool on,Delay delay){
  if(next==15)success=update(io,0xc3,0x40,c3)&&success;
  if(!success)update(io,0xb7,15,m==5?5:4);
  return success;
-}
-inline int role(uint8_t cc0,uint8_t cc1){
- if(cc1&2)return 0; // Samsung ConnStat water detection.
- return (cc0&7)==2?2:(cc0&7)==1?1:0; // Our source => Host; sink => Device.
 }
 }

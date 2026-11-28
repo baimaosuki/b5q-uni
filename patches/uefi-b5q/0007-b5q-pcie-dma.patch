@@ -1,0 +1,233 @@
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.c
+@@ -6,6 +6,7 @@
+ #include <Library/UefiBootServicesTableLib.h>
+ 
+ EFI_STATUS InstallB5qUsbDma (EFI_HANDLE ImageHandle);
++EFI_STATUS InstallB5qPcieDma (EFI_HANDLE ImageHandle);
+ 
+ STATIC VOID EFIAPI
+ LogHandoff (EFI_EVENT Event, VOID *Context)
+@@ -25,6 +26,8 @@
+   (VOID)SystemTable;
+   EFI_STATUS UsbStatus = InstallB5qUsbDma (ImageHandle);
+   DEBUG ((DEBUG_ERROR, "B5Q-USBDMA: handoff protocol %r\n", UsbStatus));
++  EFI_STATUS PcieStatus = InstallB5qPcieDma (ImageHandle);
++  DEBUG ((DEBUG_ERROR, "B5Q-PCIEDMA: handoff protocol %r\n", PcieStatus));
+   EFI_EVENT Event;
+   return gBS->CreateEventEx (EVT_NOTIFY_SIGNAL, TPL_CALLBACK, LogHandoff, NULL,
+                              &gEfiEventReadyToBootGuid, &Event);
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/B5qHandoffDxe.inf
+@@ -8,6 +8,7 @@
+ [Sources]
+   B5qHandoffDxe.c
+   UsbDma.c
++  PcieDma.c
+ [Packages]
+   MdePkg/MdePkg.dec
+ [LibraryClasses]
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDmaTables.h
+@@ -46,7 +46,7 @@
+ }
+ 
+ // HAL's 48-bit input TCR starts at L0. This aperture fits in L0[0].
+-STATIC BOOLEAN
++STATIC inline BOOLEAN
+ UsbDmaMapRange (USB_DMA_TABLES *Tables, UINT64 Start, UINT64 End)
+ {
+   UINT64 *Level1 = UsbDmaChild (Tables, &Tables->Pages[0]);
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+new file mode 100644
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+@@ -0,0 +1,97 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#include <Uefi.h>
++#include <Library/BaseMemoryLib.h>
++#include <Library/CacheMaintenanceLib.h>
++#include <Library/DebugLib.h>
++#include <Library/MemoryAllocationLib.h>
++#include <Library/UefiBootServicesTableLib.h>
++#include "../../Include/B5qPcieDma.h"
++#include "PcieDmaTables.h"
++typedef struct {UINT32 Vmsa,Reserved;UINT64 Ttbr0,Ttbr1;UINT32 Mair0,Mair1,Sctlr,Tcr,Tcr2,Padding;} HAL_CONFIG;
++typedef UINT32(EFIAPI *HAL_CREATE)(VOID**);
++typedef UINT32(EFIAPI *HAL_DELETE)(VOID*);
++typedef UINT32(EFIAPI *HAL_ATTACH)(VOID*,CONST CHAR8*,UINT32,UINT32);
++typedef UINT32(EFIAPI *HAL_CONFIGURE)(VOID*,HAL_CONFIG*);
++typedef struct {HAL_CREATE Create;HAL_DELETE Delete;HAL_ATTACH Attach,Detach;HAL_CONFIGURE Configure;} HAL_TABLE;
++typedef struct {UINT64 Revision;VOID(EFIAPI *Init)(CONST HAL_TABLE**);VOID(EFIAPI *Deinit)(VOID);} HAL_PROTOCOL;
++STATIC_ASSERT(sizeof(HAL_CONFIG)==48,"Original HAL configure ABI");
++STATIC EFI_GUID mHalGuid={0x54b6d3b4,0x5d33,0x4f91,{0x86,0x00,0x6c,0x41,0xd5,0xde,0xb1,0x9a}};
++STATIC EFI_GUID mPcieGuid=B5Q_PCIE_DMA_PROTOCOL_GUID;
++STATIC B5Q_PCIE_DMA_RESULT mResult;
++STATIC BOOLEAN mAttempted;
++#define TABLE_PAGES 32U
++
++STATIC EFI_STATUS AllocatePoolPages(VOID)
++{
++  EFI_PHYSICAL_ADDRESS Base=0xffffffffULL;
++  UINTN Pages=(B5Q_PCIE_DMA_BYTES+B5Q_PCIE_DMA_ALIGN)/EFI_PAGE_SIZE;
++  EFI_STATUS Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,Pages,&Base);
++  if(EFI_ERROR(Status))return Status;
++  UINT64 Aligned=ALIGN_VALUE(Base,B5Q_PCIE_DMA_ALIGN);
++  if(Base<0x80000000ULL || Aligned>0x100000000ULL-B5Q_PCIE_DMA_BYTES){gBS->FreePages(Base,Pages);return EFI_UNSUPPORTED;}
++  UINTN Head=(UINTN)((Aligned-Base)/EFI_PAGE_SIZE);
++  UINTN Tail=Pages-Head-(B5Q_PCIE_DMA_BYTES/EFI_PAGE_SIZE);
++  if(Head)gBS->FreePages(Base,Head);
++  if(Tail)gBS->FreePages(Aligned+B5Q_PCIE_DMA_BYTES,Tail);
++  mResult.PoolBase=Aligned;mResult.PoolBytes=B5Q_PCIE_DMA_BYTES;
++  ZeroMem((VOID*)(UINTN)Aligned,B5Q_PCIE_DMA_BYTES);
++  return EFI_SUCCESS;
++}
++STATIC EFI_STATUS ConfigurePcie(VOID)
++{
++  HAL_PROTOCOL *Protocol=NULL;CONST HAL_TABLE *Hal=NULL;VOID *Domain=NULL;
++  EFI_STATUS Status=gBS->LocateProtocol(&mHalGuid,NULL,(VOID**)&Protocol);mResult.Locate=Status;
++  if(EFI_ERROR(Status))return Status;
++  if(!Protocol || Protocol->Revision!=0x10002 || !Protocol->Init)return EFI_INCOMPATIBLE_VERSION;
++  Protocol->Init(&Hal);
++  if(!Hal || !Hal->Create || !Hal->Delete || !Hal->Attach || !Hal->Configure)return EFI_COMPROMISED_DATA;
++  Status=AllocatePoolPages();if(EFI_ERROR(Status))return Status;
++  EFI_PHYSICAL_ADDRESS Table=0xffffffffULL;
++  Status=gBS->AllocatePages(AllocateMaxAddress,EfiReservedMemoryType,TABLE_PAGES,&Table);
++  if(EFI_ERROR(Status))goto Fail;
++  mResult.TableBase=Table;mResult.TableBytes=TABLE_PAGES*EFI_PAGE_SIZE;
++  ZeroMem((VOID*)(UINTN)Table,mResult.TableBytes);
++  USB_DMA_TABLES Tables={(VOID*)(UINTN)Table,Table,0,TABLE_PAGES};
++  mResult.Map=(B5qPcieMapPool(&Tables,mResult.Iova,mResult.PoolBase,mResult.PoolBytes) && B5qPcieMapMsi(&Tables))?0:1;
++  if(mResult.Map){Status=EFI_COMPROMISED_DATA;goto Fail;}
++  WriteBackDataCacheRange((VOID*)(UINTN)Table,Tables.Used*EFI_PAGE_SIZE);
++  WriteBackDataCacheRange((VOID*)(UINTN)mResult.PoolBase,mResult.PoolBytes);
++  __asm__ volatile("dsb sy":::"memory");
++  mResult.Create=Hal->Create(&Domain);
++  if(mResult.Create || !Domain){Status=EFI_DEVICE_ERROR;goto Fail;}
++  HAL_CONFIG Config={0,0,Table,0,0x00ff0400,0,0x00c000e7,0x00802010,0x0003c071,0};
++  mResult.Configure=Hal->Configure(Domain,&Config);
++  if(mResult.Configure){Status=EFI_DEVICE_ERROR;goto Fail;}
++  mResult.Attach=Hal->Attach(Domain,"PCIE0",0x03000000,0);
++  if(!mResult.Attach)return EFI_SUCCESS;
++  Status=EFI_DEVICE_ERROR;
++Fail:
++  // A failed attach can have installed a hardware reference. Retain all pages
++  // after that call; never let ExitBootServices reclaim a live DMA address.
++  if(mResult.Attach==B5Q_PCIE_DMA_NOT_RUN) {
++    if(Domain && !mResult.Create)Hal->Delete(Domain);
++    if(mResult.TableBase)gBS->FreePages(mResult.TableBase,mResult.TableBytes/EFI_PAGE_SIZE);
++    if(mResult.PoolBase)gBS->FreePages(mResult.PoolBase,mResult.PoolBytes/EFI_PAGE_SIZE);
++    mResult.TableBase=mResult.TableBytes=mResult.PoolBase=mResult.PoolBytes=0;
++  }
++  return Status;
++}
++STATIC VOID EFIAPI PreparePcie(B5Q_PCIE_DMA_RESULT *Result)
++{
++  if(!mAttempted) {
++    mAttempted=TRUE;
++    mResult.Version=2;mResult.SidMask=0x007f1400;mResult.Iova=B5Q_PCIE_DMA_IOVA;
++    mResult.Locate=EFI_NOT_STARTED;mResult.RetentionStatus=EFI_NOT_STARTED;
++    mResult.Create=mResult.Configure=mResult.Attach=mResult.Map=B5Q_PCIE_DMA_NOT_RUN;
++    mResult.PrepareStatus=ConfigurePcie();
++    DEBUG((DEBUG_ERROR,"B5Q-PCIEDMA: locate=%r create=%x configure=%x attach=%x map=%x result=%r pool=%lx+%lx iova=%lx table=%lx+%lx\n",
++      (EFI_STATUS)mResult.Locate,mResult.Create,mResult.Configure,mResult.Attach,mResult.Map,
++      (EFI_STATUS)mResult.PrepareStatus,mResult.PoolBase,mResult.PoolBytes,mResult.Iova,mResult.TableBase,mResult.TableBytes));
++  }
++  *Result=mResult;
++}
++STATIC B5Q_PCIE_DMA_PROTOCOL mPcie={1,PreparePcie};
++EFI_STATUS InstallB5qPcieDma(EFI_HANDLE ImageHandle)
++{
++  return gBS->InstallMultipleProtocolInterfaces(&ImageHandle,&mPcieGuid,&mPcie,NULL);
++}
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
+new file mode 100644
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDmaTables.h
+@@ -0,0 +1,48 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_PCIE_DMA_TABLES_H
++#define B5Q_PCIE_DMA_TABLES_H
++#include "../../Include/B5qUsbDma.h"
++#include "UsbDmaTables.h"
++// Reuse the qualified USB table-page allocator and WB-IS descriptor encoding.
++// PCIe has its own tables and a bounded IOVA aperture, never the USB domain.
++STATIC BOOLEAN
++B5qPcieMapPool(USB_DMA_TABLES *Tables,UINT64 Iova,UINT64 Physical,UINT64 Bytes)
++{
++  if(!Bytes || Bytes>0x80000000ULL || (Iova|Physical|Bytes)&4095 || Physical<0x80000000ULL ||
++     Physical>0x100000000ULL-Bytes || Iova>0x100000000ULL-Bytes ||
++     Tables->Used!=0 || Tables->Capacity<3)return FALSE;
++  UINT64 *Root=UsbDmaNewTable(Tables);
++  if(Root==NULL)return FALSE;
++  while(Bytes) {
++    UINT64 *L1=UsbDmaChild(Tables,&Root[(Iova>>39)&511]);
++    if(L1==NULL)return FALSE;
++    UINT64 *L2=UsbDmaChild(Tables,&L1[(Iova>>30)&511]);
++    if(L2==NULL)return FALSE;
++    UINT64 *Entry=&L2[(Iova>>21)&511];UINT64 Step=1ULL<<21,Type=1;
++    if(((Iova|Physical)&(Step-1)) || Bytes<Step) {
++      UINT64 *L3=UsbDmaChild(Tables,Entry);if(L3==NULL)return FALSE;
++      Entry=&L3[(Iova>>12)&511];Step=4096;Type=3;
++    }
++    if(*Entry)return FALSE;
++    *Entry=Physical|USB_DMA_LEAF_ATTR|Type;
++    Iova+=Step;Physical+=Step;Bytes-=Step;
++  }
++  return TRUE;
++}
++// b5q also describes the QGIC MSI controller at 17110040, SPI768..799.
++// The native SPI consumer uses that doorbell, not sheng's nonexistent MSI141.
++// Like Samsung pci-msm-msi.c, map the register page through the PCIe domain.
++// Keep Device-nGnRnE (MAIR Attr0), separate from the Normal-WB DMA pool.
++STATIC BOOLEAN B5qPcieMapMsi(USB_DMA_TABLES *Tables)
++{
++  if(Tables->Used<3)return FALSE;
++  UINT64 *L1=UsbDmaChild(Tables,&Tables->Pages[0]);
++  if(L1==NULL)return FALSE;
++  UINT64 *L2=UsbDmaChild(Tables,&L1[2]);
++  if(L2==NULL)return FALSE;
++  UINT64 *L3=UsbDmaChild(Tables,&L2[(0xaffff000ULL>>21)&511]);
++  if(L3==NULL || L3[511])return FALSE;
++  L3[511]=0x17110000ULL | (3ULL<<53) | 0x700ULL | 3ULL;
++  return TRUE;
++}
++#endif
+diff --git a/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h b/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h
+new file mode 100644
+--- /dev/null
++++ b/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h
+@@ -0,0 +1,30 @@
++// SPDX-License-Identifier: BSD-2-Clause-Patent
++#ifndef B5Q_PCIE_DMA_H
++#define B5Q_PCIE_DMA_H
++#define B5Q_PCIE_DMA_PROTOCOL_GUID \
++  {0x610234d8,0x0a0d,0x4d3b,{0x9b,0xac,0xce,0xe7,0x73,0x28,0x3e,0x76}}
++#define B5Q_PCIE_DMA_IOVA 0xa0000000ULL
++#define B5Q_PCIE_DMA_BYTES 0x02000000ULL
++#define B5Q_PCIE_DMA_ALIGN 0x00400000ULL
++#define B5Q_PCIE_DMA_NOT_RUN 0xffffffffU
++// Original firmware IORT names PCIE0 and masks SID1400 by007f, including1401.
++typedef struct {
++  UINT32 Version;
++  UINT32 SidMask;
++  UINT64 Locate;
++  UINT32 Create;
++  UINT32 Configure;
++  UINT32 Attach;
++  UINT32 Map;
++  UINT64 PoolBase;
++  UINT64 PoolBytes;
++  UINT64 Iova;
++  UINT64 TableBase;
++  UINT64 TableBytes;
++  UINT64 PrepareStatus;
++  UINT64 RetentionStatus;
++} B5Q_PCIE_DMA_RESULT;
++typedef VOID (EFIAPI *B5Q_PCIE_DMA_PREPARE)(OUT B5Q_PCIE_DMA_RESULT *);
++typedef struct {UINT64 Revision; B5Q_PCIE_DMA_PREPARE Prepare;} B5Q_PCIE_DMA_PROTOCOL;
++STATIC_ASSERT(sizeof(B5Q_PCIE_DMA_RESULT)==88,"PCIe DMA wire ABI");
++#endif

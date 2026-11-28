@@ -33,7 +33,7 @@ run('native-launchd', [sys.executable, 'scripts/b5q-install/check-macos-launchd-
     '--launchd', SOURCE / 'root/sbin/launchd', '--rootless', SOURCE / 'root/System/Library/Sandbox/com.apple.xpc.launchd.rootless.plist',
     '--policy', ROOT / 'UniXNU-b5q/package/b5q-launchd-lite.json', '--report', WORK / 'native-launchd.json'])
 run('native-XPC-and-five-job-audit', [sys.executable, 'scripts/b5q-install/check-absentd-lifecycle.py',
-    '--root', SOURCE / 'root', '--cache', '/home/baimao/nabu_macos/out/nabu-27.3-fresh/assets/shared-cache/System/Library/dyld/dyld_shared_cache_arm64e',
+    '--root', SOURCE / 'root', '--cache', ROOT/'inputs/macos-27.3-26C5035r/shared-cache/dyld_shared_cache_arm64e',
     '--report', WORK / 'absent-lifecycle.json'])
 run('absentd-ASan-UBSan', [sys.executable, 'tests/b5q-ufs/test-absentd-v33.py'])
 with tempfile.TemporaryDirectory(prefix='b5q-proctop-final-preci-') as temp:

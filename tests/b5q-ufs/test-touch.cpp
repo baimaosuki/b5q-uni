@@ -1,5 +1,4 @@
 #include "B5qTouchProtocol.h"
-#include "B5qTouchPointer.h"
 #include "GeniI2c.h"
 #include "B5qTouchClock.h"
 #include "ThermalProbe.h"
@@ -137,8 +136,8 @@ int main(){
  assert(sec(secPacket,16,points)&&points[2].kind==1&&points[2].x==4095&&points[2].y==128);
  secPacket[0]=0x80|8;secPacket[1]=1;assert(sec(secPacket,16,points)&&points[2].x==31);
  secPacket[16]=0x40|60;memcpy(saved,points,sizeof saved);
- assert(sec(secPacket,32,points)&&!memcmp(saved,points,sizeof saved));
- secPacket[6]=0xc0;assert(sec(secPacket,16,points)&&points[2].x==31);
+ assert(!sec(secPacket,32,points)&&!memcmp(saved,points,sizeof saved));
+ secPacket[6]=0xc0;assert(sec(secPacket,16,points)&&!points[2].kind);
  secPacket[0]=0xc0|8|3;assert(sec(secPacket,16,points)&&!points[2].kind);
  for(unsigned length:{1u,255u,256u,257u,511u,4096u}){
   std::vector<uint8_t> out(length),expected(length);for(unsigned i=0;i<length;++i)expected[i]=i;

@@ -1,0 +1,12 @@
+{
+  "repository": "LineageOS/android_kernel_samsung_sm8550",
+  "revision": "36ffdaa5a4e2bff6e66812b444874b0cb6133fa9",
+  "source_path": "drivers/gpu/drm/drm_edid.c",
+  "source_sha256": "d994fecacc9516179284db0dfee36f22a04311c461a8db455b6187ec39584a30",
+  "derived_progressive_RGB_timings": 94,
+  "production_sha256": "a626d0c3d93a9e7bf4e7e2339b98d3f1f2d3836fe9643edc25fc76784bebfb19",
+  "hardware_verified": false,
+  "implementation_complete": false,
+  "test_sha256": "aa040734476c7bd8962ddd73680c243360af86046da4151e395378755c2146ce",
+  "test": "PASS all94 exact original progressive RGB timings;127VICs,4K60 and RGB/420-only separation;ASanUBSan"
+}

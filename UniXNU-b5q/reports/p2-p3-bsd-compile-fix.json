@@ -1,0 +1,193 @@
+{
+  "passed": true,
+  "checks": [
+    {
+      "name": "P0-P1-all-preserved-baselines",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/pre-ci-p0-p1.py"
+      ]
+    },
+    {
+      "name": "bt-fifo",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-bt-fifo.py"
+      ]
+    },
+    {
+      "name": "bt-wcn6855",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-bt-wcn6855.py"
+      ]
+    },
+    {
+      "name": "wcn-power",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-wcn-power.py"
+      ]
+    },
+    {
+      "name": "wifi-platform",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-wifi-platform.py"
+      ]
+    },
+    {
+      "name": "pcie-controller",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-pcie-controller.py"
+      ]
+    },
+    {
+      "name": "pcie-firmware-dma",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-pcie-firmware-dma.py"
+      ]
+    },
+    {
+      "name": "ath11k-qca6490",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-ath11k-qca6490.py"
+      ]
+    },
+    {
+      "name": "wireless-review-fixes",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-wireless-review-fixes.py"
+      ]
+    },
+    {
+      "name": "wireless-source-pins",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tests/b5q-ufs/test-wireless-source-pins.py"
+      ]
+    },
+    {
+      "name": "native-userland-and-firmware-identities",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/check-wireless-userland.py"
+      ]
+    },
+    {
+      "name": "Bluetooth-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/check-bt-target.py"
+      ]
+    },
+    {
+      "name": "ath11k-full-shared-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/UniXNU-b5q/scripts/build-b5q-wifi.py",
+        "--module",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/sources/UniXNU-sheng/drivers/Ath12kWifi",
+        "--out",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/artifacts/b5q-p3-work/target",
+        "--compiler",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tools/llvm21/usr/lib/llvm-21/bin/clang",
+        "--llvm",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/tools/llvm21/usr/lib/llvm-21/bin",
+        "--jobs",
+        "4"
+      ]
+    },
+    {
+      "name": "WiFi-board-and-network-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/check-wifi-target.py"
+      ]
+    },
+    {
+      "name": "original-network-ABI",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/check-wifi-ethernet-abi.py"
+      ]
+    },
+    {
+      "name": "shared-production-runtime-regressions",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/test-wireless-shared-host.py"
+      ]
+    },
+    {
+      "name": "firmware-and-loader-target",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/check-pcie-uefi-target.py"
+      ]
+    },
+    {
+      "name": "joint-symbol-PAC-zero-apps-smmu",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/scripts/b5q-install/check-wireless-target-closure.py"
+      ]
+    },
+    {
+      "name": "all-XNU-patches",
+      "passed": true,
+      "command": [
+        "/bin/python3",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/UniXNU-b5q/scripts/check-xnu-patches.py",
+        "--unixnu",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/UniXNU",
+        "--source",
+        "/home/baimao/zflip5/artifacts/b5q-p3-work/p2p3-source-check/sources/UniXNU/out/feeds/xnu-3199e8bc"
+      ]
+    }
+  ],
+  "hardware_verified": false,
+  "source_base": "4b5df9403f6862ed5a8abd3ac4bf65bbb0b36992",
+  "first_error": {
+    "run": 45245676090,
+    "reason": "Native wireless C compiled with osfmk private headers; mixed BSD types and mask macro collision"
+  },
+  "fix": "Replay actual BSD kern_event.o.json for native wireless C; preserve other compilation recipes; fifoMask avoids global macro",
+  "target_results": {
+    "objects": 122,
+    "callback_PAC_contracts": 62,
+    "missing_symbols": 0,
+    "duplicate_symbols": 0,
+    "apps_smmu_materializations": 0,
+    "Bluetooth_objects_with_private_BSD_headers": 9
+  },
+  "source_sha256": {
+    "UniXNU-b5q/scripts/b5q_compile.py": "ba0e3b140cf99bcff1019378448bcc49684ffe1f7a10b530992a98072b43ef88",
+    "UniXNU-b5q/scripts/b5q_wireless.py": "fcab3f379d7261a455321dfda419b6b87caad09f7855c29c9c3e51ccdb2d6346",
+    "UniXNU-b5q/package/B5qBtFifo.c": "4d11c6292998062d91746b065ee96f0326c7d7519b03161f5d3baa0160c5db12",
+    "scripts/b5q-install/check-bt-target.py": "cc11cdd632b1ba3f8d6cffa297bcce0137a6a620ced01ad2643bd31b0bdb4df0",
+    "UniXNU-b5q/porting.toml": "eae8491c619cf06831fb817bc75b3d0becc820e2400bd8a2766512b26cbab60a"
+  }
+}

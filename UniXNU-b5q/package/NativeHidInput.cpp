@@ -19,7 +19,7 @@
 #include <IOKit/IODeviceTreeSupport.h>
 #include <mach/mach_time.h>
 #include <kern/clock.h>
-#include "B5qTouchPointer.h"
+#include "B5qTouchMouse.h"
 #include <libkern/c++/OSData.h>
 #endif
 #if __has_feature(ptrauth_calls)
@@ -271,8 +271,7 @@ class NativeHidInput : public IOHIDDevice {
     }
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
     bool mouseEnabled=false;
-    B5qTouchPointer::Pointer pointer;
-    uint64_t tapLimit=0;
+    B5qTouchMouse pointer;
     IOReturn sendPointer(uint8_t buttonMask,int dx,int dy,int wheel=0,int pan=0) {
         uint8_t report[8];b5q_mouse_report(report,buttonMask,dx,dy,wheel,pan);
         IOBufferMemoryDescriptor *buffer=IOBufferMemoryDescriptor::withBytes(report,sizeof(report),kIODirectionNone);
@@ -316,13 +315,13 @@ class NativeHidInput : public IOHIDDevice {
         self->lastSeq=before;
 #if defined(XNU_TARGET_OS_OSX) && XNU_TARGET_OS_OSX
         if(mouseEnabled) {
-            const auto movement=pointer.update(count,ids,xs,ys,mach_absolute_time(),tapLimit,recovered);
-            if(movement.send)sendPointer(movement.buttons,movement.dx,movement.dy,movement.wheel,movement.pan);
-            if(movement.click || movement.rightClick) {
-                sendPointer(movement.rightClick?2:1,0,0);
-                sendPointer(0,0,0); // release even when press completion was ambiguous
-            }
-            native_touch_hid_reports=native_touch_hid_reports+1;
+            uint64_t nanos=0;absolutetime_to_nanoseconds(mach_absolute_time(),&nanos);
+            pointer.update(count,ids,xs,ys,uint32_t(nanos/1000000),recovered,[this](const uint8_t *report){
+                const int dx=int(int16_t(uint16_t(report[2])|(uint16_t(report[3])<<8)));
+                const int dy=int(int16_t(uint16_t(report[4])|(uint16_t(report[5])<<8)));
+                sendPointer(report[1],dx,dy,int(int8_t(report[6])),int(int8_t(report[7])));
+                native_touch_hid_reports=native_touch_hid_reports+1;
+            });
             return; // One input mode per service; never also submit digitizer report 3.
         }
 #endif
@@ -517,7 +516,6 @@ public:
             mouseEnabled=enabled==1;
             IOLog("B5qTouch: HID mode=%s\n",mouseEnabled?"relative-pointer":"absolute-digitizer");
             if(!mouseEnabled)publishContainerID();
-            nanoseconds_to_absolutetime(250000000,&tapLimit);
         }
 #endif
         if(touchOnly||touchEnabled){

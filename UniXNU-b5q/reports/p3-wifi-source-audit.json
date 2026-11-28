@@ -1,0 +1,268 @@
+{
+  "status": "HOST_VERIFIED_PENDING_CI_AND_HARDWARE",
+  "hardware_verified": false,
+  "inputs": {
+    "uefi-b5q/Resources/DTBs/b5q.dts": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f",
+    "artifacts/b5q-p3-work/zizhan/scripts/build-pong-ath11k.py": "87f42dcdbb48b5db9a2eadeed5dcfd218b25fe40a3c07cc7093a7849a6716045",
+    "artifacts/b5q-p3-work/zizhan/drivers/PongWifi/ath11k/compat/PongCompat.h": "6b8a6c20b3177d0a6ef90bbc7e6abcf9f1e10902076887d3d0534c6af11619ea",
+    "sources/UniXNU-sheng/drivers/Ath12kWifi/tools/source-lock.json": "f23882695f1c136c27b3f9cb36673bebad9ae1fc2af3fa787a98bd4add76c3c9"
+  },
+  "community_reference": {
+    "repository": "https://github.com/qiumochen/UniXNU-zizhan",
+    "commit": "a7f8ae2934c579c619a8c7b035f05163103b6b24",
+    "scope": "ath11k compatibility and split mac80211 callback bridge only; no SM8475 GPIO/PCIe/power/SMMU copied"
+  },
+  "linux_revision": "458c6079fc1d41d564c37679c8ace02cd83ee817",
+  "dts": {
+    "node": "qcom,pcie@1c00000",
+    "base": "0x1c00000",
+    "phy": "0x1c06000",
+    "perst": 94,
+    "wake": 96,
+    "wlan_en": 80,
+    "sw_ctrl": 82,
+    "xo": 204,
+    "stream_ids": [
+      "0x1400",
+      "0x1401"
+    ],
+    "dma_pool_iova": [
+      "0xa0000000",
+      "0x10000000"
+    ],
+    "cnss_dynamic_pool_bytes": "0x2000000"
+  },
+  "boundaries": [
+    "No EL1 apps_smmu MMIO",
+    "No WCN7850 ath12k driver core",
+    "Original native mac80211/cfg80211/wpa owns station/authentication",
+    "P2/P3 joint local gates before CI"
+  ],
+  "core_compile": {
+    "passed": true,
+    "objects": 22,
+    "target": "arm64e-apple-ios27.0",
+    "PAC": true,
+    "full_stack_pending": false,
+    "full_stack_objects": 109
+  },
+  "samsung_cnss2": {
+    "artifacts/b5q-p3-work/samsung-source/main.c": "de9340da5e9699fe4e2092706743f9080e14f7215eaca3ddc715382794d1dafb",
+    "artifacts/b5q-p3-work/samsung-source/pci.c": "91dcbf0ca11e4adb328d37ade2759d74ccf1eed3238abfdfb304b9b835747a7a",
+    "artifacts/b5q-p3-work/samsung-source/qmi.c": "fa840631fae0acd072536d8c1302aa38b9b4e8addf43f50c07685dce6d2db072",
+    "artifacts/b5q-p3-work/samsung-source/power.c": "e39388d4cc6a347c5eca57247d0ecaec5bacaa1ff21b103d4b66dbc6d394dfd0"
+  },
+  "samsung_cnss2_revision": "a1fdd086620bc0e2f767323c2853bcc9424e3087",
+  "bdf_note": "Samsung cnss2 qmi.c selects bdwlan[g].eXX or bdwlanHH.eLL by real QMI board/chip ID, then optional antenna suffix1/2/10 and DTS postfix(empty here). Local originals contain generic elf variants only; never silently substitute unrelated board ID.",
+  "firmware_handoff": {
+    "status": "SOURCE_TARGET_VERIFIED_PENDING_LINKED_CI_AND_HARDWARE",
+    "producer": "B5qHandoffDxe/PcieDma.c",
+    "source_iort": "artifacts/b5q-p3-work/stock-pcie-IORT.json",
+    "name": "PCIE0",
+    "arid": "0x03000000",
+    "sid_mask": "0x007f1400",
+    "pool_bytes": 33554432,
+    "iova": "0xa0000000",
+    "table_storage": "EfiReservedMemoryType",
+    "pool_storage": "EfiReservedMemoryType",
+    "ready": "only after HAL create/configure/attach and final EFI map retention; disabled wifi allocates nothing"
+  },
+  "pcie_phy": {
+    "source": "uefi-b5q/Resources/DTBs/b5q.dts",
+    "sha256": "345420f6987a86bbaaa930c9b908668e172fdcfde44d57624679cd93c8cafb1f",
+    "line": 23651,
+    "entries": 115,
+    "generated": "package/B5qPcieInputs.h"
+  },
+  "board_adapter": {
+    "status": "HOST_TARGET_ABI_PAC_VERIFIED_PENDING_CI_AND_HARDWARE",
+    "hardware_verified": false,
+    "source": "package/B5qWifiBoard.cpp",
+    "native_stack": "unchanged mainline mac80211/cfg80211/wpa; original ath11k single-MSI fallback",
+    "msi": "b5q DTS23693 QGIC alternative17110040 SPI768/INTID800; DTS default ITS is not copied as sheng SPI141; firmware maps Device page IOVAaffff000; physical QGIC operation pending",
+    "phy_entries": 115,
+    "firmware": "amss.bin resolves original amss20.bin; only QMI-derived exact cnss BDF names",
+    "host_tests": "test-wifi-platform.py and test-pcie-firmware-dma.py PASS ASan/UBSan",
+    "board_target": "artifacts/b5q-p3-work/board-target/report.json",
+    "remaining": [
+      "Full joint XNU+UEFI CI and signed runtime",
+      "Returned image and binary acceptance",
+      "Physical MSI/radio qualification"
+    ]
+  },
+  "new_source_sha256": {
+    "UniXNU-b5q/package/B5qWifiBoard.cpp": "07f5d99b83ad340dbdd589ee28b191f2a333362d5ab1bf6950d0868459971d5b",
+    "UniXNU-b5q/package/B5qPcieCore.h": "4129520c45cb82c9a7b1a333c031e9708f81637f0b06caad64b694cd509a2d1e",
+    "UniXNU-b5q/package/B5qPcieInputs.h": "3b6dc17bca47ec467bdcbbf51a325d2eda1ce24aff7f5c883f7c8b5e207a2b9b",
+    "UniXNU-b5q/package/B5qWifiArena.h": "00b678c36b5f1d993f29804debdbd81604a0a3c1bd76fc7c71fa8b9b01363b3e",
+    "artifacts/b5q-p3-work/samsung-source/pci-msm-msi.c": "f580d6a31c4bc740d374c6391d9ffa124042c6a1793baa485a5eea25b9d2c622"
+  },
+  "network_reuse": {
+    "source": "sources/UniXNU-sheng/package/ShengEthernet.cpp",
+    "sha256": "4b431d8e16976b491056ec2073db35657f2cd32ca7eec1619437b96d82645511",
+    "abi_source": "sources/UniXNU-sheng/scripts/net-ether-26C5035r.json",
+    "sha256_abi": "60026416c10909af0d814ad142aeb6c31c51cec029a8c46fc58b683e2745ee22",
+    "description": "Native WifiNet bridge, existing b5q TimeSync early interface retained; no radio hardware from sheng",
+    "status": "746_SLOTS_221_BINDINGS_TARGET_VERIFIED"
+  },
+  "review_fix_batch": {
+    "hardware_verified": false,
+    "wifi_wait": "recheck race clears wait else blocks; Window RAII releases temporary clkref mapping",
+    "P1": "QMP success explicitly reverses UTMI-only mux to PIPE; all mapped exits release12KiB; failed rcg/branches/GCC updates retainUTMI",
+    "P0": "two-finger tap accepts monotonic2->1->0 lift with originalIDs/time/motion; rejects replacement/re-add/recovery",
+    "tests": "test-wireless-review-fixes.py/test-touch-p0.py/test-usb-p1.py/test-v25-usb.py PASS ASanUBSan",
+    "native_network_ABI": "400controller+346interface slots,221originalbindings PASS",
+    "delivery_plan": "one ESP P2+P3 with fixes; separateP4ESP andP5ESP requested2026-11-24; finalrecheck before delivery",
+    "qgic_gate": "Original alternative DTnode is disabled in stock ITS configuration; explicit feature-gated nativeSPI path validates GICD_TYPER.MBIS and800INTID before enabling; no unsupported ITS/LPI claim"
+  },
+  "current_host_gates": {
+    "shared_stack": {
+      "passed": true,
+      "checks": [
+        {
+          "name": "test-buffers",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-buffers.py"
+          ],
+          "test_source_sha256": "bc814ab904e6a19c46240b601ce44fb7b87514729c848b2eaaf0987bb9708454"
+        },
+        {
+          "name": "test-cfg80211-control",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-cfg80211-control.py"
+          ],
+          "test_source_sha256": "5de0049aa34a3404ff68e4139af9a4c810ddf6a670869ddafe61ae3abea2fa9a"
+        },
+        {
+          "name": "test-control-client",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-control-client.py"
+          ],
+          "test_source_sha256": "74a103ca084f07a8ee9685a229e9d3a2a23c8d8892221a4c7e7caa4c91ac47b0"
+        },
+        {
+          "name": "test-control-endpoint",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-control-endpoint.py"
+          ],
+          "test_source_sha256": "d054bc06a878b1a1ec538265ccc69ab6fd74afb8e95121b138f7e050ec6ad0e7"
+        },
+        {
+          "name": "test-control",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-control.py"
+          ],
+          "test_source_sha256": "771d5366e5f5acc52c782df43b94de84f354f1633fbab9a38b14da921f10e43a"
+        },
+        {
+          "name": "test-crypto",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-crypto.py"
+          ],
+          "test_source_sha256": "07f994161def50f6e53d69f68151446e0564ae1f71b91544920a94b7042e3646"
+        },
+        {
+          "name": "test-eapol",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-eapol.py"
+          ],
+          "test_source_sha256": "89d6517802c1d67ecf6cb8330e26668d5f7327d609b69473d3e5dcae5a82bfad"
+        },
+        {
+          "name": "test-locks",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-locks.py"
+          ],
+          "test_source_sha256": "6ab17979f6d714fde0a7dcaf26b98c4c6ae0d7a5f0d23549aaaf5f083a6f5779"
+        },
+        {
+          "name": "test-mainline-runtime",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-mainline-runtime.py"
+          ],
+          "test_source_sha256": "70eff03acecc8c6f68f12251240bc5f6ddef335f2344eabf1ba7a158991dde17"
+        },
+        {
+          "name": "test-runtime",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-runtime.py"
+          ],
+          "test_source_sha256": "f3a8d57c3026b3c2f91993bac2b27dc1659b76f63794c00378df5ff55e510c06"
+        },
+        {
+          "name": "test-rx-rate",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-rx-rate.py"
+          ],
+          "test_source_sha256": "5bb82c3041494d6f32353c2bb3d076c7f385289d88d4115bf4d63a02f391cf75"
+        },
+        {
+          "name": "test-supplicant",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-supplicant.py"
+          ],
+          "test_source_sha256": "7aeba97b4bd36b2ac705ea5aac44397ac3cd37de0dc296cb50150a2cdf8ff1d6"
+        },
+        {
+          "name": "test-wireless-events",
+          "passed": true,
+          "command": [
+            "/bin/python3",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-wireless-events.py"
+          ],
+          "test_source_sha256": "358b4d4e274bb4489d7dc492e6ec9b666bf9771d36564b70e43dfbbf2e2e0b95"
+        },
+        {
+          "name": "test-mhi",
+          "passed": true,
+          "command": [
+            "bash",
+            "/home/baimao/zflip5/sources/UniXNU-sheng/drivers/Ath12kWifi/tools/test-mhi.sh"
+          ],
+          "test_source_sha256": "ce0d25d1d1e7e47ce9e7ddbdfc5e902494118a9a087dfbd1a585497e55cec493"
+        }
+      ],
+      "total": 14,
+      "hardware_verified": false,
+      "complete_stage": false,
+      "host_adaptation": "Darwin dead_strip -> ELF gc-sections; private Linux loff_t/errno/time namespace; fixture config callback gains same-version radio_idx; all production source and assertions retained",
+      "fixture_sha256": "6d4efd77603623bba2ef26cbee9a29051b1445af6ae119c423796fcb15fb9e0e"
+    },
+    "qca6490": "artifacts/b5q-p3-work/qca6490-host.json",
+    "strict_function_types": "all22ath11kobjectsPASS",
+    "joint_symbols_PAC_MMIO": "artifacts/b5q-p3-work/joint-target-closure.json;122objects,62callbackcontracts,0unresolved,0duplicates,0apps_smmu",
+    "preserved_baseline": "43P0+10P1groupsPASS",
+    "UEFI": "PcieDma.c/B5qHandoffDxe.c/DarwinBoot.c actualEDK2targetcompilePASS;8patchesreconstructPASS",
+    "firmware": "24originalSamsunginputfiles hashes+privateCIasset receiptPASS",
+    "native_bluetooth": "actualmacOS27originaldaemonpatchchecksPASS;BlueTool/Type0arm64etargetobjectsPASS;sign/linknativeCIpending"
+  },
+  "remaining": [
+    "Separate source commits and one joint CI",
+    "Download and check actual linked binaries, PAC, runtime signing and ESP",
+    "P4 and P5 independent implementations, images and final review"
+  ]
+}

@@ -13,11 +13,14 @@ from unixnu.boot_template import compressed_volume, fv_files, loader_pe, section
 
 BANNED = {
     "UsbConfigDxe", "UsbInitDxe", "UsbDeviceDxe", "UsbfnDwc3Dxe", "UsbPwrCtrlDxe",
-    "XhciPciEmulation", "XhciDxe", "UsbBusDxe", "UsbKbDxe", "UsbMassStorageDxe",
-    "UFSDxe", "SdccDxe", "UsbMsdDxe", "PILDxe", "PILProxyDxe", "SPSSDxe",
+    "XhciPciEmulation", "XhciPciEmulationDxe", "XhciDxe", "UsbBusDxe", "UsbKbDxe", "UsbMassStorageDxe",
+    "SdccDxe", "UsbMsdDxe", "PILDxe", "PILProxyDxe", "SPSSDxe",
 }
 REQUIRED = {"B5qHandoffDxe", "DarwinBoot", "HALIOMMU", "DisplayDxe", "ButtonsDxe",
-            "RpmhDxe", "CmdDbDxe", "RamManagerDxe"}
+            "RpmhDxe", "CmdDbDxe", "RamManagerDxe", "UFSDxe", "UniXNURamDiskDxe"}
+UFS_GUID = "0d35cd8e-97ea-4f9a-96af-0f0d89f76567"
+V8_UFS_SHA256 = "f33a84726dacd79bb243d4131f1ab25cf55aa686e1f980a59285bd024cc38d7a"
+DECOMPRESS_GUID = UUID("d8117cfe-94a6-11d4-9a3a-0090273fc14d").bytes_le
 REMOVED_PROTOCOLS = {UUID(x).bytes_le for x in (
     "e722b03f-b250-42ce-8ebd-5bd51812d037",  # UsbConfigDxe InstallMultipleProtocolInterfaces
     "d9d9ce48-44b8-4f49-8e3a-2a3b92d17dc1",  # UsbDevice
@@ -67,11 +70,18 @@ def main():
     handoff = loader_pe(fd, "f8a45ce9-92de-48cc-8e19-e97c28b724a0")
     darwin = loader_pe(fd, "1b64af87-8415-4b57-9b16-680d70913b9f")
     hal = loader_pe(fd, "9a00771f-36d4-4dd5-8916-c48ed9b16b86")
+    ufs = loader_pe(fd, UFS_GUID)
+    ramdisk = loader_pe(fd, "75ca63ad-fbae-4a06-92a0-f937c671251d")
     assert b"B5Q-USBDMA: locate=" in handoff
+    assert b"B5Q-HANDOFF: EFI memory map query" in handoff
+    assert b"B5Q-HANDOFF: EFI type=" not in handoff
+    assert b"UNXNFAT1" in ramdisk and DECOMPRESS_GUID not in ramdisk
     assert b"b5q-usb-dma-diagnostics" in darwin
     assert hashlib.sha256(hal).hexdigest() == "a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef"
+    assert hashlib.sha256(ufs).hexdigest() == V8_UFS_SHA256
     result = {"result": "PASS", "firmware_sha256": hashlib.sha256(fd).hexdigest(),
               "handoff_sha256": hashlib.sha256(handoff).hexdigest(), "darwinboot_sha256": hashlib.sha256(darwin).hexdigest(),
+              "ufs_sha256": V8_UFS_SHA256, "ramdisk_sha256": hashlib.sha256(ramdisk).hexdigest(),
               "retained": sorted(REQUIRED), "excluded": sorted(BANNED), "firmware_module_count": len(modules),
               "compiled_depex_checked": sum(bool(deps) for _, deps in modules.values())}
     a.out.write_text(json.dumps(result, indent=2) + "\n")
