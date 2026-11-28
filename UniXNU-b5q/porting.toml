@@ -2553,10 +2553,10 @@ paths = ["package/B5qRamStorage.cpp", "package/B5qUfs/B5qDataFormat.h", "package
 inputs = ["User latest instruction: macOS only, minimum work, Android data need not be preserved. Existing GPT listing from2026-11-19; not a new device read. userdata LBA3406336..47595510,180998860800B; root/ESP unchanged. Exact source SHA in reports/macos-only-layout.json."]
 configuration = ["b5q-data-ufs=2 selects only GPT userdata with exact bounds, LUN0 and envelope disk/partition UUID;1retains prior tail/macOSData mode;0RAM fallback. All other boot args unchanged, still981ASCII bytes. NoGPT rename or repartition."]
 procedure = ["Replace the earlier24GiBroot/movedsystem proposal with originaluserdata reuse. Extend production Data selector, build only2changedstorageobjects, reuse completedBatch2core/GPU/UEFI/nativeinputs, grow verified APFS seed to168.567GiB, then local readback before delivery. Device installation remains user-run only."]
-findings = ["Originaluserdata is168.568325GiB; after immutable1MiB envelope APFS is168.567348GiB (44188919blocks). Existing48GiB root and8GiB gap remain untouched; this avoids moving root or rewritingGPT. User explicitly authorizes dropping Android data for this design.", "Data mode3 adds name+exactLBA+CRC+UUID+nonoverlap gate; root authentication/FUA/tag1/sharedlock/shutdown stay unchanged. Installer requires explicituserdata replacement and unmounted/data; rejects existing APFS/envelope to prevent repeat initialization. Implementation, CI45115332412 and actualESP/APFSreadback complete; see reports/macos-only-validation.json."]
+findings = ["Originaluserdata is168.568325GiB; after immutable1MiB envelope APFS is168.567348GiB (44188919blocks). Existing48GiB root and8GiB gap remain untouched; this avoids moving root or rewritingGPT. User explicitly authorizes dropping Android data for this design.", "Data mode3 adds name+exactLBA+CRC+UUID+nonoverlap gate; root authentication/FUA/tag1/sharedlock/shutdown stay unchanged. Installer requires explicituserdata replacement and unmounted/data; rejects existing APFS/envelope to prevent repeat initialization. Implementation, CI45115332412 and image acceptance complete; actualTWRPuserdata sparse initialization plus25segmentreadback completed2026-11-23 with350.168MiBtotalblockwrites. See reports/macos-only-validation.json."]
 completion = ["Productionpositive/negative tests,2targetobjects andPAC/zeroapps_smmu, incrementalCI, actualESP/Datareadback and exact user-run installation instructions must pass before final delivery."]
-limits = ["No phone connected and no GPT/partition writes performed. Localimplementation/CI/imageacceptancepassed; physicalpersistence/PSCI/inputqualificationpending. Old30GiBtailimageisnottheuserdata payload."]
-next_action = ["User-run first conversion ofunmounteduserdatafollowedbyESP-onlyupdate; hardwarelogqualification. NeverrepeatData initialization aftersuccess; noGPT/boot/rootchanges."]
+limits = ["UserauthorizedTWRPuserdata initializationexecutedandverified;GPT/ESP/boot/rootunchanged. macOSruntimecross-rebootpersistence/PSCI/inputqualificationpending. No168GiBfullwriteperformed."]
+next_action = ["Data initializedsuccessfully;neverrepeatDataformat. UserauthorizedmatchingESPdeploymentcompletedandfullSHAreadbackPASS;macOSruntimequalificationpending,norebootperformed."]
 
 [[area.evidence]]
 kind = "source"
@@ -2577,3 +2577,58 @@ result = "ActualCI45115332412compiled2storageobjectsandnative/prelink/ESP, reuse
 kind = "source"
 reference = "reports/macos-only-validation.json"
 result = "CI45115332412SUCCESSsource1df3521219f2232314bf5e1d4960f4526775758a;ordinaryartifactdigestverifiedbeforeextraction. ActualESP838860800BSHA47b496286781e30245456475d5335ebd39bc10db7059477cb8c0bc13b327b840;Data180997812224BSHAd343babb7ca905c957c1b2643ae3cb92f844dd9c2cfd47bb911ef17f98edca0a. FinalFAT4Kn/mirrors/journal/allmembers,981Bmode2/noRAMdefault/independent4GiBRAMrecovery,6GiB/4GiBADT,SIPu64LE2/2fixups/8clusters,APFSuuid/account/root0644binary59+26policies/absentdsignaturetrust/POST69sitesPASS. Only2storageobjectscompiled;coreGPUUEFIunchanged; physicalhardwareunclaimed. Plannerstatusnowreferstothisvalidation;latestinstallerstreamandEOFtestsPASS;6digest-receiptgatecasesPASS;fullSHAcalculatedonceandboundtodev/inode/size/mtime/ctimebeforeandafterreadback,installerstillhashesallbytes."
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/macos-only-validation.json"
+result = "2026-11-23 latest user explicitly authorizes connectedTWRP userdata initialization and forbids full168GiBwriting. NativeREADCAP16 confirmsLBPME1/LBPRZ0;doNOTassumeUNMAPzeros. NewAPFSallocationplannerpreservesall42159allocatedblocks(includingzeroes),internalpool,checkpointmetadataandhostextents;25segments366125056B(<1GiB). Localstale-free-datarestorepassesactualAPFSUUID/account/owners/59+26binarypolicy/absentdreader;productiontransferreadback/validatorfailuretestsPASS. DeviceGPTprimary/backupread-onlycheckandinstallationpending;nootherpartitionwritesauthorized."
+
+[[area.evidence]]
+kind = "device"
+revision = "e157f403c6aaff5bd1438e2e1350ff64657a3855"
+command = "python3 scripts/b5q-install/install-data-ufs.py --image artifacts/b5q-esp-macos-only-userdata/data-ufs.img --partition userdata --replace-android-data --sparse-init --source-receipt artifacts/b5q-userdata-work/data-sha256-receipt.json --readback-image /tmp/b5q-device-userdata-init.img --apply"
+reference = "reports/macos-only-validation.json"
+result = "2026-11-23 user-authorized actualTWRPuserdata initializationCOMPLETE. LUN0/4Kn/exactGPT/sysfs/rootheaderchecked;25APFSsegments366125056B+1052672Benvelopewrites=367177728B(350.168MiB),not168GiB. AllsegmentsSHA256readbackPASS;actualdeviceAPFSreconstructedread-onlyparserverifiesUUID/account/autologin/rootpermissions/binary59+26policies/watchdogd/absentd. B5QDATA1committedLASTandreadbackvalid;primaryandbackupGPTmetadataunchanged. UNMAPLBPRZ0notassumedzero;allallocatedzero-blocksandinternalpoolincluded. ESP/boot/root/otherpartitionsnotwritten,noreboot;macOSruntimepersistentmount/shutdown/inputqualificationstillpending. Deviceandhostscratchcopiesremovedafterevidencecapture."
+
+[[area.evidence]]
+kind = "device"
+revision = "8e1dedef05d90cd8ded681a743942a8c51ee972b"
+command = "python3 scripts/b5q-install/install-firstboot.py --directory artifacts/b5q-esp-macos-only-userdata --esp"
+reference = "reports/macos-only-validation.json"
+result = "2026-11-23 user-authorized ESP deployment COMPLETE. Actual800MiB4KnESPfullreadbackSHA25647b496286781e30245456475d5335ebd39bc10db7059477cb8c0bc13b327b840PASS; userdataB5QDATA1mode3/bounds/CRCstillvalid. Initial4MiBddtransportfailed;4Knddwrote838860800Bin23.9secondsandverified. OriginalinstallerregressionPASS. NoDatareinit,boot/root/GPTwriteorreboot."
+
+[[area]]
+id = "local-dependencies"
+status = "implemented"
+components = []
+paths = ["reports/local-dependencies.json", "scripts/software-compositor-26C5035r.json", "scripts/software-session-26C5035r.json"]
+inputs = ["User explicitly requests migration of all b5q dependencies before manually clearing the nabu workspace. Original APFS source revision66b86bd525e8cb90f9012543be89b1f092b75cf3; exact source/destination and input hashes in reports/local-dependencies.json."]
+configuration = ["Host LLVM21,MacOSX26.5SDK,APFS tools and genericXNU2LOG decoder are local under zflip5/tools. Original26C5035rIPSW/shared-cache under zflip5/inputs; local official build override points to movedIPSW. No source/ABI/device configuration changed."]
+procedure = ["Same-filesystem rename5large dependencygroups with inodepreservation; copy9smallBSDsource/OSpolicy inputs with SHA256equality. Rewrite13activecallers/configs; keep historicalprovenance untouched. Hide entire oldworkspace withbwrap and run actual local checks."]
+findings = ["All active b5q tool/test/configreferences now resolve withinzflip5; no dependent symlink remains. Originalworkspace can be cleared byuser without these b5q dependencies. Large files were moved rather than duplicated.", "With oldworkspace hidden: APFS realaccount/owners/binary59+26policy/absentd readback, productionlogger11cases andrealv33decode,21absentdASanUBSancases,nativeXPC3cases/5realjobs,2arm64etargetobjects0missing/duplicate,6returnedobjects326PACslots/zeroapps_smmu,upstreamIPSWoverride allPASS. No phone access,IMGchange,fullrebuildorCI."]
+completion = ["Host dependency migration and oldworkspace-isolated validation complete; reportpassed=true. Device runtime acceptance is unchanged by this host-only task."]
+limits = ["The original workspace itself is not deleted. Historical reports retain old source paths as provenance; they are not live file dependencies. Licensed SDK/IPSW and binary tools remain local ignored inputs."]
+next_action = ["User may clear oldworkspace; continue b5q builds and diagnostics entirely fromzflip5."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/local-dependencies.json"
+result = "MigrationPASS: same-inode largefilemoves, copiedsourceSHAequality, zeroactiveoldpaths/links, andbwrap-hiddenoldworkspace realtests complete. Record contains exact tool/cache/decoder hashes and APFS revision. Originalfoldernotdeleted; noCIorphoneoperation."
+
+[[area]]
+id = "persistent-data-mount"
+status = "implemented"
+components = ["RamBlock", "VerifiedRoot"]
+paths = ["package/B5qUfs/B5qDataBlock.h", "package/B5qUfs/B5qDataSeed.h", "package/B5qUfs/B5qUfs.cpp", "scripts/b5q-storage-provider.patch", "scripts/b5q_ramblock.py", "scripts/build-b5q-storage.py", "scripts/relink-b5q-peripherals.py", "reports/data-mount-fix.json"]
+inputs = ["ActualBatch2logSHAa4fe97b42b23971720526d22c30240f0ef7c056203ba79850d409f6dbfb47089;NativeRamBlock.cppsourceSHA772d47a069c50c9bf92f6c9292668340e005a61d996651033d9af2b6474b897c. Existingcore88703fdc/GPU/v30loader/Data unchanged."]
+configuration = ["No boot-arg/DTS/ADT/Data format or kernelcorepatch changes. Weaktypedprovider hook accepts onlyonlineB5qDataBlock with validatedDataUUID/geometry,base0,bytes180997812224 andSHA256immutableenvelope. RAM provider remains first unchanged branch."]
+procedure = ["Prepare NativeRamBlock from pinned upstream plus original4GiBpatch andnewproviderpatch;compileonlyNativeRamBlockandB5qUfs;relinkcached45115332412native. RootpublisherthreadwaitsuniqueDataIOMediawithUUID/BSDName/Major/Minor beforepublishingbootroot;duplicates/missingproperties/refusedprovidertimeoutfailclosed."]
+findings = ["Actualhardwareadopts205811lowpages/refused0,usable7014903808B;Data mode3APFSdisk0xid23 recognized,thenPID1panicsENOENTbeforelaunchd. SourceNativeRamBlockselectVolumeSeedrequiresNativeRamBlock andcannotfindB5qDataBlock; no evidence ofDataformatfailure.", "21actualselector/hook/readinessASanUBSan casesPASS inclpersistentwithoutRAM,wrongUUID/duplicates/unready/bytebound/unknownprovider/delayedarrival/RAMrecovery. Twoarm64etargetobjects0missing/duplicate and7objectPAC326slots/zeroapps_smmuPASS;actualCIandESPacceptancepending."]
+completion = ["Req1providerandReq2readinessimplemented;Req3localchecksPASS;Req4incrementalCIandfinalESPreadbackmustcompletebeforeimages/flashcommands."]
+limits = ["No phone access orDatawrite thisround. NoXNUcore/GPU/Mesa/UEFIrebuild. Static/localvalidationnotclaimedphysicaldesktopmountsuccess."]
+next_action = ["Runonecachedstorage-onlyCI,downloadandverifyactualobjects/ESP,thenprovideESP-onlydeploymentcommandand0..7report."]
+
+[[area.evidence]]
+kind = "source"
+reference = "reports/data-mount-fix.json"
+result = "ActualBatch2journal/sourcecausalchainplus21ASanUBSan productionselector/hook/readinesscases,2targetobjects0missing/duplicate andcross-objectstoragePAC326slots/IAe90c/PSCI0ba5/zeroapps_smmuPASS. Digestdescribesvalidatedenvelopeonly. CIandfinalimageacceptancepending."

@@ -51,8 +51,11 @@ REPLACEMENTS = {
     'B5qRamStorage.cpp': ('B5qRamStorage.o', (STORAGE,)),
     'B5qPower.cpp': ('B5qPower.o', (STORAGE,)),
     'B5qUfs/B5qUfs.cpp': ('B5qUfs.late.o', (STORAGE,)),
+    'NativeRamBlock.cpp': ('NativeRamBlock.late.o', (STORAGE,)),
 }
 RECIPES = {
+    'data-mount': (45115332412, '1df3521219f2232314bf5e1d4960f4526775758a',
+                   ('NativeRamBlock.cpp','B5qUfs/B5qUfs.cpp')),
     'userdata': (45108577992, 'e66beea40e2a887e177c762804206d21ba983ef2',
                  ('B5qRamStorage.cpp','B5qUfs/B5qUfs.cpp')),
     'v26': (44930613230, '697902ef16648c0aeacbc2b1e7efe9ee19def41e', ('QcomDwc3.cpp', 'B5qTouch.cpp', 'B5qUsbBoard.cpp', 'GeniI2c.c')),
@@ -264,7 +267,7 @@ def main():
     sdk = Path(subprocess.check_output(['xcrun', '--sdk', 'macosx', '--show-sdk-path'], text=True).strip())
     include = out / 'include'
     header = prepare_headers(sdk, include, hid)
-    if args.version in ('batch2','userdata'):
+    if args.version in ('batch2','userdata','data-mount'):
         storage=dependency(core,'IOStorageFamily','IOBlockStorageDevice.h')
         dest=include/'IOKit/storage';dest.mkdir(parents=True,exist_ok=True)
         for path in storage.glob('*.h'):shutil.copyfile(path,dest/path.name)
@@ -289,10 +292,18 @@ def main():
         options = [flag for flag in cflags if not name.endswith('.c') or flag not in
                    ('-Wno-unused-private-field', '-Wno-c++11-narrowing',
                     '-Wno-deprecated-enum-enum-conversion')]
-        if name in ('B5qRamStorage.cpp','B5qUfs/B5qUfs.cpp','B5qPower.cpp'):
+        if name in ('B5qRamStorage.cpp','B5qUfs/B5qUfs.cpp','B5qPower.cpp','NativeRamBlock.cpp'):
             options+=['-include',str(include/'macos-target.h'),'-I',str(xnu/'osfmk'),
                       '-I',str(ctx.tree/'kits/VerifiedRoot/include')]
-        obj = compile_object(cxx, options, device / 'package' / name, compiled, llvm)
+        source=device/'package'/name
+        if name=='NativeRamBlock.cpp':
+            from b5q_ramblock import prepare_source
+            source=prepare_source(core/'drivers/RamBlock/NativeRamBlock.cpp',out/'source/NativeRamBlock.cpp')
+            options+=['-iquote',str(core/'drivers/RamBlock')]
+            record['ramblock_source_sha256']=sha(core/'drivers/RamBlock/NativeRamBlock.cpp')
+            record['ramblock_prepared_sha256']=sha(source)
+            record['ramblock_patch_sha256']={name:sha(device/'scripts'/name)for name in ('b5q-volatile-data-4g.patch','b5q-storage-provider.patch')}
+        obj = compile_object(cxx, options, source, compiled, llvm)
         objects[obj.name] = sha(obj)
         # Return exactly one object per source, containing the bytes inserted
         # into the archives. QcomDwc3's late transform is recorded explicitly.
