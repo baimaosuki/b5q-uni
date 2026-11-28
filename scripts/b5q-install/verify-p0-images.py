@@ -152,7 +152,18 @@ def main():
     # Read the build's producer manifest, never an acceptance report from an
     # earlier run of this verifier in the same downloaded artifact tree.
     media_path,=a.ci.rglob('runtime/media-runtime.json');media=json.loads(media_path.read_text())
-    assert media['passed']and media['preserved_addon_entries']==50 and media['new_addon_entries']==7
+    assert media['passed']
+    counts=(media['preserved_addon_entries'],media['new_addon_entries'])
+    if counts==(57,0):
+     # An already complete media addon is idempotently reused. Verify every
+     # actual uploaded reuse input byte, not just its self-declared counts.
+     reused,=a.ci.rglob('gpu-addon.bin')
+     assert sha(reused)==media['addon_sha256']
+     prior=addon.read(reused)
+     assert len(prior)==57 and len(content)==57
+     assert all(content.get(n)==(m,b)for n,m,b in prior)
+    else:assert counts==(50,7)
+    assert len(content)==57
     assert sha(assets/'kernel.macho.gpuaddon')==media['addon_sha256']
     assert sha(assets/'kernel.macho.trustcache')==media['trust_sha256']
     previous_wireless=t/'p2p3-addon'

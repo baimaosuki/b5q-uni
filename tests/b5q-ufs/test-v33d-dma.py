@@ -9,6 +9,7 @@ ns={ '__file__':str(R/'tests/b5q-ufs/test-v33b-reservations.py') }
 exec(compile(s[:s.index("fixture+='static UINT8 mUsbMapBuf")],'<existing-EFI-fixture>','exec'),ns)
 fixture=ns['fixture'].replace('descriptors[3]','descriptors[7]')
 fixture+='static UINT8 mUsbMapBuf[32768] __attribute__((aligned(8)));\n#include "B5qReservedMemory.h"\n'+ns['body']+r'''
+
 static UINT64 ReadUnaligned64(const UINT64 *p){UINT64 n;memcpy(&n,p,8);return n;}
 static void WriteUnaligned64(UINT64 *p,UINT64 n){memcpy(p,&n,8);}
 #include "MemoryWindow.h"

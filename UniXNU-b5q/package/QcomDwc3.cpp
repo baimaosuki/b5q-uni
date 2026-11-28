@@ -14,6 +14,7 @@
 #include "B5qMax77705.h"
 #include "B5qDpPort.h"
 #include <mach/mach_time.h>
+extern "C" unsigned long long ml_phys_read_double_64(uint64_t);
 extern "C" bool b5q_usb_repeater(bool,bool);
 extern "C" bool b5q_usb_typec_init(void);
 extern "C" int b5q_usb_cable_role(void);
@@ -49,6 +50,7 @@ bool sm8550_gcc_update32(volatile uint32_t *, uint32_t, uint32_t);
 // [36] bit mask of the SuperSpeed link states seen (GDBGLTSSM bits 25:22), [37] GDBGLTSSM, [38] GUSB3PIPECTL, [39] cable test steps.
 volatile uint32_t native_usb_stats[54];
 }
+void dmaDiagnostics(const char *reason);
 namespace {
 // The DWC3 global, device and OTG registers in the window Apple's class addresses: base + 0xc000.
 constexpr uint64_t kCore = 0x0a600000, kAppleWindow = kCore + 0xc000, kQscratch = kCore + 0xf8800, kGcc = 0x100000, kTcsr = 0x1fd5000,
@@ -253,19 +255,37 @@ bool readChosen(IORegistryEntry *chosen, const char *name, T &value) {
     return true;
 }
 
+struct DmaRange {uint64_t base,bytes;};
+DmaRange gDmaRam[17],gDmaExcluded[128];unsigned gDmaRamCount,gDmaExcludedCount;
 bool smmuIdentity() {
     IORegistryEntry *chosen = IORegistryEntry::fromPath("/chosen", gIODTPlane);
     uint32_t flag = 0;
     B5qUsbDmaHandoff::State state = {};
     const bool hasFlag = readChosen(chosen, "b5q-usb-dma-ready", flag);
     const bool hasState = readChosen(chosen, "b5q-usb-dma-state", state);
+    B5qUsbDmaHandoff::Diagnostics diag={};
+    const bool hasDiag=readChosen(chosen,"b5q-usb-dma-diagnostics",diag);
+    gDmaRamCount=gDmaExcludedCount=0;
+    if(hasState)gDmaRam[gDmaRamCount++]={state.ownedBase,state.ownedBytes};
+    for(unsigned kind=0;chosen&&kind<2;kind++){
+        const char *key=kind?"darwinboot-memory-excluded":"darwinboot-memory-outside";
+        auto *data=OSDynamicCast(OSData,chosen->getProperty(key));
+        if(!data||data->getLength()%16)continue;
+        for(unsigned i=0;i<data->getLength()/16;i++){
+            DmaRange range={};memcpy(&range,static_cast<const uint8_t*>(data->getBytesNoCopy())+16*i,16);
+            if(!range.bytes||range.bytes>UINT64_MAX-range.base)continue;
+            if(kind){if(gDmaExcludedCount<128)gDmaExcluded[gDmaExcludedCount++]=range;}
+            else if(gDmaRamCount<17)gDmaRam[gDmaRamCount++]=range;
+        }
+    }
+    if(hasDiag)IOLog("qcom-dwc3: firmware-dma-ext table=%llx+%llx mapped=%llx used-pages=%u flush=%x coverage=%llx retention=%llx prepare=%llx\n",diag.tableBase,diag.tableBytes,diag.mappedBytes,diag.usedPages,diag.flush,diag.coverageStatus,diag.retentionStatus,diag.prepareStatus);
     OSSafeReleaseNULL(chosen);
     if (hasState) {
         IOLog("qcom-dwc3: firmware-dma v=%u sid=%x locate=%llx create=%x configure=%x attach=%x map=%x owned=%llx+%llx\n",
               state.version, state.sid, state.locate, state.create, state.configure,
               state.attach, state.map, state.ownedBase, state.ownedBytes);
     }
-    const bool ready = hasFlag && hasState && B5qUsbDmaHandoff::ready(flag, state);
+    const bool ready = hasFlag && hasState && hasDiag && !diag.prepareStatus && !diag.flush && !diag.coverageStatus && !diag.retentionStatus && diag.usedPages && B5qUsbDmaHandoff::ready(flag, state);
     native_usb_stats[7] = ready ? state.sid : ~0u;
     IOLog("qcom-dwc3: stage=5 smmu=skipped-el2-xpu firmware-dma-ready=%u flag=%u state-present=%u\n",
           ready, flag, hasState);
@@ -496,6 +516,7 @@ public:
         if(count<=16&&(value||offset==0x30||offset==0x38)){
             uint32_t lo=at[0],hi=at[1];
             IOLog("qcom-dwc3: xhci-w64 #%u off=%x val=%llx rb=%08x:%08x\n",count,offset,value,hi,lo);
+            if(offset==0x18||offset==0x30||offset==0x38)dmaDiagnostics("write64");
             if(value&&offset!=0x18&&!lo&&!hi){
                 at[0]=(uint32_t)value;barrier();at[1]=(uint32_t)(value>>32);barrier();
                 lo=at[0];hi=at[1];
@@ -697,11 +718,40 @@ bool enterRole(int role) {
     }
     return true;
 }
+// A RAM read is authorized only by the loader's usable owned/outside ranges.
+// No allocations, mapping changes, SMMU MMIO or reads of an arbitrary bus PA.
+bool dmaRead64(uint64_t pa,uint64_t &value){
+    if((pa&7)||pa>UINT64_MAX-8)return false;
+    for(unsigned i=0;i<gDmaExcludedCount;i++)if(pa<gDmaExcluded[i].base+gDmaExcluded[i].bytes&&gDmaExcluded[i].base<pa+8)return false;
+    for(unsigned i=0;i<gDmaRamCount;i++)if(pa>=gDmaRam[i].base&&pa+8<=gDmaRam[i].base+gDmaRam[i].bytes){value=ml_phys_read_double_64(pa);return true;}
+    return false;
+}
+void dmaDiagnostics(const char *reason){
+    if(!gXhciRegs.va||!gGlobals.va)return;
+    const unsigned cap=gXhciRegs.va[0]&255,rt=gXhciRegs.va[0x18/4]&~31u;
+    if(cap+0x38>kXhciRegisterBytes||rt+0x38>kXhciRegisterBytes)return;
+    auto *op=gXhciRegs.va+cap/4;auto *ir=gXhciRegs.va+rt/4;
+    const uint64_t dcbaa=uint64_t(op[0x30/4])|(uint64_t(op[0x34/4])<<32);
+    const uint64_t erst=uint64_t(ir[0x30/4])|(uint64_t(ir[0x34/4])<<32);
+    const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);
+    const uint32_t hcs2=gXhciRegs.va[8/4];
+    IOLog("qcom-dwc3: host-dma-diag reason=%s HCSPARAMS2=%x scratchpads=%u GCTL=%x GUCTL=%x GSBUSCFG0=%x GSBUSCFG1=%x DCBAAP=%llx ERSTBA=%llx CRCR=%llx\n",reason,hcs2,((hcs2>>27)&31)|(((hcs2>>21)&31)<<5),gGlobals.va[0x110/4],gGlobals.va[0x12c/4],gGlobals.va[0x100/4],gGlobals.va[0x104/4],dcbaa,erst,crcr);
+    uint64_t first=0;bool read=dmaRead64(dcbaa&~63ULL,first);
+    IOLog("qcom-dwc3: host-dma-diag DCBAA[0]=%llx read=%u\n",first,read);
+    const unsigned entries=ir[0x28/4]&65535;
+    for(unsigned i=0;i<3&&i<entries;i++){
+        uint64_t base=0,details=0;const uint64_t pa=(erst&~63ULL)+16*i;
+        bool ok=dmaRead64(pa,base)&&dmaRead64(pa+8,details);
+        IOLog("qcom-dwc3: host-dma-diag ERST%u base=%llx words=%llx read=%u\n",i,base,details,ok);
+    }
+}
 void hostStats() {
     if (!gDmaReady || gCoreRole != kRoleHost) return;
     const uint32_t cap = gXhciRegs.va[0];
     const volatile uint32_t *op = gXhciRegs.va + (cap & 0xffu) / 4;
     native_usb_stats[47] = op[0]; native_usb_stats[48] = op[1];
+    static bool hseLogged=false;
+    if((native_usb_stats[48]&4)&&!hseLogged){hseLogged=true;dmaDiagnostics("first-HSE");}
     native_usb_stats[49] = op[0x400 / 4]; native_usb_stats[50] = op[0x410 / 4];
     native_usb_stats[51] = gXhciRegs.va[1];
     const uint64_t crcr=uint64_t(op[0x18/4])|(uint64_t(op[0x1c/4])<<32);

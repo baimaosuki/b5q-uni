@@ -1,0 +1,137 @@
+diff --git a/DarwinBootPkg/Driver/B5qUsbDma.h b/DarwinBootPkg/Driver/B5qUsbDma.h
+--- a/DarwinBootPkg/Driver/B5qUsbDma.h
++++ b/DarwinBootPkg/Driver/B5qUsbDma.h
+@@ -4,7 +4,7 @@
+ 
+ #define B5Q_USB_DMA_PROTOCOL_GUID \
+   { 0x16470a49, 0x4aa3, 0x42f0, { 0x85, 0xeb, 0xca, 0x49, 0x3b, 0xb5, 0x8a, 0x08 } }
+-#define B5Q_USB_DMA_PROTOCOL_REVISION 1
++#define B5Q_USB_DMA_PROTOCOL_REVISION 2
+ #define B5Q_USB_DMA_SID 0x40
+ #define B5Q_USB_DMA_BASE 0x80000000ULL
+ #define B5Q_USB_DMA_LIMIT 0x1000000000ULL
+@@ -31,6 +31,9 @@
+   UINT64 RetentionStatus;
+   UINT32 Delete;
+   UINT32 HalRevision;
++  UINT32 UsedPages;
++  UINT32 Flush;
++  UINT64 CoverageStatus;
+ } B5Q_USB_DMA_DIAGNOSTICS;
+ 
+ typedef struct {
+@@ -49,6 +52,6 @@
+ 
+ STATIC_ASSERT (sizeof (B5Q_USB_DMA_STATE) == 48, "XNU USB DMA state ABI");
+ STATIC_ASSERT (OFFSET_OF (B5Q_USB_DMA_STATE, OwnedBase) == 32, "XNU USB DMA range ABI");
+-STATIC_ASSERT (sizeof (B5Q_USB_DMA_DIAGNOSTICS) == 48, "USB DMA diagnostics ABI");
++STATIC_ASSERT (sizeof (B5Q_USB_DMA_DIAGNOSTICS) == 64, "USB DMA diagnostics ABI");
+ 
+ #endif
+diff --git a/DarwinBootPkg/Driver/B5qUsbDmaLoader.h b/DarwinBootPkg/Driver/B5qUsbDmaLoader.h
+--- a/DarwinBootPkg/Driver/B5qUsbDmaLoader.h
++++ b/DarwinBootPkg/Driver/B5qUsbDmaLoader.h
+@@ -82,11 +82,67 @@
+   return FALSE;
+ }
+ 
++// Read only retained page-table RAM, never SMMU registers. Every next-table
++// pointer must stay inside the allocated/used pool before it is dereferenced.
++STATIC BOOLEAN
++UsbDmaIdentityRange (CONST B5Q_USB_DMA_DIAGNOSTICS *Diag, UINT64 Base, UINT64 Bytes)
++{
++  if (!Bytes) { return TRUE; }
++  if ((Base < B5Q_USB_DMA_BASE) || (Bytes > B5Q_USB_DMA_LIMIT - Base) ||
++      (Base >= B5Q_USB_DMA_LIMIT) || ((Base | Bytes) & 0xfff) ||
++      (Base < Diag->TableBase + Diag->TableBytes && Diag->TableBase < Base + Bytes)) { return FALSE; }
++  UINT64 End = Base + Bytes;
++  while (Base < End) {
++    UINT64 Table = Diag->TableBase;
++    BOOLEAN Leaf = FALSE;
++    for (UINTN Level = 0; Level < 4; ++Level) {
++      if ((Table & 0xfff) || Table < Diag->TableBase ||
++          Table - Diag->TableBase >= (UINT64)Diag->UsedPages * EFI_PAGE_SIZE) { return FALSE; }
++      UINTN Shift = 39 - 9 * Level;
++      UINT64 Entry = ReadUnaligned64 ((CONST UINT64 *)(UINTN)(Table + ((Base >> Shift) & 511) * 8));
++      if (!(Entry & 1)) { return FALSE; }
++      if (Level < 3 && (Entry & 3) == 3) { Table = Entry & 0x0000fffffffff000ULL; continue; }
++      if (!Level || (Level == 3 ? (Entry & 3) != 3 : (Entry & 3) != 1)) { return FALSE; }
++      UINT64 Mask = (1ULL << Shift) - 1;
++      if (((Entry & 0x0000fffffffff000ULL & ~Mask) | (Base & Mask)) != Base ||
++          ((Entry >> 2) & 7) != 2 || ((Entry >> 6) & 3) != 1 ||
++          ((Entry >> 8) & 3) != 3 || !(Entry & (1ULL << 10))) { return FALSE; }
++      UINT64 Next = (Base | Mask) + 1;
++      Base = MIN (End, Next); Leaf = TRUE; break;
++    }
++    if (!Leaf) { return FALSE; }
++  }
++  return TRUE;
++}
++
++STATIC BOOLEAN
++UsbDmaCoverage (
++  CONST B5Q_USB_DMA_DIAGNOSTICS *Diag, UINT64 Address, UINT64 WindowSize,
++  CONST UINT8 *Excluded, UINTN ExcludedCount, CONST UINT8 *Outside, UINTN OutsideCount
++  )
++{
++  if (!Diag->UsedPages || Diag->UsedPages > Diag->TableBytes / EFI_PAGE_SIZE ||
++      !WindowSize || WindowSize > MAX_UINT64 - Address) { return FALSE; }
++  UINT64 Cursor = Address, End = Address + WindowSize;
++  for (UINTN I = 0; I < ExcludedCount; ++I) {
++    UINT64 Base = DarwinRangeBase (Excluded, I), Bytes = DarwinRangeSize (Excluded, I);
++    if (Base < Cursor || Base > End || Bytes > End - Base ||
++        !UsbDmaIdentityRange (Diag, Cursor, Base - Cursor)) { return FALSE; }
++    Cursor = Base + Bytes;
++  }
++  if (!UsbDmaIdentityRange (Diag, Cursor, End - Cursor)) { return FALSE; }
++  for (UINTN I = 0; I < OutsideCount; ++I) {
++    if (!UsbDmaIdentityRange (Diag, DarwinRangeBase (Outside, I), DarwinRangeSize (Outside, I))) { return FALSE; }
++  }
++  return TRUE;
++}
++
+ STATIC VOID
+ WriteUsbDmaResult (
+   UINT8 *Tree, CONST B5Q_USB_DMA_ADT *Adt, CONST B5Q_USB_DMA_RESULT *Result,
+   CONST EFI_MEMORY_DESCRIPTOR *Map, UINTN MapSize, UINTN Stride,
+-  UINT64 Address, UINT64 WindowSize, BOOLEAN HasExclusions
++  UINT64 Address, UINT64 WindowSize, BOOLEAN HasExclusions,
++  CONST UINT8 *Excluded, UINTN ExcludedCount, CONST UINT8 *Outside, UINTN OutsideCount
+   )
+ {
+   B5Q_USB_DMA_STATE StateValue = Result->State;
+@@ -97,7 +153,7 @@
+   if ((Diag->PrepareStatus == EFI_SUCCESS) &&
+       (State->Version == 1) && (State->Sid == B5Q_USB_DMA_SID) && (State->Locate == EFI_SUCCESS) &&
+       (State->Create == 0) && (State->Configure == 0) && (State->Attach == 0) && (State->Map == 0) &&
+-      (State->OwnedBase == Address) && (State->OwnedBytes == WindowSize)) {
++      (State->OwnedBase == Address) && (State->OwnedBytes == WindowSize) && (Diag->Flush == 0)) {
+     BOOLEAN Retained = UsbDmaPagesRetained (Map, MapSize, Stride, Diag->TableBase, Diag->TableBytes);
+     if (Retained && !HasExclusions) {
+       Retained = (Diag->TableBase + Diag->TableBytes <= Address) || (Address + WindowSize <= Diag->TableBase);
+@@ -106,7 +162,10 @@
+     if (!Retained) {
+       State->Map = (UINT32)(EFI_COMPROMISED_DATA & MAX_UINT32);
+     }
+-    Ready = Retained ? 1 : 0;
++    BOOLEAN Covered = Retained && UsbDmaCoverage (Diag, Address, WindowSize, Excluded, ExcludedCount, Outside, OutsideCount);
++    Diag->CoverageStatus = Covered ? EFI_SUCCESS : EFI_COMPROMISED_DATA;
++    if (!Covered) { State->Map = (UINT32)(EFI_COMPROMISED_DATA & MAX_UINT32); }
++    Ready = Covered ? 1 : 0;
+   }
+   CopyMem (Tree + Adt->Ready, &Ready, sizeof (Ready));
+   CopyMem (Tree + Adt->State, State, sizeof (*State));
+diff --git a/DarwinBootPkg/Driver/DarwinBoot.c b/DarwinBootPkg/Driver/DarwinBoot.c
+--- a/DarwinBootPkg/Driver/DarwinBoot.c
++++ b/DarwinBootPkg/Driver/DarwinBoot.c
+@@ -1171,7 +1171,9 @@
+     }
+     if (UsbAdt.Ready != MAX_UINTN) {
+       WriteUsbDmaResult ((UINT8 *)(UINTN)TreeAddress, &UsbAdt, &UsbResult, Map, MapSize, Stride,
+-                         Address, WindowSize, Excluded != NULL);
++                         Address, WindowSize, Excluded != NULL, Excluded, ExcludedCount,
++                         OutsideOffset == MAX_UINTN ? NULL : (CONST UINT8 *)(UINTN)(TreeAddress + OutsideOffset),
++                         OutsideOffset == MAX_UINTN ? 0 : OutsideCount);
+     }
+     if (PcieAdt.Ready != MAX_UINTN) {
+       WritePcieDmaResult ((UINT8 *)(UINTN)TreeAddress, &PcieAdt, &PcieResult, Map, MapSize, Stride,

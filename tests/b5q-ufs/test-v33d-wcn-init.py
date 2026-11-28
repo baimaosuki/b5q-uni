@@ -40,7 +40,7 @@ int main(){pmic[4]=0x10;pmic[5]=0x10;assert(sleepClock()&&writes==5);assert(pmic
  pmic[0x46]=0;sleepReady=false;assert(!sleepClock()&&writes==5&&channelOpens==opened);
  pmicOwner=0;reservedBits=true;sleepReady=false;assert(sleepClock()&&writes==10&&channelOpens==opened+1);
  resetAop();assert(pdcInit()&&messages.size()==11);assert(messages[8]=="{class: wlan_pdc, ss: rf, res: s2g.v, upval: 1012}");
- assert(pdcInit()&&messages.size()==11);pdcReady=false;resetAop();aopAck=false;ticks=0;assert(!pdcInit()&&ticks==1000&&aoss.va[pdcQmp.box/4]==100);
+ assert(pdcInit()&&messages.size()==11);pdcReady=false;resetAop();aopAck=false;ticks=0;assert(!pdcInit()&&ticks==1000&&aoss.va[pdcQmp.box/4]==64);
  puts("PASS actual PMKgpio3 fivewrites/bitfield-readback/idempotence/subtype rejection; nonAPPS-owned enabled pin retained withoutchannel; reservedbits accepted; AOSSrealQMP11messages+1012mV,AOPack,1sboundedtimeout retainsunacknowledgedmailbox");}
 '''
 # The synthetic map's open must preserve the AOP descriptor initialized by reset.

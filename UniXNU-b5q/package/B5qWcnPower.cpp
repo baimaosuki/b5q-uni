@@ -3,6 +3,7 @@
 #include <IOKit/IOLib.h>
 #include <IOKit/IODeviceMemory.h>
 #include <sys/errno.h>
+#include <pexpert/pexpert.h>
 #include "B5qWcnPower.h"
 #include "B5qWcnPowerCore.h"
 #include "QcomRpmh.h"
@@ -107,11 +108,29 @@ bool pdcInit(){
     for(unsigned i=0;i<sizeof(messages)/sizeof(messages[0]);i++){
         // An earlier firmware/ADSP message must be acknowledged before use.
         unsigned ms=0;while(aoss.va[pdcQmp.box/4]&&ms++<1000)IOSleep(1);
-        const int state=ms>=1000?QcomQmpBusy:qcom_qmp_send(&pdcQmp,messages[i]);
+        const int state=ms>=1000?QcomQmpBusy:qcom_qmp_send_padded(&pdcQmp,messages[i],0x40);
         const bool ok=state==QcomQmpSending&&waitPdc();
         IOLog("B5qWcn: stage=pdc-init index=%u state=%d ack=%u\n",i,pdcQmp.state,ok);
         if(!ok)return false; // Never clear an unacknowledged remote mailbox.
     }pdcReady=true;return true;
+}
+// Observer transactions only: never select a writable SPMI channel or
+// change a PMIC regulator. The APID map supplies the live peripheral route.
+void railSurvey(const char *phase) {
+    Window core;
+    if(!core.open(0xc400000,0x3000)){IOLog("B5qWcn: stage=rail-survey phase=%s result=no-core\n",phase);return;}
+    const unsigned count=core.va[BR_FEATURES/4]&BR_FEATURES_APIDS_MASK;
+    if(core.va[0]<BR_VERSION_V7_MIN||core.va[0]>=BR_VERSION_V8_MIN||!count||count>1024){IOLog("B5qWcn: stage=rail-survey phase=%s version=%x count=%u invalid=1\n",phase,core.va[0],count);return;}
+    static const unsigned ppids[]={0x14e,0x4a4,0x6aa,0x6a4,0x69e};
+    for(unsigned i=0;i<5;i++) {
+        int apid=-1;
+        for(unsigned n=0;n<count;n++)if(((core.va[(BR_APID_MAP+4*n)/4]>>8)&0xfff)==ppids[i]){if(apid>=0){apid=-2;break;}apid=int(n);}
+        Window obs;uint8_t type=0,sub=0,status=0,en=0,lo=0,hi=0,mode=0;
+        bool ok=apid>=0&&obs.open(0xc440000+uint64_t(apid)*0x20,0x20);
+        auto read=[&](unsigned reg,uint8_t &v){if(!ok)return false;obs.va[BR_CMD/4]=br_cmd(BR_OP_EXT_READL,reg,0);barrier();if(br_wait(obs.va))return false;v=uint8_t(obs.va[BR_RDATA0/4]);return true;};
+        ok=ok&&read(4,type)&&read(5,sub)&&read(8,status)&&read(0x46,en)&&read(0x40,lo)&&read(0x41,hi)&&read(0x45,mode);
+        IOLog("B5qWcn: stage=rail-survey phase=%s rail=%s ppid=%03x apid=%d read=%u type=%02x sub=%02x status=%02x enable=%02x mv=%u mode=%02x\n",phase,B5qWcn::rails[i].name,ppids[i],apid,ok,type,sub,status,en,unsigned(lo)|(unsigned(hi)<<8),mode);
+    }
 }
 bool prepare() {
     if(prepared)return true;
@@ -147,7 +166,9 @@ bool send(const QcomRscLayout &layout,uint32_t address,uint32_t value) {
 }
 bool vote(unsigned index,const B5qWcn::Rail &rail) {
     const QcomRscLayout layout=qcom_rsc_layout(rsc.va[0]);
-    bool ok=send(layout,resources[index].address+8,7) &&
+    // Only ldob15 and smpg4 expose supported-modes in the b5q stock DT.
+    // REGULATOR_MODE_FAST/HPM maps to RPMh VRM mode7 for both PMIC5 types.
+    bool ok=((index!=0&&index!=3)||send(layout,resources[index].address+8,7)) &&
         send(layout,resources[index].address,rail.mv) && send(layout,resources[index].address+4,1);
     IOLog("B5qWcn: rail=%s mv=%u address=%08x completion=%u\n",rail.name,rail.mv,resources[index].address,ok);
     return ok;
@@ -158,7 +179,9 @@ extern "C" int b5q_wcn_power_get(unsigned radio) {
     if(!ensureLock())return ENOMEM;
     IOLockLock(lock);
     bool ok=prepare();
+    if(ok)railSurvey("before");
     if(ok){AppsSmmuLock arb;ok=arb.ready() && send(qcom_rsc_layout(rsc.va[0]),xo.address,3) && power.get(radio,vote);}
+    if(prepared)railSurvey("after");
     IOLog("B5qWcn: get radio=%u owners=%u refs=%u/%u/%u/%u/%u retained=%x result=%u\n",radio,power.owners,
         power.refs[0],power.refs[1],power.refs[2],power.refs[3],power.refs[4],power.retained,ok);
     IOLockUnlock(lock);return ok?0:EIO;
@@ -214,15 +237,32 @@ extern "C" int b5q_wcn_radio_enable(unsigned radio,int enabled) {
     if(!ensureLock())return ENOMEM;
     IOLockLock(lock);
     bool ok=prepared && (!enabled || (power.owners&(1u<<radio)));
+    const unsigned swBefore=tlmm.va?tlmm.va[(82*0x1000+4)/4]&1u:2;
+    const unsigned xoBefore=tlmm.va?tlmm.va[(204*0x1000+4)/4]&1u:2;
     if(ok)ok=B5qWcn::enable(radio,enabled!=0,
         [](unsigned p){return (tlmm.va[(p*0x1000+4)/4]&1u)!=0;},
         [](unsigned p,bool on){
+            const unsigned before=tlmm.va[(p*0x1000+4)/4]&1u;
+            const unsigned sw=tlmm.va[(82*0x1000+4)/4]&1u;
             tlmm.va[(p*0x1000+4)/4]=on?2:0;
             // BT_EN default pinctrl: GPIO output, 2mA, pulldown.
             uint32_t cfg=p==80?(on?0x3c3u:0x201u):p==81?0x201u:0x200u;
             tlmm.va[p*0x1000/4]=cfg;barrier();
             tlmm.va[(p*0x1000+4)/4]=on?2:0;barrier();
+            if(p==204)IOLog("B5qWcn: stage=xo204 xo204_cfg=%x in_before=%u in_%s=%u\n",tlmm.va[p*0x1000/4],before,on?"high":"low",tlmm.va[(p*0x1000+4)/4]&1u);
+            else IOLog("B5qWcn: stage=radio-pin gpio=%u on=%u sw82-before=%u sw82-after=%u\n",p,on,sw,tlmm.va[(82*0x1000+4)/4]&1u);
         },[](unsigned us){if(us>=1000)IOSleep(us/1000);else IODelay(us);});
-    IOLog("B5qWcn: radio=%u enable=%u verified=%u\n",radio,enabled!=0,ok);
+    IOLog("B5qWcn: radio=%u enable=%u verified=%u sw82-before=%u sw82-after=%u xo204-before=%u xo204-after=%u\n",radio,enabled!=0,ok,swBefore,tlmm.va?tlmm.va[(82*0x1000+4)/4]&1u:2,xoBefore,tlmm.va?tlmm.va[(204*0x1000+4)/4]&1u:2);
     IOLockUnlock(lock);return ok?0:EIO;
+}
+
+// Initial WLAN bring-up owns the shared cold-start window through cleanup.
+// BT waits outside the power mutex so WLAN can finish and wake progress.
+static uint32_t wifiProbeState;
+extern "C" void b5q_wcn_wifi_probe_begin(void){__atomic_store_n(&wifiProbeState,1u,__ATOMIC_RELEASE);}
+extern "C" void b5q_wcn_wifi_probe_done(void){__atomic_store_n(&wifiProbeState,2u,__ATOMIC_RELEASE);}
+extern "C" int b5q_wcn_wait_wifi_probe(void){
+    unsigned wifi=0;if(!PE_parse_boot_argn("wifi",&wifi,sizeof(wifi))||!wifi)return 0;
+    for(unsigned ms=0;ms<70000;ms+=10){if(__atomic_load_n(&wifiProbeState,__ATOMIC_ACQUIRE)==2){IOLog("B5qWcn: stage=bt-wait-wifi done=1 wait-ms=%u\n",ms);return 0;}IOSleep(10);}
+    IOLog("B5qWcn: stage=bt-wait-wifi state=%u result=timeout\n",__atomic_load_n(&wifiProbeState,__ATOMIC_ACQUIRE));return ETIMEDOUT;
 }

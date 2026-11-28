@@ -26,6 +26,7 @@ static EFI_STATUS getmap(UINTN *bytes,EFI_MEMORY_DESCRIPTOR *to,UINTN *key,UINTN
 static struct {EFI_STATUS(*LocateProtocol)(EFI_GUID*,void*,void**);__typeof__(&getmap)GetMemoryMap;}services={missing_protocol,getmap},*gBS=&services;
 static void *AllocatePool(UINTN bytes){return malloc(bytes);}static void FreePool(void *p){free(p);}
 '''+fixture[b:]
+fixture=fixture.replace('#include "B5qUsbDmaLoader.h"','#include "B5qUsbDma.h"')
 fixture+='static UINT8 mUsbMapBuf[32768] __attribute__((aligned(8)));\n#include "B5qReservedMemory.h"\n'+body+r'''
 int main(void){
  for(unsigned i=0;i<sizeof(mB5qReservedRanges)/sizeof(mB5qReservedRanges[0]);i++){

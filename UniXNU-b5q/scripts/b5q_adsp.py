@@ -55,11 +55,12 @@ def prepare(reference,out):
     text=replace(text,'    if (!PE_parse_boot_argn("adsp", &mode, sizeof mode) || !mode || native_adsp_stats[0]) return;',
         '    mode=B5qFeatures::option("adsp",B5qFeatures::Adsp,2);\n    if(!mode||native_adsp_stats[0])return;','ADSP probe selection')
     destination=out/'AdspProbe.cpp';destination.write_text(text)
-    sources=[destination]+[package/(name+'.c')for name in CORES]
+    board=Path(__file__).resolve().parents[1]/'package'
+    sources=[destination]+[(board if name=='QcomQmp' else package)/(name+'.c')for name in CORES]
     (out/'sources.json').write_text(json.dumps(dict(reference_revision=revision,
         source_sha256={str(p):hashlib.sha256(p.read_bytes()).hexdigest()for p in [path,*sources[1:]]},
         generated_sha256=hashlib.sha256(destination.read_bytes()).hexdigest(),
         hardware_verified=False,stage_complete=False,
         board_evidence='Original b5q adspslpi9ea00000+59b4000, q6dtb9e980000+80000; stock ADSP/DTB MDT files',
         pending='Target/callback audit, Samsung audio topology, firmware DMA and final integration'),indent=2)+'\n')
-    return sources,[package]
+    return sources,[board,package]

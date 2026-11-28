@@ -12,6 +12,9 @@ unsigned b5q_wcn_power_owners(void);
 int b5q_wcn_pcie_vote(void);
 /* Serializes XO204 and the radio's own enable pin; never resets its peer. */
 int b5q_wcn_radio_enable(unsigned, int);
+void b5q_wcn_wifi_probe_begin(void);
+void b5q_wcn_wifi_probe_done(void);
+int b5q_wcn_wait_wifi_probe(void);
 #ifdef __cplusplus
 }
 #endif

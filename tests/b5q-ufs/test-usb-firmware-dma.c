@@ -31,6 +31,7 @@
 #define AsciiStrCmp strcmp
 #define ZeroMem(a, n) memset(a, 0, n)
 #define CopyMem memcpy
+#define MIN(a,b) ((a)<(b)?(a):(b))
 typedef bool BOOLEAN;
 typedef size_t UINTN;
 typedef uint8_t UINT8;
@@ -64,6 +65,18 @@ static EFI_STATUS missing_protocol(EFI_GUID *guid, void *registration, void **va
 static struct { EFI_STATUS (*LocateProtocol)(EFI_GUID *, void *, void **); } services = {missing_protocol};
 static __typeof__(services) *gBS = &services;
 
+// Model only CPU physical-to-host translation; all table entries and coverage
+// decisions are the actual production loader/page-table code below.
+static UINT64 testPhysicalBase;static UINT64 *testPhysicalPages;static UINTN testPhysicalBytes;
+static UINT64 ReadUnaligned64(const UINT64 *p){
+ UINT64 at=(UINT64)(uintptr_t)p,value;
+ if(testPhysicalPages&&at>=testPhysicalBase&&at-testPhysicalBase<testPhysicalBytes){memcpy(&value,(const UINT8*)testPhysicalPages+(at-testPhysicalBase),8);return value;}
+ memcpy(&value,p,8);return value;
+}
+#ifndef DARWINBOOT_MEMORY_WINDOW_H
+static UINT64 DarwinRangeBase(const UINT8 *p,UINTN i){return ReadUnaligned64((const UINT64*)(p+i*16));}
+static UINT64 DarwinRangeSize(const UINT8 *p,UINTN i){return ReadUnaligned64((const UINT64*)(p+i*16+8));}
+#endif
 #include "B5qUsbDmaLoader.h"
 #include "UsbDmaTables.h"
 
@@ -125,29 +138,30 @@ int main(void)
   assert(!walk(&high, first - 4096, &shift));
   assert(!walk(&high, last, &shift));
 
-  UINT8 tree[100] = {0};
+  UINT8 tree[116] = {0};
   B5Q_USB_DMA_ADT adt = {MAX_UINTN, MAX_UINTN, MAX_UINTN};
   assert(FindUsbDmaProperty("b5q-usb-dma-ready", tree, 0, 4, &adt));
   assert(!FindUsbDmaProperty("b5q-usb-dma-ready", tree, 0, 4, &adt));
   assert(FindUsbDmaProperty("b5q-usb-dma-state", tree + 4, 4, 48, &adt));
-  assert(FindUsbDmaProperty("b5q-usb-dma-diagnostics", tree + 52, 52, 48, &adt));
+  assert(FindUsbDmaProperty("b5q-usb-dma-diagnostics", tree + 52, 52, 64, &adt));
   B5Q_USB_DMA_RESULT result;
   GetUsbDmaResult(0x8c0004000, 0x100000000, &result);
-  EFI_MEMORY_DESCRIPTOR map = {EfiReservedMemoryType, tables.PhysicalBase, 0, 16, 0};
-  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x100000000, FALSE);
+  testPhysicalBase=high.PhysicalBase;testPhysicalPages=high.Pages;testPhysicalBytes=sizeof(high_pages);
+  EFI_MEMORY_DESCRIPTOR map = {EfiReservedMemoryType, high.PhysicalBase, 0, 32, 0};
+  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x100000000, FALSE, NULL,0,NULL,0);
   assert(tree[0] == 0 && result.Diagnostics.PrepareStatus == 14);
   result = (B5Q_USB_DMA_RESULT){
     .State = {1, 0x40, 0, 0, 0, 0, 0, 0x8c0004000, 0x80000000},
-    .Diagnostics = {.TableBase = tables.PhysicalBase, .TableBytes = 4096, .MappedBytes = 0x80000000}
+    .Diagnostics = {.TableBase = high.PhysicalBase, .TableBytes = sizeof(high_pages), .MappedBytes = last-first, .UsedPages = high.Used}
   };
-  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x80000000, FALSE);
+  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x80000000, FALSE, NULL,0,NULL,0);
   assert(tree[0] == 1);
   map.Type = EfiBootServicesData;
-  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x80000000, FALSE);
+  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x80000000, FALSE, NULL,0,NULL,0);
   assert(tree[0] == 0 && result.State.Map == 0);
   map.Type = EfiReservedMemoryType;
-  result.State.OwnedBytes = 0x100000000;
-  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x100000000, FALSE);
+  result.State.OwnedBytes = 0x300000000;
+  WriteUsbDmaResult(tree, &adt, &result, &map, sizeof(map), sizeof(map), 0x8c0004000, 0x300000000, FALSE, NULL,0,NULL,0);
   assert(tree[0] == 0);
   puts("PASS USB actual0x88ba04000+6GiB every4KiB WB-IS, 1GiB/2MiB/4KiB mappings, unmapped holes, held table pool, optional ADT and final-map retry");
 }

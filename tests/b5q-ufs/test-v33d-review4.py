@@ -105,7 +105,8 @@ void Reg::operator=(uint32_t v){m->order.push_back(half);m->staged[half]=v;
  if(m->dropAll)return;
  if(!m->reverseLatch){if(half==0){m->visible[0]=m->staged[0];m->visible[1]=m->staged[1];}}
  else if(half==1){if(m->order.size()>=2&&m->order[m->order.size()-2]==0){m->visible[0]=m->staged[0];m->visible[1]=m->staged[1];}}}
-unsigned logs=0,rb2=0;void IOLog(const char *fmt,...){logs++;if(strstr(fmt,"rb2="))rb2++;}void barrier(){}
+unsigned logs=0,rb2=0;void dmaDiagnostics(const char*){}
+void IOLog(const char *fmt,...){logs++;if(strstr(fmt,"rb2="))rb2++;}void barrier(){}
 WRITE
 int main(){uint64_t value=0x88ba04000ULL;Model normal;XHCI_WRITE64(&normal,0x30,value);assert((normal.order==std::vector<unsigned>{1,0})&&normal.visible[0]==uint32_t(value)&&normal.visible[1]==8&&logs==1&&!rb2);
  Model alternate;alternate.reverseLatch=true;XHCI_WRITE64(&alternate,0x30,value);assert((alternate.order==std::vector<unsigned>{1,0,0,1})&&alternate.visible[0]==uint32_t(value)&&alternate.visible[1]==8&&rb2==1);

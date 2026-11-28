@@ -41,7 +41,7 @@ template<class Read,class Pin,class Delay> bool enable(unsigned radio,bool on,
     if(!on){pin(own,false);delay(100000);return !read(own);}
     pin(own,false);delay(50000);
     if(!read(peer))delay(500000);
-    pin(204,true);delay(200);pin(own,true);delay(5000);pin(204,false);delay(50000);
+    pin(204,true);if(!read(204)){pin(204,false);return false;}delay(200);pin(own,true);delay(5000);pin(204,false);delay(50000);
     return read(own);
 }
 }
