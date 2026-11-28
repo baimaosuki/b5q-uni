@@ -28,7 +28,7 @@ static void descriptor() {
    case 0x80:
     assert(report==0x1a);bits+=size*count;
     if(page==9 && size==1 && count==2) {assert(minimum==1 && maximum==2 && value==2);buttons=true;}
-    if(page==1 && size==16 && count==2) {assert(usages.size()==2 && usages[0]==0x30 && usages[1]==0x31 && value==6);assert(unit==0x13&&exponent==0xe&&physicalMin==0xffffd8bd&&physicalMax==0x2743);xy=true;}
+    if(page==1 && size==16 && count==2) {assert(usages.size()==2 && usages[0]==0x30 && usages[1]==0x31 && value==6);assert(unit==0x13&&exponent==0xe&&physicalMin==0xfffff1c7&&physicalMax==0xe39);assert(32767.0/(physicalMax*0.01)>800&&32767.0/(physicalMax*0.01)<1000);xy=true;}
     if(page==1 && size==8 && usages.size()==1 && usages[0]==0x38) {assert(value==6&&unit==0&&exponent==0&&physicalMin==0&&physicalMax==0);wheel=true;}
     if(page==0xc && size==8 && usages.size()==1 && usages[0]==0x238) {assert(value==6&&unit==0&&exponent==0&&physicalMin==0&&physicalMax==0);pan=true;}
     usages.clear();break;
