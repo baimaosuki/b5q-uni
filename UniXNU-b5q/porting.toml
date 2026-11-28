@@ -3318,9 +3318,9 @@ inputs = ["Physical logs/b5q-xnu2log-review5/XNU2LOG.txt SHA and sourcebefore ha
 configuration = ["OnlyWCNpinwriter claimsAPSS EGPIO_ENABLEwhenread-onlyPRESENTset,retainsalreadysetENABLE,50uspadsettleafterlatchwrite;RPMhvoltages/modes/QMP untouched", "TouchCommC1enabledfirst,11disabledonC1success;11config/enableattemptedonlyafterC1failure;publishonlykind1,keepnativeC1explicitlift/palm/creasefilter", "Tap slop260X/140Y;Motionrawjump>480X/>260Yorframegap>80msreanchorsandclearsremainderswithoutmotion;scale8X/4Yand48countclampdropsclippedbacklog;HIDphysicalrange+-3641centiinches declares~900CPI;32msclickpulse and staggeredrighttap retained", "No firmware,boardargs,TypeC,DP,USBcontrollerorotherhardware edits;CIreuse-firmwaremarker andexactinputproof;originalData/GPUaddon retained"]
 procedure = ["ExecuteproductionWCNradio-enableagainstcausalROBIT11/ownershipBIT12/50uspadmodel for204/80/81;missingownershipnegative mustfailbeforeEN", "Exerciseall16C1/fallback11commandoutcomes,actualpublishkind2reject,expandedslop/jumps/gap/remainderclampand~900CPIHID;retainASanUBSan/clicktimer/righttap/scrollrecoverytests", "Runcompleteexistinglocalgates/arm64e/PAC/zeroEL1SMMU;submitb5q-onlycommit,pushandfollowCI,downloadreturnedartifacts,packagefinal800MiB4KnESPandpairedbyte-identicalreview5boot,fullreadbackthenpublishabsoluteIMGpaths/SHA"]
 findings = ["Review5physicalbootconfirmsfirmwareDMAflush/coverage andDeviceAppleUSBMux; onlykernelpinownershipandtouchbehaviorneedchanges. No claim thatnewWCNROM/PCIe/BTorpointerphysicalbehavioralreadytested", "CausalproductionEGPIOtestPASS:ROpresentbitretainedbyhardware,GPIO204mustwrite1200beforeinputgoeshighafter50us;GPIO80/81sameownershiprule;strippingENABLEfailsbeforeWLANEN;existingENABLEpreserved", "NativeC1successskips11config/enable;fallback11requiresC1failureandvalidreportconfig. Productionpublishrejectskind2ghost;widenedslop and jump/gap/48clamp/newCPIregressionsPASS", "ldob15surveycandidate14ehasapid=-1/read0throughoutphysicalreview5log;stockRPMhldob15bindsL15BbutdoesnotencodephysicalSPMIPPID. ActualPPIDremainsunknown,notguessedfromvoltage;explicitunknown/candidate logadded andexistingRPMhVRMvoteleftunchanged"]
-completion = ["All27localgatesPASS inclnewproductionEGPIO/C1/kind2/jump/slop/clamp/CPI tests,arm64e/PAC/zeroEL1SMMU;allfirmwaresourcesand18patchesbyteidenticaltoreview5;CI/finalimagespendingactualcompletion"]
+completion = ["All27localgatesPASS;CI45600350653kernel/payloadSUCCESS;exactreview5firmwarereused;completeactualreturned/PAC/APFS/900CPIandfinal800MiB4KnESP/bootreadbackPASS. Bootbyte-identicaltophysicallytestedreview5. Exactpaths/SHAinreports/review6-release.json;newhardwarebehaviorpending."]
 limits = ["HOST_VERIFIED_PENDING_HARDWARE;ldob15actualSPMIPPIDunknownfromavailableinputs;existingvoteunchanged;no phoneaccessorflash"]
-next_action = ["FinishlocalgatesandCI;directlydeliverfinalpairedESP/bootIMGafterreturnedreadback"]
+next_action = ["DeliveronepairedESP/bootIMGset;onlyESPcontentschanged,bootidenticalreview5. No phone access or flash;newWCN/touchbehaviorrequiresnextphysicalbootlog."]
 
 [[area.evidence]]
 kind = "host"
@@ -3328,3 +3328,45 @@ revision = "7bac239e1e0a9304bbb4ca59852d5f8ad757326b"
 reference = "reports/review6-release.json"
 command = "test-touch-p0.py; test-review6.py; test-pointer-batch2.cpp; pre-ci-v33d.py"
 result = "FocusedASanUBSanproductionEGPIO/nativeC1/11fallback/kind2/jump/slop/clamp/~900CPItestsPASS;completegates/CI/finalimagespending;firmwareinputsunchanged. Physicalproofonlyreferstodeployedreview5baseline."
+
+[[area.evidence]]
+kind = "host"
+revision = "f81d8565c3758cc54f103cee39d7de53c281de8e"
+reference = "reports/review6-release.json"
+command = "check-v33b-returned.py; actualHID900CPI/USBbyteidentity; wireless-ADSPclosure; package-batch2-esp.py; package-usb-dma-boot.py --physical-esp; verify-p0-images.py --wireless --media --dp --v33b"
+result = "AllPASS. ESP838860800B SHAc0c4a07f1cfa2867b3387efb0b37eb41e94e25e2a257e7d8d94a9418915588ac; boot19124224B SHAf716e83d26f46f7719fd2014a91ad2ead4ecfb3b40648868d19712346dac586f. FirmwareFD/18patches andbootbyteidenticalreview5;actualnewHIDdescriptor/targetPAC/zeroEL1SMMU/APFS/WiFiplist/GPU/fourmenus/POSTallPASS. ldob15PPIDunknownreported;VRMunchanged;nohardwarequalificationorphoneoperation."
+
+
+[[area]]
+id = "review7-pcie-touch-bt-usb-host"
+status = "host-verified"
+components = ["QcomDwc3"]
+paths = ["package/B5qWifiDma.h", "package/B5qWifiArena.h", "package/B5qTouch.cpp", "package/B5qTouchMouse.h", "package/B5qMouseReport.h", "package/B5qBtFifo.c", "package/B5qBluetooth.cpp", "package/QcomDwc3.cpp", "package/B5qUfs/B5qLogUfs.h", "reports/review7-release.json"]
+inputs = ["Review6/review6-2 physical log and source snapshot SHA256 in reports/review7-release.json; firmware MISSIONMODE RXallocation peak33552512/33554432, BT NVM timeout after3.2Mbps switch", "Stock b5q disable-clk-gating and SID40; prior HALconfigure machine-code tests and0014 constants retained; original Samsung firmware hashes unchanged"]
+configuration = ["Firmware/loader PCIe64MiB,4MiBalignment,lowPA/reservedguards; kernel handoff and Arena64MiB; follow-on0019/0020 patches reconstruct producer/consumer", "Touch11 atomic fullframe first,C1 fallback,kind1filter; scale5X/2Y326CPI,slop220X/115Y,64countclamp; raw480/260or80msgap reanchor retained", "UARTFIFO progress deadline covers pendingTX and pendingRX; startup qbt command waits honour same deadline; hardware CTS/RFR remain enabled; no firmwareblob edits", "USB core reset restoresGCTLbit0; usb-utmi optional defaultoff; firstHSE/ring/powercallback diagnostics plusbounded validatedESPwriter sync; IRQ callersrequestonly; no new disk write authority"]
+procedure = ["Run production ASanUBSan tests including causalCTS/lostwatermark/NVMmultisegments and qbtstartupdeadline; full localgates,arm64eABI/PAC,zeroEL1SMMU and firmwarepatchreplay", "Submit b5q-only jointkernel+firmware CI; followtoend,downloadordinaryartifacts,returnedbinary gates and directlypackage paired800MiB4KnESP/raw16MiBbootstrapboot; readbackbeforehandoff"]
+findings = ["64MiB expansion also requires B5qWifiDma.ready and Arena limits; changing firmwaremacro alone leaves kernel rejecting pool", "Review6C1 retainsstaleslots; userrequest restoresatomic11 and review4descriptor/gain while keeping jumpguard and boundedclickpulses", "FirstCI45618191537firmwareSUCCESS,kernelonlymissing__ZTV12AppleUSBXHCI fromAppleClangqualifiedsupercall. Actual26C5035rSHA d1003b... hasZTVfffffe0008a0dc60=fixturefirstslot-16; translatednativefffffff008a0dc60nowboundasdata inbothproductioninputandresolver;targetimportregressionadded,noPACorvtablefabrication", "Urgentloggerrequest nowrequireswriterstate2beforechangingtarget; preverificationstate0/1/3cannotshortenvolumeopenbackoff. Newproductionnegativecases; priorfailedCIfirstlogretainedandcachepreserved", "FIFOwrite transfers ownership of command bytes before physicalCTS-drained completion; qbtboot wait ignored FIFOdeadline and FIFO had no pendingTX retry. A lost watermark can strand command until timeout; fix retainsclock/flow and bounded commandtimeout. Actual failing NVM segment cannot be inferred from old logs; bootfailure now logs counters/pins/IRQ/FIFO", "ReturnedfirmwareCI45618191537SUCCESS/FDa98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37; actualPcieIR64MiB and finalDarwinBootPE pool-equalityRVA3cd8/retentionRVA3d48 verified; old32MiBloaderfailsnegative. Supplementalchecker uses uploadedfinalPE,not absentintermediateobject. Firstkernelbuildfailedonlynativebasevtabledataimport,nowfixedandlocalgatesPASS;finaljointCI/IMGpending", "DeviceDMAverified physically,so USBTCR2/0014 unchanged; stockGCTLgate difference fixed. Ambiguous CCstat0+DFP snapshots logged without inventingattach orchangingDevicepolicy. No hardware success claimed."]
+completion = ["27 localgate groups PASS plus completeP0-P4 retainedbaseline;CI45623026650SUCCESS;returnedactualbinaries/finalpairedIMGreadbackPASS;nohardwareclaim"]
+limits = ["HOST_VERIFIED_PENDING_HARDWARE; no phone access/flash; ldob15 SPMI PPID remainsunknown,existingvotesunchanged"]
+next_action = ["Deliver final paired IMG paths/SHA; newphysicalWiFi/BT/Host/touch behavior remainspending;no phone access"]
+
+[[area.evidence]]
+kind = "host"
+revision = "f81d8565c3758cc54f103cee39d7de53c281de8e"
+reference = "reports/review7-release.json"
+command = "test-review7.py; test-touch-p0.py; pre-ci-v33d.py"
+result = "Alllocalgate groupsPASS including actualarm64eABI/PAC,wireless+ADSPjointclosure,64MiBtablewalks,326CPI/jump/slop/clicktests,causalCTS/lostIRQ64TLVsegments,bootwaitdeadlines and validatedurgentABjournal. CI/returned/finalIMG/hardwarepending."
+
+[[area.evidence]]
+kind = "host"
+revision = "09e7203cb25f8c70af7c984dd12767532ea22e50"
+reference = "reports/review7-release.json"
+command = "test-review7.py; test-log-writer.py; pre-ci-v33d.py"
+result = "FinalalllocalgatesPASS including actualnativeZTVsymbol/targetdataimport/productionbinding,loggerunreadynegative,fullP0-P4,arm64eABI/PAC/wirelessADSPjoint/zeroEL1SMMU. FirstCIkernelonlyvtablemissing resolvedwithoutfakeimplementation; firstfailurelogSHA retained. FinaljointCI/newIMG/hardwarepending."
+
+[[area.evidence]]
+kind = "host"
+revision = "04018235ba36b16cf5dbe43b870b2ae42ddeb82e"
+reference = "reports/review7-release.json"
+command = "check-v33b-returned.py; check-review7-returned.py; check-wireless-target-closure.py --with-adsp; package-batch2-esp.py; package-usb-dma-boot.py --physical-esp; verify-p0-images.py --wireless --media --dp --v33b"
+result = "JointCI45623026650SUCCESS;originalunchangedWiFiplist/GPUarchive/0014/staticmap/signaturegatesPASS;actual64MiBproducerandfinalLoaderPE/326CPI/USBvtable427PAC/loggerABI andfinal800MiB4KnESP/raw16MiBbootstrapbootreadbackPASS. Exactpaths/bytes/SHA inreport. Firmwarea98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37; Data/rootunaccessed/phoneunflashed. HOST_VERIFIED_PENDING_HARDWARE."

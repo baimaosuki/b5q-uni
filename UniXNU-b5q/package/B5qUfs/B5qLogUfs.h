@@ -12,6 +12,8 @@
 #include "B5qLogProtocol.h"
 #include "B5qLogArgs.h"
 #include <kern/clock.h>
+#include <machine/machine_routines.h>
+extern "C" int get_preemption_level(void);
 extern "C" void thread_yield_internal(unsigned int);
 static const uint8_t nabu_log_build_id[32]="b5q-log-v12-26C5035r";
 
@@ -26,6 +28,28 @@ static uint32_t nabu_log_io_scsi;
 extern "C" {
 volatile unsigned nabu_log_writer_state=0,nabu_log_writer_rounds=0,nabu_log_writer_failures=0;
 uint64_t nabu_log_committed_end=0;
+static uint64_t nabu_log_urgent_end=0;
+}
+/* Request the existing validated writer, never submit UFS from a USB callback.
+ * Sleepable callers wait for this exact console prefix to reach stable media.
+ * Interrupt/disabled-preemption callers request only; no unsafe blocking. */
+extern "C" unsigned b5q_log_sync(unsigned milliseconds) {
+  // An early USB callback must not shorten the logger's volume-open retry
+  // pacing. Urgency belongs only to an already verified writer.
+  if(nabu_log_writer_state!=2 || __atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE))return 3;
+  struct nb_log_snapshot snapshot;
+  if(!nabu_capture_snapshot(&snapshot))return 3;
+  uint64_t wanted=__atomic_load_n(&nabu_log_urgent_end,__ATOMIC_RELAXED);
+  while(wanted<snapshot.end && !__atomic_compare_exchange_n(&nabu_log_urgent_end,&wanted,snapshot.end,false,__ATOMIC_RELEASE,__ATOMIC_RELAXED)){}
+  if(ml_at_interrupt_context() || !ml_get_interrupts_enabled() || get_preemption_level())return 2;
+  if(milliseconds>1000)milliseconds=1000;
+  uint64_t deadline;clock_interval_to_deadline(milliseconds,kMillisecondScale,&deadline);
+  do {
+    if(__atomic_load_n(&nabu_log_committed_end,__ATOMIC_ACQUIRE)>=snapshot.end)return 0;
+    if(__atomic_load_n(&nabu_log_stopping,__ATOMIC_ACQUIRE) || nabu_log_writer_state!=2)return 3;
+    thread_yield_internal(1);
+  }while(mach_absolute_time()<deadline);
+  return 1;
 }
 /* 1 success, 0 bounded contention, -2 retryable read, -1 transport/gate failure. The existing root
  * read path stays read-only. Only this function can emit the bounded WRITE(10). */
@@ -69,7 +93,9 @@ static void nabuLogPause(unsigned milliseconds)
   unsigned budget=milliseconds>1000?1000000:milliseconds*1000;
   do {
     thread_yield_internal(1);
-  } while(budget-- && mach_absolute_time()<deadline);
+  } while(budget-- && mach_absolute_time()<deadline &&
+      __atomic_load_n(&nabu_log_urgent_end,__ATOMIC_ACQUIRE)<=
+      __atomic_load_n(&nabu_log_committed_end,__ATOMIC_ACQUIRE));
 }
 static int nabuLogRead(void *,uint64_t lba,uint32_t blocks,uint8_t *data)
 {

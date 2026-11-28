@@ -1,0 +1,25 @@
+diff --git a/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h b/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h
+--- a/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h
++++ b/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h
+@@ -4,7 +4,7 @@
+ #define B5Q_PCIE_DMA_PROTOCOL_GUID \
+   {0x610234d8,0x0a0d,0x4d3b,{0x9b,0xac,0xce,0xe7,0x73,0x28,0x3e,0x76}}
+ #define B5Q_PCIE_DMA_IOVA 0xa0000000ULL
+-#define B5Q_PCIE_DMA_BYTES 0x02000000ULL
++#define B5Q_PCIE_DMA_BYTES 0x04000000ULL
+ #define B5Q_PCIE_DMA_ALIGN 0x00400000ULL
+ #define B5Q_PCIE_DMA_NOT_RUN 0xffffffffU
+ // Original firmware IORT names PCIE0 and masks SID1400 by007f, including1401.
+diff --git a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+--- a/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
++++ b/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c
+@@ -23,6 +23,9 @@
+ STATIC B5Q_PCIE_DMA_RESULT mResult;
+ STATIC BOOLEAN mAttempted;
+ #define TABLE_PAGES 32U
++STATIC_ASSERT((B5Q_PCIE_DMA_BYTES % B5Q_PCIE_DMA_ALIGN)==0,"PCIe pool full alignment");
++STATIC_ASSERT(B5Q_PCIE_DMA_IOVA+B5Q_PCIE_DMA_BYTES<=0xaffff000ULL,"PCIe pool excludes MSI IOVA");
++STATIC_ASSERT(TABLE_PAGES>=6U,"PCIe root/L1/L2 and MSI L3 capacity");
+ 
+ STATIC EFI_STATUS AllocatePoolPages(VOID)
+ {

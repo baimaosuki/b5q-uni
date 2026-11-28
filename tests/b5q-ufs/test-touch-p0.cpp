@@ -61,11 +61,11 @@ static void pointer() {
  s.update(1,ids,x,y,210,false,send);assert(sent.size()==2&&!s.held);
  s.update(0,nullptr,nullptr,nullptr,250,false,send);s.advance(282,send);
  assert(sent.size()==4&&sent[2][1]==1&&!sent[3][1]&&s.clicks_left==2);
- // Crossing the widened slop anchors; next61X/26Y raw counts ->7/6.
+ // Crossing the widened slop anchors; next61X/26Y raw counts ->12/13.
  s={};sent.clear();x[0]=y[0]=norm(1000);s.update(1,ids,x,y,300,false,send);
  x[0]=norm(1300);y[0]=norm(1160);s.update(1,ids,x,y,320,false,send);assert(sent.empty()&&s.mode==B5qTouchMouse::Moving);
  x[0]=norm(1361);y[0]=norm(1186);s.update(1,ids,x,y,340,false,send);
- assert(sent.size()==1&&int16_t(sent[0][2]|sent[0][3]<<8)==7&&int16_t(sent[0][4]|sent[0][5]<<8)==6&&!sent[0][1]);
+ assert(sent.size()==1&&int16_t(sent[0][2]|sent[0][3]<<8)==12&&int16_t(sent[0][4]|sent[0][5]<<8)==13&&!sent[0][1]);
  s.update(0,nullptr,nullptr,nullptr,360,false,send);assert(sent.size()==1&&!s.clicks_left&&s.taps_cancelled_slop==1);
  // Slow stationaryframe gap does not cancel within300ms. Time crossinganchors.
  s={};sent.clear();s.update(1,ids,x,y,400,false,send);s.update(1,ids,x,y,580,false,send);assert(s.mode==B5qTouchMouse::CandidateTap);
@@ -73,7 +73,7 @@ static void pointer() {
  s.update(1,ids,x,y,702,false,send);assert(sent.empty());
  // Remainders retain subcount precision in both directions.
  for(unsigned i=1;i<=10;i++){x[0]=norm(1361+int(i));y[0]=norm(1186+int(i));s.update(1,ids,x,y,702+i,false,send);}
- int dx=0,dy=0;for(auto &r:sent){dx+=int16_t(r[2]|r[3]<<8);dy+=int16_t(r[4]|r[5]<<8);}assert(dx==1&&dy==2);
+ int dx=0,dy=0;for(auto &r:sent){dx+=int16_t(r[2]|r[3]<<8);dy+=int16_t(r[4]|r[5]<<8);}assert(dx==2&&dy==5);
  for(unsigned i=1;i<=10;i++){x[0]=norm(1371-int(i));y[0]=norm(1196-int(i));s.update(1,ids,x,y,720+i,false,send);}
  dx=dy=0;for(auto &r:sent){dx+=int16_t(r[2]|r[3]<<8);dy+=int16_t(r[4]|r[5]<<8);}assert(dx==0&&dy==0);
  // Contact replacement reanchors, no phantomtap; >2contacts recoverto movement.
@@ -100,7 +100,7 @@ static void pointer() {
  int flip[]={2,1};s.update(2,flip,x,y,2630,false,send);assert(sent.size()==1);s.update(0,nullptr,nullptr,nullptr,2640,false,send);assert(sent.size()==1);
  // Expanded slop tolerates realistic finger-roll on both phone axes.
  s={};sent.clear();x[0]=y[0]=norm(1000);s.update(1,ids,x,y,2700,false,send);
- x[0]=norm(1260);y[0]=norm(1140);s.update(1,ids,x,y,2740,false,send);
+ x[0]=norm(1220);y[0]=norm(1115);s.update(1,ids,x,y,2740,false,send);
  assert(s.mode==B5qTouchMouse::CandidateTap&&sent.empty());
  s.update(0,nullptr,nullptr,nullptr,2780,false,send);assert(s.held==1);s.advance(2812,send);assert(!s.held);
  // Discontinuities re-anchor and erase both fractional remainders; a normal
@@ -113,17 +113,17 @@ static void pointer() {
   if(cause==0)x[0]=norm(2000);if(cause==1)y[0]=norm(1500);if(cause==2){x[0]=norm(1350);y[0]=norm(1020);}
   const uint32_t t=cause==2?3101:3030;s.update(1,ids,x,y,t,false,send);
   assert(sent.size()==beforeJump&&!s.remainderX&&!s.remainderY);
-  const int ax=s.anchorX,ay=s.anchorY;x[0]=norm(ax+8);y[0]=norm(ay+4);s.update(1,ids,x,y,t+10,false,send);
+  const int ax=s.anchorX,ay=s.anchorY;x[0]=norm(ax+5);y[0]=norm(ay+2);s.update(1,ids,x,y,t+10,false,send);
   assert(sent.size()==beforeJump+1&&int16_t(sent.back()[2]|sent.back()[3]<<8)==1&&int16_t(sent.back()[4]|sent.back()[5]<<8)==1);
  }
  // Largest allowed same-frame deltas are clamped without delayed overflow.
  s={};sent.clear();x[0]=y[0]=norm(1000);s.update(1,ids,x,y,4000,false,send);
  x[0]=norm(1300);s.update(1,ids,x,y,4010,false,send);
  x[0]=norm(1780);y[0]=norm(1260);s.update(1,ids,x,y,4020,false,send);
- assert(sent.size()==1&&int16_t(sent[0][2]|sent[0][3]<<8)==48&&int16_t(sent[0][4]|sent[0][5]<<8)==48);
+ assert(sent.size()==1&&int16_t(sent[0][2]|sent[0][3]<<8)==64&&int16_t(sent[0][4]|sent[0][5]<<8)==64);
  s.update(1,ids,x,y,4030,false,send);assert(sent.size()==1);
  x[0]=norm(1300);y[0]=norm(1000);s.update(1,ids,x,y,4040,false,send);
- assert(int16_t(sent.back()[2]|sent.back()[3]<<8)==-48&&int16_t(sent.back()[4]|sent.back()[5]<<8)==-48);
+ assert(int16_t(sent.back()[2]|sent.back()[3]<<8)==-64&&int16_t(sent.back()[4]|sent.back()[5]<<8)==-64);
  // Bounds, malformedinput, recoveryrelease, queuedclicks andunsignedclockwrap.
  for(uint32_t start:{100u,UINT_MAX-50u}){
   s={};sent.clear();s.update(1,ids,x,y,start,false,send);s.update(0,nullptr,nullptr,nullptr,start+10,false,send);
@@ -135,6 +135,6 @@ static void pointer() {
  s.update(11,nullptr,nullptr,nullptr,120,false,send);s.update(1,nullptr,nullptr,nullptr,130,false,send);
  int extreme[]={INT_MIN,INT_MAX};s.update(2,ids,extreme,extreme,140,false,send);s.cancel(send);
  int duplicate[]={1,1};s.update(2,duplicate,x,y,150,false,send);assert(!s.fingers);
- puts("PASS P0touch:4requestedcases,32msclicks,physicalXY7/6,no-doubletapdrag/no-extra-up,remainder+/-,identity,3..10contacts,staggeredrighttap,scrollfreeze,recovery,bounds,queuedpulses,timewrap");
+ puts("PASS P0touch:4requestedcases,32msclicks,physicalXY12/13,no-doubletapdrag/no-extra-up,remainder+/-,identity,3..10contacts,staggeredrighttap,scrollfreeze,recovery,bounds,queuedpulses,timewrap");
 }
 int main(){reports();pointer();}

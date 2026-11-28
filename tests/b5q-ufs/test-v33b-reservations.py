@@ -104,7 +104,7 @@ HELPER
 int main(){for(auto range:mB5qReservedRanges){if(range.Base>0xffffffff)continue;next=range.Base;clears=frees=0;
  assert(AllocatePoolPages()==EFI_UNSUPPORTED&&clears==0&&frees==1);}
  next=0xc8010000;clears=frees=0;assert(!AllocatePoolPages()&&clears==1&&mResult.PoolBase==0xc8400000);
- puts("PASS actual PCIe allocation rejects all lowreserved starts beforezero, frees unsafeallocation, safe32MiBpool accepted");}
+ puts("PASS actual PCIe allocation rejects all lowreserved starts beforezero, frees unsafeallocation, safe64MiBpool accepted");}
 '''.replace('HELPER',pcie)
 with tempfile.TemporaryDirectory(prefix='b5q-pcie-allocation-')as td:
  t=Path(td);(t/'test.cpp').write_text(pre);subprocess.run(['c++','-std=c++17','-O1','-g','-fsanitize=address,undefined','-I'+str(I),str(t/'test.cpp'),'-o',str(t/'test')],check=True);subprocess.run([str(t/'test')],check=True)

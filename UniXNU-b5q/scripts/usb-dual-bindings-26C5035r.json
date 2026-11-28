@@ -297,7 +297,8 @@
     "__ZN12AppleUSBXDCI16opaque357_147482Ev": "0xfffffff00b1cc878",
     "__ZN12AppleUSBXDCI16opaque332_103764Ev": "0xfffffff00b1b20e4",
     "__ZN12AppleUSBXDCI16opaque297_147217Ev": "0xfffffff00b1dc850",
-    "__ZN12AppleUSBXDCI9terminateEj": "0xfffffff00b1b0f20"
+    "__ZN12AppleUSBXDCI9terminateEj": "0xfffffff00b1b0f20",
+    "__ZTV12AppleUSBXHCI": "0xfffffff008a0dc60"
   },
   "slots": {
     "xhci": 427,

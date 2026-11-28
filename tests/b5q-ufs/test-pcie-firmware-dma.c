@@ -23,25 +23,25 @@ static void property(UINT8 *tree,UINTN *at,const char *name,const void *value,UI
 int main(void) {
   assert(!qualified_usb_main());
   UINT64 pages[32*512];
-  for(UINT64 base=0x80000000;base<0xfe000000;base+=0x04000000) {
+  for(UINT64 base=0x80000000;base<=0xfc000000;base+=0x04000000) {
     memset(pages,0,sizeof(pages));USB_DMA_TABLES t={pages,0xffe00000,0,32};
-    assert(B5qPcieMapPool(&t,0xa0000000,base,0x02000000));
-    for(UINT64 off=0;off<0x02000000;off+=4096) {
+    assert(B5qPcieMapPool(&t,0xa0000000,base,0x04000000));
+    for(UINT64 off=0;off<0x04000000;off+=4096) {
       unsigned shift=0;UINT64 e=walk(&t,0xa0000000+off,&shift);
       assert(shift==21 && (e&0x748)==0x748);
       assert(((e&USB_DMA_PA_MASK)+((0xa0000000+off)&((1ULL<<shift)-1)))==base+off);
     }
-    unsigned shift=0;assert(!walk(&t,0x9ffff000,&shift));assert(!walk(&t,0xa2000000,&shift));
+    unsigned shift=0;assert(!walk(&t,0x9ffff000,&shift));assert(!walk(&t,0xa4000000,&shift));
     assert(B5qPcieMapMsi(&t));
     UINT64 msi=walk(&t,0xaffff040,&shift);
     assert((msi&(1ULL<<6))!=0);
     assert(shift==12 && (msi&USB_DMA_PA_MASK)==0x17110000 && (msi&0x1c)==0);
     assert(!B5qPcieMapMsi(&t));assert(!walk(&t,0xafffe000,&shift));
-    assert(!B5qPcieMapPool(&t,0xa0000000,base,0x02000000)); // no overwrite
+    assert(!B5qPcieMapPool(&t,0xa0000000,base,0x04000000)); // no overwrite
   }
   memset(pages,0,sizeof(pages));USB_DMA_TABLES t={pages,0xffe00000,0,32};
-  assert(!B5qPcieMapPool(&t,0xa0000000,0x100000000,0x2000000));
-  assert(!B5qPcieMapPool(&t,0xa0000000,0x80000001,0x2000000));
+  assert(!B5qPcieMapPool(&t,0xa0000000,0x100000000,0x4000000));
+  assert(!B5qPcieMapPool(&t,0xa0000000,0x80000001,0x4000000));
   assert(!B5qPcieMapPool(&t,0xfffff000,0x80000000,8192));
   assert(!B5qPcieMapPool(&t,0xa0000000,0x80000000,UINT64_MAX-4095));
   assert(!B5qPcieMapPool(&t,0xa0000000,0x80000000,0));
@@ -55,9 +55,9 @@ int main(void) {
   property(tree,&at,"name","chosen",7);property(tree,&at,"b5q-pcie-dma-ready",NULL,4);
   property(tree,&at,"b5q-pcie-dma-state",NULL,88);UINTN length=at,cursor=0;
   B5Q_PCIE_DMA_ADT adt={MAX_UINTN,MAX_UINTN};assert(FindPcieDmaNode(tree,length,&cursor,0,3,&adt) && cursor==length);
-  EFI_MEMORY_DESCRIPTOR map[2]={{.Type=EfiReservedMemoryType,.PhysicalStart=0xc0000000,.NumberOfPages=8192},
+  EFI_MEMORY_DESCRIPTOR map[2]={{.Type=EfiReservedMemoryType,.PhysicalStart=0xc0000000,.NumberOfPages=16384},
     {.Type=EfiReservedMemoryType,.PhysicalStart=0xffe00000,.NumberOfPages=32}};
-  result=(B5Q_PCIE_DMA_RESULT){.Version=2,.SidMask=0x007f1400,.PoolBase=0xc0000000,.PoolBytes=0x2000000,
+  result=(B5Q_PCIE_DMA_RESULT){.Version=2,.SidMask=0x007f1400,.PoolBase=0xc0000000,.PoolBytes=0x4000000,
     .Iova=0xa0000000,.TableBase=0xffe00000,.TableBytes=32*4096};
   WritePcieDmaResult(tree,&adt,&result,map,sizeof(map),sizeof(map[0]),0x8c0000000ULL,0x180000000ULL,false);
   UINT32 ready=0;memcpy(&ready,tree+adt.Ready,4);assert(ready==1);
@@ -75,5 +75,5 @@ int main(void) {
   for(UINTN truncated=0;truncated<length;truncated++) {
     cursor=0;B5Q_PCIE_DMA_ADT bad={MAX_UINTN,MAX_UINTN};assert(!FindPcieDmaNode(tree,truncated,&cursor,0,3,&bad));
   }
-  puts("PASS production PCIe DMA tables/all32MiB pages/attributes/bounds; loader option, ADT truncation, HAL failure, retained pool/table gate; USB baseline rerun");
+  puts("PASS production PCIe DMA tables/all64MiB pages/attributes/bounds; loader option, ADT truncation, HAL failure, retained pool/table gate; USB baseline rerun");
 }

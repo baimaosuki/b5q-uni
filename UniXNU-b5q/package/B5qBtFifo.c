@@ -187,7 +187,10 @@ bool b5q_bt_fifo_service(struct b5q_bt_fifo *g) {
          * interrupt the boot CPU. The timed worker retries and reenables it. */
         wr(g,G_S_IRQ_EN,room?F_S_IRQS:F_S_IRQS&~(F_RX_WATER|F_RX_LAST));
     }
-    g->retry_at=(g->rx_count || (rd(g,F_RX_STATUS)&0x1ffffffu))?now(g)+1000000ULL:0;
+    /* A short RX tail may have no watermark edge; a CTS-stalled TX may
+     * lose its watermark while the shared IRQ is masked. Keep the owning
+     * worker alive until both directions are empty, including during boot. */
+    g->retry_at=(g->tx_busy || g->rx_count || (rd(g,F_RX_STATUS)&0x1ffffffu))?now(g)+1000000ULL:0;
     barrier(g);fifoMask(g,false);return false;
 }
 bool b5q_bt_fifo_drained(struct b5q_bt_fifo *g) {
@@ -197,7 +200,7 @@ size_t b5q_bt_fifo_write(struct b5q_bt_fifo *g,const uint8_t *p,size_t n) {
     if(g->state!=B5Q_BT_FIFO_RUN || !p || !n || !b5q_bt_fifo_drained(g))return 0;
     if(n>sizeof(g->tx))n=sizeof(g->tx);
     memcpy(g->tx,p,n);g->tx_length=(unsigned)n;g->tx_offset=0;g->tx_busy=true;
-    wr(g,G_TX_LEN,(uint32_t)n);wr(g,G_M_CMD,1u<<27);transmit_fifo(g);barrier(g);return n;
+    wr(g,G_TX_LEN,(uint32_t)n);wr(g,G_M_CMD,1u<<27);transmit_fifo(g);g->retry_at=now(g)+1000000ULL;barrier(g);return n;
 }
 void b5q_bt_fifo_set_flow(struct b5q_bt_fifo *g,bool enabled) {
     g->flow=enabled;uint32_t cfg=rd(g,G_TX_CFG);

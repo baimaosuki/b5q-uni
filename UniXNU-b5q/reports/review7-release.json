@@ -1,0 +1,157 @@
+{
+  "status": "DELIVERED_HOST_VERIFIED_PENDING_HARDWARE",
+  "hardware_verified": false,
+  "inputs": {
+    "UniXNU-b5q/package/B5qBtFifo.c": "a9f2acb4103e070a3f70f02c5eeeb625c34f5adcbac3bf5541ace4c0181629d9",
+    "UniXNU-b5q/package/B5qBtFifo.h": "0082dd23bf2059010b4c68fac0b7873de25c76fff59d4bd58d0896c565c4c67d",
+    "UniXNU-b5q/package/B5qTouchProtocol.h": "6fbf6ffbe09ebc1dd971116e006f8f1d11045853b77e71daabf12bea9e16e3dc",
+    "UniXNU-b5q/package/B5qTouchPower.h": "1d4a07f2ba3f57ba175ff7562dd83b265d208b37a5bc0ab22f4428bde51fac75",
+    "UniXNU-b5q/package/B5qTouchIrq.h": "82068375f2cb5f145630d8da2708d70c4c3445e28d01516f0403892e3d4e0eb1",
+    "UniXNU-b5q/package/B5qTouch.cpp": "9940e78bb956e4eb04d283fd78838a1578ea139c8c77b15fc6bcbd7acb2ae03f",
+    "UniXNU-b5q/package/B5qTouchMouse.h": "7ff16397b8d0b5e88e7a05db62d58dfb3771f4380eccd4aa373c8adad69d5677",
+    "UniXNU-b5q/package/B5qTouchClock.h": "f8945a0803b00bf64a78e2d3d8b938c19e965f33c3c460ac99944e6f54ae6fa1",
+    "UniXNU-b5q/package/B5qTouchBus.h": "57efea31d69dfaf878b31f6eb40700a8d87da322d3181a4dde47912a02fe1a83",
+    "UniXNU-b5q/package/B5qTouchReports.h": "46104f4b59e72c7d81a87de1b607e57873aa458d82576fd185a739ec23a1f1be",
+    "UniXNU-b5q/package/B5qMouseReport.h": "f1d8e50504c5bcebfcfe2683c8f0c65682bec719d36204918391bd9a65d498b6",
+    "UniXNU-b5q/package/B5qBluetooth.cpp": "656304bd71ade44dc1510367c9626b4037a3af324a61f1347ab5964d16aef261",
+    "UniXNU-b5q/package/QcomDwc3.cpp": "0e8447548342312fdcc920e424b3c707169ee3203ed3881c7e304b744b7522e6",
+    "UniXNU-b5q/package/B5qUsbBoard.cpp": "529ebeda5b27b4c7472c72275ebc79b9e65cab2fa2a1e42c12f4d67d270f7827",
+    "UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "9c185561a62971beb5ff3dad6b5ce2c3630bd3e78dba4af864a03e52c59d2448",
+    "UniXNU-b5q/package/B5qWifiArena.h": "00b678c36b5f1d993f29804debdbd81604a0a3c1bd76fc7c71fa8b9b01363b3e",
+    "UniXNU-b5q/package/B5qWifiDma.h": "a082987a2594b0f21ea46b1ec70bd3bf2b765972b137a1d4562650be21155832",
+    "uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h": "00fbcf81181123e1f9161c4b2887685659c9d4fbce57051547c291b6d208ade2",
+    "UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/B5qPcieDma.h": "00fbcf81181123e1f9161c4b2887685659c9d4fbce57051547c291b6d208ade2",
+    "logs/b5q-xnu2log-review6/XNU2LOG.txt": "c9354bf59211625992aa08366dd2057543ce6a0e70a8abd5d1e8757834ecad45",
+    "logs/b5q-xnu2log-review6-2/XNU2LOG.txt": "f7124e8dab56346546d3f395a2324dc3411df4c40eeba5c5ce7cb0bce4d287d3"
+  },
+  "requirements": [
+    "PCIe64MiB with producer/loader/kernel64MiB agreement",
+    "mode11 atomic first,kind1 only,review4 5/2 gain326CPI,220/115 slop,64 clamp,jump/gap reanchor",
+    "FIFO TX progress deadline and qbt boot wait merge; causal CTS stalls/lost watermark/multisegment RX regression",
+    "Stock GCTL disable-clock-gating restored after reset; optional usb-utmi; early ring/HSE/power checkpoint with bounded existing validated log writer sync; ambiguous CC diagnostics only"
+  ],
+  "preserved": [
+    "0014 executable USB constants and2048pagepool",
+    "Device role/TypeC topology policy",
+    "no EL1 apps_smmu",
+    "existing persistent Data and all signatures/WiFi readiness assertions"
+  ],
+  "limits": [
+    "HOST_VERIFIED_PENDING_HARDWARE",
+    "NVM timeout physical exact failing segment not present in review6 logs; local transport wait bug reproducible; no fabricated hardware fix confirmation"
+  ],
+  "USB_TCR2_audit": {
+    "b5q": "0x0003c071",
+    "sheng": "0x00038002",
+    "PASIZE_field_low3": {
+      "b5q": 1,
+      "sheng": 2
+    },
+    "b5q_output_bits": 36,
+    "b5q_mapping_limit": "0x1000000000",
+    "largest_review6_host_example": "0x88ba04000",
+    "finding": "36-bit PA limit is64GiB; observedhostPA and mappingaperture fit. Existing HALdomainconfigure compatibility machine-code tests,slot5flush andphysicalDeviceenumeration retained. PS40alone is not evidence ofHostfailure; no TCR2change.",
+    "HAL_sha256": "a6020ff87c4526baf9f8cb39870e618691a83cf5ecb8ae4cd1e9e1d42ed9c2ef",
+    "validation": "test-v33d-dma.py + existing HALoriginalmachinecodetests; actualbinaryreturnedgates pending"
+  },
+  "before_snapshot_sha256": {
+    "artifacts/b5q-review7-work/before/uefi-b5q/Platforms/Samsung/b5qPkg/Include/B5qPcieDma.h": "00fbcf81181123e1f9161c4b2887685659c9d4fbce57051547c291b6d208ade2",
+    "artifacts/b5q-review7-work/before/uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/PcieDma.c": "885ad9ba75604d4237b62f47fbe2e6f28a7b1495e987582572f3ce86fdc63a6a",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouchProtocol.h": "6fbf6ffbe09ebc1dd971116e006f8f1d11045853b77e71daabf12bea9e16e3dc",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qBluetooth.cpp": "656304bd71ade44dc1510367c9626b4037a3af324a61f1347ab5964d16aef261",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouchPower.h": "1d4a07f2ba3f57ba175ff7562dd83b265d208b37a5bc0ab22f4428bde51fac75",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qWifiDma.h": "a082987a2594b0f21ea46b1ec70bd3bf2b765972b137a1d4562650be21155832",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouchIrq.h": "82068375f2cb5f145630d8da2708d70c4c3445e28d01516f0403892e3d4e0eb1",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qBtFifo.c": "a9f2acb4103e070a3f70f02c5eeeb625c34f5adcbac3bf5541ace4c0181629d9",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouch.cpp": "9940e78bb956e4eb04d283fd78838a1578ea139c8c77b15fc6bcbd7acb2ae03f",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouchMouse.h": "7ff16397b8d0b5e88e7a05db62d58dfb3771f4380eccd4aa373c8adad69d5677",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qBtFifo.h": "0082dd23bf2059010b4c68fac0b7873de25c76fff59d4bd58d0896c565c4c67d",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qMouseReport.h": "f1d8e50504c5bcebfcfe2683c8f0c65682bec719d36204918391bd9a65d498b6",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qUsbBoard.cpp": "529ebeda5b27b4c7472c72275ebc79b9e65cab2fa2a1e42c12f4d67d270f7827",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouchClock.h": "f8945a0803b00bf64a78e2d3d8b938c19e965f33c3c460ac99944e6f54ae6fa1",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qWifiArena.h": "00b678c36b5f1d993f29804debdbd81604a0a3c1bd76fc7c71fa8b9b01363b3e",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouchBus.h": "57efea31d69dfaf878b31f6eb40700a8d87da322d3181a4dde47912a02fe1a83",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qTouchReports.h": "46104f4b59e72c7d81a87de1b607e57873aa458d82576fd185a739ec23a1f1be",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/QcomDwc3.cpp": "0e8447548342312fdcc920e424b3c707169ee3203ed3881c7e304b744b7522e6",
+    "artifacts/b5q-review7-work/before/UniXNU-b5q/package/B5qUfs/B5qLogUfs.h": "9c185561a62971beb5ff3dad6b5ce2c3630bd3e78dba4af864a03e52c59d2448",
+    "artifacts/b5q-review7-work/before/UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/B5qPcieDma.h": "00fbcf81181123e1f9161c4b2887685659c9d4fbce57051547c291b6d208ade2"
+  },
+  "local_checks": 29,
+  "local_gate_sha256": "717ba1ed45ee89e1f8854334a0c116d0ae959017daacaa31d5b07c6ec1b08f02",
+  "local_checks_names": [
+    "Bluetooth-provider",
+    "wireless-mutex-provider",
+    "pre-ci-all",
+    "pre-ci-v33b",
+    "touch-p0",
+    "v33d-dma",
+    "v33d-usb-device",
+    "v33d-review2",
+    "v33d-wcn-init",
+    "v33d-packaging",
+    "v33d-review3",
+    "v33d-review4",
+    "v33d-reclaim-dma",
+    "review5",
+    "review5-firmware",
+    "review7",
+    "dp-loader",
+    "dp-dpu",
+    "loader-inputs",
+    "original-binaries",
+    "target-compile",
+    "firmware-reconstruction",
+    "firmware-target",
+    "review4-target-proof",
+    "wireless-all-callbacks",
+    "wireless-ADSP-joint",
+    "all-cross-object-PAC",
+    "hid-timer-workloop-PAC",
+    "all-board-zero-EL1-SMMU"
+  ],
+  "CI_run": 45623026650,
+  "build_commit": "04018235ba36b16cf5dbe43b870b2ae42ddeb82e",
+  "firmware": {
+    "path": "/home/baimao/zflip5/artifacts/b5q-review7-work/ci45623026650-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
+    "bytes": 3145728,
+    "sha256": "a98a68dbe8921e578cb54a27ea7a592414015846897ada7af0b97d8de1765c37"
+  },
+  "firmware_download_digest_verified": true,
+  "loader_binary_proof": {
+    "source": "returned finalDarwinBoot.efi embeddedinFD",
+    "64MiB_pool_size_equality_RVA": "0x3cd8",
+    "64MiB_retention_argument_RVA": "0x3d48",
+    "old32MiB_loader_rejected": true
+  },
+  "validation_note": "Supplemental returnedchecker reads actual finalPE because firmware uploads no DarwinBoot.obj; equalitybranch/retentioncall andnegativeoldloader checked. Allruntime inputs identical to CI37493ec.",
+  "first_CI_failure": {
+    "run": 45618191537,
+    "kernel": "failure",
+    "firmware": "success",
+    "only_missing_symbol": "__ZTV12AppleUSBXHCI",
+    "referenced_by": "QcomDwc3Xhci::setPowerState",
+    "log_sha256": "864bd21d1ea568ce2b387923ecb7c0e758744e5c34fbecf6c157bc452aaebe86",
+    "native_vtable_original": "0xfffffe0008a0dc60",
+    "fixture_first_slot": "0xfffffe0008a0dc70",
+    "native_vtable_translated": "0xfffffff008a0dc60",
+    "fix": "Originaldata binding in dual/hostinputs and productionresolver; no fakevtable/PACdisable",
+    "cache": "Completedcompilationprogress retained byCI"
+  },
+  "log_ready_guard": "Urgent requests acceptedonlywriterstate2aftervolume/token/slotvalidation; state0/1/3cannotshortenstartupbackoff orwrite. Productionnegativecases added.",
+  "CI_conclusion": "success",
+  "images": {
+    "esp.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-review7/esp.img",
+      "bytes": 838860800,
+      "sha256": "24b04838f8afba9ce4e1da238274812c1397973dbc3899e948009b5fdec46fda"
+    },
+    "boot.img": {
+      "path": "/home/baimao/zflip5/artifacts/b5q-esp-review7/boot.img",
+      "bytes": 19124224,
+      "sha256": "20eac73c262470d43984b8edd363dde55f86e38fb75312a68b4a32610907470a"
+    }
+  },
+  "returned_gates": "PASS original returned gate + supplemental actual64MiB/HID326/ABI/PAC/ADT + actualwirelessADSP",
+  "final_readback": "PASS verify-p0-images.py --wireless --media --dp --v33b",
+  "phone_accessed": false
+}

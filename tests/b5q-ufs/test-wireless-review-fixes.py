@@ -14,6 +14,10 @@ harness=r'''
 #include <cstdint>
 #include <cstdio>
 #include <vector>
+#include <cstring>
+#define IOLog(...) ((void)0)
+static bool forceUtmi;
+bool PE_parse_boot_argn(const char *name,void *p,unsigned n){assert(!strcmp(name,"usb-utmi")&&n==4);*(unsigned*)p=forceUtmi;return forceUtmi;}
 #include "QcomQmpUsb3.h"
 #include "B5qUsbInputs.h"
 uint32_t scratch[1024],gcc[0x80000/4],phyWords[0x3000/4],native_usb_stats[54];
@@ -49,6 +53,7 @@ int main(){
   stageFailure=failure;selectUtmiClock();phyWords[kQmpStatus/4]=failure==6?64:0;
   assert(!qmpInit(false));assert((scratch[2]&9)==9);assert(maps==releases);
  }
+ forceUtmi=true;unsigned previous=maps;assert(!qmpInit(false)&&maps==previous&&(scratch[2]&9)==9);forceUtmi=false;
  for(bool changed:{false,true}){race=changed;clears=blocks=0;observed=wakeCount;waitTest();assert(clears==unsigned(changed)&&blocks==unsigned(!changed));}
  puts("PASS actual USB unplugged-UTMI->hotplug PIPE CC1/CC2,6faults/allmapsreleased; production Wi-Fi wait IRQ race cancels without block");
 }

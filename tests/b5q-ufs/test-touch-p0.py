@@ -44,17 +44,18 @@ int main(){
   TouchBus b;b.app=bits&1;b.config=bits&2;b.full=bits&4;b.delta=bits&8;
   reports.mode=0xc1;reports.reconfigure=true;
   const bool ok=configureReports(b);
-  const bool delta=b.app&&b.delta;
-  const bool full=b.app&&!delta&&b.config&&b.full;
+  const bool full=b.app&&b.config&&b.full;
+  const bool delta=b.app&&!full&&b.delta;
   assert(ok==(delta||full));
   assert(reports.mode==(delta?0xc1:full?0x11:0));
   assert(!reports.reconfigure&&!layoutFailures);
   assert(b.commands[0]==0x2000);
   if(!b.app)assert(b.commands.size()==1);
-  if(delta){assert(b.commands==std::vector<unsigned>({0x2000,0x05c1,0x0611}));assert(!configBytes);}
-  else if(b.app){assert(b.commands[1]==0x05c1&&b.commands[2]==0x06c1&&b.commands[3]==0x2500);if(b.config)assert(b.commands.back()==0x0511);else assert(b.commands.size()==4);}
+  if(full){assert(b.commands==std::vector<unsigned>({0x2000,0x2500,0x0511,0x06c1}));assert(configBytes);}
+  else if(b.app){assert(b.commands[1]==0x2500);assert(b.commands[b.commands.size()-2]==0x0611&&b.commands.back()==0x05c1);}
+
  }
- puts("PASS production report-mode selection:16 app/config/0x11/0xc1 outcomes,SamsungC1first,fullframeonlyafterC1failure,reset state");
+ puts("PASS production report-mode selection:16 app/config/0x11/0xc1 outcomes,atomic11first,C1onlyafterfullfailure,reset state");
 }
 '''
  src=Path(td)/'modes.cpp';src.write_text(source);exe=Path(td)/'modes'

@@ -204,10 +204,18 @@ extern "C" void check_dp_target_display_callbacks(B5qDpDisplayConfig &config){co
   assert sites and all(v['key']==0 and not v['address_diversity']and v['diversity']==div for v in sites),(fragment,sites)
   calls=[v for v in scans[consumer]['calls']if v['diversity']==div];assert calls
   nativeCallbackContracts.append(dict(producer=fragment,sites=sites,consumer=consumer,calls=calls))
+ # Host diagnostics call the actual ordinary UFS logger. Prove its strong
+ # provider from the just-qualified complete board compile, never allowlist
+ # an unresolved future API or bind it to an older deployed kernel.
+ ufs_receipt=json.loads((R/'artifacts/b5q-p0-work/pre-ci.json').read_text());assert ufs_receipt['passed']
+ for name,digest in ufs_receipt['source_sha256'].items():assert hashlib.sha256((R/name).read_bytes()).hexdigest()==digest
+ ufs_object=R/'artifacts/b5q-p0-work/objects/B5qUfs.o';ufs_exports={n for n,_,kind in object_symbols(ufs_object.read_bytes())if kind&14}
+ assert '_b5q_log_sync'in ufs_exports
+ known.update(ufs_exports)
  missing=sorted(imports-defined-known-set(bindings))
  # Do not turn a compile result into a false whole-driver closure result.
  assert not missing,missing
- result=dict(target_compile_passed=True,implementation_complete=True,hardware_verified=False,
+ result=dict(ufs_logger_provider_sha256=hashlib.sha256(ufs_object.read_bytes()).hexdigest(),target_compile_passed=True,implementation_complete=True,hardware_verified=False,
   actual_objects={str(p):hashlib.sha256(p.read_bytes()).hexdigest()for p in objects},
   input_sources={str(p):hashlib.sha256(p.read_bytes()).hexdigest()for p in sources},
   original_USB_vtable_slots=slots,USB_IRQ_PAC='IA2abe matches actual ArmCpu dispatch',EL1_apps_smmu_materializations=0,

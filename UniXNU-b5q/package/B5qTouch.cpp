@@ -134,13 +134,14 @@ bool configureReports(TouchBus &bus){
  reports.mode=0;reports.reconfigure=false;configBytes=0;layoutFailures=0;
  if(!command(bus,0x20,nullptr,0))return false;
  const uint8_t full=0x11,delta=0xc1;
- bool ok11=false;
- const bool okC1=command(bus,5,&delta,1);
- if(okC1){command(bus,6,&full,1);reports.mode=delta;}
+ // Full reports replace every slot atomically; C1 deltas can retain a lost lift.
+ const bool ok11=command(bus,0x25,nullptr,0,true)&&command(bus,5,&full,1);
+ bool okC1=false;
+ if(ok11){command(bus,6,&delta,1);reports.mode=full;}
  else {
-  command(bus,6,&delta,1);
-  if(command(bus,0x25,nullptr,0,true))ok11=command(bus,5,&full,1);
-  if(ok11)reports.mode=full;
+  command(bus,6,&full,1);
+  okC1=command(bus,5,&delta,1);
+  if(okC1)reports.mode=delta;
  }
  IOLog("B5qTouch: stage=enable-report mode=%02x full_config=%lu ok11=%u okC1=%u\n",reports.mode,(unsigned long)configBytes,ok11,okC1);
  return reports.mode!=0;

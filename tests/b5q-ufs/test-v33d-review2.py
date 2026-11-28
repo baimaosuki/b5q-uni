@@ -70,7 +70,7 @@ while i<len(data):
  elif tag==0x08:local.append(v)
  elif tag==0x80:
   if 0x30 in local and 0x31 in local:
-   exp=g[0x54]&15;exp=exp-16 if exp&8 else exp;cpi=32767/(g[0x44]*10**exp);assert abs(cpi/900-1)<0.02 and g[0x34]==-g[0x44];xy=True
+   exp=g[0x54]&15;exp=exp-16 if exp&8 else exp;cpi=32767/(g[0x44]*10**exp);assert abs(cpi/326-1)<0.02 and g[0x34]==-g[0x44];xy=True
   if 0x38 in local:assert g.get(0x64,0)==0 and g.get(0x54,0)==0;wheel=True
   local=[]
  elif tag==0xa0:local=[]
