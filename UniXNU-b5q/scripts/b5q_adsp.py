@@ -12,7 +12,7 @@ def replace(text,old,new,meaning):
     if text.count(old)!=1:raise ValueError('Pinned ADSP source changed: '+meaning)
     return text.replace(old,new)
 
-def prepare(reference,out):
+def prepare(reference,out,board=None):
     reference,out=map(Path,(reference,out));out.mkdir(parents=True,exist_ok=True)
     revision=subprocess.check_output(['git','-C',str(reference),'rev-parse','HEAD'],text=True).strip()
     if revision!=REVISION:raise ValueError('ADSP reference revision changed')
@@ -55,7 +55,7 @@ def prepare(reference,out):
     text=replace(text,'    if (!PE_parse_boot_argn("adsp", &mode, sizeof mode) || !mode || native_adsp_stats[0]) return;',
         '    mode=B5qFeatures::option("adsp",B5qFeatures::Adsp,2);\n    if(!mode||native_adsp_stats[0])return;','ADSP probe selection')
     destination=out/'AdspProbe.cpp';destination.write_text(text)
-    board=Path(__file__).resolve().parents[1]/'package'
+    board=Path(board)if board is not None else Path(__file__).resolve().parents[1]/'package'
     sources=[destination]+[(board if name=='QcomQmp' else package)/(name+'.c')for name in CORES]
     (out/'sources.json').write_text(json.dumps(dict(reference_revision=revision,
         source_sha256={str(p):hashlib.sha256(p.read_bytes()).hexdigest()for p in [path,*sources[1:]]},

@@ -1,5 +1,5 @@
 {
-  "status": "LOCAL_GATES_PASS_CI_READY",
+  "status": "LOCAL_CI_LAYOUT_FIX_PASS_RETRY_READY",
   "source_parent": "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243",
   "input_sha256": {
     "uefi-b5q/Platforms/Samsung/b5qPkg/Drivers/B5qHandoffDxe/UsbDma.c": "06ad265a13c80b5f30b30556921bd5622d70eb5a4b874e4a4e532980825c4d78",
@@ -16,8 +16,25 @@
   "final_ESP_pending": true,
   "final_boot_pending": true,
   "local_gate_checks": 27,
-  "local_gate_sha256": "53e44593f17a54c39d4e85fc2aa16062d65f20f82cd3440ba0cd90150de446b0",
+  "local_gate_sha256": "adc80f9315ab647d7a183075e1618c9518357dd365b268e6fc67895fae6bfc82",
   "patches": 18,
   "immutable_touch_TypeC_DP_0014_returned_assertions": true,
-  "CI_pending": true
+  "CI_pending": true,
+  "successful_firmware_run": 45577883578,
+  "first_failures": [
+    {
+      "run": 45577883578,
+      "job": 139080219375,
+      "step": "Install upstream macOS host tools",
+      "cause": "Runner DNS gaierror resolving ipsw release download host; no kernel compile started",
+      "log_sha256": "80dc998610922157739f383f9ff15232c25961686f815f8aa24e11709509544d",
+      "successful_firmware_preserved": true
+    },
+    {
+      "run": 45577883578,
+      "job": 139084120601,
+      "cause": "ADSP __file__ inferred tree/package instead of production kits/b5q",
+      "log_sha256": "575f3cfe447b3140626f073c11745e65f06131cb4437e451306035d6e660d712"
+    }
+  ]
 }

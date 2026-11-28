@@ -66,3 +66,17 @@ loader=(R/'UniXNU/drivers/DarwinBoot/DarwinBootPkg/Driver/DarwinBoot.c').read_te
 assert last.index('GetMemoryMap')<last.index('DarwinOutsideRanges')<last.index('DescribeWindow')<last.index('WriteUsbDmaResult')<last.index('gBS->ExitBootServices')
 assert 'OutsideOffset == MAX_UINTN ? 0 : OutsideCount'in last
 print('PASS productionfirmware:slot5@40,pointerchecks,allHALflushcalls;finalEBSmap/exclusions/outside precedecoverage;0014constants retained')
+
+# Production scripts are staged under tree/scripts, while board sources live
+# under tree/kits/b5q. Exercise that layout, not the convenient local checkout.
+import importlib.util,shutil
+with tempfile.TemporaryDirectory(prefix='b5q-staged-adsp-layout-')as td:
+ t=Path(td);script=t/'tree/scripts/b5q_adsp.py';script.parent.mkdir(parents=True);shutil.copyfile(R/'UniXNU-b5q/scripts/b5q_adsp.py',script)
+ spec=importlib.util.spec_from_file_location('staged_adsp',script);module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+ board=t/'tree/kits/b5q';board.mkdir(parents=True)
+ for name in ['QcomQmp.c','QcomQmp.h']:shutil.copyfile(P/name,board/name)
+ sources,includes=module.prepare(R/'sources/UniXNU-sheng',t/'generated',board=board)
+ assert sources[5]==board/'QcomQmp.c'and sources[5].is_file()and includes[0]==board
+ assert all(p.is_file()for p in sources)
+ assert not(t/'tree/package').exists()
+print('PASS stagedCIADSP layout:explicitkits/b5q QMP source+headers;allgeneratedinputs exist withouttree/package')
