@@ -2,7 +2,7 @@ name: b5q v33b complete runtime repair
 run-name: b5q v33b runtime repair / ${{ github.sha }}
 on:
   push:
-    branches: [codex/b5q-p0-p5]
+    branches: [main]
     paths:
       - '.github/workflows/b5q-p0-p5.yml'
       - 'UniXNU-b5q/board.toml'

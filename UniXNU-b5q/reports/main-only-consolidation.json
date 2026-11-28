@@ -1,0 +1,426 @@
+{
+  "status": "HOST_VERIFIED",
+  "source_base": "73cfbbd6bcc715fd4276be7e3181affd1cd98a96",
+  "old_remote_main": "5d7c4eadaa5344e1b96edc593b26d6d18d2bc6d0",
+  "history_candidate": "950747155ff9cbd085a68f5ccfd66987b016a4be",
+  "all_original_branch_tips_reachable": true,
+  "branch_tips": [
+    {
+      "ref": "refs/heads/main",
+      "sha": "0d7987483db8ec18963de5c47cc814c1c0fbe4ef",
+      "date": "2026-11-18 19:07:59 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/main",
+      "sha": "5d7c4eadaa5344e1b96edc593b26d6d18d2bc6d0",
+      "date": "2026-11-23 01:07:37 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-batch1-final-proctop",
+      "sha": "58d6adf550c0beb36e8708e0f3779a674596c6d6",
+      "date": "2026-11-23 10:33:57 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/codex/b5q-batch1-final-proctop",
+      "sha": "58d6adf550c0beb36e8708e0f3779a674596c6d6",
+      "date": "2026-11-23 10:33:57 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-new-batch2-verified",
+      "sha": "3ce1c73573577cadd20d7cf81b72a093977ece89",
+      "date": "2026-11-23 12:15:29 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/codex/b5q-new-batch2-verified",
+      "sha": "3ce1c73573577cadd20d7cf81b72a093977ece89",
+      "date": "2026-11-23 12:15:29 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-macos-only-userdata",
+      "sha": "1df3521219f2232314bf5e1d4960f4526775758a",
+      "date": "2026-11-23 13:02:27 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-macos-only-userdata-verified",
+      "sha": "bb2e739005a8481c5b08c309dad198e043910fbf",
+      "date": "2026-11-23 13:47:33 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/codex/b5q-macos-only-userdata-verified",
+      "sha": "bb2e739005a8481c5b08c309dad198e043910fbf",
+      "date": "2026-11-23 13:47:33 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-twrp-sparse-init",
+      "sha": "8e1dedef05d90cd8ded681a743942a8c51ee972b",
+      "date": "2026-11-23 14:12:19 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-new-batch2",
+      "sha": "05eeb6e4599d0170322853f97f0a2e71baf92bb2",
+      "date": "2026-11-23 14:53:25 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/codex/b5q-new-batch2",
+      "sha": "05eeb6e4599d0170322853f97f0a2e71baf92bb2",
+      "date": "2026-11-23 14:53:25 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-data-mount-fix-verified",
+      "sha": "a94d83a89334a2a3807937d6dbd14e6e5c2a820e",
+      "date": "2026-11-23 15:10:29 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/codex/b5q-data-mount-fix-verified",
+      "sha": "a94d83a89334a2a3807937d6dbd14e6e5c2a820e",
+      "date": "2026-11-23 15:10:29 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-p5-development",
+      "sha": "9b8620adadb2532224cc95c97dd74523af9b5254",
+      "date": "2026-11-24 13:52:45 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-p0-p5",
+      "sha": "07806e9b9ede578837ca44c10a11d7e6d5eedbee",
+      "date": "2026-11-24 14:56:21 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33b-runtime-repair",
+      "sha": "f7e6401231761cbcb23ade5ae0ea33a7597531e1",
+      "date": "2026-11-24 21:57:56 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33d-reviewed-release",
+      "sha": "237e034cbd46b6bc50f9aeb326e30555619abffe",
+      "date": "2026-11-25 12:15:56 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33d-review4-ci",
+      "sha": "7ac6632022fdba386b12ebd3a992b4d5abd70826",
+      "date": "2026-11-25 13:59:42 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33d-review4-seed-ci",
+      "sha": "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243",
+      "date": "2026-11-25 14:22:09 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review5-ci",
+      "sha": "801fd2ae3ef883604fa17191c139e408b3d632ff",
+      "date": "2026-11-25 16:36:53 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review5-retry-ci",
+      "sha": "7bac239e1e0a9304bbb4ca59852d5f8ad757326b",
+      "date": "2026-11-25 17:03:26 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review6-ci",
+      "sha": "f81d8565c3758cc54f103cee39d7de53c281de8e",
+      "date": "2026-11-25 18:59:45 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review7-release",
+      "sha": "e33286dc60e39f3677d960d689137e75af9c7d56",
+      "date": "2026-11-25 22:15:43 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review8-release",
+      "sha": "d6c3699328a16c597e4933f31efd5795701f259c",
+      "date": "2026-11-26 01:10:19 +0800"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review9-arm-ci",
+      "sha": "73cfbbd6bcc715fd4276be7e3181affd1cd98a96",
+      "date": "2026-11-28 18:11:25 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/codex/b5q-p0-p5",
+      "sha": "73cfbbd6bcc715fd4276be7e3181affd1cd98a96",
+      "date": "2026-11-28 18:11:25 +0800"
+    },
+    {
+      "ref": "refs/remotes/origin/codex/b5q-review9-arm-ci",
+      "sha": "73cfbbd6bcc715fd4276be7e3181affd1cd98a96",
+      "date": "2026-11-28 18:11:25 +0800"
+    }
+  ],
+  "merge_steps": [
+    {
+      "ref": "refs/heads/codex/b5q-batch1-final-proctop",
+      "sha": "58d6adf550c0beb36e8708e0f3779a674596c6d6",
+      "date": "2026-11-23 10:33:57 +0800",
+      "method": "fast-forward"
+    },
+    {
+      "ref": "refs/heads/codex/b5q-new-batch2-verified",
+      "sha": "3ce1c73573577cadd20d7cf81b72a093977ece89",
+      "date": "2026-11-23 12:15:29 +0800",
+      "method": "merge",
+      "parents": [
+        "58d6adf550c0beb36e8708e0f3779a674596c6d6",
+        "3ce1c73573577cadd20d7cf81b72a093977ece89"
+      ],
+      "commit": "a877d23d3ef170afcfb6d1d1f985bed4e49ba5cc",
+      "conflicts": [
+        "UniXNU-b5q/package/B5qProcTopFormat.h",
+        "UniXNU-b5q/scripts/relink-b5q-peripherals.py"
+      ]
+    },
+    {
+      "ref": "refs/heads/codex/b5q-macos-only-userdata",
+      "sha": "1df3521219f2232314bf5e1d4960f4526775758a",
+      "date": "2026-11-23 13:02:27 +0800",
+      "method": "merge",
+      "parents": [
+        "a877d23d3ef170afcfb6d1d1f985bed4e49ba5cc",
+        "1df3521219f2232314bf5e1d4960f4526775758a"
+      ],
+      "commit": "e0bdec4ba716deda683dec18df1e035ea90bebb2",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-macos-only-userdata-verified",
+      "sha": "bb2e739005a8481c5b08c309dad198e043910fbf",
+      "date": "2026-11-23 13:47:33 +0800",
+      "method": "merge",
+      "parents": [
+        "e0bdec4ba716deda683dec18df1e035ea90bebb2",
+        "bb2e739005a8481c5b08c309dad198e043910fbf"
+      ],
+      "commit": "18841050f9a37a521c33ddb870ee5b52806abc72",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-twrp-sparse-init",
+      "sha": "8e1dedef05d90cd8ded681a743942a8c51ee972b",
+      "date": "2026-11-23 14:12:19 +0800",
+      "method": "merge",
+      "parents": [
+        "18841050f9a37a521c33ddb870ee5b52806abc72",
+        "8e1dedef05d90cd8ded681a743942a8c51ee972b"
+      ],
+      "commit": "4f2806fef201152a97c451403b5dd2a2f1038cd0",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-new-batch2",
+      "sha": "05eeb6e4599d0170322853f97f0a2e71baf92bb2",
+      "date": "2026-11-23 14:53:25 +0800",
+      "method": "merge",
+      "parents": [
+        "4f2806fef201152a97c451403b5dd2a2f1038cd0",
+        "05eeb6e4599d0170322853f97f0a2e71baf92bb2"
+      ],
+      "commit": "97b63ca9807573239f56b445fe05c5f0be8c1a77",
+      "conflicts": [
+        "UniXNU-b5q/porting.toml"
+      ]
+    },
+    {
+      "ref": "refs/heads/codex/b5q-data-mount-fix-verified",
+      "sha": "a94d83a89334a2a3807937d6dbd14e6e5c2a820e",
+      "date": "2026-11-23 15:10:29 +0800",
+      "method": "merge",
+      "parents": [
+        "97b63ca9807573239f56b445fe05c5f0be8c1a77",
+        "a94d83a89334a2a3807937d6dbd14e6e5c2a820e"
+      ],
+      "commit": "601b08efc219e3683b8ee7716642b37d0a281781",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-p5-development",
+      "sha": "9b8620adadb2532224cc95c97dd74523af9b5254",
+      "date": "2026-11-24 13:52:45 +0800",
+      "method": "merge",
+      "parents": [
+        "601b08efc219e3683b8ee7716642b37d0a281781",
+        "9b8620adadb2532224cc95c97dd74523af9b5254"
+      ],
+      "commit": "5fdc5f6d2b91aa466afdf963b5fadf825187c581",
+      "conflicts": [
+        "UniXNU-b5q/porting.toml",
+        "scripts/b5q-install/verify-apfs-init-readback.py",
+        "scripts/b5q-install/verify-batch1-final.py"
+      ]
+    },
+    {
+      "ref": "refs/heads/codex/b5q-p0-p5",
+      "sha": "07806e9b9ede578837ca44c10a11d7e6d5eedbee",
+      "date": "2026-11-24 14:56:21 +0800",
+      "method": "merge",
+      "parents": [
+        "5fdc5f6d2b91aa466afdf963b5fadf825187c581",
+        "07806e9b9ede578837ca44c10a11d7e6d5eedbee"
+      ],
+      "commit": "7166a3af8a7482d94607665486f7745e5b45a0e7",
+      "conflicts": [
+        "UniXNU-b5q/package/B5qDpDisplay.cpp",
+        "UniXNU-b5q/package/B5qDpLink.cpp",
+        "UniXNU-b5q/package/B5qDpModes.h",
+        "UniXNU-b5q/porting.toml",
+        "UniXNU-b5q/reports/p0-p5-goal-delivery.md",
+        "UniXNU-b5q/reports/p5-local-development.json",
+        "scripts/b5q-install/check-dp-display-dma-inputs.py",
+        "scripts/b5q-install/check-dp-local.py",
+        "scripts/b5q-install/check-dp-target.py",
+        "tests/b5q-ufs/test-dp-link-owner.py"
+      ]
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33b-runtime-repair",
+      "sha": "f7e6401231761cbcb23ade5ae0ea33a7597531e1",
+      "date": "2026-11-24 21:57:56 +0800",
+      "method": "merge",
+      "parents": [
+        "7166a3af8a7482d94607665486f7745e5b45a0e7",
+        "f7e6401231761cbcb23ade5ae0ea33a7597531e1"
+      ],
+      "commit": "f3949bd49105556523433b0a732fbc18eafc8f54",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33d-reviewed-release",
+      "sha": "237e034cbd46b6bc50f9aeb326e30555619abffe",
+      "date": "2026-11-25 12:15:56 +0800",
+      "method": "merge",
+      "parents": [
+        "f3949bd49105556523433b0a732fbc18eafc8f54",
+        "237e034cbd46b6bc50f9aeb326e30555619abffe"
+      ],
+      "commit": "d7c6b48da245e94c3db9cb55fd0eaf5d2062028b",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33d-review4-ci",
+      "sha": "7ac6632022fdba386b12ebd3a992b4d5abd70826",
+      "date": "2026-11-25 13:59:42 +0800",
+      "method": "merge",
+      "parents": [
+        "d7c6b48da245e94c3db9cb55fd0eaf5d2062028b",
+        "7ac6632022fdba386b12ebd3a992b4d5abd70826"
+      ],
+      "commit": "9d3fcbd5c2d8ae1e380365f4cdaf2aca11b722d1",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-v33d-review4-seed-ci",
+      "sha": "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243",
+      "date": "2026-11-25 14:22:09 +0800",
+      "method": "merge",
+      "parents": [
+        "9d3fcbd5c2d8ae1e380365f4cdaf2aca11b722d1",
+        "9e7cbeb54bbe35fba8be9ac8bc4a89f944850243"
+      ],
+      "commit": "8c58a70a353d0eae7c7c1a65335450b3d3dc957f",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review5-ci",
+      "sha": "801fd2ae3ef883604fa17191c139e408b3d632ff",
+      "date": "2026-11-25 16:36:53 +0800",
+      "method": "merge",
+      "parents": [
+        "8c58a70a353d0eae7c7c1a65335450b3d3dc957f",
+        "801fd2ae3ef883604fa17191c139e408b3d632ff"
+      ],
+      "commit": "4edf7078de52af945da7bc8cb2287885cb618ae2",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review5-retry-ci",
+      "sha": "7bac239e1e0a9304bbb4ca59852d5f8ad757326b",
+      "date": "2026-11-25 17:03:26 +0800",
+      "method": "merge",
+      "parents": [
+        "4edf7078de52af945da7bc8cb2287885cb618ae2",
+        "7bac239e1e0a9304bbb4ca59852d5f8ad757326b"
+      ],
+      "commit": "dd91c7d690be551c72f80d1cafc79e9724f02d3b",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review6-ci",
+      "sha": "f81d8565c3758cc54f103cee39d7de53c281de8e",
+      "date": "2026-11-25 18:59:45 +0800",
+      "method": "merge",
+      "parents": [
+        "dd91c7d690be551c72f80d1cafc79e9724f02d3b",
+        "f81d8565c3758cc54f103cee39d7de53c281de8e"
+      ],
+      "commit": "5f15aee2bbb5159eb7709257b5b7ae810ba109b7",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review7-release",
+      "sha": "e33286dc60e39f3677d960d689137e75af9c7d56",
+      "date": "2026-11-25 22:15:43 +0800",
+      "method": "merge",
+      "parents": [
+        "5f15aee2bbb5159eb7709257b5b7ae810ba109b7",
+        "e33286dc60e39f3677d960d689137e75af9c7d56"
+      ],
+      "commit": "5571f375572030a39a00a8b68f3bab7d450f26ac",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review8-release",
+      "sha": "d6c3699328a16c597e4933f31efd5795701f259c",
+      "date": "2026-11-26 01:10:19 +0800",
+      "method": "merge",
+      "parents": [
+        "5571f375572030a39a00a8b68f3bab7d450f26ac",
+        "d6c3699328a16c597e4933f31efd5795701f259c"
+      ],
+      "commit": "56cd87b3a68c334843d5920ba3fe32ed3b3783d4",
+      "conflicts": []
+    },
+    {
+      "ref": "refs/heads/codex/b5q-review9-arm-ci",
+      "sha": "73cfbbd6bcc715fd4276be7e3181affd1cd98a96",
+      "date": "2026-11-28 18:11:25 +0800",
+      "method": "merge",
+      "parents": [
+        "56cd87b3a68c334843d5920ba3fe32ed3b3783d4",
+        "73cfbbd6bcc715fd4276be7e3181affd1cd98a96"
+      ],
+      "commit": "950747155ff9cbd085a68f5ccfd66987b016a4be",
+      "conflicts": []
+    }
+  ],
+  "latest_review23_driver_sources_unchanged": true,
+  "historical_build_recipes_kept_at_review23": [
+    ".github/workflows/b5q-batch1-final.yml",
+    "scripts/b5q-install/pre-ci-batch1-final.py"
+  ],
+  "publication_branch": "main",
+  "ci_trigger": "push main",
+  "migration_triggers_ci": false,
+  "review24_committed": false,
+  "unrelated_working_changes_preserved": true,
+  "rule_id": 28294251,
+  "rule_description": "Block creation of every branch except refs/heads/main; no bypass actors",
+  "validation": [
+    "15 release-control tests PASS",
+    "production ProcTop ASan/UBSan 160000 concurrentevents+format tests PASS",
+    "pre-push main/nonmain/delete cases PASS",
+    "alloriginalbranch tips ancestry PASS"
+  ],
+  "source_sha256": {
+    ".github/workflows/b5q-p0-p5.yml": "b7969518de2628810439d0b7456933b7815f1fa10174ef09619dc5bab4f0c11c",
+    ".githooks/pre-push": "3aa67aac68bc879bc3bdaec0c0fb4d8161645de6823553d9023a07e07b1a50c8",
+    "scripts/b5q-release.py": "6df66e2b68c3b442cf97ce286f8187d72a1af97b328d245f6250a7bed87d39b4",
+    "scripts/b5q-release.json": "9f9dd8aecf68b25bb5010c0b9ee7872545e4397bf76f512b50ebc4bc922dfac8",
+    "scripts/b5q-verify-release.py": "d97d87aa5b879e93756b4cf5b36df753c566e6fef126d046a0f5acbcc6455be0",
+    "tests/test_b5q_release.py": "9f1976707bbff1c3415600a8af143f975a9be8bf2e2a621329b9ceeb3341ff39",
+    "docs/b5q-release-flow.md": "c00b0c32558ca227c14bc0ae30a181c534202b703514c4ff36239b4319efb23f"
+  },
+  "protected_input_change": {
+    "authorized_by": "2026-11-28 owner: all CI commits on main and remote main only",
+    "path": ".github/workflows/b5q-p0-p5.yml",
+    "change": "push branch filter codex/b5q-p0-p5 -> main; no build steps changed",
+    "other69_protected_inputs_unchanged": true
+  }
+}

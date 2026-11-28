@@ -86,3 +86,8 @@
 ## TWRP userdata原地初始化（2026-11-23，最新用户明确授权）
 
 用户禁止写满百余GiB镜像，并明确要求“设备已经在TWRP里面，你自己初始化”。允许连接现有b5q TWRP并仅对已验证边界的userdata执行UNMAP与小范围APFS初始化写入、回读和身份头最后提交；不需要再次确认。源已验证APFS按分配位图保留所有allocated-zero数据、internal pool、checkpoint/元数据，复制量必须小于1GiB。禁止调用完整168GiB写入路径。GPT/boot/ESP/macosroot和三星受保护分区不得写；仅允许GPT元数据及已授权macosroot身份头的只读核验。完成后保留小型操作结果与逐段SHA证据，清理RAM/主机临时恢复副本，不重编任何内核/固件或触发CI。
+
+
+## main 单分支开发与 CI（2026-11-28，最新明确用户指令）
+
+本设备仅在 main 持续开发。每轮 CI 的全部授权源码必须先 commit 到 main，并只 push origin main；不得再创建或推送开发/CI分支。远端只保留 main，历史分支提交已按时间合并保留。使用 scripts/b5q-release.py start 时必须位于 main；发布脚本和 pre-push hook 检查目标，GitHub main-only ruleset 禁止创建其他分支。用户要求本地验收的轮次仍不得自动提交/推送/触发 CI；需等该轮发布授权。历史 CI resume/replay 不得触发新构建。

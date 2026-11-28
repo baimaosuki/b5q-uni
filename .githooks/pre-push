@@ -1,0 +1,12 @@
+#!/bin/sh
+# This single-device repository publishes only main. Branch deletion is cleanup.
+while read -r local_ref local_oid remote_ref remote_oid; do
+    case "$remote_ref" in
+        refs/heads/main) ;;
+        refs/heads/*)
+            case "$local_oid" in
+                0000000000000000000000000000000000000000) ;;
+                *) echo "b5q: only refs/heads/main may be pushed" >&2; exit 1 ;;
+            esac ;;
+    esac
+done

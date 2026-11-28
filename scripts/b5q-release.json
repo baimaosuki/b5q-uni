@@ -1,0 +1,17 @@
+{
+  "repo": "baimaosuki/b5q-uni",
+  "remote": "origin",
+  "branch": "main",
+  "workflow": "b5q-p0-p5.yml",
+  "firmware_receipt": "artifacts/b5q-review7-work/ci45623026650-firmware/firmware-transfer.json",
+  "firmware_dir": "artifacts/b5q-review7-work/ci45623026650-firmware",
+  "fd": "artifacts/b5q-review7-work/ci45623026650-firmware/b5q-uni/b5q-uni/uefi-b5q/Build/b5qPkg/DEBUG_CLANGPDB/FV/SILICIUM_UEFI.fd",
+  "bluetooth_le_mask": true,
+  "kernel_markers": [
+    "host-vbus-swap", "port-power-hold name=", "port-power-hold-release",
+    "B5qUsbPortPowerHold", "host-port-edge", "B5qWifi: wmi-init radios=",
+    "twt_ap_pdev=", "rddm-summary", "wmi-rx-history", "B5qBluetooth: stage=h4",
+    "evt13=", " le-conn-param-req handle=", " le-data-len handle=",
+    " le-phy status=", "B5qAMFI", "no-lc"
+  ]
+}

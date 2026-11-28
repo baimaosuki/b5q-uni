@@ -3773,3 +3773,23 @@ reference = "reports/review23-source-audit.json"
 revision = "43768c7c4aaf28ad4d027c3019f655b1ef971d88"
 command = "pre-ci-v33d.py;test-review23.py;check-dp-local.py;check-dp-target.py;check-xnu-patches.py --unixnu sources/UniXNU --source sources/UniXNU/out/feeds/xnu-3199e8bc"
 result = "PASS42canonicalplus2providergates,28Rusttests,26DPgroups,147patches,arm64e/PAC/ABIand70protectedhashes;HOST_VERIFIED_PENDING_HARDWARE,novalidationofphysicalfixesorMacpixeltestexecutionclaimed"
+
+
+[[area]]
+id = "main-only-history-consolidation"
+status = "host-verified"
+components = []
+paths = ["reports/main-only-consolidation.json"]
+inputs = ["Owner requests chronological merge of every historical branch into main and no other remote branches", "Published Review23 source73cfbbd6bcc715fd4276be7e3181affd1cd98a96; branch tip and dirty-file manifests retained locally"]
+configuration = ["main is the sole development and CI publication branch; migration commits skip CI", "Latest Review23 hardware sources retained; one authorized protected-input change is only the main push filter"]
+procedure = ["Merge all branch tips by original commit date, retaining parent histories; resolve older overlapping files using later reviewed versions and combine porting areas by ID", "Enforce main-only release commits/pushes, local pre-push check and active GitHub branch-creation ruleset28294251"]
+findings = ["All original local/remote branch tips reachable from consolidated history; Review23 package source bytes unchanged", "Earlier retired build recipe changes remain accessible in history while published Review23 recipe and checks stay current", "15release-control tests,production160000eventProcTopASan/UBSan andpre-push allow/reject/delete checks pass"]
+completion = ["Ready to publish main and atomically delete remote historical branch refs; original commits retained"]
+limits = ["Review24 local task is not implemented or committed by this branch-flow migration; no CI,ESP or device access"]
+next_action = ["Continue authorized local-only Review24 on main; publish its changes only after subsequent CI authorization"]
+[[area.evidence]]
+kind = "host"
+reference = "reports/main-only-consolidation.json"
+revision = "73cfbbd6bcc715fd4276be7e3181affd1cd98a96"
+command = "git merge-tree chronological branch merges;tests/test_b5q_release.py;ProcTop ASan/UBSan;pre-push main-only cases"
+result = "PASS all historical tips reachable,latestReview23drivers retained,15tests andmain-onlyguards;noCIorphone"
